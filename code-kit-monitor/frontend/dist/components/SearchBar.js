@@ -1,0 +1,8 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useChanges } from '../stores/changes';
+const STATUSES = ['all', 'normal', 'interrupted', 'blocked'];
+const PHASES = ['all', '0-change', '1-requirement', '2-design', '2a-ui-design', '3-task', '4-dev', '5-test', '6-review', '7-integration'];
+export default function SearchBar() {
+    const { filter, setFilter } = useChanges();
+    return (_jsxs("div", { style: { display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }, children: [_jsx("input", { type: "text", placeholder: "\u641C\u7D22 change-id / \u5173\u952E\u8BCD...", value: filter.q, onChange: (e) => setFilter({ q: e.target.value }), style: { flex: 1, minWidth: 240, padding: '6px 12px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text)', fontFamily: 'var(--font-display)', fontSize: 13, outline: 'none' } }), _jsx("select", { value: filter.status, onChange: (e) => setFilter({ status: e.target.value }), style: { padding: '6px 12px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text)', fontFamily: 'var(--font-body)', fontSize: 13 }, children: STATUSES.map((s) => _jsx("option", { value: s, children: s === 'all' ? '状态: 全部' : s }, s)) }), _jsx("select", { value: filter.phase, onChange: (e) => setFilter({ phase: e.target.value }), style: { padding: '6px 12px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', color: 'var(--color-text)', fontFamily: 'var(--font-body)', fontSize: 13 }, children: PHASES.map((p) => _jsx("option", { value: p, children: p === 'all' ? '阶段: 全部' : p }, p)) })] }));
+}

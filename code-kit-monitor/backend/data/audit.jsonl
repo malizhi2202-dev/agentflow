@@ -1,0 +1,6 @@
+{"timestamp": "2026-07-06T01:13:59.950515+00:00", "user_id": "admin", "user_name": "管理员", "action": "reconcile", "target_id": "1", "target_type": "agent", "detail": "safe: Agent#1 心跳恢复 自动重启成功", "drift_detected": false}
+{"timestamp": "2026-07-06T01:10:59.950515+00:00", "user_id": "admin", "user_name": "管理员", "action": "reconcile", "target_id": "2", "target_type": "agent", "detail": "caution: Agent#2 负载>90% 任务重调度到Agent#5", "drift_detected": true}
+{"timestamp": "2026-07-06T01:07:59.950515+00:00", "user_id": "admin", "user_name": "管理员", "action": "reconcile", "target_id": "5", "target_type": "agent", "detail": "safe: Agent#5 探针超时 自动重试成功", "drift_detected": false}
+{"timestamp": "2026-07-06T01:03:59.950515+00:00", "user_id": "admin", "user_name": "管理员", "action": "reconcile", "target_id": "3", "target_type": "agent", "detail": "dangerous: Agent#3 连续3次修复失败 暂停等待人工确认", "drift_detected": true}
+{"timestamp": "2026-07-06T01:00:59.950515+00:00", "user_id": "admin", "user_name": "管理员", "action": "reconcile", "target_id": "1", "target_type": "agent", "detail": "safe: Agent#1 漂移检测 状态自动对齐", "drift_detected": false}
+{"timestamp": "2026-07-06T00:57:59.950515+00:00", "user_id": "admin", "user_name": "管理员", "action": "reconcile", "target_id": "4", "target_type": "agent", "detail": "caution: Agent#4 依赖链断裂 已通知管理员", "drift_detected": true}

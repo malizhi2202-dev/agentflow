@@ -1,0 +1,210 @@
+/* ═══════════════════════════════════════════
+   code-kit console · 开发操作台风格
+   借鉴 Linear + GitHub + VSCode
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* 背景 */
+  --bg-app:         #0d0e12;
+  --bg-sidebar:     #0f1015;
+  --bg-main:        #13141a;
+  --bg-card:        #181a1f;
+  --bg-card-hover:  #1e2028;
+  --bg-input:       #0b0c10;
+  --bg-tooltip:     #22242a;
+  --bg-selected:    rgba(84,140,240,0.1);
+
+  /* 主色 */
+  --blue:           #548cf0;
+  --blue-hover:     #6a9df4;
+  --blue-bg:        rgba(84,140,240,0.08);
+  --blue-border:    rgba(84,140,240,0.2);
+
+  /* 语义 */
+  --green:          #5cb878;
+  --green-bg:       rgba(92,184,120,0.08);
+  --red:            #e05555;
+  --red-bg:         rgba(224,85,85,0.08);
+  --orange:         #e8a450;
+  --orange-bg:      rgba(232,164,80,0.08);
+  --purple:         #b47cd8;
+  --purple-bg:      rgba(180,124,216,0.08);
+
+  /* 文字 */
+  --text:           #e1e2e5;
+  --text-secondary: #9699a0;
+  --text-muted:     #5d6068;
+
+  /* 边框 */
+  --border:         rgba(255,255,255,0.06);
+  --border-strong:  rgba(255,255,255,0.10);
+
+  /* 字体 */
+  --font:           -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:      'JetBrains Mono', 'Fira Code', monospace;
+
+  /* 间距 */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
+
+  /* 圆角 */
+  --r-sm: 4px; --r-md: 8px; --r-lg: 12px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+
+  /* 动效 */
+  --ease: cubic-bezier(0.16, 0, 0.2, 1);
+  --fast: 100ms; --normal: 200ms;
+
+  /* 拓扑画布 */
+  --bg-canvas: #0b0c10;
+  --node-glow-healthy: 0 0 6px rgba(92,184,120,0.3);
+  --node-glow-failed: 0 0 8px rgba(224,85,85,0.4);
+  --grid-dot: rgba(255,255,255,0.03);
+
+  /* ── Agent 管控面 (Control Plane) ── */
+  /* 状态指示灯 */
+  --cp-status-idle:    oklch(0.65 0.19 155);   /* 空闲 */
+  --cp-status-running: oklch(0.72 0.16 85);    /* 运行中 */
+  --cp-status-blocked: oklch(0.58 0.22 25);    /* 阻塞 */
+  --cp-status-dead:    oklch(0.55 0.01 260);   /* 死亡/离线 */
+  --cp-status-failed:  oklch(0.55 0.22 20);    /* 失败 */
+
+  /* 探针时间线 */
+  --cp-probe-pass: oklch(0.65 0.19 155);       /* 探针通过 */
+  --cp-probe-fail: oklch(0.58 0.22 25);        /* 探针失败 */
+
+  /* 修复级别 */
+  --cp-repair-safe:     oklch(0.65 0.19 155);   /* safe */
+  --cp-repair-caution:  oklch(0.72 0.16 85);    /* caution */
+  --cp-repair-dangerous: oklch(0.55 0.22 20);   /* dangerous */
+
+  /* 调度器 */
+  --cp-queue-pending:  oklch(0.72 0.16 85);     /* 排队中 */
+  --cp-queue-assigned: oklch(0.62 0.18 255);    /* 已分配 */
+
+  /* 详情面板 */
+  --cp-detail-width: 420px;
+  --cp-detail-bg: oklch(0.16 0.01 260);
+}
+
+/* ── 全局 ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.5;
+}
+#root { width: 100vw; height: 100vh; }
+::selection { background: var(--blue-bg); }
+
+/* ── 滚动条 ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── 动画 ── */
+@keyframes pulse-red { 0%,100%{box-shadow:0 0 0 0 rgba(224,85,85,0.3)} 50%{box-shadow:0 0 0 6px rgba(224,85,85,0)} }
+@keyframes spin { to{transform:rotate(360deg)} }
+@keyframes slide-in { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+@keyframes dash-flow { to{stroke-dashoffset:-24} }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0ms !important; transition-duration: 0ms !important; }
+}
+
+/* ── 输入框 ── */
+input, select, textarea {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color var(--fast);
+}
+input:focus, select:focus, textarea:focus { border-color: var(--blue); }
+input::placeholder { color: var(--text-muted); }
+select { cursor: pointer; }
+
+/* ── 按钮 ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 500;
+  border: 1px solid var(--border-strong); cursor: pointer;
+  background: var(--bg-card); color: var(--text-secondary);
+  transition: all var(--fast); white-space: nowrap; line-height: 1.4;
+}
+.btn:hover { background: var(--bg-card-hover); color: var(--text); }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover { background: var(--blue-hover); }
+.btn-ghost { background: transparent; border-color: transparent; }
+.btn-ghost:hover { background: var(--bg-card); }
+.btn-sm { padding: 3px 8px; font-size: 11px; }
+.btn-xs { padding: 2px 6px; font-size: 10px; border-radius: 3px; }
+
+/* ── 标签 ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 1px 6px; border-radius: 3px;
+  font-size: 10px; font-weight: 500; letter-spacing: 0.01em;
+}
+.badge-blue { background: var(--blue-bg); color: var(--blue); }
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-orange { background: var(--orange-bg); color: var(--orange); }
+.badge-purple { background: var(--purple-bg); color: var(--purple); }
+
+/* ── 状态点 ── */
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.dot-green { background: var(--green); }
+.dot-red { background: var(--red); }
+.dot-orange { background: var(--orange); }
+.dot-blue { background: var(--blue); }
+.dot-gray { background: var(--text-muted); }
+
+/* ── 卡片 ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s4);
+  transition: background var(--fast), border-color var(--fast);
+}
+.card:hover { border-color: var(--border-strong); }
+.card-clickable { cursor: pointer; }
+.card-clickable:hover { background: var(--bg-card-hover); }
+
+/* ── 进度条 ── */
+.progress { height: 4px; background: var(--bg-input); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; transition: width 0.4s var(--ease); }
+
+/* ── 统计卡 ── */
+.stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--s3) var(--s4);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.stat-value { font-size: 24px; font-weight: 700; line-height: 1.1; font-family: var(--font-mono); }
+.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-sub { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+/* ── Tab ── */
+.tab-bar { display: flex; border-bottom: 1px solid var(--border); margin-bottom: var(--s4); }
+.tab {
+  padding: 8px 16px; background: none; border: none; border-bottom: 2px solid transparent;
+  color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all var(--fast);
+  margin-bottom: -1px;
+}
+.tab:hover { color: var(--text-secondary); }
+.tab.active { color: var(--text); border-bottom-color: var(--blue); font-weight: 600; }

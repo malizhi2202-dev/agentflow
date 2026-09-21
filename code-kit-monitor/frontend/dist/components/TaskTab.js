@@ -1,0 +1,31 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { Bot, UserCheck, RotateCcw } from 'lucide-react';
+const STATUS_LABEL = {
+    done: { text: '✅ done', color: 'var(--color-success)', bg: 'oklch(0.65 0.16 150 / 0.1)' },
+    in_progress: { text: '● 进行中', color: 'var(--color-primary)', bg: 'oklch(0.65 0.18 230 / 0.1)' },
+    pending: { text: '○ pending', color: 'var(--color-text-dim)', bg: 'transparent' },
+    blocked: { text: '🚫 blocked', color: 'var(--color-danger)', bg: 'oklch(0.55 0.22 25 / 0.1)' },
+};
+export default function TaskTab({ tasks }) {
+    if (!tasks.length)
+        return _jsx("p", { style: { color: 'var(--color-text-dim)' }, children: "\u6682\u65E0 task \u6570\u636E" });
+    const doneCount = tasks.filter((t) => t.status === 'done').length;
+    const autoCount = tasks.filter((t) => t.auto !== false).length;
+    const manualCount = tasks.filter((t) => t.auto === false).length;
+    const retryCount = tasks.filter((t) => (t.retries || 0) > 0).length;
+    return (_jsxs("div", { "aria-live": "polite", children: [_jsxs("div", { style: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }, children: [_jsxs("div", { style: { background: 'var(--color-surface)', borderRadius: 'var(--radius-md)', padding: 12, textAlign: 'center', border: '1px solid var(--color-grid)' }, children: [_jsxs("div", { style: { fontSize: 22, fontFamily: 'var(--font-display)', fontWeight: 600, color: 'var(--color-primary)' }, children: [doneCount, "/", tasks.length] }), _jsx("div", { style: { fontSize: 11, color: 'var(--color-text-dim)', marginTop: 2 }, children: "\u5B8C\u6210" })] }), _jsxs("div", { style: { background: 'var(--color-surface)', borderRadius: 'var(--radius-md)', padding: 12, textAlign: 'center', border: '1px solid var(--color-info)', borderLeft: '3px solid var(--color-info)' }, children: [_jsxs("div", { style: { fontSize: 22, fontFamily: 'var(--font-display)', fontWeight: 600, color: 'var(--color-info)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }, children: [_jsx(Bot, { size: 20 }), " ", autoCount] }), _jsx("div", { style: { fontSize: 11, color: 'var(--color-text-dim)', marginTop: 2 }, children: "\uD83E\uDD16 \u81EA\u52A8\u6267\u884C" })] }), _jsxs("div", { style: { background: 'var(--color-surface)', borderRadius: 'var(--radius-md)', padding: 12, textAlign: 'center', border: '1px solid var(--color-warning)', borderLeft: '3px solid var(--color-warning)' }, children: [_jsxs("div", { style: { fontSize: 22, fontFamily: 'var(--font-display)', fontWeight: 600, color: 'var(--color-warning)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }, children: [_jsx(UserCheck, { size: 20 }), " ", manualCount] }), _jsx("div", { style: { fontSize: 11, color: 'var(--color-text-dim)', marginTop: 2 }, children: "\uD83D\uDC64 \u9700\u4EBA\u5DE5\u786E\u8BA4" })] }), _jsxs("div", { style: { background: 'var(--color-surface)', borderRadius: 'var(--radius-md)', padding: 12, textAlign: 'center', border: '1px solid var(--color-grid)' }, children: [_jsxs("div", { style: { fontSize: 22, fontFamily: 'var(--font-display)', fontWeight: 600, color: retryCount > 0 ? 'var(--color-danger)' : 'var(--color-text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }, children: [_jsx(RotateCcw, { size: 20 }), " ", retryCount] }), _jsx("div", { style: { fontSize: 11, color: 'var(--color-text-dim)', marginTop: 2 }, children: "\u91CD\u8BD5" })] })] }), _jsxs("div", { style: { background: 'var(--color-bg)', borderRadius: 'var(--radius-md)', padding: '8px 12px', marginBottom: 16, fontSize: 11, color: 'var(--color-text-dim)', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', gap: 16 }, children: [_jsxs("span", { children: ["\uD83E\uDD16 ", _jsx("b", { style: { color: 'var(--color-info)' }, children: "\u81EA\u52A8" }), "\uFF1A\u4E13\u5BB6\u56E2\u5168\u7968/\u591A\u6570\u901A\u8FC7 \u2192 4-dev \u81EA\u52A8\u6267\u884C\uFF0C\u4E0D\u6682\u505C"] }), _jsxs("span", { children: ["\uD83D\uDC64 ", _jsx("b", { style: { color: 'var(--color-warning)' }, children: "\u4EBA\u5DE5" }), "\uFF1A\u4E13\u5BB6\u56E2\u6295\u7968\u6216\u5E73\u7968 \u2192 4-dev \u6267\u884C\u524D\u6682\u505C\uFF0C\u7B49\u4EBA\u5DE5\u786E\u8BA4"] })] }), tasks.map((t) => {
+                const status = STATUS_LABEL[t.status] || STATUS_LABEL.pending;
+                const isAuto = t.auto !== false;
+                return (_jsxs("div", { style: {
+                        display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', marginBottom: 2,
+                        borderLeft: `3px solid ${isAuto ? 'var(--color-info)' : 'var(--color-warning)'}`,
+                        background: status.bg, borderRadius: '0 var(--radius-sm) var(--radius-sm) 0',
+                        fontFamily: 'var(--font-body)', fontSize: 13,
+                    }, children: [_jsx("span", { style: { fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--color-text-dim)', minWidth: 36 }, children: t.id }), _jsx("span", { style: {
+                                display: 'inline-flex', alignItems: 'center', gap: 3, padding: '1px 6px', borderRadius: 'var(--radius-sm)',
+                                fontSize: 11, fontWeight: 600,
+                                background: isAuto ? 'oklch(0.60 0.10 200 / 0.15)' : 'oklch(0.70 0.15 85 / 0.2)',
+                                color: isAuto ? 'var(--color-info)' : 'var(--color-warning)',
+                            }, children: isAuto ? _jsxs(_Fragment, { children: [_jsx(Bot, { size: 12 }), " \u81EA\u52A8"] }) : _jsxs(_Fragment, { children: [_jsx(UserCheck, { size: 12 }), " \u4EBA\u5DE5\u786E\u8BA4"] }) }), _jsx("span", { style: { flex: 1, color: 'var(--color-text)' }, children: t.name }), _jsx("span", { style: { fontSize: 11, padding: '1px 6px', borderRadius: 'var(--radius-sm)', color: status.color, background: status.bg }, children: status.text }), (t.retries || 0) > 0 && (_jsxs("span", { style: { fontSize: 11, color: 'var(--color-danger)', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', gap: 2 }, children: [_jsx(RotateCcw, { size: 12 }), " ", t.retries] }))] }, t.id));
+            })] }));
+}

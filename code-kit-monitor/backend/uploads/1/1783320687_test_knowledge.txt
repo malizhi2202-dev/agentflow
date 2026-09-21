@@ -1,0 +1,4 @@
+This is a test knowledge document for embedding testing.
+It contains multiple sentences to allow chunking.
+The chunks should have memory_type=document after indexing.
+This is additional content for better chunk separation.
