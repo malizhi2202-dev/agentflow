@@ -1,6 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-export default function ConfirmDialog({ open, title, message, onConfirm, onCancel, danger }) {
-    if (!open)
-        return null;
-    return (_jsx("div", { style: { position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', animation: 'slide-in var(--fast) var(--ease)' }, onClick: onCancel, role: "dialog", "aria-modal": "true", "aria-label": title, children: _jsxs("div", { style: { background: 'var(--bg-card)', border: '1px solid var(--border-strong)', borderRadius: 'var(--r-lg)', padding: '20px 24px', maxWidth: 420, width: '90%', boxShadow: 'var(--shadow-md)' }, onClick: e => e.stopPropagation(), children: [_jsx("h3", { style: { fontSize: 15, fontWeight: 700, marginBottom: 8 }, children: title }), _jsx("p", { style: { fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20, lineHeight: 1.6 }, children: message }), _jsxs("div", { style: { display: 'flex', gap: 8, justifyContent: 'flex-end' }, children: [_jsx("button", { className: "btn", onClick: onCancel, children: "\u53D6\u6D88" }), _jsx("button", { className: `btn ${danger ? 'btn-danger' : 'btn-primary'}`, onClick: onConfirm, autoFocus: true, children: "\u786E\u5B9A" })] })] }) }));
-}

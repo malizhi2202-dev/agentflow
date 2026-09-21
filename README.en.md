@@ -1,4 +1,4 @@
-# code-kit-platform
+# AgentFlow
 
 > **Full-stack AI Development Platform** — Agent Orchestration + Visual Monitoring from Requirements to Archive
 
@@ -39,7 +39,7 @@ From 2025 to 2026, AI agent orchestration tools have exploded — Dify, Coze, n8
 | **Deploy and pray** | All platforms are fire-and-forget. No K8s-style reconcile loop (desired state vs. actual state → auto-heal drift). |
 | **Build only, no process governance** | Requirements review, design inspection, expert gating, test acceptance... The entire software engineering lifecycle is absent from existing agent platforms. |
 
-**code-kit-platform was born to fill these gaps.**
+**AgentFlow was born to fill these gaps.**
 
 ---
 
@@ -98,7 +98,7 @@ Desired State (YAML)  ──→  Topology Snapshot
 
 > K8s-style declarative orchestration. Every competitor is "fire and forget."
 
-### 5. code-kit Full Development Lifecycle
+### 5. Full Development Lifecycle
 
 ```
 CHANGE → REQUIREMENT → DESIGN → UI-DESIGN → TASK
@@ -114,7 +114,7 @@ CHANGE → REQUIREMENT → DESIGN → UI-DESIGN → TASK
 
 ## 📊 Competitive Analysis
 
-| Capability | **code-kit-platform** | Sim Studio | Langflow | Dify | n8n | Build A Harness |
+| Capability | **AgentFlow** | Sim Studio | Langflow | Dify | n8n | Build A Harness |
 |------------|:---:|:---:|:---:|:---:|:---:|:---:|
 | YAML↔Canvas Bidirectional Sync | ✅ | ❌ | ❌ | ❌ | ❌ | 🔄 JSON |
 | Edge Strategy Count | **15** | 3-4 | 3-4 | 3-4 | basic | 5-6 |
@@ -141,7 +141,7 @@ CHANGE → REQUIREMENT → DESIGN → UI-DESIGN → TASK
 
 ```
 ┌───────────────────────────────┐  ┌────────────────────────────────┐
-│    code-kit Workflow Monitor   │  │        AI Dev Platform          │
+│    Workflow Monitor           │  │        AI Dev Platform         │
 │                               │  │                                │
 │  • Change List + Progress     │  │  • Tool Library (Plugin/Skill/  │
 │  • Expert Gate Voting Vis     │  │    MCP)                        │
@@ -239,8 +239,8 @@ CHANGE → REQUIREMENT → DESIGN → UI-DESIGN → TASK
                           │
 ┌─────────────────────────┼───────────────────────────────────┐
 │                  Filesystem                                  │
-│  .specs/   ←→   code-kit/   ←→   runtime.jsonl             │
-│  (Artifacts)     (CLI Tool)       (Runtime Data)             │
+│  .specs/   ←→   prompts/   ←→   runtime.jsonl                │
+│  (Artifacts)     (Prompts)        (Runtime Data)             │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -292,7 +292,7 @@ cd code-flow
 ### 2. Install Backend
 
 ```bash
-cd code-kit-monitor/backend
+cd agentflow/backend
 python3 -m venv venv
 source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -309,12 +309,12 @@ npm install
 
 ```bash
 # Terminal 1 — Start Backend
-cd code-kit-monitor/backend
+cd agentflow/backend
 source venv/bin/activate
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 # Terminal 2 — Start Frontend
-cd code-kit-monitor/frontend
+cd agentflow/frontend
 npm run dev
 ```
 
@@ -383,7 +383,7 @@ Tool Library → Select Plugin/Skill/MCP → Create Workflow → Publish → Bin
 New Project → Input Requirements → Bind Agent + Workflow → Execute → Monitor
 ```
 
-### code-kit Monitoring
+### Workflow Monitoring
 
 ```
 Home → View Active Changes → Enter Detail → View Gates / Tasks / Token Usage
@@ -394,8 +394,7 @@ Home → View Active Changes → Enter Detail → View Gates / Tasks / Token Usa
 ## 📁 Project Structure
 
 ```
-code-flow/
-├── code-kit/                         # code-kit CLI Tool
+AgentFlow/
 ├── .specs/                           # Project Specs + AI Artifacts
 │   ├── CONTEXT.md                    # Shared Project Context
 │   ├── ARCHITECTURE.md               # Architecture Decision Records
@@ -405,7 +404,7 @@ code-flow/
 │       ├── DESIGN.md
 │       ├── TASK.md
 │       └── ...
-├── code-kit-monitor/                 # This Product (Web Dashboard)
+├── agentflow/                        # This Product (Web Dashboard)
 │   ├── backend/
 │   │   ├── main.py                   # FastAPI Entry + Auth Middleware
 │   │   ├── config.py                 # Config (Port, CORS, Paths)
@@ -466,7 +465,7 @@ code-flow/
 | `CORS_ORIGIN` | `http://localhost:5173` | Allowed frontend origin |
 | `DATABASE_URL` | (empty=SQLite) | MySQL connection string |
 | `REDIS_URL` | (empty=skip) | Redis cache URL |
-| `SPECS_DIR` | `../.specs` | code-kit artifacts directory |
+| `PROMPTS_DIR_NAME` | `prompts` | Prompts/templates directory name |
 | `SCAN_INTERVAL` | `5` | Filesystem scan interval (seconds) |
 | `UI_LANG` | `zh` | UI language: `zh` (Chinese) or `en` (English) |
 
