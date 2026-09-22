@@ -7,10 +7,10 @@
 ## 当前位置
 
 - **活跃 Change**: `product-prototype-refresh`（来源 issue：MALIZHI-6 项目原型文档审核）
-- **当前阶段**: 需求门（G2 · 质量门）**4/4 ✅ 通过（15:49）→ 本阶段出口完成，已交架构设计进 2-design ＋ 2a-ui-design** —— `REQUIREMENT.md` 终稿：**7 US / 13 AC** / v1·v2·out（v2 含需代码议题 12 个 slug，真源＝RESEARCH §2）/ NFR 5 轮 ＋ W1 `BASELINE-code-facts.md`（含新增 S10）＋ W2 `RESEARCH-competitors.md` ＋ `CONTEXT.md` §15；票面首轮 1✅+3条件❌、全部修正落地后四张改票 ✅ 逐条实测证据与五条交接提示（AC-13 逐块打标、tier-2 作用范围、可选收紧式、**先验验据的两步法＋本阶段复现结果**、人工 5 项）记 REQUIREMENT §7 终裁段
+- **当前阶段**: 2-design **出口完成** —— `DESIGN.md` ＋ 3 份 ADR（`.specs/adr/001~003`）落盘：交付物形态锁定「零依赖单文件 HTML」，接口＝**标记契约 + K1-K9 派生对账闸**（§1.5），12 条决策各带备选/理由/代价，风险 9 条含缓解，§9 沉淀 3 条。**🛡️ G2 方案门已召集（票面待 4 票：🟫 架构师 M／🟦 研发负责人／🟩 领域专家／🔴 安全审计师）**，通过后即交 2a-ui-design
 - **当前 Task**: —
-- **中断任务**（R1.5 清窗）: 无
-- **会话开始建议**: 需求门已过，1-requirement 不再回炉。进 2-design 先读 `@.specs/product-prototype-refresh/REQUIREMENT.md`（§1 口径 + §3 13 条 AC + §7 终裁与交接提示）与 `@.specs/product-prototype-refresh/BASELINE-code-facts.md`（数字唯一基准、S1-S10 边界）；12 个需代码议题**不在本 change 内实现**（R7.1，另开 change）。**2a-ui-design 开工前必须拿到人工对 `product-design.html` ①/② 的拍板**（现按 ② 新建起草）。
+- **中断任务**（R1.5 清窗）: 无（G2 待票期间本 change 停在 2-design 出口，不进 2a、不写交付稿）
+- **会话开始建议**: 先数 G2 票是否集齐 4 票（未集齐 → 静默待票，不推进）。票齐后进 2a-ui-design：读 `@.specs/product-prototype-refresh/DESIGN.md` §1.5（标记契约＝接口名，改字面串必须同笔改 `REQUIREMENT.md` 该条 AC 命令）＋ §0/§6（两轴标签不可合并、交付稿不进 S1-S10 整表、`.html` 后缀必须保持）＋ `@.specs/adr/001~003`；**2a 开工前必须拿到人工对 `product-design.html` ①/② 的拍板**（现按 ② 新建起草）。12 个需代码议题仍**不在本 change 内实现**（R7.1）。
 
 ## 阻塞与待决策
 
@@ -33,7 +33,8 @@
 
 ## 决策日志（最近 10 条，倒序）
 
-- `[2026-09-22]` **需求门 4/4 ✅ 终裁通过，本阶段出口**：三张条件票（🟩 `01a0c815-603c`／🟫 `01a0c815-d682`／🔴 `01a0c816-eaff`）在修正落地后全部翻正，**且三位都是执行命令而非读文字**——🔴 按 `### AC-*` 分节把工件里验证方式行的命令原文抽进 bash 逐条跑（反例必红／合格稿必绿，AC-3/4/5/7/8/9 全对）、🟫 反测我采纳的判据能否被 inflate（漏画 → 7 拦下、挤一行 → 1 拦下）、🟩 原文照跑三条对账命令（`12 / SAME / SAME`）。落地的判据性改动：AC 12→**13**（新增 AC-13 竞品融入判据）、全文计数型命令换逐条/段内共现、AC-4 核对面纳入 `backup/`（平台编辑器自动备份已入库这一事实复验后入 BASELINE 新增 **S10**，S1-S9 引用范围同步 S1-S10）、归属字段统一 §1 四值枚举。**五条交接提示交下游、不回炉改已投票的 AC**（含 🔴 的可选收紧扩展式登记不并档；另把她的"抽命令原文、反例必红／合格稿必绿"两步法连同样本放置禁忌——反例/合格稿不得落在 `.specs/product-prototype-refresh/` 内，否则被 AC-4 tier-1 自判违规——记为提示 5；本阶段已在 `58ced1e5`（AC 段与 `612e4dd4`/`d07b4c1c` 逐字一致，diff 为证）复现：12 条 F 型命令对合格稿 12/12 放过、对反例稿拦下 9 条，余 3 条为成对设计或样本缺料）。交 [@架构设计] 进 2-design ＋ 2a；人工 5 项仍挂、① 卡 2a 开工 — `@.specs/product-prototype-refresh/REQUIREMENT.md#终裁`
+- `[2026-09-22]` **2-design 出口（DESIGN.md + ADR-001/002/003）**：步骤 0 走"已锁决策直接读用"例外（`CONTEXT` §15.2#5/#7 + CHANGE 视觉调性）→ **不向人工重开偏好提问**；交付物锁定零依赖单文件 HTML（排除构建链/CDN/位图：`demo.gif` 实测 2.8MB 一张即爆 NFR 预算），接口＝**§1.5 标记契约（AC 命令的字面串即接口名）+ K1-K9 派生对账闸**。三条实测发现进工件：① **AC-7/AC-8 词锚定窗口可假绿**（「安全与审计」出现在导航时，安全段漏写边界仍判 1；`id="sec-security"` 锚定版判 0）→ 交付稿该字样只在安全章出现、侧边栏用 label 原文「审计日志」，加严闸 K7/K8 进 5-test 与票面命令并跑；② **需求侧交接提示③ 的可选收紧 tier-1 扩展式 → 显式决定并档**（`DESIGN` D7，对现产物 + `backup/` 实测 0 命中，不动已投票原式）；③ **唯一基准自身一处小漂移**：`BASELINE:35` 记 `Detail`「含 6 个 tab 组件」，代码 `frontend/src/pages/Detail.tsx:9` 的 `TABS` 与 `*Tab` import 均为 **5** → 本阶段不改已投票工件，交付稿按实测值写并上报需求侧改该单元格。两轴标签（归属四值 / 标注三态）保持正交 + 值域闭集 + 合法组合矩阵（ADR-003），12 需代码议题全部圈在 §6 外（`agent-execution-sandbox`、`knowledge-rag-retrieval` 须各自新 change + ADR，且届时建议先跑 A-architect）。出口自检实跑：`git diff --name-only b15c4554..HEAD | grep -vcE "^(\.specs/|STATE\.md)"` → **0**、tier-1 与并档收紧式 → 各 **0 命中**、`12 / SAME-REQUIREMENT / SAME-STATE`、AC-1 基准 `32/168/11/13` 复现、9 条融入派生 `G1 G4 G5 G6 G7 G8 G9 G10 G13` — `@.specs/product-prototype-refresh/DESIGN.md`
+- `[2026-09-22]` **需求门 4/4 ✅ 终裁通过，本阶段出口**：三张条件票（🟩 `01a0c815-603c`／🟫 `01a0c815-d682`／🔴 `01a0c816-eaff`）在修正落地后全部翻正，**且三位都是执行命令而非读文字**——🔴 按 `### AC-*` 分节把工件里验证方式行的命令原文抽进 bash 逐条跑（反例必红／合格稿必绿，AC-3/4/5/7/8/9 全对）、🟫 反测我采纳的判据能否被 inflate（漏画 → 7 拦下、挤一行 → 1 拦下）、🟩 原文照跑三条对账命令（`12 / SAME / SAME`）。落地的判据性改动：AC 12→**13**（新增 AC-13 竞品融入判据）、全文计数型命令换逐条/段内共现、AC-4 核对面纳入 `backup/`（平台编辑器自动备份已入库这一事实复验后入 BASELINE 新增 **S10**，S1-S9 引用范围同步 S1-S10）、归属字段统一 §1 四值枚举。**五条交接提示交下游、不回炉改已投票的 AC**（含 🔴 的可选收紧扩展式——2-design 已按 D7 显式并档，见上一行；另把她的"抽命令原文、反例必红／合格稿必绿"两步法连同样本放置禁忌——反例/合格稿不得落在 `.specs/product-prototype-refresh/` 内，否则被 AC-4 tier-1 自判违规——记为提示 5；本阶段已在 `58ced1e5`（AC 段与 `612e4dd4`/`d07b4c1c` 逐字一致，diff 为证）复现：12 条 F 型命令对合格稿 12/12 放过、对反例稿拦下 9 条，余 3 条为成对设计或样本缺料）。交 [@架构设计] 进 2-design ＋ 2a；人工 5 项仍挂、① 卡 2a 开工 — `@.specs/product-prototype-refresh/REQUIREMENT.md#终裁`
 
 - `[2026-09-22]` **需求门 4/4 到齐 + 🔴🟫 两张条件票当轮闭合**：安全审计师构造反例证明 **AC-3/AC-4/AC-5/AC-7/AC-8 的全文计数型命令可被绕过**（远程 `url()`/协议相对/`srcset`/`iframe`/内联 `fetch` 判绿；同行堆叠多条"本项目已有"互相顶包；`grep -A2 加密` 被邻行蒙过；AC-4 核对面漏 `backup/`——平台编辑器保存即自动复制原件入 `backup/`，`CLAUDE.md` 亦记为"产物保存前的自动备份"）→ 本阶段**逐条独立重跑反例与合格稿后**换命令：AC-3 加强版（反例 5 命中 vs 旧命令 0）并把 out-1「不接真实数据」并进机器闸、Then 明写保留 `<a href>` 来源引用；AC-4 两级（tier-1 含 `backup/` 现 0 命中 exit 1，tier-2 管绝对路径/邮箱/主机名）＋ 新纪律"本 change 产物不经平台 PUT 编辑器"；AC-5 加同行堆叠探测；AC-7/8 改段内共现。高级产品经理指出 **CHANGE 验收线 1 末句「并含调研新增界面」在 12 条 AC 里无人验**（`grep -c 调研新增界面 REQUIREMENT` → 0 证实）→ 新增 **AC-13**（9 条「融入原型」须带"来源=调研结论 G<n>"标注 + 调研局限随稿一节 + UAT-7 逐条勾）。另：归属列两拨词汇（本文两值 vs 表内五值，实测 1/6/7/1）→ §1 定**四值枚举为唯一口径**；G11 补"最近骨架"锚点（`assignee` 全仓 0 命中、`scheduled_task.py:13,18` 的 `agent_id`+`owner_id`）；§4 追加安全类可引事实；🔴 非阻断 2 的代码事实复验后入 BASELINE 新增 **S10**（`artifact.py:10-26` GET 产物无鉴权、PUT 才要 `project:write`）→ S1-S10 整表禁搬进外发原型稿；`F=` 路径赋值统一。计数对账不变式复跑：12 / SAME-REQUIREMENT / SAME-STATE ✓
 
@@ -43,8 +44,7 @@
 - `[2026-09-22]` **W1 定性两处「壳能力」**：`routes/token_usage.py` 系正则扫 `.specs/*-SUMMARY.md` 文本（非逐运行记账）、`tools_api.py:89-91` 的 MCP 只生成骨架 zip（无运行时）→ 原型必须标「未接入/演示边界」，并登记议题 `token-cost-ledger` / `mcp-tool-runtime`
 - `[2026-09-22]` **G1 终裁：4/4 全票通过**（🔴 复验 `3de89ded` 后按原话翻 ✅；其改票附注两条当轮落地：核对命令换 `1[2]3456`+`--exclude=CHANGE.md` 防自命中/防 glob 空匹配 exit 2、加密陈述补 `ENCRYPTION_KEY` RuntimeError 与短密钥零填充无 KDF 边界——均复测后写入）。0-change 出口：需求分析接 1-requirement — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
 - `[2026-09-22]` G1 第 2 轮：🟫 产品经理复验 `3de89ded` 后按原话改票 ✅（票面 3✅ + 🔴 未到 → 静默待票）；其假锚点纠错（「Artifact 页」不存在，产物视图实为 `components/ArtifactTab.tsx`、宿主 `Detail.tsx:60` 计入工作流监控域）复测属实、当轮改掉，不留给 REQUIREMENT 继承 — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
-- `[2026-09-22]` G1 首轮集票 4/4：原始 2/2 但两张 ❌ 均为「修正落地即改 ✅」条件票→不当真分歧提交人工；🔴 R-1（数据分类与敏感面节 + 示例数据合成排除条）、R-2（验收线 4 零外部依赖）、🟩（数字口径条 + 29 文件/168 端点复测）、W3 归属双字段全部落盘 v3，已请 🟫🔴 改票；任一仍 ❌ → 平票提交人工 — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
-- `[2026-09-22]` 立项 `product-prototype-refresh`：W1 审核 / W2 竞品调研 / W3 融合原型文档，三个工作包全在文档层，L1 代码零改动；视觉调性锁定既有前端实现（Tremor+Tailwind+tokens.css 管控台基线，2a 可修正）— `@.specs/product-prototype-refresh/CHANGE.md`（同轮首建本 `STATE.md`）
+- `[2026-09-22]` 立项 `product-prototype-refresh`：W1 审核 / W2 竞品调研 / W3 融合原型文档，三个工作包全在文档层，L1 代码零改动；视觉调性锁定既有前端实现（Tremor+Tailwind+tokens.css 管控台基线，2a 可修正）— `@.specs/product-prototype-refresh/CHANGE.md`（同轮首建本 `STATE.md`）。更早票链（G1 首轮集票 4/4：原始 2/2，两张条件 ❌ 落地后翻正）全文在 `@.specs/product-prototype-refresh/CHANGE.md:92`，本日志按"最近 10 条"上限压缩为一行
 
 ## 已归档 Changes（最近 5 个，倒序）
 
