@@ -7,7 +7,7 @@
 ## 当前位置
 
 - **活跃 Change**: `product-prototype-refresh`（来源 issue：MALIZHI-6 项目原型文档审核）
-- **当前阶段**: CHANGE —— 产物已落 `.specs/product-prototype-refresh/CHANGE.md`，G1 需求门 4 专家投票进行中
+- **当前阶段**: CHANGE —— `CHANGE.md` v2 已落盘；G1 第 1 票 🟫 ❌（三条修正项已全部核实落盘，待其改票）；🟦🟩🔴 三票未到
 - **当前 Task**: —
 - **中断任务**（R1.5 清窗）: 无
 - **会话开始建议**: 先加载 `@.specs/product-prototype-refresh/CHANGE.md` 与 issue 评论流的 G1 票；票齐按 R13.2 裁决（4/4 或 3/4 → 进 1-requirement，反对意见记 CHANGE 末尾；平票 → 提交人工）。
@@ -26,7 +26,8 @@
 ## 决策日志（最近 10 条，倒序）
 
 - `[2026-09-22]` 立项 `product-prototype-refresh`：W1 审核 / W2 竞品调研 / W3 融合原型文档，三个工作包全在文档层，L1 代码零改动 — `@.specs/product-prototype-refresh/CHANGE.md`
-- `[2026-09-22]` 视觉调性锁定既向前端实现（Tremor+Tailwind+tokens.css 管控台基线）；code-kit 九卡库未安装，2a 可修正 — `@.specs/product-prototype-refresh/CHANGE.md#视觉调性`
+- `[2026-09-22]` G1 第 1 轮：🟫 产品经理 ❌→三条修正全部核实成立并落盘（验收线能力域 8→11：补知识产物与文档/告警/人工审批；验收线 3 增「校准基线」声明要求；页面口径 34 文件 vs 32 挂载写清 + SecurityPage/AssemblyView 登记 W1 孤儿盘点）；另采纳验收线 2 判定期标注、扩展候选一次拍板两条建议 — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
+- `[2026-09-22]` 视觉调性锁定既有前端实现（Tremor+Tailwind+tokens.css 管控台基线）；code-kit 九卡库未安装，2a 可修正 — `@.specs/product-prototype-refresh/CHANGE.md#视觉调性`
 - `[2026-09-22]` 首建仓库根 STATE.md（此前不存在）
 
 ## 已归档 Changes（最近 5 个，倒序）
