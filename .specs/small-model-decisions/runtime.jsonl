@@ -1,0 +1,6 @@
+{"ts": "2026-09-22T19:30:16", "stage": "0-change", "event": "CHANGE.md 定稿（4 澄清回答入账）"}
+{"ts": "2026-09-22T19:31:38", "stage": "1-requirement", "event": "用户补充原话入账（未显式配置=零介入→AC-0 铁律）；REQUIREMENT.md 落盘；需求门 4/4 全票通过"}
+{"ts": "2026-09-22T19:44:57", "stage": "P-product", "event": "PRODUCT-DESIGN.html v4：决策层 13 处增补（能力地图/§1.4 铁律/§2.7/§5.19/§6.23+6.24 规划原型/矩阵/术语/FAQ Q20/导航/版本元数据），AC-0 两步制贯穿；图标修正 cube→layers msg→chat；状态标=待人审门验收"}
+{"ts": "2026-09-22T19:51:59", "stage": "P-product", "event": "⑤ 人审门：用户原话「通过」→ v4 状态标晋级已过审；下游 REQUIREMENT 与本 PRD 双向一致性维持；2-design 未启动（用户明示暂不进入）"}
+{"ts": "2026-09-22T19:56:21", "stage": "P-product", "event": "v5：三处决策层设计画面化（p8 斜杠命令面板/p3 域策略绑定卡/p22 decision 时间线行+run 成本 chip），呈审中；v4 已过审记录保留"}
+{"ts": "2026-09-22T20:00:23", "stage": "P-product", "event": "⑤ v5 呈审→用户原话「好的」（对「点头晋级」提议的确认）→ 状态标晋级已过审；P-product 前置阶段闭环，2-design 仍等指令"}

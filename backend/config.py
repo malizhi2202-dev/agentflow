@@ -6,7 +6,7 @@ HOST: str = os.environ.get("HOST", "127.0.0.1")
 PORT: int = int(os.environ.get("PORT", "8000"))
 SCAN_INTERVAL: int = int(os.environ.get("SCAN_INTERVAL", "5"))
 CORS_ORIGIN: str = os.environ.get("CORS_ORIGIN", "http://localhost:5173")
-PROJECT_ROOT: str = os.environ.get("PROJECT_ROOT", os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+PROJECT_ROOT: str = os.environ.get("PROJECT_ROOT", os.path.dirname(os.path.dirname(__file__)))
 
 # 项目隔离：每个项目有独立的 .specs/ 和配置
 CURRENT_PROJECT: str = PROJECT_ROOT
