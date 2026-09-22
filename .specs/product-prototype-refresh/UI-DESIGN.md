@@ -195,6 +195,7 @@
 | 值 | 用途 | 依据 |
 |---|---|---|
 | `200px` | 左栏宽 | 与产品侧栏同宽（`App.tsx:265 width: collapsed ? 48 : 200`）→「与原有无法区分」 |
+| `44em`（**可选**，非白名单也非字面 px） | 若 4-dev 把某段散文写到多段，正文可加 `max-width: 44em` 收行宽（中文 71 字/行偏长的逃生口，🟫 (b)）；用 `em` 不触 U12 的 px 白名单，且不新增 token（`--cp-*` 语义不合用） |
 | `1000px` | 正文列 `max-width` | 1280 − 200(栏) − 2×40(--s10 留白) ≈ 1000 ⇒ **1280 视口零横向滚动**（NFR），且中文一行 ≈ 71 字 |
 | `9999px` | skip-link 移出屏（`:focus` 复位） | 可达性基线，非视觉值 |
 
@@ -272,9 +273,9 @@
 |---|---|---|---|---|---|---|
 | 左栏入口 / TOC 项 | 13px `--text-secondary`，无底 | 底 `--bg-card-hover` + 字 `--text`（100ms 颜色） | 2px `--blue` 环 + 2px offset | 静态稿无路由态 → **不做当前项态**（N5） | Tab 逐项，Enter 跳锚 | `nav[aria-label="文档目录"]` 内链接；`💬 对话中心` 原文照读 |
 | 域章 / 附加章 | 无底 + 下 hairline | — | — | `outline:2px solid var(--blue)`（**非** `--blue-border`）+ `--bg-selected` 底 | 由 TOC 进入 | `<section>` + `aria-labelledby` 指向 H2 |
-| 页块 C3 | 平面卡（**无阴影**） | 底 `--bg-card-hover`（不动 transform：静态文档里跳一下＝噪声） | 内含链接时环在链接上 | 描边 | 无可聚焦子件（`h3` 不 tabindex） | `article` + mono 文件名读作逐字（路径类，正确） |
+| 页块 C3 | 平面卡（**无阴影**） | **无 hover**（🟫 (c)：产品里 `--bg-card-hover` 专配 `.card-clickable{cursor:pointer}`（`tokens.css:183-184`），本稿页块无可点声称 → 借它就是在谎称可点；`card→hover` 的 ΔL 本来也只有 0.027） | 内含链接时环在链接上 | 描边 | 无可聚焦子件（`h3` 不 tabindex） | `article` + mono 文件名读作逐字（路径类，正确） |
 | 徽标 C4/C5 | 短词**文本节点**；o1-o3 同色 8% 底无边框（产品 `.badge` 原形），o4/s1-s3 `--bg-card` + 1px 框 | 不变（非控件） | 不适用 | 不适用 | 不适用 | 可读性靠文本节点本身（🟫 ④：`::after` 文案不进 Ctrl+F/复制，故放弃该形态；D13 的"文案不在 DOM 里"这一半由文本节点直接消除，`content:` 与 `aria-label` 禁枚举原串仍由 U6a/U6b 守着） |
-| 待标注 C6 | 强框 + 现状句 + 双徽标 | 底 `--bg-card-hover` | — | 可被 `#nb-*` 直达 → 描边 | 若用 `<details>`：Enter 展开 | 展开态由原生 `summary` 播报 |
+| 待标注 C6 | 强框 + 现状句 + 双徽标 | **无 hover**（同 C3；用 `<details>` 时靠原生 `summary` 的 `:focus-visible` 环给反馈） | — | 可被 `#nb-*` 直达 → 描边 | 若用 `<details>`：Enter 展开 | 展开态由原生 `summary` 播报 |
 | 融入块 C8 | hairline 上界 + 来源行 | — | 链接 hover 同 C11 | 描边 | Tab 到 `<a>` | 来源行可读 |
 | 表格 C9 | 行线 hairline | 行底 `--bg-card-hover` | 单元内链接有环 | — | 原生表格朗读 | `caption` + `th[scope]` 齐（**禁 placeholder 式表头**） |
 | 折叠 `<details>` | `--s3` 上距，summary 13px `--blue` | 下划线 | 环在 summary 上 | — | Enter/Space 原生 | 无需 JS |
