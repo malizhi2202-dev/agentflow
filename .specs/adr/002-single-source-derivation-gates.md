@@ -17,7 +17,7 @@
 ## Decision
 
 1. **每个数字与清单只有一个真源**：规模数字与域/页归属 = `BASELINE-code-facts.md` §1/§2；竞品 G 号、去向与需代码议题 slug = `RESEARCH-competitors.md` §2；应用侧入口与页面清单 = `frontend/src/App.tsx`（`NAV`/`ADMIN_NAV` 的 label 原文、`./pages/*` 的 32 个挂载）；视觉值 = `frontend/src/styles/tokens.css`。交付稿**只呈现派生结果，永不成为真源**。
-2. **一致性用单行派生命令对账**，集中写进 DESIGN §1.5 的 K1-K9（缺则报缺、多则报多），不另立脚本文件。编号以 DESIGN §1.5 为唯一列表，本处只述意图：
+2. **一致性用单行派生命令对账**，集中写进 DESIGN §1.5 的 K 系列（K1…K10）（缺则报缺、多则报多），不另立脚本文件。编号以 DESIGN §1.5 为唯一列表，本处只述意图：
    - **K1** 结构计数与页名集合 `comm` **双向**对账（缺页 / 虚构页两个方向都要空；域章数 == `BASELINE §2` 现算域数；page 块数 == 32）；
    - **K2** `data-anchor` 逐条 `[ -f ]` 存在性（消灭"看着像引用"的空标）；
    - **K3** `data-owner`（归属四值）与 `data-state`（标注三态）**值域闭集**，两轴不得互相代偿；
