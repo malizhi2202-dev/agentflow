@@ -33,7 +33,7 @@
 | Token 源 | 唯一声明处 `frontend/src/styles/tokens.css` 的 `:root`，**逐名去重 61 个**（不是 DESIGN 记的 51；差的 10 个全在"同行多声明"里，见 §14-上报①）；全局无第二个 token 文件 | `grep -oE -- '--[a-z0-9-]+[ ]*:' tokens.css \| sort -u \| wc -l` → 61 |
 | 色彩实际比例 | 引用频次（`frontend/src` 全量）：`--border` 251 · `--text-muted` 186 · `--font-mono` 160 · `--text-secondary` 152 · `--bg-card` 126 · `--bg-input` 121 · **`--blue` 103** · `--red` 74 · `--green` 73 · `--orange` 35 · `--purple` 35。→ **中性占绝对多数，品牌蓝是"点缀层"**（约 4% 的 token 引用），语义四色只做状态不做装饰 | 本轮 `grep -rhoE "var\(--[a-z0-9-]+\)" \| sort \| uniq -c` |
 | 交互反馈语言 | **只有颜色与边框，没有位移、没有阴影、没有缩放**：`.card:hover{border-color:var(--border-strong)}`（tokens.css:182）· `.card-clickable:hover{background:var(--bg-card-hover)}`（:184）· `.btn-primary:hover{background:var(--blue-hover)}`（:148）· `.tab:hover{color:var(--text-secondary)}`（:209）· `input:focus{border-color:var(--blue)}`（:133）。全仓 `translateY` 只有 2 类用途：`@keyframes slide-in`（:114，入场）与 `top:50%` 的**居中**（`Home.tsx:45` 等）——**不是 hover 反馈**（本行结论经我复核更正，初稿曾把 hover 位移当成既有语汇） | tokens.css:133/148/155/182/184/209 |
-| 动效语言 | 单一缓动 `--ease: cubic-bezier(0.16,0,0.2,1)`（引用 7 次）+ 两档时长 `--fast 100ms`（18 次）/ `--normal 200ms`（2 次）；`prefers-reduced-motion` 已全局兜底（tokens.css:117-119，含 `scroll-behavior` 与 `transition-duration`）。**违例**：`transition: all`（2 处）、侧栏 `transition: width var(--normal)`（`App.tsx:269`）——动的是布局属性 | 本轮实测 |
+| 动效语言 | 单一缓动 `--ease: cubic-bezier(0.16,0,0.2,1)`（引用 7 次）+ 两档时长 `--fast 100ms`（18 次）/ `--normal 200ms`（2 次）；`prefers-reduced-motion` 已全局兜底（`tokens.css:117-119`，**只**含 `animation-duration`/`transition-duration`；实测 `grep -rn 'scroll-behavior' frontend/src` → **0 命中**，产品侧不存在该声明 → §6.4 的 `html{scroll-behavior:auto}` 是本稿自补）。**违例**：`transition: all`（2 处）、侧栏 `transition: width var(--normal)`（`App.tsx:269`）——动的是布局属性 | 本轮实测 |
 | 结构语言 | elevation **只有 2 级**（`--shadow-sm` 0 次引用 / `--shadow-md` 7 次）；圆角 3 档且极度偏小（`--r-sm` 51 · `--r-md` 18 · `--r-lg` 5）；密度：卡内边距 16px、gap 8px 是最高频内联值（`padding/gap:8` 344 次、`4` 302 次、`6` 246 次、`12` 164、`16` 126） | 本轮实测 |
 | 图形与图标 | 图标库 `lucide-react`（58 个文件引用，`size={16}`）——**交付稿用不了**（零依赖 + 禁位图 → 无图标字体/无 CDN）；logo 是几何字符 `◈` 而非图片（`App.tsx:271`） | 本轮实测 |
 | 文案调性 | 工程向、动词短词（`保存/新建/取消/重试/刷新`）；nav 短名（工具库/工作流/角色/Agent…）；**侧栏品牌名写「AI 开发平台」而 README 写「AgentFlow」**（`App.tsx:275` vs `README.md:1`）→ 见 §14-上报④ | 本轮实测 |
@@ -106,7 +106,8 @@
 | 主文字 | `--text` | `#e1e2e5` | 正文/标题/表格单元 | — |
 | 次文字 | `--text-secondary` | `#9699a0` | 说明句、meta、目录未选中项 | — |
 | 弱文字 | `--text-muted` | `#5d6068` | **交付稿禁用于任何信息性文字**（实测 2.77:1，见 §4） | 一切要读的字 |
-| hairline | `--border` / `--border-strong` | `rgba(255,255,255,0.06/.10)` | 分隔线、表格行线 | 当"可见边框"表达交互态（不足 3:1） |
+| hairline | `--border` / `--border-strong` | `rgba(255,255,255,0.06/.10)` | 分隔线、表格行线 | 当"可见边框"表达交互态（实测 1.06 / 1.34，不足 3:1）；**`--blue-border` 同档禁用**（叠底 1.30–1.48，见 §6.4 `:target`） |
+| 装饰蓝框 | `--blue-border` | `rgba(84,140,240,0.2)` | **本稿唯一用途**：选中卡片的 1px 静态装饰边（非语义，不承担"态"） | 表达任何交互态（`:target`/`hover`/`focus`）——实测叠底 **1.30:1（on `--bg-app`）/ 1.33:1（on `--bg-card`）**，与 hairline 同档；交互态一律 `--blue`（🟫 ①＋🟦 阻断一，U14 机验）。**登记理由**：本稿此前在 §6.4/C2/§9 三处用它表达 `:target`，却未在此表列行（实测该行计数 0）→ 补上，颜色权威表不再少角色 |
 | 字体 | `--font` / `--font-mono` | `tokens.css:43-44` 原文 | 见 §5 | 自造 `--font-display` |
 | 间距 | `--s1..--s10` | 4/8/12/16/20/24/32/40 | 见 §6 | 表外数值 |
 | 圆角 | `--r-sm/--r-md/--r-lg` | 4/8/12 | 见 §6 | — |
@@ -208,9 +209,9 @@
 ### 6.4 动效（**本交付稿＝零动画**）
 
 - 允许：`transition: color/background-color/border-color/outline-color var(--fast) var(--ease)` —— 只有颜色，100ms，缓动取产品唯一曲线。
-- 禁止：`transition: all`（app 有 2 处）、`transition: width`（`App.tsx:269`）、任何 `@keyframes`（app 有 `pulse-red`/`spin`/`slide-in`/`dash-flow` 四条，**一条都不用**）、`scroll-behavior: smooth` 之外的滚动干预（原生滚动不劫持）。
-- 兜底逐字沿用产品形态：`@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *,*::before,*::after{animation-duration:0ms!important;transition-duration:0ms!important} }`（源 `tokens.css:117-119`）→ U9 机验存在。
-- 滚动定位反馈改由**静态描边**承担：`.domain:target, .page-block:target { border-color: var(--blue-border) }` + 一次性 `--bg-selected` 底 —— 无动画也读得出"我跳到了这里"。
+- 禁止：`transition: all`（app 有 2 处）、`transition: width`（`App.tsx:269`）、任何 `@keyframes`（app 有 `pulse-red`/`spin`/`slide-in`/`dash-flow` 四条，**一条都不用**）、**`scroll-behavior: smooth`**（平滑滚动本身就是这份稿里唯一的滚动动画，与 §0.4 打破①「零动效」同族；U9b 机验）。原生滚动不劫持。
+- 兜底沿用产品那条媒体查询：`@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *,*::before,*::after{animation-duration:0ms!important;transition-duration:0ms!important} }`（源 `tokens.css:117-119`）→ U9 机验存在。**口径据实**（🟫 ② 纠正；实测 `grep -rn 'scroll-behavior' frontend/src` → **0 命中**）：产品侧根本没有 `scroll-behavior` 这条声明，`tokens.css:117-119` 只有 `*{animation/transition-duration}` 一族，`prefers-reduced-motion` 全仓也仅此一处 → 本稿的 `html{scroll-behavior:auto}` 是**我自补的显式声明**，不是"逐字沿用产品形态"；§0.2 动效语言行同步改正，U9 期望值不变。
+- 滚动定位反馈由**静态描边**承担，且必须用**看得见的那一档**：`.domain:target, .page-block:target, .notice:target { outline: 2px solid var(--blue); outline-offset: 2px; background: var(--bg-selected) }`。理由：`:target` 是本稿**唯一**的跳转反馈通道（无按钮、无动画、不做当前项高亮），而 `--blue-border` 叠底实测 **1.30:1（on `--bg-app`）/ 1.33:1（on `--bg-card`）**，与 `--border`（1.06）/`--border-strong`（1.34）同档 → 用它等于违反 §3.1 hairline 行我自己写下的「不足 3:1 不得用于表达交互态」（🟫 ① 与 🟦 阻断一独立复算同判）。改用焦点已用的 `--blue`（5.29/5.87:1 ≥ 3:1，与 §7 N7 的 `:focus-visible` 同形、`outline` 不动布局）；`--bg-selected` 底**保留**为第二通道（叠底 ΔL +0.057/+0.049，暗色分层阈值 0.04 以上），但**判定不依赖它**；新增 U14 机验 `:target` 里禁现 `--blue-border`。
 
 ---
 
@@ -218,7 +219,7 @@
 
 ```
 ┌─ 200px 左栏（sticky，自身可滚，bg-sidebar + hairline 右界）────┬─ 1000px 正文列 ─┐
-│ ▌平台入口（镜像实现挂载）＝13 项 · 每项 <a data-nav="label 原文">  │ header.masthead  │
+│ ▌平台入口（镜像实现挂载）＝13 项 · 每项 <a class="toc-entry" data-nav="label 原文" href="#pg-<挂载页>">  │ header.masthead  │
 │   工具库 工作流 角色 Agent 💬 对话中心 Agent 管控 编排 监控        │  H1 + 校准基线行  │
 │   项目 知识库 审批 用户管理 审计日志        ← App.tsx label 原文    │  图例（D17 合规） │
 │ ▌能力域 11 项（href="#sec-*"，第 8 域写「审计日志」，见下）        │ main > section×12│
@@ -234,7 +235,8 @@
 | N4 | 域章顺序＝BASELINE §2 的 1..11 + 外壳，**附加章（融入/slug/局限/附录）排在 12 个域章之后且不带 `class="domain"`** | K6c `grep -c 'class="domain"'` 必须 12（11 域 + 外壳）；U4 机验目录不越界 |
 | N5 | 跳转全靠 `#` 锚点 + `<details>`，**零 JS**；不做"当前项高亮" | 静态稿无路由态，写 `aria-current` 会恒假（＝对读屏器撒谎，🔴 反模式）；`:target` 只做被跳到的**块**的描边反馈。`<details>` 原生键盘可达（Enter/Space）→ 不必为折叠写 JS |
 | N6 | 每页块 `id="pg-<页面名原文>"`，目录/来源行/边界句一律用 `#` 锚点引用（**引用用 id，不复述域名**） | AC-1 可指认性；附录只写「S 号 → `#sec-*`」＝D3/D11 新规格；避免第二处出现枚举/域名字样 |
-| N7 | 键盘与读屏路径：`跳至主内容` skip-link → 左栏 13+11+2 链接 → 正文 `<a>`；`html{scroll-behavior:smooth}` + reduced-motion 关；`:focus-visible` 一律 2px `--blue` 环（5.29:1 ≥ 3:1 图形对比） | WCAG 2.4.1 绕过区块 / 2.4.7 可见焦点 / 1.4.11 |
+| N7 | 键盘与读屏路径：`跳至主内容` skip-link → 左栏 13+11+2 **链接** → 正文 `<a>`；定位走原生瞬时（`html{scroll-behavior:auto}`，无 smooth）；`:focus-visible` 一律 2px `--blue` 环（5.29:1 ≥ 3:1 图形对比） | WCAG 2.4.1 绕过区块 / 2.4.7 可见焦点 / 1.4.11 |
+| N8 | **13 条入口各自的落点钉死，且从代码现算**（🟦 阻断二）：`<a class="toc-entry" data-nav="<label>" href="#pg-<挂载页组件名>">`。推导链：`App.tsx:51-63`（`NAV` 11 项）+ `:65-68`（`ADMIN_NAV` 2 项）给 `id`→`label`；`renderContent` 的 `case '<id>': … <Component …>` 给 `id`→挂载组件 ⇒ `#pg-<Component>`。三条实测特例：① `orchestration` 有三分支（`:248` 一带），**默认挂载 `OrchestrationListPage`** → 落点取它，1:N 的展开交第二组 `#sec-orchestration`（这正是两组并存的意义：**入口到"那一页"、域到"那一组页"**）；② `users`/`audit` 的 `case` 各出现**两次**（`:146-147` 是权限门 `return perm(...)`、`:231-232` 才是挂载分支）→ 取含组件的那个；③ 13 个目标组件**全部**在 32 页集合内（无需新增块）。失效形态写死在这里的理由：`<a>` 不带 `href` 就**不是链接、不进 tab 顺序** → 全闸跑绿仍交出"看着能点、按 Tab 跳不过去"的左栏，而 U10 只数条数抓不到 | US-2 读懂导航结构 / N7 的键盘路径；U15 + U16 机验 |
 
 ---
 
@@ -245,19 +247,22 @@
 | 组件 | 标记形态（**一物一行＝物理单行**） | 长相 | at-rest / hover / focus |
 |---|---|---|---|
 | **C1 masthead** | `<header class="masthead">` + `<h1>` + `<p class="baseline">` + `<div class="legend">` | 上下 `--s10`，下 hairline；H1 T1；基线行 mono 12px `--text-secondary` | 无 hover；基线行文案逐字钉：`校准基线：<7-40 位 hex> · YYYY-MM-DD · 页面 32 / 端点 168 / 域 11`（K10 严格式 + AC-6 三处一致） |
-| **C2 域章** | `<section class="domain" id="sec-…">`（**`class` 必须写在 `id` 前**，见 §10-冲突 C） | H2 T2 + `--s8/--s4` 内边距 + 下 hairline | `:target` → `border-color: var(--blue-border)`；无底色（防卡中卡） |
+| **C2 域章** | `<section class="domain" id="sec-…">`（**`class` 必须写在 `id` 前**，见 §10-冲突 C） | H2 T2 + `--s8/--s4` 内边距 + 下 hairline | `:target` → `outline:2px solid var(--blue); outline-offset:2px` + `background:var(--bg-selected)`（**禁 `--blue-border`**，U14）；无底（防卡中卡） |
 | **C3 页块** | `<article class="page-block" id="pg-X" data-page="X" data-domain="域原文" data-owner="本项目已有" data-anchor="frontend/src/pages/X.tsx">…</article>`（**同物理行**） | `--bg-card` 底 + `--r-md` + `--s4` 内边距 + 1px hairline + H3 mono | rest 平面（**无阴影**）；hover 只 `background: var(--bg-card-hover)`（100ms 颜色过渡）；`:target` 描边 |
-| **C4 归属徽标 `o1..o4`** | `<span class="chip chip-o1" role="img" aria-label="归属 已有"></span>`；文案由 `::after` 给（**D13**） | 10px/500，`--s1`/6px 内距，`--r-sm`，1px `--border-strong` 框，底 `--bg-card`；文字色 o1 `--green`／o2 `--orange`／o3 `--blue`／o4 `--text-secondary` | `::after` 白名单：`已有/半接/竞品建议/未做`；**禁出现枚举原串**（U6a/U6b）；`:hover` 不变（不是控件） |
-| **C5 状态徽标 `s1..s3`** | 同 C4，`chip-s1|s2|s3` + `aria-label="标注 未接"` | 文字色一律 `--text`（**中性**：状态不再叠第二套色，避免与归属色打架） | 白名单：`未接/演示/规划`；与 o 徽标同排、gap `--s1`、**归属在前** |
+| **C4 归属徽标 `o1..o4`** | `<span class="chip chip-o1">已有</span>` —— **短词走文本节点**，枚举原串只在 `data-owner`/`data-state` 属性里（🟫 ④：`::after` 生成内容不进 Ctrl+F、不进选中复制，评审搜「半接/演示/竞品建议」= 0 结果，而这三个词正是 §2「定位 → 核对 → 判归属」的抓手；D13 的单写红线仍咬得住——短词非原串，实测双写原串才红 `occ 5/lines 3`，文本节点形态 `33/33` 绿） | 10px/500，`--s1`/6px 内距，`--r-sm`，1px `--border-strong` 框，底：o1/o2/o3 用**产品 `.badge` 原形**（`tokens.css:155-162` 同色 8% 底 + 无边框：`background:var(--green-bg)/--orange-bg/--blue-bg`、`border-color:transparent`；叠底对比度 §4 已算 7.13 / 6.28 / 4.78 全过 AA）——🟫 ③：我原来的 `--bg-card`+1px 框把产品的"状态标签"画成"表单小框"，读起来不再是同一个东西，且让 T-UI-05 有两种都合法的形态可抄；o4 与 s1..s3 仍 `--bg-card` + 框（红字不落红底＝§4 实测 4.28 裁定的同一族）；文字色 o1 `--green`／o2 `--orange`／o3 `--blue`／o4 `--text-secondary` | `::after` 白名单：`已有/半接/竞品建议/未做`；**禁出现枚举原串**（U6a/U6b）；`:hover` 不变（不是控件） |
+| **C5 状态徽标 `s1..s3`** | 同 C4，`chip-s1|s2|s3`，**不再需要** `role="img"`+`aria-label`（文本节点天然可读；🔴 可复算该维） | 文字色一律 `--text-secondary`（**中性**：状态不叠第二套语义色，避免与归属色打架） | 白名单：`未接/演示/规划`；与 o 徽标同排、gap `--s1`、**归属在前** |
 | **C6 待标注块** | `<section class="notice" id="nb-<语义名>" data-state="…">`（可带 `data-owner`/`data-anchor`/`data-slug`） | 同 C3 但框 `--border-strong`，H3 T4 + 现状句 T5 + 「缺哪半条腿」T5 | 无 hover；`⚠️` 之类前缀**禁用**（emoji 白名单只有 N2 一处） |
 | **C7 边界句** | `<p class="edge-note">现状 + 边界限定词</p>`（**必须在同域章内、且早于本章任何嵌套 `<section>`**，§10-冲突 B） | 13px `--text-secondary`，无底色无线条——**不做彩色左条**（§0.4 打破③），用 `12 · ` 前缀序号代替 | — |
 | **C8 融入块** | `<div class="view-block" id="vb-G4" data-from="G4"><p class="vb-src">来源：调研结论 G4</p>…</div>` | 上 hairline（不是卡！）+ 来源行 mono 11px | 一行只准一个 `调研结论 G<n>`（AC-13/K4b 的 occ==lines） |
-| **C9 slug 表 / 附录表** | `<table>` + `<caption class="page-sum">` + `<tr data-slug="…">` / `<tr><td>S1</td><td><a href="#sec-security">#sec-security</a></td></tr>` | 12px，行线 hairline，`th` `--text-secondary` 500；单元不截断不换行成省略号（NFR）。**两表行数一律现算、禁写范围号**：slug 表＝`RESEARCH §2` 的**交付稿可见子集**（依 **D19**，真源全集与可见集可以不等、差值显式登记在闸行，禁把内部件画进稿子凑绿）；附录表＝**稿内实际出现的边界句数**（BASELINE §4 现有 11 条，但 S11 与 `admin-file-read-jail` 同源、依 **D11/D19 不进外发稿** → 附录 **10 行**，实测样本 10 行） | 行 hover `--bg-card-hover`；附录标题逐字：`附录：边界句所在域索引`（**禁**「S1-S10 总表/清单/一览/目录」「攻击面」「弱点」（K11）；禁复述限定句文本与域名字样（D3/D11）） |
-| **C10 图例** | `<div class="legend"><p>本项目已有 = 能在 <code>frontend/src/pages/</code> 或 <code>backend/routes/</code> 指到实现</p>…</div>` | 12px `--text-secondary`，每项一行 | **D17**：含归属枚举值的行必须同行含路径子串，否则 AC-5a 假红；解释句禁复述 `data-*` 原串以外的枚举写法（U6） |
-| **C11 代码/锚点** | `<code>frontend/src/…:12-20</code>` | mono 12px `--text-secondary`，`--bg-input` 底 或无底 + `--r-sm`，**不上色** | 链接态才用 `--blue`；路径一律**仓库相对路径**（禁绝对路径与用户名，AC-4 tier-2） |
+| **C9 slug 表 / 附录表** | `<table>` + `<caption class="page-sum">` + `<tr data-slug="…">` / `<tr><td>S1</td><td><a href="#sec-security">#sec-security</a></td></tr>` | 12px，行线 hairline，`th` `--text-secondary` 500；单元不截断不换行成省略号（NFR）；`td/th{overflow-wrap:anywhere}`（同 🟦 非阻断2，长 slug/URL 不得顶穿版心）。**两表行数一律现算、禁写范围号**：slug 表＝`RESEARCH §2` 的**交付稿可见子集**（依 **D19**，真源全集与可见集可以不等、差值显式登记在闸行，禁把内部件画进稿子凑绿）；附录表＝**稿内实际出现的边界句数**（BASELINE §4 现有 11 条，但 S11 与 `admin-file-read-jail` 同源、依 **D11/D19 不进外发稿** → 附录 **10 行**，实测样本 10 行） | 行 hover `--bg-card-hover`；附录标题逐字：`附录：边界句所在域索引`（**禁**「S1-S10 总表/清单/一览/目录」「攻击面」「弱点」（K11）；禁复述限定句文本与域名字样（D3/D11）） |
+| **C10 图例** | `<div class="legend"><p>本项目已有 = 能在 <code>frontend/src/pages/</code> 或 <code>backend/routes/</code> 指到实现</p>…</div>` | 12px `--text-secondary`，每项一行 | **图例必须建立短词↔原串映射**（🟦 非阻断1）：`部分已有（徽标「半接」）= …`、`缺失-竞品建议新增（徽标「竞品建议」）与缺失（徽标「未做」）= …` —— 全稿原本没有任何地方建立这两对映射，而「半接」正是评审最关心的「缺哪半条腿」入口；合规我核过：AC-5b 仍 `occ==lines`（每行只 1 次原串）、D17 同行含路径子串 ✅、U6a/U6b 禁的是 CSS `content:` 与 `aria-label`，图例是 HTML 文本不触。另加一行 `不支持打印/导出 PDF` 声明（见 §11 新行）。**D17**：含归属枚举值的行必须同行含路径子串，否则 AC-5a 假红；解释句禁复述 `data-*` 原串以外的枚举写法（U6） |
+| **C11 代码/锚点** | `<code>frontend/src/…:12-20</code>` | mono 12px `--text-secondary`，`--bg-input` 底 或无底 + `--r-sm`，**不上色**；`overflow-wrap:anywhere`（🟦 非阻断2：最长 slug `human-agent-assignment-board` 28 字符、最长来源 URL 36–37 字符，12px 等宽 ≈ 200–270px，一格不包就顶穿 1280 无横向滚动那条 NFR） | 链接态才用 `--blue`；路径一律**仓库相对路径**（禁绝对路径与用户名，AC-4 tier-2） |
 | **C12 SVG 框图** | `<svg viewBox class="fig">` + `<g class="node">` / `<path class="edge">` | `.node{fill:var(--bg-card);stroke:var(--border-strong)}` `.edge{fill:none;stroke:var(--blue);stroke-width:1.5}` —— **SVG 内不写字面色、不写 `var()` 进 presentation 属性**（浏览器不可靠），一律走类 | 无 `<use href>`（AC-3 正命门）、无 `data:` 位图、`<title>`/`role="img"`+`aria-label` 给读屏器；两张为限（D3 框图 + §3 状态机） |
 
-**注（D5 的适用面）**：上表中 `class="page-block"`、`data-*` 五属性、`id="nb-*"`、`id="vb-G*"`、`sec-security`/`sec-control-plane`、`<管理员口令>`、校准基线行的串——**都是接口**，改它们必须同笔改 `DESIGN.md §1.5`；`chip-o1..s3`、`edge-note`、`toc-domain`、`legend`、`fig`、`view-block` 之外的视觉 class 与全部 §5/§6 数值——**是我这一棒新钉的视觉规格**，改它们只需改本文件，不动 `REQUIREMENT.md`。
+| **C13 左栏项** | `<a class="toc-entry" data-nav="<label>" href="#pg-<Component>">`（第一组）／`<a class="toc-entry toc-domain" href="#sec-*">`（第二组）／附录两条同形 | `display:block; padding:7px var(--s3); margin-bottom:2px; border-radius:var(--r-sm); font-size:13px; color:var(--text-secondary)`；栏题 11px/600；hover 只动 `background:var(--bg-card-hover)`+`color:var(--text)`（与产品 `.card-clickable:hover` 同族信号，🟫 (c) 见下） | **`href` 是接口的一部分**：无 `href` 的 `<a>` 不是链接、不进 tab 顺序（N7/U15 机验）；`data-nav` 仍只许第一组用（K5/N1）；U16 机验每条 `href="#x"` 都能在同稿找到 `id="x"` |
+| **C14 打印声明行** | `<p class="edge-note">本稿不支持打印 / 导出 PDF…</p>`（masthead 图例之后一行） | 13px `--text-secondary` | 沉默不管——🟦 非阻断3：本稿定性"天生会被转发"，而浏览器默认不打印背景，`--text` 压白纸实测 **1.30:1** → 显式表态"评审以屏读为准"（U17 机验存在）；要不要做打印态是产品决策，归口 §14-⑨ |
+
+**注（D5 的适用面）**：上表中 `class="page-block"`、`data-*` 五属性、`id="nb-*"`、`id="vb-G*"`、`sec-security`/`sec-control-plane`、`<管理员口令>`、校准基线行的串——**都是接口**，改它们必须同笔改 `DESIGN.md §1.5`；`chip-o1..s3`、`toc-entry`、`edge-note`、`toc-domain`、`legend`、`fig`、`view-block` 之外的视觉 class 与全部 §5/§6 数值——**是我这一棒新钉的视觉规格**，改它们只需改本文件，不动 `REQUIREMENT.md`。
 
 ---
 
@@ -266,9 +271,9 @@
 | 组件 | at rest | hover | `:focus-visible` | `:target`/当前 | 键盘 | 读屏 |
 |---|---|---|---|---|---|---|
 | 左栏入口 / TOC 项 | 13px `--text-secondary`，无底 | 底 `--bg-card-hover` + 字 `--text`（100ms 颜色） | 2px `--blue` 环 + 2px offset | 静态稿无路由态 → **不做当前项态**（N5） | Tab 逐项，Enter 跳锚 | `nav[aria-label="文档目录"]` 内链接；`💬 对话中心` 原文照读 |
-| 域章 / 附加章 | 无底 + 下 hairline | — | — | 描边 `--blue-border` | 由 TOC 进入 | `<section>` + `aria-labelledby` 指向 H2 |
+| 域章 / 附加章 | 无底 + 下 hairline | — | — | `outline:2px solid var(--blue)`（**非** `--blue-border`）+ `--bg-selected` 底 | 由 TOC 进入 | `<section>` + `aria-labelledby` 指向 H2 |
 | 页块 C3 | 平面卡（**无阴影**） | 底 `--bg-card-hover`（不动 transform：静态文档里跳一下＝噪声） | 内含链接时环在链接上 | 描边 | 无可聚焦子件（`h3` 不 tabindex） | `article` + mono 文件名读作逐字（路径类，正确） |
-| 徽标 C4/C5 | 1px 框 + 短词 | 不变（非控件） | 不适用 | 不适用 | 不适用 | `role="img"` + `aria-label="归属 已有"`；**文案在 CSS 里 → aria-label 必带**（D13 代价的正解），且 aria-label 里也禁枚举原串（U6b） |
+| 徽标 C4/C5 | 短词**文本节点**；o1-o3 同色 8% 底无边框（产品 `.badge` 原形），o4/s1-s3 `--bg-card` + 1px 框 | 不变（非控件） | 不适用 | 不适用 | 不适用 | 可读性靠文本节点本身（🟫 ④：`::after` 文案不进 Ctrl+F/复制，故放弃该形态；D13 的"文案不在 DOM 里"这一半由文本节点直接消除，`content:` 与 `aria-label` 禁枚举原串仍由 U6a/U6b 守着） |
 | 待标注 C6 | 强框 + 现状句 + 双徽标 | 底 `--bg-card-hover` | — | 可被 `#nb-*` 直达 → 描边 | 若用 `<details>`：Enter 展开 | 展开态由原生 `summary` 播报 |
 | 融入块 C8 | hairline 上界 + 来源行 | — | 链接 hover 同 C11 | 描边 | Tab 到 `<a>` | 来源行可读 |
 | 表格 C9 | 行线 hairline | 行底 `--bg-card-hover` | 单元内链接有环 | — | 原生表格朗读 | `caption` + `th[scope]` 齐（**禁 placeholder 式表头**） |
@@ -293,6 +298,7 @@
 | **A** | **AC-9 与 HTML 转义互斥**：票面命令是 `grep -c "<管理员口令>" "$F"` ≥1，而 HTML 里要**可见**显示尖括号必须写 `&lt;…&gt;` → 该形态**不含**字面 `<管理员口令>`，实测 `grep -c` = **0**（红）。写成裸 `<管理员口令>` 则被当未知标签解析、屏幕上什么都不显示（＝"为过闸而写不可见文本"）。 | 两者都要：**可见部分转义** + **同元素属性保留机读原文**：`<code data-literal="<管理员口令>">&lt;管理员口令&gt;</code>` → 实测 `grep -c` = **1** ✓、屏幕上正常显示 `<管理员口令>` ✓、DevTools/DOM 里原文也在（不是隐藏文本）。 | 下轮 `REQUIREMENT` 若愿改：命令换成 `grep -cE "(<|&lt;)管理员口令(>|&gt;)" "$F"` 即两形态皆放行（AC-9 属已投票 → 本 change 不动）。 |
 | **B** | **K7/K12 的 awk 窗口会被嵌套 `</section>` 提前截断**：K6 强制待标注块写成 `<section … id="nb-*">`，而 K7/K12 的 awk 是「开窗 → 遇**第一个** `</section>` 关窗」。→ 边界句若排在任何嵌套 section 之后，窗口只剩一小截，**K7/K12 直接判 0**（票面词锚版却可能仍判 1 → 两版打架）。 | 域章内**顺序钉死**：`H2 → 边界句 `<p class="edge-note">` → 页块 → 嵌套 notice`；并加两条机验 **U5a/U5b**（边界句行号 < 本章第一个嵌套 `<section>` 行号）。实测样本：`PASS 122<124`、`PASS 99<106`。 | 设计侧可把 K7/K12 换成深度感知 awk，或在 §1.5 把"边界句先于嵌套 section"升为契约（**后者零风险，建议采**）。 |
 | **C** | **K7/K12 字面正则仍属性顺序敏感**：两条 awk 都写死 `/<section class="domain" id="sec-security"/`；而 **D16** 说"同标签属性书写顺序不是契约"。→ 只调换 `class`/`id` 顺序就能让设计侧闸静默判 0（本轮实测：把两属性对调后 K7 输出 0）。 | 交付稿一律按 **`class` 在前、`id` 在后** 写域章与全部 `<section>`（钉成形态，见 C2/C6）；这样既满足 K7/K12 现写法，将来闸改成顺序无关也不会红。 | 设计侧：K7/K12 与 D16 口径并档（`<section[^>]*id="sec-security"[^>]*>` + awk 分段取属性），与 K3b/K6 的重写同族。 |
+| **E** | **我自己触发的 AC-12 红（已修，留在这是为了让"跑解析器"这件事留下代价记录）**：回写票面时我用 `/opt/python3.14/bin/python3` 直接 import `backend/parsers/gate.py` 复验票面块 → 生成 `backend/parsers/__pycache__/gate.cpython-314.pyc`，随后的 `git add -A` 把它一起提交 → AC-12（零 L1 写入）在 `e419b88f` 之后实测 **1** | `a6a73506` 删除该产物，`b15c4554..HEAD` 净差异回到 **0**（AC-12 复跑 ✅）。纪律：**读产品代码的解析器要在仓库外副本里跑**，或跑完立刻清 `__pycache__` 再 `add`；`.gitignore` 补 `__pycache__/` 是 L1 写入，我不做 → 归口 §14-⑧ |
 | **D** | **K1 的左集派生式在并档后的 `BASELINE §2` 上产出脏项**（本轮实测：并档后现式左集 **33 项 ≠ 32 页**；`comm` 双向报「缺页 2 项 / 虚构页 1 项」，其中一项是 `` `pages/Detail.tsx:3-9`） ``，另一项是 grep 的**运行期提示语**被当成集合元素）。根因不是内容错，是 **`tr '、' '\n'` 按字节处理**：`、` 的 UTF-8 三字节是 `E3 80 81`，于是任何含这三个字节的汉字都会被撕开——实测 `流`＝`E6 B5 81`、`见`＝`E8 A7 81` 都在被撕之列（`BASELINE:35` 并档新增的注解文字里就有它们）→ 产生非法字节序列 → `grep -vE` 判定输入为二进制并把「匹配到二进制文件 （标准输入）」写进 stdout。**并档前同一式子给 32 项干净集合**，所以这是一次"措辞改动引爆既有脆弱式"，不是谁写错了数字。 | 本阶段把跑批式改成**先剥括号注解再按顿号切分**：`sed -E 's/（[^（）]*）//g'` 前置 → 实测左集回到 **32**、`comm` 双向**全空**（§13 的 K1a/K1b 就是这个式子；K1c/K1d 两行保留现式实测值作证据）。交付稿侧**不需为此改任何东西**（页集本来就是 32）。 | 架构设计（DESIGN §1.5 的 K1 与 §7.6 配方同一条左集式）；若不愿改式子，则需求侧需知：`BASELINE §2` 的页面列括号注解**不要用含 `、`以外汉字的长注解**（不可持续，建议仍改式子） |
 
 ---
@@ -309,6 +315,7 @@
 | 示例数据 | 无真实业务样例授权 | 全合成（`demo-user` / 相对路径 / 占位口令）+ 合成声明行 | ❌ 真口令、❌ IP、❌ 邮箱、❌ 绝对路径（AC-4 双 tier；**反例连本文件都不能写**：四段点分十进制的回环地址字面量会被 tier-1 的 IP 式自己命中，实测曾在此行假红 → 一律写「本机回环地址」） | `grep -cE "[0-9]{1,3}(\.[0-9]{1,3}){3}"` 交付稿须 0 |
 | logo | 文字标 + 几何字符 `◈` | `◈` + 文本 `AgentFlow`（`README.md:1`/`CLAUDE.md` 一致） | ❌ 自绘额外图形标、❌ 用 `App.tsx:275` 的「AI 开发平台」（→ §14-上报④） | `App.tsx:274` |
 | 竞品名 | 4 家点名，2 家已定位 | 只写已定位者（含来源 `<a href>`）；Buzzz/AgentOS 标「**未定位/三义待指认**」 | ❌ 把竞品自述当本项目既有能力、❌ 编"业界普遍" | RESEARCH §1 |
+| 打印 / 导出 PDF | 无 `@media print`（实测 `grep -cE "打印\|@media print"` → UI-DESIGN 改前 **0** · REQUIREMENT **0** · DESIGN **0**；`DESIGN:281` 的 R5 谈的是外发**泄**面不是打印态） | 稿内一行**显式声明不支持**（C14 + U17），评审以屏读为准 | ❌ 沉默——那等于让 4-dev 替产品做一个没人批的承诺（暗色底压白纸实测 `--text` 1.30:1，整条路不可用）；补真打印态需一套 light 配色 → 破 U2b 的"颜色只从 `var()` 来"，属新 token 决策，须走需求门 | 本轮无授权；归口 §14-⑨ |
 | 客户推荐 / 活动计数 | 无 | **无此区**（管控台文档不设证言位） | ❌ `TESTIMONIAL PLACEHOLDER` 都别放——放了就是占位符病 | — |
 
 ---
@@ -328,7 +335,7 @@
 
 ---
 
-## 13. UI 侧自检闸 U1…U13（设计侧 K 系列的视觉补充；**本轮逐条实跑**，命令单行、可原样抽出跑）
+## 13. UI 侧自检闸 U1…U17（设计侧 K 系列的视觉补充；**本轮逐条实跑**，命令单行、可原样抽出跑；🟫/🟦 的票内修法已并入）
 
 > 适用对象只有一个：`F=.specs/product-prototype-refresh/product-design.html`。它们**不与任何已投票 AC / 设计侧 K 冲突**（只做加严），也不改 §1.5 的字面串。
 
@@ -362,17 +369,43 @@ grep -cE '[0-9]{1,3}(\.[0-9]{1,3}){3}' "$F"
 sed -n '/^:root *[{]/,/^ *}/!p' "$F" | grep -oE '(^|[;{ ])(grid-template-columns|max-width|min-width|width|left):[ ]*[0-9]+px' | grep -oE '[0-9]+px' | sort -u | grep -vE '^(200px|1000px|9999px)$'
 # (13) 内部体积预算（NFR 2 MB 的 1/10 = 200 KB；期望 <=200000 **字节**）
 wc -c < "$F"
+# (9b) 零滚动动画：禁 smooth（§6.4，🟫 ②）
+grep -cE 'scroll-behavior: *smooth|scroll-behavior:smooth' "$F"
+# (14) :target 禁再走不可见档描边（🟫 ① ＋ 🟦 阻断一）
+grep -oE ':target[^}]*\}' "$F" | grep -c -- '--blue-border'
+# (15) 每条带 data-nav 的 <a> 必须有 href="#（🟦 阻断二；无 href 的 <a> 不进 tab 顺序）
+grep -oE '<a [^>]*data-nav[^>]*>' "$F" | grep -vc 'href="#'
+# (16) 每个 #锚点都落得到（同稿存在该 id；期望空）
+comm -23 <(grep -oE '<a [^>]*href="#[^"]+"' "$F" | sed -E 's/.*href="#([^"]+)".*/\1/' | sort -u) <(grep -oE 'id="[^"]+"' "$F" | sed -E 's/id="([^"]+)"/\1/' | sort -u)
+# (17) 打印不承诺必须显式声明（🟦 非阻断3）
+grep -c '不支持打印' "$F"
 ```
 
 **本轮跑法与结果（不是承诺，是已跑）**：一致性样本 `good2a.html` 由 §1.5 派生命令现算生成，落在**仓库外** `$TMPDIR/ui2a/`（一次性的 `build.py`/`run.tsv` 同处，**均不入库**——入库会同时违反 D2 与 §2 单向依赖）。跑完 `git status --porcelain` = **0 行**。
 
 | 闸 | 结果 | 闸 | 结果 | 闸 | 结果 |
 |---|---|---|---|---|---|
-| U1 字号闭集 | ✅ 空 | U1b 禁 `font:` 简写 | ✅ 0 | U2b 根外色值（宽容锚） | ✅ 0 |
-| U3 幻影变量 | ✅ 0 | U4 章外域名 | ✅ 0 | U5a / U5b 嵌套截断 | ✅ `PASS 124<126` / `PASS 101<108` |
+| U3 幻影变量 | ✅ 0 | U4 章外域名 | ✅ 0 | U5a / U5b 嵌套截断 | ✅ `PASS 123<125` / `PASS 100<107` |
 | U6a / U6b 徽标枚举串 | ✅ 0 / 0 | U7 静态化 | ✅ 0 | U8 emoji 白名单外 | ✅ 空 |
 | U9 reduced-motion | ✅ 1 | U10 data-nav | ✅ 13 | U11 IP 字面量 | ✅ 0 |
-| U12 几何白名单 | ✅ 空 | U13 体积 | ✅ 29 296 B（预算 200 KB 的 14.6%） | | |
+| U1 字号闭集 | ✅ 空 | U1b 禁 `font:` 简写 | ✅ 0 | U2b 根外色值（宽容锚） | ✅ 0 |
+| U12 几何白名单 | ✅ 空 | U13 体积 | ✅ 28 746 B（预算 200 KB 的 14.4%） | U9b 滚动动画 | ✅ 0 |
+| U14 `:target` 禁 `--blue-border` | ✅ 0 | U15 `data-nav` 必带 `href` | ✅ 0 | U16 锚点落点 | ✅ 空 |
+| U17 打印声明 | ✅ 1 | | | | |
+
+### 13.0 样本重建配方（不落脚本、只落步骤 —— 回应"§13 的断言我无法复跑"）
+
+一致性样本**故意不入库**（§7.6 的 🔴 B-3 纪律），但它不是黑箱：全部**名单与数字**都由下面 6 条命令现算，任何人可据此重建同一形态（脚本只是把这 6 条输出拼成 §7/§8 钉的标记形态）。
+
+```bash
+awk -F'|' '/^\| [0-9]+ \|/ || /^\| — \|/ {print $4}' .specs/product-prototype-refresh/BASELINE-code-facts.md | sed -E 's/（[^（）]*）//g' | tr '、' '\n' | sed -E 's/[[:space:]]//g' | grep -vE '^$' | sort -u   # → 32 个 data-page（§10-D 的稳健式）
+grep -oE "label: '[^']+'" frontend/src/App.tsx | sed -E "s/label: '([^']+)'/\1/" | sort -u                                        # → 13 个 data-nav label 原文（K5）
+grep -oE "\{ id: '([a-z-]+)', label: '[^']+'" frontend/src/App.tsx                                                               # + renderContent 的 case '<id>' → <Component> ⇒ 13 条 href="#pg-<Component>"（N8）
+grep -cE "^import .*from '\./pages/" frontend/src/App.tsx ; grep -rEn '^@router\.(get|post|put|patch|delete)' backend/routes | wc -l   # → masthead 的 32 / 168（AC-1，禁抄）
+awk -F'|' '/^\| G[0-9]+/{print $2,$9}' .specs/product-prototype-refresh/RESEARCH-competitors.md | grep 融入原型 | grep -oE 'G[0-9]+' | sort -u   # → 9 个 id="vb-G*"（K9）
+grep -oE '`[a-z]+(-[a-z]+)+`' .specs/product-prototype-refresh/RESEARCH-competitors.md | sort -u | grep -v human-approval | grep -v admin-file-read-jail   # → 12 个 data-slug（K4 可见子集）
+```
+标记形态（`class` 在 `id` 前、`:target` 的 outline、徽标文本节点、附录 10 行等）不在这里派生——那是 §7/§8 的规格，跑批用的 U 闸就是为它而存在。
 
 ### 13.1 🟩 前端架构师票内 5 条修口的落地记录（逐条含**复现数字**，全部只改本文件自有的 U 闸与措辞）
 
@@ -386,7 +419,7 @@ wc -c < "$F"
 
 **同轮另两处自撞的坑（不属票内，一并记）**：① 样本一开始**自造** `--shadow-md:0 4px 12px rgba(0,0,0,0.3)` → K6b 红（真值是 `tokens.css:54` 的 `0.4`），差一个字符即红 → 结论入 §3.1：**未用到的 token 宁可不声明**，声明了就逐字节照抄；② `tokens.css` 的 `--cp-*` 系列（第 68-89 行）**本来就是 OKLCH** → §3 的 hex 例外声明据实收窄：不是"OKLCH 在本仓库不可行"，而是"我沿用的那批 hex 值被 K6b 文本级锁死"。
 
-**同一份样本上的已投票票面 + 设计侧 K 系列（本轮实跑逐条，零红）**：`AC-1 32/168 · AC-2 32 且入口 diff 空 · AC-3 0 · AC-4 三层全 0 · AC-5a 0 / AC-5b 33/33 · AC-6 行在（486453d5 · 2026-09-22 · 页面 32 / 端点 168 / 域 11） · AC-7a 1 / AC-7b 0 · AC-8a 1 / AC-8b 1 · AC-9 1 · AC-10 16 0 · AC-11 7(≥6) · AC-12 0 · AC-13 9 · K1 稳健式双向空 · K2 空 · K3 空 · K3b 空 · K4 空（可见子集 12） · K4b PASS · K6 6 · K6b 空 · K6c 12 · K7 1 · K8 0 · K9 空 · K10 1 · K11 0 · K12 1 · U1…U13 全中（U5a 124<126、U5b 101<108、U10 13、U13 29 296 B）`；另附三行**诊断/证据**（K1c 现式左集 33 项 → §10-D；U2c 真身 `:root` 块严格锚 31、U12b 旧式脏值 420px → §13.1）。整轮共 **57 行断言**，含 1 行 K4b 与 2 行 U5 的 `PASS` 文案式输出。
+**同一份样本上的已投票票面 + 设计侧 K 系列（本轮实跑逐条，零红）**：`AC-1 32/168 · AC-2 32 且入口 diff 空 · AC-3 0 · AC-4 三层全 0 · AC-5a 0 / AC-5b 33/33 · AC-6 行在（`59ac3f07` · 2026-09-22 · 页面 32 / 端点 168 / 域 11，样本重建时点现取） · AC-7a 1 / AC-7b 0 · AC-8a 1 / AC-8b 1 · AC-9 1 · AC-10 16 0 · AC-11 7(≥6) · AC-12 0（本轮曾红一次，见 §10-E）· AC-13 9 · K1 稳健式双向空 · K2 空 · K3 空 · K3b 空 · K4 空（可见子集 12） · K4b PASS · K6 6 · K6b 空 · K6c 12 · K7 1 · K8 0 · K9 空 · K10 1 · K11 0 · K12 1 · U1…U17 全中（U5a 123<125、U5b 100<107、U9b 0、U10 13、U13 28 746 B、U14 0、U15 0、U16 空、U17 1）`；另附三行**诊断/证据**（K1c 现式左集 33 项 → §10-D；U2c 真身 `:root` 块严格锚 31、U12b 旧式脏值 420px → §13.1）。整轮共 **62 行断言**（🟦 要求把 U14 与两条锚点检查计入 → 已计），含 1 行 K4b 与 2 行 U5 的 `PASS` 文案式输出。
 
 > **对齐时点**：本文件初版量在 `73da31a6`；随后上游并入 5 个提交（G2 终裁 4/4、需求侧三件归口、K4 改「可见子集」、S11 并档、D18/D19 新立），我在合并后的 tip 上**全部重跑一遍**再定稿 —— 唯一变化的闸值是 **AC-10 第二列 `15 0` → `16 0`**（去向表增 G16 行，属真源而非我的口径）。样本 masthead 的 commit 串是**构建时点**值（K10 只校格式，AC-6 的"三处一致"指同一 commit 现算三处），4-dev 写稿时按 §1.5 现算重取即可，不必沿用我这两个串的数值来源。
 
@@ -402,6 +435,8 @@ wc -c < "$F"
 | ④ | 产品自称两处不一致：`App.tsx:275` 侧栏写「AI 开发平台」，`README.md:1` 与 `CLAUDE.md` 写「AgentFlow」 | 交付稿 H1 取后者；`docs-drift-resync` 需一条 | 需求分析（并入既有议题，不新开） |
 | ⑤ | 三条产品侧 a11y/反模式事实：`--text-muted` 2.77:1 却第 3 多引用（186 处）· `.btn-primary` `#fff` on `--blue` = 3.29:1 不达 AA（`btn-primary` 19 处）· `borderLeft: Npx solid 语义色` 彩色侧条 **11 个文件** | 交付稿一律规避（§4/§6.4/§12）；**产品侧修复的影响面**＝`tokens.css` 值 + 186 + 19 + 11 文件，须另开 change（R3：本 change 零 L1 写入，我只登记不改） | 需求分析 → 未来 change |
 | ⑥ | 上游三条归口**本阶段已全部并档**（本轮 merge 复核：`BASELINE:35` tab 已改 5、§4 已增 **S11**、`RESEARCH §2` 已增 G16 行使去向表 **16 行**、真源 slug **13** 条、可见子集 **12** 条，并新立 **D19**「按可见子集派生」与 **D18**「禁写范围号」） | 交付稿 `data-slug` 仍挂 **12** 条、附录仍 **10** 行；本轮按新式 K4 复跑 diff 空、AC-10 第二列 0 | 无需再催（已闭） |
+| ⑧ | **`.gitignore` 缺 `__pycache__/`**，导致任何在仓库内跑产品解析器（如 `parse_gates`）的 agent 都会把编译产物暴露在 `git add -A` 下（本轮我自己就中了一次，见 §10-E） | 交付稿无关；补一行是 L1 写入，2a 不做 | 任务拆解 → 4-dev（一行 `.gitignore`，或约定"解析器只在仓库外副本跑"） |
+| ⑨ | **打印 / 导出 PDF 到底承不承诺**：`REQUIREMENT.md:156` 说本稿"天生会被转发"，但三工件对打印态零声明，NFR 的 1280 无横向滚动验证方式是"一次手动检查"（`:155`） | 本稿本轮按**不承诺**处理并显式声明（C14 + U17）；若要承诺，需要一套 light 配色 → 新增 token 决策，破 U2b「颜色只从 `var()` 来」，须回需求门 | 需求分析（要不要 `@media print` 准则）|
 | ⑦ | **`tr '、' '\n'` 不是多字节安全的**（详见 §10-D：`BASELINE §2` 并档后 K1 左集 33 项 ≠ 32，脏项里含一条 grep 的「匹配到二进制文件」提示语；并档前同式干净）→ 一切"按顿号切中文文本"的派生式同雷 | 4-dev 会在 K1 上撞上**说不清原因的假红**（缺页 2 / 虚构页 1）；本文件已给稳健式并保留现式证据两行 | 架构设计（K1 左集式与 §7.6 配方同条；建议 `sed -E 's/（[^（）]*）//g'` 前置，或整条改 `awk -F'、'`） |
 
 ---
@@ -413,11 +448,11 @@ wc -c < "$F"
 | `T-UI-01` | 把 §3.1 的 token 子集**逐字节**物化进交付稿 `:root`（含 `'Segoe UI'` 单引号形态），只声明用到的名 | `comm -13 <(tokens.css 变量对) <(稿内变量对)` → 空（K6b） |
 | `T-UI-02` | 按 §5.2 落 8 档字号（长写法，**禁 `font:` 简写**）+ §5.1 两栈（use-site 前置 `'IBM Plex Sans'`，禁自造变量） | U1 空 + U1b 0 + `grep -c "font-display\|font-body" "$F"` → 0 |
 | `T-UI-03` | §6.1/§6.2 间距与版心（200/1000/9999 三几何字面量之外全走 `var()`；边框宽度走 `border:`/`outline:` 简写） | U12 空 + U2b 0（锚须容忍 `:root {` 与缩进 `}`，见 §13.1-1）+ U11 0 |
-| `T-UI-04` | C1/C2/C3 三件 + 域章属性顺序（`class` 前 `id` 后）+ 域章内顺序钉法 + 页集覆盖 | `grep -c 'class="domain"' → 12`（K6c）+ U5a/U5b PASS + **K1 用稳健式**（先 `sed -E 's/（[^（）]*）//g'` 剥全角括号注解、再 `tr '、' '\n'`）→ `comm` 双向空；用现式会得 33 项假红，见 §10-D |
-| `T-UI-05` | C4/C5 两轴徽标：`::after` 白名单文案 + `role="img"` + `aria-label`（禁枚举原串） | U6a 0 + U6b 0 + AC-5b occ==lines |
+| `T-UI-04` | C1/C2/C3 + C13 左栏项（13 条 `href="#pg-*"` 按 N8 现算）+ `:target` 用 `--blue` outline + 域章属性顺序（`class` 前 `id` 后）+ 域章内顺序钉法 + 页集覆盖 | `grep -c 'class="domain"' → 12`（K6c）+ U14 0 + U15 0 + U16 空 + U5a/U5b PASS + **K1 用稳健式**（先 `sed -E 's/（[^（）]*）//g'` 剥全角括号注解、再 `tr '、' '\n'`）→ `comm` 双向空；用现式会得 33 项假红，见 §10-D |
+| `T-UI-05` | C4/C5 两轴徽标：**短词文本节点** + o1-o3 走产品 `.badge` 同色 8% 底原形（禁 `::after`/`role="img"`/`aria-label`） | U6a 0 + U6b 0 + AC-5b occ==lines（33/33）+ 双写原串必红（反例实测 `occ 5/lines 3`） |
 | `T-UI-06` | C6/C7 待标注与边界句（6 个具名 `nb-*` 落所属域章、且早于任何嵌套 section） | K6 → 6 + AC-7a ≥1 + AC-8a/b ≥1 |
-| `T-UI-07` | C8/C9/C10/C12（9 个 `vb-G*`、12 slug 行、图例、两张 SVG 框图） | K9 diff 空 + K4 diff 空 + AC-13 → 9 + K11 → 0 |
-| `T-UI-08` | 可达性收尾：skip-link / `:focus-visible` / `nav[aria-label]` / `caption+th[scope]` / reduced-motion 兜底 / `<details>` | U7 0 + U8 空 + U9 ≥1 |
+| `T-UI-07` | C8/C9/C10（含短词↔原串映射）/C12（9 个 `vb-G*`、12 slug 行、图例、两张 SVG 框图） | K9 diff 空 + K4 diff 空 + AC-13 → 9 + K11 → 0 |
+| `T-UI-08` | 可达性收尾 + C14 打印声明行：skip-link / `:focus-visible` / `nav[aria-label]` / `caption+th[scope]` / reduced-motion 兜底 / `<details>` | U7 0 + U8 空 + U9 ≥1 |
 | `T-UI-09` | 全闸复跑并回填票面（DESIGN §1.5 现算的已投票 AC 与 K 系列闸 ＋ 本文件 U1…U13），样本一律落仓库外 | 全部断言中且零红 + `git status --porcelain` 不含样本 |
 
 ---
@@ -434,6 +469,8 @@ wc -c < "$F"
 - [x] **不越界**：本文件不碰技术方案（R3）——交付物形态、K 系列闸、票面格式一律沿用 DESIGN；我改的只有间距/字号/组件长相/导航形态 + 三条**加严**不**放宽**的 UI 闸；`frontend/**`、`backend/**` 零写入（AC-12 实测 0）。
 - [x] **接口纪律**：未新增任何与 §1.5/票面冲突的字面串；新钉的视觉 class 全部标为"非接口"（§8 注），改它们不需动 `REQUIREMENT.md`。
 - [x] **样本落位**：`good2a.html` 与生成/跑批脚本在仓库外 `$TMPDIR/ui2a/`，工作树 0 行（对齐 §7.6 的 🔴 B-3 纪律）。
+- [x] **🟫🟦 两票修口已落地**：🟫 四条 🟡＋三条更轻中的 (a)(b)(c)、🟦 两条阻断＋三条非阻断，逐条按对方给定的形态落地并机验（新增 U14 `:target` 禁 `--blue-border`、U15 `data-nav` 必带 `href`、U16 锚点落点存在、U17 打印声明、U9b 禁 smooth；§3.1 补角色行、§7 新增 N8、§8 新增 C13/C14、C4/C5 改文本节点、图例建立短词↔原串映射、`overflow-wrap:anywhere`）。零放宽：全部只改本文件自有 U 闸与措辞，未触碰任何已投票 AC 或冻结 K 命令。
+- [x] **AC-12 自曝并修复**：跑产品解析器留下的 `__pycache__` 编译产物被 `git add -A` 扫入 → AC-12 一度实测 1，`a6a73506` 删除后复跑 0（§10-E；`.gitignore` 建议归口 §14-⑧）。
 - [x] **票内修口已落地**：🟩 一票附的 5 条 U 闸精度/口径修口逐条复现后落地（§13.1 有修前→修后的实跑数字），未触碰任何已投票 AC 或冻结的 K 命令。
 - [ ] **门禁**：G2a 1/4（🟩 ✅，🟫/🟦/🔴 未到）→ 按 R13 契约，票齐前不推进 3-task。
 
@@ -441,11 +478,11 @@ wc -c < "$F"
 
 🗳️ G2a UI 设计门: UI-DESIGN.md 是否通过？调性是否纯粹、美学是否达标、交互是否可用、组件是否可落地、无障碍是否覆盖？
 
-🟫 资深UI设计师: ⚪ 待票
-🟦 资深用户体验官: ⚪ 待票
+🟫 资深UI设计师: ✅ 调性执行到位（工业卡零污染、AI-slop 硬命中 0）、字号/间距/几何三维均有闭集与实测出处，可进 3-task；17 行对比度逐行复算与我完全一致；四条 🟡（`:target` 描边 1.30:1 / `scroll-behavior` 归属写错 / 徽标偏离产品 `.badge` / `::after` 文案搜不到）不门控本票，已全部落地，见 §10 与 §13.1
+🟦 资深用户体验官: ❌ 条件票两条，均落在本阶段主责维度（组件长相 / 导航形态），**两条已按其给定形态落地并机验**：① `:target` 改 `outline:2px solid var(--blue)`（`--blue-border` 1.33:1 违反 §3.1 自己的 3:1 口径）+ §3.1 补 `--blue-border` 角色行 + 新 U14；② 13 条入口按 N8 从 `App.tsx` 现算 `href="#pg-<Component>"` + 新增 C13 左栏项 + 新 U15/U16（13 条落点实测全齐、锚点 diff 空）。其三条非阻断（图例短词映射 / `overflow-wrap` / 打印表态）亦已落地。改票待其按自己给的三条命令复跑
 🟩 前端架构师: ✅ token 封闭性/对比度/锚点逐值复算一致，§10-D 独立复跑同判（现式 33／稳健式 32），C1–C12 零 JS 零构建可表达；附 5 条一行级 U 闸精度修口（已全部落地并复跑，见 §13.1）
 🔴 无障碍专家: ⚪ 待票
-结果: 1/4 待票（🟩 已 ✅ 且其 5 条修口已落地复跑；🟫/🟦/🔴 未到，按 R13 契约票齐前不推进 3-task）
+结果: 2/4 通过、1 票 ❌（条件已满足、待该角色改票）、1 票未到（🔴）。按 R13 契约票未齐 → 本阶段不推进 3-task；两条 ❌ 阻断与九条 🟡/非阻断的落地证据全在本文件（§10-E、§13 结果表、§13.1、§14-⑧⑨），复跑命令在 §13 与 §13.0
 
 ---
 
