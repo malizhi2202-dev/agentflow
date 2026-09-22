@@ -91,7 +91,7 @@
 |---|---|---|---|---|
 | D1 | 交付稿 = **单文件零依赖静态 HTML**，浏览器直开 | 构建链产物 / Markdown+渲染器 / 位图原型稿 | 见 §0 排除项：AC-3+AC-12+NFR 三者交集只有这一条路 | 无交互（导航靠 `<a href="#…">` + `<details>`）；改样式要动文件本体 |
 | D2 | 数字与清单 **一律派生**（K1/K4/K5/K6 现算），交付稿只呈现结果 | 手工抄一份"更顺眼"的清单 / 造生成脚本落 `frontend/` | AC §6 可维护性明写"数字以 BASELINE 引用式呈现，改代码只改 BASELINE 一行"；手抄即下一份 README 式漂移（D1-D7 就是这么来的） | 派生命令对表格格式敏感（`awk -F'\|'` 依赖 `\| N \|` 行形）；格式变了要同步 K 系列命令 |
-| D3 | 结构四层 + 附录：`头部/校准基线 → 13 入口导航 → 11 能力域 section → 32 个 page-block`，附录含调研局限、9 条融入块、12 slug 去向、S1-S10 边界句 | 按"页面"平铺（不按域）/ 按竞品结论为主线 | AC-1 与 AC-2 要"11 域全覆盖 + 32 页逐名 + 13 入口"三套坐标同时可见；域为章、页为块才能同时满足，且孤儿页面（AC-11 禁作能力页）能放进非域位置 | 交付稿偏长（预期 ~1.5-2.5k 行 HTML）；跨层导航必须靠稳定 id |
+| D3 | 结构四层 + 附录：`头部/校准基线 → 13 入口导航 → 11 能力域 section → 32 个 page-block`，附录含调研局限、9 条融入块、12 slug 去向、**S1-S10 边界句所在域索引（只放各边界句所在的 `id` 锚点，不放正文）**——"集中列一遍弱点"正是 D11 禁的形态，🔴 B-1 指出二者原本自相矛盾，此处即修法 ① | 按"页面"平铺（不按域）/ 按竞品结论为主线 | AC-1 与 AC-2 要"11 域全覆盖 + 32 页逐名 + 13 入口"三套坐标同时可见；域为章、页为块才能同时满足，且孤儿页面（AC-11 禁作能力页）能放进非域位置 | 交付稿偏长（预期 ~1.5-2.5k 行 HTML）；跨层导航必须靠稳定 id |
 | D4 | **两轴标签保持正交、分属性承载**：`data-owner`（归属四值）/ `data-state`（标注三态），且两套枚举值各自闭集 | 合并成一个"状态"列（AI 最容易犯的塌缩）/ 用自由文本"部分可用" | `CONTEXT.md` §15.1 已把两轴拆成两个术语；AC-5 管"是不是我们的现状"，AC-11 管"进没进界面"，AC-13 注脚（`:120`）明确二者不可互相代偿。塌成一列会让 AC-11 的六处逐处判据失去抓手 | 每个条目要写两个属性，交付稿稍长；需在 K3 做值域闭集核对 |
 | D5 | **标记契约**（§1.5）是交付稿的接口：AC 命令里出现的字面串是**接口名**，2a 可自由改视觉与排版，**不得单方面改字面串** | 让 2a/4-dev 随意命名 class，再回头改 REQUIREMENT 的 AC 命令 | 已投票的 AC 命令是判据本体；"改标记不改命令"= 假红，"改命令不改标记"= 假绿（R3 角色红线：AC 归需求侧，字面串归设计侧定义） | 2a 需一次同步纪律：动字面串必须同笔改 `REQUIREMENT.md` 该条命令并在票面登记，否则按违规处理 |
 | D6 | **每条标注独占一个块**（AC-13 的 9 条与 AC-5 的归属条目均"逐块打标"，禁一行汇总） | 一行 dump `G1 G4 G5 …` 交差 | 已投票命令实测两种都能"过"：`grep -oE … \| sort -u \| wc -l` 对挤在一行的标签同样计数 → 数量闸拦不住，必须加**堆叠探测**（出现次数 == 行数）与**逐块 id**（K4）。需求侧交接提示 ① 正是此点 | 交付稿写法更啰嗦；5-test 要多跑两条闸 |
@@ -99,12 +99,14 @@
 | D8 | **tier-2 只对交付稿 `"$F"` 跑**，绝不扩到目录 | 全 `.specs/` 一把扫 | 需求侧交接提示 ②：pattern 文本自身在 `REQUIREMENT.md` 里就自匹配（`@` 与 `\.local` 出现在命令文本中），扩目录必然假红 | 敏感核对的覆盖面靠 tier-1 兜底（tier-1 已含 `backup/`） |
 | D9 | **锚点必须可解析**：每条 `本项目已有/部分已有` 的 `data-anchor` 指向 `pages/`、`routes/`、`components/`、`models/`、`services/`、`engine/` 下**实际存在的路径**（可带 `:L-L` 行段） | 只写目录名 / 写"某处有实现" | AC-5 的存在理由就是消灭"看着像引用"的空标（G1 🔴 的假锚点教训）；K2 用 `[ -f ]` 逐条证伪 | 写稿时要真去开文件核对；BASELINE 与代码若不一致要先改 BASELINE（见 R1） |
 | D10 | **AC-7/AC-8 的窗口从"词锚定"改"节点锚定"**：交付稿里「安全与审计」字样**只出现在 `<section id="sec-security">` 内**，侧边栏用 label 原文「审计日志」；「加密」的每一处都落在**自己的 `<p>…</p>`** 内 | 照已投票命令原样跑 / 改 AC 命令文本 | 已实测出假绿：把「安全与审计」写进导航后，`awk '/安全与审计/{f=1}…'` 的窗口起点漂到导航段，安全段漏写边界句仍判 1；`id` 锚定版正确判 0。票面命令不改（它在合格稿上同判 1），但 5-test 必须跑加严版 | 交付稿要接受一条"未进票面"的加严闸；域名措辞受约束（不能自由改写成"安全与合规"） |
-| D11 | 交付稿的**敏感面自约束**：正文**不得整表搬运 BASELINE §4 的 S1-S10 攻击面清单**，只在各自所属域写限定式边界句 | 把 10 条边界一次性列成"平台弱点总表" | `backend/routes/artifact.py:10-26` 的 `GET /api/changes/{id}/{artifact}` 对 `.md` 产物**无鉴权**可读（S10），交付稿是外发面：一份"弱点目录"比分散的限定句危险得多 | 想一次看全攻击面的人要回 BASELINE（内部件，本就受 localhost 限定），而非交付稿 |
+| D11 | 交付稿的**敏感面自约束**：正文**与附录都不得集中列 BASELINE §4 的 S1-S10 攻击面清单**（索引化只允许 `id` 锚点），只在各自所属域写限定式边界句；**判据补齐**：K11 禁词闸机验措辞 + UAT-8 人工勾语义（此前 D11 零闸＝"声明有判据、实际无判据"，🔴 B-1） | 把 10 条边界一次性列成"平台弱点总表"，或附录用"边界句汇总"名义集中搬正文 | `backend/routes/artifact.py:10-26` 的 `GET /api/changes/{id}/{artifact}` 对 `.md` 产物**无鉴权**可读（S10），交付稿是外发面：一份"弱点目录"比分散的限定句危险得多。**🔴 B-2 纠正推论范围**：文件名保持 `.html` 只避开 `artifact.py` 这一层，**不是交付稿的防线**——`admin_api.py:126-135` 的 `GET /api/admin/files/{path:path}` 既不 `get_current_user` 也不 `has_permission`，唯一守卫是 `'..' in path`，而 `os.path.join(_prompts_dir(), "/etc/hosts")` 会**丢掉前缀**（本轮实测语义），故能访问本机 API 者可读仓库内**任何**文件，`.md`/`.html` 在它面前无区别；同文件 PUT（`:139-143`）反而两条守卫齐备，是现成的对照实现 | 想一次看全攻击面的人要回 BASELINE（内部件）；而"内部件受 localhost 限定"这层**已被上面那条读绕过** → 登记 `admin-file-read-jail`（§6），属新 change 的 L1 修复，本 change 不动代码 |
 | D12 | **交付稿不写任何实现方案**（对 12 个需代码议题只写"是什么/怎样算通过 + 归属/标注 + 去向"），两条架构级议题只登记不自设计 | 顺手给沙箱/RAG 画技术方案 | R3 角色红线 + R7.1（需代码议题须新 change）+ 交棒硬边界原文"不要当普通功能设计掉进 2-design" | 读者在交付稿里看不到"打算怎么做"，需另开 change 才有——这是有意的 |
 
 | D13 | **每条记录里，AC 命令所用的枚举字面串只出现一次**：枚举值写在属性里（`data-owner="本项目已有"`），可见徽标文案由 CSS 的 `::after` 配语义 class（`.chip-o1`～`.chip-o4`、`.chip-s1`～`.chip-s3`）提供，**CSS 里禁重抄枚举字面串** | 属性 + 可见文本双写（最自然的写法）/ 纯文本无属性 | 本轮实测的**假红通道**：双写形态下 32 行合格骨架被 AC-5 的堆叠探测判为 `occ=64 / lines=32` → 一份完全合规的稿子必然红；改单写后 `occ=32 / lines=32` 通过，且 AC-5a（同行锚点共现）、AC-2、AC-11 地板、AC-13 唯一数、K6 六处全部不退色 | 屏幕阅读器读不到徽标文字 → 可见文案要在 `<abbr>`/`aria-label` 里用**不同词**（如"已有""部分""竞品建议""缺失"），禁再用枚举原串，否则又变双写 |
 | D14 | 交付稿**必须完整呈现 12 个 slug**（`data-slug` 或 `<code>` 原样，AC-10 的 v2 呈现要求），K4 才能拿 `RESEARCH §2` 现算集做双向 diff | 只写"另有 12 条议题见 RESEARCH" | 只写指句 → K4 无从 diff，"写了没落"重新变成无人验的口子（正是 AC-13 ③ 记录过的那类失效） | 交付稿多一张 12 行表；人工若砍扩展候选（人工 ②），该表要跟着回算 |
 | D15 | **票面格式按产品的解析器写**（详见 §8 五条）：门名/问题/票行/结果行各有固定形态，票面块**必须落在工件里**（产品只解析工件，不解析评论） | 只把票面写在评论里；或把票写成表格行/列表项 | 实测：写成表格行 → `votes` 空、整块静默丢弃，门禁视图表现为"没投过"；正文裸写票面标记 → 开假门收养真票行。门禁可见性是交付链的一部分，不是排版（R6.2：判据要能被产品自己复述） | 新增一条"跑 `parse_gates` 看能不能解析出本门"的自检（已入 §7） |
+| D16 | **设计侧新闸一律"属性顺序无关"**（K3b / K6 重写；已投票 AC 用简单 grep 不受影响） | 把同标签属性书写顺序写进契约 | 🟦 陷阱二实测：非法组合倒序写一行，旧 K3b **静默漏检**（现式判 0、顺序无关式判 1）；`id` 与 `data-state` 倒序时旧 K6 数到 `1` 而真值是 `2`。HTML 属性顺序自由，未声明的顺序不能当接口 | 闸命令各长一行；K3b/K6 的既有样本复跑结论不变 |
+| D17 | **含枚举字面串的行必须同行含路径子串**（不限"条目行"，正文与图例同守） | 图例用裸枚举句 | 🟦 陷阱一实测：图例写「归属取值有 本项目已有 / 部分已有 …」→ 已投票的 AC-5a 直接判 `1`（红），第一稿必撞；改成自带路径的写法（「本项目已有 = 能在 `frontend/src/pages/` 或 `backend/routes/` 指到实现」）→ `0`，且这句解释本来就该有 | 图例变长；正文提到归属值时要挂路径 |
 
 ### 1.4 上游（需求门 G2）五条交接提示 → 本设计的处置
 
@@ -128,10 +130,10 @@
 | AC-2 | `grep -c 'class="page-block"' "$F"` ≥32 ＋ 侧边栏 13 入口全出现 | 每页一个 `<div class="page-block" id="pg-<PageName>" data-page="<PageName>" data-domain="<域名>">`（**class 字面串不改**）；导航用 `data-nav="<label 原文>"` ×13 | **K1** 页名集合双向对账 · **K5** 入口 label 集合对账 |
 | AC-5 | `grep -E "本项目已有\|部分已有" "$F" \| grep -vcE "pages/\|routes/\|…"` → 0 ＋ 堆叠探测 | 归属只写在 `data-owner`，且**同一行**必带 `data-anchor="<真实路径>"`；一行一块；**枚举字面串每行只出现一次**（可见徽标走 CSS，见 D13） | **K2** 锚点 `[ -f ]` 逐条存在性 · **K3** 四值闭集 · **K3b** 两轴非法组合 · **K4b** 堆叠探测 |
 | AC-7 | `awk '/安全与审计/{f=1} f{print} f&&/<\/section>/{f=0}' \| grep -cE "X-User-Id\|回落"` ≥1 ＋ 禁词命令 0 | 边界句写在 `<section class="domain" id="sec-security" …> … </section>` 之内；「安全与审计」字样在全文**仅此一个 section 内**（导航写 label 原文「审计日志」） | **K7** 节点锚定版：`awk '/<section class="domain" id="sec-security"/{f=1} f{print} f&&/<\/section>/{f=0}'` → 必须 ≥1 |
-| AC-8 | `awk '/加密/{f=1} f{print} f&&/<\/p>/{f=0}' \| grep -cE "ENCRYPTION_KEY"` ≥1 ＋ 同窗口 `无 KDF\|零填充` ≥1 | 每一处含「加密」的句子独占**一个 `<p>…</p>`**，段内同行含 `ENCRYPTION_KEY` 与 S2 限定语 | **K8** 逐段同行判定：`grep -E "加密" "$F" \| grep -vcE "ENCRYPTION_KEY"` → 0 ＋ 同法核限定语 → 0 |
+| AC-8 | `awk '/加密/{f=1} f{print} f&&/<\/p>/{f=0}' \| grep -cE "ENCRYPTION_KEY"` ≥1 ＋ 同窗口 `无 KDF\|零填充` ≥1 | 每一处含「加密」的句子独占**一个 `<p>…</p>`**，段内同行含 `ENCRYPTION_KEY` 与 S2 限定语 | **K8** 收窄式逐段同行判定：`grep -E "加密" "$F" \| grep -E "密钥\|API Key" \| grep -vcE "ENCRYPTION_KEY"` → 0（🔴 修正：旧式把传输加密句也算违规） |
 | AC-9 | `grep -c "<管理员口令>" "$F"` ≥1 | 登录态示例显示字面量 `<管理员口令>`（HTML 里转义书写，grep 命中原文） | 与 D7 收紧式同跑（示例键值一律 `<占位>`） |
 | AC-10 | `RESEARCH §2` 去向列第二列 0 ＋ 12 slug 计数不变式 | 交付稿只**引用** slug（`<code>` 原样），12 条去向各带 `data-from`/去向标注；不重算不重述方案 | **K4** `diff`（RESEARCH 现算 12 ↔ 交付稿 `data-slug` 集）→ 空 |
-| AC-11 | 数量地板 ≥6 ＋ UAT-6 逐处 | 六处各一个具名块：`<section class="notice" id="nb-<语义名>" data-state="未接入\|演示边界\|规划中">`（语义名 = token-usage / mcp-tool / trace-viewer / knowledge-rag / security-page / assembly-view） | **K6** `grep -oE 'id="nb-[a-z-]+"[^>]*data-state="…"' \| sort -u \| wc -l` → **恰好 6**（数量地板只防"漏光"，不防"一处代表全部"） |
+| AC-11 | 数量地板 ≥6 ＋ UAT-6 逐处 | 六处各一个具名块：`<section class="notice" data-state="未接入\|演示边界\|规划中" id="nb-<语义名>">`（D16：属性顺序自由，闸不得依赖顺序）（语义名 = token-usage / mcp-tool / trace-viewer / knowledge-rag / security-page / assembly-view） | **K6** `grep -oE 'id="nb-[a-z-]+"[^>]*data-state="…"' \| sort -u \| wc -l` → **恰好 6**（数量地板只防"漏光"，不防"一处代表全部"） |
 | AC-13 | `grep -oE "调研结论[ =]*G[0-9]+" \| sort -u \| wc -l` → 9 ＋ UAT-7 | 每条融入一个 `<div class="view-block" id="vb-G<n>" data-from="G<n>">`，块内**一行**写 `来源：调研结论 G<n>`；②的调研局限单独成节 | **K4** 融入块数 == `RESEARCH §2` 现算融入条数（当前 9）且 `occ == lines`；**K9** `id="vb-G<n>"` 集合 == 现算 G 号集合 → diff 空 |
 | AC-3 | 加强版 grep → 0（exit 1） | 无 `<link>`/`<script src>`/`fetch(`；来源引用 `<a href="https://…">` **必须保留**（R6.2，删它才是违规） | 交付前跑同一条命令，另核 `wc -c "$F"` ≤ 2000000 |
 | AC-4 | tier-1（含 `backup/`，`--exclude=CHANGE.md`）0 命中；tier-2 只跑 `"$F"` | 全产物零凭据形态、示例全合成 | **D7 并档**：追加跑收紧式 `(password\|passwd\|token\|secret\|api_key)["' ]*[:=]["' ]*[A-Za-z0-9._!@#%^&*-]{4,}`（现产物 + `backup/` 实测 0 命中） |
@@ -139,7 +141,7 @@
 
 **K6b（视觉一致性）**：交付稿 `:root` 里出现的每个变量，其**变量名与值**都必须能在 `frontend/src/styles/tokens.css` 找到同名同值声明——`comm -13 <(tokens 变量对) <(稿内变量对)` → 空（自造变量如 `--radius-legacy` 会被这一步拦下，已实测）。
 
-**闸的命令形态**（2a/4-dev/5-test 一律照此，仓库根执行；改形态即改接口，须按 D5 同步）：
+**闸的命令形态**（2a/4-dev/5-test 一律照此，仓库根执行；改形态即改接口，须按 D5 同步）。两条前言约束：**D16** 设计侧新闸一律**同标签属性顺序无关**（HTML 属性顺序是自由的，未声明的顺序不构成接口）；**D17** 含枚举字面串的行**必须同行含路径子串**，不限条目行——图例与解释性正文同守，否则已投票的 AC-5a 会在第一稿上假红（🟦 实测：裸图例句判 `1`，自带路径的图例句判 `0`）：
 
 ```
 K1  B=$(awk -F'|' '/^\| [0-9]+ \|/ || /^\| — \|/ {print $4}' .specs/product-prototype-refresh/BASELINE-code-facts.md \
@@ -152,22 +154,27 @@ K2  grep -oE 'data-anchor="[^"]+"' "$F" | sed -E 's/data-anchor="([^"]+)"/\1/; s
       | sort -u | while read -r p; do [ -f "$p" ] || echo "MISS $p"; done      # 空 = 绿
 K3  grep -oE 'data-owner="[^"]+"' "$F" | sed -E 's/.*"(.*)"/\1/' | sort -u | grep -vE '^(本项目已有|部分已有|缺失-竞品建议新增|缺失)$'
     grep -oE 'data-state="[^"]+"' "$F" | sed -E 's/.*"(.*)"/\1/' | sort -u | grep -vE '^(未接入|演示边界|规划中)$'      # 两行均空
-K3b awk '/data-owner=.*data-state=/{o=$0; sub(/.*data-owner="/,"",o); sub(/".*/,"",o); s=$0; sub(/.*data-state="/,"",s);
-       sub(/".*/,"",s); print o"|"s}' "$F" | sort -u \
+K3b awk '{own=""; sta=""}                                  # D16 顺序无关（旧式只看 data-owner 在前的行，倒序静默漏检：实测判 0）
+       { if (match($0,/data-owner="[^"]+"/)) own=substr($0,RSTART+12,RLENGTH-13)
+         if (match($0,/data-state="[^"]+"/))  sta=substr($0,RSTART+12,RLENGTH-13)
+         if (own!="" && sta!="") print own"|"sta }' "$F" | sort -u \
       | grep -E '^(本项目已有\|(未接入|规划中)|缺失(-竞品建议新增)?\|(未接入|演示边界))$'      # 空 = 无非法组合（§3 矩阵）
 K4  diff <(grep -oE '`[a-z]+(-[a-z]+)+`' .specs/product-prototype-refresh/RESEARCH-competitors.md | sort -u | grep -v human-approval) \
          <(grep -oE 'data-slug="[a-z-]+"' "$F" | sed -E 's/data-slug="([a-z-]+)"/`\1`/' | sort -u)      # 空 = 12 条齐
 K4b test $(grep -oE '调研结论[ =]*G[0-9]+' "$F" | wc -l) -eq $(grep -cE '调研结论[ =]*G[0-9]+' "$F")    # 同行堆叠即红
 K5  diff <(grep -oE "label: '[^']+'" frontend/src/App.tsx | sed -E "s/label: '([^']+)'/\1/" | sort -u) \
          <(grep -oE 'data-nav="[^"]+"' "$F" | sed -E 's/data-nav="([^"]+)"/\1/' | sort -u)              # 空 = 13 入口原文一致
-K6  grep -oE 'id="nb-[a-z-]+"[^>]*data-state="(未接入|演示边界|规划中)"' "$F" | sort -u | wc -l         # 恰好 6
+K6  grep -oE '<section[^>]*>' "$F" | grep -E 'id="nb-[a-z-]+"' | grep -cE 'data-state="(未接入|演示边界|规划中)"'   # 恰好 6（D16；旧式 id 写后面会少数：实测判 1 vs 真值 2）
 K6c grep -c 'class="domain"' "$F"                                                                      # 11 域 + 平台外壳 = 12
 K7  awk '/<section class="domain" id="sec-security"/{f=1} f{print} f&&/<\/section>/{f=0}' "$F" | grep -cE 'X-User-Id|回落'   # ≥1
-K8  grep -E '加密' "$F" | grep -vcE 'ENCRYPTION_KEY'      # 0；同法核 '无 KDF|零填充' → 0（逐段同行，替代词锚窗口）
+K8  grep -E '加密' "$F" | grep -E '密钥|API Key' | grep -vcE 'ENCRYPTION_KEY'      # 0（🔴 收窄式：只核密钥语义行，逐段同行，替代词锚窗口）
+    # 旧式（少中间那一层 grep）三行样本实测判 2、收窄式判 1：旧式把与密钥无关的传输加密句也算违规，
+    # 最坏失效是作者为过闸给传输句也贴上密钥限定语 → 凭空造出一句安全失真，正是 AC-8 / D11 要防的东西。
 K9  diff <(awk -F'|' '/^\| G[0-9]+/{print $2,$9}' .specs/product-prototype-refresh/RESEARCH-competitors.md \
              | grep 融入原型 | grep -oE 'G[0-9]+' | sort -u) \
          <(grep -oE 'id="vb-G[0-9]+"' "$F" | sed -E 's/id="vb-(G[0-9]+)"/\1/' | sort -u)                # 空 = 9 条逐块齐
 K10 grep -cE '校准基线：[0-9a-f]{7,40} · 20[0-9]{2}-[0-9]{2}-[0-9]{2}' "$F"                              # ≥1（AC-6 的严格式）
+K11 grep -cE '攻击面|弱点(总表|清单)|S1-S10' "$F"        # D11 的机验面：必须 0（反例附录稿实测 1、合格稿 0；🔴 B-1 补的闸）
 ```
 
 **两版并跑纪律**：AC-7 / AC-8 的票面命令（词锚）与 K7 / K8（节点锚、逐段同行）**必须同时执行**；两版判定不一致 = 交付稿措辞不合格，按 §5-R2 回到稿子改，不改票面命令。
@@ -197,7 +204,7 @@ K10 grep -cE '校准基线：[0-9a-f]{7,40} · 20[0-9]{2}-[0-9]{2}-[0-9]{2}' "$F
                                                           │
                           ┌───────────────────────────────┴───────────────┐
                           v                                               v
-              已投票 AC 命令（13 条，需求侧）                   K 系列（K1…K10） 加严闸（设计侧）
+              已投票 AC 命令（13 条，需求侧）                   K 系列（K1…K11） 加严闸（设计侧）
                           └───────────────────────┬───────────────────────┘
                                                   v
                                     5-test 逐条勾清单 + 6-review + STATE/票面
@@ -235,7 +242,7 @@ K10 grep -cE '校准基线：[0-9a-f]{7,40} · 20[0-9]{2}-[0-9]{2}-[0-9]{2}' "$F
 ## 4. ADR 索引
 
 - `@.specs/adr/001-prototype-doc-zero-dependency.md` —— 交付稿形态：零依赖单文件 HTML（排除构建链/CDN/位图）。低可逆：一旦交付，下游（S-align、`docs-drift-resync`、票面 AC 命令）都按此假设。
-- `@.specs/adr/002-single-source-derivation-gates.md` —— 「单处真源 + 多处 diff 派生闸」范式从 RESEARCH 计数不变式推广为交付稿的通用纪律（K 系列（K1…K10））。低可逆：改派生方式 = 动所有文档类 AC 的判据。
+- `@.specs/adr/002-single-source-derivation-gates.md` —— 「单处真源 + 多处 diff 派生闸」范式从 RESEARCH 计数不变式推广为交付稿的通用纪律（K 系列（K1…K11））。低可逆：改派生方式 = 动所有文档类 AC 的判据。
 - `@.specs/adr/003-two-axes-ownership-and-state.md` —— 归属四值与标注三态**永不合并**，分属性承载，值域闭集。低可逆：合并即 AC-5/AC-11/AC-13 三条判据互相失效。
 
 （本 change 无 ARCHITECTURE.md，故不 supersede 任何既有 ADR；`agent-execution-sandbox`、`knowledge-rag-retrieval` 两条架构级议题的 ADR 归属其各自新 change，见 §6。）
@@ -251,11 +258,11 @@ K10 grep -cE '校准基线：[0-9a-f]{7,40} · 20[0-9]{2}-[0-9]{2}-[0-9]{2}' "$F
 | R3 | **数量型闸被"堆叠"糊过**（`sort -u \| wc -l` 对挤在一行的 9 个 G 号同样给 9）。**已复现**（§7.5）：反例稿 9 条挤一行 → AC-13 判 `9`（绿），K4b `occ=9 / lines=1` 与 K9（稿内 `vb-G*` 数 0）双双拦下 | AC-5/AC-13 的"逐块"意图变空文 | 中（已复现） | D6 逐块 + K4b 堆叠探测 + K9 集合 diff（三条同处 §1.5 命令块，一次跑完） |
 | R3b | **判据也会反过来假红**：枚举字面串"属性 + 可见文本"双写时，32 行**完全合规**的骨架被 AC-5b 判 `occ=64 / lines=32` → 必然不过闸，进而诱导实现方去改判据（比假绿更贵的失效路径）。**已复现**（§7.5） | 交付期反复返工 + 票面被侵蚀 | 高（已复现） | **D13 单写规则**（枚举串每行只出现一次，可见徽标走 CSS `::after` + 语义 class）；单写形态实测 `32/32` 通过且 AC-5a/AC-2/AC-11/AC-13/K6 全部不退色 |
 | R4 | **交付稿成第二真源 / 二次漂移**（有人开始在原型里"顺手改数字"，README 的历史就这么来的） | 又一份需要 `docs-drift-resync` 的过时文档 | 中 | D2/K1/K4/K6b 派生对账 + AC-6 校准基线（7-40 hex SHA + 日期 + 页面/端点数）+ §2 单向依赖声明 |
-| R5 | **交付稿外发泄面**（它会被转发；`artifact.py:10-26` 的 GET 无鉴权可读 `.md` 产物，`product-design.html` 若被改名成 `.md` 就会被 `artifact=DESIGN` 的子串匹配读走） | 把 S1-S10 弱点清单集中送出去 | 中 | D11（禁整表搬 S1-S10，只在所属域写限定句）+ 文件名**必须保持 `.html`**（不是 `.md`，故不进该读取面的 `SAFE_NAMES`/`.md` 判定）+ AC-4 两级 + D7 收紧式 |
-| R6 | **2a 单方面改标记**（class/id 换名） | 交付前 9 条 AC 集体假红，或改了命令没改稿 → 假绿 | 中 | D5 的"同笔同步"规则 + §1.5 把字面串写死成接口；票面登记；K 系列（K1…K10） 在改后必跑 |
+| R5 | **交付稿外发泄面**（它会被转发，也会被截图/导出——D11 的禁词闸管不到非文本形态）。两层要分清：① `artifact.py:10-26` 无鉴权读 `.md` 产物，`product-design.html` 若改名成 `.md` 会被 `artifact=DESIGN` 的子串匹配读走；② **`admin_api.py:126-135` 的 GET 是无鉴权任意文件读**（`'..' in path` 挡绝对路径，`os.path.join` 丢前缀），它让"文件名形态"这层设计**不构成防线** | 把 S1-S10 弱点清单集中送出去；或误以为改了后缀就安全 | 中（②是既有 L1 弱点，非本 change 引入） | ① 文件名保持 `.html`（`SAFE_NAMES`/`.md` 判定不进该面）＋知识上传白名单 `agent_knowledge_api.py:189` 不含 `.html`（不会被自动吞成产品数据）；② 真正的收敛点在 L1：登记 **`admin-file-read-jail`**（GET 补 `get_current_user` ＋ `full.startswith(_prompts_dir())` 双闸，照抄同文件 PUT 的写法），**另开 change**；③ 内容侧与形态无关：D11 禁集中列 ＋ K11 机验 ＋ UAT-8 人工勾 ＋ AC-4 两级 ＋ D7 收紧式 |
+| R6 | **2a 单方面改标记**（class/id 换名） | 交付前 9 条 AC 集体假红，或改了命令没改稿 → 假绿 | 中 | D5 的"同笔同步"规则 + §1.5 把字面串写死成接口；票面登记；K 系列（K1…K11） 在改后必跑 |
 | R7 | **范围诱惑**：`trace-viewer-reattach` 之类"接条线就行"的议题被顺手实现；或两条架构级议题被当普通功能设计掉 | 破 AC-12 与 R7.1，交付物变成未评审代码的载体 | 中 | §6 圈死 + R3.1（Architect 零代码）+ 出口必跑 AC-12 diff 命令（§7 实跑 0） |
 | R8 | **体积/首屏预算**（1.5-2.5k 行 HTML + 内联 CSS，NFR ≤2 MB / ≤2 s） | 首屏卡顿或超预算 | 低 | 禁位图与 base64（仓库根 `demo.gif` 2.8 MB 是反例）；图形只画必要框图；交付前 `wc -c "$F" ≤ 2000000` 一次性核 |
-| R9 | **长期债务**：交付稿的 K 系列闸依赖表格行形（`\| N \|`）与 `data-*` 属性名；BASELINE/RESEARCH 一旦重排表格或改列序，派生命令静默失配 | 闸"绿"但不再对账 | 中 | 把 K 系列命令集中写进 §1.5 与 ADR-002（单处可改）；`docs-drift-resync` 的 AC 里加一条"跑通全部 K 命令"；不另立脚本（禁造第二工具） |
+| R9 | **长期债务**：交付稿的 K 系列闸（现 K1…K11）依赖表格行形（`\| N \|`）与 `data-*` 属性名；且新闸自身曾对**同标签属性顺序**敏感（🟦 陷阱二，已按 D16 改顺序无关式）；BASELINE/RESEARCH 一旦重排表格或改列序，派生命令静默失配 | 闸"绿"但不再对账 | 中 | 把 K 系列命令集中写进 §1.5 与 ADR-002（单处可改）；`docs-drift-resync` 的 AC 里加一条"跑通全部 K 命令（K1…K11）"；不另立脚本（禁造第二工具） |
 
 ---
 
@@ -265,6 +272,8 @@ K10 grep -cE '校准基线：[0-9a-f]{7,40} · 20[0-9]{2}-[0-9]{2}-[0-9]{2}' "$F
 - 交付稿本体 `product-design.html`（属 4-dev）、视觉基线 `UI-DESIGN.md`（属 2a）、任务拆解（属 3-task）、验证矩阵与 UAT（属 5-test）。
 - 生成器/校验脚本落 `frontend/` 或 `backend/`（AC-12 禁止）；对账一律用 §1.5 的单行命令，不引入第二套工具（D2/R9）。
 - README.md 回写（`docs-drift-resync`）、孤儿页面/组件清理（out-2）、真实数据接入（out-1）、可交互高保真原型、市场定位与定价（out-4）。
+- **`admin-file-read-jail`（🔴 B-2 本轮新登记的需代码议题，第 13 条）**：`admin_api.py:126-135` 的 `GET /api/admin/files/{path:path}` 无鉴权 ＋ 绝对路径绕过 `..` 守卫 → 任意文件读；修法是 GET 补 `get_current_user` ＋ `full.startswith(_prompts_dir())`（同文件 PUT `:139-143` 已有对照实现）。本 change 只到文档层，不改它。**三点归口**：① 它**不进交付稿的 `data-slug` 集**——K4 的现算真源仍是 `RESEARCH-competitors.md` §2 的 12 条，提前塞进稿子会让 K4 假红，故稿内呈现等需求侧把它并入 RESEARCH §2 之后再同步；② 需求侧应同时补 **BASELINE §4 的 S11 边界句**（内部件持有，依 D11 不得进交付稿）与 12→13 的计数不变式；③ 它属"鉴权缺失"类，按 R7.1 新 change 走，无需 ADR（不改架构边界，补的是既有约束）。
+- **样本与工具的落位纪律（🔴 B-3）**：`§7.5` 的两份样本一律落**仓库外**（`$TMPDIR/proto-samples/`），**含真形假值的样本禁止 commit 进仓**——它们所在路径不在 AC-4 核对面（`.specs/product-prototype-refresh/` ＋ `backup/`）内，进了 git 历史就成了"不受审副本"。顺带一条已验的否证：**别指望加 `.gitignore`**，AC-12 的 `grep -vcE "^(\.specs/|STATE\.md)"` 对 `.gitignore` 计数 **1** → 加它自己就破了"零 L1 写入"红线（本轮算术复核过）。
 - 人工 5 项拍板（`STATE.md` 阻塞表原样保留）：`product-design.html` ①/②、3 个扩展候选、Buzzz 官网、AgentOS 三义、D-discovery 编制。本设计对 ①/② **两路兼容**（`F=` 单行赋值），故不卡本阶段。
 
 ---
@@ -280,7 +289,14 @@ K10 grep -cE '校准基线：[0-9a-f]{7,40} · 20[0-9]{2}-[0-9]{2}-[0-9]{2}' "$F
 | 页面集真源可信 | `diff`（App.tsx 派生 ↔ BASELINE §2 派生） | 完全一致（32/32）✅ —— 唯 §2 行 1 的**括号内** tab 数与代码不符（R1） |
 | AC-1 基准复现 | BASELINE §1 三条命令 | `32` / `168` / `13` ✅ |
 | 9 条融入派生 | `awk -F'\|' '/^\| G[0-9]+/{print $2,$9}' RESEARCH-competitors.md \| grep 融入原型` | `G1 G4 G5 G6 G7 G8 G9 G10 G13` = 9 ✅ |
-| K 系列闸可用性 | 两份样本（§7.5）上跑 K 系列（K1…K10）全部命令形态 | 合格稿 10 条全绿；反例稿逐条报出：缺页 `30` / 虚构页 `Fake` / 假锚点 `pages/Nope.tsx` / K4b `9 vs 1` / K6 `1` / K7 `0` / K8 裸加密 `1` / K9 diff `10` 行 / K3b 非法组合 `1` / K6b 造词变量 `--radius-legacy` / K10 `0` ✅ |
+| K 系列闸可用性 | 两份样本（§7.5）上跑 K 系列（K1…K11）全部命令形态 | 合格稿 10 条全绿；反例稿逐条报出：缺页 `30` / 虚构页 `Fake` / 假锚点 `pages/Nope.tsx` / K4b `9 vs 1` / K6 `1` / K7 `0` / K8 裸加密 `1` / K9 diff `10` 行 / K3b 非法组合 `1` / K6b 造词变量 `--radius-legacy` / K10 `0` ✅ |
+| D3↔D11 冲突消解（🔴 B-1） | D3 附录格改「边界句**所在域索引**（只放 `id`，不放正文）」＋ 新闸 `K11` 双向跑 | 反例附录稿 `1` / 合格稿 `0` ✅（🔴 给的命令与数字一致） |
+| 设计侧新闸顺序无关（🟦 陷阱二） | K3b / K6 换顺序无关式，对"倒序属性行"复跑，并对两份既有样本回归 | K3b 旧式判 `0`（静默漏检）→ 新式 `1`；K6 旧式 `1` → 新式 `2`；`good5` 仍是 K6=6 / K3b=0、`bad3` 仍是 K6=1 / K3b=1 → 只增检出、不改既有结论 ✅ |
+| 图例不踩已投票 AC-5a（🟦 陷阱一） | 裸枚举句 vs 自带路径图例句 | `1`（假红通道，第一稿必撞）vs `0` ✅ → 立 D17 |
+| K8 误伤面（🔴 非阻断 1） | 旧式 vs 收窄式，三行样本 | 旧式 `2`（把 HTTPS 传输句算违规）→ 收窄式 `1` ✅ 已换主用式 |
+| `.html` 推论完整性（🔴 B-2） | `python3 -c "import os; print(os.path.join('/app/prompts','/etc/hosts'))"` ＋ 读 `admin_api.py:126-143` 守卫 | `/etc/hosts`（`'..' in path` 挡不住绝对路径），且该 GET 无 `get_current_user`/`has_permission`、PUT 两条都有 ✅ → D11/R5 措辞已改、`admin-file-read-jail` 已登记（§6） |
+| §7.6 配方逐条复跑（本轮把配方变成可执行） | 从 §7.6 抽出 ```bash 块写成脚本执行，再对两份既有样本跑新式闸回归 | 十条断言全部命中期望值：K11 `1/0`、K3b 倒序 `1`、K6 `2`、K8 `2/1`、图例 `1/0`、AC-7 词锚 `1`→K7 `0`；既有样本回归 `good5` K6=6 / K3b=0 / K8=0 / K11=0，`bad3` K6=1 / K3b=1 / K8=1 ✅ 结论未变 |
+| 加 `.gitignore` 这条路（🔴 B-3③） | `printf '.gitignore\n…' \| grep -vcE "^(\.specs/\|STATE\.md)"` | 计数 `1` → 会自破 AC-12 红线，故不加，改走"样本落仓库外 ＋ 禁入库" ✅ |
 | 票面块能被产品解析（D15，本轮新增） | 载入 `backend/parsers/gate.py` 后对 `DESIGN.md` 跑 `parse_gates`（该文件用 `list[dict]` 注解，本机 python3.8 需先注入 `from __future__ import annotations` 才能 exec —— 环境事实，非缺陷） | 改前：只出 1 个门且门名是表格碎片、`question` 空（正文裸写票面标记会开假门 → 立为 D15 规则 5）；改后：`name=G2 方案门` ＋ 完整 `question` ＋ `votes` 4 条（🟫 ✅ ＋ 三张 ⚪）＋ `result=1/4` ✅ |
 | 交付稿存在性 | `git log --all --oneline -- '*product-design*'` | 空 —— 仓库无既有稿，人工 ① 仍待拍板（不卡本阶段） |
 
@@ -314,6 +330,52 @@ K10 grep -cE '校准基线：[0-9a-f]{7,40} · 20[0-9]{2}-[0-9]{2}-[0-9]{2}' "$F
 | K3 值域 ／ K3b 组合 ／ K6b 变量 | 外值 0 ／ 非法 0 ／ 造词 0 | 外值 0 ／ **非法 1**（`缺失-竞品建议新增 \| 未接入`）／ **造词 1**（`--radius-legacy`） | 两轴正交与"沿用既有 token"都可机验 |
 | K6c 域章数 | `12`（11 域 + 外壳） | `2` | 结构计数对账生效 |
 
+### 7.6 复现配方（🔴 B-3①：验据必须可交付，不接受"作者本机能跑"）
+
+以下在**仓库根**执行，样本写到仓库外（`$TMPDIR/proto-samples/`，依 §6 落位纪律）；每条都是"命令 → 期望值"，评审者与 5-test 可一键复跑：
+
+```bash
+S="${TMPDIR:-/tmp}/proto-samples"; mkdir -p "$S"
+
+# (1) K11 禁词闸双向：集中列弱点的附录稿 1 / 合格稿 0
+printf '<section class="notice" id="nb-appendix"><h2>附录：S1-S10 攻击面总表</h2></section>\n' > "$S/appendix.html"
+printf '<section class="notice" id="nb-limits"><h2>本域边界见各章限定句</h2></section>\n'      > "$S/limits.html"
+grep -cE '攻击面|弱点(总表|清单)|S1-S10' "$S/appendix.html"    # 期望 1
+grep -cE '攻击面|弱点(总表|清单)|S1-S10' "$S/limits.html"      # 期望 0
+
+# (2) K3b 顺序无关：属性倒序的非法组合必须仍被抓到（旧式静默漏检）
+printf '<div><span data-state="未接入"></span><span data-owner="缺失-竞品建议新增"></span></div>\n' > "$S/rev.html"
+awk '{own=""; sta=""}
+     { if (match($0,/data-owner="[^"]+"/)) own=substr($0,RSTART+12,RLENGTH-13)
+       if (match($0,/data-state="[^"]+"/))  sta=substr($0,RSTART+12,RLENGTH-13)
+       if (own!="" && sta!="") print own"|"sta }' "$S/rev.html" | sort -u \
+  | grep -cE '^(本项目已有\|(未接入|规划中)|缺失(-竞品建议新增)?\|(未接入|演示边界))$'          # 期望 1（旧式同输入判 0）
+
+# (3) K6 顺序无关：id 写在 data-state 之后也要数到 2（旧式判 1）
+printf '<section data-state="未接入" id="nb-a"></section>\n<section id="nb-b" data-state="演示边界"></section>\n' > "$S/k6.html"
+grep -oE '<section[^>]*>' "$S/k6.html" | grep -E 'id="nb-[a-z-]+"' | grep -cE 'data-state='  # 期望 2
+
+# (4) K8 收窄式：与密钥无关的传输加密句不该被算成违规
+printf '<p>全站传输走 HTTPS 加密</p>\n<p>API Key 加密存储</p>\n<p>密钥经 AES-256-GCM 加密，取决于 ENCRYPTION_KEY</p>\n' > "$S/k8.html"
+grep -E '加密' "$S/k8.html" | grep -vcE 'ENCRYPTION_KEY'                                  # 旧式期望 2（含误伤）
+grep -E '加密' "$S/k8.html" | grep -E '密钥|API Key' | grep -vcE 'ENCRYPTION_KEY'          # 收窄式期望 1（只剩真裸句）
+
+# (5) D17 图例陷阱：裸枚举句踩已投票的 AC-5a；自带路径的图例句不踩
+printf '<p>归属取值有 本项目已有 / 部分已有 / 缺失-竞品建议新增 / 缺失</p>\n'          > "$S/legend.html"
+printf '<p>本项目已有 = 能在 frontend/src/pages/ 或 backend/routes/ 指到实现</p>\n'      > "$S/legend2.html"
+grep -E '本项目已有|部分已有' "$S/legend.html"  | grep -vcE 'pages/|routes/'              # 期望 1 ← 这就是假红通道
+grep -E '本项目已有|部分已有' "$S/legend2.html" | grep -vcE 'pages/|routes/'              # 期望 0
+
+# (6) AC-7 假绿 → K7 真红：导航含该字样、安全段无边界句（窗口起点漂移）
+printf '<nav><a data-nav="安全与审计">安全与审计</a></nav>\n<section class="domain" id="sec-1"><p>演示数据可回落</p></section>\n<section class="domain" id="sec-security"><p>已交付 RBAC，认证强度足够。</p></section>\n' > "$S/ac7trap.html"
+awk '/安全与审计/{f=1} f{print} f&&/<\/section>/{f=0}' "$S/ac7trap.html" | grep -cE 'X-User-Id|回落'   # 票面词锚期望 1（假绿）
+awk '/<section class="domain" id="sec-security"/{f=1} f{print} f&&/<\/section>/{f=0}' "$S/ac7trap.html" | grep -cE 'X-User-Id|回落'  # K7 期望 0（真红）
+```
+
+**合格稿不在这段配方里，这是刻意的**：它的全部内容都由 §1.5 的派生命令唯一决定（K1 页集 / K5 入口 / K6 六处 / K9 九条 / K6b 变量对 / K10 基线行），评审者逐条跑那些命令即可复现同样的"全绿"断言，不需要作者的私有文件——把生成脚本入库会同时违反 D2（禁第二套工具）与 §2 的单向依赖。
+
+凭据形态的反例（`api_key` 赋值样式，用来证明 D7 收紧式相对已投票原式的增量：原式 0 命中、收紧式 1 命中）同样按 §6 留在仓库外，本文**不复制其字面量**——"键 = 值"形态一旦写进 `.specs/product-prototype-refresh/`，就会被并档后的收紧式自己命中，这正是需求门提示 ② 说的自匹配陷阱。
+
 **两条"验据本身的问题"已回到设计**（不是回到票面）：① 双写枚举串会让 AC-5b 在合格稿上假红 → **D13**；② 交付稿若少挂 slug，AC-10 的表格判据仍绿而 K4 报缺 → **D14**（必须齐 12 条）。票面 13 条 AC 的命令文本**一字未改**。
 
 ---
@@ -336,10 +398,10 @@ K10 grep -cE '校准基线：[0-9a-f]{7,40} · 20[0-9]{2}-[0-9]{2}-[0-9]{2}' "$F
 
 🗳️ G2 方案门: DESIGN.md 是否完整、可验证？从各自主责维度看，可以进入下一阶段吗？
 🟫 架构师(M): ✅ 三项关注点独立复跑成立（§1.5 归口 / §2 单向依赖 / 三条 ADR 名副其实），另提 2 条非阻断
-🟦 研发负责人: ⚪ 待票
+🟦 研发负责人: ✅ 可实现性独立复跑成立（K1/K4/K5/K9 左集 32/12/13/9 全中、D13 单写可过、R9 失配方向全指红）；附两条实现陷阱，已立为 D16/D17
 🟩 领域专家: ⚪ 待票
-🔴 安全审计师: ⚪ 待票
-结果: 1/4 → 待集齐 4 票后裁决（4/4 或 3/4 自动进 2a；3/4 把反对意见记入工件末尾）
+🔴 安全审计师: ❌ 条件票三条 —— B-1 D3↔D11 自相矛盾且 D11 零闸；B-2 `.html` 推论不完整（`admin_api.py:126-135` 无鉴权任意文件读）；B-3 §7.5 证据不可复跑、样本落位无纪律。三条已随提交落地（D3 附录索引化 + K11、D11/R5 措辞纠正 + 登记 `admin-file-read-jail`、新增 §7.6 复现配方），待其复验改票
+结果: 3/4（🟫✅ 🟦✅ 🔴❌条件 🟩待票）→ 集齐第 4 票后按 R13.2 终裁；🔴 三条依 R9.2 需另一角色二次确认，终裁时指定
 
 > 这块**本身就是按 D15 写的**，且用产品自己的解析器验过：对改后的 `DESIGN.md` 跑 `parse_gates` → **1 个门**，`name=G2 方案门`、`question` 取到完整问题、`votes` 4 条（🟫 ✅ ＋ 三张 ⚪ 待票）、`result` 取到 `1/4` 那一行。
 > 两个真实反例（都实测过，不是设想）：① 票面塞进 markdown 表格或写成 `- ` 列表项 → `votes` 为空、**整块静默丢弃**，门禁视图表现为"这门没投过"；② 正文里裸写票面标记（哪怕只是举例说明）→ 它先开一个假门并把真票行收养过去，门名变成上下文碎片。②是本轮自己踩到并修掉的，故立为规则 5。
@@ -359,15 +421,15 @@ K10 grep -cE '校准基线：[0-9a-f]{7,40} · 20[0-9]{2}-[0-9]{2}-[0-9]{2}' "$F
 
 | 路径 | 能力 | 触发场景 | 复用建议 |
 |---|---|---|---|
-| `.specs/product-prototype-refresh/DESIGN.md` §1.5（K 系列（K1…K10） 对账闸，非代码文件） | 让"给人读的文档"变成**可 grep 的验收面对象**：结构锚点（`class`/`data-*`/`id`）+ 派生 diff + 节点锚定窗口 | ① `docs-drift-resync` 校 README 与代码是否一致；② 任何以文档为交付物的 change（架构文档、迁移说明、运维手册）；③ 5-test 需要"文档级 UAT 机器化"时 | 文档型 change 一律先写"标记契约 + K 系列派生闸"再写文档本体；数量型 `grep -c` 一律配 `occ == lines` 堆叠探测 |
+| `.specs/product-prototype-refresh/DESIGN.md` §1.5（K 系列（K1…K11） 对账闸，非代码文件） | 让"给人读的文档"变成**可 grep 的验收面对象**：结构锚点（`class`/`data-*`/`id`）+ 派生 diff + 节点锚定窗口 | ① `docs-drift-resync` 校 README 与代码是否一致；② 任何以文档为交付物的 change（架构文档、迁移说明、运维手册）；③ 5-test 需要"文档级 UAT 机器化"时 | 文档型 change 一律先写"标记契约 + K 系列派生闸"再写文档本体；数量型 `grep -c` 一律配 `occ == lines` 堆叠探测 |
 
 ### 9.2 新增 / 改变的项目级技术决策（建议 append 到 CONTEXT「已锁技术决策」）
 
 | 决策 | 取值 | 影响范围 | 推翻代价 |
 |---|---|---|---|
 | 文档型交付物的验收判据 = **节点/属性锚定**，不用中文措辞或词边界当窗口起点 | `id="sec-*"` / `<p>` 段内 / `data-*` 属性 | 本 change 全部文档 AC；未来任何文档 AC | 低（改 AC 命令文本 + 交付稿标记，但会连带已投票票面重开） |
-| 数字与清单只从**唯一真源**派生，交付物内禁手抄、禁造第二工具 | K 系列（K1…K10） 单行命令 | 所有 `.specs/` 产物与 README | 中（要逐处改回引用式） |
-| 对外可转发的产物**不整表搬运内部弱点清单**，只写所属域的限定式边界句 | D11 | 任何面向外发的文档/截图/导出 | 低（但一旦整表外发，撤回不了） |
+| 数字与清单只从**唯一真源**派生，交付物内禁手抄、禁造第二工具 | K 系列（K1…K11） 单行命令 | 所有 `.specs/` 产物与 README | 中（要逐处改回引用式） |
+| 对外可转发的产物**不集中搬运内部弱点清单**（含附录索引化只放锚点），只写所属域的限定式边界句；措辞面向**任何外发形态**（文档、截图、导出片段皆同） | D11 ＋ K11 ＋ UAT-8 | 任何面向外发的文档/截图/导出 | 低（但一旦整表外发，撤回不了） |
 
 ### 9.3 新增 / 修改的跨模块契约
 
@@ -388,7 +450,7 @@ N/A —— 零新增依赖（无 npm/pip 包、无构建工具、无外部资源
 
 ```
 - 新增禁动：交付稿正文禁整表搬 BASELINE §4 的 S1-S10 清单（只写所属域限定句）；文档型交付物保持 .html 后缀，
-  禁改名为 .md 落进无鉴权 GET 面（D11/R5）。
+  禁改名为 .md 落进 `artifact.py` 无鉴权 GET 面（D11/R5）；同时记一句边界——**这不代表交付稿安全**，`admin_api.py:126-135` 的任意文件读绕过一切文件名设计（已登记 `admin-file-read-jail`，见 §6）。
 - 新增禁动：改 AC 命令引用的字面标记必须同笔改交付稿（D5），禁"只改一边"。
 - 解禁：无。
 - 建议补做（不阻塞）：项目无 .specs/ARCHITECTURE.md，而 `agent-execution-sandbox`、`knowledge-rag-retrieval`

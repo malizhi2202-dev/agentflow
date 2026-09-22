@@ -22,7 +22,7 @@
 2. **无 JavaScript**：导航靠锚点 + `<details>` 原生折叠；不引入构建链（Vite/JIT/`npm build`）。
 3. 图形一律**手写内联 SVG**（框图/表格），禁位图与 base64 内联图（反例：仓库根 `demo.gif` 实测 2.8 MB，一张即爆 NFR 预算）。
 4. **来源引用必须保留**为 `<a href="https://…">` 文本节点——删掉它才是违规（R6.2 出处纪律）。
-5. 文件名**必须保持 `.html` 后缀**：`backend/routes/artifact.py:10-26` 的无鉴权 GET 面按"子串匹配 + `endswith('.md')`"取文件，`product-design.md` 会被 `artifact=DESIGN` 读走，`.html` 不会（详见 DESIGN §5-R5 / §9.3）。
+5. 文件名**必须保持 `.html` 后缀**：`backend/routes/artifact.py:10-26` 的无鉴权 GET 面按"子串匹配 + `endswith('.md')`"取文件，`product-design.md` 会被 `artifact=DESIGN` 读走，`.html` 不会（详见 DESIGN §5-R5 / §9.3）。**但这条推论的边界要在 ADR 里说清（G2 🔴 B-2）**：保持 `.html` 只避开 `artifact.py` 这一层，**不构成"交付稿安全"的防线**——`backend/routes/admin_api.py:126-135` 的 `GET /api/admin/files/{path:path}` 既不取 `get_current_user` 也不查 `has_permission`，唯一守卫是 `'..' in path`，而 `os.path.join(_prompts_dir(), '/etc/hosts')` 会丢掉前缀（本轮实测），故能访问本机 API 者可读仓库内任意文件，`.md` 与 `.html` 在它面前没有区别。同文件的 PUT（`:139-143`）两条守卫齐备并做 `full.startswith(_prompts_dir())`，是现成的对照实现。
 
 ## Consequences
 
