@@ -67,6 +67,7 @@
 | S7 | 执行隔离 | 全仓 `grep -i "sandbox\|docker"` 在 `backend/**.py` **0 命中**；`subprocess` 仅 `routes/git_safety.py` | 不得呈现任何"沙箱/隔离执行"能力（缺口 G3） |
 | S8 | 定时任务 | `models/scheduled_task.py:8-14`（`cron_expr`）+ `services/scheduler_service.py` | 可写"Agent 定时任务（cron）"——README 功能模块层未记载，属 W1 新发现 |
 | S9 | 渠道/触发 | 5 适配器（飞书/钉钉/Slack/Telegram/SMTP）+ `channel_api.py` 8 端点 + OAuth（含 Mock）+ `webhook` 签名（README 安全节） | 可写"多渠道消息中继 + OAuth 接入"；"mention 即开会话"无实现 → 不写 |
+| S10 | 知识产物的**读取面** | `GET /api/changes/{change_id}/{artifact}`（`routes/artifact.py:10-26`）只校验文件名白名单，**无任何鉴权**；同文件 PUT（`:28-34`）才要 `project:write`。配合 S1（localhost + 缺 `X-User-Id` 回落 admin）＝凡能访问本服务者可读 `.specs/**` 全部 markdown | 可写"知识产物是平台一等数据、经 API 可读"；**但 S1-S9 攻击面清单不得整表搬进原型稿**——原型（`product-design.html`）是天生外发件（US-5），只带"边界限定句"，完整清单留在本文件与 REQUIREMENT 内部 |
 
 ## 5. 与既有文档的漂移差异清单（供 2a/原型/议题 `docs-drift-resync` 消费）
 
