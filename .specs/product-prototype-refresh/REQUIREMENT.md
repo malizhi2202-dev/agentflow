@@ -111,7 +111,11 @@
 
 ### v2（下一轮考虑 · 即议题，R18.4；已登记 STATE.md「已留档议题」）
 
-- 需代码的能力（11 条 slug）：`token-cost-ledger`、`mcp-tool-runtime`、`unified-inbox`、`trace-viewer-reattach`、`skill-capture-from-run`、`inbound-channel-session`、`model-verification-tier`、`separation-of-duty-gate`、`human-agent-assignment-board`，以及架构级两条 `agent-execution-sandbox`、`knowledge-rag-retrieval`。
+- 需代码的能力（**12 条 slug**，以 RESEARCH §2 反引号 slug 去重集为唯一真源，数量一致性核对命令见 RESEARCH §2「计数不变式」）：
+  - 轻成本可先行 6：`token-cost-ledger`、`unified-inbox`、`trace-viewer-reattach`、`model-verification-tier`、`separation-of-duty-gate`、`skill-capture-from-run`
+  - 中等 3：`mcp-tool-runtime`、`inbound-channel-session`、`approval-ladder-autonomy`
+  - 架构级（须 2-design + ADR）2：`agent-execution-sandbox`、`knowledge-rag-retrieval`
+  - 边界待定 1：`human-agent-assignment-board`
 - 既有议题 `docs-drift-resync`：待原型成为事实源后回写 README（D1-D7 差异清单是它的输入）。
 - 界面原型的可交互高保真版（本次静态稿 + 文案）。
 
@@ -142,7 +146,7 @@
 
 - G1（立项/需求方向门）：4/4 通过，链见 `@.specs/product-prototype-refresh/CHANGE.md#过程记录`。
 - **需求门（质量门，R9.1 序列中在 G1 之后、G2 方案门之前）**：🟫🟦🟩🔴 四人投票已在本阶段出口评论召集，票面结果待集齐后追加于下方；未集齐 4 票不推进。
-- 本阶段自检：AC 全部 G/W/T + 单一验证 ✓ ｜ v1/v2/out 三类齐（v2 11+2 条、out 5 条）✓ ｜ 非功能 5 轮显式（含「无」）✓ ｜ CONTEXT.md 已追加术语/决策/默认行为 ✓ ｜ 无 HOW（实现归 DESIGN/2a）✓ ｜ R18.3 落盘前置（三份产物 + STATE）✓
+- 本阶段自检：AC 全部 G/W/T + 单一验证 ✓ ｜ v1/v2/out 三类齐（v2＝需代码议题 **12** 个 slug + 既有议题 `docs-drift-resync` + 高保真 1 条，out 5 条）✓ ｜ 非功能 5 轮显式（含「无」）✓ ｜ CONTEXT.md 已追加术语/决策/默认行为 ✓ ｜ 无 HOW（实现归 DESIGN/2a）✓ ｜ R18.3 落盘前置（三份产物 + STATE）✓ ｜ **跨工件计数对账**：RESEARCH §2 slug 去重集 = REQUIREMENT v2 = STATE 议题段 = 12 ✓（G2 🟩 条件票落地项）
 
 ### 需求门票面（计票中 · 先数票再裁决，未集齐 4 票不推进）
 
@@ -150,7 +154,7 @@
 |---|---|---|---|
 | 🟦 资深用户评测员 | **✅** | 回帖 `01a0c7ff-84ba-7830-8413-3ade31b3e35b`；在 tip `0db6417b` 亲跑 AC-1（32/168）、AC-4（0 命中 exit 1）、AC-10（`15 0`）、AC-12（0），并逐 label 核过 13 入口、核过 CONTEXT §15.1-15.4 | 三条非阻断：① AC-2「32 行」措辞 → **已当轮改**（12 行 · 32 页 + 自校验行说明）；② AC-11 数量地板不代逐处 → **已当轮改**（六项逐处 + UAT-6 勾清单归 5-test，地板 ≥4 抬到 ≥6）；③ US-2 的 13 入口未进 AC → **已当轮并入 AC-2 Then/UAT-1** |
 | 🟫 高级产品经理 | 未到 | 召集票 `01a0c7fd`（15:21）点名范围覆盖 / v1·v2·out / 遗漏场景 / 4 条"观望-否决"是否抬进 v1 | — |
-| 🟩 架构师 | 未到 | 召集票点名可行性基线、11 个议题依赖方向、非功能充分性、BASELINE 分层 | — |
+| 🟩 架构师 | **❌ 条件票**（唯一阻断项） | 回帖 `01a0c805-b3d6-7b57-a5b5-c6d374318bcc`；四项关注点逐条**代码实测**通过（可行性基线写实、G1/G6 两条锚点全真、NFR 充分、BASELINE 三层咬合且不与 CONTEXT §3 打架；S1-S9 抽核全真），唯一破口＝**跨工件计数不一致**：RESEARCH §2 实际登记 12 个需代码 slug，而本文 §4 v2、RESEARCH 合计行、STATE 决策日志三处写 11——`approval-ladder-autonomy`（G4/STATE/CONTEXT 三处均在）在 v2 枚举漏网 | **阻断项已当轮落地**：① 本文 §4 v2 补登该 slug 并按轻6/中3/架构级2/边界待定1 分组＝12；② RESEARCH 合计行 11→**12** 并新增「计数不变式 + 核对命令」防复发；③ STATE 决策日志与本文自检行同步 12。非阻断 1 条（CONTEXT §3 表头加快照路标）**亦当轮落地**；其原第二条（AC-2 标记命名耦合）已被 `240b8e37` 吸收、他本人撤回。**待其在新 tip 上复验改票** |
 | 🔴 安全审计师 | 未到 | 召集票点名 AC-3/4/5/9/11 粒度、敏感数据处理是否落到 AC+NFR、演示边界与加密措辞 | — |
 
-**当前票面：1/4（🟦 ✅）→ 不裁决、不推进**（R9/R13.2；票到齐后在本段改写为终裁 + `▶️ 自动继续`）。三位后续复验读到的是含上述三处修正的新 tip，修正内容均为**收紧/改错**，不改范围、不改 AC 条数（仍 12 条）、不改任何去向判定。
+**当前票面：2/4（🟦 ✅ ＋ 🟩 ❌条件票，唯一阻断项已当轮落地、待其在新 tip 复验改票；🟫🔴 未到）→ 未集齐 4 票，不裁决、不推进**（R9/R13.2；票到齐后在本段改写为终裁 + `▶️ 自动继续`）。本轮改动全部是**改错与收紧**：12 个需代码 slug 的跨工件对账（§4 v2 分组重排 + RESEARCH §2 计数不变式 + STATE 两处）、CONTEXT §3 快照路标；**不改范围、不改 AC 条数（仍 12 条）、不改任何去向判定、不改任何数字基准**（AC-1 32/168、AC-10 `15 0`、AC-12 0 越界复跑结论不变）。

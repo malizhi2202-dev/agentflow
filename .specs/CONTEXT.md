@@ -32,6 +32,8 @@
 
 ## 3. 代码规模（2026-07-06 精确扫描）
 
+> ⚠️ **本表是 2026-07-06 历史快照，不是现行基准。** 现行唯一数字基准 = `@.specs/product-prototype-refresh/BASELINE-code-facts.md` §1（2026-09-22 复测，每行附可复跑命令）；旧→新全量对照见本文 §15.4。R1.5 重启链会整读本文，先撞旧数者以此行为准。（路标由 G2 🟩 非阻断项补，2026-09-22）
+
 | 指标 | 数量 | 扫描命令 |
 |---|---|---|
 | 后端 .py 文件（排除 .venv, __pycache__） | **112** | `find backend/ -name '*.py' -not -path '*/.venv/*' -not -path '*/__pycache__/*' \| wc -l` |
@@ -385,6 +387,7 @@ frontend/src/__tests__/frontend-edge-cases.test.tsx
 7. **视觉调性锁定既有实现**（Tremor 3.18 + Tailwind 3.4 + `tokens.css`），2a 不重选皮肤。
 8. **本 change 零 L1 代码写入**；"值得引入"的需代码结论一律转议题（R16.1/R7.1）。
 9. **调研取证通道 = 一手来源直连**（官网 HTML + 官方 README + GitHub Search API）；本运行时 `web_search` 不可用，竞品自述必须经「归属」字段隔离。
+10. **需代码议题的唯一真源 = `RESEARCH-competitors.md` §2 表内反引号 slug 去重集（现 12 条）**；`REQUIREMENT.md` §4 v2、`STATE.md` 议题段与各条决策日志只允许**引用该集**并与其数量一致，禁止手抄计数（G2 🟩 条件票就是此不变式在枚举层破口的实证，核对命令随 RESEARCH §2「计数不变式」）。
 
 ### 15.3 默认行为（留给 AI 的可信默认值）
 
