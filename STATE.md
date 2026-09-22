@@ -7,10 +7,10 @@
 ## 当前位置
 
 - **活跃 Change**: `product-prototype-refresh`（来源 issue：MALIZHI-6 项目原型文档审核）
-- **当前阶段**: REQUIREMENT 出口·**需求门 4/4 票到齐（🟦 ✅ ＋ 🟩🔴🟫 三张条件 ❌；其 5 项修正与全部非阻断项已当轮落地，待三位在同一新 tip 复验改票）** —— 产物 `REQUIREMENT.md`（7 US / **13 AC**，AC-13 由 🟫 补 / v1·v2·out / NFR 5 轮）＋ W1 底稿 `BASELINE-code-facts.md` ＋ W2 深挖 `RESEARCH-competitors.md`（15 条缺口去向闭合、需代码议题 12 个 slug）＋ `CONTEXT.md` 域语言已落盘；本轮把全文计数型验证命令换成逐条/段内共现（🔴 S-1/S-2/S-3）并立 AC 的 `F=` 路径约定；票面与承接项去向记 REQUIREMENT §7
+- **当前阶段**: 需求门（G2 · 质量门）**4/4 ✅ 通过（15:49）→ 本阶段出口完成，已交架构设计进 2-design ＋ 2a-ui-design** —— `REQUIREMENT.md` 终稿：**7 US / 13 AC** / v1·v2·out（v2 含需代码议题 12 个 slug，真源＝RESEARCH §2）/ NFR 5 轮 ＋ W1 `BASELINE-code-facts.md`（含新增 S10）＋ W2 `RESEARCH-competitors.md` ＋ `CONTEXT.md` §15；票面首轮 1✅+3条件❌、全部修正落地后四张改票 ✅ 逐条实测证据与四条交接提示（AC-13 逐块打标、tier-2 作用范围、可选收紧式、人工 5 项）记 REQUIREMENT §7 终裁段
 - **当前 Task**: —
 - **中断任务**（R1.5 清窗）: 无
-- **会话开始建议**: 先读 `@.specs/product-prototype-refresh/REQUIREMENT.md`（§1 口径与判定 + §7 票面表）与 `@.specs/product-prototype-refresh/BASELINE-code-facts.md`（数字唯一基准）。每有一票回帖先重读线程数票：集齐 4 票才按 R13.2 裁决（4/4 或 3/4 → 交架构设计 2-design；前端项目另需 2a-ui-design，票面抄 §7），未集齐静默收口。进入 2a 前必须拿到人工对 `product-design.html` ①/② 的拍板。
+- **会话开始建议**: 需求门已过，1-requirement 不再回炉。进 2-design 先读 `@.specs/product-prototype-refresh/REQUIREMENT.md`（§1 口径 + §3 13 条 AC + §7 终裁与交接提示）与 `@.specs/product-prototype-refresh/BASELINE-code-facts.md`（数字唯一基准、S1-S10 边界）；12 个需代码议题**不在本 change 内实现**（R7.1，另开 change）。**2a-ui-design 开工前必须拿到人工对 `product-design.html` ①/② 的拍板**（现按 ② 新建起草）。
 
 ## 阻塞与待决策
 
@@ -33,10 +33,11 @@
 
 ## 决策日志（最近 10 条，倒序）
 
+- `[2026-09-22]` **需求门 4/4 ✅ 终裁通过，本阶段出口**：三张条件票（🟩 `01a0c815-603c`／🟫 `01a0c815-d682`／🔴 `01a0c816-eaff`）在修正落地后全部翻正，**且三位都是执行命令而非读文字**——🔴 按 `### AC-*` 分节把工件里验证方式行的命令原文抽进 bash 逐条跑（反例必红／合格稿必绿，AC-3/4/5/7/8/9 全对）、🟫 反测我采纳的判据能否被 inflate（漏画 → 7 拦下、挤一行 → 1 拦下）、🟩 原文照跑三条对账命令（`12 / SAME / SAME`）。落地的判据性改动：AC 12→**13**（新增 AC-13 竞品融入判据）、全文计数型命令换逐条/段内共现、AC-4 核对面纳入 `backup/`（平台编辑器自动备份已入库这一事实复验后入 BASELINE 新增 **S10**，S1-S9 引用范围同步 S1-S10）、归属字段统一 §1 四值枚举。**四条交接提示交下游、不回炉改已投票的 AC**（含 🔴 的可选收紧扩展式，登记不并档）。交 [@架构设计] 进 2-design ＋ 2a；人工 5 项仍挂、① 卡 2a 开工 — `@.specs/product-prototype-refresh/REQUIREMENT.md#终裁`
+
 - `[2026-09-22]` **需求门 4/4 到齐 + 🔴🟫 两张条件票当轮闭合**：安全审计师构造反例证明 **AC-3/AC-4/AC-5/AC-7/AC-8 的全文计数型命令可被绕过**（远程 `url()`/协议相对/`srcset`/`iframe`/内联 `fetch` 判绿；同行堆叠多条"本项目已有"互相顶包；`grep -A2 加密` 被邻行蒙过；AC-4 核对面漏 `backup/`——平台编辑器保存即自动复制原件入 `backup/`，`CLAUDE.md` 亦记为"产物保存前的自动备份"）→ 本阶段**逐条独立重跑反例与合格稿后**换命令：AC-3 加强版（反例 5 命中 vs 旧命令 0）并把 out-1「不接真实数据」并进机器闸、Then 明写保留 `<a href>` 来源引用；AC-4 两级（tier-1 含 `backup/` 现 0 命中 exit 1，tier-2 管绝对路径/邮箱/主机名）＋ 新纪律"本 change 产物不经平台 PUT 编辑器"；AC-5 加同行堆叠探测；AC-7/8 改段内共现。高级产品经理指出 **CHANGE 验收线 1 末句「并含调研新增界面」在 12 条 AC 里无人验**（`grep -c 调研新增界面 REQUIREMENT` → 0 证实）→ 新增 **AC-13**（9 条「融入原型」须带"来源=调研结论 G<n>"标注 + 调研局限随稿一节 + UAT-7 逐条勾）。另：归属列两拨词汇（本文两值 vs 表内五值，实测 1/6/7/1）→ §1 定**四值枚举为唯一口径**；G11 补"最近骨架"锚点（`assignee` 全仓 0 命中、`scheduled_task.py:13,18` 的 `agent_id`+`owner_id`）；§4 追加安全类可引事实；🔴 非阻断 2 的代码事实复验后入 BASELINE 新增 **S10**（`artifact.py:10-26` GET 产物无鉴权、PUT 才要 `project:write`）→ S1-S10 整表禁搬进外发原型稿；`F=` 路径赋值统一。计数对账不变式复跑：12 / SAME-REQUIREMENT / SAME-STATE ✓
 
-- `[2026-09-22]` **需求门第 2 票 🟩 ❌条件票（唯一阻断项）→ 当轮落地待复验**：跨工件计数对账破口属实——`RESEARCH §2` 实际登记 **12** 个需代码 slug，而 `REQUIREMENT §4 v2` / `RESEARCH 合计行` / 本文件决策日志三处手抄成 **11**（漏 `approval-ladder-autonomy`；该项在 G4 行、本文件议题段、CONTEXT §15.1 三处均在，纯枚举漏网）→ 三处改 12、v2 按 轻6/中3/架构级2/边界待定1 分组重排，并立 **RESEARCH §2「计数不变式」**（真源＝表内反引号 slug 去重集 + 可跑核对命令）与 **CONTEXT §15.2#10**（引用数量必须等于该集大小，禁止各自手抄）防复发；🟩 非阻断一条（CONTEXT §3 表头加"2026-07-06 快照 · 现行基准＝BASELINE"路标，因 R1.5 重启链整读 CONTEXT 会先撞旧数）亦落地；其原第二条 AC-2 标记命名耦合已被 `240b8e37` 吸收、本人撤回。自验：不变式命令 → 12 ✓、AC-4 / AC-10 / AC-12 复跑结论不变 ✓
-- `[2026-09-22]` **需求门第 1 票入账（🟦 ✅ 1/4）**：三条非阻断承接项当轮改入工件而非拖到 2a/5-test —— AC-2「32 行归属表」系本阶段措辞错（BASELINE §2 实为 12 行 · 32 页），已改并写清"行≠页"；AC-11 由"数量地板 ≥4"抬为**六项逐处 + ≥6 + UAT-6 勾清单**（数量可被凑数、逐处才有效）；US-2 的 13 个一级入口并入 AC-2。票面与三人未到状态记 REQUIREMENT §7。数票依据＝服务端 issue 级 delta 空报告 + 触发票本身（本时段 `multica` 读接口连接失败，未凭记忆数票）；GitHub 侧可达，故修正照常提交推送
+- `[2026-09-22]` **需求门第 1、2 票入账（🟦 ✅、🟩 ❌条件票）**：🟦 三条非阻断当轮改入工件（AC-2 行/页措辞纠错＝BASELINE §2 实为 12 行·32 页；AC-11 由数量地板抬为六项逐处 + UAT-6；US-2 的 13 入口并入 AC-2）→ `240b8e37`；🟩 唯一阻断项＝跨工件计数破口（真源 12 个需代码 slug，三处手抄 11、`approval-ladder-autonomy` 在 v2 枚举漏网）→ v2 分组重排＝12、RESEARCH §2 立「计数不变式 + 一条命令三处对账」、CONTEXT §15.2#10 立规、STATE 与自检同步，非阻断的 CONTEXT §3 快照路标同轮落地 → `47b624d9`（数票依据一律走服务端实时读，未凭记忆；该时段 `multica` 读接口曾一度不可达，GitHub 侧可达故照常推送）
 - `[2026-09-22]` **1-requirement 出口**：`REQUIREMENT.md`（7 US / 12 AC（出口时点数；G2 🟫 条件票补 AC-13 → 现 **13 AC**）全 GWT+单一验证 / v1·v2·out / NFR 5 轮）交付；W1 事实底稿 `BASELINE-code-facts.md` 成为数字唯一基准（页面 34 文件·**挂载 32**、端点 **168**、模型 19、表 26=ORM 口径、store 12、孤儿 2 页 + 9 组件、既有能力边界 S1-S9（出口时点数；G2 🔴 复验后补 S10 → 现 S1-S10）、漂移 D1-D7）；W2 `RESEARCH-competitors.md` 15 条缺口去向闭合（融入原型 9 / **需代码议题 12 个 slug**（原文误记 11，漏 `approval-ladder-autonomy`，已由 G2 🟩 条件票纠正）/ 否决 3）+ 3 个扩展候选交人工一次拍板；`CONTEXT.md` §15 追加域语言（11 术语 / 10 已锁决策 / 5 默认行为，§3 另加快照路标）— `@.specs/product-prototype-refresh/REQUIREMENT.md`
 - `[2026-09-22]` **调研取证通道降级备案**：本运行时 `web_search` 不可用（endpoint 未配置），事实改由官网 HTML + 官方 README + GitHub Search API 直连取得（2026-09-22 全部实测可达）；竞品自述一律经「归属」字段隔离，禁止当本项目现状（R6.2）
 - `[2026-09-22]` **W1 定性两处「壳能力」**：`routes/token_usage.py` 系正则扫 `.specs/*-SUMMARY.md` 文本（非逐运行记账）、`tools_api.py:89-91` 的 MCP 只生成骨架 zip（无运行时）→ 原型必须标「未接入/演示边界」，并登记议题 `token-cost-ledger` / `mcp-tool-runtime`
