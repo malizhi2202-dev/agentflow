@@ -247,7 +247,7 @@
 | **C6 待标注块** | `<section class="notice" id="nb-<语义名>" data-state="…">`（可带 `data-owner`/`data-anchor`/`data-slug`） | 同 C3 但框 `--border-strong`，H3 T4 + 现状句 T5 + 「缺哪半条腿」T5 | 无 hover；`⚠️` 之类前缀**禁用**（emoji 白名单只有 N2 一处） |
 | **C7 边界句** | `<p class="edge-note">现状 + 边界限定词</p>`（**必须在同域章内、且早于本章任何嵌套 `<section>`**，§10-冲突 B） | 13px `--text-secondary`，无底色无线条——**不做彩色左条**（§0.4 打破③），用 `12 · ` 前缀序号代替 | — |
 | **C8 融入块** | `<div class="view-block" id="vb-G4" data-from="G4"><p class="vb-src">来源：调研结论 G4</p>…</div>` | 上 hairline（不是卡！）+ 来源行 mono 11px | 一行只准一个 `调研结论 G<n>`（AC-13/K4b 的 occ==lines） |
-| **C9 slug 表 / 附录表** | `<table>` + `<caption class="page-sum">` + `<tr data-slug="…">` / `<tr><td>S1</td><td><a href="#sec-security">#sec-security</a></td></tr>` | 12px，行线 hairline，`th` `--text-secondary` 500；单元不截断不换行成省略号（NFR） | 行 hover `--bg-card-hover`；附录标题逐字：`附录：边界句所在域索引`（**禁**「S1-S10 总表/清单/一览/目录」「攻击面」「弱点」（K11）；禁复述限定句文本与域名字样（D3/D11）） |
+| **C9 slug 表 / 附录表** | `<table>` + `<caption class="page-sum">` + `<tr data-slug="…">` / `<tr><td>S1</td><td><a href="#sec-security">#sec-security</a></td></tr>` | 12px，行线 hairline，`th` `--text-secondary` 500；单元不截断不换行成省略号（NFR）。**两表行数一律现算、禁写范围号**：slug 表＝`RESEARCH §2` 的**交付稿可见子集**（依 **D19**，真源全集与可见集可以不等、差值显式登记在闸行，禁把内部件画进稿子凑绿）；附录表＝**稿内实际出现的边界句数**（BASELINE §4 现有 11 条，但 S11 与 `admin-file-read-jail` 同源、依 **D11/D19 不进外发稿** → 附录 **10 行**，实测样本 10 行） | 行 hover `--bg-card-hover`；附录标题逐字：`附录：边界句所在域索引`（**禁**「S1-S10 总表/清单/一览/目录」「攻击面」「弱点」（K11）；禁复述限定句文本与域名字样（D3/D11）） |
 | **C10 图例** | `<div class="legend"><p>本项目已有 = 能在 <code>frontend/src/pages/</code> 或 <code>backend/routes/</code> 指到实现</p>…</div>` | 12px `--text-secondary`，每项一行 | **D17**：含归属枚举值的行必须同行含路径子串，否则 AC-5a 假红；解释句禁复述 `data-*` 原串以外的枚举写法（U6） |
 | **C11 代码/锚点** | `<code>frontend/src/…:12-20</code>` | mono 12px `--text-secondary`，`--bg-input` 底 或无底 + `--r-sm`，**不上色** | 链接态才用 `--blue`；路径一律**仓库相对路径**（禁绝对路径与用户名，AC-4 tier-2） |
 | **C12 SVG 框图** | `<svg viewBox class="fig">` + `<g class="node">` / `<path class="edge">` | `.node{fill:var(--bg-card);stroke:var(--border-strong)}` `.edge{fill:none;stroke:var(--blue);stroke-width:1.5}` —— **SVG 内不写字面色、不写 `var()` 进 presentation 属性**（浏览器不可靠），一律走类 | 无 `<use href>`（AC-3 正命门）、无 `data:` 位图、`<title>`/`role="img"`+`aria-label` 给读屏器；两张为限（D3 框图 + §3 状态机） |
@@ -281,13 +281,14 @@
 
 ---
 
-## 10. 本轮实跑撞出来的三处判据冲突（已按最小合规形态落地，**不擅改任何已投票/已冻结命令**）
+## 10. 本轮实跑撞出来的四处判据/派生式问题（已按最小合规形态落地，**不擅改任何已投票或已冻结命令**）
 
 | # | 冲突事实（实跑所得） | 本基线的落地解法 | 归口建议（不由我改） |
 |---|---|---|---|
 | **A** | **AC-9 与 HTML 转义互斥**：票面命令是 `grep -c "<管理员口令>" "$F"` ≥1，而 HTML 里要**可见**显示尖括号必须写 `&lt;…&gt;` → 该形态**不含**字面 `<管理员口令>`，实测 `grep -c` = **0**（红）。写成裸 `<管理员口令>` 则被当未知标签解析、屏幕上什么都不显示（＝"为过闸而写不可见文本"）。 | 两者都要：**可见部分转义** + **同元素属性保留机读原文**：`<code data-literal="<管理员口令>">&lt;管理员口令&gt;</code>` → 实测 `grep -c` = **1** ✓、屏幕上正常显示 `<管理员口令>` ✓、DevTools/DOM 里原文也在（不是隐藏文本）。 | 下轮 `REQUIREMENT` 若愿改：命令换成 `grep -cE "(<|&lt;)管理员口令(>|&gt;)" "$F"` 即两形态皆放行（AC-9 属已投票 → 本 change 不动）。 |
 | **B** | **K7/K12 的 awk 窗口会被嵌套 `</section>` 提前截断**：K6 强制待标注块写成 `<section … id="nb-*">`，而 K7/K12 的 awk 是「开窗 → 遇**第一个** `</section>` 关窗」。→ 边界句若排在任何嵌套 section 之后，窗口只剩一小截，**K7/K12 直接判 0**（票面词锚版却可能仍判 1 → 两版打架）。 | 域章内**顺序钉死**：`H2 → 边界句 `<p class="edge-note">` → 页块 → 嵌套 notice`；并加两条机验 **U5a/U5b**（边界句行号 < 本章第一个嵌套 `<section>` 行号）。实测样本：`PASS 122<124`、`PASS 99<106`。 | 设计侧可把 K7/K12 换成深度感知 awk，或在 §1.5 把"边界句先于嵌套 section"升为契约（**后者零风险，建议采**）。 |
 | **C** | **K7/K12 字面正则仍属性顺序敏感**：两条 awk 都写死 `/<section class="domain" id="sec-security"/`；而 **D16** 说"同标签属性书写顺序不是契约"。→ 只调换 `class`/`id` 顺序就能让设计侧闸静默判 0（本轮实测：把两属性对调后 K7 输出 0）。 | 交付稿一律按 **`class` 在前、`id` 在后** 写域章与全部 `<section>`（钉成形态，见 C2/C6）；这样既满足 K7/K12 现写法，将来闸改成顺序无关也不会红。 | 设计侧：K7/K12 与 D16 口径并档（`<section[^>]*id="sec-security"[^>]*>` + awk 分段取属性），与 K3b/K6 的重写同族。 |
+| **D** | **K1 的左集派生式在并档后的 `BASELINE §2` 上产出脏项**（本轮实测：并档后现式左集 **33 项 ≠ 32 页**；`comm` 双向报「缺页 2 项 / 虚构页 1 项」，其中一项是 `` `pages/Detail.tsx:3-9`） ``，另一项是 grep 的**运行期提示语**被当成集合元素）。根因不是内容错，是 **`tr '、' '\n'` 按字节处理**：`、` 的 UTF-8 三字节是 `E3 80 81`，于是任何含这三个字节的汉字都会被撕开——实测 `流`＝`E6 B5 81`、`见`＝`E8 A7 81` 都在被撕之列（`BASELINE:35` 并档新增的注解文字里就有它们）→ 产生非法字节序列 → `grep -vE` 判定输入为二进制并把「匹配到二进制文件 （标准输入）」写进 stdout。**并档前同一式子给 32 项干净集合**，所以这是一次"措辞改动引爆既有脆弱式"，不是谁写错了数字。 | 本阶段把跑批式改成**先剥括号注解再按顿号切分**：`sed -E 's/（[^（）]*）//g'` 前置 → 实测左集回到 **32**、`comm` 双向**全空**（§13 的 K1a/K1b 就是这个式子；K1c/K1d 两行保留现式实测值作证据）。交付稿侧**不需为此改任何东西**（页集本来就是 32）。 | 架构设计（DESIGN §1.5 的 K1 与 §7.6 配方同一条左集式）；若不愿改式子，则需求侧需知：`BASELINE §2` 的页面列括号注解**不要用含 `、`以外汉字的长注解**（不可持续，建议仍改式子） |
 
 ---
 
@@ -366,7 +367,9 @@ echo $(( $(wc -c < "$F") / 1024 )) KB
 | U10 data-nav | ✅ 13 | U11 IP 字面量 | ✅ 0 | U12 几何白名单 | ✅ 空 |
 | U13 体积 | ✅ 28 KB（29 541 B / 预算 2 MB 的 1.4%） | | | | |
 
-**同一份样本上的已投票票面 + 设计侧 K 系列（51 条断言全中，零红）**：`AC-1 32/168 · AC-2 32 且 K5 diff 空 · AC-3 0 · AC-4 三层全 0 · AC-5a 0 / AC-5b 33/33 · AC-6 行在 · AC-7a 1 / AC-7b 0 · AC-8a 1 / AC-8b 1 · AC-9 1 · AC-10 15 0 · AC-11 7(≥6) · AC-12 0 · AC-13 9 · K1 双向空 · K2 空 · K3 空 · K3b 空 · K4 空 · K4b PASS · K6 6 · K6b 空 · K6c 12 · K7 1 · K8 0 · K9 空 · K10 1 · K11 0 · K12 1`。
+**同一份样本上的已投票票面 + 设计侧 K 系列（本轮实跑逐条，零红）**：`AC-1 32/168 · AC-2 32 且入口 diff 空 · AC-3 0 · AC-4 三层全 0 · AC-5a 0 / AC-5b 33/33 · AC-6 行在 · AC-7a 1 / AC-7b 0 · AC-8a 1 / AC-8b 1 · AC-9 1 · AC-10 16 0 · AC-11 7(≥6) · AC-12 0 · AC-13 9 · K1 稳健式双向空 · K2 空 · K3 空 · K3b 空 · K4 空（可见子集 12） · K4b PASS · K6 6 · K6b 空 · K6c 12 · K7 1 · K8 0 · K9 空 · K10 1 · K11 0 · K12 1 · U1…U13 全中（U5a 122<124、U5b 99<106、U10 13、U13 29 541 B）`；另附两行 **K1 现式诊断**（左集 33 项／脏 2 项 → §10-D）。
+
+> **对齐时点**：本文件初版量在 `73da31a6`；随后上游并入 5 个提交（G2 终裁 4/4、需求侧三件归口、K4 改「可见子集」、S11 并档、D18/D19 新立），我在合并后的 tip 上**全部重跑一遍**再定稿 —— 唯一变化的闸值是 **AC-10 第二列 `15 0` → `16 0`**（去向表增 G16 行，属真源而非我的口径）。样本 masthead 的 commit 串是**构建时点**值（K10 只校格式，AC-6 的"三处一致"指同一 commit 现算三处），4-dev 写稿时按 §1.5 现算重取即可，不必沿用我这两个串的数值来源。
 
 ---
 
@@ -379,7 +382,8 @@ echo $(( $(wc -c < "$F") / 1024 )) KB
 | ③ | app 里 **26 个变量名被引用但零声明**（`--text-dim` 235 · `--color-primary` 101 · `--color-text` 83 · `--font-display` 35 · `--color-danger` 35 · `--radius-md/sm`、`--border-weak/normal`、`--bg-elevated/panel`、`--color-{bg,border,surface,success,warning,info,grid,text-dim,text-secondary,elevated}`、`--text-{primary,weak}`、`--font-body`、`--info`、`--duration-micro`） | "沿用既有实现"≠照抄类名：抄进交付稿＝K6b 红 + 浏览器静默无值；已落 U3 机验 | 需求分析/架构设计（可作 `design-token-hygiene` 议题，属"需代码"） |
 | ④ | 产品自称两处不一致：`App.tsx:275` 侧栏写「AI 开发平台」，`README.md:1` 与 `CLAUDE.md` 写「AgentFlow」 | 交付稿 H1 取后者；`docs-drift-resync` 需一条 | 需求分析（并入既有议题，不新开） |
 | ⑤ | 三条产品侧 a11y/反模式事实：`--text-muted` 2.77:1 却第 3 多引用（186 处）· `.btn-primary` `#fff` on `--blue` = 3.29:1 不达 AA（`btn-primary` 19 处）· `borderLeft: Npx solid 语义色` 彩色侧条 **11 个文件** | 交付稿一律规避（§4/§6.4/§12）；**产品侧修复的影响面**＝`tokens.css` 值 + 186 + 19 + 11 文件，须另开 change（R3：本 change 零 L1 写入，我只登记不改） | 需求分析 → 未来 change |
-| ⑥ | 已在 STATE 表的三条需求侧归口（`BASELINE:35` tab 6→**实测 5**、BASELINE §4 补 S11 边界句、需代码议题 12→13）本轮复核：**交付稿 `data-slug` 仍只挂 12 条**（并入前挂 13 会 K4 假红，实测 diff 空 vs 12 条） | 不重复催；4-dev 按 12 写 | 需求分析 |
+| ⑥ | 上游三条归口**本阶段已全部并档**（本轮 merge 复核：`BASELINE:35` tab 已改 5、§4 已增 **S11**、`RESEARCH §2` 已增 G16 行使去向表 **16 行**、真源 slug **13** 条、可见子集 **12** 条，并新立 **D19**「按可见子集派生」与 **D18**「禁写范围号」） | 交付稿 `data-slug` 仍挂 **12** 条、附录仍 **10** 行；本轮按新式 K4 复跑 diff 空、AC-10 第二列 0 | 无需再催（已闭） |
+| ⑦ | **`tr '、' '\n'` 不是多字节安全的**（详见 §10-D：`BASELINE §2` 并档后 K1 左集 33 项 ≠ 32，脏项里含一条 grep 的「匹配到二进制文件」提示语；并档前同式干净）→ 一切"按顿号切中文文本"的派生式同雷 | 4-dev 会在 K1 上撞上**说不清原因的假红**（缺页 2 / 虚构页 1）；本文件已给稳健式并保留现式证据两行 | 架构设计（K1 左集式与 §7.6 配方同条；建议 `sed -E 's/（[^（）]*）//g'` 前置，或整条改 `awk -F'、'`） |
 
 ---
 
@@ -395,7 +399,7 @@ echo $(( $(wc -c < "$F") / 1024 )) KB
 | `T-UI-06` | C6/C7 待标注与边界句（6 个具名 `nb-*` 落所属域章、且早于任何嵌套 section） | K6 → 6 + AC-7a ≥1 + AC-8a/b ≥1 |
 | `T-UI-07` | C8/C9/C10/C12（9 个 `vb-G*`、12 slug 行、图例、两张 SVG 框图） | K9 diff 空 + K4 diff 空 + AC-13 → 9 + K11 → 0 |
 | `T-UI-08` | 可达性收尾：skip-link / `:focus-visible` / `nav[aria-label]` / `caption+th[scope]` / reduced-motion 兜底 / `<details>` | U7 0 + U8 空 + U9 ≥1 |
-| `T-UI-09` | 全闸复跑并回填票面（§1.5 已投票 13 条 + K1…K12 + U1…U13），样本一律落仓库外 | 51 条断言全中 + `git status --porcelain` 不含样本 |
+| `T-UI-09` | 全闸复跑并回填票面（DESIGN §1.5 现算的已投票 AC 与 K 系列闸 ＋ 本文件 U1…U13），样本一律落仓库外 | 全部断言中且零红 + `git status --porcelain` 不含样本 |
 
 ---
 
