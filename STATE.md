@@ -7,10 +7,10 @@
 ## 当前位置
 
 - **活跃 Change**: `product-prototype-refresh`（来源 issue：MALIZHI-6 项目原型文档审核）
-- **当前阶段**: REQUIREMENT 出口 —— `REQUIREMENT.md`（7 US / 12 AC / v1·v2·out / NFR 5 轮）＋ W1 底稿 `BASELINE-code-facts.md` ＋ W2 深挖 `RESEARCH-competitors.md`（15 条缺口去向闭合）已落盘，`CONTEXT.md` 已追加域语言；**需求门（G2）4 票召集待集**（未集齐不推进）
+- **当前阶段**: REQUIREMENT 出口·**需求门计票中（票面 1/4：🟦 ✅ ｜ 🟫🟩🔴 未到 → 不裁决不推进）** —— 产物 `REQUIREMENT.md`（7 US / 12 AC / v1·v2·out / NFR 5 轮）＋ W1 底稿 `BASELINE-code-facts.md` ＋ W2 深挖 `RESEARCH-competitors.md`（15 条缺口去向闭合）＋ `CONTEXT.md` 域语言已落盘；🟦 三条非阻断承接项已当轮改入 AC-2/AC-11（票面与去向记 REQUIREMENT §7）
 - **当前 Task**: —
 - **中断任务**（R1.5 清窗）: 无
-- **会话开始建议**: 先读 `@.specs/product-prototype-refresh/REQUIREMENT.md`（§1 口径与判定 + §7 票面预留）与 `@.specs/product-prototype-refresh/BASELINE-code-facts.md`（数字唯一基准）。需求门集票后：4/4 或 3/4 → 交架构设计（2-design；前端项目另需 2a-ui-design）；票面结果抄录到 REQUIREMENT §7。进入 2a 前必须拿到人工对 `product-design.html` ①/② 的拍板。
+- **会话开始建议**: 先读 `@.specs/product-prototype-refresh/REQUIREMENT.md`（§1 口径与判定 + §7 票面表）与 `@.specs/product-prototype-refresh/BASELINE-code-facts.md`（数字唯一基准）。每有一票回帖先重读线程数票：集齐 4 票才按 R13.2 裁决（4/4 或 3/4 → 交架构设计 2-design；前端项目另需 2a-ui-design，票面抄 §7），未集齐静默收口。进入 2a 前必须拿到人工对 `product-design.html` ①/② 的拍板。
 
 ## 阻塞与待决策
 
@@ -33,6 +33,7 @@
 
 ## 决策日志（最近 10 条，倒序）
 
+- `[2026-09-22]` **需求门第 1 票入账（🟦 ✅ 1/4）**：三条非阻断承接项当轮改入工件而非拖到 2a/5-test —— AC-2「32 行归属表」系本阶段措辞错（BASELINE §2 实为 12 行 · 32 页），已改并写清"行≠页"；AC-11 由"数量地板 ≥4"抬为**六项逐处 + ≥6 + UAT-6 勾清单**（数量可被凑数、逐处才有效）；US-2 的 13 个一级入口并入 AC-2。票面与三人未到状态记 REQUIREMENT §7。数票依据＝服务端 issue 级 delta 空报告 + 触发票本身（本时段 `multica` 读接口连接失败，未凭记忆数票）；GitHub 侧可达，故修正照常提交推送
 - `[2026-09-22]` **1-requirement 出口**：`REQUIREMENT.md`（7 US / 12 AC 全 GWT+单一验证 / v1·v2·out / NFR 5 轮）交付；W1 事实底稿 `BASELINE-code-facts.md` 成为数字唯一基准（页面 34 文件·**挂载 32**、端点 **168**、模型 19、表 26=ORM 口径、store 12、孤儿 2 页 + 9 组件、既有能力边界 S1-S9、漂移 D1-D7）；W2 `RESEARCH-competitors.md` 15 条缺口去向闭合（融入原型 9 / 议题 11 个 slug / 否决 3）+ 3 个扩展候选交人工一次拍板；`CONTEXT.md` §15 追加域语言（11 术语 / 9 已锁决策 / 5 默认行为）— `@.specs/product-prototype-refresh/REQUIREMENT.md`
 - `[2026-09-22]` **调研取证通道降级备案**：本运行时 `web_search` 不可用（endpoint 未配置），事实改由官网 HTML + 官方 README + GitHub Search API 直连取得（2026-09-22 全部实测可达）；竞品自述一律经「归属」字段隔离，禁止当本项目现状（R6.2）
 - `[2026-09-22]` **W1 定性两处「壳能力」**：`routes/token_usage.py` 系正则扫 `.specs/*-SUMMARY.md` 文本（非逐运行记账）、`tools_api.py:89-91` 的 MCP 只生成骨架 zip（无运行时）→ 原型必须标「未接入/演示边界」，并登记议题 `token-cost-ledger` / `mcp-tool-runtime`
