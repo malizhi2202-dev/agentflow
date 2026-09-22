@@ -38,16 +38,19 @@
 | G13 | 生成者不得自证：修复方不能是唯一检查方（OpenWorker security review "re-scanned and diff-reviewed before you approve"） | openworker.com/README「Use cases · Security review」 | 门禁已有 schema/参数校验（`gate_registry.py`），但**无"同一 Agent 产出即由它自己过闸"的禁止规则** | 部分已有 | **值得引入（理念级）**：与人工审批天然配套，属规则而非基建 | 轻：闸口判定加一条"产出者 ≠ 评审者"约束 | 融入原型（门禁视图加这条规则）+ 登记议题（需代码）`separation-of-duty-gate` |
 | G14 | RAG / 向量检索：文档入库→切分→检索→注入对话（Dify "RAG Pipeline"） | https://github.com/langgenius/dify README Key features 4 | 知识库为文档型存储；全仓 grep `embedding` 与 `vector` 均 0 命中，`chat_service.py` 不引用 knowledge（S5） | 缺失-竞品建议新增 | **观望→需代码**：产品价值明确，但 SQLite 无向量能力，选型（sqlite-vec / LanceDB / 外部库）即架构决策 | 重：破「零新依赖 + 单机 SQLite」默认 | 登记议题（需代码）**架构级** `knowledge-rag-retrieval`；原型只写"文档型知识产物"现状 |
 | G15 | 集成生态规模（n8n "1500+ integrations"）与"可视化画布 + 代码兜底"（Code When You Need It） | https://github.com/n8n-io/n8n README Key Capabilities | 画布已有（React Flow + 13 策略），工具库为自维护 CRUD，无社区分发面 | 部分已有 | **不适配（规模路线）**：铺集成数量会把它从"管控平台"变成"iPaaS"，与 CLAUDE.md 定位冲突 | — | 否决。理由：生态规模不是本平台的差异化路径；`tools`/`templates`/`roles` 三市场已覆盖"可分发"这一真实需求 |
+| G16 | **无竞品参照 · 本项目自证缺口**（本表唯一非竞品来源行）：管理端提示词文件读取端点无鉴权，且绝对路径使 `..` 守卫失效 → 任意文件读 | 代码自证：`backend/routes/admin_api.py:126-134`（GET 无鉴权，对比同文件 PUT 要 `project:write`）＋ 挂载面 `main.py:17,271` ＋ 绕过式实测 `os.path.join("/srv/app/prompts","/etc/passwd")` → `/etc/passwd` | 缺失（安全边界破口，非能力缺口）；边界事实已入 BASELINE §4-S11 | 缺失 | **必改（安全）· 非竞品引入**：与 G1-G15 不同，本行只作计数与追踪用；依 ADR-001／D11，破口细节与绕过式**不得进交付稿**（外发件只带边界限定句） | 轻：该路由补鉴权 ＋ 用 `os.path.realpath` 把路径约束在 prompts 目录内（无新依赖、不破单体 + SQLite 默认形态） | 登记议题（需代码）内部件 `admin-file-read-jail` — 不得进交付稿（K4 的交付稿可见子集须排除本行）
 
-**去向合计（验收线 2 抽查用）**：融入原型 9（G4 G5 G6 G7 G8 G9 G10 G13 及 G1 双标部分）、**登记议题（需代码）12 个 slug**（含 2 个架构级 G3/G14；轻 6 / 中 3 / 架构级 2 / 边界待定 1）、否决 3（G12 G15，另 G3 在本 change 内亦判否决）；0 条空白、0 条"写了没落"。
+**去向合计（验收线 2 抽查用）**：融入原型 9（G4 G5 G6 G7 G8 G9 G10 G13 及 G1 双标部分；G16 不在此列）、**登记议题（需代码）13 个 slug**（含 2 个架构级 G3/G14；轻 7 / 中 3 / 架构级 2 / 边界待定 1。其中 G16 一条为**内部件、不进交付稿** → 交付稿可见子集仍 **12**）、否决 3（G12 G15，另 G3 在本 change 内亦判否决）；16 条：0 空白、0"写了没落"（G16 为唯一非竞品来源行，由代码自证）。
 
-> **计数不变式（G2 🟩 条件票落地的防复发条）**：本表反引号包住的议题 slug 去重集 = **需代码议题的唯一真源（12 条）**。`REQUIREMENT.md` §4 v2 与 `STATE.md` 议题段/决策日志只允许引用该集、数量必须相等，禁止各自手抄计数。一条命令完成三处对账（三个非成员词须排除：human-approval 系 13 连线策略名、docs-drift-resync 系既有议题、product-prototype-refresh 系 change-id）：
+> **计数不变式（G2 🟩 条件票落地 · 2026-09-22 并档 G16 后为 13）**：本表反引号包住的议题 slug 去重集 = **需代码议题的唯一真源（13 条）**，其中标了「不得进交付稿」的行（现仅 G16）属**内部件**，
+             '**交付稿可见子集 = 13 − 1 = 12**。`REQUIREMENT.md` §4 v2 与 `STATE.md` 议题段/决策日志只允许引用该集、数量必须相等，禁止各自手抄计数。`REQUIREMENT.md` §4 v2 与 `STATE.md` 议题段/决策日志只允许引用该集、数量必须相等，禁止各自手抄计数。一条命令完成三处对账（三个非成员词须排除：human-approval 系 13 连线策略名、docs-drift-resync 系既有议题、product-prototype-refresh 系 change-id）：
 >
 > ```bash
-> S=$(grep -oE '`[a-z]+(-[a-z]+)+`' .specs/product-prototype-refresh/RESEARCH-competitors.md | sort -u | grep -v human-approval); echo "$S" | wc -l
+> S=$(grep -oE '`[a-z]+(-[a-z]+)+`' .specs/product-prototype-refresh/RESEARCH-competitors.md | sort -u | grep -v human-approval); echo "$S" | wc -l   # 真源全集 → 13
 > diff <(awk '/需代码的能力（/,/界面原型的可交互/' .specs/product-prototype-refresh/REQUIREMENT.md | grep -oE '`[a-z]+(-[a-z]+)+`' | sort -u | grep -v docs-drift) <(echo "$S") && echo SAME-REQUIREMENT
 > diff <(awk '/出口登记的需代码议题/,/^## 决策日志/' STATE.md | grep -oE '`[a-z]+(-[a-z]+)+`' | sort -u | grep -v product-prototype) <(echo "$S") && echo SAME-STATE
-> # 2026-09-22 实测：12 / SAME-REQUIREMENT / SAME-STATE（本 change 收口前 6-review 可复跑）
+> echo "$S" | grep -v admin-file-read-jail | wc -l                              # 交付稿可见子集 → 12（K4 用这个数，不用 13）
+# 2026-09-22 并档后实测：13 / SAME-REQUIREMENT / SAME-STATE / 可见子集 12（本 change 收口前 6-review 可复跑）
 > ```
 
 ## 3. 扩展候选清单（交人工**一次**拍板，不再单开一轮 · G1 🟫 建议）

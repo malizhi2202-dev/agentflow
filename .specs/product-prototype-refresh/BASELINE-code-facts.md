@@ -32,7 +32,7 @@
 
 | # | 能力域 | 挂载页 | 页 | README 是否记载 |
 |---|---|---|---|---|
-| 1 | 工作流监控 | Home、Detail（含 6 个 tab 组件）、Runtime、MonitoringDashboard | 4 | ✅ |
+| 1 | 工作流监控 | Home、Detail（含 5 个 tab 组件：`WorkflowTab`/`TaskTab`/`GateTab`/`ArtifactTab`/`HealthTab`，复跑：`grep -cE "^import .*Tab" frontend/src/pages/Detail.tsx` → 5 ＋ `TABS` 5 项，见 `pages/Detail.tsx:3-9`）、Runtime、MonitoringDashboard | 4 | ✅ |
 | 2 | Agent 编排 | OrchestrationPage、OrchestrationListPage、AgentBuilder、AgentDetail、WorkflowEditor、WorkflowList、WorkflowDetail、WorkflowCreate | 8 | ✅ |
 | 3 | 控制面与域管理 | AgentControlPlane | 1 | ❌ 未记载 |
 | 4 | 对话中心 | ConversationCenter | 1 | ✅ |
@@ -67,7 +67,8 @@
 | S7 | 执行隔离 | 全仓 `grep -i "sandbox\|docker"` 在 `backend/**.py` **0 命中**；`subprocess` 仅 `routes/git_safety.py` | 不得呈现任何"沙箱/隔离执行"能力（缺口 G3） |
 | S8 | 定时任务 | `models/scheduled_task.py:8-14`（`cron_expr`）+ `services/scheduler_service.py` | 可写"Agent 定时任务（cron）"——README 功能模块层未记载，属 W1 新发现 |
 | S9 | 渠道/触发 | 5 适配器（飞书/钉钉/Slack/Telegram/SMTP）+ `channel_api.py` 8 端点 + OAuth（含 Mock）+ `webhook` 签名（README 安全节） | 可写"多渠道消息中继 + OAuth 接入"；"mention 即开会话"无实现 → 不写 |
-| S10 | 知识产物的**读取面** | `GET /api/changes/{change_id}/{artifact}`（`routes/artifact.py:10-26`）只校验文件名白名单，**无任何鉴权**；同文件 PUT（`:28-34`）才要 `project:write`。配合 S1（localhost + 缺 `X-User-Id` 回落 admin）＝凡能访问本服务者可读 `.specs/**` 全部 markdown | 可写"知识产物是平台一等数据、经 API 可读"；**但 S1-S9 攻击面清单不得整表搬进原型稿**——原型（`product-design.html`）是天生外发件（US-5），只带"边界限定句"，完整清单留在本文件与 REQUIREMENT 内部 |
+| S10 | 知识产物的**读取面** | `GET /api/changes/{change_id}/{artifact}`（`routes/artifact.py:10-26`）只校验文件名白名单，**无任何鉴权**；同文件 PUT（`:28-34`）才要 `project:write`。配合 S1（localhost + 缺 `X-User-Id` 回落 admin）＝凡能访问本服务者可读 `.specs/**` 全部 markdown | 可写"知识产物是平台一等数据、经 API 可读"；**但本表上方各边界行构成的清单不得整表搬进原型稿**——原型（`product-design.html`）是天生外发件（US-5），只带"边界限定句"，完整清单留在本文件与 REQUIREMENT 内部 |
+| S11 | 管理端**提示词文件读取**端点的可达面（2-design 期间发现，G2 方案门 B 系列同源）｜`GET /api/admin/files/{path:path}`（`routes/admin_api.py:126-134`）**无 `get_current_user` / 无鉴权**，而同文件 PUT（`:136-141`）要 `project:write`；守卫 `if not os.path.exists(full) or '..' in path` 在 `os.path.join(_prompts_dir(), path)` **之后**判，而 `{path:path}` 可带前导斜杠 —— `os.path.join("/srv/app/prompts", "/etc/passwd")` → `/etc/passwd`，绝对路径直接丢前缀，`..` 检查形同虚设 → **任意文件读**。路由确在挂载面上（`main.py:17` import ＋ `:271 include_router(admin_router)`），非理论风险。配合 §4-S1（localhost ＋ 缺 header 回落 admin）＝凡能连到本服务者可读任意文件 | **不可写入交付稿。** 本行只留内部件：依 ADR-001／D11，外发原型只带"边界限定句"，不得带可被照着利用的破口细节与绕过式。修复登记为需代码议题 `admin-file-read-jail`（见 RESEARCH §2 G16 与 STATE 议题段）；本 change 零 L1 写入（AC-12） |
 
 ## 5. 与既有文档的漂移差异清单（供 2a/原型/议题 `docs-drift-resync` 消费）
 
@@ -79,4 +80,4 @@
 | D4 | `CONTEXT.md` 端点 153 / 路由 27 | 168 / 28 | 快照过期 |
 | D5 | `CONTEXT.md` 表 21（sqlite3） | ORM 声明 26 | 口径不同 + 无 `platform.db`；本文件已标口径 |
 | D6 | `CONTEXT.md` 服务 25 / 模型 15 | 24（+5 适配器）/ 19 | 快照过期 |
-| D7 | `.specs/README-CONSISTENCY-REPORT.md:5`「10 项 8 不准」 | 本次 7 条差异（D1-D6 与 S3/S4 类）方向一致 | 既有结论成立，不需重做该报告 |
+| D7 | `.specs/README-CONSISTENCY-REPORT.md:5`「10 项 8 不准」 | 本次 §5 前六条与 §4-S3/S4 类方向一致 | 既有结论成立，不需重做该报告 |
