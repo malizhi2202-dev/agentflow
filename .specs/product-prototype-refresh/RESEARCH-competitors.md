@@ -2,7 +2,7 @@
 
 - **Change ID**: product-prototype-refresh ｜ **工作包**: W2（竞品调研）｜ **深挖执行**: 1-requirement（按 CHANGE W2 与验收线 2 的约定，判定发生在本阶段出口）
 - **日期**: 2026-09-22 ｜ **现状锚点基准**: `@.specs/product-prototype-refresh/BASELINE-code-facts.md`
-- **取证通道与局限（必须先读）**：本运行时的 `web_search` 工具不可用（endpoint 未配置，返回空），全部事实改为**直连一手来源**：产品官网 HTML + 官方仓库 `README.md`（raw.githubusercontent）+ GitHub Search API。未做全站爬取、未读第三方评测 → 能力面以「官方自述」为限；这正是 §归属字段要防的失真来源，**竞品自述一律不得当作本项目已有能力**。
+- **取证通道与局限（必须先读）**：本运行时的 `web_search` 工具不可用（endpoint 未配置，返回空），全部事实改为**直连一手来源**：产品官网 HTML + 官方仓库 `README.md`（raw.githubusercontent）+ GitHub Search API。未做全站爬取、未读第三方评测（专业评测与安全审计报告未取，G2 🔴 要求随产物交付的局限一并写明） → 能力面以「官方自述」为限；这正是 §归属字段要防的失真来源，**竞品自述一律不得当作本项目已有能力**。
 - **可行性粗判基线（CHANGE 风险条）**：FastAPI 单体（`backend/config.py:5-6`：HOST 默认回环地址、PORT 8000）+ SQLite 默认（`backend/database.py`）+ 单机部署、无容器编排、无执行沙箱（BASELINE §4-S6/S7）。凡需常驻多进程/隔离执行/向量存储者，粗判为「需架构决策」。
 
 ## 1. 点名产品消歧结果（R6.2：查不到即标待确认）
@@ -16,6 +16,8 @@
 | 「等」的扩展候选 | 见 §3，交人工一次拍板（G1 🟫 建议） | — |
 
 ## 2. 能力缺口清单（逐条带来源 / 归属 / 适配初判 / 可行性粗判 / 去向）
+> **归属列口径（G2 🟫 收口）**：一律取 `REQUIREMENT.md` §1 的**四值枚举**——本项目已有 / 部分已有（含"半成品"子注，须点明缺哪半条腿）/ 缺失-竞品建议新增 / 缺失（自证缺口）。本表实测分布：1 / 5+1 / 7 / 1（=15 条），旧写法"部分已有（半成品）"归入②、"缺失"归入④，不再另立词。
+
 
 去向三选一强制（CHANGE 验收线 2）：**融入原型** ｜ **登记议题（需代码）** ｜ **否决（带理由）**。
 
@@ -31,7 +33,7 @@
 | G8 | 定时/无人值守自动化的完整语义：cron 报表、频道常watch，**运行留全量 transcript**（Multica Autopilots · OpenWorker "Standing automations" · agentOS cron+webhooks） | multica.ai/docs/autopilots · README「Hand off the work」 | `models/scheduled_task.py:8-14` 有 `cron_expr` + `services/scheduler_service.py`（S8，README 功能模块层未记载） | 本项目已有 | **值得写准（不是新能力）**：W1 新发现，README/原型此前未呈现；缺的只是"运行记录可回看"这一点与 G6 同题 | 已有，零改动 | 融入原型（归属=已有，锚点已指） |
 | G9 | 双向渠道触发：在 Slack 里 @ 一下就开会话干活，结果回到线程（OpenWorker Slack mention · Multica channels 5 家） | openworker.com/README「What it can do」 · multica.ai/docs/channels | 5 适配器（飞书/钉钉/Slack/Telegram/SMTP）+ `channel_api.py` 8 端点 + OAuth（含 Mock）+ Webhook 签名（S9）；但无"入站 mention → 建会话"闭环 | 部分已有 | **值得引入（中）**：入站方向补齐即成闭环，符合"团队已在哪里说话"的落地逻辑 | 中：入站解析 + 会话映射，单体可承载 | 融入原型 + 登记议题（需代码）`inbound-channel-session` |
 | G10 | 模型准入分级：BYOM 随便贴 key，但"已验证可用于工具调用"的清单单独打标（OpenWorker "curated model list… at your own risk"） | openworker.com/README「Bring your model」 | 固定 7 provider（`llm_providers.py:310-318`），无"验证态/风险态"标记，无 model 级能力位（BASELINE §1） | 缺失-竞品建议新增 | **值得引入（低成本高信任）**：把"能连"与"跑通过工具调用"分开，直接减少 Agent 上线踩坑 | 轻：provider/model 元数据字段 + 界面徽标 | 融入原型 + 登记议题（需代码）`model-verification-tier` |
-| G11 | 人 + Agent 同板派工：issue 指派给 agent 如同指派给同事，leader 在 squad 内路由（Multica Assign/Squads） | multica.ai/docs/assigning-issues · /docs/squads | 有编排（13 连线策略）与域隔离（`domain_api.py` 9 端点），但**无人工任务/派工实体**，人是登录账号不是"看板上的 assignee" | 缺失-竞品建议新增 | **观望**：价值真实但与本平台"编排 Agent 而非管理人"的定位有张力，需先定产品边界（偏好问题，非技术） | 中→重：新实体 + 新页 + 通知，需 DESIGN | 登记议题（需代码）`human-agent-assignment-board`（原型不画成既有能力，仅入"边界待定"注记） |
+| G11 | 人 + Agent 同板派工：issue 指派给 agent 如同指派给同事，leader 在 squad 内路由（Multica Assign/Squads） | multica.ai/docs/assigning-issues · /docs/squads | 有编排（13 连线策略）与域隔离（`domain_api.py` 9 端点），但**无人工任务/派工实体**，人是登录账号不是"看板上的 assignee"。（G2 🟫 复核为硬事实：全仓 grep `assignee` 于 backend 0 命中；最近骨架 = `scheduled_task.py:13,18` 的 `agent_id` + `owner_id`，且 `models/project.py`、`models/human_approval.py` 已存在——"边界待定"是产品边界选择题，不是从零起） | 缺失-竞品建议新增 | **观望**：价值真实但与本平台"编排 Agent 而非管理人"的定位有张力，需先定产品边界（偏好问题，非技术） | 中→重：新实体 + 新页 + 通知，需 DESIGN | 登记议题（需代码）`human-agent-assignment-board`（原型不画成既有能力，仅入"边界待定"注记） |
 | G12 | 多端客户端（Electron 桌面 + Expo iOS）与"同一 workspace 四端"（Multica desktop/mobile） | multica.ai/docs/desktop-app · README「Make it yours」 | 纯 Web 前端（Vite），无桌面/移动壳 | 缺失 | **不适配**：管控台价值在信息与门禁，端壳不改变能力；维护四端与单机定位不匹配 | — | 否决。理由：与「单机 FastAPI + Web 管控台」边界冲突，端壳不新增任何管控能力 |
 | G13 | 生成者不得自证：修复方不能是唯一检查方（OpenWorker security review "re-scanned and diff-reviewed before you approve"） | openworker.com/README「Use cases · Security review」 | 门禁已有 schema/参数校验（`gate_registry.py`），但**无"同一 Agent 产出即由它自己过闸"的禁止规则** | 部分已有 | **值得引入（理念级）**：与人工审批天然配套，属规则而非基建 | 轻：闸口判定加一条"产出者 ≠ 评审者"约束 | 融入原型（门禁视图加这条规则）+ 登记议题（需代码）`separation-of-duty-gate` |
 | G14 | RAG / 向量检索：文档入库→切分→检索→注入对话（Dify "RAG Pipeline"） | https://github.com/langgenius/dify README Key features 4 | 知识库为文档型存储；全仓 grep `embedding` 与 `vector` 均 0 命中，`chat_service.py` 不引用 knowledge（S5） | 缺失-竞品建议新增 | **观望→需代码**：产品价值明确，但 SQLite 无向量能力，选型（sqlite-vec / LanceDB / 外部库）即架构决策 | 重：破「零新依赖 + 单机 SQLite」默认 | 登记议题（需代码）**架构级** `knowledge-rag-retrieval`；原型只写"文档型知识产物"现状 |
@@ -56,6 +58,8 @@
 | **AgentOps**（AgentOps-AI/agentops） | 专治本项目最假的短板（G1 成本台账 / G6 可回放 trace）：session→agent→operation→workflow 分层 span 的观测模型可直接借语义，不必借它的服务 | https://github.com/AgentOps-AI/agentops README（Quick Start / Self-Hosting / span 分层，已读）· https://agentops.ai |
 | **n8n**（n8n-io/n8n） | 「Fair-code、self-host 或云、RBAC + 审计 + 敏感数据」是同类产品里把**管控与部署形态**讲得最完整的参照，可校准我们的单机体量叙事 | https://github.com/n8n-io/n8n README（Key Capabilities 全段，已读） |
 
+> **出处依赖（G2 🟫 随票记录，不阻断）**：G14 的唯一竞品出处是 Dify，G3 的两个出处是 Dify + rivet agentOS（后者自身三义待指认）——两条「架构级」议题的竞品参照都建在未拍板的名字上。议题本身靠代码自证（`embedding|vector` 0 命中、无沙箱/subprocess 面）站得住，故不阻断；**但若人工回「不采纳扩展候选」，须把 G3/G14 的来源列改标「本项目自证缺口 + 竞品参照待定」**，别让已登记的架构级议题日后看着无据。
+
 > 备注：候选名已核可达、能力已读 README，但**未做逐项深挖**——是否纳入由人工拍板；任一入选即在本表追加行（同口径：来源/归属/初判/可行性/去向）。
 
 ## 4. 调研期新发现的产品事实（供 REQUIREMENT 的 AC 与 2a 消费）
@@ -64,3 +68,4 @@
 2. **两个"看着像能力、实际是壳"**：`token_usage`（正则扫 markdown）与 MCP（只发骨架 zip）。原型若不标注，会把它们画成已交付防护/已交付账本——正是 G1 🔴 与本项目"文档漂移"共同要防的失真。
 3. **`TraceViewer` 零挂载**：README 已把它写进"拓扑监控"能力句 → 唯一一条「宣传面 > 可达面」的实证，适合做原型校准的样例。
 4. **竞品共同结构**：Multica / OpenWorker / Dify / n8n 全部把「**人工闸口 + 审计留痕 + 自带模型/自带机器**」当主卖点，而不是把模型能力当卖点 → 与 AgentFlow「管控平台」定位同向，支持 W1 把管控面画厚。
+5. **可被原型引用的安全类边界（G2 🔴 追加，均为本仓自证事实，非竞品结论）**：本地开发默认口令存在、`main.py:194-212` 仅监听 localhost、缺 `X-User-Id` 时回落 admin、`encryption_service.py` 强度取决于 `ENCRYPTION_KEY`（短密钥 `ljust(32,"0")` 零填充、无 KDF、缺 key 直接 RuntimeError）、平台编辑器保存会向已入库的 `backup/` 自动复制原件（`routes/artifact.py:51-55`，`CLAUDE.md` 亦记为"产物保存前的自动备份"）——最后一条是 G2 🔴 S-2 把 AC-4 核对面扩到 `backup/` 的依据。

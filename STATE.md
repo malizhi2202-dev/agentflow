@@ -7,7 +7,7 @@
 ## 当前位置
 
 - **活跃 Change**: `product-prototype-refresh`（来源 issue：MALIZHI-6 项目原型文档审核）
-- **当前阶段**: REQUIREMENT 出口·**需求门计票中（票面 2/4：🟦 ✅ ＋ 🟩 ❌条件票 → 唯一阻断项已当轮落地、待其复验改票 ｜ 🟫🔴 未到 → 不裁决不推进）** —— 产物 `REQUIREMENT.md`（7 US / 12 AC / v1·v2·out / NFR 5 轮）＋ W1 底稿 `BASELINE-code-facts.md` ＋ W2 深挖 `RESEARCH-competitors.md`（15 条缺口去向闭合）＋ `CONTEXT.md` 域语言已落盘；承接项：🟦 三条（AC-2/AC-11/13 入口）＋ 🟩 一条阻断（需代码议题 **12** 个 slug 的跨工件对账，并立 RESEARCH §2「计数不变式」+ CONTEXT §15.2#10 防复发）＋ 🟩 非阻断（CONTEXT §3 表头加快照路标）均已改（票面与去向记 REQUIREMENT §7）
+- **当前阶段**: REQUIREMENT 出口·**需求门 4/4 票到齐（🟦 ✅ ＋ 🟩🔴🟫 三张条件 ❌；其 5 项修正与全部非阻断项已当轮落地，待三位在同一新 tip 复验改票）** —— 产物 `REQUIREMENT.md`（7 US / **13 AC**，AC-13 由 🟫 补 / v1·v2·out / NFR 5 轮）＋ W1 底稿 `BASELINE-code-facts.md` ＋ W2 深挖 `RESEARCH-competitors.md`（15 条缺口去向闭合、需代码议题 12 个 slug）＋ `CONTEXT.md` 域语言已落盘；本轮把全文计数型验证命令换成逐条/段内共现（🔴 S-1/S-2/S-3）并立 AC 的 `F=` 路径约定；票面与承接项去向记 REQUIREMENT §7
 - **当前 Task**: —
 - **中断任务**（R1.5 清窗）: 无
 - **会话开始建议**: 先读 `@.specs/product-prototype-refresh/REQUIREMENT.md`（§1 口径与判定 + §7 票面表）与 `@.specs/product-prototype-refresh/BASELINE-code-facts.md`（数字唯一基准）。每有一票回帖先重读线程数票：集齐 4 票才按 R13.2 裁决（4/4 或 3/4 → 交架构设计 2-design；前端项目另需 2a-ui-design，票面抄 §7），未集齐静默收口。进入 2a 前必须拿到人工对 `product-design.html` ①/② 的拍板。
@@ -33,17 +33,17 @@
 
 ## 决策日志（最近 10 条，倒序）
 
+- `[2026-09-22]` **需求门 4/4 到齐 + 🔴🟫 两张条件票当轮闭合**：安全审计师构造反例证明 **AC-3/AC-4/AC-5/AC-7/AC-8 的全文计数型命令可被绕过**（远程 `url()`/协议相对/`srcset`/`iframe`/内联 `fetch` 判绿；同行堆叠多条"本项目已有"互相顶包；`grep -A2 加密` 被邻行蒙过；AC-4 核对面漏 `backup/`——平台编辑器保存即自动复制原件入 `backup/`，`CLAUDE.md` 亦记为"产物保存前的自动备份"）→ 本阶段**逐条独立重跑反例与合格稿后**换命令：AC-3 加强版（反例 5 命中 vs 旧命令 0）并把 out-1「不接真实数据」并进机器闸、Then 明写保留 `<a href>` 来源引用；AC-4 两级（tier-1 含 `backup/` 现 0 命中 exit 1，tier-2 管绝对路径/邮箱/主机名）＋ 新纪律"本 change 产物不经平台 PUT 编辑器"；AC-5 加同行堆叠探测；AC-7/8 改段内共现。高级产品经理指出 **CHANGE 验收线 1 末句「并含调研新增界面」在 12 条 AC 里无人验**（`grep -c 调研新增界面 REQUIREMENT` → 0 证实）→ 新增 **AC-13**（9 条「融入原型」须带"来源=调研结论 G<n>"标注 + 调研局限随稿一节 + UAT-7 逐条勾）。另：归属列两拨词汇（本文两值 vs 表内五值，实测 1/6/7/1）→ §1 定**四值枚举为唯一口径**；G11 补"最近骨架"锚点（`assignee` 全仓 0 命中、`scheduled_task.py:13,18` 的 `agent_id`+`owner_id`）；§4 追加安全类可引事实；`F=` 路径赋值统一。计数对账不变式复跑：12 / SAME-REQUIREMENT / SAME-STATE ✓
+
 - `[2026-09-22]` **需求门第 2 票 🟩 ❌条件票（唯一阻断项）→ 当轮落地待复验**：跨工件计数对账破口属实——`RESEARCH §2` 实际登记 **12** 个需代码 slug，而 `REQUIREMENT §4 v2` / `RESEARCH 合计行` / 本文件决策日志三处手抄成 **11**（漏 `approval-ladder-autonomy`；该项在 G4 行、本文件议题段、CONTEXT §15.1 三处均在，纯枚举漏网）→ 三处改 12、v2 按 轻6/中3/架构级2/边界待定1 分组重排，并立 **RESEARCH §2「计数不变式」**（真源＝表内反引号 slug 去重集 + 可跑核对命令）与 **CONTEXT §15.2#10**（引用数量必须等于该集大小，禁止各自手抄）防复发；🟩 非阻断一条（CONTEXT §3 表头加"2026-07-06 快照 · 现行基准＝BASELINE"路标，因 R1.5 重启链整读 CONTEXT 会先撞旧数）亦落地；其原第二条 AC-2 标记命名耦合已被 `240b8e37` 吸收、本人撤回。自验：不变式命令 → 12 ✓、AC-4 / AC-10 / AC-12 复跑结论不变 ✓
 - `[2026-09-22]` **需求门第 1 票入账（🟦 ✅ 1/4）**：三条非阻断承接项当轮改入工件而非拖到 2a/5-test —— AC-2「32 行归属表」系本阶段措辞错（BASELINE §2 实为 12 行 · 32 页），已改并写清"行≠页"；AC-11 由"数量地板 ≥4"抬为**六项逐处 + ≥6 + UAT-6 勾清单**（数量可被凑数、逐处才有效）；US-2 的 13 个一级入口并入 AC-2。票面与三人未到状态记 REQUIREMENT §7。数票依据＝服务端 issue 级 delta 空报告 + 触发票本身（本时段 `multica` 读接口连接失败，未凭记忆数票）；GitHub 侧可达，故修正照常提交推送
-- `[2026-09-22]` **1-requirement 出口**：`REQUIREMENT.md`（7 US / 12 AC 全 GWT+单一验证 / v1·v2·out / NFR 5 轮）交付；W1 事实底稿 `BASELINE-code-facts.md` 成为数字唯一基准（页面 34 文件·**挂载 32**、端点 **168**、模型 19、表 26=ORM 口径、store 12、孤儿 2 页 + 9 组件、既有能力边界 S1-S9、漂移 D1-D7）；W2 `RESEARCH-competitors.md` 15 条缺口去向闭合（融入原型 9 / **需代码议题 12 个 slug**（原文误记 11，漏 `approval-ladder-autonomy`，已由 G2 🟩 条件票纠正）/ 否决 3）+ 3 个扩展候选交人工一次拍板；`CONTEXT.md` §15 追加域语言（11 术语 / 10 已锁决策 / 5 默认行为，§3 另加快照路标）— `@.specs/product-prototype-refresh/REQUIREMENT.md`
+- `[2026-09-22]` **1-requirement 出口**：`REQUIREMENT.md`（7 US / 12 AC（出口时点数；G2 🟫 条件票补 AC-13 → 现 **13 AC**）全 GWT+单一验证 / v1·v2·out / NFR 5 轮）交付；W1 事实底稿 `BASELINE-code-facts.md` 成为数字唯一基准（页面 34 文件·**挂载 32**、端点 **168**、模型 19、表 26=ORM 口径、store 12、孤儿 2 页 + 9 组件、既有能力边界 S1-S9、漂移 D1-D7）；W2 `RESEARCH-competitors.md` 15 条缺口去向闭合（融入原型 9 / **需代码议题 12 个 slug**（原文误记 11，漏 `approval-ladder-autonomy`，已由 G2 🟩 条件票纠正）/ 否决 3）+ 3 个扩展候选交人工一次拍板；`CONTEXT.md` §15 追加域语言（11 术语 / 10 已锁决策 / 5 默认行为，§3 另加快照路标）— `@.specs/product-prototype-refresh/REQUIREMENT.md`
 - `[2026-09-22]` **调研取证通道降级备案**：本运行时 `web_search` 不可用（endpoint 未配置），事实改由官网 HTML + 官方 README + GitHub Search API 直连取得（2026-09-22 全部实测可达）；竞品自述一律经「归属」字段隔离，禁止当本项目现状（R6.2）
 - `[2026-09-22]` **W1 定性两处「壳能力」**：`routes/token_usage.py` 系正则扫 `.specs/*-SUMMARY.md` 文本（非逐运行记账）、`tools_api.py:89-91` 的 MCP 只生成骨架 zip（无运行时）→ 原型必须标「未接入/演示边界」，并登记议题 `token-cost-ledger` / `mcp-tool-runtime`
 - `[2026-09-22]` **G1 终裁：4/4 全票通过**（🔴 复验 `3de89ded` 后按原话翻 ✅；其改票附注两条当轮落地：核对命令换 `1[2]3456`+`--exclude=CHANGE.md` 防自命中/防 glob 空匹配 exit 2、加密陈述补 `ENCRYPTION_KEY` RuntimeError 与短密钥零填充无 KDF 边界——均复测后写入）。0-change 出口：需求分析接 1-requirement — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
 - `[2026-09-22]` G1 第 2 轮：🟫 产品经理复验 `3de89ded` 后按原话改票 ✅（票面 3✅ + 🔴 未到 → 静默待票）；其假锚点纠错（「Artifact 页」不存在，产物视图实为 `components/ArtifactTab.tsx`、宿主 `Detail.tsx:60` 计入工作流监控域）复测属实、当轮改掉，不留给 REQUIREMENT 继承 — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
 - `[2026-09-22]` G1 首轮集票 4/4：原始 2/2 但两张 ❌ 均为「修正落地即改 ✅」条件票→不当真分歧提交人工；🔴 R-1（数据分类与敏感面节 + 示例数据合成排除条）、R-2（验收线 4 零外部依赖）、🟩（数字口径条 + 29 文件/168 端点复测）、W3 归属双字段全部落盘 v3，已请 🟫🔴 改票；任一仍 ❌ → 平票提交人工 — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
-- `[2026-09-22]` 立项 `product-prototype-refresh`：W1 审核 / W2 竞品调研 / W3 融合原型文档，三个工作包全在文档层，L1 代码零改动 — `@.specs/product-prototype-refresh/CHANGE.md`（同轮首建本 `STATE.md`，此前仓库根无跨会话状态文件）
-- `[2026-09-22]` G1 第 1 轮：🟫 产品经理 ❌→三条修正全部核实成立并落盘（验收线能力域 8→11：补知识产物与文档/告警/人工审批；验收线 3 增「校准基线」声明要求；页面口径 34 文件 vs 32 挂载写清 + SecurityPage/AssemblyView 登记 W1 孤儿盘点）；另采纳验收线 2 判定期标注、扩展候选一次拍板两条建议 — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
-- `[2026-09-22]` 视觉调性锁定既有前端实现（Tremor+Tailwind+tokens.css 管控台基线）；code-kit 九卡库未安装，2a 可修正 — `@.specs/product-prototype-refresh/CHANGE.md#视觉调性`
+- `[2026-09-22]` 立项 `product-prototype-refresh`：W1 审核 / W2 竞品调研 / W3 融合原型文档，三个工作包全在文档层，L1 代码零改动；视觉调性锁定既有前端实现（Tremor+Tailwind+tokens.css 管控台基线，2a 可修正）— `@.specs/product-prototype-refresh/CHANGE.md`（同轮首建本 `STATE.md`）
 
 ## 已归档 Changes（最近 5 个，倒序）
 
