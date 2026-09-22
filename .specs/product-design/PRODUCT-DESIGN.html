@@ -379,8 +379,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
   <span class="sep">/</span>
   <h1>产品设计文档 &amp; 界面原型</h1>
   <div class="tools">
-    <span class="chip mono">v5 · 2026-09-22</span>
-    <span class="chip mono">状态: 已过审 ✅（v5，用户原话「好的」· 点头晋级呈审提议 2026-09-22；v4 同日「通过」）</span>
+    <span class="chip mono">v7 · 2026-09-22</span>
+    <span class="chip mono">状态: 已过审 ✅（v7，用户原话「通过」2026-09-22；本档过审链 v4「通过」·v5「好的」·v7「通过」）</span>
     <span class="chip warn">原型内所有数据均为演示假数据</span>
     <button class="btn sm" onclick="window.print()">打印 / 存 PDF</button>
   </div>
@@ -455,6 +455,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <a href="#p22" class="planned">6.22 执行回放 ✱</a>
     <a href="#p23" class="planned">6.23 决策模型目录 ✱</a>
     <a href="#p24" class="planned">6.24 微调工厂 ✱</a>
+    <a href="#p25" class="planned">6.25 环境参谋 ✱</a>
     <p class="grp">附录</p>
     <a href="#s7">7 · 角色权限矩阵</a>
     <a href="#s8">8 · 术语表</a>
@@ -564,6 +565,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>决策</td><td>决策模型目录与两步绑定</td><td>Choice / Bool / Score 类型化决策，校准概率输出；本地（llama.cpp / LM Studio）+ 云 API 双轨；登记≠启用，按用途三开关独立绑定，<b>未绑定=直通路由零介入（AC-0）</b></td><td>§6.23</td></tr>
         <tr><td>决策</td><td>分层路由与升级回退</td><td>调度候选选择 / 对话分诊 / 简单任务白名单派发；低置信自动升级大模型（<span class="mono">escalated</span>），失败回退直通（<span class="mono">decision_fallback</span>），全程入审计</td><td>§6.23</td></tr>
         <tr><td>决策</td><td>微调工厂与三指标自测</td><td>域内对话+记忆数据（显式开关+脱敏+台账）编排本机 LLaMA-Factory 微调专属决策模型；准确率 / ECE / 基线一致率过门槛才可切生产（服务端门禁）</td><td>§6.24</td></tr>
+        <tr><td>决策</td><td>环境参谋（机器自适应部署方案）</td><td>≤5s 硬件画像 → 方案库匹配出「引擎×模型×量化×步骤」分层可执行方案（命令可复制 / 脚本可下载）；<b>只给方案不代执行——装不装由用户决定（2026-09-22 原话）</b>；机器画像只读、默认不上传；测不出就只推云档（诚实降级）</td><td>§6.25</td></tr>
         <tr class="grp-row"><td colspan="4">管控与自愈</td></tr>
         <tr><td>管控</td><td>隔离域</td><td>域 CRUD；删除域时 Agent 回归默认域（不级联删除）</td><td>§6.3</td></tr>
         <tr><td>管控</td><td>能力分组</td><td>按 <span class="mono">capabilities</span> 自动派生三层树；零新增表</td><td>§6.3</td></tr>
@@ -1039,6 +1041,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <p><b>校准是它敢上岗的执照</b>：「说 80% 就真的 80% 对」意味着概率可直接当置信度用——低于域配阈值（默认 0.6）自动升级大模型（<span class="mono">escalated</span>），服务失败即回退直通路由（<span class="mono">decision_fallback</span>）。这构成平台的<b>快慢分层</b>：便宜的确定性小决策在前，昂贵的复杂推理在后。</p>
     <p><b>铁律：两步制显式启用</b>——第一步登记进目录（连通、健康态），第二步按用途逐个绑定（路由决策 / 对话分诊 / 简单任务派发，三个独立开关，全默认关）。<b>未绑定 = 决策代码路径零调用</b>，界面无「建议启用」式骚扰（用户原话：不显性指定或没配置就不要用了）。</p>
     <p><b>微调闭环（域内专属）</b>：域 owner 显式开启后，用<b>本域</b>对话与记忆数据（PII 脱敏 + 数据指纹台账 + 可回放「哪些会话被用过」）编排本机 LLaMA-Factory 训练专属决策模型；产物按版本登记血缘（基座+配方+数据指纹），过<b>三指标自测</b>（准确率 / ECE / 与前一生产版本决策一致率，默认门槛 accuracy ≥80% 且 ECE ≤0.05）才允许切生产——门禁在状态转换层（服务端），不是提示词约定（§1.6.5 纪律 ① 的自家应用）。硬件不达标？微调入口灰显并明写缺什么，推理轨不受限。</p>
+    <p><b>环境参谋</b>：以上 B/A 两层对机器的要求，收进一个入口——画像（≤5s，只读、默认不上传）→ 方案库匹配 → 分层方案卡，每张卡"能/不能干什么 + 磁盘/延迟估算 + 步骤清单"；<b>参谋零执行</b>——不装引擎、不下模型、不写配置，一切动作以可复制命令 / 可下载脚本 / 操作路径交付，装不装、何时装由用户决定（2026-09-22 用户原话「只给方案不执行 让用户决定是否安装」，原"白名单代执行"设计取消）。连通状态由再次画像的只读探测刷新（探测≠执行）。画像测不出的机器不猜配置：只推云 API 兜底档并明写缺因。见 §6.25。</p>
 
     <h2 class="sec"><span class="num">3</span>系统架构</h2>
     <p class="q">本章回答：系统由哪些组件构成、数据存在哪里、对外暴露什么接口。</p>
@@ -1480,7 +1483,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
   <!-- ══════════════════ 6 ══════════════════ -->
   <section class="doc-sec" id="s6">
     <h3 id="s5-19">5.19 决策模型与微调工厂 <span class="chip warn">规划 · 未实现</span></h3>
-    <p><b>谁能用</b>：目录登记=平台管理员；用途绑定与阈值=域 owner/管理员；微调开关=域 owner（仅本域数据）；切生产=过自测门槛者。<b>操作路径</b>：①设置连接（本地 llama.cpp/LM Studio OpenAI 兼容口，或云 API+密钥）→ 目录健康态变绿；②到「域策略」把该模型绑到具体用途（三个开关独立）——<b>只做完①，一切流量仍走直通路由</b>；③低置信阈值与审计在决策页可查（每次决策记概率分布与耗时）。<b>微调</b>：开域开关 → 选对话/记忆切片 → 硬件预检（不过则灰显明说）→ 平台生成任务调用本机 LLaMA-Factory → 产物登记新版本 → 自测报告 → 过门槛一键切生产/回滚。<b>对话内入口</b>：<span class="mono">/决策模型 推荐|登记|微调|评测|状态</span>（未开对应能力的域，命令不产生效果）。详见 §2.7 与 §6.23-6.24。</p>
+    <p><b>谁能用</b>：目录登记=平台管理员；用途绑定与阈值=域 owner/管理员；微调开关=域 owner（仅本域数据）；切生产=过自测门槛者。<b>操作路径</b>：①设置连接（本地 llama.cpp/LM Studio OpenAI 兼容口，或云 API+密钥）→ 目录健康态变绿；②到「域策略」把该模型绑到具体用途（三个开关独立）——<b>只做完①，一切流量仍走直通路由</b>；③低置信阈值与审计在决策页可查（每次决策记概率分布与耗时）。<b>微调</b>：开域开关 → 选对话/记忆切片 → 硬件预检（不过则灰显明说）→ 平台生成任务调用本机 LLaMA-Factory → 产物登记新版本 → 自测报告 → 过门槛一键切生产/回滚。<b>对话内入口</b>：<span class="mono">/决策模型 推荐|登记|微调|评测|状态</span>（未开对应能力的域，命令不产生效果）。<b>环境参谋</b>：<span class="mono">/决策模型 方案</span> 或 §6.25 页——画像→出方案（命令/脚本/路径），执行与否用户决定。详见 §2.7 与 §6.23-6.25。</p>
 
     <h2 class="sec"><span class="num">6</span>界面原型</h2>
     <h3 id="p0">6.0 全局交互纪律（12 条 · 所有页面的公共约束）</h3>
@@ -2059,7 +2062,7 @@ edges:
           </div>
           <div style="margin:0 14px 6px;border:1px solid var(--blue-border);background:var(--bg-card);border-radius:8px;padding:8px 11px;font-size:12px;line-height:1.7">
             <div class="tiny dim">输入 <b class="mono">/</b> 唤出命令 · 当前域：quant-research</div>
-            <b class="mono">/决策模型</b> <b style="color:var(--blue)">推荐</b> · 登记 · 微调 · 评测 · 状态　<span class="tiny dim">——命令仅对已开对应能力的域生效（AC-D1），未开的域不产生效果（AC-0）</span>
+            <b class="mono">/决策模型</b> <b style="color:var(--blue)">推荐</b> · 登记 · 微调 · 评测 · 状态 · <b style="color:var(--blue)">方案</b>　<span class="tiny dim">——命令仅对已开对应能力的域生效（AC-D1），未开的域不产生效果（AC-0）</span>
             <div class="tiny dim" style="margin-top:2px">「状态」示例：路由决策=<b style="color:var(--green)">开</b>（Jev-Style-Qwen3.5-2B · 阈值 0.60 · 今日 escalated 14 · fallback 0）· 对话分诊=关 · 简单任务=关</div>
           </div>
           <div class="composer">
@@ -3015,6 +3018,39 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
       </div>
     </div>
 
+    <h3 id="p25">6.25 环境参谋 · 部署方案 <span class="chip warn">规划原型 · 未实现</span></h3>
+    <p class="proto-note"><span class="chip warn">规划原型</span>change <span class="mono">small-model-decisions</span> E 层：分层部署方案（可复制命令 / 可下载脚本 / 操作路径三种交付形态，平台零执行）。<b>此界面尚不存在</b>。演示数据。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/decision-models/advisor</span><span class="fake">规划原型</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <div class="nav-grp">管理</div>
+          <a class="active"><svg class="icon"><use href="#i-layers"/></svg>决策模型</a>
+          <a><svg class="icon"><use href="#i-shield"/></svg>审计日志</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">决策模型 <span class="dim">· 环境参谋</span></span><span class="right"><button class="btn sm">重新画像 · 3.1s</button><button class="btn sm primary">按推荐层部署</button></span></div>
+          <div class="app-body">
+            <div class="callout"><p><b>机器画像（本机 · 默认不上传）：</b>macOS 15 · Apple M1 Max · <b>32GB 统一内存</b> · 磁盘余 412GB · Metal ✓ / CUDA ✗ / Vulkan ✗ → <b>档位判定：本地推理 + 本地微调均可用</b>（统一内存 32GB ≥ 16GB，AC-B3 通过）。画像完整性：完整。</p></div>
+            <table class="tbl">
+              <thead><tr><th>方案层</th><th>引擎</th><th>推荐模型 · 量化</th><th>能 / 不能</th><th>磁盘 · 延迟估算</th><th>缺失步骤（逐项确认）</th></tr></thead>
+              <tbody>
+                <tr><td><b>L1 · 本机最优</b> <span class="chip ok">推荐</span></td><td>MLX（Apple 原生）</td><td>Jev-Style-Qwen3.5-2B · bf16<br><span class="tiny dim">复刻卡实测 77ms/决策</span></td><td>推理 ✓ 微调 ✓（MLX 后端）</td><td>7.8GB · ~80ms</td><td class="tiny">☐ <b class="mono">pip install mlx</b> <span class="dim">（指南 · 不代执行）</span>　☐ <button class="btn sm" style="padding:1px 7px">⧉ 复制下载命令</button> <span class="tiny dim">源 + sha256 ✓ · Apache-2.0</span>　☐ ⧉ 端点配置片段 + 校验命令</td></tr>
+                <tr><td>L2 · 跨平台稳妥</td><td>llama.cpp（Metal 后端）</td><td>同模型 · Q8_0（2.1GB）<br><span class="tiny dim">决策一致率 99.4% vs bf16</span></td><td>推理 ✓ 微调 ✗（走 LLaMA-Factory 另配）</td><td>2.1GB · ~110ms</td><td class="tiny">☐ <b class="mono">brew install llama.cpp</b> <span class="dim">⧉ 复制</span>　☐ ⧉ 模型下载命令</td></tr>
+                <tr><td>L3 · 兜底</td><td>云 API</td><td>intent-cls-mini（0.6B 类）</td><td>推理 ✓ 微调 ✗ 数据出域需单独确认</td><td>0GB · 网络往返</td><td class="tiny">☐ 登记 API Key（平台给操作路径，用户自填）</td></tr>
+                <tr><td class="dim">另一台 · Windows 轻薄本（画像不完整）</td><td class="dim">— 无独显</td><td class="dim">Q4_K_M 1.3GB（纯 CPU 勉强）</td><td><span class="chip err">微调不可用</span> <span class="tiny dim">内存 8GB &lt; 16GB</span></td><td class="dim">~1.4s/决策（CPU）</td><td class="tiny dim">参谋原话：CPU 档延迟超预算 4.7 倍，不推荐承担路由决策 → <b>只推 L3 云档</b>，缺因见画像</td></tr>
+              </tbody>
+            </table>
+            <p class="small dim">红线注记：本页<b>零执行</b>——「⧉ 复制」「脚本下载」「操作路径」都只是方案，装不装、什么时候装由用户决定（AC-E4，2026-09-22 原话「只给方案不执行」）；画像与再探测为只读动作。测不出配置的机器禁止凑方案（AC-E5 演示在末行）。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <h2 class="sec"><span class="num">7</span>角色权限矩阵</h2>
     <p class="q">本章回答：进去之后能做什么。矩阵必须与 §5.0 的模块可见性一致。</p>
 
@@ -3029,6 +3065,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
         <tr><td>决策模型目录 · 登记/连接 <span class="chip warn">规划</span></td><td class="c dot-yes">●</td><td class="c dot-no">○</td><td class="c dot-no">—</td><td class="c dot-no">—</td></tr>
         <tr><td>域用途绑定 · 阈值 · 微调开关 <span class="chip warn">规划</span></td><td class="c dot-yes">●</td><td class="c dot-no">○</td><td class="c dot-no">—</td><td class="c dot-yes">●</td></tr>
         <tr><td>微调任务 · 数据台账 · 切生产 <span class="chip warn">规划</span></td><td class="c dot-yes">●<span class="tiny">（域 owner）</span></td><td class="c dot-no">○</td><td class="c dot-no">—</td><td class="c dot-yes">●</td></tr>
+        <tr><td>环境参谋 · 画像与方案（零执行）<span class="chip warn">规划</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny">（仅本机画像）</span></td><td class="c dot-no">—</td><td class="c dot-yes">●</td></tr>
         <tr class="grp-row"><td colspan="5">项目与产物（project:read / project:write）</td></tr>
         <tr><td>工作台 · 变更总览</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td></tr>
         <tr><td>项目管理</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td></tr>
@@ -3126,6 +3163,8 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
         <tr><td><b>两步制</b></td><td>登记≠启用：目录连通后仍须按用途逐个绑定（路由/分诊/简单任务三独立开关，默认全关）。</td><td>§2.7 · §6.23</td></tr>
         <tr><td><b>升级与回退</b><br><span class="tiny dim">escalated / decision_fallback</span></td><td>top1 概率低于域阈值（默认 0.6）转大模型=升级；决策服务失败回直通=回退。两者皆审计事件。</td><td>§2.7 · §6.23</td></tr>
         <tr><td><b>三指标自测</b></td><td>准确率 / ECE（校准误差，越小越可信）/ 与前一生产版本决策一致率；默认门槛 accuracy ≥80% 且 ECE ≤0.05，服务端门禁。</td><td>§6.24</td></tr>
+        <tr><td><b>机器画像</b></td><td>参谋对本机硬件与后端能力（Metal/CUDA/Vulkan）的 ≤5s 探测结果；存本机、默认不上传。</td><td>§6.25</td></tr>
+        <tr><td><b>环境参谋 · 只出方案</b></td><td>画像→方案库→分层部署方案的向导，<b>平台零执行</b>（交付形态：可复制命令/可下载脚本/操作路径），装不装由用户决定；连通状态靠只读再探测刷新。</td><td>§2.7 · §6.25</td></tr>
       </tbody>
     </table>
   </section>
@@ -3194,7 +3233,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
   </section>
 
   <footer class="doc-foot">
-    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v5 · 2026-09-22（v4 过审原话「通过」；v5 过审原话「好的」——均 2026-09-22）</p>
+    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）</p>
     <p>单文件自包含 HTML，零外部依赖（无 CDN / 无外链字体 / 无外部图片）；设计令牌与产品源码 <span class="mono">frontend/src/styles/tokens.css</span> 同源；§6 全部数据为演示假数据，其中 6.19–6.22 为<b>明确标注的规划原型</b>。</p>
     <p>数量口径来自对当前代码库与 <span class="mono">.specs/</span> 产物的实测扫描（2026-09-21）：后端 117 个 <span class="mono">.py</span> 模块（含 8 个测试文件）/ 28 个路由模块 / 169 个端点 / 132 条路径 / 19 个 ORM 模型模块 → 26 张表 / 24 个服务 + 5 个渠道适配器 / 4 个引擎模块 / 4 个运行时适配器；前端 100 个 <span class="mono">ts/tsx</span> / 34 个页面 / 28 个组件 + 13 个 Edge 组件 / 12 个 Zustand store。凡属推测或未实现的内容已在正文标注「待确认」。</p>
     <p>上游输入：<span class="mono">.specs/CONTEXT.md</span>、<span class="mono">.specs/agent-domains/</span>、<span class="mono">.specs/capability-groups/</span>、<span class="mono">.specs/agent-control-plane/</span>、<span class="mono">.specs/knowledge-plus/</span>、<span class="mono">.specs/README-CONSISTENCY-REPORT.md</span>；竞品调研输入：<span class="mono">.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md</span>（67 个开源仓库一手实测，2026-09-21）+ 第 3 轮增量（2026-09-22 web 实抓 20+ 项目 + <span class="mono">~/project/multica</span> 全仓深读终版）。上游结论：<span class="mono">.specs/platform-evolution/ROADMAP.md</span>（第 1-3 轮 19+19 条过审结论；本版全部新增内容可指回 <span class="mono">D-harness-landscape-2026/</span> 与 <span class="mono">D-multica-borrow-wave2/</span> 证据链）；v4 决策层章上游：<span class="mono">.specs/small-model-decisions/CHANGE.md + REQUIREMENT.md</span>（需求门 4/4 通过 2026-09-22；<b>代码未实现，全部新增带「规划/未实现」标注</b>）；P-product ⑤ 人审门：<b>v4 已过审（用户原话「通过」2026-09-22）</b>。</p>

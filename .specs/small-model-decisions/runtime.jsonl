@@ -4,3 +4,6 @@
 {"ts": "2026-09-22T19:51:59", "stage": "P-product", "event": "⑤ 人审门：用户原话「通过」→ v4 状态标晋级已过审；下游 REQUIREMENT 与本 PRD 双向一致性维持；2-design 未启动（用户明示暂不进入）"}
 {"ts": "2026-09-22T19:56:21", "stage": "P-product", "event": "v5：三处决策层设计画面化（p8 斜杠命令面板/p3 域策略绑定卡/p22 decision 时间线行+run 成本 chip），呈审中；v4 已过审记录保留"}
 {"ts": "2026-09-22T20:00:23", "stage": "P-product", "event": "⑤ v5 呈审→用户原话「好的」（对「点头晋级」提议的确认）→ 状态标晋级已过审；P-product 前置阶段闭环，2-design 仍等指令"}
+{"ts": "2026-09-22T20:17:44", "stage": "1-requirement", "event": "用户追加 E 层原话入 CHANGE；US8+AC-E1~E5 入 REQUIREMENT；需求门第 2 轮 4/4；P-product v6 落 §6.25 环境参谋原型+8 处联动，呈审中"}
+{"ts": "2026-09-22T20:29:29", "stage": "1-requirement", "event": "用户修订「只给方案不执行+配置不上传」→ AC-E4 重写·需求门第3轮4/4·CHANGE/CONTEXT 同步·文档 v7 十五处联动呈审中"}
+{"ts": "2026-09-22T20:41:06", "stage": "P-product", "event": "⑤ v7 呈审→用户原话「通过」→ 晋级已过审；P-product（含 E 层两轮追加）闭环；2-design 仍等指令"}
