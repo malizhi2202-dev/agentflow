@@ -7,10 +7,10 @@
 ## 当前位置
 
 - **活跃 Change**: `product-prototype-refresh`（来源 issue：MALIZHI-6 项目原型文档审核）
-- **当前阶段**: CHANGE —— `CHANGE.md` v4 已落盘；G1 票面：🟫✅（第 2 轮改票，非阻断假锚点 `Artifact 页`→`ArtifactTab` 已复测改掉）🟦✅ 🟩✅ + 🔴 复验改票未到 → 静默待票，不终裁
+- **当前阶段**: REQUIREMENT —— G1 需求门 **4/4 通过**（🟫✅🟦✅🟩✅🔴✅，条件票全部复验翻正，R9.2 链闭合），0-change 收口移交需求分析；W2 逐项深挖 + `REQUIREMENT.md` 归 1-requirement
 - **当前 Task**: —
 - **中断任务**（R1.5 清窗）: 无
-- **会话开始建议**: 先加载 `@.specs/product-prototype-refresh/CHANGE.md` 与 issue 评论流的 G1 票；票齐按 R13.2 裁决（4/4 或 3/4 → 进 1-requirement，反对意见记 CHANGE 末尾；平票 → 提交人工）。
+- **会话开始建议**: 先读 `@.specs/product-prototype-refresh/CHANGE.md`（含 G1 全投票记录与 W1/1-requirement 承接项：数字口径、安全域边界含 `ENCRYPTION_KEY` 精度条、竞品消歧、扩展候选随出口一次拍板、验收线 2 判定在其出口）。进入 2a-ui-design 前必须拿到人工对 `product-design.html` ①/② 的拍板。
 
 ## 阻塞与待决策
 
@@ -25,6 +25,7 @@
 
 ## 决策日志（最近 10 条，倒序）
 
+- `[2026-09-22]` **G1 终裁：4/4 全票通过**（🔴 复验 `3de89ded` 后按原话翻 ✅；其改票附注两条当轮落地：核对命令换 `1[2]3456`+`--exclude=CHANGE.md` 防自命中/防 glob 空匹配 exit 2、加密陈述补 `ENCRYPTION_KEY` RuntimeError 与短密钥零填充无 KDF 边界——均复测后写入）。0-change 出口：需求分析接 1-requirement — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
 - `[2026-09-22]` G1 第 2 轮：🟫 产品经理复验 `3de89ded` 后按原话改票 ✅（票面 3✅ + 🔴 未到 → 静默待票）；其假锚点纠错（「Artifact 页」不存在，产物视图实为 `components/ArtifactTab.tsx`、宿主 `Detail.tsx:60` 计入工作流监控域）复测属实、当轮改掉，不留给 REQUIREMENT 继承 — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
 - `[2026-09-22]` G1 首轮集票 4/4：原始 2/2 但两张 ❌ 均为「修正落地即改 ✅」条件票→不当真分歧提交人工；🔴 R-1（数据分类与敏感面节 + 示例数据合成排除条）、R-2（验收线 4 零外部依赖）、🟩（数字口径条 + 29 文件/168 端点复测）、W3 归属双字段全部落盘 v3，已请 🟫🔴 改票；任一仍 ❌ → 平票提交人工 — `@.specs/product-prototype-refresh/CHANGE.md#过程记录`
 - `[2026-09-22]` 立项 `product-prototype-refresh`：W1 审核 / W2 竞品调研 / W3 融合原型文档，三个工作包全在文档层，L1 代码零改动 — `@.specs/product-prototype-refresh/CHANGE.md`
