@@ -411,9 +411,9 @@ wc -c < "$F"
 | id | 动作 | verify（单行，已在本文件 §13/§1.5 跑过） |
 |---|---|---|
 | `T-UI-01` | 把 §3.1 的 token 子集**逐字节**物化进交付稿 `:root`（含 `'Segoe UI'` 单引号形态），只声明用到的名 | `comm -13 <(tokens.css 变量对) <(稿内变量对)` → 空（K6b） |
-| `T-UI-02` | 按 §5.2 落 8 档字号 + §5.1 两栈（use-site 前置 `'IBM Plex Sans'`，禁自造变量） | U1 空 + `grep -c "font-display\|font-body" "$F"` → 0 |
-| `T-UI-03` | §6.1/§6.2 间距与版心（200/1000/9999 三几何字面量之外全走 `var()`） | U12 空 + U2b 0 + U11 0 |
-| `T-UI-04` | C1/C2/C3 三件 + 域章属性顺序（`class` 前 `id` 后）+ 域章内顺序钉法 | `grep -c 'class="domain"' → 12`（K6c）+ U5a/U5b PASS |
+| `T-UI-02` | 按 §5.2 落 8 档字号（长写法，**禁 `font:` 简写**）+ §5.1 两栈（use-site 前置 `'IBM Plex Sans'`，禁自造变量） | U1 空 + U1b 0 + `grep -c "font-display\|font-body" "$F"` → 0 |
+| `T-UI-03` | §6.1/§6.2 间距与版心（200/1000/9999 三几何字面量之外全走 `var()`；边框宽度走 `border:`/`outline:` 简写） | U12 空 + U2b 0（锚须容忍 `:root {` 与缩进 `}`，见 §13.1-1）+ U11 0 |
+| `T-UI-04` | C1/C2/C3 三件 + 域章属性顺序（`class` 前 `id` 后）+ 域章内顺序钉法 + 页集覆盖 | `grep -c 'class="domain"' → 12`（K6c）+ U5a/U5b PASS + **K1 用稳健式**（先 `sed -E 's/（[^（）]*）//g'` 剥全角括号注解、再 `tr '、' '\n'`）→ `comm` 双向空；用现式会得 33 项假红，见 §10-D |
 | `T-UI-05` | C4/C5 两轴徽标：`::after` 白名单文案 + `role="img"` + `aria-label`（禁枚举原串） | U6a 0 + U6b 0 + AC-5b occ==lines |
 | `T-UI-06` | C6/C7 待标注与边界句（6 个具名 `nb-*` 落所属域章、且早于任何嵌套 section） | K6 → 6 + AC-7a ≥1 + AC-8a/b ≥1 |
 | `T-UI-07` | C8/C9/C10/C12（9 个 `vb-G*`、12 slug 行、图例、两张 SVG 框图） | K9 diff 空 + K4 diff 空 + AC-13 → 9 + K11 → 0 |
