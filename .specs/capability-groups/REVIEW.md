@@ -3,7 +3,18 @@
 - **Change ID**: capability-groups
 - **审查时间**: 2026-09-23 09:08 CST
 - **审查者**: AI（Reviewer 角色）· 4.2 二审已派出但本 turn 未回收 → 该节标「待确认」（详见 4.2）
-- **总体结论**: **阻塞（不通过）** —— 2.0 金字塔门禁 🔴（`TEST.md` 与 CHANGE.md 自declared 的 `test_backend.py` 均不存在）+ 5 项 🔴 Critical。按 kit-6-review 步骤 2.0：**先回 5-test 补完**，Critical 未修或未获「已知接受」签字前禁止进 7-integration（R2.5）。
+- **总体结论**: **阻塞（不通过）** —— 2.0 金字塔门禁 🔴（`TEST.md` 与 CHANGE.md 自declared 的 `test_backend.py` 均不存在）+ **8 项** 🔴 Critical（v1 为 7 项；本文件行头曾误记「5 项」，一并订正）。按 kit-6-review 步骤 2.0：**先回 5-test 补完**，Critical 未修或未获「已知接受」签字前禁止进 7-integration（R2.5）。
+- **版本**: **v2**（2026-09-23 修订，见「修订记录」）
+
+### 修订记录
+
+| 版本 | 时间 | 触发 | 变更 |
+|---|---|---|---|
+| v1 | 09:08 | 6-review 主审 | 首版：15 项发现（7🔴/5🟡/3🟢），commit `97044bd0` |
+| **v2** | 09:40 | **G4 安全审计师 ❌** | **F4 判错，已在四处改正**：① F4 原按「站点」记数（把 7 处同形查询当成一个可缓办的家族），改为**按 sink 分类**；② 新增 **F16 🔴 凭据搬运链**（`domain_api.py:208 → :231/:243 → chat_service.py:103`）—— v1 那句「capability 列表虽非密钥」恰好把最严重的一跳盖了过去；③ 补 **§2.4 安全审查节**（OWASP 逐项 + 身份层前提 + 依赖/秘钥扫描结果）与 3 条新盲区；④ 待人工裁定第 5 条按 sink 重述；⑤ `T-FIX-04` 拆出 `T-FIX-13`，两条 verify 改写为**不宣称「越权已修复」**，`T-FIX-00` 加「非 admin 身份 + 跨 owner 负例」硬要求 |
+
+> **R9.2 二次确认记录**：F16 由安全审计师首指（给出逐行链），主审**未直接采信，而是独立复现后确认** —— §2.4 的 in-process 复现含「新副本 `api_key_encrypted` 与受害者密文逐字节相等」断言。F16 = 双角色确认的 🔴。
+> **G4 提示**：v1 的投票基线已过时，**4 位投票人以 v2 为准**；若某票明确针对 v1，收票时按「对本文件投票」解释并在票面注明版本差异。
 
 ### 审查基线（工件与 diff 的实际情况，R6.2 明示）
 
@@ -75,12 +86,14 @@ capability=%           -> ['A','B','C'] 期望 []     ← 通配符透传，过�
 | 编号 | 衰退风险 | 🔴 | 🟡 | 🟢 |
 |---|---|---|---|---|
 | R1 | Cognitive Overload 认知过载 | 0 | 1 | 0 |
-| R2 | Change Propagation 变更传播 | 1 | 1 | 0 |
+| R2 | Change Propagation 变更传播 | 2 | 1 | 0 |
 | R3 | Knowledge Duplication 知识重复 | 1 | 1 | 0 |
 | R4 | Accidental Complexity 偶然复杂 | 0 | 1 | 0 |
 | R5 | Dependency Disorder 依赖混乱 | 0 | 1 | 0 |
 | R6 | Domain Model Distortion 领域扭曲 | 1 | 0 | 0 |
 | —（UI · 第三轮另计） | | 3 | 1 | 1 |
+
+> 本表按**诊断维度**计数（一次诊断可产出多条发现，且 Spec 合规轮的发现在此不重复计），**与「严重发现汇总」的 F 编号表不是同一分区**。发现清单的权威计数以 F 表为准：**16 项 = 8🔴 / 5🟡 / 3🟢**。
 
 ### 2.2 6 维诊断 · 详细发现（4 要素）
 
@@ -123,13 +136,22 @@ if capability:
 数据量大再上 MySQL `JSON_CONTAINS` / SQLite `json_each`，并把「按哪个方言」写进 DESIGN 的兼容性约束里（R6.2：MySQL 路径本轮未实测，属待确认）。
 **生成 fix 任务**：T-FIX-01
 
-### 🔴 R2 · Change Propagation：本次新增第 7 处「域内全量 Agent」越权读，且 `visibility` 全局未生效
+### 🔴 R2 · Change Propagation：一条「域内即全量」的查询被复制 7 份，**其中一份的 sink 是凭据**
 
-**Symptom**：`domain_api.py:110` `db.query(Agent).filter(Agent.domain_id == domain_id).all()` **无 owner / 无 visibility 过滤** —— 这是该文件第 **7** 处同形查询（实测 `:34, 91, 110, 143, 172, 208, 279`，本次新增 `:110`）。入口只做了 `_filter_owner(Domain)`（`:105-108`），因此**任何域 owner 都能读出域内他人 Agent 的 capability 集合**。而 `models/agent.py:33` `visibility` 默认 `"private"` 在**整个 backend 从未被用于任何查询条件**（全仓 grep：仅 `to_dict()` 输出 + `domain_api.py:248` 模板复制）。
-**Source**：Fowler · *Refactoring* ·「Divergent Change / 同一不变量散落在多处」；Martin · *Clean Architecture* · 边界处强制策略。项目侧对应 `CLAUDE.md`：「同一不变量应在两处独立校验（入口 + 中间件），不要假设前一处覆盖了所有入口」。
-**Consequence**：泄露面随域数线性增长（每新增一个端点就复制一次这条查询）。capability 列表虽非密钥，但足以刻画他人 Agent 的能力画像 + 证明其存在，与 `visibility=private` 的产品承诺直接冲突。
-**Remedy**：把「域内可见 Agent」收成**一个**函数 `_visible_agents(db, user, domain_id)`（admin 全量 / 非 admin 取 `owner_id == user["id"] or visibility != 'private'`），7 处调用点全部替换；`visibility` 要么落实执行要么从模型删除并改文档。**这是跨端点的统一修复，宜开新 CHANGE**（本 change 只承担 `:110` 一处 + 登记议题）。
-**生成 fix 任务**：T-FIX-04（本 change 面内）+ 全量替换登记为议题（R18.4）
+**Symptom**：`domain_api.py:110` `db.query(Agent).filter(Agent.domain_id == domain_id).all()` **无 owner / 无 visibility 过滤**，是该文件第 **7** 处同形查询（实测 `:34, 91, 110, 143, 172, 208, 279`，本 change 新增 `:110`）。入口只做了 `_filter_owner(Domain)`（`:105-108`）—— 即代码在此把「域成员」当成了「可支配」。
+**Source**：Fowler · *Refactoring* ·「Divergent Change / 同一不变量散落在多处」；Martin · *Clean Architecture* · 边界处强制策略。项目侧对应 `CLAUDE.md`：「同一不变量应在两处独立校验（入口 + 中间件）」+「`Domain` 不是安全边界」（**后者不能豁免本条**：恰恰是 `:202`/`:105` 把 Domain 当成了鉴权前提）。
+**Consequence（v2 改正：必须按 sink 分，不能按站点分）**：同一句查询的 7 个调用点，**后果量级不同**，v1 把它们并成一谈是判级错误 ——
+
+| sink 类型 | 调用点 | 后果 | 处置 |
+|---|---|---|---|
+| 返回 capability 字符串 | `:110`（本 change 新增） | 他人 Agent 的能力画像 + 存在性 | 🔴 本 change 内修（T-FIX-04） |
+| **新建 Agent 行并复制凭据字段** | **`:208 → :231 → :243`** | **他人 LLM 凭据被搬运 + 他人 token 配额被消耗** | **🔴 独立成条 = F16，见 §2.4；不得缓办、不得只进 ROADMAP** |
+| 计数 / 释放域绑定 / 排队统计 | `:34`(`agent_count`)、`:91`、`:143`、`:172`、`:279` | 存在性枚举 / 计数旁路 | 🔴→ 另开 CHANGE 统一收口（议题） |
+
+另：`models/agent.py:33` `visibility` 默认 `"private"` 在**整个 backend 从未被用于任何查询条件**（全仓 grep：仅 `to_dict()` 输出 + `domain_api.py:248` 模板复制）→ 该字段目前是装饰性的，与产品承诺冲突。
+**不变量矛盾（本次实测指出）**：`:202` 按「你是不是域 owner」鉴权、`:208` 按「域内即全量」取数、`agents_api.py:26` 又按 owner 过滤 —— **三处对「域 owner 对域内 Agent 有什么权」给了两个答案**。必须二选一并写进文档：要么「域成员＝管理权」（则删 owner 过滤并改产品口径），要么「域内每个 Agent 读写都按 owner 收口」（则 7 处全改）。现状是最坏的一种：两边都以为对方兜了底。
+**Remedy**：按上表分档处理；统一收口函数 `_visible_agents(db, user, domain_id)`（admin 全量 / 非 admin 取 `owner_id == user["id"] or visibility != 'private'`）。**`visibility` 的落实与 6 处旧查询属跨端点修复 → 另开 CHANGE（R3.2/R7.1），但 `:208` 这条不在可另开的集合里（F16 与本条同文件同函数，见 §2.4）。**
+**生成 fix 任务**：T-FIX-04（`:110`）· T-FIX-13（`:208` 链）· 其余 6 处 + `visibility` 落实 → 议题（R18.4）
 
 ### 🟡 R4 · Accidental Complexity：用字符串模式匹配冒充集合语义
 
@@ -180,6 +202,73 @@ graph LR
 
 **循环依赖**：无（`grep "^from routes|from main import"` 在非 routes 层 0 命中；`main.py` 为组装根）。
 **反向依赖**：无（routes→services→models 单向）。**唯一反向风险 = 业务逻辑住在 routes 层**（R5 发现），已出 fix。
+
+### 2.4 安全审查节（v2 补 · G4 安全审计师 ❌ 的直接后果）
+
+> kit-6-review 的三轮里没有独立安全节，但 2.0/2.1 把「安全」轮次推给 `TEST.md` —— 而本 change 的 `TEST.md` 不存在，所以**这条 🔴 与安全零证据同源**（同一条门禁红，不重复计两条）。本节按 G4 要求逐项标注 OWASP，**不适用的也写理由**。
+
+#### F16 · 🔴 Critical（A01 越权 → **凭据搬运**）`POST /api/domains/{id}/scale`
+
+主审独立复现（**in-process 直调端点函数**，内存 SQLite，未起 HTTP 服务）：
+
+```
+构造：Domain#1 owner=mallory（攻击者是域 owner）
+      Agent#10 owner=alice,  domain_id=1, capabilities=["code-review"],
+                api_key_encrypted="ENC::alice-super-secret-llm-key"     ← 受害者凭据
+      Agent#11 owner=mallory, domain_id=1, capabilities=["python"]      ← 攻击者自己的 Agent（不含该 capability）
+调用：scale_agents(domain_id=1, {"capability":"code-review","desired_replicas":2}, user=mallory)
+结果：HTTP 返回 {'status': 'scaled'}
+      新副本 id=12 name='alice-coder-replica-1' owner_id='mallory'
+        api_key_encrypted == 受害者的密文 ? True          ← 逐字节相等
+        model_config_json={'capabilities': ['code-review']}  visibility='private'
+      攻击者 owner 过滤后能看到(即可 /run): [11, 12]      ← 副本归他所有，跑得动
+      受害者 owner 过滤后能看到:            [10]
+```
+
+**链（每一跳都有行号，均已读过原文）**：
+
+| 跳 | 位置 | 事实 |
+|---|---|---|
+| 1 | `domain_api.py:202` | 只鉴权「你是不是这个域的 owner」（`_filter_owner(Domain)`） |
+| 2 | `domain_api.py:208` | `db.query(Agent).filter(Agent.domain_id == domain_id).all()` **不带 owner / 不带 visibility** →「域成员」被当成「可支配」 |
+| 3 | `domain_api.py:212-215` | 按 capability 命中，`matching` 可包含**他人**的 Agent |
+| 4 | `domain_api.py:231` | `template = matching[0]` → 模板可以是别人的 Agent |
+| 5 | `domain_api.py:236,243` | `owner_id=user["id"]`（新副本归请求者）＋ **`api_key_encrypted=template.api_key_encrypted`**（装着别人的 LLM Key），`model_config_json`/`workflow_id`/`*_limit` 一并外移 |
+| 6 | `agents_api.py` `api_run_agent` | 副本 `owner_id` 已是请求者 → **通过** `_filter_owner`，可正常执行 |
+| 7 | `services/chat_service.py:103` | `api_key = decrypt(agent.api_key_encrypted)` → 执行时解密取用，**用的是受害者的 Key** |
+
+**后果**：他人 LLM 凭据被盗用 + 他人 token 配额被消耗（`token_*_limit` 一并复制）+ 他人模型配置/工作流绑定外移。**不是**「证明其存在」——v1 就是这么轻描淡写的，判错。
+
+**前置条件不是构造出来的**（这点决定严重度）：`agents_api.py:54`（创建）与 `:84-87`（`api_update_agent` 的 `setattr` 白名单含 `domain_id`）**接受任意 `domain_id`，既不校验存在也不校验归属** → 「团队域里装着非域 owner 的 Agent」是**当前代码的正常用法**，攻击者只需建一个域并等别人的 Agent 落进来（或反向：把自己的塞进别人的域再扩容，语义同样坏）。
+
+**修复判据（T-FIX-13 的 verify）**：非 Agent owner 的域 owner，**无法 mint 出携带他人 `api_key_encrypted` 的副本**。
+
+#### OWASP Top 10 逐项（本次审查面）
+
+| # | 类别 | 判定 | 依据 |
+|---|---|---|---|
+| A01 | 失效的访问控制 | 🔴 **命中** | F16（`:208→:243`）+ `:110` 缺 owner 过滤 + `visibility` 全后端未执行 + 三处不变量互相矛盾 |
+| A02 | 加密机制失效 | 🟡 不在本面，但相邻 | 口令为无盐 `hashlib.sha256`、默认口令 `123456` 硬编码（`CLAUDE.md` 已记为待修，属项目级议题）；**`api_key_encrypted` 走 `encryption_service` 是真加密** → F16 的可怕之处正在于"密文被合法搬走且运行时会解密" |
+| A03 | 注入 | ✅ **不成立（v1 未误报，v2 明确背书）** | F2 的 `contains()` 走绑定参数；实测 `?capability=' OR '1'='1` 与 `?capability=--` 均**返回 0 行、不报错** → SQL 结构未被改写。它是**语义绕过 + 领域扭曲**，不挂安全名头。另 `:26` 的 `_filter_owner` 跑在 `:37` 之前 → `?capability=%` 只能枚举**调用者自己**的 Agent，A01 维度亦干净 |
+| A04 | 不安全设计 | 🟡 命中（设计层） | 「Domain 是分组还是权限边界」无人拍板（见 R2 节末不变量矛盾）→ 同类洞会在每个新端点复现 |
+| A05 | 安全错误配置 | 🟡 项目级 | `main.py:196-199` localhost-only 判定在反向代理后失效（`request.client.host`）；`CLAUDE.md` 已记 |
+| A06 | 易受攻击与过时组件 | ➖ **本 change 不适用** | 本次 commit 不含依赖变更（`git show --stat 97044bd0 ad350689` → 仅 3 个文档文件，0 个 `requirements` 行）。存量问题另计（见下「依赖扫描」） |
+| A07 | 身份认证失效 | 🔴 **项目级命中，本面相邻** | `main.py:204` 从 `X-User-Id` 取身份、`:210` **不传即 `get_user("admin")`**；`auth.py:180-185` `get_current_user` 缺 state 时同样回退 admin，唯一缓解是 `main.py:196-199` 的 localhost 判定。**直接影响本轮所有行过滤修复的可验性**（见下方前提声明） |
+| A08 | 软件与数据完整性失效 | ➖ 不适用 | 本面无反序列化、无插件/模板加载、无 CI 供应链变更 |
+| A09 | 日志与监控失效 | 🟡 命中 | `log_audit` 确实记了 `domain.scale`（`:245+`），但**记不了"模板是别人的"**：审计字段无 `template_owner`。F16 发生时，审计日志看起来完全正常 |
+| A10 | 服务端请求伪造 | ➖ 不适用 | 本面无出站 URL 取参（`control_plane_api` 的 `_resolve_health_url` 属别的 change，未审） |
+
+#### 本轮新做的扫描（此前既没做也没列进盲区）
+
+| 扫描 | 结果 | 口径 |
+|---|---|---|
+| 审查面秘钥/凭据模式 | **1 命中，判为非凭据**：`agents_api.py:45` `api_key = payload.get("api_key","") or "not_set"` 是缺失时的**占位默认值**，不是密钥字面量；4 个审查文件内无真实 key/token/AKIA 字面量 | 主审 grep 补做（`-Ei "(api_key\|secret\|token\|passw\|sk-\|AKIA)…[:=]…"`）。⚠️ 顺带一条 🟢：这行把「未提供 api_key」静默吞成 `"not_set"` 再 `encrypt()`，而不是 400 —— 与 F16 无涉，但会让"凭据缺失"在运行期才炸 |
+| 依赖 CVE | **本轮未跑工具**（无 `pip-audit`/`safety` 可用；联网扫描不属本 run 交付）→ 记盲区 | 存量事实：`backend/requirements.txt` 13 条**全是 `>=` 区间、无任何锁文件**（`poetry.lock`/`uv.lock`/`requirements.lock` 均不存在）→ 构建不可复现，属项目级议题，**不是本门的红** |
+| OWASP 逐项 | 已做（上表） | v1 全仓 grep `OWASP` 在本文件 0 命中 → 本轮补齐 |
+
+#### 前提声明：本轮所有「行过滤」类修复都建在可伪造的身份上
+
+`T-FIX-04` / `T-FIX-13` 的 owner/visibility 收口，前提是 `request.state.user` 可信 —— 而 A07 说明它**不可信**（无 `X-User-Id` 即 admin）。因此两条任务的 verify **一律不得写「越权已修复」**，只能写「**入口层已加行过滤，身份层仍待修**」（`CLAUDE.md`：同一不变量应在两处独立校验）。身份层 fail-open 不在本 change 面、已登记为项目级待修，**本处不另判一条红**，只防止它被当成已修。
 
 ---
 
@@ -260,12 +349,15 @@ graph LR
 
 ## 严重发现汇总
 
+> **v2 合计 16 项：8 🔴 / 5 🟡 / 3 🟢**（v1 为 15 项 7🔴；新增 F16）。
+
 | # | 严重度 | 类别 | 描述 | 位置 | fix 任务 |
 |---|---|---|---|---|---|
 | F1 | 🔴 Critical | 测试门禁 | `TEST.md` 与 CHANGE.md 自declared 的 `test_backend.py` 均不存在，5 轮金字塔全部未声明；FR1-FR5 零自动化覆盖 | `.specs/capability-groups/` | T-FIX-00 |
 | F2 | 🔴 Critical | Spec 合规 / R6 | 「Agent 有 capability」两套矛盾真相：API 用 JSON 文本 LIKE，UI/路由用数组成员；跨 key 假阳性 + `%`/`_` 通配符透传（实测复现） | `backend/routes/agents_api.py:25,36-38` | T-FIX-01 |
 | F3 | 🔴 Critical | R3 | 重写同文件已 import 的既有 helper（5 处重复表达同一决定） | `backend/routes/domain_api.py:110-118` vs `services/k8s_routing_service.py:20-29` | T-FIX-02 |
-| F4 | 🔴 Critical | 安全 / R2 | 新增第 7 处无 owner/visibility 过滤的域内 Agent 查询；`visibility="private"` 全后端从未被执行 | `backend/routes/domain_api.py:110`（同形 `:34,91,143,172,208,279`） | T-FIX-04 |
+| F4 | 🔴 Critical | 安全A01 / R2 | `:110` 无 owner/visibility 过滤的域内 Agent 查询（**v2 按 sink 降级重述**：本条 sink = capability 字符串；同族其余站点见 F16 与议题）；`visibility="private"` 全后端从未被执行 | `backend/routes/domain_api.py:110`（同形 `:34,91,143,172,279`） | T-FIX-04 |
+| **F16** | 🔴 **Critical** | **安全A01 → 凭据搬运** | 域 owner 可用 `POST /api/domains/{id}/scale` 以**他人 Agent 为模板** mint 归自己所有的副本，**逐字节复制 `api_key_encrypted`**（`:208→:231→:243`），副本过 owner 过滤可运行 → `chat_service.py:103 decrypt()` 取用受害者凭据。in-process 复现见 §2.4。**v1 把它并进 F4 的「7 处同形查询」是判级错误** | `domain_api.py:202,208,231,236,243` + `chat_service.py:103` | **T-FIX-13** |
 | F5 | 🔴 Critical | UI 3.1/3.2 | 纯白 `#fff` 硬编码（本 change 按钮 2 处） | `AgentControlPlane.tsx:457,473`（另 `:850,962,1012,1225` pre-existing） | T-FIX-07 |
 | F6 | 🔴 Critical | UI 3.1 | 硬编码字号/间距/圆角（根因：`tokens.css` 无字号与间距 scale token，仅 `--s1`/`--r-sm`） | `AgentControlPlane.tsx:401-441,459,475` | T-FIX-08 |
 | F7 | 🔴 Critical | UI 3.2 | 卡片嵌套卡片（域卡片 > 能力组卡片 > Agent 行，三层树三层卡） | `AgentControlPlane.tsx:585-605` + `:402-403` | T-FIX-09 |
@@ -283,6 +375,7 @@ graph LR
 - **看了**：FR1-FR5 / NFR1-NFR3 逐条；`agents_api.py`（1-70 行）、`domain_api.py`（1-150 + 7 处 Agent 查询清单）、`k8s_routing_service.py`（1-60）、`models/agent.py` 全文、`AgentControlPlane.tsx` 的 `:74,156,360-490,552-700,860-870,1137`、`stores/domains.ts`、`tokens.css` token 清单、`backend/tests/` 全目录 grep、`.specs/capability-groups/` 四份工件。
 - **实跑了**：`tsc --noEmit`（32 错误，本面 0）、SQLAlchemy 谓词编译（SQLite + MySQL 方言）、内存 SQLite 三条样本的 FR1 反例复现、`visibility` 与既有 helper 的全仓 grep。
 - **没看 / 判不了（盲区）**：① 运行时 UAT —— 未启动 uvicorn/vite，任何"界面看起来对不对"都没验；② 对比度未实测（无量具）；③ MySQL 部署路径未实测 → 待确认；④ 无 `UI-DESIGN.md` → 视觉北极星与美学一致性整节跳过（非通过）；⑤ 无 `TEST.md` → 5 轮金字塔只能判缺，不能判过；⑥ 未审 `agent-domains`/`knowledge-plus`/`multi-provider`/`small-model-decisions`（均不满足预检）；⑦ 无独立 diff，按 CHANGE「变更范围」表界定审查面，可能漏掉未列在该表却被顺带改动的文件；⑧ 「未与 pre-existing 代码划清归属」的行已逐条标注，但 79 天未更新的 `CONTEXT.md` 使部分「是不是本次引入」只能靠 grep 推断。
+- **v2 因安全节新增的盲区（别当通过）**：⑨ **依赖/CVE 扫描未跑工具**（环境无 `pip-audit`/`safety`，联网扫描不属本 run 交付）→ 仅登记存量事实：`requirements.txt` 13 条全 `>=` 区间、无锁文件；⑩ **F16 只做到 in-process 直调复现，未在跑起来的实例上打过 HTTP** → 跨进程/带真 `cryptography` 密钥的端到端链未验；⑪ **A07 身份伪造链的真实部署组合行为未实测** —— `X-User-Id` 伪造与 `main.py:196-199` localhost 判定在反向代理后的实际表现未验（未起服务），`CLAUDE.md` 已记此 fail-open；⑫ OWASP 逐项是**主审自标**，其 A01/A03 两条经安全审计师独立复核（A03 由对方跑 `' OR '1'='1` 与 `'--` 负例确认），其余 8 项**无第二人复核**。
 
 ---
 
@@ -294,13 +387,14 @@ graph LR
 | 2 | 无独立 diff，是否接受以 CHANGE.md「变更范围」表作为审查面口径？ | R2.7 要求「本次 diff」 |
 | 3 | `CapabilityGroupRow` 的路由/扩容按钮归属：本 change 剥离，还是承认为 control-plane 面（F15）？ | R7 范围控制 |
 | 4 | 4.2 需不需要真·跨模型二审（本环境仅做到 fresh-context 同模型二审）？ | kit 4.2「强烈建议」 |
-| 5 | F4 的全量替换涉及 7 个端点 + `visibility` 存废 → 是否开新 CHANGE（我倾向：本 change 只修 `:110`，其余进 ROADMAP 议题）？ | R3.2 / R7.1 |
+| 5 | **v2 已按 sink 重述，v1 的倾向作废。** 现拆成三档：`:110`（本 change 内修，T-FIX-04）✅ 无争议；`:208` 凭据链（F16/T-FIX-13）—— 安全审计师明确要求**不得缓办、不得只进 ROADMAP 议题**，主审独立复现后同意；但 `:208` 属**pre-existing 的 `/scale` 端点**、不在本 change「变更范围」内 → **唯一可处的两一个是「本 change 内修」还是「另开 CHANGE 优先修」，两个都不许"登记成议题以后再说"**（R2.5：🔴 不修就得人工签字「已知接受」，而凭据搬运这条主审不建议任何人签接受）。其余 5 处（`:34,91,143,172,279`）+ `visibility` 落实 + 三处不变量矛盾的方向选择 → 另开 CHANGE，同意。 | R2.5 / R3.2 / R7.1 |
 
 ---
 
 ## 修复任务（已追加至 `TASK.md`，编号延续）
 
-见 `.specs/capability-groups/TASK.md` 末尾「## 修复任务（6-review 产出）」段：**T-FIX-00 ~ T-FIX-12**，每条含 `verify` 命令。T-FIX-00（补 5-test）为**回退任务**：完成前本 change 不得重进 6-review。
+见 `.specs/capability-groups/TASK.md` 末尾「## 修复任务（6-review 产出）」段：**T-FIX-00 ~ T-FIX-13**，每条含 `verify` 命令。T-FIX-00（补 5-test）为**回退任务**：完成前本 change 不得重进 6-review。
+**v2 变更**：`T-FIX-04` 只管 `:110` 并把 verify 措辞改为「入口层已加行过滤，身份层仍待修」；新增 **`T-FIX-13`** 专办 F16 凭据链；`T-FIX-00` 增加「至少一条以**非 admin 身份**跑、断**跨 owner 负例**」硬要求，并禁止把 `_quick_test.py` 当回归基线。
 
 ---
 
@@ -310,8 +404,10 @@ graph LR
 - [x] 二轮 6 维输出含 4 要素 + 书本引用 + R1~R6 编号
 - [x] 第四轮按触发条件判完：4.1 未触发（已写明判据）· 4.2 触发已判定，**二审结果未回收 → 该节明示「待确认」，未冒充已跑**
 - [x] 每条发现都有严重度标签 + `file:line` + 依据
-- [x] 每个 Critical 都已生成 fix 任务
-- [x] 报告里没有自己悄悄改过的代码（R3.3 全程只读；实验均为 `-c` 内联、未写盘、未入仓库）
-- [ ] **🛡️ G4 门禁**：见 issue 回帖（本文件写完后在同一条评论召集 4 位专家投票）
+- [x] 每个 Critical 都已生成 fix 任务（8 🔴 → F1:`T-FIX-00` F2:`01` F3:`02` F4:`04` F5:`07` F6:`08` F7:`09` F16:`13`）
+- [x] 报告里没有自己悄悄改过的代码（R3.3 全程只读；实验均为 `python -` 内联 + 内存 SQLite，`log_audit` 打桩避免写 `backend/data/audit.jsonl`，未写盘、未入仓库）
+- [x] **v2 新增**：安全审查节（§2.4）齐 —— F16 单列 🔴 + OWASP 逐项（不适用者给理由）+ 依赖/秘钥扫描结果 + 身份层前提声明
+- [x] **v2 新增**：每个 🔴 的第二角色确认已记录（R9.2）—— F16 由安全审计师首指、主审独立复现确认；A03「不成立」由主审判、安全审计师跑负例背书。**其余 7 项 🔴 目前只有主审一人**，G4 其余三票须补这一层
+- [ ] **🛡️ G4 门禁**：**1/4 到票** —— 安全审计师 ❌（其 4 条通过条件已在本 v2 逐条落地：安全节 ✅ / T-FIX-13 拆分 ✅ / T-FIX-00 加硬要求 ✅ / 盲区补 3 条 ✅ → 等其改票）。资深测试工程师、架构师、领域专家 **3 票未到 → 按身份规约本 turn 不推进、不召集重投票**。收齐 4 票后按 R13.2 裁决
 
-**下一步**：G4 结果出来后 —— 若放行 → 回 `5-test` 执行 T-FIX-00；🔴 全部修复或取得人工「已知接受」签字后，方可重进 6-review → 7-integration。**当前不得进集成。**
+**下一步**：等 G4 余下 3 票。放行 → 回 `5-test` 执行 T-FIX-00；🔴 全部修复或取得人工「已知接受」签字后，方可重进 6-review → 7-integration。**当前不得进集成。**

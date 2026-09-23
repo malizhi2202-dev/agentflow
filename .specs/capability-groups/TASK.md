@@ -56,15 +56,17 @@
 
 ## 修复任务（6-review 产出 · 2026-09-23）
 
-> 来源：`@.specs/capability-groups/REVIEW.md`（F1-F15）。Reviewer 未改任何代码（R3.3）。
+> 来源：`@.specs/capability-groups/REVIEW.md`（F1-F16 · **v2**）。Reviewer 未改任何代码（R3.3）。
 > 执行回 `4-dev`；**T-FIX-00 是回退任务（5-test），完成前本 change 不得重进 6-review**。
 > 每条含 `verify`（R2.3）。`write_files` 之外的改动须先更新本 TASK 或开新 CHANGE（R7.1）。
+> **v2 变更（G4 安全审计师 ❌ 后）**：T-FIX-04 收窄到 `:110` 并改 verify 措辞；新增 **T-FIX-13** 专办 F16 凭据搬运链；T-FIX-00 加「非 admin 身份 + 跨 owner 负例」硬要求。
 
 ### T-FIX-00: 回 5-test — 补 `TEST.md`（5 轮金字塔）+ `test_backend.py` 🔴门禁
 - **read_files**: `.specs/capability-groups/REQUIREMENT.md`, `DESIGN.md`, `REVIEW.md`
-- **write_files**: `.specs/capability-groups/TEST.md`, `.specs/capability-groups/test_backend.py`
-- **action**: 从 FR1-FR5 / NFR1-NFR3 派生用例（R5.1，禁止从实现代码派生）；必须把 REVIEW.md 里已复现的三个 FR1 反例固化成回归（跨 key 假阳性、`_` 通配符、`%` 绕过）；声明 5 轮状态，跳过的轮次给理由（R5.4）；`_quick_test.py` 那种 print 式脚本不作数
-- **verify**: `cd backend && /home/malizhi/.venv/bin/python -m pytest tests/ -q -k capab` 通过，且 `.specs/capability-groups/TEST.md` 存在
+- **write_files**: `.specs/capability-groups/TEST.md`, `.specs/capability-groups/test_backend.py`, `.specs/capability-groups/_quick_test.py`（仅限加标注或改身份可注入）
+- **action**: 从 FR1-FR5 / NFR1-NFR3 派生用例（R5.1，禁止从实现代码派生）；必须把 REVIEW.md 里已复现的三个 FR1 反例固化成回归（跨 key 假阳性、`_` 通配符、`%` 绕过）；声明 5 轮状态，跳过的轮次给理由（R5.4）
+- **硬要求（v2 · G4 安全 ⑤）**: ① **至少一条用例以非 admin 身份跑**，并断**跨 owner 负例**（他人资源不可见、不可 mint）—— F16/T-FIX-13 的回归也落在这里；② 实测 `_quick_test.py`：**0 个 `assert`**、身份写死 `X-User-Id: admin`（`:6`）、末尾**无条件** `print("=== All backend tests passed! ===")`，唯一像检查的 Test 5 也只是打印。照这个姿势写的回归**结构性看不见越权** → 它要么改成身份可注入 + 真断言，要么在文件头显式标注「**非回归基线**」。禁止把它的输出当任何 verify 的通过证据
+- **verify**: `cd backend && /home/malizhi/.venv/bin/python -m pytest tests/ -q -k capab` 通过，且 `.specs/capability-groups/TEST.md` 存在；`grep -c assert .specs/capability-groups/_quick_test.py` 不为 0 **或** 该文件头已含「非回归基线」标注（二选一，不许既无断言又无标注）
 - 状态: [ ]
 
 ### T-FIX-01: FR1 单一真相 — 弃 JSON 文本 LIKE，改数组成员判定 🔴
@@ -88,11 +90,21 @@
 - **verify**: `cd frontend && grep -c "status === 'healthy'" src/pages/AgentControlPlane.tsx` 为 0；`./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | grep -c "error TS"` 仍为 32（不新增）
 - 状态: [ ]
 
-### T-FIX-04: `:110` 补 owner/visibility 过滤（安全 · F4）🔴
+### T-FIX-04: `:110` 补 owner/visibility 过滤（A01 · F4）🔴
 - **read_files**: `backend/routes/domain_api.py`, `backend/models/agent.py`, `CLAUDE.md`
 - **write_files**: `backend/routes/domain_api.py`, `.specs/capability-groups/test_backend.py`
-- **action**: 本 change 面内只修新增的第 7 处（`:110`）—— 域内 Agent 查询加 owner/visibility 条件。**其余 6 处（`:34,91,143,172,208,279`）与「`visibility` 是否全局执行」属跨端点统一修复，须按 REVIEW.md 待裁定项 5 由人拍板后开新 CHANGE，本任务内禁止顺手改**（R7.1）
-- **verify**: 新用例断言「非域 owner 且非 admin 的用户不能从 `GET /api/domains/{id}/capabilities` 读到他人 private Agent 的 capability」；`python -m pytest tests/ -q`
+- **action**: **只修本 change 新增的那一处 `:110`** —— 域内 Agent 查询加 owner/visibility 收口。**sink 分类见 REVIEW.md §2.4**：`:208` 已独立成 F16/T-FIX-13（不许混进本任务）；其余 4 处（`:34,91,143,172,279`）+ `visibility` 全局落实 + 三处不变量矛盾的方向选择 → 另开 CHANGE，本任务内禁止顺手改（R7.1）
+- **v1 verify 的判弱已订正**：原文写「非域 owner 且非 admin 的用户读不到」—— 但漏洞主体恰是**域 owner 越权读域内他人 Agent**，那条断言根本挡不住。按下面重述
+- **verify**: 新用例断言「**即使调用者是域 owner**，也**不能**从 `GET /api/domains/{id}/capabilities` 得到域内**他人** Agent 的 capability」；且**必须**以非 admin 身份跑（配合 T-FIX-00 硬要求）。verify 结论文案只能写「**入口层已加行过滤，身份层仍待修**」——**禁止写「越权已修复」**：`main.py:204` 从 `X-User-Id` 取身份、`:210` 不传即 admin（`auth.py:180-185` 同），唯一缓解 `main.py:196-199` 的 localhost 判定在反代后失效（`CLAUDE.md` 已记此 fail-open，不属本 change 面、已登记为项目级待修）
+- 状态: [ ]
+
+### T-FIX-13: 堵 F16 凭据搬运链（`/scale` 以他人 Agent 为模板 mint 副本）🔴 · **v2 新增**
+- **read_files**: `backend/routes/domain_api.py`, `backend/services/chat_service.py`, `backend/models/agent.py`, `backend/routes/agents_api.py`
+- **write_files**: `backend/routes/domain_api.py`, `backend/services/domain_scale_service.py`(新建), `.specs/capability-groups/test_backend.py`
+- **action**: `domain_api.py:208` 的模板候选集按 owner/visibility 收口（**只有调用者可支配的 Agent 能当模板**）；`:243` 的 `api_key_encrypted=template.api_key_encrypted` **默认不再复制凭据** —— 副本要么要求调用者自备 key，要么走显式的「共享凭据」授权路径并落审计（选型属产品决定，见下）。附带两个必修小项：① `:231 template = matching[0]` 的"取第一个"是不确定选择（无排序），须确定化；② `agents_api.py:54` / `:84-87` 接受**任意 `domain_id`**、不校验存在与归属 —— 这是本链的前置条件，至少要在校验层拒绝把 Agent 放进不属于你的域（R6.5 边界：本条已列入本任务 write_files 的相邻影响，若需改 `agents_api.py` 请先更新本 TASK）
+- **审计可验性（A09）**: `:255` 的 `log_audit("domain.scale", …)` 现在只记 `"scaled N→M (+K)"`，**F16 发生时日志完全正常** → detail 须带上 `template_id` 与 `template_owner`
+- **verify**: 回归断言「**非 Agent owner 的域 owner，无法 mint 出携带他人 `api_key_encrypted` 的副本**」—— 可直接照 REVIEW.md §2.4 那段 in-process 复现的构造写成测试（受害者 Agent 在攻击者的域内 + 同 capability，断言新副本的 `api_key_encrypted` **不等于**受害者密文，或直接 403/400）。结论文案同样**不得**写「越权已修复」（身份层未修，见 T-FIX-04）
+- **不得缓办条款**: 本条**不许**降级为 ROADMAP 议题（R2.5）。若人工判定它超出本 change 范围，唯一合法出路是**另开 CHANGE 优先修**，或在 REVIEW.md「待人工裁定」上留下**人对"已知接受"的原话签字**；两者都没有时本 change 停在 6-review
 - 状态: [ ]
 
 ### T-FIX-05: 拆 `CapabilityGroupRow`（R1 · F11）🟡
@@ -102,7 +114,7 @@
 - **verify**: `cd frontend && ./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | grep -c "AgentControlPlane\|CapabilityGroup"` 为 0；`wc -l < src/pages/AgentControlPlane.tsx` 较 1428 下降
 - 状态: [ ]
 
-### T-FIX-06: 键盘可达 + 对比度实测（UI 3.4 · F9）🔴
+### T-FIX-06: 键盘可达 + 对比度实测（UI 3.4 · F9）🟡
 - **read_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/styles/tokens.css`
 - **write_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/styles/tokens.css`
 - **action**: 能力组头 `<div onClick>`（`:411-413`）改 `<button>`（或 `role="button" tabIndex={0}` + Enter/Space `onKeyDown`），补 `aria-expanded` / `aria-controls`；确认 `prefers-reduced-motion` 有降级；用工具（非肉眼）实测 `#fff` on `var(--blue)` 与 `fontSize: 10` 的 WCAG 2.1 AA 对比度并记入 TEST.md 第 4 轮
@@ -147,6 +159,7 @@
 ### T-FIX-12: 登记议题（不入本 change）🟢
 - **read_files**: `.specs/CONTEXT.md`, `frontend/src/styles/tokens.css`, `STATE.md`
 - **write_files**: `STATE.md`, `.specs/platform-evolution/TOPICS.md`
-- **action**: 按 R18.4 登记三条 —— ① `tokens.css:43` `--font` 含 **Roboto**（字体类强制禁忌，全局既有、非本 change）；② `visibility="private"` 全后端从未被执行（跨 7 端点 + 模型字段存废）；③ `CONTEXT.md` 已 **79 天**未更新、无「技术债」段、§3 规模表与现实偏离（实测 117 py / 100 ts·tsx vs 记录 112 / 96）→ 可重跑 intel-scan
-- **verify**: 三条在 `STATE.md` 或 `TOPICS.md` 可 grep 到
+- **action**: 按 R18.4 登记四条 —— ① `tokens.css:43` `--font` 含 **Roboto**（字体类强制禁忌，全局既有、非本 change）；② `visibility="private"` 全后端从未被执行（跨端点 + 模型字段存废，与 T-FIX-04/13 同源的统一收口）；③ `CONTEXT.md` 已 **79 天**未更新、无「技术债」段、§3 规模表与现实偏离（实测 117 py / 100 ts·tsx vs 记录 112 / 96）→ 可重跑 intel-scan；④ **依赖不可复现构建**：`backend/requirements.txt` 13 条**全为 `>=` 区间、仓内无任何锁文件**（`poetry.lock`/`uv.lock`/`requirements.lock` 实测均不存在）→ CVE 扫描无法固化基线（本条为存量，**不是 capability-groups 的红**）
+  > 交叉引用不另立项：`X-User-Id` 身份 fail-open 已在 `CLAUDE.md` 待修清单内（A07），只点名不重复登记（R18.4 禁同义概念）
+- **verify**: 四条在 `STATE.md` 或 `TOPICS.md` 可 grep 到
 - 状态: [ ]

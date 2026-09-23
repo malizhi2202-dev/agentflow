@@ -7,12 +7,13 @@
 
 | 字段 | 值 |
 |---|---|
-| 当前阶段 | **6-review**（change `capability-groups`）· 门禁 **G4 召集投票中**，未集齐 4 票不推进 |
-| 当前 task | 无（Reviewer 只出报告与 fix 任务，R3.3）· 待执行队列：`T-FIX-00`（回 5-test）→ `T-FIX-01/02/04/06/07/08/09`（🔴） |
-| 中断任务 | 无写操作中断。`REVIEW.md` + `TASK.md` 修复段已落盘；等 G4 回帖后由本阶段汇总裁决 |
-| 产物 | `.specs/capability-groups/REVIEW.md`（15 项发现：7🔴 / 5🟡 / 3🟢）· `.specs/capability-groups/TASK.md` §「修复任务」T-FIX-00~12 |
+| 当前阶段 | **6-review**（change `capability-groups`）· 门禁 **G4 收票 1/4**（安全审计师 ❌ → 已按其 4 条通过条件出 **REVIEW.md v2**，待其改票；余 3 票未到 → **不推进**） |
+| 当前 task | 无（Reviewer 只出报告与 fix 任务，R3.3）· 待执行队列：`T-FIX-00`（回 5-test）→ 🔴 `T-FIX-01/02/04/07/08/09/13` |
+| 中断任务 | 无写操作中断。`REVIEW.md`(v2) + `TASK.md` 修复段已落盘；G4 收齐 4 票后按 R13.2 裁决 |
+| 产物 | `.specs/capability-groups/REVIEW.md` **v2**（16 项：**8🔴** / 5🟡 / 3🟢，含 §2.4 安全审查节 + 修订记录）· `.specs/capability-groups/TASK.md` §「修复任务」T-FIX-00~13 |
+| v2 起因 | G4 安全审计师指出 F4 **按站点记数、应按 sink 分类** → 暴露 **F16**：`POST /api/domains/{id}/scale` 允许域 owner 以**他人 Agent 为模板** mint 归自己所有的副本，并**逐字节复制 `api_key_encrypted`**（`domain_api.py:208→:231→:243` → `chat_service.py:103` 解密取用）。主审 **in-process 复现确认**（非采信而来）。v1 那句「capability 列表虽非密钥」把最重的一跳盖过 = **判级错误，已认并改** |
 | 出口条件 | G4 ≥3/4 放行 → 回 `5-test` 跑 T-FIX-00；🔴 全部修复或取得人工「已知接受」签字（R2.5）后才可重进 6-review。**当前禁止进 7-integration** |
-| 待人工裁定 | REVIEW.md 末尾「待人工裁定」5 条（UI 🔴 归属、无独立 diff 的审查口径、路由/扩容按钮归属、真跨模型二审、`visibility` 全量修复是否另开 CHANGE） |
+| 待人工裁定 | REVIEW.md「待人工裁定」5 条。**第 5 条已按 sink 重述**：`:208` 凭据链**不得缓办、不得只进 ROADMAP 议题**，只能在「本 change 内修」与「另开 CHANGE 优先修」之间选 |
 
 > 全仓 6-review 预检结论：本仓库当前**无任何 change 具备进入 6-review 的完整前置**（`capability-groups`/`agent-domains` 缺 TEST.md，`small-model-decisions` 缺 DESIGN/TASK/TEST 且无代码，`knowledge-plus`/`multi-provider` 工件不全，`agent-control-plane` 已审 4/4 通过）。选 `capability-groups` 为目标：工件最全且代码已实现。
 
