@@ -60,7 +60,7 @@
 > 执行回 `4-dev`；**T-FIX-00 是回退任务（5-test），完成前本 change 不得重进 6-review**。
 > 每条含 `verify`（R2.3）。`write_files` 之外的改动须先更新本 TASK 或开新 CHANGE（R7.1）。
 > **v3 变更（G4 资深测试工程师 ❌ + 架构师 ✅带 6 条修订，逐条实测后接受）**：本段整体重写成**可交接**的。修的是八类：①`T-FIX-00` 落点与 verify 互斥（无 pytest 配置，`pytest tests/` 收不到 `.specs/`）→ 测试改落 `backend/tests/test_capability_groups.py`；②全量基线实测 **41 failed/134 passed/6 skipped** → 所有 verify 改**定向**，并写明为什么不跑全量（防 R5.3 削弱断言 / R7.1 顺手修绿）；③`capability_service.py` 由 01、02 共同「新建」→ R7.3 冲突，改由 **02 建立、01 消费**并给出顺序；④F6 根因**我写错了**（间距/圆角 token 存在且被 0 使用，非"不存在"）；⑤verify 里所有 `≥1`/`较 X 下降`/`不再…` 非二值判据 → 换成 awk 区间 + 等值判定；⑥用例补正向锚点与边界（含 `?capability=` 空串语义二选一、`" code-review "` 归一化、`domain_id`/`status` 组合），FR3-FR5 依赖 T-FIX-05 抽纯 selector 才有 unit 落点 → 排到 T-FIX-00 之前；⑦安全类修复须**先**让身份层 fail-closed，否则 admin 旁路在默认路径上是空操作（架构师 ④ 时序陷阱）；⑧T-FIX-13 的拒绝状态码按 `CLAUDE.md` 约定改 **404**（v2 写 403 违反项目约定），并撤回 v2 顺手新建的 `domain_scale_service.py`。
-
+> **v4 变更（G4 领域专家 ❌，第 4 票）**：**`T-FIX-03` 整条重写** —— v3 版是**破坏性任务**（会把现在正确的 `:156-1137` 改成恒假，且它的 verify 会被这次改坏所满足 → 假绿），v4 标为「禁止按 v3 执行」并改为「喂数据看行为」；`T-FIX-01/02` 纳入**前端第三套真相**（F18）；`T-FIX-12` 追加 4 条议题（术语表缺口 / `dead` 告警永不触发 / `AgentProbePanel` 5 处幽灵字段 / services↔engine 定序）。F19/F20/F15 属**需求侧**，只登记为待人工裁定第 6/7/8 条，**不进任何 T-FIX**（R3.2）。
 ### T-FIX-00: 回 5-test — 补 `TEST.md`（5 轮金字塔）+ capability 回归 🔴门禁
 > **v3 重写**：v2 版**不可交接**（G4 资深测试工程师 ❌①②③ + 架构师 ④⑤ 共同判定，主审逐条实测后接受）。三处硬伤：`write_files` 与 `verify` 互斥、指向的测试口径抓不住本 bug、用例全是反向断言缺正向锚点。
 
@@ -87,7 +87,7 @@
 ### T-FIX-01: FR1 单一真相 — 弃 JSON 文本 LIKE，改数组成员判定 🔴
 - **read_files**: `backend/routes/agents_api.py`, `backend/services/capability_service.py`, `.specs/capability-groups/DESIGN.md`
 - **write_files**: `backend/routes/agents_api.py`, `backend/tests/test_capability_groups.py`
-- **action**: `agents_api.py:36-38` 的 `contains(f'"{capability}"')` 换成 `capability in capabilities_of(a)`（**消费 T-FIX-02 的产物，本任务不建 `capability_service.py`** —— v2 让 01/02 都「新建」同一文件，R7.3 交付物定义自相矛盾，v3 由架构师 ③ 纠正）；删除手写双引号拼接；归一化（trim + 空白折叠）落在 `capabilities_of` 里，本任务只调；若因数据量须走 `JSON_CONTAINS`，先把 MySQL/SQLite 双方言结论写进 DESIGN 再实现（G4 架构师 ⑥：MySQL 上 JSON→text 隐式渲染，序列化是否带空格随版本变 → **不只是语义错，还不可移植**）
+- **action**: `agents_api.py:36-38` 的 `contains(f'"{capability}"')` 换成 `capability in capabilities_of(a)`（**消费 T-FIX-02 的产物，本任务不建 `capability_service.py`** —— v2 让 01/02 都「新建」同一文件，R7.3 交付物定义自相矛盾，v3 由架构师 ③ 纠正）；删除手写双引号拼接；归一化（trim + 空白折叠）落在 `capabilities_of` 里，本任务只调；**（v4 · F18）同一条具名规则必须覆盖前端**：`AgentControlPlane.tsx:588-592` 取 `cfg.capabilities` 后不过滤空串/空白/非字符串，是**第三套真相**（`capabilities:[""]` 会自成一个空名分组，而后端算「无能力」归未分类）—— 只统一后端则「单一真相」名不副实；若因数据量须走 `JSON_CONTAINS`，先把 MySQL/SQLite 双方言结论写进 DESIGN 再实现（G4 架构师 ⑥：MySQL 上 JSON→text 隐式渲染，序列化是否带空格随版本变 → **不只是语义错，还不可移植**）
 - **顺序（R7.3）**：`T-FIX-00`（RED 钉住现状）→ `T-FIX-02`（建唯一入口）→ 本任务；**本任务完成即 FR1 行为变更点**，F12（`:110` 越权读）必须与它同批或在其后立刻做，否则 `list_domain_capabilities` 继续读未收口的行
 - **verify（二值）**: `cd backend && /home/malizhi/.venv/bin/python -m pytest tests/test_capability_groups.py -q` **定向通过**（不写裸 `pytest tests/ -q`，全量基线红 41 个），且 T-FIX-00 列的 FR1 ≥8 条（含正向锚点 + 空串语义 + 空格归一化 + `domain_id`/`status` 组合）全部在内
 - 状态: [ ]
@@ -95,16 +95,22 @@
 ### T-FIX-02: 复用既有抽象 + 业务逻辑下沉 services（R3/R5）🔴
 - **read_files**: `backend/routes/domain_api.py`, `backend/services/k8s_routing_service.py`, `backend/routes/gateway_api.py`, `backend/routes/agents_api.py`, `backend/routes/agent_knowledge_api.py`
 - **write_files**: `backend/services/capability_service.py`(新建，**本任务是它的唯一建立者**), `backend/services/k8s_routing_service.py`, `backend/routes/domain_api.py`, `backend/routes/gateway_api.py`, `backend/tests/test_capability_groups.py`
-- **action**: 新建 `services/capability_service.py` 作为 capability 派生的**唯一入口**，签名必须带归一化契约（G4 架构师 ②：现有 `_extract_capabilities` 只做「是 str 且 strip 非空」，**不 trim 值本身** → 实测 `['code-review',' code-review ']` 去重得 2 组，同一套真相自己裂开）：`capabilities_of(agent) -> list[str]`（`c.strip()`，并折叠连续空白 + `casefold()` 折不折叠由产品拍，先按不折叠、写进 docstring）+ `distinct_capabilities(agents) -> list[str]`。**消灭 7 处后端副本**（v3 订正：v2 写「5 处」是**我的 grep 模式漏了** `'cfg.get("capabilities"'`，漏掉 `(x.model_config_json or {}).get(...)` 两处；`get("capabilities"` 实测 7 处）：`agent_knowledge_api.py:714`、`agents_api.py:133`、`domain_api.py:114`（本次新增的内联副本）、**`k8s_routing_service.py` 自己文件内的 `:26 / :39 / :108`**、`gateway_api.py:85`。⚠️ **别只删 `domain_api.py:114` 就宣布完成** —— 「规范实现」`:39`/`:108` 就是它自己的字面副本，那个 helper 在自己文件里都没被贯彻，它只是最不坏的一处
+- **action**: 新建 `services/capability_service.py` 作为 capability 派生的**唯一入口**，签名必须带归一化契约（G4 架构师 ②：现有 `_extract_capabilities` 只做「是 str 且 strip 非空」，**不 trim 值本身** → 实测 `['code-review',' code-review ']` 去重得 2 组，同一套真相自己裂开）：`capabilities_of(agent) -> list[str]`（`c.strip()`，并折叠连续空白 + `casefold()` 折不折叠由产品拍，先按不折叠、写进 docstring）+ `distinct_capabilities(agents) -> list[str]`。**消灭 7 处后端副本 + 前端 1 处第三套真相（v4 · F18：`AgentControlPlane.tsx:588-592` 的分组谓词，须走同一条具名归一规则，不得各自实现）**（v3 订正：v2 写「5 处」是**我的 grep 模式漏了** `'cfg.get("capabilities"'`，漏掉 `(x.model_config_json or {}).get(...)` 两处；`get("capabilities"` 实测 7 处）：`agent_knowledge_api.py:714`、`agents_api.py:133`、`domain_api.py:114`（本次新增的内联副本）、**`k8s_routing_service.py` 自己文件内的 `:26 / :39 / :108`**、`gateway_api.py:85`。⚠️ **别只删 `domain_api.py:114` 就宣布完成** —— 「规范实现」`:39`/`:108` 就是它自己的字面副本，那个 helper 在自己文件里都没被贯彻，它只是最不坏的一处
 - **顺序（G4 架构师 ③）**：本任务**排在 T-FIX-00 之后**（RED 回归先钉住当前行为，再改导出）；`T-FIX-01` 只消费本任务产出的函数，**不建**这个文件
 - **verify（二值，G4 两条都提了）**: ① `cd backend && grep -rn 'get("capabilities"' --include='*.py' . | grep -v __pycache__ | grep -v capability_service.py | wc -l` **为 0**（旧模式 `cfg.get(` 前缀会漏 2 处，禁止使用）；② `cd backend && /home/malizhi/.venv/bin/python -m pytest tests/test_capability_groups.py -q` **定向通过**（⚠️ **不得写裸 `pytest tests/ -q`**：全量基线本就红的，见 T-FIX-00 的基线条）；③ 归一化断言入用例：`['code-review',' code-review ']` 经 `distinct_capabilities` 后为 **1 组**
 - 状态: [ ]
 
-### T-FIX-03: 健康口径统一（R3 附 · F10）🟡
-- **read_files**: `frontend/src/pages/AgentControlPlane.tsx`, `.specs/capability-groups/DESIGN.md`
-- **write_files**: `frontend/src/lib/agentHealth.ts`(新建), `frontend/src/pages/AgentControlPlane.tsx`
-- **action**: 抽 `isAgentHealthy(status)` 与 `probeHealthOf(probe)` 两个具名函数（DESIGN.md:97-104 为唯一口径源）；把 `:156-157` 与 `:1137` 的 `agent.status === 'healthy'`（恒假死分支 —— `healthy` 从不是 Agent.status 的取值）改为 `isAgentHealthy(agent.status)`
-- **verify**: `cd frontend && grep -c "status === 'healthy'" src/pages/AgentControlPlane.tsx` 为 0；`./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | grep -c "error TS"` 仍为 32（不新增）
+### T-FIX-03: 修契约缺口 + 两个状态词表各自具名（F10 · **v4 重写**）🔴
+> **⚠️ v3 版禁止执行**：它要求把 `:156-1137` 换成 `isAgentHealthy(agent.status)`。`isAgentHealthy` 是 `running|standby` 谓词（`:366-368`，生命周期口径），作用在探针词表（`healthy`/`unhealthy`/…）上**恒假** —— 照它做会把「徽标永远红」这个我声称已存在的 bug **真的做出来**；而 v3 的 verify（`grep -c "status === 'healthy'"` 为 0）**恰好被这次改坏所满足** → 假绿过关（R5.2：verify 必须能挡住它声称挡的事）。G4 领域专家首指，主审逐行复现后确认。
+
+- **read_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/stores/controlPlane.ts`, `backend/routes/control_plane_api.py`, `backend/services/agent_probe_service.py`, `.specs/capability-groups/DESIGN.md`
+- **write_files**: `frontend/src/lib/agentHealth.ts`(新建), `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/stores/controlPlane.ts`（+ 若走 (a)-后端方案则含 `backend/routes/control_plane_api.py`）
+- **action（四件事，逐条对应 F10 表）**：
+  - **(a) 补契约缺口**：`stores/controlPlane.ts:8,10` 声明的 `health` / `runtime` 后端从不发（`control_plane_api.py:75-85` 构造的 entry 键集实测无此两键）。二选一：后端 `list_probes` 补发 `health`+`runtime`，**或** 前端 `:74/:75` 改读 `status` 并用探针词表判 `unhealthy`。⚠️ **改公共 payload 前先 grep 全部引用点（R4.6）**：`AgentProbePanel.tsx:64,168,169,318,478` 共 5 处在读幽灵字段，`AgentControlPlane.tsx:531,1076,1129` 在渲染幽灵 `runtime`
+  - **(b) `:156-1137` 保持不动** —— 它们是当前唯一正确的健康判定（`status` 即探针判定，`:94-95` 赋的正是 `healthy`/`degraded`/…，且 `:160` 用配套的 `getHealthLabel`）
+  - **(c) 两个词表各自具名，不得共用「健康」一词**：`isAgentHealthy(Agent.status)`＝**生命周期**口径（能力组概要用它，DESIGN.md:97-104 是其规范源）；`isProbeHealthy(AgentStatus.status)`＝**探针判定**口径。并在 **DESIGN.md:97-104 补一句作用域声明**（它定义的是概要用的生命周期口径，**不覆盖探针判定**）—— 不写这句，下次还会有人拿它去判探针行（我就是上一个）
+  - **(d) 顺带修词表零交集的两处**：`getStatusConfig`(`:112` + `STATUS_CONFIG:22-27` 键集 `{running,idle,blocked,dead}`) 与 `STATUS_PRIORITY`(`:197` + `:15-20` 同键集) 作用在探针词表上**全部落 fallback / 全落 99** → 「运行状态」列吐英文、列表排序实际失效
+- **verify（喂数据看行为，禁止「grep 计数归零」式验法）**: ① 造一条 `status='healthy'` 的探针行 → 断言**该 Agent 行徽标为绿（`--green`）且顶部「健康」卡计数 > 0**；② 造一条 `status='unhealthy'` → 徽标红且计入「停止/异常」；③ `runtime` 非空的 Agent → 三处渲染出该值；④ `grep -c "isProbeHealthy\|isAgentHealthy" src/lib/agentHealth.ts` ≥ 2 且 `AgentControlPlane.tsx` 内不再有裸 `=== 'healthy'` 与 `=== 'dead'` 的**混用**（`status === 'dead'` 属可接受，前提是它读生命周期字段）；⑤ `tsc --noEmit` 的 `grep -c "error TS"` **等于 32**（不是 ≥32）
 - 状态: [ ]
 
 ### T-FIX-04: `:110` 补 owner/visibility 过滤（A01 · F4）🔴
@@ -184,5 +190,6 @@
 - **write_files**: `STATE.md`, `.specs/platform-evolution/TOPICS.md`
 - **action**: 按 R18.4 登记四条 —— ① `tokens.css:43` `--font` 含 **Roboto**（字体类强制禁忌，全局既有、非本 change）；② `visibility="private"` 全后端从未被执行（跨端点 + 模型字段存废，与 T-FIX-04/13 同源的统一收口）；③ `CONTEXT.md` 已 **79 天**未更新、无「技术债」段、§3 规模表与现实偏离（实测 117 py / 100 ts·tsx vs 记录 112 / 96）→ 可重跑 intel-scan；④ **依赖不可复现构建**：`backend/requirements.txt` 13 条**全为 `>=` 区间、仓内无任何锁文件**（`poetry.lock`/`uv.lock`/`requirements.lock` 实测均不存在）→ CVE 扫描无法固化基线（本条为存量，**不是 capability-groups 的红**）
   > 交叉引用不另立项：`X-User-Id` 身份 fail-open 已在 `CLAUDE.md` 待修清单内（A07），只点名不重复登记（R18.4 禁同义概念）
-- **verify**: 四条在 `STATE.md` 或 `TOPICS.md` 可 grep 到
+- **action · v4 追加四条（G4 领域专家）**：⑤ **术语表缺口是 F10 那类混用的土壤** —— 实测 `capability`/`能力组`/`健康概要`/`未分类`/`默认域` 在 `.specs/CONTEXT.md` 中 **0 命中**（`探针` 仅散文中出现 2 次、无定义条目），而本 change 的 DESIGN 首次把「健康」写成规范 → 把这 6 个术语写进 CONTEXT.md 域语言段，否则下一轮 review 还会在同一词表上判错行；⑥ `alert_service.py:141` 读 `status in ("dead","unhealthy")` 里的 **`dead` 全后端无写入点** → `agent_dead` 告警**永不触发**（与 F10 同根因的既有扩散面，本 change 面外）；⑦ `AgentProbePanel.tsx:64,168,169,318,478` 5 处读幽灵 `probe.health` 字段（T-FIX-03 修契约时须一并核，R4.6）；⑧ `services/scheduler_service.py:5` → `engine.scheduler` 与 `engine/reconcile_loop.py:57,:464` → `services.*` 构成 **services↔engine 层级双向**（无 import cycle），DESIGN.md:10 的依赖清单未给 `engine` 排位次 → 补 ADR/依赖清单定序
+- **verify**: 八条在 `STATE.md` 或 `TOPICS.md` 可 grep 到（⑤⑥⑦⑧ 为 v4 追加）
 - 状态: [ ]

@@ -4,7 +4,7 @@
 - **审查时间**: 2026-09-23 09:08 CST
 - **审查者**: AI（Reviewer 角色）· 4.2 二审已派出但本 turn 未回收 → 该节标「待确认」（详见 4.2）
 - **总体结论**: **阻塞（不通过）** —— 2.0 金字塔门禁 🔴（`TEST.md` 与 CHANGE.md 自declared 的 `test_backend.py` 均不存在）+ **8 项** 🔴 Critical（v1 为 7 项；本文件行头曾误记「5 项」，一并订正）。按 kit-6-review 步骤 2.0：**先回 5-test 补完**，Critical 未修或未获「已知接受」签字前禁止进 7-integration（R2.5）。
-- **版本**: **v3**（2026-09-23 09:5x 修订，见「修订记录」）· v1/v2 各有被判实的取证错误
+- **版本**: **v4**（2026-09-23 10:1x 修订，见「修订记录」）· **四版四票，每一版都被查出一处取证或判级错误**；v4 这处最重：方向反了，照它修还会造出新 bug
 
 ### 修订记录
 
@@ -13,6 +13,7 @@
 | v1 | 09:08 | 6-review 主审 | 首版：15 项发现（7🔴/5🟡/3🟢），commit `97044bd0` |
 | **v2** | 09:40 | **G4 安全审计师 ❌** | **F4 判错，已在四处改正**：① F4 原按「站点」记数（把 7 处同形查询当成一个可缓办的家族），改为**按 sink 分类**；② 新增 **F16 🔴 凭据搬运链**（`domain_api.py:208 → :231/:243 → chat_service.py:103`）—— v1 那句「capability 列表虽非密钥」恰好把最严重的一跳盖了过去；③ 补 **§2.4 安全审查节**（OWASP 逐项 + 身份层前提 + 依赖/秘钥扫描结果）与 3 条新盲区；④ 待人工裁定第 5 条按 sink 重述；⑤ `T-FIX-04` 拆出 `T-FIX-13`，两条 verify 改写为**不宣称「越权已修复」**，`T-FIX-00` 加「非 admin 身份 + 跨 owner 负例」硬要求 |
 | **v3** | 09:5x | **G4 资深测试工程师（Master）❌ + 架构师 ✅带 6 条修订** | 两处**是我的取证/根因错误**，不是判断分歧：① **F6 根因写错** —— 我上一轮那条 `grep … \| head -60` 被截断，据此断言「`tokens.css` 无间距/圆角 scale」；全量重列实测 `:47` 有 `--s1..--s10`、`:50` 有 `--r-sm/--r-md/--r-lg`，且 `AgentControlPlane.tsx` 用它们 **0 次** → 正解是「**有 token 不用**」（机械替换），**不该拿它去换人工「已知接受」签字**；同因把 `--text` 这个已存在的中性前景也判成缺失。② **F3 计数 5 处错**（我的 verify grep 模式 `cfg.get("capabilities"` 漏了 `(x.model_config_json or {}).get(...)` 两处、以及「规范实现」自己文件内两处内联）→ 实为**后端 7 处 + 前端 2 处**。③ `T-FIX-00/01/02/04` 的 verify 与 write_files **互斥**（仓内**无任何 pytest 配置**，`pytest tests/` 收不到 `.specs/`）+ **全量基线实测 41 failed/134 passed/6 skipped** → 全部改定向。④ 2.3「反向依赖：无」**说过头**：我只 grep 了 `from routes`/`from main`，漏了 `services↔engine`。⑤ F13 在 2.2 记 🟡、汇总表记 🟢（自相矛盾，按取严）。⑥ 新增 **F17 🟡 归一化缺失**。⑦ T-FIX-01/02 争建同一文件（R7.3）→ 02 建、01 消费。⑧ 非二值 verify 全部改写。详见 TASK.md 修复任务段 v3 |
+| **v4** | 10:1x | **G4 领域专家 ❌（第 4 票 → 4/4 收齐）** | **F10 取证方向反了 + `T-FIX-03` 是破坏性修复且其 verify 会假绿**（详见 F10 段更正声明）：真正恒假的是我打 ✅ 放过的 `:74-75`，被我判恒假的 `:156-1137` 反而是全文件唯一正确处。另按其实测补 **F18 前端第三套真相 / F19 默认域双指 / F20 `未分类` 占用命名空间**；**撤销 F15 的「范围蔓延」定性**，改记「路由/扩容缺需求溯源」（需求欠账，非实现越界）；F10 升 🔴；`'dead'` 告警永不触发、`AgentProbePanel.tsx` 5 处幽灵字段、`CONTEXT.md` 6 个术语零定义 → 进议题。四票齐，见末尾 G4 裁决 |
 
 > **R9.2 二次确认记录**：F16 由安全审计师首指（给出逐行链），主审**未直接采信，而是独立复现后确认** —— §2.4 的 in-process 复现含「新副本 `api_key_encrypted` 与受害者密文逐字节相等」断言。F16 = 双角色确认的 🔴。
 > **G4 提示**：v1 的投票基线已过时，**4 位投票人以 v2 为准**；若某票明确针对 v1，收票时按「对本文件投票」解释并在票面注明版本差异。
@@ -48,7 +49,7 @@
 | NFR2 向后兼容（现有端点/UI 不受影响） | ❌ **无证据** | 无 `TEST.md`、无 `test_backend.py`、`backend/tests/` 7 个文件**无一** grep 到 `capability`（实测）。回归完全未覆盖 |
 | NFR3 虚拟分组 · 不建新表 | ✅ | `backend/models/` 无新增；`domain_api.py:110` 只读 `Agent` |
 | 未引入 out-of-scope 内容 | ⚠️ 判不了 | `REQUIREMENT.md` **无 out-of-scope 段**（需求侧缺口，非实现问题）→ 记为 R18.4 议题 |
-| 未范围蔓延 | 🟡 | `CapabilityGroupRow` 额外承担**自动路由 / 扩容 / 排队 badge**（`:445-490` props `onRoute`/`onScale`/`queueCount`/`autoRouteEnabled`），FR4 只要求「组名、数量、健康概要、箭头」。该能力属 control-plane / k8s 面，与另一 change 的职责重叠（R7 边界疑点）→ 待人工裁定归属 |
+| 未范围蔓延 | ✅（v4 改判） | `CapabilityGroupRow` 承担自动路由/扩容/排队 badge（`:445-490`），FR4 只要求「组名、数量、健康概要、箭头」——但 v4 依领域专家证据**撤销越界定性**：路由/扩容规则本就是 capability 粒度且能力组行是唯一宿主，剥到域级反而失去可寻址处。真缺口是该业务规则**无需求溯源**（见 F15），属 R7「谁规定过」而非「按钮长在哪个组件里」，两件事已分开写 |
 | 未越过 DESIGN 边界 | ❌ | DESIGN.md:54-66 明写后端实现应为「**`JSON_CONTAINS` 或 Python 端过滤**」，两种都**没用**，改用第三种（JSON 文本 LIKE）→ 设计偏离，且是唯一导致 FR1 错误的决定 |
 
 **FR1 复现记录**（只读实验，未写盘；`cd backend && /home/malizhi/.venv/bin/python -c`，SQLAlchemy 2.0.54 + 内存 SQLite，3 条 Agent）：
@@ -179,13 +180,36 @@ if capability:
 **Remedy**：把 `CapabilityGroupRow` 拆为 `CapabilityGroupHeader`（分组+健康概要）与 `GroupOpsBar`（路由/扩容/排队，props 打包成一个 `ops` 对象或下沉到 store 的选择器）；文件按组件切目录。
 **生成 fix 任务**：T-FIX-05
 
-### 🟡 R3（附）· Knowledge Duplication：同一文件内三种「健康」口径，其中一种永假
+### 🔴 F10（v4 重写）· 两套「状态」词表混用，恒假的不是我指的那两行 —— 是我的宾语搞错了
 
-**Symptom**：`AgentControlPlane.tsx:366-367` `isAgentHealthy = status in {running, standby}`（与 DESIGN.md:97-104 一致，✅ 本 change 采用之）；`:74` 用 `probe.health === 'healthy'`（探针口径，另一个概念）；`:156-157` 与 `:1137` 判断 `agent.status === 'healthy'` —— **`healthy` 从不是 Agent.status 的取值**（实测写入点：`agents_api.py:125 'running'`、`:167 'standby'`、`reconcile_loop.py:419 'paused'`、`:439 'degraded'`，无任何处写 `'healthy'`）→ 该分支恒假，Agent 行状态徽标**永远走红色底**。
-**Source**：Evans · *DDD* ·「统一语言」；Fowler ·*Refactoring* ·「Dead Code / Speculative Branch」。
-**Consequence**：`:156/:1137` 属 pre-existing（非本 change 引入），但本 change 的 DESIGN 首次把健康口径**写成规范**，于是这两行成为可判定的错码：用户在域树里看到所有 Agent 都像异常。
-**Remedy**：抽 `lib/agentHealth.ts`（`isAgentHealthy` + `probeHealthOf`）供三处共用；`:156/:1137` 改为 `isAgentHealthy(agent.status)`。
-**生成 fix 任务**：T-FIX-03（其中 `:156/:1137` 归属 pre-existing，建议并入同一任务，不另开 change）
+> **v4 更正声明（G4 领域专家 ❌②）**：v1–v3 这一段**取证方向反了**。我判定恒假的是 `:156-157`/`:1137`，理由是「`healthy` 从不是 `Agent.status` 的取值」—— 前提成立，**宾语错了**：那两处读的不是 `Agent.status`，是探针 DTO 的 `status`，`healthy` 恰在其取值域内 → 它们是**全文件唯一正确的健康判定**。真正恒假的是我当时**打了 ✅ 放过**的 `:74-75`。更要命的是我给的 remedy（改成 `isAgentHealthy(agent.status)`）会把现在正确的代码**改成恒假**，而它的 verify 恰好会被这次改坏所满足 → **假绿过关**。这不是措辞问题：报告是 4-dev 的输入，照它做会**造出一个新 bug**（R5.2 + R6.3）。以下为重写后的事实。
+
+**词表（两侧都在同一文件里被混用）**
+
+| 词表 | 取值域 | 写入点（实测） |
+|---|---|---|
+| **生命周期** `Agent.status` | `running` / `standby` / `paused` / `degraded` | `agents_api.py:125,167`、`reconcile_loop.py:419,439` |
+| **探针判定** `AgentStatus.status` | `healthy` / `degraded` / `unhealthy` / `error` / `skipped` / `unknown` | `agent_probe_service.py:216,271,407,419`；`control_plane_api.py:94-95` 把它赋给 `entry["status"]` |
+
+**逐行判决（全部实读原文 + 实读 payload 构造）**
+
+| 行 | 代码 | 判决 | 依据 |
+|---|---|---|---|
+| `:108`/`:1033` | `agent: AgentStatus` | —— | prop 类型是**探针 DTO**，不是 `Agent`。v1–v3 我把它当 `Agent` 读，错从这里开始 |
+| `:156-157`、`:1137` | `agent.status === 'healthy'` | ✅ **正确，勿动** | `status` 即探针判定，`healthy` 在其取值域内；且 `:160` 用 `getHealthLabel`（`:33-40`，正是探针词表）→ **自洽** |
+| `:74` | `a.health === 'healthy'` → `healthyCount` | 🔴 **恒 `undefined` → 顶部「健康」卡永远显示 0** | `control_plane_api.py:75-85` 构造的 entry 键集里**没有 `health`**（实测该文件仅在 `:94-95` 写 `entry["status"]`，全文件无 `"health"` 键）；而卡片副标题还写着「healthy 状态」 |
+| `:75` | `a.status === 'dead' \|\| a.health === 'unhealthy'` | 🔴 **两个分支都不可能为真 → 「停止」卡永远 0** | 探针词表里没有 `dead`；**全后端 grep `'dead'` 无任何写入点**，只有 `alert_service.py:141` 在**读**它 → 那条 `agent_dead` 告警同样**永不触发**（同一根因的第二处扩散） |
+| `:531`、`:1076`、`:1129` | 渲染 `agent.runtime` | 🔴 恒空 | 同上，payload 无 `runtime` 键 |
+| `stores/controlPlane.ts:8,10` | `health: string` / `runtime: string` | 🔴 **类型在撒谎** | 接口声明了两个后端从不发出的字段 → TS 编译期完全看不出问题，这正是它能活到今天的原因 |
+| `AgentProbePanel.tsx:64,168,169,318,478` | 读 `probe.health` | 🟡 同根因既有扩散面（5 处，非本 change） | 契约修复时须一并 grep（R4.6） |
+| `:112` + `:22-27` | `getStatusConfig(agent.status)` | 🔴 「运行状态」列**恒走 fallback** | `STATUS_CONFIG` 键集 `{running,idle,blocked,dead}` 作用在探针词表上**零交集** → 直接吐英文 `healthy`/`unhealthy` + muted 灰 |
+| `:197-198` + `:15-20` | `STATUS_PRIORITY[a.status] ?? 99` | 🟡 列表排序**实际失效** | 优先级键集 `{dead:0,blocked:1,running:2,idle:3}` 同样零交集 → 全部落 99，排序退化为原序 |
+
+**Source**：Evans · *DDD* ·「统一语言」；Ousterhout · *A Philosophy of Software Design* ·「深模块要求契约清晰」；项目侧 `CLAUDE.md`「路由只做参数校验与鉴权」的反面 —— 契约漂移没人守。
+**Consequence**：这是**用户可见的错误数字**（两张概览卡恒 0 + 一列英文状态 + 排序失效），不是内部美感问题；本 change 的 DESIGN 首次把「健康」写成规范，使这些行成为**可判定**的错码。且 `未分类` 兜底桶与「默认域」双指（F19/F20）说明同一类「一个名字两个所指」在本模块是**系统性的**，不是孤例。
+**Remedy**：见重写后的 `T-FIX-03`（四件事：补契约缺口 / `:156-1137` 不动 / 两词表各自具名 + DESIGN 加作用域声明 / verify 换成喂数据看行为）。**`:156-1137` 在报告里已明确标注「当前正确，勿动」**，供 4-dev 与后续 review 双向对账。
+**判级变更**：🟡 → **🔴**（领域专家建议上调，主审按其实测后果同意：用户可见错误数字 + 技术上可行但业务上不通）。**R9.2 二次确认**：领域专家首指 → 主审逐行独立复现（含实读 payload 键构造与后端 `'dead'` 无写入点）后确认。
+**生成 fix 任务**：T-FIX-03（重写）· 连带 `alert_service.py:141` 与 `AgentProbePanel.tsx` 5 处属既有扩散面 → 登记议题（T-FIX-12）
 
 ### 🟡 R5 · Dependency Disorder：业务逻辑落在 routes 层
 
@@ -367,7 +391,7 @@ graph LR
 
 ## 严重发现汇总
 
-> **v3 合计 17 项：8 🔴 / 7 🟡 / 2 🟢**（v1 15 项 7🔴 → v2 加 F16 → v3 加 F17，并把 F13 由 🟢 取严升为 🟡）。计数由本表逐行数出，非手填。
+> **v4 合计 20 项：9 🔴 / 9 🟡 / 2 🟢**（v1 15/7🔴 → v2 +F16 → v3 +F17 且 F13 升 🟡 → v4 +F18/F19/F20 且 F10 升 🔴）。计数由本表逐行数出，非手填。
 
 | # | 严重度 | 类别 | 描述 | 位置 | fix 任务 |
 |---|---|---|---|---|---|
@@ -377,24 +401,27 @@ graph LR
 | F4 | 🔴 Critical | 安全A01 / R2 | `:110` 无 owner/visibility 过滤的域内 Agent 查询（**v2 按 sink 降级重述**：本条 sink = capability 字符串；同族其余站点见 F16 与议题）；`visibility="private"` 全后端从未被执行 | `backend/routes/domain_api.py:110`（同形 `:34,91,143,172,279`） | T-FIX-04 |
 | **F16** | 🔴 **Critical** | **安全A01 → 凭据搬运** | 域 owner 可用 `POST /api/domains/{id}/scale` 以**他人 Agent 为模板** mint 归自己所有的副本，**逐字节复制 `api_key_encrypted`**（`:208→:231→:243`），副本过 owner 过滤可运行 → `chat_service.py:103 decrypt()` 取用受害者凭据。in-process 复现见 §2.4。**v1 把它并进 F4 的「7 处同形查询」是判级错误** | `domain_api.py:202,208,231,236,243` + `chat_service.py:103` | **T-FIX-13** |
 | F17 | 🟡 Major | R3/R4 | capability 值未归一化：带空格的 `" code-review "` 与 `"code-review"` 去重成 2 组、且前者匹配不到任何查询（v3 补 · 实跑确认） | `backend/services/k8s_routing_service.py:20-29` | T-FIX-02 + T-FIX-00 |
+| F18 | 🟡 Major | R3 / R6 | **前端是 capability 的第三套真相**：`:588-592` 取 `cfg.capabilities` 后**不过滤**空串/空白/非字符串，而后端两套真相都会过滤 → `capabilities:[""]` 的 Agent 在画布上自成一个**空名分组**、在后端算「无能力」归入未分类。**`T-FIX-01` 只统一后端仍收不平**，且这正是 F3 抱怨的那类副本 | `AgentControlPlane.tsx:588-592` vs `k8s_routing_service.py:20-29` | T-FIX-01 + T-FIX-02（前端须纳入同一条具名规则） |
+| F19 | 🟡 Major | R6 领域 | **「默认域」一词双指 → FR5 不可判定**：`main.py:143-151` 启动时**真建了一行** `Domain(name="默认域", owner_id="admin")`；而 `:860-870` 的「默认域」卡是 `domainKey="default"`/`domainId=null` 的 NULL 兜底桶，`:836` `sortedDomains` **不过滤**同名行 → 树上可**同时出现两张「默认域」**（一张可删、一张不可删）；删真实那行走 `domain_api.py:84`「`domain_id` 置 NULL（回归默认域）」= **把 Agent 从「默认域」搬进「默认域」**，删除计数对用户不可见。根因在 `agent-domains/REQUIREMENT.md` FR3 自相矛盾（既说"自动创建默认域行"又说"NULL 视为默认域"），本 change FR5 原样继承 | `main.py:143-151`、`AgentControlPlane.tsx:836,858-870`、`domain_api.py:84` | **待人工裁定第 6 条** + T-FIX-12 议题（R3.2：**禁止**混进 T-FIX-04 顺手改） |
+| F20 | 🟡 Major | R6 领域 | `未分类` 是**裸字符串 key，与用户可自填的 capability 同一命名空间**（`:594-596` 与 `groups[cap]` 同表）→ 声明 capability 就叫 `未分类` 的 Agent 会并进兜底桶，并在 `domain_api.py:119` 的能力清单里与兜底桶**不可区分**。另 **FR1×FR5 的交集没有任何 AC**：`?capability=未分类` 在 T-FIX-01（数组成员判定）落地后**恒 0 条** → 外部集成方无法复现画布上那一组，用户故事 4 与 FR5 互相打不到 | `AgentControlPlane.tsx:594-596`、`domain_api.py:119` | **待人工裁定第 7 条**（兜底桶改保留字或 API 支持 `capability=__none__`，口径写进 FR5 → 属 1-requirement，Reviewer 只登记） |
 | F5 | 🔴 Critical | UI 3.1/3.2 | 纯白 `#fff` 硬编码（本 change 按钮 2 处） | `AgentControlPlane.tsx:457,473`（另 `:850,962,1012,1225` pre-existing） | T-FIX-07 |
 | F6 | 🔴 Critical | UI 3.1 | 硬编码字号 + 间距/圆角。**v3 拆性**：字号＝`tokens.css` 确无 font-size token（需人工定 scale）；间距/圆角＝**`--s*`/`--r-*` 已存在、本页面 0 引用**（机械替换，**不该进「已知接受」选项**） | `AgentControlPlane.tsx:401-441,459,475` | T-FIX-08 |
 | F7 | 🔴 Critical | UI 3.2 | 卡片嵌套卡片（域卡片 > 能力组卡片 > Agent 行，三层树三层卡） | `AgentControlPlane.tsx:585-605` + `:402-403` | T-FIX-09 |
 | F8 | 🟡 Major | Spec 合规 | 偏离 DESIGN 指定的实现方式（「`JSON_CONTAINS` 或 Python 端过滤」两者皆未用） | `DESIGN.md:54-66` vs `agents_api.py:36-38` | T-FIX-01 |
 | F9 | 🟡 Major | UI 3.4 | 能力组头 `<div onClick>` 键盘不可达、无 `aria-expanded` | `AgentControlPlane.tsx:411-413,425` | T-FIX-06 |
-| F10 | 🟡 Major | R3 附 | 三种「健康」口径并存，其中 `status === 'healthy'` 恒假 → Agent 行徽标永远红（pre-existing，被本 change 的 DESIGN 口径否证） | `AgentControlPlane.tsx:74,156-157,366-367,1137` | T-FIX-03 |
+| F10 | **🔴 Critical（v4 升级）** | R3 / 统一语言 | **两套状态词表混用，而我 v1–v3 指错了对象**：恒假的是 `:74/:75`（顶部「健康」「停止」两张概览卡**永远 0** —— payload 无 `health` 键，且全后端无 `'dead'` 写入点，只有 `alert_service.py:141` 在读它 → 那条 `agent_dead` 告警同样永不触发）、`:531/:1076/:1129` 的 `runtime` 恒空、`getStatusConfig`(`:112`) 与 `STATUS_PRIORITY`(`:197`) 对探针词表**零交集** → 状态列吐英文、排序失效；`stores/controlPlane.ts:8,10` 声明了后端从不发的字段（**类型在撒谎**，所以编译期看不出来）。v1–v3 判为恒假的 `:156-1137` **是全文件唯一正确的健康判定** | `AgentControlPlane.tsx:74-75,156-157,531,1076,1129,1137` + `control_plane_api.py:75-85` + `stores/controlPlane.ts:8,10` | T-FIX-03（**v3 版会造新 bug，已重写**） |
 | F11 | 🟡 Major | R1 | 1428 行单文件 / `CapabilityGroupRow` 171 行 14 props，分组与路由扩容同组件 | `AgentControlPlane.tsx:370-540` | T-FIX-05 |
 | F12 | 🟡 Major | Spec 合规 | FR2 端点零消费者；用户故事 4「以便外部集成」不可验证 | `domain_api.py:100-119`、`stores/domains.ts`（无 fetch） | T-FIX-11 |
 | F13 | **🟡 Major**（v3 取严）| R5 | 业务逻辑住 routes 层，违反 `CLAUDE.md`「路由只做参数校验与鉴权」——**v2 自相矛盾：2.2 正文记 🟡、本表记 🟢**，按取严统一为 🟡 | `domain_api.py:101-119`、`agents_api.py:25-39` | T-FIX-02 |
 | F14 | 🟢 Minor | 一致性 | 组顺序两端各自 `sort()`，中文 `未分类` 的落位依赖 locale | `domain_api.py:119` / `AgentControlPlane.tsx:666` | T-FIX-10 |
-| F15 | 🟢 Minor | 范围 | `CapabilityGroupRow` 承担路由/扩容（超 FR4 声明），疑与 control-plane change 职责重叠 | `AgentControlPlane.tsx:445-490` | 待人工裁定归属 |
+| F15 | 🟢 Minor | 需求溯源（**v4 改定性**） | ~~范围蔓延~~ **撤销**：`route_to_agent`(`k8s_routing_service.py:50`) 与 `POST /domains/{id}/scale`(`domain_api.py:185-215`) **本来就是 capability 粒度**的既有规则，实测能力组行是这些按钮的**唯一宿主**（`DomainAccordionRow` 内无同形按钮，只透传 `onRoute/onScale`）→ 把按钮剥到域级会让「按能力扩容」失去可寻址处，**按业务语义能力组行是正确宿主**。真问题：这条业务规则在 `.specs/` 的 REQUIREMENT/DESIGN/CHANGE 里 **0 命中**（我实跑复核确认，只存在于 PRODUCT-DESIGN.html / COMPETITIVE-RESEARCH / BRAINSTORM）→ **需求欠账，不是实现越界** | `AgentControlPlane.tsx:445-490` | T-FIX-05 照做（R1 认知负载，与归属无关）· 溯源缺口 → 待人工裁定第 8 条 |
 
 ### 覆盖面声明（不把「没找到问题」当「没有问题」）
 
 - **看了**：FR1-FR5 / NFR1-NFR3 逐条；`agents_api.py`（1-70 行）、`domain_api.py`（1-150 + 7 处 Agent 查询清单）、`k8s_routing_service.py`（1-60）、`models/agent.py` 全文、`AgentControlPlane.tsx` 的 `:74,156,360-490,552-700,860-870,1137`、`stores/domains.ts`、`tokens.css` token 清单、`backend/tests/` 全目录 grep、`.specs/capability-groups/` 四份工件。
 - **实跑了**：`tsc --noEmit`（32 错误，本面 0）、SQLAlchemy 谓词编译（SQLite + MySQL 方言）、内存 SQLite 三条样本的 FR1 反例复现、`visibility` 与既有 helper 的全仓 grep。
 - **没看 / 判不了（盲区）**：① 运行时 UAT —— 未启动 uvicorn/vite，任何"界面看起来对不对"都没验；② 对比度未实测（无量具）；③ MySQL 部署路径未实测 → 待确认；④ 无 `UI-DESIGN.md` → 视觉北极星与美学一致性整节跳过（非通过）；⑤ 无 `TEST.md` → 5 轮金字塔只能判缺，不能判过；⑥ 未审 `agent-domains`/`knowledge-plus`/`multi-provider`/`small-model-decisions`（均不满足预检）；⑦ 无独立 diff，按 CHANGE「变更范围」表界定审查面，可能漏掉未列在该表却被顺带改动的文件；⑧ 「未与 pre-existing 代码划清归属」的行已逐条标注，但 79 天未更新的 `CONTEXT.md` 使部分「是不是本次引入」只能靠 grep 推断。
-- **v2 因安全节新增的盲区（别当通过）**：⑨ **依赖/CVE 扫描未跑工具**（环境无 `pip-audit`/`safety`，联网扫描不属本 run 交付）→ 仅登记存量事实：`requirements.txt` 13 条全 `>=` 区间、无锁文件；⑩ **F16 只做到 in-process 直调复现，未在跑起来的实例上打过 HTTP** → 跨进程/带真 `cryptography` 密钥的端到端链未验；⑪ **A07 身份伪造链的真实部署组合行为未实测** —— `X-User-Id` 伪造与 `main.py:196-199` localhost 判定在反向代理后的实际表现未验（未起服务），`CLAUDE.md` 已记此 fail-open；⑫ OWASP 逐项是**主审自标**：A03 已由主审**自跑负例**转为一手证据（v3），A01 由安全审计师首指 + 主审 in-process 复现，其余 7 项**无第二人复核**。
+- **v2 因安全节新增的盲区（别当通过）**：⑨ **依赖/CVE 扫描未跑工具**（环境无 `pip-audit`/`safety`，联网扫描不属本 run 交付）→ 仅登记存量事实：`requirements.txt` 13 条全 `>=` 区间、无锁文件；⑩ **F16 只做到 in-process 直调复现，未在跑起来的实例上打过 HTTP** → 跨进程/带真 `cryptography` 密钥的端到端链未验；⑪ **A07 身份伪造链的真实部署组合行为未实测** —— `X-User-Id` 伪造与 `main.py:196-199` localhost 判定在反向代理后的实际表现未验（未起服务），`CLAUDE.md` 已记此 fail-open；⑫ **OWASP 逐项是主审自标**：A03 已由主审自跑负例转一手证据（v3），A01 由安全审计师首指 + 主审 in-process 复现，**其余 7 项无第二人复核**；⑬ **F10 的界面表现未实测**（领域专家同一自白）：「健康卡恒 0」「状态列吐英文」是**静态契约推导 + payload 键实测**得出的，未起服务看渲染 → **UAT 时必须顺手确认顶部「健康」卡是否为 0**，若不为 0 则说明另有写入路径我没找到，F10 需再改。：A03 已由主审**自跑负例**转为一手证据（v3），A01 由安全审计师首指 + 主审 in-process 复现，其余 7 项**无第二人复核**。
 
 ---
 
@@ -407,6 +434,9 @@ graph LR
 | 3 | `CapabilityGroupRow` 的路由/扩容按钮归属：本 change 剥离，还是承认为 control-plane 面（F15）？ | R7 范围控制 |
 | 4 | 4.2 需不需要真·跨模型二审（本环境仅做到 fresh-context 同模型二审）？ | kit 4.2「强烈建议」 |
 | 5 | **v2 已按 sink 重述，v1 的倾向作废。** 现拆成三档：`:110`（本 change 内修，T-FIX-04）✅ 无争议；`:208` 凭据链（F16/T-FIX-13）—— 安全审计师明确要求**不得缓办、不得只进 ROADMAP 议题**，主审独立复现后同意；但 `:208` 属**pre-existing 的 `/scale` 端点**、不在本 change「变更范围」内 → **唯一可处的两一个是「本 change 内修」还是「另开 CHANGE 优先修」，两个都不许"登记成议题以后再说"**（R2.5：🔴 不修就得人工签字「已知接受」，而凭据搬运这条主审不建议任何人签接受）。其余 5 处（`:34,91,143,172,279`）+ `visibility` 落实 + 三处不变量矛盾的方向选择 → 另开 CHANGE，同意。 | R2.5 / R3.2 / R7.1 |
+| 6 | **F19「默认域」双指**：`agent-domains/REQUIREMENT.md` FR3 自相矛盾（既「自动创建默认域行」又「NULL 视为默认域」），本 change FR5 原样继承 → 须由 **1-requirement** 定口径（哪个才是「默认域」？兜底桶叫什么？删除语义与计数怎么显示）。Reviewer/Dev 均不得改需求（R3.2） | R3.2 / R6.5 |
+| 7 | **F20 `未分类` 占用 capability 命名空间 + FR1×FR5 交集无 AC**：兜底桶改保留字（如 `__none__`）还是让 API 支持 `capability=未分类`？两者都要写进 FR5 才能派生 AC | R5.1 / R3.2 |
+| 8 | **F15 需求欠账**：自动路由 / 弹性扩容这条业务规则在 `.specs/` 的 REQUIREMENT/DESIGN/CHANGE 中 **0 命中**（实测），只存在于 PRODUCT-DESIGN.html / COMPETITIVE-RESEARCH / BRAINSTORM。要不要补一条 REQUIREMENT 溯源（或明确它属 k8s 管控 change 的范围、本 change 只作宿主）？ | R7.1 / R3.2 |
 
 ---
 
@@ -428,6 +458,32 @@ graph LR
 - [x] **v2 新增**：安全审查节（§2.4）齐 —— F16 单列 🔴 + OWASP 逐项（不适用者给理由）+ 依赖/秘钥扫描结果 + 身份层前提声明
 - [ ] **v3 自查失败模式（记给下一轮的自己）**：v1→v3 的**两处错同源** —— 我都把**被 `head -N` 截断的 grep 输出当成穷尽证据**（F6 的 token 清单、F3 的副本计数）。教训：**凡结论形如「X 不存在 / 共 N 处」，取证命令必须不截断且回显总数**（全量列 + `wc -l`）；做不到就把措辞降级成「至少 N 处」。
 - [x] **v2 新增**：每个 🔴 的第二角色确认已记录（R9.2）—— F16 由安全审计师首指、主审独立复现确认；A03「不成立」由主审判、安全审计师跑负例背书。**其余 7 项 🔴 目前只有主审一人**，G4 其余三票须补这一层
-- [ ] **🛡️ G4 门禁**：**3/4 到票，门未结** —— 🗳️ 安全审计师 ❌（4 条条件 → v2 已逐条落地）· 🗳️ 资深测试工程师（**Master**）❌（4 条阻塞项 → v3 已逐条实测并落地，含我 F6 根因假了这处）· 🗳️ 架构师 ✅带 6 条修订（全部落地；「反向依赖：无」是我的 grep 漏边）。**🔴 领域专家票未到 → 不发 R13.2 裁决、不推进。** 两位 ❌ 的条件是「改完复核后改 ✅」→ v3 已回执请其复核；**架构师那条 ✅ 若被读成「可合并」即误读**（其原话：G4 之后唯一合法动作是回 5-test）
+- [x] **🛡️ G4 门禁**：**4/4 票已收齐 → 结果 1/4（3❌ + 1 条附修订的 ✅）→ 按规约回本阶段修改，不推进、不进 7-integration**。逐票理由与共识见下方「G4 裁决记录」
+
+---
+
+## G4 裁决记录（4/4 票已收齐 · 2026-09-23 10:2x）
+
+```
+🗳️ G4 审查门: capability-groups REVIEW.md 是否完整、可验证？可否进入下一阶段？
+   🟫 资深测试工程师（Master）: ❌ 附 4 条通过条件（T-FIX-00 落点/verify 互斥、测试口径抓不住 bug、
+                                用例缺正向锚点与边界、F6 根因错）→ v3 已逐条实测并落地
+   🟦 架构师:                 ✅ 附 6 条修订（重复面 8 处、归一化契约、01/02 抢建同一文件、
+                                测试落点、pytest 基线红、services↔engine 反向边）→ v3 全部落地
+   🟩 领域专家:               ❌ F10 取证方向反了 + T-FIX-03 会造新 bug 且 verify 假绿；
+                                另补 F18/F19/F20 与 F15 改定性 → v4 已落地
+   🔴 安全审计师:             ❌ 附 4 条通过条件（按 sink 分档、F16 独立成条、
+                                T-FIX-00 非 admin + 跨 owner 负例、盲区补依赖/秘钥/OWASP）→ v2 已落地
+   结果: 1/4 → 多数反对（3❌ / 1✅，且唯一 ✅ 明确声明"不等于放行合并"）
+        → 按身份规约：列出全部反对理由，回本阶段（6-review）修改。**不推进、不进 7-integration。**
+```
+
+**四票的反对理由全部可核对**（逐条附实测：内存 SQLite 反例、AST 抽 payload 键、词表交叉 grep、`--collect-only`、定向跑全量测试）。三条 ❌ 均为「**加条件**」而非「加严」——门禁红（无 `TEST.md`）四方一致同意且独立成立。
+
+**四票共同指向的一件事，比任何单条发现都重要**：本报告 v1→v4 的四处实质错误（F4 判级、F6 根因、F3 计数、F10 宾语）**没有一处是判断分歧，全是我的取证纪律问题** —— 截断的 grep 当成穷尽、二手结果当成本手、payload 键没实抽就读代码推断。审查者的可信度不来自结论严厉，来自每条证据可复跑。
+
+**未闭环项（按 Master 硬要求显式记录，不因票齐而消解）**：4.2 跨模型二审**未执行**（fresh-context 二审派出于 turn 结束前取消），本节状态=待确认。放行进入下一阶段前须由人工决定是否补真跨模型二审（待裁定第 4 条）。
+
+**本轮已落地的修订**：REVIEW.md v4（20 项 / 9🔴）· TASK.md T-FIX-00~13 全段重写为可交接（含 T-FIX-03 重写）。**下一步不是推进，而是：三位 ❌ 投票人按各自给的核对命令复核 v4 → 改票；同时待人工裁定 8 条需人拍板（其中第 1/2/6/7/8 条涉及需求与签字，AI 无权自决）。**
 
 **下一步**：① 等 🔴 领域专家票 + 两位 ❌ 的复核改票（v3 已把核对命令原样交回）；② 门结后无论 3/4 还是 4/4，第一个动作都是**回 5-test 跑 T-FIX-00**，不是进 7-integration；③ **4.2 跨模型二审未闭环，必须在 G4 最终结论里点名**（G4 测试工程师硬要求：不许因「票收齐」就自动当它结了）。**当前不得进集成、不得合并。**
