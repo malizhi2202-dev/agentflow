@@ -8,8 +8,8 @@
 | 字段 | 值 |
 |---|---|
 | 当前阶段 | **6-review 已结：G4 第四轮 4/4 全票 ✅，门结**（Master 第三轮复核后撤回 ❌，其反对意见记录作废）· **出口 = 回 5-test**，动作序 `T-FIX-05`（4-dev · 已派开发执行）→ `T-FIX-00`（5-test · 上一轮已派测试验证），change `capability-groups`。⚠️ **通过的是「审查工件可交接」，不是「本 change 可集成」**：R2.5 下 9 项 🔴 一项未修 → **禁止进 7-integration、禁止合并**（v8：门已 4/4 全票，通过的仍是「工件可交接」）；**人工欠的是「R2.5 那 9 条签字」（尤其第 9 条 admin 旁路口径），不欠「G4 平票裁决」—— G4 从未平票，v5/v6 里我把票面记错过两次，已在 REVIEW.md 更正并写进计数规程**；2.0 门禁红（缺 `TEST.md`）→ 唯一出口是回 **5-test 执行 `T-FIX-00`**（本轮已派）。4.2 跨模型二审仍未执行。剩余那 1 票 ❌ = Master 对 v5/v6 落地的复核，不是判断冲突 |
-| 当前 task | 无（Reviewer 只出报告与 fix 任务，R3.3）· 待执行队列：`T-FIX-00`（回 5-test）→ 🔴 `T-FIX-01/02/04/07/08/09/13` |
-| 中断任务 | 无写操作中断。`REVIEW.md`(v3) + `TASK.md`(v3) 已落盘并推送 |
+| 当前 task | **`T-FIX-05` 已完成并落盘**（2026-09-23 10:35 · 4-dev · `.specs/capability-groups/T-FIX-05-SUMMARY.md` · 分支 `agent/agent/acdcda109f00`，**未并 main，合并须人工确认 R15.2**）：4 条 verify 全过（`tsc`=32【护栏】· `vitest run capability` **14 用例全绿**【验收】· 页面 1428→**1372**【验收】· 新折叠头操作态命中 **0**【验收】），①b 的 RED→GREEN 是**搬家版先红 7 条**再补归一 → 判据被证明能区分「抽了函数」与「抽对了函数」。待执行队列不变：`T-FIX-00`（回 5-test · 上一轮已派）→ 🔴 `T-FIX-01/02/04/07/08/09/13` |
+| 中断任务 | 无。**`T-FIX-05` 无 PROGRESS.md（一次跑完，未触发 R1.1 清窗）**；其 SUMMARY 末尾「下游判据影响」表是 `T-FIX-03/06/07/08/09/10` 的**必读交接物**（元规则 4：`AgentControlPlane.tsx` 单写者串行，本条已落地 → 行号与 awk 区间全部漂移，其中 `T-FIX-03` 判据⑤ 的 `sed -n '74,75p'` 现打到 `function OverviewCards` = **假绿**，`T-FIX-06` 的 action 目标已搬进 `CapabilityGroupHeader.tsx` = **该文件须补进它的 `write_files`**） |
 | 产物 | `.specs/capability-groups/REVIEW.md` **v8**（20 项 = **9🔴** / 9🟡 / 2🟢，含 §2.4 安全节 + G4 第一轮/第二轮裁决记录）· `.specs/capability-groups/TASK.md` T-FIX-00~13（**v6**：补 verify 落点 + 全条标【验收】/【护栏】+ **未修态基线表 15 行** + T-FIX-13 改判明文 + v6 三条残留修复） |
 | v2 起因 | G4 安全审计师指出 F4 **按站点记数、应按 sink 分类** → 暴露 **F16**：`POST /api/domains/{id}/scale` 让域 owner 以**他人 Agent 为模板** mint 归自己的副本并**逐字节复制 `api_key_encrypted`**（`domain_api.py:208→:231→:243` → `chat_service.py:103` 解密取用）。主审 in-process 复现确认。v1 那句「capability 列表虽非密钥」盖过了最重的一跳 = **判级错误，已认** |
 | v8 起因 | **G4 Master 第三轮复核 ✅ → 4/4 全票，门结**。v8 只吸收其 3 条「前看提醒」（其明说不计为条件，主审仍落成规则）：**元规则 3** = `vitest run <pattern>` 按文件名子串过滤 → 改名/漏建 = **静默 0 用例假绿**，须同时断言用例数 ≥1；**元规则 4** = `AgentControlPlane.tsx` 是 `T-FIX-03/05/06/07/08/09` **六条**共同靶文件 → **必须串行/单写者**，否则并行互覆盖且 R6.5 边界判据互判越界（假红）；卡片行号订正 `:79` → **`:81`**（实读 :79 总数/:80 健康/:81 异常/:82 队列任务）。另据 Master「顺带核到」：v5→v7 未改 `T-FIX-00` 判据文本 → 其对 `T-FIX-00` 的复核继续有效。**集成仍未开**：R2.5 九项 🔴 未修 + 人工签字；4.2 跨模型二审仍未执行 |
@@ -31,6 +31,7 @@
 
 | 时间 | 事项 | 产物 |
 |---|---|---|
+| 2026-09-23 | **4-dev 执行 `T-FIX-05`**（capability-groups · G4 4/4 后派单）：抽出 `components/capability/groupByCapability.ts`（含与后端同名的具名归一规则 `capabilitiesOf`）+ `CapabilityGroupHeader.tsx`，`CapabilityGroupRow` props 14→5，页面 1428→1372，新增 14 条前端用例（F18 归一 7 条先红后绿） |
 | 2026-09-21 | 剥离 code-kit 耦合、目录扁平化 | 全仓 `code-kit\|codekit\|code_kit\|code-kit-monitor` grep = 0 命中 |
 | 2026-09-21 | 竞品调研（67 个开源仓库一手实测） | `.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md`（997 行） |
 | 2026-09-21 | 参考 Multica 检视可借鉴点 | 已并入调研报告与产品文档 §1.6.5 |

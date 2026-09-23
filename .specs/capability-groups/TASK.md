@@ -171,7 +171,7 @@
 - **action（v6 补 F18 · 领域专家残留 3）**：① 把 `:585-605` 的分组派生抽成 `groupByCapability(agents) → Record<string, Agent[]>` **纯函数**（无 React 依赖、可 unit）；**①b 该纯函数必须调用与后端同一条具名归一规则**（过滤空串/空白/非字符串 + `strip()`），**不得**再自带一份裸 `Array.isArray(cfg.capabilities)` —— F18 此前只写在 `T-FIX-01/02` 的 action 里，而那两条 `write_files` **一个前端文件都没有** → 「要求落地的任务落不了地、能落地的任务不知道要做」（领域专家残留 3）；② 分组展示（名/数量/健康概要/箭头）与操作面（自动路由/扩容/排队/loading）拆开，`CapabilityGroupRow` 的 **14 个 props 降到 ≤6**，操作态从 `stores/domains.ts` 取，不逐层透传
 - **verify（二值 · G4 两条都提了）**: ① `cd frontend && test ! -e tsconfig.tsbuildinfo && ./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | grep -c "error TS"` **等于 32**（`grep -c … ≥ 32` 是**永远为真的废检查** —— 基线本来就是 32）；② 定向 `npx vitest run capability` 通过且用例数 ≥1；③ `wc -l < src/pages/AgentControlPlane.tsx` **< 1428**；④ `test -f src/components/capability/groupByCapability.ts && grep -c "routeLoading\|scaleLoading\|queueCount" src/components/capability/CapabilityGroupHeader.tsx` **为 0**（操作态确已离开分组展示组件）
 - **verify · v6 追加（挡「只搬家不归一」）**：**【验收】** 往 `groupByCapability` 喂一条 `capabilities:[""]` 的种子 → 断言 ①结果里**不存在空名分组**（无 `''` key）②该 Agent 落入 `未分类` ③喂 `capabilities:[" code-review "]` 时与 `"code-review"` **归入同一组**。今天这条必红（`:588-592` 不过滤），故它是能区分「抽了函数」与「抽对了函数」的那道门 —— 只把内联代码搬进文件、不接归一规则，也照样能让 `wc -l` 与 props 数达标
-- 状态: [ ]
+- 状态: [x] **T-FIX-05 已完成**（2026-09-23 10:35 · 4-dev · 分支 `agent/agent/acdcda109f00`）· SUMMARY：`@.specs/capability-groups/T-FIX-05-SUMMARY.md`（含 ①b RED→GREEN 一手输出与「下游判据影响」表：行号已漂移，`T-FIX-03` 判据⑤ 的 `sed -n '74,75p'` 现打到错误区间 = **假绿**，须改址）
 
 ### T-FIX-06: 键盘可达 + 对比度实测（UI 3.4 · F9）🟡
 - **read_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/styles/tokens.css`
