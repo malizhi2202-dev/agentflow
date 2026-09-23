@@ -1,23 +1,37 @@
 # TEST: capability-groups — 能力分组（Capability Groups）
 
 - **Change ID**: capability-groups
-- **关联**: `@.specs/capability-groups/REQUIREMENT.md` v1.0 · `DESIGN.md` · `TASK.md`「修复任务」段 **v6** · `REVIEW.md` §2.0 / §2.4 / 「G4 第三轮」
+- **关联**: `@.specs/capability-groups/REQUIREMENT.md` v1.0 · `DESIGN.md` · `TASK.md`「修复任务」段 **v8** · `REVIEW.md` §2.0 / §2.4 / 「G4 第四轮（4/4 门结）」 · `T-FIX-04-SUMMARY.md` / `T-FIX-05-SUMMARY.md`
 - **项目类型**: 全栈（后端 FastAPI + React/TS 前端）
-- **产物**: `backend/tests/test_capability_groups.py`（26 条用例，新建）· 本文件
-- **当前状态**: 第 1 轮 **RED 基线已建立**。本文档**不是**「测试通过」——9 项 🔴 未修（R2.5 仍拦集成），
+- **产物**: `backend/tests/test_capability_groups.py`（**28 条**用例，新建）· 本文件
+- **基线**: 第 1 次 = `5092f1de`（本阶段自己的 RED 交付）；第 2 次复跑 = **`50d944d5`**（`agent/agent/acdcda109f00`，含 `T-FIX-05` + cherry-pick 的本阶段 RED + `T-FIX-04`）
+- **当前状态**: **第 1 轮已复跑第 2 次**：28 条 = **18 红 / 10 护栏绿**（17 红 → `T-FIX-04` 转绿 1 条 → 本轮新增 2 条红：后端归一化必须与前端同规则）。
+  本文档**不是**「测试通过」——**9 项 🔴 的账**：F1（=`T-FIX-00`，本工件）✅ · F4（`T-FIX-04`）✅ · **余 7 项未修**
+  （F2/F3 → `T-FIX-01/02`、F10 → `T-FIX-03`、F16 → `T-FIX-13`、F5/F6/F7 → `T-FIX-07/08/09`），R2.5 仍拦集成；
+  （`T-FIX-05` 是 🟡，已完成，不在这 9 项里）
   第 2 轮阻塞在需求侧缺性能预算，第 4/5 轮部分未跑。**测试门（4 专家投票）本轮不召集**，理由见文末「出口条件」。
 
 ## 本次测试范围声明（5 轮金字塔 · R5.4）
 
 | 轮次 | 状态 | 范围 | 部分 / 跳过理由 |
 |---|---|---|---|
-| 第 1 轮 · 功能 | ⚠️ 部分（RED 基线完成） | FR1 ×15 · FR2 ×6 · NFR2 ×3 · 安全负例 ×2（合计 26 条，全部入 `backend/tests/`） | FR3/FR4/FR5 **无 unit 落点**：分组逻辑内联在 `AgentControlPlane.tsx:585-605`，须 `T-FIX-05` 抽出 `groupByCapability` 纯函数才有可断言的单元 → 本轮按 TASK 记 UAT（§1.5）。修复落地后**必须复跑本轮** |
+| 第 1 轮 · 功能 | ⚠️ 部分（**已复跑第 2 次**） | FR1 ×17 · FR2 ×6 · NFR2 ×3 · 安全负例 4 条（2 条住在 FR1/FR2 类内，2 条 = `TestCapabScaleCredentialChain`）= **28 条**，全部入 `backend/tests/` | FR3/FR4 **已有 unit**：`T-FIX-05` 抽出 `groupByCapability` + `capabilitiesOf`，`frontend/src/__tests__/capability-group.test.tsx` **14 条**（`npx vitest run capability` 实跑 14 passed）→ §1.5 两条 UAT 升级为 unit。FR5 仍 🟡：`未分类` / 默认域口径 = 待人工裁定第 6、7 条，**裁定前不写用例**（避免把未定口径冻进代码） |
 | 第 2 轮 · 性能 | ❌ 未跑（**阻塞待人工**） | — | `REQUIREMENT.md` 非功能性需求 NFR1/2/3 **无任何量化预算**（无 p95 / 无 bundle 上限 / 无 LCP），kit-5-test 步骤 2.1 明确「没有就停下来，让用户先补」→ 记开放项 O-1，不由 AI 自定义阈值（R18.1 ②） |
-| 第 3 轮 · 安全 | ⚠️ 部分 | 越权 / 凭据搬运 / A09 可验性负例**已进用例**（3 条，其中 2 条 RED）；依赖扫描 + 秘钥模式扫描已跑，输出见 §3 | `pip-audit`/`trufflehog`/`gitleaks`/`semgrep`/`bandit` **本机均缺**（实测 `command -v`）→ 秘钥扫描退化为模式 grep，**不等价于工具**，已记盲区 B-3；依赖 CVE 基线不可固化（仓内无任何锁文件 → `T-FIX-12` ④ 议题） |
+| 第 3 轮 · 安全 | ⚠️ 部分（**本轮补上后端 CVE 数**） | 越权 / 凭据搬运 / A09 可验性负例**已进用例**（4 条，全 RED，见 §1.2 末行）；`pip-audit`（verify 在隔离 venv 实跑）+ `npm audit` + 秘钥模式扫描均有数 | `trufflehog` PyPI 上只有**旧 Python v2**（不是 v3 Go 扫描器）、`gitleaks`/`semgrep`/`bandit` 无 apt 候选 → 秘钥扫描仍是模式 grep，**不等价于工具**（盲区 B-3）；SAST 未跑（B-4）；Python 侧无锁文件 → CVE 基线不可固化 |
 | 第 4 轮 · 兼容 | ⚠️ 部分 | 4.3 数据迁移 = **N/A（有理由，见 §4.2）**；MySQL 方言差异记 **待确认**（§4.3） | 4.1 跨浏览器 / 4.2 视口未跑：本阶段未起 dev server，且 `npm run build` 必红（`CLAUDE.md` 既载事实，32 个 TS 错误）→ 记开放项 O-2，视觉/可达性走 UAT + 6-review 第三轮 |
 | 第 5 轮 · 可观测 | ⚠️ 部分 | A09「扩容审计查得到模板主人」有可执行判据（RED）；「凭据不落日志」已 grep（§5.1） | 指标 / 告警 / `/health` liveness-readiness 区分需起服务实测 → 记开放项 O-3 |
 
 ---
+
+## 0.1 环境口径（可复现性 · verify 执行提出，本阶段采纳）
+
+- 本机 **`python` 不在 PATH**（只有 `python3` = 3.8.10，无依赖）→ 本文所有命令用 `/home/malizhi/.venv/bin/python`
+  （**Python 3.14.4 / pytest 9.1.1 / SQLAlchemy 2.0.54 / FastAPI 0.141.1**）。
+  照字面写 `python -m pytest` 的下游会直接 `command not found`，**别把「跑不起来」误读成「判据不成立」**。
+- `ENCRYPTION_KEY` 必须由测试自带（新文件顶部 `os.environ.setdefault`），否则 `services/encryption_service.py` 在导入期就抛。
+- 前端命令用 `./node_modules/.bin/vitest`（`npx vitest` 等价）；`npm` / `node` 在 `/tmp/node-v22.19.0-linux-x64/bin`。
+- ⚠️ 跑 vitest 会改写**被 git 跟踪**的 `frontend/node_modules/.vite/vitest/results.json` → 提交前 `git checkout --` 复原，
+  否则工作树脏（本阶段两次跑到都复原了）。
 
 ## 第 1 轮 · 功能测试
 
@@ -25,18 +39,31 @@
 Python 3.14.4 / SQLAlchemy 2.0.54 / FastAPI 0.141.1 / pytest 9.1.1）：
 
 ```text
-# 未含本次新用例（T-FIX-00 开工前，2026-09-23 10:09 实跑）
-41 failed, 134 passed, 6 skipped, 41 warnings in 5.06s
-
-# 含本次 26 条新用例（交付态，10:19 实跑）
+# 未含本次新用例（T-FIX-00 开工前，2026-09-23 10:09 实跑 @ a90ea251）
+41 failed, 134 passed, 6 skipped,  41 warnings in 5.06s
+# 含 26 条新用例（交付态，10:19 实跑 @ 5092f1de）
 58 failed, 143 passed, 6 skipped, 161 warnings in 5.92s
+# 复跑第 2 次（T-FIX-04/05 落地后，11:2x 实跑 @ 50d944d5，且本工件新增 2 条 → 28 条）
+59 failed, 144 passed, 6 skipped, 165 warnings in 8.65s
 ```
 
-> 两个数字**同源可核对**：41+17（本轮新增的 RED）= 58，134+9（本轮新增的护栏）= 143，总数 181 → 207。
-> REVIEW/TASK 引用的 `41/134/6` 基线在此有了来源（TASK `T-FIX-00` verify ④）。
+> 四个维度**逐条同源可核对**：41+17（RED）= 58，134+9（护栏）= 143，总数 181 → 207；
+> `T-FIX-04` 让 1 条红转绿（58 → 57，143 → 144），本工件新增 2 条红（→ 59 / 144），总数 207 → 209。
+> 第 3 行的数由本阶段**一手复跑**取得（不是转述 4-dev 的数）；4-dev 报的 `57 failed / 144 passed / 6 skipped`
+> 与我加的 2 条无关，**对齐成立**。
 > ⚠️ **既有 41 红不由本阶段修**：它们是 `test_api_integration`(28) / `test_edge_cases`(7) / `test_round6_api_edges`(3) 里
 > 用打桩会话与漂移代码写出来的用例（架构师 ⑤）。本 change 的所有判定一律走**定向**命令，
 > 全量数只作对照 —— 既不许「顺手修绿 41 个」（R7.1），也不许削弱别人的断言（R5.3）。
+
+定向与前端（同一 revision `50d944d5`，本阶段一手实跑）：
+
+```text
+cd backend  && python -m pytest tests/test_capability_groups.py -q   → 18 failed, 10 passed in 4.55s
+cd backend  && python -m pytest tests/ --collect-only -q -k capab     → 28/209 tests collected (181 deselected)
+cd frontend && npx vitest run                                        → Test Files 6 passed / Tests 66 passed
+cd frontend && npx vitest run capability                             → Tests 14 passed (14)   ← 元规则 3：判据吃用例数，不吃退出码
+cd frontend && npx tsc --noEmit | grep -c "error TS"                 → 32（= 基线，NFR1 护栏仍成立）
+```
 
 ### 1.1 为什么换测试缝（口径先行，防止被按「现有风格」重写）
 
@@ -55,25 +82,26 @@ DB、谓词、行收口、加解密全部走真的。
 
 ### 1.2 AC → 用例矩阵
 
-| AC | 类型 | 用例 | 未修态 |
+| AC | 类型 | 用例 | 未修态 → 复跑第 2 次（`50d944d5`） |
 |---|---|---|---|
-| FR1 第一句（数组成员判定） | integration（真实 session） | `TestCapabFR1AgentFilter` ×15 | 12 RED / 3 护栏 |
-| FR1 第二句（可与 `domain_id` / `status` 组合） | integration | 同上 4 条 `test_capab_combined_*`（含 `domain_id=0` 的 `IS NULL` 支与非 0 支各 1 条） | 4 RED |
-| FR2（`{domain_id, capabilities}` + 去重） | integration | `TestCapabFR2DomainCapabilities` ×6 | 2 RED / 4 护栏 |
-| FR3 三层域树 | manual → unit（待 `T-FIX-05`） | UAT-1（§1.5） | 🟡 无自动化证据 |
-| FR4 能力组展示（名/数量/健康概要/箭头） | manual → unit（待 `T-FIX-05`）+ a11y（待 `T-FIX-06`） | UAT-2（§1.5） | 🟡 同上 |
-| FR5 未分类 / 默认域 | manual | UAT-3（§1.5）**+ 口径未定**：`未分类` 占用 capability 命名空间（REVIEW F20 → 待人工裁定第 7 条）→ 本轮**不写** `?capability=未分类` 的用例，避免把未定口径冻进代码 | 🟡 待裁定 |
-| NFR1 零新增 TS 错误 | 工具 | `cd frontend && ./node_modules/.bin/tsc --noEmit -p tsconfig.json \| grep -c "error TS"` → **32**（**等于**基线 32，不是 ≥32；本轮实跑） | ✅ 护栏 |
-| NFR2 向后兼容 | integration | `TestCapabNfr2Regression` ×3 | 3 护栏 |
+| FR1 第一句（数组成员判定） | integration（真实 session） | `TestCapabFR1AgentFilter` ×17 | 14 RED（新增 2 条见 §1.3.1）/ 3 护栏 |
+| FR1 第二句（可与 `domain_id` / `status` 组合） | integration | 同上 4 条 `test_capab_combined_*`（含 `domain_id=0` 的 `IS NULL` 支与非 0 支各 1 条） | 4 RED → 4 RED（`T-FIX-01` 未落地） |
+| FR2（`{domain_id, capabilities}` + 去重） | integration | `TestCapabFR2DomainCapabilities` ×6 | 2 RED → **1 RED**（`T-FIX-04` 转绿跨 owner 那条）/ 4 护栏 |
+| FR3 三层域树 | ~~manual~~ → **unit 已有** | UAT-1（§1.5）+ `capability-group.test.tsx`（`groupByCapability` 分组/组键格式 4 条） | 🟡 无自动化证据 → **✅ 14 passed**（前端，实跑） |
+| FR4 能力组展示（名/数量/健康概要/箭头） | ~~manual~~ → **unit 已有** + a11y（待 `T-FIX-06`） | UAT-2（§1.5）+ `CapabilityGroupHeader` 3 条（含 `N healthy / M total` 渲染） | 🟡 → 🟠 **部分**：健康概要与折叠头有 unit；**键盘可达 / `aria-expanded` 仍无证据**（`T-FIX-06` 未落地，实测 `grep -c aria-expanded` 页面仍 0） |
+| FR5 未分类 / 默认域 | manual（前端归一半边已有 unit） | UAT-3（§1.5）+ 前端 `capabilitiesOf`「归一后只剩空值 → `未分类`」1 条；**后端半边口径未定**：`未分类` 占用 capability 命名空间（REVIEW F20 → 待人工裁定第 7 条）、默认域双指（F19 → 第 6 条）→ 本轮**不写** `?capability=未分类` 的用例，避免把未定口径冻进代码 | 🟡 待裁定（不因前端绿而升级） |
+| NFR1 零新增 TS 错误 | 工具 | `cd frontend && ./node_modules/.bin/tsc --noEmit -p tsconfig.json \| grep -c "error TS"` → **32**（**等于**基线 32，不是 ≥32；两个 revision 各实跑一次） | ✅ 护栏（复跑仍 32） |
+| NFR2 向后兼容 | integration | `TestCapabNfr2Regression` ×3 | 3 护栏 → 3 护栏（未减） |
 | NFR3 虚拟分组不建表 | 静态核对 | `git diff --name-only` 内无 `backend/models/**`、无迁移文件；新用例只读写 `agents` / `domains` 两张既有表 | ✅ |
-| 安全（跨 owner / 凭据搬运 / A09） | integration | `test_capab_fr2_domain_owner_cannot_read_other_owners_capability`、`TestCapabScaleCredentialChain` ×2、`test_capab_non_admin_percent_query_leaks_nothing`（末条与 FR1 行重叠计） | 4 条**全 RED** |
+| 安全（跨 owner / 凭据搬运 / A09） | integration | `test_capab_fr2_domain_owner_cannot_read_other_owners_capability`、`TestCapabScaleCredentialChain` ×2、`test_capab_non_admin_percent_query_leaks_nothing`（末条与 FR1 行重叠计） | 4 条全 RED → **3 RED**（跨 owner 转绿；`:208` 裸查未收口，凭据链两条仍红） |
 
-**用例下限对照（TASK `T-FIX-00` 逐条）**：FR1 ≥8 ✓（15，含 ≥1 正向锚点 ✓、≥3 边界 ✓、空串语义已择一 ✓、空格归一 ✓）·
+**用例下限对照（TASK `T-FIX-00` 逐条）**：FR1 ≥8 ✓（17，含 ≥1 正向锚点 ✓、≥3 边界 ✓、空串语义已择一 ✓、空格归一 ✓）·
 FR1 组合 ≥3 ✓（4）· FR2 ≥2 ✓（6，含 `domain_name` 被断言固化 ✓）· NFR2 ≥1 ✓（3）· 安全负例以非 admin 身份跑并断跨 owner ✓。
 
-### 1.3 RED 基线（17 条，逐条可复跑）
+### 1.3 RED 基线（第 1 次 17 条 / 复跑第 2 次 18 条，逐条可复跑）
 
-`cd backend && /home/malizhi/.venv/bin/python -m pytest tests/test_capability_groups.py -q` → **17 failed, 9 passed**（2.13s）
+`cd backend && /home/malizhi/.venv/bin/python -m pytest tests/test_capability_groups.py -q`
+→ 第 1 次（`5092f1de`）**17 failed, 9 passed** · 复跑第 2 次（`50d944d5` + 本工件新增 2 条）**18 failed, 10 passed**
 
 | # | 用例（省略 `test_capab_` 前缀） | 钉的缺陷 | 修它的是 |
 |---|---|---|---|
@@ -113,7 +141,25 @@ AssertionError: 'template_owner' not found in
 > 第二条正是安全审计师要求写进 `T-FIX-13` 契约的那件事：**判密文不等会假绿**。
 > 本用例判 `decrypt(副本) != 受害者明文`，`encrypt()` 每次新 nonce 这条捷径就骗不过去。
 
-### 1.4 两处「AI 先替你定了」的裁定（须人工过目，R18.1 ①）
+### 1.3.1 复跑第 2 次的增量（1 条转绿 · 本工件新增 2 条 · 1 条**新确认的假阳性形态**）
+
+| 变化 | 用例 | 一手证据 |
+|---|---|---|
+| ✅ 转绿（`T-FIX-04`） | `fr2_domain_owner_cannot_read_other_owners_capability` | 单跑 `-k fr2_domain_owner` → `1 passed, 25 deselected`；改动是 `domain_api.py:110` 复用 `_filter_owner(..., Agent)`（`git show 5e93984d` = 1 文件 `-4/+4`） |
+| 🆕 新增红 | `normalization_folds_inner_whitespace`（`"  a\t\tb  "` 存 → 查询 `a b` 须命中） | `Lists differ: [] != ['H1-inner-ws']` |
+| 🆕 新增红 | `query_does_not_fold_case`（存 `Code-Review` → 查询 `code-review` 须 **0 条**） | `Lists differ: ['H2-case'] != []` ← **今天真返回了那一行** |
+
+> **这条新确认为什么值得单独记**：`?capability=code-review` 现在能把能力写成 `Code-Review` 的 Agent 也捞出来 ——
+> SQLite 的 `LIKE` 对 ASCII **默认不区分大小写**。这是 F2（`contains()` 走文本 LIKE）的**第 4 种表现形态**，
+> 此前 REVIEW 只记了跨 key / `_` / `%` 三种，**没人发现大小写也被悄悄折叠了**。
+> 归 `T-FIX-01` 同一处修复（换成 Python 端成员判定即一并消失），但**验收口径要补上它**：
+> 只写「三种反例转绿」的判据会漏掉这一类。
+> ⚠️ 大小写那半条依赖一条**未拍的产品裁定**（`T-FIX-02`：「`casefold()` 折不折叠由产品拍，先按不折叠」），
+> 改判时**本条与前端 `capability-group.test.tsx:74` 必须同时改**（只改一边 = 把 F18 从「一个 bug」变成「两套真相」）。
+>
+> 另：本工件**新增的 2 条不改变任何既有断言**，`MagicMock`/`urlopen`/`8800` 三条 grep 仍为 0，定向数从 26 → 28。
+
+### 1.4 三处「AI 先替你定了」的裁定（须人工过目，R18.1 ①）
 
 1. **`?capability=`（空串）= 返回 0 条**，不是「视为未传、返回全量」。依据：`T-FIX-02` 的归一化契约规定
    非 str / strip 后为空的项一律丢弃 → 归一化后空串**不可能**是任何 Agent 的能力，两种语义里只有「0 条」与它自洽。
@@ -121,19 +167,35 @@ AssertionError: 'template_owner' not found in
    不要用改代码绕过断言（R5.3）。
 2. **`capabilities` 非 list（字符串 / `null`）视为「无能力」**，与 `k8s_routing_service._extract_capabilities` 现有行为一致；
    不新增「字符串也算单元素」的解释。落点：`T-FIX-02` 的 `capabilities_of()` docstring 须写死。
+   ✅ 复跑时核对：**前端 `capabilitiesOf` 已按同一口径实现并断言**（`capability-group.test.tsx:77-83`，非数组/非字符串 → `[]`）→ 两端一致，本条可视为已定。
+3. **归一化细则**（`T-FIX-02` 明写：`strip()` + **折叠连续空白** + `casefold()` 折不折叠**由产品拍、先按不折叠**）。
+   `T-FIX-05` 落地时前端已把这三条写成断言（`:73` 折叠空白、`:74` 不折大小写），而**后端此前没有任何用例钉它**
+   → 「F18 单一真相」只剩后端一层。本轮补 §1.3.1 那 2 条把后端半边钉上；
+   ⚠️ **大小写那一半不是我的裁定**，是 `T-FIX-02` 里的临时口径，**待产品拍**（新开放项 O-9）。
 
-### 1.5 UAT 脚本（FR3/FR4/FR5 · 本轮唯一合法证据形式）
+### 1.5 UAT 脚本 → 复跑后：**UAT-1/2 已升级为 unit**，UAT-3 仍待裁定
 
-> 为什么是 UAT 而不是 unit：分组逻辑内联在 1428 行的 `AgentControlPlane.tsx:585-605`，`groupByCapability` 纯函数
-> 尚未抽出（`T-FIX-05`）。抽出后**必须**补 `frontend/src/__tests__/capability-group.test.tsx`，
-> 且含 TASK v6 追加的那条归一断言：喂 `capabilities:[""]` → 结果里无空名分组、该 Agent 落 `未分类`；
-> 喂 `" code-review "` → 与 `"code-review"` 同组。**「只搬家不归一」过不了这条**。
+> 第 1 次为什么只能记 UAT：分组逻辑内联在 1428 行的 `AgentControlPlane.tsx:585-605`，没有可断言的单元。
+> `T-FIX-05`（`0f10be77`）抽出 `groupByCapability` + `capabilitiesOf` + `CapabilityGroupHeader` 后，
+> 落点 `frontend/src/__tests__/capability-group.test.tsx` 有 **14 条**（本阶段一手复跑 `npx vitest run capability` → `Tests 14 passed (14)`）。
+> **升级依据是逐条对得上的**，不是「有测试文件就算过」：
+
+| 原 UAT 期望 | 现在由哪条 unit 承担（用例名取自该文件） | 状态 |
+|---|---|---|
+| 空串能力不落空名分组、落 `未分类` | `capabilitiesOf · 空串能力不得自成一组，须落 未分类`（`:51`，断 `not.toContain('')` + 落兜底桶） | ✅ 自动化 |
+| 带空格值与规范值同组 | `前后空格归一后与规范值同组`（`:62`）+ `归一后同一 Agent 内的重复项去重`（`:68`） | ✅ 自动化 |
+| 纯空白 / 非字符串 / 缺字段 | `纯空白能力等同无能力`（`:57`）、`非字符串项 / 非数组 / 缺字段一律丢弃，不抛异常`（`:77`） | ✅ 自动化 |
+| 域树三层展开折叠（真实 DOM 路径） | `按 capability 分组，多能力 Agent 落多组`（`:27`）+ `组键格式`（`:45`）+ `CapabilityGroupHeader 渲染组名与健康概要`（`:97`） | 🟠 单元级已过，**浏览器里的折叠交互仍无证据**（未起服务） |
+| 健康概要 `N healthy / M total` | `渲染组名与健康概要（N healthy / M total）`（`:97`） | ✅ 自动化（渲染层） |
+| 折叠头键盘可达 + `aria-expanded` | **无** | 🟡 仍是 UAT（`T-FIX-06` 未落地；`AgentControlPlane.tsx` 内 `grep -c aria-expanded` 仍 **0**） |
+| FR5 默认域双指 / `未分类` 占用命名空间 | **不写用例** | 🟡 待人工裁定第 6、7 条 |
 
 #### UAT-1 · 三层域树展开折叠
 - **前置**: 后端起服务；种子数据 = 1 个域内 3 个 Agent，其中 1 个 `capabilities: [" code-review "]`、1 个 `capabilities: []`
 - **步骤**: 1. 打开控制面 → 域树 2. 展开域 3. 点能力组头（鼠标一次 + 键盘 Enter 一次）4. 展开组看实例列表
 - **期望**: - 带空格那条与 `code-review` **同一组**（不出现两个组）- 无能力 Agent 落 `未分类` - 折叠头可键盘操作，`aria-expanded` 随状态翻转
-- **实际**: 🟡 **未执行**（本阶段未起服务；键盘与 `aria-expanded` 部分是 `T-FIX-06` 的判据，实测当前 `grep -c aria-expanded` = 0）
+- **实际**: 🟠 **一半升级为 unit**（分组/归一/组键 4 条 + 渲染 3 条，`npx vitest run capability` → 14 passed，本阶段一手复跑）；
+  **浏览器里的折叠交互与键盘可达仍未执行**（本阶段未起服务；`aria-expanded` 是 `T-FIX-06` 判据，实测页面 `grep -c aria-expanded` = 0）
 - **执行人 / 时间**: 待人工 / —
 
 #### UAT-2 · 健康概要 N healthy / M total
@@ -167,9 +229,11 @@ TOTAL                               444    269    39%
   两个 routes 模块里其余端点属别的 change —— 记为**已知偏离**，不是「覆盖率达标」。
 - 有意义的子集：`agents_api.py:35-38`（能力过滤那三行）与 `domain_api.py:100-119`（FR2 端点）**被执行且被断言**，
   这两处是本 change 的病灶；`T-FIX-01/02` 落地后这两个模块的行覆盖应显著上升（作为**观察项**，不作判据）。
-- 边界用例（≥3 要求）：空串 · 空白/带空格值 · 非 list（字符串）· `null` · 越界字面量（`%` / `_` / 引号闭合串）·
-  域不存在 404 · 空域 · 三重参数组合 —— 共 8 类，全部在 §1.3 表内。
+- 边界用例（≥3 要求）：空串 · 空白/带空格值 · **内部连续空白** · **大小写** · 非 list（字符串）· `null` ·
+  越界字面量（`%` / `_` / 引号闭合串）· 域不存在 404 · 空域 · 三重参数组合 —— 共 10 类，见 §1.3 + §1.3.1。
 - 错误路径：404 × 2（越权 / 未知域）· 非 list 数据形态 × 2 · 凭据不可得路径（拒绝 或 无凭据副本 或 明文不等）三选一。
+- ✅ 复跑第 2 次（`50d944d5`，28 条）后**上面那张 coverage 表数字一字未变**：新增的 2 条走的是同一批行，没有把覆盖率「跑高」——
+  这句话是给下一个人的防误导提示（覆盖率没动 ≠ 用例没起作用，红的是谓词不是可达性）。
 
 ### 1.7 测试质量自检（6 维衰退风险）
 
@@ -227,12 +291,13 @@ TOTAL                               444    269    39%
 
 已做的部分（不算通过判定，只是基线，避免下一轮拿不到对比）：
 
-| 项 | 实测 |
-|---|---|
-| 后端全量套件耗时 | 5.92s（207 条，含新 26 条） |
-| 新定向套件耗时 | 2.13s（26 条）→ 单条 ≈ 82ms，无慢查询迹象（内存 SQLite，样本太小不外推） |
-| 前端 `vitest run` 基线 | **5 files / 52 tests passed**，3.91s（`frontend`，exit 0）→ `T-FIX-05/06` 新增用例的对照基线 |
-| N+1 观察 | `domain_api.py:110` 与 `agents_api.py:38` 都是「一次查询 + Python 端逐行取 JSON」→ 本 change 数据量下无 N+1；**但** `T-FIX-01` 若改为逐行 `capabilities_of()` 过滤，全表扫描行数 = owner 过滤后的行数，需人工预算才能判定是否可接受 |
+| 项 | 第 1 次（`5092f1de`） | 复跑第 2 次（`50d944d5`） |
+|---|---|---|
+| 后端全量套件耗时 | 5.92s / 207 条 | **8.65s / 209 条**（+2 条用例；wall time 在本机浮动大，**不作判据**） |
+| 新定向套件耗时 | 2.13s / 26 条（≈ 82ms/条） | **4.55s / 28 条**（≈ 163ms/条；每条都建一次内存库 + `create_all`，成本在 fixture 不在被测代码 → 不外推） |
+| 前端 `vitest run` 基线 | 5 files / 52 tests，3.91s | **6 files / 66 tests，7.18s**（exit 0）；定向 `vitest run capability` = 14 passed |
+| `T-FIX-04` 的查询形态 | — | **零新增往返**：改动是给既有那一条查询加 `WHERE agents.owner_id = ?`（非 admin 时），admin 时代码路径与改前完全一致（`git show 5e93984d` = 1 文件 `-4/+4`）。索引实测：`models/agent.py:14` 的 `owner_id` **有** `index=True`，`:22` 的 `domain_id` 是 FK **无** 索引（SQLite 不自动给 FK 建）→ 非 admin 路径吃 `owner_id` 索引且选择度高，**不是性能回归**；真正该盯的是 `T-FIX-01` 把谓词从 SQL 挪进 Python 之后，行数 = owner 过滤后的全行数 |
+| N+1 观察 | `domain_api.py:110` 与 `agents_api.py:38` 都是「一次查询 + Python 端逐行取 JSON」→ 本 change 数据量下无 N+1；**但** `T-FIX-01` 若改为逐行 `capabilities_of()` 过滤，全表扫描行数 = owner 过滤后的行数，需人工预算才能判定是否可接受 | 同上（未变） |
 
 → 开放项 **O-1**：请人工给 `GET /api/agents` 与 `GET /api/domains/{id}/capabilities` 的 p95 预算（或明确「内部工具，不设性能门」并签「已知接受」）。**AI 不自定阈值**。
 
@@ -243,20 +308,35 @@ TOTAL                               444    269    39%
 ### 3.1 依赖漏洞
 
 ```text
-$ cd frontend && npm audit --omit=dev        # exit 1
+$ cd frontend && npm audit --omit=dev                       # exit 1
 5 vulnerabilities (4 moderate, 1 high)
   js-yaml 5.0.0 - 5.2.1        Severity: high      GHSA-pm4m-ph32-ghv5（flow 集合指数级解析 → DoS）
   esbuild  <=0.24.2            Severity: moderate  GHSA-67mh-4wv8-2f99（dev server 任意跨源读响应）
   prismjs  <1.30.0             Severity: moderate  GHSA-x7hr-w5r2-h6wg（DOM Clobbering）
-$ pip-audit / bandit / semgrep               # 本机未安装 → 后端依赖与 SAST 未能出数
+
+# 后端：第 1 次写「本机全缺 → 不出结论」，复跑时由 verify 执行在**隔离 venv** 里装上 pip-audit 2.10.1 实跑
+$ pip-audit -r <68 项 venv 快照> --no-deps --desc on        # rc 1
+Found 8 known vulnerabilities in 4 packages（7 个唯一 ID）
+  anyio 4.14.0        CVE-2026-63374 / -64847 / -63349 → 4.14.2   ✅ 可达（httpx/starlette/anthropic 的传递依赖）
+  PyPDF2 3.0.1        PYSEC-2026-1835 → 3.9.0（官方建议迁 pypdf）  ✅ **直接声明项** requirements.txt:10
+  pip 26.1.2          PYSEC-2026-3721 → 26.2                       ❌ 解释器工具本身，不在声明面
+  soupsieve 2.8.4     CVE-2026-85999 / -86000 → 2.9.0              ❌ 经 beautifulsoup4←markdownify，而 markdownify 不在 requirements.txt（venv 自带）
 ```
 
-- High / Critical：**1**（`js-yaml`）。判定影响需要人：它是 `react-syntax-highlighter` 的传递依赖，
-  **本仓 `npm run build` 本来就是红的**（`CLAUDE.md` 既载），`fix --force` 会连带打破 `react-syntax-highlighter@16.1.1` 的 breaking change。
-  → 记 R2.5 待裁定第 1 条的**同族决策**，不由 5-test 自行降级。
-- 后端：`backend/requirements.txt` 13 条**全为 `>=` 区间、无任何锁文件**（`T-FIX-12` ④ 已登记为议题）
-  → CVE 基线**不可固化**，本轮**不出**「后端依赖干净」这个结论。
-- 处理：open（`js-yaml` 与锁文件缺失都需人拍；修依赖本身超出 `capability-groups` 的 `write_files`）。
+- High / Critical：**前端 1**（`js-yaml`）。后端那 8 行的 **severity 未逐条取到**（复跑输出里没给）→ **不猜级**，
+  要定级就重跑 `pip-audit --desc on` 把每条的 `severity` 字段贴回来（挂在 O-12 下：常驻化 + 补 severity，两件事一起）。
+  前端这条的判定影响需要人：`js-yaml` 是 `react-syntax-highlighter` 的传递依赖，而**本仓 `npm run build` 本来就是红的**
+  （`CLAUDE.md` 既载），`fix --force` 会连带 `react-syntax-highlighter@16.1.1` 的 breaking change
+  → 记 R2.5 待裁定的**同族决策**，不由 5-test 自行降级。
+- **只有 2 个包落在声明面上**（`PyPDF2` + `anyio`），其余 2 个包属工具链 / venv 自带 ——
+  这条拆分对定性有用：**别把「8」读成「本应用有 8 个洞」**。
+- ⚠️ **更正第 1 轮的一处措辞过宽**：我写过「仓内无任何锁文件」。**Python 侧属实**
+  （只有 `backend/requirements.txt`，13 条全 `>=` 区间，无 pip-tools/poetry/uv 锁），
+  但 npm 侧有被 git 跟踪的 `frontend/package-lock.json`，另有 `backend/package-lock.json` 是 `"packages": {}` 的**空壳**。
+  正确口径：**Python 侧无锁文件 → 后端 CVE 基线不可固化**；npm 侧有锁但 `audit` 仍要人拍降级（`T-FIX-12` ④ 的作用域须照此收窄）。
+- 使用限制：那份 68 项清单是**跑测试那个 venv 的快照**，不严格等于 `requirements.txt`；
+  `pip-audit` **没有**装进共享 venv（装在一次性 venv，事后复核共享 venv 仍 68 项、无 pip-audit）
+  → 要把它变成人人可跑的常驻工具，需要有人拍「装进共享 venv」这一步（记开放项 O-12）。
 
 ### 3.2 秘钥扫描（模式 grep，非工具）
 
@@ -270,24 +350,30 @@ backend/services/oauth_mock.py:52  "refresh_token": "mock_refresh_token_" + uuid
 
 - 命中 **2**，判定**真凭据 0**：两条都是 `oauth_mock.py` 里与 `uuid` 拼接的**运行时生成值**，不是硬编码密钥。
 - ⚠️ 口径声明（避免被当成穷尽证据）：这条模式只吃「`KEY = 字面量`」形态，
-  **不等价于** `trufflehog`/`gitleaks`（本机均缺，见 3.1）→ 记盲区 **B-3**。
+  **不等价于** `trufflehog`/`gitleaks` → 记盲区 **B-3**。
+- **复跑时补的两条事实（比第 1 轮的措辞更准）**：
+  ① `trufflehog` 在 PyPI 上最高只有 **2.2.1（旧 Python v2）**，**不是** v3 Go 扫描器，`apt-cache` 亦无候选
+  —— 所以「装不上」这个说法本身也不准确，正确说法是「**装得上但不是那个工具**」；
+  ② 扫描面被我低估了：`git ls-files frontend/node_modules | wc -l` = **35517** 个被 git 跟踪的依赖文件
+  （`CLAUDE.md` 既载此事）→ 模式 grep 跳过了它们（我排除了 `node_modules`），
+  因此 B-3 的真实范围是「**跟踪面 381 → 全跟踪面 35,898**」，不是「381 个文件扫完」。
   本轮**新写入的测试文件**里的 `"sk-victim-DO-NOT-COPY"` / `"sk-ca"` 是刻意造的假凭据，名字已表明性质。
 
 ### 3.3 SAST
 
-未执行（无 Semgrep / CodeQL / Bandit）。记盲区 **B-4**，不写「已扫描」。
+未执行（无 Semgrep / CodeQL / Bandit；`pip install bandit` 未做，见 O-12 的常驻化决策）。记盲区 **B-4**，不写「已扫描」。
 
 ### 3.4 OWASP Top 10（只列本轮**新增自动化证据**能判的部分；完整判定见 `REVIEW.md` §2.4，本节不重复其取证）
 
 | 项 | 状态 | 本轮证据 / 备注 |
 |---|---|---|
-| A01 越权 | 🟡 **有判据未修** | `fr2_domain_owner_cannot_read_other_owners_capability`（RED，T-FIX-04）· `non_admin_percent_query_leaks_nothing`（RED） |
+| A01 越权 | 🟠 **`:110` 已收口，但留了一条互斥要人裁** | `fr2_domain_owner_cannot_read_other_owners_capability` **转绿**（真实 session 一手复跑，单跑 `1 passed`）· `non_admin_percent_query_leaks_nothing` 仍 RED（等 `T-FIX-01`）。⚠️ admin 旁路与本工件的【护栏】互斥，4-dev 按护栏保留既有 admin 分支 → 三条出路记 **O-11** |
 | A02 加密失败 | ✅ 判定不变 | `encryption_service` 每次 `nonce = os.urandom(12)`（`:20`）→ 本轮据此**否决了「判密文不等」这种判据**，用例只判明文 |
-| A03 注入 | ✅ 不成立 | `quote_injection_literal_returns_zero_rows_without_error` 为护栏（0 行、不报错）；与 REVIEW 结论一致：绑定参数，只语义绕过 |
-| A04 不安全设计 | 🟡 | 「域成员 = 可支配」这个错误设计仍活在 `:110`/`:208`，两条用例把它钉住（一红一红） |
+| A03 注入 | ✅ 不成立（**但表现形态从 3 种增到 4 种**） | `quote_injection_literal_returns_zero_rows_without_error` 为护栏（0 行、不报错）；与 REVIEW 结论一致：绑定参数，只语义绕过。复跑新证据：同一处 `LIKE` 还**悄悄折叠了大小写**（§1.3.1）→ 「语义绕过」不止通配符一条 |
+| A04 不安全设计 | 🔴 **半修** | 「域成员 = 可支配」：`FR2` 端点（`:110`）已收口，**`:208` 的模板候选集仍是裸查**（4-dev 自己指出，并给出复用 `_filter_owner(..., Agent)` 的落点）→ 凭据搬运两条用例保持 RED，等 `T-FIX-13` |
 | A05 配置错误 | ❌ 本轮未测 | 见 REVIEW §2.4 前提声明（身份 fail-open，A07 项下） |
-| A06 漏洞组件 | ❌ 未闭环 | §3.1：1 high 待裁定 + 后端无锁文件 |
-| A07 鉴权 | 🟡 未修（**不由本 change 修**） | 身份层 fail-open 是项目级议题；本轮按 `T-FIX-04` v5 结论**不等它**，用例以直传身份跑非 admin 路径 |
+| A06 漏洞组件 | 🟠 有数未闭环 | §3.1：前端 1 high 待裁；后端 `pip-audit` 实跑 **8 行 / 7 个唯一 ID / 4 个包**，其中**只有 `PyPDF2` + `anyio` 落在声明面**；Python 侧无锁文件 → 基线不可固化 |
+| A07 鉴权 | 🟡 未修（**不由本 change 修，但它决定 A01 的成色**） | **一手复核**：`backend/auth.py:181-186` 在 `request.state.user` 缺失时 `user = get_user("admin")` → **不带身份头即 admin**（`CLAUDE.md` 亦载）。含义：admin 分支还在，`:110` 的行收口在**未鉴权路径上就是空操作** —— 这是 A07 与该分支的耦合，必须与 O-11 一起裁。本轮用例**不等它**（按 `T-FIX-04` v5 结论直传身份跑非 admin 路径） |
 | A08 数据完整性 | 🟡 | `scale_*` 两条：副本不得携他人凭据；`audit` 记录须可指认模板主人 |
 | A09 日志监控 | 🔴 **有判据未修** | `scale_audit_detail_must_name_the_template_owner`（RED）：`scaled 1→2 (+1)` 里查不到模板归属 |
 | A10 SSRF | ❌ 不适用（本面） | 本轮 `write_files` 内无外部 URL 取回逻辑；`_quick_test.py` 的 `127.0.0.1:8000` 属冒烟脚本，已标「非回归基线」 |
@@ -299,7 +385,11 @@ backend/services/oauth_mock.py:52  "refresh_token": "mock_refresh_token_" + uuid
 ### 4.1 跨浏览器 / 视口
 
 未执行（未起 dev server；`npm run build` 必红 = 32 个 TS 错误，基线如此）。→ 开放项 **O-2**。
-键盘可达（`aria-expanded` 等）是 `T-FIX-06` 判据，实测当前 `grep -c "aria-expanded" AgentControlPlane.tsx` = **0**。
+本轮**自动化基线**已随 `T-FIX-05` 上移：`npx vitest run` = **6 files / 66 tests passed**（复跑一手，第 1 次是 5 files / 52）；
+`npx vitest run capability` = **14 passed**（元规则 3：判据吃用例数，不吃退出码）。
+可达性的现状（一手测，两个文件分别数）：`AgentControlPlane.tsx` `aria-expanded` = **0** / `tabIndex` = **0** / `onKeyDown` = **1**（在别处，非折叠头）；
+`components/capability/CapabilityGroupHeader.tsx` 三个全 **0** → `T-FIX-06` 的落点已从「1428 行大文件」变成这个新组件，
+**它的 `write_files` 里目前没有该新文件**（4-dev 亦报同一处）→ 与 O-13 同类：action 点名的对象搬了家，落点没跟着搬。
 
 ### 4.2 数据迁移
 
@@ -315,7 +405,7 @@ sqlite: WHERE (agents.model_config_json LIKE '%' || ? || '%')
 mysql : LIKE concat('%%', %s, '%%')
 ```
 
-- 本轮 26 条用例全部跑在 **SQLite**（内存）上 → **对 MySQL 方言零覆盖**。
+- 本轮 28 条用例全部跑在 **SQLite**（内存）上 → **对 MySQL 方言零覆盖**。
 - 不只是语义错：MySQL 上 JSON 列隐式转 text 的序列化**是否带空格随版本变**（架构师 G4 ⑥ 加权），
   带不带空格会直接改变 `LIKE '%"...%'` 的命中集 → 同一份数据在两种部署下可能给出**不同结果**。
 - 因此：`T-FIX-01` 若走 `JSON_CONTAINS`，**先把 MySQL/SQLite 双方言结论写进 DESIGN 再实现**；
@@ -343,38 +433,62 @@ mysql : LIKE concat('%%', %s, '%%')
 
 ## 新增测试登记
 
-| 用例文件 | 类型 | 覆盖 AC | 所属轮次 |
-|---|---|---|---|
-| `backend/tests/test_capability_groups.py`（26 条） | integration（真实 session） | FR1（15）· FR2（6）· NFR2（3）· A01/A04/A08/A09 负例（2 + 1 重叠） | 1 · 3 |
-| `.specs/capability-groups/_quick_test.py`（仅加**文件头标注**） | 冒烟脚本 | 无（明确标为**非回归基线**，禁止当任何 verify 的证据） | 1 |
-| `frontend/src/__tests__/capability-group.test.tsx` | unit（**待建**，`T-FIX-05` 落点） | FR3/FR4/FR5 + v6 归一断言 | 1 |
-| `frontend/src/__tests__/agent-control-plane-a11y.test.tsx` | unit（**待建**，`T-FIX-06` 落点） | 键盘可达 / `aria-expanded` | 1 · 4 |
+| 用例文件 | 类型 | 覆盖 AC | 作者 / 落点 | 所属轮次 |
+|---|---|---|---|---|
+| `backend/tests/test_capability_groups.py`（**28 条**） | integration（真实 session） | FR1（17）· FR2（6）· NFR2（3）· A01/A04/A08/A09 负例（4，2 条住在前两类内） | 5-test（本工件） | 1 · 3 |
+| `frontend/src/__tests__/capability-group.test.tsx`（**14 条**） | unit（纯函数 + 组件渲染） | FR3（分组/组键）· FR4（渲染 / onToggle）· FR5 前端半边（归一后落 `未分类`）· F17/F18 归一 | `T-FIX-05`（4-dev）· **本阶段复跑核对**：`npx vitest run capability` → 14 passed | 1 |
+| `frontend/src/__tests__/agent-control-plane-a11y.test.tsx` | unit（**待建**，`T-FIX-06` 落点） | 键盘可达 / `aria-expanded`（实测页面与该头组件 `aria-expanded` / `tabIndex` 均 **0**，`onKeyDown` 只在页面别处 1 处） | 4-dev（待） | 1 · 4 |
+| `.specs/capability-groups/_quick_test.py`（仅加**文件头标注**） | 冒烟脚本 | 无（明确标为**非回归基线**，禁止当任何 verify 的证据） | 5-test（本工件） | 1 |
 
 ## 回归保护
 
 本次变更可能影响的旧功能与对应证据：
 
-- `GET /api/agents` 的既有参数（`status` / `domain_id` / 无参）→ `TestCapabNfr2Regression` 3 条，未修态已绿，**修复后必须仍绿**
-- `GET /api/domains/{id}/capabilities` 契约形状（含 `domain_name`）→ `fr2_contract_shape_and_dedup`
-- `POST /api/domains/{id}/scale` 的正常路径（调用者用**自己的** Agent 当模板）→ ⚠️ **无用例**：本轮只加了负例。
+- `GET /api/agents` 的既有参数（`status` / `domain_id` / 无参）→ `TestCapabNfr2Regression` 3 条，未修态已绿，**修复后必须仍绿**（复跑第 2 次：仍 3 绿 ✅）
+- `GET /api/domains/{id}/capabilities` 契约形状（含 `domain_name`）→ `fr2_contract_shape_and_dedup`（复跑仍绿；**它的 admin 身份断言与 TASK 的「不带 admin 旁路」互斥 → O-11**）
+- `POST /api/domains/{id}/scale` 的正常路径（调用者用**自己的** Agent 当模板）→ ⚠️ **无用例**：本工件只加了负例。
   记开放项 **O-7**，`T-FIX-13` 落地时须补一条正向（否则「把整条端点堵死」也能骗过负例）
-- 既有 41 个红：本轮**未触碰**（定向判定，全量数只作对照）
+- **一手复核**（不转述）：`domain_api.py:208` 仍是 `db.query(Agent).filter(Agent.domain_id == domain_id).all()` 裸查，
+  `:231 template = matching[0]` / `:236 owner_id=user["id"]` / `:243 api_key_encrypted=template.api_key_encrypted` **原位未动**，
+  文件仍 290 行 → 凭据搬运两条用例保持 RED 是**应有状态**，不是用例写歪。
+- `T-FIX-04` 的改法是**参数化既有谓词**（`_filter_owner(q, user, model=Domain)`），**没有新增第 6 份 owner 副本**
+  （全仓仍 5 份：4 个 route 模块 + `storage/sqlite_backend.py:31`）→ 这一条对 F3/F18「副本数」的账是**中性偏正**，
+  已登记进另开 CHANGE 的清单，不由本 change 收口。
+- capability 的**第 4 套真相**：`frontend/src/pages/AgentBuilder.tsx:48`（`(a.model_config_json && a.model_config_json.capabilities) || []`，
+  同样不过滤空串/空白）—— 由 4-dev 在 `T-FIX-05` 里发现，本阶段**登记不修**（越界，且不在任何 T-FIX 的 `write_files`）→ **O-13**
+- 既有 41 个红：本工件**未触碰**（定向判定，全量数只作对照）
 
 ## 出口条件（下一轮谁做什么，避免被读成「TEST 已过」）
 
-1. `T-FIX-00` 的 verify：① 定向收集 ✓（`26/207 tests collected (181 deselected)`，此前是 `no tests collected`）
-   ② 定向通过 ⏳（**修复后**才为真，未修态 17 红是设计目标 —— 见下方「一条措辞歧义」）
-   ③ 三条 grep 护栏 ✓ 全 0 ④ 全量真实输出已贴 ✓ ⑤ `_quick_test.py` 已标「非回归基线」✓（`grep -c 非回归基线` = 1）
-2. **一条措辞歧义（提给 6-review 与自己）**：`T-FIX-00` 的 verify ② 写成【验收】`pytest tests/test_capability_groups.py -q` 定向通过，
-   但未修态它**必然为假**（RED 基线的定义就是它）。建议 TASK 下轮把 ② 标成**【验收·修复后】**，
-   并把「未修态实测值 = 17 failed / 9 passed」补进基线表 —— 否则实现者会以为「把用例删了/弱化了就达标」（正是 R5.3 的入口）。
-3. 代码修复（`T-FIX-01..13`）现在**解除阻塞**：RED 基线存在，`T-FIX-02` 改公开导出的前置条件（R4.6 回归覆盖）满足。
-   每条落地后**复跑本节定向命令**，17 条 RED 应逐条转绿；任一红转不了 = 该条修复未真正落地。
-4. **测试门（4 专家投票）本轮不召集**：在 9 项 🔴 未修、第 1 轮 17 条红、FR3-FR5 只有 UAT 的情况下召集，
-   等于让专家对「还没实现的测试通过与否」投票。召集条件 = `T-FIX-01..13` 复跑后第 1 轮全绿 + O-1/O-2/O-3 有结论。
+1. `T-FIX-00` 的 verify（**两个 revision 各跑一次**：交付态 `5092f1de` + 复跑态 `50d944d5`，
+   并由 verify 执行在 `5092f1de` 做过一次第二方复跑，五条**一字不差**命中期望）：
+   ① 定向收集 ✓（26 → `28/209 tests collected (181 deselected)`，此前是 `no tests collected`）
+   ② 定向通过 ⏳（**修复后**才为真；未修态 17 红 → 复跑 18 红，见 §1.3）
+   ③ 三条 grep 护栏 ✓ 全 0（两个 revision 各一次）④ 全量真实输出已贴 ✓（三个数，含 warnings 维度）
+   ⑤ `_quick_test.py` 已标「非回归基线」✓（`grep -c 非回归基线` = 1，`grep -c assert` 仍 = 0）
+2. **一条措辞歧义，现已两次命中 → 建议升格为元规则**：`T-FIX-00` 的 verify ② 写成【验收】「定向通过」，
+   但未修态它**必然为假**（RED 基线的定义就是它）；4-dev 在 `T-FIX-04` 撞到**同一条**的第二例
+   （它的 verify 字面作用域「定向套件通过」在单任务粒度不可判定，17 红分属 01/02/04/13 四个任务）。
+   建议 TASK v9 写进元规则 2 的通用条款：**跨任务共享的判据一律标【验收·修复后】+ 附未修态实测值**。
+   不这么写的后果照旧：实现者以为「删掉/弱化用例就达标」（R5.3 的入口）。
+3. 代码修复的阻塞状态（复跑后更新）：`T-FIX-04` ✅ / `T-FIX-05` ✅ · `T-FIX-01` 等 `T-FIX-02` 的产物 ·
+   **`T-FIX-02` 卡在 R4.6 的人批（O-10 四选一）→ 现在它是队列头**；
+   `T-FIX-13` 未被任何东西阻塞（`:208` 仍是裸查，两条凭据链 RED 在等它）。
+   每条落地后**复跑本节定向命令**，对应红应逐条转绿；任一红转不了 = 该条修复未真正落地。
+4. **测试门（4 专家投票）本轮仍不召集**，理由更新为：9 项 🔴 结 2 项（F1 = 本工件、F4 = `T-FIX-04`）**余 7 项未修**，
+   定向 18 红，且 FR3/FR4 的前端 unit 只覆盖到纯函数层（浏览器交互 / 键盘可达无证据）。
+   召集条件 = 第 1 轮 28 条全绿 + O-1（性能预算）/ O-2（跨浏览器）/ O-3（可观测）/ O-10 / O-11 有结论。
 5. 4.2 跨模型二审（`REVIEW.md` 遗留）：仍未闭环，不因本轮推进而结（按 Master 的硬要求记在这里）。
 
-## 开放项（本轮新增，须在下一轮有归属）
+## 本轮更正（我自己写错/写旧的三处，逐条给依据）
+
+| 更正 | 原来写的 | 现在的事实（一手核对方式） |
+|---|---|---|
+| 交接基线 | 我给 4-dev 的「从 `5092f1de` 起分支」 | **按字面会拿到 v6 的 TASK/REVIEW**：`5092f1de` 的父提交是 `a90ea251`，`d1e68c07`(v7) / `68f9bb53`(v8) **不是它的祖先**（`git log --graph 50d944d5` 可核）。4-dev 改用「cherry-pick 到 v8 tip 之上」并核对我的三个文件逐字节未动（`git diff 5092f1de 50d944d5 -- <三个文件>` 输出为空，本阶段复核一致）。**教训写死**：交接给下游的基线必须是**可核的祖先关系**，不是「我刚推的那个 commit」 |
+| 锁文件口径 | 「仓内**无**任何锁文件」 | Python 侧属实，npm 侧有被跟踪的 `frontend/package-lock.json`（+ `backend/package-lock.json` 是空壳）→ §3.1 已收窄为「**Python 侧**无锁文件」 |
+| 状态时效 | 「`groupByCapability` 还没抽出」 | 我读的是 10:04 的 tip；`T-FIX-05`（`0f10be77`）已抽出并带 14 条 unit → §1.5 已升级。**这与主审那两条「我在复述状态而不是数状态」同病根**：写工件前重新取数，别复用十分钟前读到的世界 |
+
+## 开放项（O-1~O-8 为第 1 次，O-9~O-13 为本次复跑新增）
 
 | # | 项 | 归属 |
 |---|---|---|
@@ -385,4 +499,9 @@ mysql : LIKE concat('%%', %s, '%%')
 | O-5 | MySQL 方言渲染未测（JSON→text 随版本变） | `T-FIX-01` + DESIGN 记录 |
 | O-6 | 审计无 trace-id | 议题（跨 change） |
 | O-7 | `/scale` 正向路径无用例 | `T-FIX-13` 落地时补 |
-| O-8 | **`STATE.md` 不在 `T-FIX-00` 的 `write_files` 里，但 R18.3 + 阶段规约要求写完更新状态行** → 本轮按规则改了它（`git diff --name-only` 里就这一条越界，已在此显式记账而不是藏进提交）。下轮请二选一：把 `STATE.md` 补进每条 T-FIX 的 `write_files`，**或**在该段元规则 1 里写明「`STATE.md` 状态行例外」——否则「守边界」与「写状态」互相否证，实现者只能挑一个违反 | 6-review 下一版 TASK |
+| O-8 | **`STATE.md` 不在 `T-FIX-00` 的 `write_files` 里，但 R18.3 + 阶段规约要求写完更新状态行** → 本轮按规则改了它（`git diff --name-only` 里就这一条越界，已在此显式记账而不是藏进提交）。下轮请二选一：把 `STATE.md` 补进每条 T-FIX 的 `write_files`，**或**在该段元规则 1 里写明「`STATE.md` 状态行例外」——否则「守边界」与「写状态」互相否证，实现者只能挑一个违反。**第 2 次命中**：`T-FIX-04` 撞到同一堵墙（4-dev 亦选择「改 + 在 SUMMARY 显式记账」）→ 两条同证，建议直接补 `write_files` | 6-review 下一版 TASK |
+| O-9 | **归一化的大小写口径未拍**：`T-FIX-02` 写「`casefold()` 折不折叠由产品拍，先按不折叠」→ 前端 `capability-group.test.tsx:74` 与本工件新增的 `query_does_not_fold_case` 都按**不折叠**钉。若产品改判折叠，**两处必须同时改判**（只改一边 = F18 从「一个 bug」变成「两套真相」） | 人工 / 产品（经 6-review 并入待裁定） |
+| O-10 | **`T-FIX-02` 命中 R4.6，四选一没人答 → 队列头卡在这**。引用图（4-dev 已做好）：`_extract_capabilities` 定义在 `k8s_routing_service.py:20`（11 行体）被 `domain_api.py:9` 跨模块 import，调用点 `:175/:211/:285` → 同时命中「删既有代码 ≥5 行」与「删/重命名导出符号」。(i) 删符号 + 改 3 处调用（`T-FIX-13` 的锚点需重定位）· **(ii) 保留为 deprecated 薄封装委托 `capabilities_of`（4-dev 与本阶段都倾向这条：只命中「删 ≥5 行」一条，符号与 import 面不动、漂移最小，且 F18「唯一入口」照样成立）** · (iii) 不动（七副本停在 6，`T-FIX-02` 的【验收】判据必红）。⚠️ R4.6 的人批**不由 5-test 代签** | 人工（R4.6 硬性）|
+| O-11 | **admin 旁路与本工件护栏互斥**（= 待人工裁定第 9 条的具体化）。TASK `T-FIX-04`：「模型/模板收口默认**不带** admin 旁路」；本工件【护栏】`fr2_contract_shape_and_dedup`：admin 身份请求他人域、断言看得见其 capability → **不可同时为真**。三条出路：**(A)** 改 TASK 文本（非 admin 收口、admin 沿用既有分支）—— 代价：`auth.py:181-186` 的 fail-open 使「无身份头 = admin」，所以 A 在未鉴权路径上等于**`:110` 的收口形同未修**（A07 修好前该分支对外敞开）。**(A′)** TASK 自己给出的形态：豁免保留但须写成**显式分支 + 落审计**（现况是隐式复用 `_filter_owner` 的 admin 分支，不满足 A′）—— 选它我就补一条「admin 读他人域须落审计」的用例（现在**不写**，免得像 FR5 那样把未定口径冻进代码）。**(B)** 真要 no-bypass：**由 5-test 把该护栏的调用身份从 admin 改成域 owner 本人**（断言的两项 capability 一字不改，属**换身份不换强度**，不是 R5.3 的削弱），4-dev 再删分支。⚠️ 若 4-dev 先删分支会留下 1 条红被读成「dev 改坏了测试」→ **顺序不能反：先裁，再由 5-test 改，再删**（本轮把这条写死的原因：护栏在我手里） | 人工签（R2.5 第 9 条 · 唯一会改变代码形状的那条） |
+| O-12 | **`pip-audit` 常驻化**：verify 执行在**一次性 venv** 里装上跑出了后端 CVE 数（共享 venv 未被污染，已复核），但人人可复跑需要有人拍「装进共享 `/home/malizhi/.venv`」这一步；同时那 8 行的 **severity 未逐条取到** → 定级要补一次跑 | 人工（工具链）|
+| O-13 | **capability 第 4 套真相**：`frontend/src/pages/AgentBuilder.tsx:48` 的 `(...).capabilities \|\| []` 不过滤空串/空白（4-dev 在 `T-FIX-05` 中发现，未动 = 越界）。F18 现写「后端 7 + 前端 1」→ 要么给 `T-FIX-01/02` 补这个落点，要么把它记进 F18 清单，**别让「前端已平」这句话停在半真的账上** | 6-review 下一版 TASK / F18 清单 |

@@ -208,6 +208,30 @@ class TestCapabFR1AgentFilter(CapabDbCase):
         body = self._list(capability=" code-review ")
         self.assertEqual(["G-exact"], self._names(body))
 
+    def test_capab_normalization_folds_inner_whitespace(self):
+        """【RED · T-FIX-02 归一化契约】存储值须**折叠内部连续空白**后才与查询串可比。
+
+        判据来源不是实现，而是 TASK `T-FIX-02` 的 action 原文：「`c.strip()`，并折叠连续空白 +
+        `casefold()` 折不折叠由产品拍，**先按不折叠、写进 docstring**」。同一份契约前端已在
+        `capabilitiesOf` 上钉死（`frontend/src/__tests__/capability-group.test.tsx:73`，实跑 14 passed）；
+        后端不钉同一条 = F18「单一真相」只剩后端一层，两端各自正确但规则不同。
+        """
+        self._agent(name="H1-inner-ws", capabilities=["  a\t\tb  "])
+        self.assertEqual(["H1-inner-ws"], self._names(self._list(capability="a b")),
+                         "strip 只管首尾不够，`a\\t\\tb` 归一后必须等于 `a b`")
+
+    def test_capab_query_does_not_fold_case(self):
+        """【RED · 同上，且**依赖一条未拍的产品裁定**】大小写按「先按不折叠」口径：不折叠。
+
+        现状 `contains()` 走 SQL `LIKE`，SQLite 对 ASCII **默认不区分大小写** → `code-review` 查询
+        会命中 `Code-Review`，是一种**看不见的假阳性**（`_`/`%` 那两条反例的同族）。
+        ⚠️ 若产品改判「折叠大小写」，**本条与前端 `capability-group.test.tsx:74` 必须同时改判**；
+        只改一边 = 把 F18 从一个 bug 变成两套真相（R5.3 的「显式换语义并记因」，不是改到能过）。
+        """
+        self._agent(name="H2-case", capabilities=["Code-Review"])
+        self.assertEqual([], self._names(self._list(capability="code-review")),
+                         "`Code-Review` 不是 `code-review` 的能力（不折叠大小写口径）")
+
     def test_capab_combined_with_domain_id(self):
         """FR1 第二句（可与 `domain_id` 组合）：非 0 支 + 同域假阳性靶。"""
         d = self._domain("生产域", "admin")
