@@ -7,15 +7,16 @@
 
 | 字段 | 值 |
 |---|---|
-| 当前阶段 | **6-review**（change `capability-groups`）· 门禁 **G4 已收齐 4/4 → 结果 1/4（3❌ + 1 条附 6 修订的 ✅）→ 按规约「多数反对 = 回本阶段修改」：不推进、不进 7-integration** |
+| 当前阶段 | **6-review**（change `capability-groups`）· **G4 第二轮票面 2✅/2❌ 平票** → 按 R13.2：列出分歧点**提交人工，停止推进**。实质无判断冲突（四位一致：本 change 阻塞、门禁红独立成立、`T-FIX-03` v3 会造新 bug）；分歧只在「工件此刻是否可交接」= 三位尚未复核 v4/v5 |
 | 当前 task | 无（Reviewer 只出报告与 fix 任务，R3.3）· 待执行队列：`T-FIX-00`（回 5-test）→ 🔴 `T-FIX-01/02/04/07/08/09/13` |
 | 中断任务 | 无写操作中断。`REVIEW.md`(v3) + `TASK.md`(v3) 已落盘并推送 |
-| 产物 | `.specs/capability-groups/REVIEW.md` **v4**（20 项：**9🔴** / 9🟡 / 2🟢，含 §2.4 安全节 + G4 裁决记录）· `.specs/capability-groups/TASK.md` §「修复任务」T-FIX-00~13（v4：T-FIX-03 重写） |
+| 产物 | `.specs/capability-groups/REVIEW.md` **v5**（20 项 = **9🔴** / 9🟡 / 2🟢，含 §2.4 安全节 + G4 第一轮/第二轮裁决记录）· `.specs/capability-groups/TASK.md` T-FIX-00~13（v5：补 verify 落点 + 全条标【验收】/【护栏】+ **未修态基线表 14 行** + T-FIX-13 改判明文） |
 | v2 起因 | G4 安全审计师指出 F4 **按站点记数、应按 sink 分类** → 暴露 **F16**：`POST /api/domains/{id}/scale` 让域 owner 以**他人 Agent 为模板** mint 归自己的副本并**逐字节复制 `api_key_encrypted`**（`domain_api.py:208→:231→:243` → `chat_service.py:103` 解密取用）。主审 in-process 复现确认。v1 那句「capability 列表虽非密钥」盖过了最重的一跳 = **判级错误，已认** |
+| v5 起因 | **G4 第二轮票（安全 ✅带 3 条 + Master ❌带 3 条 + 半条）查的是「判据本身不成立」**：① `T-FIX-13` verify 判密文不等 → `encryption_service.py:20` 每次 `os.urandom(12)` 新 nonce（实跑 `encrypt(K)!=encrypt(K)` = True）→ **凭据仍被盗用时可变绿**，改判明文；② F16 前置写小 —— 无 `X-User-Id` 即 admin、`_filter_owner` 对 admin 不加条件 → `:202`+`:208` **一起旁路**（实跑 `scaled` + `decrypt(副本)==受害者明文`）→ 改记 **A01×A07**（反代后 = 远程未鉴权凭据窃取）；③ fail-closed 由前置改**结论**（用例今天可写），「不带 admin 旁路」定为**默认**（与 `CLAUDE.md`「Domain 不是安全边界」的张力 → 须人工签）；④ `T-FIX-03` 的 `status === 'healthy'` 归零判据作废（今天 =4，含唯一正确的 `getHealthLabel:34`）；⑤ 三处 verify 打靶 `write_files` 之外的文件 → 补落点；⑥ 一条判据**未修已为真**（`<div onClick` 今天 =0，JSX 拆行）→ 换 `grep -A1 "<div$" \| grep -c onClick`（今天 6）；⑦ 两个「权威计数」统一为 20 项；⑧ `:411-413` → `:412-413` |
 | v4 起因 | **G4 领域专家 ❌ 查出本报告最严重的一处**：F10 **取证方向反了** —— 我判恒假的 `AgentControlPlane.tsx:156-1137` 读的是**探针 DTO 的 `status`**（`healthy` 在其取值域内 → 唯一正确处），真正恒假的是我打 ✅ 放过的 `:74-75`（`control_plane_api.py:75-85` 构造的 payload **无 `health`/`runtime` 键**，而 `stores/controlPlane.ts:8,10` 声明了它们 → 类型在撒谎）。后果不止于报告错：**我给的 T-FIX-03 会把正确代码改成恒假，且它的 verify（grep 计数归零）恰好被这次改坏满足 → 假绿**。已在 v4 整条重写为「喂数据看行为」并标注「禁止按 v3 执行」。另补 F18 前端第三套真相 / F19 默认域双指 / F20 `未分类` 占用命名空间，**撤销 F15 范围蔓延定性**（改记需求溯源欠账，实测 `.specs/` 内 0 命中），F10 升 🔴 |
 | v3 起因 | G4 测试工程师（Master）+ 架构师查出**我的取证错误同源**：两条结论都建立在**被 `head -N` 截断的 grep** 上 → ① F6 根因假（间距/圆角 token **存在且本页面 0 引用**，不是"缺失"；只有字号真缺）→ 差点让人在假前提上签「已知接受」；② F3 副本数 5 处错（实为后端 7 + 前端 2，"规范实现"自己文件内也有 2 处内联）；③ 2.3「反向依赖：无」漏查 `services↔engine`；④ `T-FIX-00` 的 verify 与 write_files 互斥（**仓内无 pytest 配置**）；⑤ 全量测试基线实测 **41 failed/134 passed/6 skipped** → 所有 verify 改定向，防 R5.3/R7.1 双踩 |
 | 出口条件 | G4 收齐 4 票且 ≥3/4 → 回 `5-test` 跑 T-FIX-00；🔴 全部修复或取得人工「已知接受」签字（R2.5）后才可重进 6-review。**当前禁止进 7-integration、禁止合并** |
-| 待人工裁定 | REVIEW.md「待人工裁定」**8 条**（v4 新增第 6「默认域双指须 1-requirement 定口径」、第 7「`未分类` 保留字/`__none__` + FR1×FR5 无 AC」、第 8「路由/扩容规则无需求溯源」）。**第 1 条已加限定**：只有 F6 的「字号」那一半可进「已知接受」，间距/圆角属机械替换不得换签字；签审查口径须连带确认 `CHANGE.md` 把测试放在 `.specs/` 这个错路径。**第 5 条**：`:208` 凭据链**不得缓办**，只能选「本 change 内修」或「另开 CHANGE 优先修」 |
+| 待人工裁定 | **8 条 + 本轮新增 1 条偏好决策**（`T-FIX-13` 要不要保留 admin 旁路；安全主张不保留，主审附议但按 R18 ④ 交人签）。原 8 条见 REVIEW.md（v4 新增第 6「默认域双指须 1-requirement 定口径」、第 7「`未分类` 保留字/`__none__` + FR1×FR5 无 AC」、第 8「路由/扩容规则无需求溯源」）。**第 1 条已加限定**：只有 F6 的「字号」那一半可进「已知接受」，间距/圆角属机械替换不得换签字；签审查口径须连带确认 `CHANGE.md` 把测试放在 `.specs/` 这个错路径。**第 5 条**：`:208` 凭据链**不得缓办**，只能选「本 change 内修」或「另开 CHANGE 优先修」 |
 
 > 全仓 6-review 预检结论：本仓库当前**无任何 change 具备进入 6-review 的完整前置**（`capability-groups`/`agent-domains` 缺 TEST.md，`small-model-decisions` 缺 DESIGN/TASK/TEST 且无代码，`knowledge-plus`/`multi-provider` 工件不全，`agent-control-plane` 已审 4/4 通过）。选 `capability-groups` 为目标：工件最全且代码已实现。
 
