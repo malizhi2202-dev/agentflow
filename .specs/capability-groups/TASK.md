@@ -58,14 +58,41 @@
 
 > 来源：`@.specs/capability-groups/REVIEW.md`（F1-F16 · **v2**）。Reviewer 未改任何代码（R3.3）。
 > 执行回 `4-dev`；**T-FIX-00 是回退任务（5-test），完成前本 change 不得重进 6-review**。
-> 每条含 `verify`（R2.3）。`write_files` 之外的改动须先更新本 TASK 或开新 CHANGE（R7.1）。
+
+> **两条元规则（v5 · G4 资深测试工程师 ②③ 提出；主审自跑确认后写死在此，约束本段每一条）**
+> 1. **靶文件边界**：verify 里每个被 grep / pytest / vitest 打靶的文件，**必须出现在该任务的 `write_files` 里**。缺落点 = 守边界则 verify 必不过、过了就是越界（R7.3/R6.5）。
+> 2. **每条 verify 标类型**，并在**未修代码上实跑一遍**记下取值（否则读的人分不清有没有门槛）：
+>    - **【验收】** 必须**现在为假、修后为真**（今天实测：`aria-expanded` = 0；`var(--s*)` = 0；`CapabilityGroupRow` 区间硬编码 = 6；卡片样式 = 7；`collect-only -k capab` = 无用例）
+>    - **【护栏】** 必须**两个时点都为真**（如 `tsc` 的 `grep -c "error TS"` **=32**、新测试文件内 `MagicMock` 命中 **=0**）
+>    ⚠️ 反例（本段 v3/v4 真犯过）：`grep -c "<div onClick"` 要求为 0，而**今天就是 0** —— JSX 把 `<div` 与 `onClick=` 拆在 `:412/:413` 两行，该字节串根本不存在 → 零门槛。> 每条含 `verify`（R2.3）。`write_files` 之外的改动须先更新本 TASK 或开新 CHANGE（R7.1）。
 > **v3 变更（G4 资深测试工程师 ❌ + 架构师 ✅带 6 条修订，逐条实测后接受）**：本段整体重写成**可交接**的。修的是八类：①`T-FIX-00` 落点与 verify 互斥（无 pytest 配置，`pytest tests/` 收不到 `.specs/`）→ 测试改落 `backend/tests/test_capability_groups.py`；②全量基线实测 **41 failed/134 passed/6 skipped** → 所有 verify 改**定向**，并写明为什么不跑全量（防 R5.3 削弱断言 / R7.1 顺手修绿）；③`capability_service.py` 由 01、02 共同「新建」→ R7.3 冲突，改由 **02 建立、01 消费**并给出顺序；④F6 根因**我写错了**（间距/圆角 token 存在且被 0 使用，非"不存在"）；⑤verify 里所有 `≥1`/`较 X 下降`/`不再…` 非二值判据 → 换成 awk 区间 + 等值判定；⑥用例补正向锚点与边界（含 `?capability=` 空串语义二选一、`" code-review "` 归一化、`domain_id`/`status` 组合），FR3-FR5 依赖 T-FIX-05 抽纯 selector 才有 unit 落点 → 排到 T-FIX-00 之前；⑦安全类修复须**先**让身份层 fail-closed，否则 admin 旁路在默认路径上是空操作（架构师 ④ 时序陷阱）；⑧T-FIX-13 的拒绝状态码按 `CLAUDE.md` 约定改 **404**（v2 写 403 违反项目约定），并撤回 v2 顺手新建的 `domain_scale_service.py`。
 > **v4 变更（G4 领域专家 ❌，第 4 票）**：**`T-FIX-03` 整条重写** —— v3 版是**破坏性任务**（会把现在正确的 `:156-1137` 改成恒假，且它的 verify 会被这次改坏所满足 → 假绿），v4 标为「禁止按 v3 执行」并改为「喂数据看行为」；`T-FIX-01/02` 纳入**前端第三套真相**（F18）；`T-FIX-12` 追加 4 条议题（术语表缺口 / `dead` 告警永不触发 / `AgentProbePanel` 5 处幽灵字段 / services↔engine 定序）。F19/F20/F15 属**需求侧**，只登记为待人工裁定第 6/7/8 条，**不进任何 T-FIX**（R3.2）。
+
+> **v5 变更（G4 资深测试工程师 ❌复核 + 安全审计师 ✅带 3 条，逐条实测后接受）**：① `T-FIX-00` 的 `_quick_test.py`、`T-FIX-05/06` 的前端测试文件**补进 `write_files`**（此前 verify 打靶了不可写的文件 → 守边界则必不过，R7.3）；② `T-FIX-06` 的 `<div onClick` 归零判据**删除**（今天实测就是 0，零门槛）；③ 全部 verify 标 **【验收】/【护栏】** 并附**未修态实测值**；④ `T-FIX-13` 的 verify **由判密文改为判明文**（`encrypt()` 每次新 nonce → 旧判据可在凭据仍被盗用时变绿，主审实跑确认）；⑤ `T-FIX-04/13` 的「身份层 fail-closed 先行」由**前置改为结论**（用例今天就可写，不阻塞这条 🔴）；⑥ `T-FIX-03` 的 `status === 'healthy'` 计数归零形式**禁止使用**（今天 =4，含唯一正确的 `getHealthLabel:34` → 只能靠改坏正确代码通过）。
+
+**未修态基线（v5 一次跑齐，供实现者对照「现在为假」）**
+
+| 判据 | 今天实测 | 修后要求 | 类型 |
+|---|---|---|---|
+| `pytest tests/ --collect-only -q -k capab` | `no tests collected (181 deselected)` | 列出新用例 | 【验收】 |
+| `grep -c assert _quick_test.py` | 0 | >0 或加「非回归基线」标注 | 【验收】 |
+| `grep -c "aria-expanded" AgentControlPlane.tsx` | 0 | ≥1 **+ 真实键盘用例** | 【验收】 |
+| `grep -A1 "<div$" \| grep -c onClick` | 6 | 0 | 【验收】 |
+| `grep -c "<div onClick"` | **0（故作废）** | —— 不得用作判据 | ⚠️ 假判据 |
+| `sed -n '74,75p' \| grep -c "a\.health"` | 2 | 0 | 【验收】 |
+| `grep -c "status === 'healthy'"` | **4**（含 `:34` 正确映射） | —— 不得归零 | ⚠️ 假判据 |
+| `awk '/function CapabilityGroupRow/,/^}$/' \| grep -cE "(gap\|padding\|margin): [0-9]+px\|borderRadius: [0-9]+"` | 6 | 0 | 【验收】 |
+| 同区间 `grep -c "boxShadow\|border: 1px\|borderRadius"` | 7 | 0 | 【验收】 |
+| `grep -cE "#fff\b\|#ffffff\b" AgentControlPlane.tsx` | 6 | 0 | 【验收】 |
+| `grep -c "var(--s[0-9]\|var(--r-" AgentControlPlane.tsx` | 0 | >0 | 【验收】 |
+| `grep -rn 'get("capabilities"' backend/` | 7 | 1（只剩 helper 内部） | 【验收】 |
+| `tsc --noEmit` 的 `grep -c "error TS"` | 32 | **=32**（不是 ≥32） | 【护栏】 |
+| `pytest tests/ -q` 全量 | 41 failed / 134 passed / 6 skipped（**主审跑的量，Master 未复跑、只 `--collect-only` 得 181 与之自洽** → TEST.md 第 1 轮第一行须贴全量真实输出，让这个数有来源） | 不要求变绿 | 【护栏·基线】 |
 ### T-FIX-00: 回 5-test — 补 `TEST.md`（5 轮金字塔）+ capability 回归 🔴门禁
 > **v3 重写**：v2 版**不可交接**（G4 资深测试工程师 ❌①②③ + 架构师 ④⑤ 共同判定，主审逐条实测后接受）。三处硬伤：`write_files` 与 `verify` 互斥、指向的测试口径抓不住本 bug、用例全是反向断言缺正向锚点。
 
 - **read_files**: `.specs/capability-groups/REQUIREMENT.md`, `DESIGN.md`, `REVIEW.md`（§2.4 + FR1 复现记录）
-- **write_files**: `backend/tests/test_capability_groups.py`（**新建，与既有 7 个文件同级 → 才可被 pytest 收集**）, `.specs/capability-groups/TEST.md`
+- **write_files**: `backend/tests/test_capability_groups.py`（**新建，与既有 7 个文件同级 → 才可被 pytest 收集**）, `.specs/capability-groups/TEST.md`, `.specs/capability-groups/_quick_test.py`（**v5 补落点**：verify 打靶它就必须给它写权限 —— G4 测试 ② 指出 v3/v4 缺这条）
 - **落点纠正（R2.3/R7.3/R6.5）**: v2 把测试写到 `.specs/capability-groups/test_backend.py` 而 verify 跑 `pytest tests/` —— 实测**仓库根与 `backend/` 都没有 pytest 配置**（`pytest.ini`/`pyproject.toml`/`setup.cfg`/`conftest.py` 全不存在），`pytest tests/` **永远收集不到** `.specs/` 下的文件：守 `write_files` 则 verify 必不过，verify 过了就是偷偷越界写了 `backend/tests/`。根因在需求侧：`CHANGE.md:26` 把测试文件放进 `.specs/`（那是知识产物目录，不是运行目录）→ **该交付物路径由本任务的 `backend/tests/test_capability_groups.py` 取代**，需在 CHANGE 侧注明（改 CHANGE 属 R3.2 → 交人工拍）
 - **测试口径必须钉死（G4 测试 ②，否则对 FR1 必然假绿）**: 新建用例**必须走真实 SQLAlchemy session**（`DATABASE_URL` 可 env 覆盖，`backend/database.py:6-8` 支持 sqlite），断言**返回的行集合**。
   **禁止** mock `db.query` 链、**禁止**依赖活服务。理由（实测）：`backend/tests/test_api_integration.py:17` 的 `_mock_db()` 是 `MagicMock(spec=Session)`、`:29` 在**模块级**挂 `app.dependency_overrides[get_db]` → 谓词从不落到真 SQL；`test_agent_channel.py:349,354` 另一路 `urlopen` 打 `127.0.0.1:8800` 活服务。**照这两种"现有风格"写，当前这个 `contains()` 实现也会变绿**，等于给真 bug 补假证据。
@@ -81,7 +108,7 @@
 - **⚠️ 全量基线本就是红的（G4 架构师 ⑤，实测）**：`cd backend && python -m pytest tests/ -q` → **41 failed / 134 passed / 6 skipped**（`test_api_integration` 28 个 + `test_edge_cases` 7 个 + `test_round6_api_edges` 的 ChatService 三个；前两类是 mock `Session.execute` 返回 `MagicMock` 后迭代直接抛 `TypeError: 'int' object is not iterable`，第三类是 `chat_service` 漂移后测试没跟）。**不写进契约，下一轮实现者会「顺手修绿 41 个既有失败」（= R7.1 范围失控），或反过来削弱断言让自己的用例通过（= R5.3）**。故所有 T-FIX 的 verify 一律用 `pytest tests/test_capability_groups.py -q` **定向**判定，全量数只作对照
 - **`_quick_test.py` 不作基线（G4 安全 ⑤）**: 实测全文 **0 个 `assert`**、身份写死 `X-User-Id: admin`（`:6`）、末尾**无条件** `print("=== All backend tests passed! ===")`，唯一像检查的 Test 5 也只是打印 → 这种姿势写的回归**结构性看不见越权**。要么改身份可注入 + 真断言，要么文件头显式标「**非回归基线**」。禁止把它的输出当任何 verify 的证据
 - **TEST.md**: 声明 5 轮状态，跳过的轮次给理由（R5.4）；第 4 轮（兼容）须记 MySQL 的 JSON→text 隐式渲染问题（架构师加权：`contains()` 在 MySQL 上序列化是否带空格随版本变，**不只是语义错，还不可移植**）
-- **verify**: ① `cd backend && /home/malizhi/.venv/bin/python -m pytest tests/ --collect-only -q -k capab | tail -1` **能看到新用例**（当前为 `no tests collected (181 deselected)`，用例名须含 `capab`）；② `pytest tests/test_capability_groups.py -q` 定向通过；③ `grep -c assert .specs/capability-groups/_quick_test.py` 不为 0 **或** 文件头含「非回归基线」标注（不许既无断言又无标注）；④ `.specs/capability-groups/TEST.md` 存在且贴有 RED 先行输出
+- **verify（v5 标类型 + 附未修态实测值）**: ① **【验收】** `cd backend && python -m pytest tests/ --collect-only -q -k capab | tail -1` 能列出新用例（今天实测 `no tests collected (181 deselected)`；用例名须含 `capab`）；② **【验收】** `pytest tests/test_capability_groups.py -q` 定向通过；③ **【护栏】** 该新文件内 `MagicMock` / `urlopen` / `8800` 三种命中数均为 **0**（`grep -n` 逐个查）；④ **【护栏】** TEST.md 第 1 轮**第一行贴 `pytest tests/ -q` 的全量真实输出**，让 41/134/6 这个基线**有来源而不是断言**（G4 测试明确要求：他自己只跑了 `--collect-only` 得 181，与 41+134+6 自洽但未复跑全量）；⑤ **【验收】** `_quick_test.py` 的 `grep -c assert` 由**今天实测 0** 变为 >0，**或**文件头出现「非回归基线」标注（不许既无断言又无标注）
 - 状态: [ ]
 
 ### T-FIX-01: FR1 单一真相 — 弃 JSON 文本 LIKE，改数组成员判定 🔴
@@ -110,13 +137,13 @@
   - **(b) `:156-1137` 保持不动** —— 它们是当前唯一正确的健康判定（`status` 即探针判定，`:94-95` 赋的正是 `healthy`/`degraded`/…，且 `:160` 用配套的 `getHealthLabel`）
   - **(c) 两个词表各自具名，不得共用「健康」一词**：`isAgentHealthy(Agent.status)`＝**生命周期**口径（能力组概要用它，DESIGN.md:97-104 是其规范源）；`isProbeHealthy(AgentStatus.status)`＝**探针判定**口径。并在 **DESIGN.md:97-104 补一句作用域声明**（它定义的是概要用的生命周期口径，**不覆盖探针判定**）—— 不写这句，下次还会有人拿它去判探针行（我就是上一个）
   - **(d) 顺带修词表零交集的两处**：`getStatusConfig`(`:112` + `STATUS_CONFIG:22-27` 键集 `{running,idle,blocked,dead}`) 与 `STATUS_PRIORITY`(`:197` + `:15-20` 同键集) 作用在探针词表上**全部落 fallback / 全落 99** → 「运行状态」列吐英文、列表排序实际失效
-- **verify（喂数据看行为，禁止「grep 计数归零」式验法）**: ① 造一条 `status='healthy'` 的探针行 → 断言**该 Agent 行徽标为绿（`--green`）且顶部「健康」卡计数 > 0**；② 造一条 `status='unhealthy'` → 徽标红且计入「停止/异常」；③ `runtime` 非空的 Agent → 三处渲染出该值；④ `grep -c "isProbeHealthy\|isAgentHealthy" src/lib/agentHealth.ts` ≥ 2 且 `AgentControlPlane.tsx` 内不再有裸 `=== 'healthy'` 与 `=== 'dead'` 的**混用**（`status === 'dead'` 属可接受，前提是它读生命周期字段）；⑤ `tsc --noEmit` 的 `grep -c "error TS"` **等于 32**（不是 ≥32）
+- **verify（喂数据看行为，禁止「grep 计数归零」式验法）**: ① 造一条 `status='healthy'` 的探针行 → 断言**该 Agent 行徽标为绿（`--green`）且顶部「健康」卡计数 > 0**；② 造一条 `status='unhealthy'` → 徽标红且计入「停止/异常」；③ `runtime` 非空的 Agent → 三处渲染出该值；④ **【护栏】** `agentHealth.ts` 内 `isProbeHealthy|isAgentHealthy` 命中 **≥2**（今天该文件不存在=0）；⑤ **【验收·不得用全文计数】** `sed -n '74,75p' src/pages/AgentControlPlane.tsx | grep -c "a\.health"` **由今天实测 2 变 0**。⚠️ **禁止**写成 `grep -c "status === 'healthy'"` 归零 —— 该计数今天实测 **4**，其中 `:34` 是 `getHealthLabel` 内**唯一与探针词表自洽的正确映射**、`:156/:157/:1137` 同样正确（G4 测试实跑指出：归零判据**只能靠改坏正确代码才可能通过**，是 R5.2 反面样本，比我 v4 的措辞更硬一层）；⑥ **【护栏】** `tsc --noEmit` 的 `grep -c "error TS"` **等于 32**（今天实测 32；不是 ≥32）
 - 状态: [ ]
 
 ### T-FIX-04: `:110` 补 owner/visibility 过滤（A01 · F4）🔴
 - **read_files**: `backend/routes/domain_api.py`, `backend/models/agent.py`, `CLAUDE.md`, `backend/main.py`
 - **write_files**: `backend/routes/domain_api.py`, `backend/tests/test_capability_groups.py`
-- **前置（G4 架构师 ④ 时序陷阱，v3 补）**: **身份层 fail-closed 必须先于本任务的「admin 全量」分支落地。** `main.py:210` 不带 `X-User-Id` 即 `get_user("admin")`（`auth.py:180-185` 同）→ 默认路径的角色**就是** admin；若先加行过滤，`if user.role=="admin": return 不过滤` 在默认路径上是空操作，而且**一条「无 header 应 401/403」的测试都写不出来**，还会给决策者「越权已修」的错觉。fail-open 属项目级待修（`CLAUDE.md` 已记）→ 若人工坚持它完全出本 change，则本任务的过滤**不得含 admin 旁路**，二选一写死在 TEST.md
+- **身份层与本案的顺序（v5 改正 · G4 安全 ③）**：v3/v4 把它写成「fail-closed **必须先于** 本任务落地，否则连用例都写不出来」—— **后半句不成立**：REVIEW.md §2.4 与安全、主审两次的复现都是 in-process 直传 `user` 字典跑的，`X-User-Id` 可不可信**与本条回归能不能写无关**。所以本任务**不被身份层阻塞**、今天就可测。正确口径：模型/模板收口**默认不带 admin 旁路**（域 owner 没有任何正当理由读到别人的行，admin 也没有），若人工另批 admin 豁免，必须写成**显式分支 + 审计**；身份层 fail-closed 仍是项目级独立待修（A07，不在本门计红），**但本条不等它**。
 - **action**: **只修本 change 新增的那一处 `:110`** —— 域内 Agent 查询加 owner/visibility 收口。**sink 分类见 REVIEW.md §2.4**：`:208` 已独立成 F16/T-FIX-13（不许混进本任务）；其余 4 处（`:34,91,143,172,279`）+ `visibility` 全局落实 + 三处不变量矛盾的方向选择 → 另开 CHANGE，本任务内禁止顺手改（R7.1）
 - **v1 verify 的判弱已订正**：原文写「非域 owner 且非 admin 的用户读不到」—— 但漏洞主体恰是**域 owner 越权读域内他人 Agent**，那条断言根本挡不住。按下面重述
 - **verify**: 定向 `pytest tests/test_capability_groups.py -q` 通过，用例断言「**即使调用者是域 owner**，也**不能**从 `GET /api/domains/{id}/capabilities` 得到域内**他人** Agent 的 capability」，且以**非 admin 身份**跑。结论文案只能写「**入口层已加行过滤，身份层仍待修**」——**禁止写「越权已修复」**
@@ -126,16 +153,16 @@
 - **read_files**: `backend/routes/domain_api.py`, `backend/services/chat_service.py`, `backend/models/agent.py`, `backend/routes/agents_api.py`
 - **write_files**: `backend/routes/domain_api.py`, `backend/tests/test_capability_groups.py`, `backend/routes/agents_api.py`（仅 `:54`/`:84-87` 的 `domain_id` 校验，见 action ②）
   > v3 收缩：v2 顺手写了「新建 `services/domain_scale_service.py`」—— 本任务的正解是**改 3 行**（候选集加 owner 条件 + 不复制凭据 + 模板选择确定化），抽新 service 属额外设计，R7.3 下不该由 Reviewer 预写。若实现者认为确需抽层，先更新本 TASK 再动
-- **前置**: 同 T-FIX-04 的 fail-closed 顺序陷阱（本任务的收口同样带 admin 旁路语义）
+- **收口口径（v5 · G4 安全 ③）**：**「不带 admin 旁路」定为默认，不是备选** —— 域 owner 没有正当理由 mint 一份装着别人 API Key 的副本，admin 也没有。这样 T-FIX-13 今天可测、在 fail-open 的默认路径上依然有效、且不必把 `main.py`/`auth.py` 拽进本 change（R7.1）。身份层本身仍是 A07 项目级独立待修，**F16 不等它**。
 - **action**: `domain_api.py:208` 的模板候选集按 owner/visibility 收口（**只有调用者可支配的 Agent 能当模板**）；`:243` 的 `api_key_encrypted=template.api_key_encrypted` **默认不再复制凭据** —— 副本要么要求调用者自备 key，要么走显式的「共享凭据」授权路径并落审计（选型属产品决定）。附带两个必修小项：① `:231 template = matching[0]` 的"取第一个"是不确定选择（无排序），须确定化；② `agents_api.py:54`（创建）与 `:84-87`（`setattr` 白名单含 `domain_id`）**接受任意 `domain_id`、不校验存在与归属** —— 这是本链的前置条件，须拒绝把 Agent 放进不属于你的域
 - **审计可验性（A09）**: `:255` 的 `log_audit("domain.scale", …)` 现在只记 `"scaled N→M (+K)"`，**F16 发生时日志完全正常** → detail 须带上 `template_id` 与 `template_owner`
-- **verify（二值）**: 定向 `cd backend && /home/malizhi/.venv/bin/python -m pytest tests/test_capability_groups.py -q` 通过；用例照 REVIEW.md §2.4 的 in-process 构造写（受害 Agent 在攻击者的域内 + 同 capability），断言新副本的 `api_key_encrypted` **不等于**受害者密文，或该请求被拒。**状态码按项目约定**：`CLAUDE.md` 明写「越权与『资源不存在』统一返回 **404**，避免用状态码探测他人资源」→ v2 我写的「或 403/400」**违反本项目约定**，v3 纠正为 404（用 403 等于给探测者一个"存在但无权限"的信号，正是要避免的那种）。结论同样**不得**写「越权已修复」
+- **verify（v5 改正 · L2 断错对象 → 改判明文）**: 定向 `cd backend && python -m pytest tests/test_capability_groups.py -q` 通过，用例必须断下面三选一，**且禁止用「密文不等」作判据**：① `decrypt(副本.api_key_encrypted) != 受害者明文 Key`；② 副本根本不携带可用凭据（字段为 NULL / 走自建凭据）；③ 该请求被拒（404，按 `CLAUDE.md` 越权与不存在统一）。⚠️ **为什么不许判密文**：`encryption_service.py:20` 每次 `nonce = os.urandom(12)` → **同一明文的密文必然逐次不同**；主审实跑 `encrypt(K) != encrypt(K)` → **True**，所以实现者只要写 `api_key_encrypted = encrypt(decrypt(template.api_key_encrypted))`，「不等于受害者密文」这条断言**通过而盗窃完全成立**（`decrypt(副本) == 受害者明文 Key` → True，`chat_service.py:103` 运行时照样解出明文取用）。§2.4 的复现用的是 `"ENC::alice-…"` 假密文，它证明了**复制传播**，但**不能**当回归判据样板（R5.2：verify 要验「漏洞已堵住」，不是「代码改了」）
 - **不得缓办条款**: 本条**不许**降级为 ROADMAP 议题（R2.5）。若人工判定它超出本 change 范围，唯一合法出路是**另开 CHANGE 优先修**，或在 REVIEW.md「待人工裁定」上留下**人对"已知接受"的原话签字**；两者都没有时本 change 停在 6-review
 - 状态: [ ]
 
 ### T-FIX-05: 拆 `CapabilityGroupRow`（R1 · F11）🟡
 - **read_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/stores/domains.ts`
-- **write_files**: `frontend/src/components/capability/groupByCapability.ts`(新建 · 纯函数), `frontend/src/components/capability/CapabilityGroupHeader.tsx`(新建), `frontend/src/components/capability/GroupOpsBar.tsx`(新建), `frontend/src/pages/AgentControlPlane.tsx`
+- **write_files**: `frontend/src/components/capability/groupByCapability.ts`(新建 · 纯函数), `frontend/src/components/capability/CapabilityGroupHeader.tsx`(新建), `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/__tests__/capability-group.test.tsx`（**v5 补落点**：verify 要跑 `vitest run capability`，靶文件必须可写。好消息是**仓里本来就有 vitest** —— G4 测试实测 `package.json:10 "test": "vitest run"`、`devDeps vitest ^2.0.0`、`src/__tests__/` 已有 5 个用例文件 → FR3-FR5 不必退回「只能 UAT」）
 - **顺序（v3 · G4 测试 ③）**: **排在本 change 的 `T-FIX-00` 之前或同波**。分组逻辑现在内联在 1428 行的 `AgentControlPlane.tsx:585-605`，不抽成纯函数就没有 unit 落点，FR3/FR4/FR5 下一轮**仍然零证据** —— 所以它不只是"顺手重构"，它是 FR3-FR5 可测性的**前置条件**
 - **action**: ① 把 `:585-605` 的分组派生抽成 `groupByCapability(agents) → Record<string, Agent[]>` **纯函数**（无 React 依赖、可 unit）；② 分组展示（名/数量/健康概要/箭头）与操作面（自动路由/扩容/排队/loading）拆开，`CapabilityGroupRow` 的 **14 个 props 降到 ≤6**，操作态从 `stores/domains.ts` 取，不逐层透传
 - **verify（二值 · G4 两条都提了）**: ① `cd frontend && test ! -e tsconfig.tsbuildinfo && ./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | grep -c "error TS"` **等于 32**（`grep -c … ≥ 32` 是**永远为真的废检查** —— 基线本来就是 32）；② 定向 `npx vitest run capability` 通过且用例数 ≥1；③ `wc -l < src/pages/AgentControlPlane.tsx` **< 1428**；④ `test -f src/components/capability/groupByCapability.ts && grep -c "routeLoading\|scaleLoading\|queueCount" src/components/capability/CapabilityGroupHeader.tsx` **为 0**（操作态确已离开分组展示组件）
@@ -143,16 +170,16 @@
 
 ### T-FIX-06: 键盘可达 + 对比度实测（UI 3.4 · F9）🟡
 - **read_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/styles/tokens.css`
-- **write_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/styles/tokens.css`
+- **write_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/styles/tokens.css`, `frontend/src/__tests__/agent-control-plane-a11y.test.tsx`（**v5 补落点**：verify ② 要跑 `vitest run a11y`，v3/v4 全套 T-FIX 里**没有任何** `frontend/src/__tests__/*` 落点 —— G4 测试 ② 实跑 `grep -c "__tests__"` = 0 证实）
 - **action**: 能力组头 `<div onClick>`（`:411-413`）改 `<button>`（或 `role="button" tabIndex={0}` + Enter/Space `onKeyDown`），补 `aria-expanded` / `aria-controls`；确认 `prefers-reduced-motion` 有降级；用工具（非肉眼）实测 `#fff` on `var(--blue)` 与 `fontSize: 10` 的 WCAG 2.1 AA 对比度并记入 TEST.md 第 4 轮
-- **verify（二值；v2 的 `grep -c … ≥ 1` 与「写入 TEST.md」都不可判定 —— 前者一条空 `<div aria-expanded>` 即满足，后者只看有没有字）**: ① `grep -c "aria-expanded" src/pages/AgentControlPlane.tsx` **≥1 且** 同文件 `grep -c "role=\"button\"\|<div onClick" ` 中 `<div onClick` 为 **0**（折叠头须是真 `<button>`，不是补属性的 div）；② 有键盘可达用例：`npx vitest run a11y` 或 TEST.md 第 1 轮记录「Tab 聚焦 + Enter 展开」的**自动断言或人工步骤编号**；③ 对比度写的是**数值 + 判定**（如 `#8a8f98/#14161a = 5.1:1 → 通过 AA`），只贴色值不判定的视为未做
+- **verify（v5 标类型 + 换掉一条【今天已为真】的假判据）**: ① **【验收】** `grep -c "aria-expanded" src/pages/AgentControlPlane.tsx` 由今天实测 **0** 变 ≥1 **且** ② **【验收】** `npx vitest run a11y` 里有一条**真实键盘用例**：对折叠头 `fireEvent.keyPress('{Enter}')`（或 `space`）→ 断言 `aria-expanded` 由 false 翻到 true。⚠️ **禁止**再用 `grep -c "<div onClick"` 归零作判据 —— 该计数**今天实测就是 0**（折叠头在 `:412` 是 `<div` 换行、`:413` 才 `onClick={onToggle}`，字节串 `<div onClick` 在文件里根本不存在）→ 零门槛（G4 测试 ③ 实跑指出）。替代辅判：**【验收】** `grep -A1 "<div$" src/pages/AgentControlPlane.tsx | grep -c onClick` 由今天实测 **6** 变 0；注意**别用 `<button` 计数**（今天已是 14，那是另一回事）；③ **【护栏】** `tsc --noEmit` 的 `grep -c "error TS"` = 32
 - 状态: [ ]
 
 ### T-FIX-07: 清 `#fff` 硬编码（UI 3.1 · F5）🔴
 - **read_files**: `frontend/src/styles/tokens.css`, `frontend/src/pages/AgentControlPlane.tsx`
 - **write_files**: `frontend/src/styles/tokens.css`, `frontend/src/pages/AgentControlPlane.tsx`
 - **action**: `tokens.css` 增加倾斜中性前景 token（禁纯白，ui-anti-patterns 颜色类），替换 `:457,473`（本 change 面）；`:850,962,1012,1225` 属 pre-existing 同形，一并替换须在 verify 里证明无回归
-- **verify**: `cd frontend && grep -c "#fff\b\|#ffffff\b" src/pages/AgentControlPlane.tsx` 为 0
+- **verify**: **【验收】** `cd frontend && grep -c "#fff\b\|#ffffff\b" src/pages/AgentControlPlane.tsx` 由今天实测 **6**（`:457,:473` 本 change 新增 + `:850,:962,:1012,:1225` 既有）变 **0**；**【护栏】** `grep -c "#fff" src/styles/tokens.css` 不变（token 定义里的十六进制不算违规）
 - 状态: [ ]
 
 ### T-FIX-08: 硬编码间距/圆角改用既有 token + 字号 scale 待决（UI 3.1 · F6）🔴
