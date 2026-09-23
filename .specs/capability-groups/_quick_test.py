@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""Quick backend API test for capability-groups."""
+"""Quick backend API test for capability-groups.
+
+⚠️ 非回归基线（T-FIX-00 · 5-test 于 2026-09-23 显式标注，原因逐条实测）：
+  · 全文 0 条断言（一条判据都没有），末尾**无条件** print 出 "All backend tests passed!"
+    → 它打印的是"跑完了"，不是"通过了"；
+    （本说明刻意不复述那个"断言"关键字的英文原文：写进来就会让 `grep -c <那个词>` 这条判据
+     被**注释**满足，正是 TASK 元规则 2 要防的「零门槛判据」。本文件的合法出路只有真加判据，或保留本标注。）
+  · 身份写死 `X-User-Id: admin`（`:6`）→ 结构性看不见越权（跨 owner 的负例它永远看不到）；
+  · 依赖一个在跑的 `127.0.0.1:8000`（`:5`）→ 不进 pytest 收集、不可重复、CI 里无从执行。
+  capability-groups 的回归判据在 **`backend/tests/test_capability_groups.py`**
+  （真实 session + 行集合断言 + 可被 pytest 定向收集），本文件只作手工冒烟脚本保留。
+  → 禁止把本文件的输出当任何 verify 的证据（REVIEW G4 安全 ⑤ / TASK `T-FIX-00`）。
+"""
 import urllib.request, urllib.error, json
 
 BASE = "http://127.0.0.1:8000"
