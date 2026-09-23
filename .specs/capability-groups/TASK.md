@@ -151,7 +151,7 @@
 - **action**: **只修本 change 新增的那一处 `:110`** —— 域内 Agent 查询加 owner/visibility 收口。**sink 分类见 REVIEW.md §2.4**：`:208` 已独立成 F16/T-FIX-13（不许混进本任务）；其余 4 处（`:34,91,143,172,279`）+ `visibility` 全局落实 + 三处不变量矛盾的方向选择 → 另开 CHANGE，本任务内禁止顺手改（R7.1）
 - **v1 verify 的判弱已订正**：原文写「非域 owner 且非 admin 的用户读不到」—— 但漏洞主体恰是**域 owner 越权读域内他人 Agent**，那条断言根本挡不住。按下面重述
 - **verify**: 定向 `pytest tests/test_capability_groups.py -q` 通过，用例断言「**即使调用者是域 owner**，也**不能**从 `GET /api/domains/{id}/capabilities` 得到域内**他人** Agent 的 capability」，且以**非 admin 身份**跑。结论文案只能写「**入口层已加行过滤，身份层仍待修**」——**禁止写「越权已修复」**
-- 状态: [ ]
+- 状态: [x] **T-FIX-04 已完成**（2026-09-23 11:05 · 4-dev · 分支 `agent/agent/acdcda109f00`＝v8 tip + cherry-pick `5092f1de`）· SUMMARY：`@.specs/capability-groups/T-FIX-04-SUMMARY.md`。结论口径按本任务要求锁定为「**入口层已加行过滤，身份层（A07）仍待修**」，未写「越权已修复」。取值：`tests/test_capability_groups.py` 未修态 `17 failed / 9 passed` → 修后 `16 failed / 10 passed`（转绿的正是本任务的判据用例 `TestCapabFR2DomainCapabilities::test_capab_fr2_domain_owner_cannot_read_other_owners_capability`）；全量 `58 failed / 143 passed / 6 skipped` → `57 / 144 / 6`（护栏不减、红不增）。⚠️ 本任务 verify 的字面作用域「定向套件通过」在单任务粒度**不可判定**（17 红分属 01/02/04/13 四个任务）→ 与 5-test 给 `T-FIX-00` verify ② 提的是同一条措辞歧义，**第 2 次命中**，建议升格为元规则 2 的通用条款：跨任务共享判据一律标【验收·修复后】+ 未修态取值。⚠️ 另有一处需人裁：本任务「默认不带 admin 旁路」与 `T-FIX-00` 护栏 `test_capab_fr2_contract_shape_and_dedup`（admin 身份请求他人域、断言看得到他人 capability）**互斥** → 我按护栏保留既有 admin 分支、未改任何断言，两条出路写在 SUMMARY「决策与偏离」①。
 
 ### T-FIX-13: 堵 F16 凭据搬运链（`/scale` 以他人 Agent 为模板 mint 副本）🔴 · **v2 新增**
 - **read_files**: `backend/routes/domain_api.py`, `backend/services/chat_service.py`, `backend/models/agent.py`, `backend/routes/agents_api.py`
