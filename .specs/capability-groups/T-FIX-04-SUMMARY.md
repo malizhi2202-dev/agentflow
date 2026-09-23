@@ -183,5 +183,5 @@ $ grep -rn "visibility" backend/ --include=*.py | grep -v tests/
 
 - TASK.md 中 `T-FIX-04` 已勾选：**是**（`状态: [x]` + 一句话结论 + 未修态/修后取值）
 - verify：**对应红→绿 1 条、护栏 9→10 不减、全量 58/143→57/144、`git diff` 单文件 0 越界**；整文件 26 条全绿不可由单任务达成（已按上文登记）
-- 提交 hash：代码 `见本轮 fix(capability-groups): T-FIX-04 提交`；工件随后一条 docs 提交（由出口评论给出实际值）
+- 提交 hash：代码 **`5e93984d`**（含测试判定的原子提交，本任务无新增断言）· 工件 `e2cc151f`（本 SUMMARY + TASK 勾选 + STATE）· 上游链 `eaf53010` = cherry-pick 自 `5092f1de`
 - 出口：@mention 测试验证（本条 + 上一轮 `T-FIX-05` 合并成一次派发，不多烧 run）；G3 四票本轮不召集，理由与上一轮同（元规则 4 单写者 + 本 change 的 4-dev task 集票已在上一周期收过），若主审判定单条 T-FIX 也须过 G3，明说即召集
