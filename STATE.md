@@ -7,13 +7,14 @@
 
 | 字段 | 值 |
 |---|---|
-| 当前阶段 | **6-review**（change `capability-groups`）· 门禁 **G4 收票 1/4**（安全审计师 ❌ → 已按其 4 条通过条件出 **REVIEW.md v2**，待其改票；余 3 票未到 → **不推进**） |
+| 当前阶段 | **6-review**（change `capability-groups`）· 门禁 **G4 收票 3/4，门未结**（安全 ❌ + 资深测试工程师（Master）❌ + 架构师 ✅带 6 条修订；🔴 领域专家未到 → **不裁决、不推进**） |
 | 当前 task | 无（Reviewer 只出报告与 fix 任务，R3.3）· 待执行队列：`T-FIX-00`（回 5-test）→ 🔴 `T-FIX-01/02/04/07/08/09/13` |
-| 中断任务 | 无写操作中断。`REVIEW.md`(v2) + `TASK.md` 修复段已落盘；G4 收齐 4 票后按 R13.2 裁决 |
-| 产物 | `.specs/capability-groups/REVIEW.md` **v2**（16 项：**8🔴** / 5🟡 / 3🟢，含 §2.4 安全审查节 + 修订记录）· `.specs/capability-groups/TASK.md` §「修复任务」T-FIX-00~13 |
-| v2 起因 | G4 安全审计师指出 F4 **按站点记数、应按 sink 分类** → 暴露 **F16**：`POST /api/domains/{id}/scale` 允许域 owner 以**他人 Agent 为模板** mint 归自己所有的副本，并**逐字节复制 `api_key_encrypted`**（`domain_api.py:208→:231→:243` → `chat_service.py:103` 解密取用）。主审 **in-process 复现确认**（非采信而来）。v1 那句「capability 列表虽非密钥」把最重的一跳盖过 = **判级错误，已认并改** |
-| 出口条件 | G4 ≥3/4 放行 → 回 `5-test` 跑 T-FIX-00；🔴 全部修复或取得人工「已知接受」签字（R2.5）后才可重进 6-review。**当前禁止进 7-integration** |
-| 待人工裁定 | REVIEW.md「待人工裁定」5 条。**第 5 条已按 sink 重述**：`:208` 凭据链**不得缓办、不得只进 ROADMAP 议题**，只能在「本 change 内修」与「另开 CHANGE 优先修」之间选 |
+| 中断任务 | 无写操作中断。`REVIEW.md`(v3) + `TASK.md`(v3) 已落盘并推送 |
+| 产物 | `.specs/capability-groups/REVIEW.md` **v3**（17 项：**8🔴** / 7🟡 / 2🟢，含 §2.4 安全节 + 修订记录）· `.specs/capability-groups/TASK.md` §「修复任务」T-FIX-00~13（**v3 已改成可交接**） |
+| v2 起因 | G4 安全审计师指出 F4 **按站点记数、应按 sink 分类** → 暴露 **F16**：`POST /api/domains/{id}/scale` 让域 owner 以**他人 Agent 为模板** mint 归自己的副本并**逐字节复制 `api_key_encrypted`**（`domain_api.py:208→:231→:243` → `chat_service.py:103` 解密取用）。主审 in-process 复现确认。v1 那句「capability 列表虽非密钥」盖过了最重的一跳 = **判级错误，已认** |
+| v3 起因 | G4 测试工程师（Master）+ 架构师查出**我的取证错误同源**：两条结论都建立在**被 `head -N` 截断的 grep** 上 → ① F6 根因假（间距/圆角 token **存在且本页面 0 引用**，不是"缺失"；只有字号真缺）→ 差点让人在假前提上签「已知接受」；② F3 副本数 5 处错（实为后端 7 + 前端 2，"规范实现"自己文件内也有 2 处内联）；③ 2.3「反向依赖：无」漏查 `services↔engine`；④ `T-FIX-00` 的 verify 与 write_files 互斥（**仓内无 pytest 配置**）；⑤ 全量测试基线实测 **41 failed/134 passed/6 skipped** → 所有 verify 改定向，防 R5.3/R7.1 双踩 |
+| 出口条件 | G4 收齐 4 票且 ≥3/4 → 回 `5-test` 跑 T-FIX-00；🔴 全部修复或取得人工「已知接受」签字（R2.5）后才可重进 6-review。**当前禁止进 7-integration、禁止合并** |
+| 待人工裁定 | REVIEW.md「待人工裁定」5 条。**第 1 条已加限定**：只有 F6 的「字号」那一半可进「已知接受」，间距/圆角属机械替换不得换签字；签审查口径须连带确认 `CHANGE.md` 把测试放在 `.specs/` 这个错路径。**第 5 条**：`:208` 凭据链**不得缓办**，只能选「本 change 内修」或「另开 CHANGE 优先修」 |
 
 > 全仓 6-review 预检结论：本仓库当前**无任何 change 具备进入 6-review 的完整前置**（`capability-groups`/`agent-domains` 缺 TEST.md，`small-model-decisions` 缺 DESIGN/TASK/TEST 且无代码，`knowledge-plus`/`multi-provider` 工件不全，`agent-control-plane` 已审 4/4 通过）。选 `capability-groups` 为目标：工件最全且代码已实现。
 
