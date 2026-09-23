@@ -8,6 +8,8 @@ import {
 import { useControlPlane, AgentStatus, QueueItem, ReconcileEntry } from '../stores/controlPlane';
 import { useDomains, Domain, RouteResult, ScaleResult } from '../stores/domains';
 import { useAgents, Agent } from '../stores/agents';
+import { groupByCapability, groupKeyOf } from '../components/capability/groupByCapability';
+import CapabilityGroupHeader from '../components/capability/CapabilityGroupHeader';
 
 // ── 常量 ──
 type TabKey = 'agents' | 'queue' | 'reconcile' | 'domains';
@@ -367,32 +369,89 @@ function isAgentHealthy(status: string): boolean {
   return status === 'running' || status === 'standby';
 }
 
-function CapabilityGroupRow({
-  groupKey,
-  capability,
-  agents,
-  isExpanded,
-  onToggle,
-  domainId,
-  autoRouteEnabled,
-  queueCount,
-  onRoute,
-  onScale,
-  routeLoading,
-  scaleLoading,
-}: {
-  groupKey: string;
-  capability: string;
-  agents: Agent[];
-  isExpanded: boolean;
-  onToggle: () => void;
-  domainId: number | null;
-  autoRouteEnabled: boolean;
-  queueCount: number;
+/** 能力组的操作态：所属域 key + 页面层的 loading/回调。排队数与自动路由开关由 GroupOpsBar 自行从 store 取。 */
+interface GroupOps {
+  domainKey: string;
   onRoute: (capability: string) => void;
   onScale: (capability: string) => void;
   routeLoading: boolean;
   scaleLoading: boolean;
+}
+
+/**
+ * 能力组的「操作面」（T-FIX-05 · F11：与「分组展示」拆开）。
+ * 自动路由开关与排队计数直接从 `stores/domains.ts` 的选择器取，不再逐层透传；
+ * loading / 回调仍住在 DomainTreeTab 的本地 state（该 store 不在本任务 write_files 内）。
+ */
+function GroupOpsBar({ capability, ops }: { capability: string; ops: GroupOps }) {
+  const autoRouteEnabled = useDomains(function(s) { return Boolean(s.autoRoute[ops.domainKey]); });
+  const queued = useDomains(function(s) { return s.queueCounts[groupKeyOf(ops.domainKey, capability)] || 0; });
+
+  return (
+    <>
+      {/* 排队数 Badge */}
+      {queued > 0 && (
+        <span style={{
+          fontSize: 10, color: 'var(--orange)',
+          background: 'var(--orange-bg)', padding: '1px 6px', borderRadius: 8,
+          fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3,
+        }}>
+          <AlertTriangle size={10} />
+          排队: {queued}
+        </span>
+      )}
+      {/* 自动路由按钮 */}
+      {autoRouteEnabled && (
+        <button
+          onClick={function(e) { e.stopPropagation(); ops.onRoute(capability); }}
+          disabled={ops.routeLoading}
+          title="自动路由 - 选择负载最低的 Agent"
+          style={{
+            padding: '4px 10px', background: 'var(--blue)', color: '#fff',
+            border: 'none', borderRadius: 4, cursor: ops.routeLoading ? 'wait' : 'pointer',
+            fontSize: 10, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 3,
+          }}
+        >
+          <GitBranch size={11} />
+          {ops.routeLoading ? '路由中...' : '路由'}
+        </button>
+      )}
+      {/* 弹性缩放按钮 */}
+      {autoRouteEnabled && (
+        <button
+          onClick={function(e) { e.stopPropagation(); ops.onScale(capability); }}
+          disabled={ops.scaleLoading}
+          title="弹性缩放 - 创建 Agent 副本"
+          style={{
+            padding: '4px 10px', background: 'var(--green)', color: '#fff',
+            border: 'none', borderRadius: 4, cursor: ops.scaleLoading ? 'wait' : 'pointer',
+            fontSize: 10, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 3,
+          }}
+        >
+          <CopyPlus size={11} />
+          {ops.scaleLoading ? '扩容中...' : '扩容'}
+        </button>
+      )}
+    </>
+  );
+}
+
+/**
+ * 能力组：折叠头拆到 `CapabilityGroupHeader`（分组展示），本组件只留容器与展开的 Agent 列表；
+ * 操作面走 `GroupOpsBar`。props 由 14 个降到 5 个（F11）。
+ */
+function CapabilityGroupRow({
+  capability,
+  agents,
+  isExpanded,
+  onToggle,
+  ops,
+}: {
+  capability: string;
+  agents: Agent[];
+  isExpanded: boolean;
+  onToggle: () => void;
+  ops: GroupOps;
 }) {
   const healthyCount = agents.filter(function(a) { return isAgentHealthy(a.status); }).length;
   const totalCount = agents.length;
@@ -409,77 +468,14 @@ function CapabilityGroupRow({
 
   return (
     <div style={{ marginBottom: 4, border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
-      {/* 能力组头部 */}
-      <div
-        onClick={onToggle}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '8px 12px', cursor: 'pointer',
-          background: isExpanded ? 'var(--bg-selected)' : 'var(--bg-input)',
-          transition: 'background 0.15s', userSelect: 'none',
-          borderBottom: isExpanded ? '1px solid var(--border)' : 'none',
-        }}
-      >
-        <span style={{
-          color: 'var(--text-muted)', display: 'flex', alignItems: 'center',
-          transition: 'transform 0.2s', transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-        }}>
-          <ChevronRight size={14} />
-        </span>
-        <span style={{ fontWeight: 600, fontSize: 12, flex: 1, color: 'var(--text)' }}>
-          📦 {capability}
-        </span>
-        <span style={{
-          fontSize: 10, color: healthyCount === totalCount ? 'var(--green)' : 'var(--orange)',
-          background: 'var(--bg-card)', padding: '1px 6px', borderRadius: 8,
-          fontWeight: 500,
-        }}>
-          {healthyCount} healthy / {totalCount} total
-        </span>
-        {/* 排队数 Badge */}
-        {queueCount > 0 && (
-          <span style={{
-            fontSize: 10, color: 'var(--orange)',
-            background: 'var(--orange-bg)', padding: '1px 6px', borderRadius: 8,
-            fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3,
-          }}>
-            <AlertTriangle size={10} />
-            排队: {queueCount}
-          </span>
-        )}
-        {/* 自动路由按钮 */}
-        {autoRouteEnabled && (
-          <button
-            onClick={function(e) { e.stopPropagation(); onRoute(capability); }}
-            disabled={routeLoading}
-            title="自动路由 - 选择负载最低的 Agent"
-            style={{
-              padding: '4px 10px', background: 'var(--blue)', color: '#fff',
-              border: 'none', borderRadius: 4, cursor: routeLoading ? 'wait' : 'pointer',
-              fontSize: 10, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 3,
-            }}
-          >
-            <GitBranch size={11} />
-            {routeLoading ? '路由中...' : '路由'}
-          </button>
-        )}
-        {/* 弹性缩放按钮 */}
-        {autoRouteEnabled && (
-          <button
-            onClick={function(e) { e.stopPropagation(); onScale(capability); }}
-            disabled={scaleLoading}
-            title="弹性缩放 - 创建 Agent 副本"
-            style={{
-              padding: '4px 10px', background: 'var(--green)', color: '#fff',
-              border: 'none', borderRadius: 4, cursor: scaleLoading ? 'wait' : 'pointer',
-              fontSize: 10, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 3,
-            }}
-          >
-            <CopyPlus size={11} />
-            {scaleLoading ? '扩容中...' : '扩容'}
-          </button>
-        )}
-      </div>
+      <CapabilityGroupHeader
+        capability={capability}
+        healthyCount={healthyCount}
+        totalCount={totalCount}
+        isExpanded={isExpanded}
+        onToggle={onToggle}
+        actions={<GroupOpsBar capability={capability} ops={ops} />}
+      />
 
       {/* 展开的 Agent 列表 */}
       {isExpanded && (
@@ -555,13 +551,7 @@ function DomainAccordionRow({
   agentsLoading,
   expandedGroups,
   onToggleGroup,
-  domainId,
-  autoRouteEnabled,
-  queueCounts,
-  onRoute,
-  onScale,
-  routeLoading,
-  scaleLoading,
+  ops,
 }: {
   domainKey: string;
   name: string;
@@ -574,35 +564,10 @@ function DomainAccordionRow({
   agentsLoading: boolean;
   expandedGroups: Set<string>;
   onToggleGroup: (groupKey: string) => void;
-  domainId: number | null;
-  autoRouteEnabled: boolean;
-  queueCounts: Record<string, number>;
-  onRoute: (capability: string) => void;
-  onScale: (capability: string) => void;
-  routeLoading: boolean;
-  scaleLoading: boolean;
+  ops: GroupOps;
 }) {
-  // 按 capability 分组 agents
-  const capabilityGroups = (function() {
-    const groups: Record<string, Agent[]> = {};
-    for (const agent of agents) {
-      const cfg = agent.model_config_json || {};
-      const caps: string[] = (cfg && typeof cfg === 'object' && Array.isArray(cfg.capabilities))
-        ? cfg.capabilities
-        : [];
-      if (caps.length === 0) {
-        // 无 capability → "未分类"
-        if (!groups['未分类']) groups['未分类'] = [];
-        groups['未分类'].push(agent);
-      } else {
-        for (const cap of caps) {
-          if (!groups[cap]) groups[cap] = [];
-          groups[cap].push(agent);
-        }
-      }
-    }
-    return groups;
-  })();
+  // 按 capability 分组 —— 唯一具名规则住在 components/capability/groupByCapability.ts（F18）
+  const capabilityGroups = groupByCapability(agents);
 
   return (
     <div
@@ -672,24 +637,15 @@ function DomainAccordionRow({
             </div>
           ) : (
             Object.keys(capabilityGroups).sort().map(function(cap) {
-              var groupAgents = capabilityGroups[cap];
-              var groupKey = domainKey + ':' + cap;
-              var capQueueCount = queueCounts[groupKey] || 0;
+              var groupKey = groupKeyOf(domainKey, cap);
               return (
                 <CapabilityGroupRow
                   key={groupKey}
-                  groupKey={groupKey}
                   capability={cap}
-                  agents={groupAgents}
+                  agents={capabilityGroups[cap]}
                   isExpanded={expandedGroups.has(groupKey)}
                   onToggle={function() { onToggleGroup(groupKey); }}
-                  domainId={domainId}
-                  autoRouteEnabled={autoRouteEnabled}
-                  queueCount={capQueueCount}
-                  onRoute={onRoute}
-                  onScale={onScale}
-                  routeLoading={routeLoading}
-                  scaleLoading={scaleLoading}
+                  ops={ops}
                 />
               );
             })
@@ -701,7 +657,7 @@ function DomainAccordionRow({
 }
 
 function DomainTreeTab() {
-  const { domains, fetchDomains, createDomain, deleteDomain, autoRoute, queueCounts, toggleAutoRoute, routeToAgent, scaleAgents, fetchQueueCounts } = useDomains();
+  const { domains, fetchDomains, createDomain, deleteDomain, toggleAutoRoute, routeToAgent, scaleAgents, fetchQueueCounts } = useDomains();
   const { fetchAgentsByDomain } = useAgents();
 
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
@@ -869,13 +825,7 @@ function DomainTreeTab() {
         agentsLoading={agentsLoading['default'] || false}
         expandedGroups={expandedGroups}
         onToggleGroup={toggleGroup}
-        domainId={null}
-        autoRouteEnabled={autoRoute['default'] || false}
-        queueCounts={queueCounts}
-        onRoute={handleRoute}
-        onScale={handleScale}
-        routeLoading={routeLoading}
-        scaleLoading={scaleLoading}
+        ops={{ domainKey: 'default', onRoute: handleRoute, onScale: handleScale, routeLoading: routeLoading, scaleLoading: scaleLoading }}
       />
 
       {/* 其他域 */}
@@ -899,13 +849,7 @@ function DomainTreeTab() {
               agentsLoading={agentsLoading[key] || false}
               expandedGroups={expandedGroups}
               onToggleGroup={toggleGroup}
-              domainId={domain.id}
-              autoRouteEnabled={autoRoute[key] || false}
-              queueCounts={queueCounts}
-              onRoute={handleRoute}
-              onScale={handleScale}
-              routeLoading={routeLoading}
-              scaleLoading={scaleLoading}
+              ops={{ domainKey: key, onRoute: handleRoute, onScale: handleScale, routeLoading: routeLoading, scaleLoading: scaleLoading }}
             />
           );
         })
