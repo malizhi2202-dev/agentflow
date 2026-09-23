@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from database import get_db
 from models.agent import Agent
+from models.domain import Domain  # T-FIX-13：建/改 Agent 时校验 domain_id 的存在与归属
 from services.encryption_service import encrypt
 from services.audit_service import log_audit
 from services.llm_providers import SUPPORTED_PROVIDERS
@@ -19,6 +20,21 @@ def _filter_owner(q, user: dict):
     if user.get("role") != "admin":
         q = q.filter(Agent.owner_id == user["id"])
     return q
+
+
+def _assert_domain_access(domain_id, user: dict, db: Session):
+    """T-FIX-13 · F16 前置条件：拒绝把 Agent 放进**不存在或不属于你**的域。
+
+    这是「以他人 Agent 为模板 mint 副本」这条链的第一步 —— 能把 Agent 塞进别人的域，
+    下一步才能在别人的域里挑模板。越权与「资源不存在」统一 404（CLAUDE.md 约定，避免用状态码探测他人资源）。
+    与 domain_api 的模板候选集收口同源，**故意不带 admin 旁路**（TASK v9 锁定的口径）；
+    O-11 若另批豁免，改这一处即可（两处都指向同一个开关）。
+    `domain_id` 为 None/0 视为「不入域」，与 `api_list_agents` 里 `domain_id=0` 的既有语义一致。
+    """
+    if not domain_id:
+        return
+    if not db.query(Domain).filter(Domain.id == domain_id, Domain.owner_id == user["id"]).first():
+        raise HTTPException(status_code=404, detail="域不存在")
 
 
 @router.get("")
@@ -51,6 +67,7 @@ def api_create_agent(payload: dict, request: Request = None, db: Session = Depen
     runtime = payload.get("runtime", "langgraph")
     if runtime not in SUPPORTED_RUNTIMES:
         raise HTTPException(status_code=400, detail=f"不支持的 runtime: '{runtime}'。支持: {sorted(SUPPORTED_RUNTIMES)}")
+    _assert_domain_access(payload.get("domain_id"), user, db)
     agent = Agent(owner_id=user["id"], name=payload["name"], description=payload.get("description", ""), runtime=runtime, model_provider=model_provider, model_name=payload.get("model_name", ""), model_config_json=payload.get("model_config_json", {}), api_key_encrypted=encrypt(api_key), workflow_id=payload.get("workflow_id"), token_soft_limit=payload.get("token_soft_limit", 800000), token_hard_limit=payload.get("token_hard_limit", 1000000), domain_id=payload.get("domain_id"))
     db.add(agent)
     db.commit()
@@ -83,6 +100,8 @@ def api_update_agent(agent_id: int, payload: dict, request: Request = None, db: 
         raise HTTPException(status_code=404, detail="Agent 不存在")
     for f in ("name", "description", "model_provider", "model_name", "model_config_json", "workflow_id", "token_soft_limit", "token_hard_limit", "domain_id"):
         if f in payload:
+            if f == "domain_id":
+                _assert_domain_access(payload[f], user, db)
             if f == "model_provider" and payload[f] not in SUPPORTED_PROVIDERS:
                 raise HTTPException(status_code=400, detail=f"不支持的 model_provider: '{payload[f]}'。支持: {sorted(SUPPORTED_PROVIDERS)}")
             setattr(a, f, payload[f])

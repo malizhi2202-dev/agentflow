@@ -452,3 +452,41 @@ class TestCapabScaleCredentialChain(CapabDbCase):
         details = " | ".join(str(part) for a in scale_records for part in a)
         self.assertIn("template_owner", details,
                       "审计要能回答「拿谁的 Agent 当了模板」（A09：事后查不到本身就是缺陷）")
+
+    def test_capab_scale_allowed_path_names_template_owner_and_carries_no_template_key(self):
+        """【4-dev 补 · T-FIX-13 · A09】上一条在候选集收口后走 404 → `skipTest`（无可断对象）。
+
+        A09「审计要答得出拿谁的 Agent 当了模板」是本任务点名的必修项，**不能只由一条 skip 承载** ——
+        否则「漏洞堵了但没有一处绿证明审计真的可查」。本例是**纯加法**：不改动上面任何断言（R5.3），
+        走的是「模板归调用者本人」这条**真会扩容**的路径，断三件事：
+        ① 副本不落模板凭据（无显式 key → 落 `not_set` 哨兵，即 `agents_api` 建 Agent 时同一个「无凭据」约定）；
+        ② 审计 detail 答得出 `template_id` / `template_owner`；③ 调用者自备 key 时用的是他自己的 key。
+        5-test 若要把这三件拆成三条或重写口径，随取。
+        """
+        alice = _req("alice", "user")
+        d = self._domain("真扩容域", "alice")
+        tpl = self._agent(name="AG-own", owner="alice", capabilities=["code-review"],
+                          domain_id=d.id, api_key=VICTIM_KEY)   # 刻意拿受害者串当"自己的"key：连自己的也不许搬
+        body = scale_agents(d.id, {"capability": "code-review", "desired_replicas": 2},
+                            request=alice, db=self.db)
+        self.assertEqual("scaled", body.get("status"), "模板归调用者时端点必须真的扩容，否则本例也退化成 skip")
+        copies = [a for a in self.db.query(Agent).all() if a.name == "AG-own-replica-1"]
+        self.assertEqual(1, len(copies))
+        self.assertEqual("alice", copies[0].owner_id, "副本归调用者")
+        self.assertNotEqual(VICTIM_KEY, decrypt(copies[0].api_key_encrypted),
+                            "「不搬运模板凭据」不许只在被拒路径上成立")
+        self.assertEqual("not_set", decrypt(copies[0].api_key_encrypted),
+                         "无显式 api_key → 落仓库既有的「无凭据」哨兵，副本不带可用凭据")
+        details = " | ".join(str(part) for a in self.audits if "domain.scale" in [str(x) for x in a] for part in a)
+        self.assertIn(f"template_id={tpl.id}", details, "A09：事后要查得到模板 id")
+        self.assertIn("template_owner=alice", details, "A09：事后要查得到模板归谁")
+
+        d2 = self._domain("自备 key 域", "alice")
+        self._agent(name="AH-own", owner="alice", capabilities=["code-review"],
+                    domain_id=d2.id, api_key=VICTIM_KEY)
+        scale_agents(d2.id, {"capability": "code-review", "desired_replicas": 2,
+                             "api_key": "sk-alice-mine"}, request=alice, db=self.db)
+        mine = [a for a in self.db.query(Agent).all() if a.name == "AH-own-replica-1"]
+        self.assertEqual(1, len(mine))
+        self.assertEqual("sk-alice-mine", decrypt(mine[0].api_key_encrypted),
+                         "显式自备 key 这条正解（action 的「要求调用者自备 key」）必须真的可用")
