@@ -86,6 +86,7 @@
 | `grep -cE "#fff\b\|#ffffff\b" AgentControlPlane.tsx` | 6 | 0 | 【验收】 |
 | `grep -c "var(--s[0-9]\|var(--r-" AgentControlPlane.tsx` | 0 | >0 | 【验收】 |
 | `grep -rn 'get("capabilities"' backend/` | 7 | 1（只剩 helper 内部） | 【验收】 |
+| `groupByCapability` 对 `capabilities:[""]` 的行为（v6 · 领域专家残留 3） | 今天 `:588-592` 不过滤 → 产出一个**空名分组** | 无空名分组、落 `未分类` | 【验收】 |
 | `tsc --noEmit` 的 `grep -c "error TS"` | 32 | **=32**（不是 ≥32） | 【护栏】 |
 | `pytest tests/ -q` 全量 | 41 failed / 134 passed / 6 skipped（**主审跑的量，Master 未复跑、只 `--collect-only` 得 181 与之自洽** → TEST.md 第 1 轮第一行须贴全量真实输出，让这个数有来源） | 不要求变绿 | 【护栏·基线】 |
 ### T-FIX-00: 回 5-test — 补 `TEST.md`（5 轮金字塔）+ capability 回归 🔴门禁
@@ -131,10 +132,10 @@
 > **⚠️ v3 版禁止执行**：它要求把 `:156-1137` 换成 `isAgentHealthy(agent.status)`。`isAgentHealthy` 是 `running|standby` 谓词（`:366-368`，生命周期口径），作用在探针词表（`healthy`/`unhealthy`/…）上**恒假** —— 照它做会把「徽标永远红」这个我声称已存在的 bug **真的做出来**；而 v3 的 verify（`grep -c "status === 'healthy'"` 为 0）**恰好被这次改坏所满足** → 假绿过关（R5.2：verify 必须能挡住它声称挡的事）。G4 领域专家首指，主审逐行复现后确认。
 
 - **read_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/stores/controlPlane.ts`, `backend/routes/control_plane_api.py`, `backend/services/agent_probe_service.py`, `.specs/capability-groups/DESIGN.md`
-- **write_files**: `frontend/src/lib/agentHealth.ts`(新建), `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/stores/controlPlane.ts`（+ 若走 (a)-后端方案则含 `backend/routes/control_plane_api.py`）
+- **write_files**: `frontend/src/lib/agentHealth.ts`(新建), `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/stores/controlPlane.ts`, `.specs/capability-groups/DESIGN.md`（**v6 · 领域专家残留 2**：(c) 要求在 DESIGN.md:97-104 补作用域声明，而此前 DESIGN.md 只在 `read_files` → 按本段元规则「`write_files` 之外的改动须先更新本 TASK」，那句话今天**无处可写**；而它恰是防止下一个人再犯 F10 的唯一防线）（+ 若走 (a)-后端方案则含 `backend/routes/control_plane_api.py`）
 - **action（四件事，逐条对应 F10 表）**：
   - **(a) 补契约缺口**：`stores/controlPlane.ts:8,10` 声明的 `health` / `runtime` 后端从不发（`control_plane_api.py:75-85` 构造的 entry 键集实测无此两键）。二选一：后端 `list_probes` 补发 `health`+`runtime`，**或** 前端 `:74/:75` 改读 `status` 并用探针词表判 `unhealthy`。⚠️ **改公共 payload 前先 grep 全部引用点（R4.6）**：`AgentProbePanel.tsx:64,168,169,318,478` 共 5 处在读幽灵字段，`AgentControlPlane.tsx:531,1076,1129` 在渲染幽灵 `runtime`
-  - **(b) `:156-1137` 保持不动** —— 它们是当前唯一正确的健康判定（`status` 即探针判定，`:94-95` 赋的正是 `healthy`/`degraded`/…，且 `:160` 用配套的 `getHealthLabel`）
+  - **(b) `:156-1137` 的【判定语义】不得改变**（v6 · G4 领域专家残留 1：原文「保持不动」与 (c)「各自具名」字面冲突，照字面读会逼实现者二选一）：按 (c) **等值改名**成 `isProbeHealthy(agent.status)` 可以；换成生命周期谓词 `isAgentHealthy(agent.status)` **不行**（它只认 `running|standby`，对探针词表恒假 = v3 那个坑）。精准取证（不截断、回显总数）：`grep -n "=== 'healthy'"` = **5 处**（`:34` 合法映射 / `:74` 幽灵字段 / `:156` / `:157` / `:1137`）；`grep -n "status === 'healthy'"` = **4 处**（Master 数的即这个）→ **两个计数都不是合格判据**，只打 `:74-75` 的 `a.health` 才对 —— 它们是当前唯一正确的健康判定（`status` 即探针判定，`:94-95` 赋的正是 `healthy`/`degraded`/…，且 `:160` 用配套的 `getHealthLabel`）
   - **(c) 两个词表各自具名，不得共用「健康」一词**：`isAgentHealthy(Agent.status)`＝**生命周期**口径（能力组概要用它，DESIGN.md:97-104 是其规范源）；`isProbeHealthy(AgentStatus.status)`＝**探针判定**口径。并在 **DESIGN.md:97-104 补一句作用域声明**（它定义的是概要用的生命周期口径，**不覆盖探针判定**）—— 不写这句，下次还会有人拿它去判探针行（我就是上一个）
   - **(d) 顺带修词表零交集的两处**：`getStatusConfig`(`:112` + `STATUS_CONFIG:22-27` 键集 `{running,idle,blocked,dead}`) 与 `STATUS_PRIORITY`(`:197` + `:15-20` 同键集) 作用在探针词表上**全部落 fallback / 全落 99** → 「运行状态」列吐英文、列表排序实际失效
 - **verify（喂数据看行为，禁止「grep 计数归零」式验法）**: ① 造一条 `status='healthy'` 的探针行 → 断言**该 Agent 行徽标为绿（`--green`）且顶部「健康」卡计数 > 0**；② 造一条 `status='unhealthy'` → 徽标红且计入「停止/异常」；③ `runtime` 非空的 Agent → 三处渲染出该值；④ **【护栏】** `agentHealth.ts` 内 `isProbeHealthy|isAgentHealthy` 命中 **≥2**（今天该文件不存在=0）；⑤ **【验收·不得用全文计数】** `sed -n '74,75p' src/pages/AgentControlPlane.tsx | grep -c "a\.health"` **由今天实测 2 变 0**。⚠️ **禁止**写成 `grep -c "status === 'healthy'"` 归零 —— 该计数今天实测 **4**，其中 `:34` 是 `getHealthLabel` 内**唯一与探针词表自洽的正确映射**、`:156/:157/:1137` 同样正确（G4 测试实跑指出：归零判据**只能靠改坏正确代码才可能通过**，是 R5.2 反面样本，比我 v4 的措辞更硬一层）；⑥ **【护栏】** `tsc --noEmit` 的 `grep -c "error TS"` **等于 32**（今天实测 32；不是 ≥32）
@@ -164,8 +165,9 @@
 - **read_files**: `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/stores/domains.ts`
 - **write_files**: `frontend/src/components/capability/groupByCapability.ts`(新建 · 纯函数), `frontend/src/components/capability/CapabilityGroupHeader.tsx`(新建), `frontend/src/pages/AgentControlPlane.tsx`, `frontend/src/__tests__/capability-group.test.tsx`（**v5 补落点**：verify 要跑 `vitest run capability`，靶文件必须可写。好消息是**仓里本来就有 vitest** —— G4 测试实测 `package.json:10 "test": "vitest run"`、`devDeps vitest ^2.0.0`、`src/__tests__/` 已有 5 个用例文件 → FR3-FR5 不必退回「只能 UAT」）
 - **顺序（v3 · G4 测试 ③）**: **排在本 change 的 `T-FIX-00` 之前或同波**。分组逻辑现在内联在 1428 行的 `AgentControlPlane.tsx:585-605`，不抽成纯函数就没有 unit 落点，FR3/FR4/FR5 下一轮**仍然零证据** —— 所以它不只是"顺手重构"，它是 FR3-FR5 可测性的**前置条件**
-- **action**: ① 把 `:585-605` 的分组派生抽成 `groupByCapability(agents) → Record<string, Agent[]>` **纯函数**（无 React 依赖、可 unit）；② 分组展示（名/数量/健康概要/箭头）与操作面（自动路由/扩容/排队/loading）拆开，`CapabilityGroupRow` 的 **14 个 props 降到 ≤6**，操作态从 `stores/domains.ts` 取，不逐层透传
+- **action（v6 补 F18 · 领域专家残留 3）**：① 把 `:585-605` 的分组派生抽成 `groupByCapability(agents) → Record<string, Agent[]>` **纯函数**（无 React 依赖、可 unit）；**①b 该纯函数必须调用与后端同一条具名归一规则**（过滤空串/空白/非字符串 + `strip()`），**不得**再自带一份裸 `Array.isArray(cfg.capabilities)` —— F18 此前只写在 `T-FIX-01/02` 的 action 里，而那两条 `write_files` **一个前端文件都没有** → 「要求落地的任务落不了地、能落地的任务不知道要做」（领域专家残留 3）；② 分组展示（名/数量/健康概要/箭头）与操作面（自动路由/扩容/排队/loading）拆开，`CapabilityGroupRow` 的 **14 个 props 降到 ≤6**，操作态从 `stores/domains.ts` 取，不逐层透传
 - **verify（二值 · G4 两条都提了）**: ① `cd frontend && test ! -e tsconfig.tsbuildinfo && ./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | grep -c "error TS"` **等于 32**（`grep -c … ≥ 32` 是**永远为真的废检查** —— 基线本来就是 32）；② 定向 `npx vitest run capability` 通过且用例数 ≥1；③ `wc -l < src/pages/AgentControlPlane.tsx` **< 1428**；④ `test -f src/components/capability/groupByCapability.ts && grep -c "routeLoading\|scaleLoading\|queueCount" src/components/capability/CapabilityGroupHeader.tsx` **为 0**（操作态确已离开分组展示组件）
+- **verify · v6 追加（挡「只搬家不归一」）**：**【验收】** 往 `groupByCapability` 喂一条 `capabilities:[""]` 的种子 → 断言 ①结果里**不存在空名分组**（无 `''` key）②该 Agent 落入 `未分类` ③喂 `capabilities:[" code-review "]` 时与 `"code-review"` **归入同一组**。今天这条必红（`:588-592` 不过滤），故它是能区分「抽了函数」与「抽对了函数」的那道门 —— 只把内联代码搬进文件、不接归一规则，也照样能让 `wc -l` 与 props 数达标
 - 状态: [ ]
 
 ### T-FIX-06: 键盘可达 + 对比度实测（UI 3.4 · F9）🟡
