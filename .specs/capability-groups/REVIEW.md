@@ -198,7 +198,7 @@ if capability:
 | `:108`/`:1033` | `agent: AgentStatus` | —— | prop 类型是**探针 DTO**，不是 `Agent`。v1–v3 我把它当 `Agent` 读，错从这里开始 |
 | `:156-157`、`:1137` | `agent.status === 'healthy'` | ✅ **正确，勿动** | `status` 即探针判定，`healthy` 在其取值域内；且 `:160` 用 `getHealthLabel`（`:33-40`，正是探针词表）→ **自洽** |
 | `:74` | `a.health === 'healthy'` → `healthyCount` | 🔴 **恒 `undefined` → 顶部「健康」卡永远显示 0** | `control_plane_api.py:75-85` 构造的 entry 键集里**没有 `health`**（实测该文件仅在 `:94-95` 写 `entry["status"]`，全文件无 `"health"` 键）；而卡片副标题还写着「healthy 状态」 |
-| `:75` | `a.status === 'dead' \|\| a.health === 'unhealthy'` | 🔴 **两个分支都不可能为真 → 「停止」卡永远 0** | 探针词表里没有 `dead`；**全后端 grep `'dead'` 无任何写入点**，只有 `alert_service.py:141` 在**读**它 → 那条 `agent_dead` 告警同样**永不触发**（同一根因的第二处扩散） |
+| `:75` | `a.status === 'dead' \|\| a.health === 'unhealthy'` | 🔴 **两个分支都不可能为真 → 「异常」卡永远 0** | 探针词表里没有 `dead`；**全后端 grep `'dead'` 无任何写入点**，只有 `alert_service.py:141` 在**读**它 → 那条 `agent_dead` 告警同样**永不触发**（同一根因的第二处扩散） |
 | `:531`、`:1076`、`:1129` | 渲染 `agent.runtime` | 🔴 恒空 | 同上，payload 无 `runtime` 键 |
 | `stores/controlPlane.ts:8,10` | `health: string` / `runtime: string` | 🔴 **类型在撒谎** | 接口声明了两个后端从不发出的字段 → TS 编译期完全看不出问题，这正是它能活到今天的原因 |
 | `AgentProbePanel.tsx:64,168,169,318,478` | 读 `probe.health` | 🟡 同根因既有扩散面（5 处，非本 change） | 契约修复时须一并 grep（R4.6） |
@@ -409,7 +409,7 @@ graph LR
 | F7 | 🔴 Critical | UI 3.2 | 卡片嵌套卡片（域卡片 > 能力组卡片 > Agent 行，三层树三层卡） | `AgentControlPlane.tsx:585-605` + `:402-403` | T-FIX-09 |
 | F8 | 🟡 Major | Spec 合规 | 偏离 DESIGN 指定的实现方式（「`JSON_CONTAINS` 或 Python 端过滤」两者皆未用） | `DESIGN.md:54-66` vs `agents_api.py:36-38` | T-FIX-01 |
 | F9 | 🟡 Major | UI 3.4 | 能力组头 `<div onClick>` 键盘不可达、无 `aria-expanded` | `AgentControlPlane.tsx:411-413,425` | T-FIX-06 |
-| F10 | **🔴 Critical（v4 升级）** | R3 / 统一语言 | **两套状态词表混用，而我 v1–v3 指错了对象**：恒假的是 `:74/:75`（顶部「健康」「停止」两张概览卡**永远 0** —— payload 无 `health` 键，且全后端无 `'dead'` 写入点，只有 `alert_service.py:141` 在读它 → 那条 `agent_dead` 告警同样永不触发）、`:531/:1076/:1129` 的 `runtime` 恒空、`getStatusConfig`(`:112`) 与 `STATUS_PRIORITY`(`:197`) 对探针词表**零交集** → 状态列吐英文、排序失效；`stores/controlPlane.ts:8,10` 声明了后端从不发的字段（**类型在撒谎**，所以编译期看不出来）。v1–v3 判为恒假的 `:156-1137` **是全文件唯一正确的健康判定** | `AgentControlPlane.tsx:74-75,156-157,531,1076,1129,1137` + `control_plane_api.py:75-85` + `stores/controlPlane.ts:8,10` | T-FIX-03（**v3 版会造新 bug，已重写**） |
+| F10 | **🔴 Critical（v4 升级）** | R3 / 统一语言 | **两套状态词表混用，而我 v1–v3 指错了对象**：恒假的是 `:74/:75`（顶部「健康」与「异常」两张概览卡**永远 0**（实测卡片标签在 `:78-80`：`label: 健康 / sub: healthy 状态`、`label: 异常 / sub: dead / unhealthy`，两个 sub 里的取值都不可达） —— payload 无 `health` 键，且全后端无 `'dead'` 写入点，只有 `alert_service.py:141` 在读它 → 那条 `agent_dead` 告警同样永不触发）、`:531/:1076/:1129` 的 `runtime` 恒空、`getStatusConfig`(`:112`) 与 `STATUS_PRIORITY`(`:197`) 对探针词表**零交集** → 状态列吐英文、排序失效；`stores/controlPlane.ts:8,10` 声明了后端从不发的字段（**类型在撒谎**，所以编译期看不出来）。v1–v3 判为恒假的 `:156-1137` **是全文件唯一正确的健康判定** | `AgentControlPlane.tsx:74-75,156-157,531,1076,1129,1137` + `control_plane_api.py:75-85` + `stores/controlPlane.ts:8,10` | T-FIX-03（**v3 版会造新 bug，已重写**） |
 | F11 | 🟡 Major | R1 | 1428 行单文件 / `CapabilityGroupRow` 171 行 14 props，分组与路由扩容同组件 | `AgentControlPlane.tsx:370-540` | T-FIX-05 |
 | F12 | 🟡 Major | Spec 合规 | FR2 端点零消费者；用户故事 4「以便外部集成」不可验证 | `domain_api.py:100-119`、`stores/domains.ts`（无 fetch） | T-FIX-11 |
 | F13 | **🟡 Major**（v3 取严）| R5 | 业务逻辑住 routes 层，违反 `CLAUDE.md`「路由只做参数校验与鉴权」——**v2 自相矛盾：2.2 正文记 🟡、本表记 🟢**，按取严统一为 🟡 | `domain_api.py:101-119`、`agents_api.py:25-39` | T-FIX-02 |
