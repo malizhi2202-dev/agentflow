@@ -267,7 +267,7 @@ graph LR
 |---|---|---|---|
 | A01 | 失效的访问控制 | 🔴 **命中** | F16（`:208→:243`）+ `:110` 缺 owner 过滤 + `visibility` 全后端未执行 + 三处不变量互相矛盾 |
 | A02 | 加密机制失效 | 🟡 不在本面，但相邻 | 口令为无盐 `hashlib.sha256`、默认口令 `123456` 硬编码（`CLAUDE.md` 已记为待修，属项目级议题）；**`api_key_encrypted` 走 `encryption_service` 是真加密** → F16 的可怕之处正在于"密文被合法搬走且运行时会解密" |
-| A03 | 注入 | ✅ **不成立（v1 未误报，v2 明确背书）** | F2 的 `contains()` 走绑定参数；实测 `?capability=' OR '1'='1` 与 `?capability=--` 均**返回 0 行、不报错** → SQL 结构未被改写。它是**语义绕过 + 领域扭曲**，不挂安全名头。另 `:26` 的 `_filter_owner` 跑在 `:37` 之前 → `?capability=%` 只能枚举**调用者自己**的 Agent，A01 维度亦干净 |
+| A03 | 注入 | ✅ **不成立 —— 已由主审 v3 自跑负例（此前是二手采信安全审计师的结果，现已换成自己的一手证据）** | in-process 直调 `api_list_agents`，4 行数据、以非 admin 用户身份：<br>`capability="' OR '1'='1"` → `[]` 不报错；`capability="'; DROP TABLE agents; --"` → `[]` 且**表仍有 4 行** → 谓词走绑定参数，SQL 结构未被改写。<br>同一轮把 F2 的两个反例也钉死：`code-review` → `['a1','a2']`（**a2 的 `capabilities` 是 `[]`，只是另一个 key 的值恰为 `"code-review"`** → 跨 key 假阳性）、`code_review` → 同样 `['a1','a2']`（`_` 通配符把 `code-review` 也吃进来）。<br>**A01 维度亦不成立**：`%` → 只返回调用者自己的 3 条（他人的 a4 不出现）→ `:26` `_filter_owner` 确在 `:37` 之前生效。对照：**admin 身份 + `%` → 4 条全出**（含他人 Agent）→ 唯一逃逸口是角色，而角色来自 A07 的可伪造 header。<br>**结论**：F2 是**语义绕过 + 领域扭曲**，不挂安全名头；`capability=''` 实测返回全量（`if capability:` 跳过过滤）→ 该语义须在 TEST.md 里**显式择一**，不能靠巧合。 |
 | A04 | 不安全设计 | 🟡 命中（设计层） | 「Domain 是分组还是权限边界」无人拍板（见 R2 节末不变量矛盾）→ 同类洞会在每个新端点复现 |
 | A05 | 安全错误配置 | 🟡 项目级 | `main.py:196-199` localhost-only 判定在反向代理后失效（`request.client.host`）；`CLAUDE.md` 已记 |
 | A06 | 易受攻击与过时组件 | ➖ **本 change 不适用** | 本次 commit 不含依赖变更（`git show --stat 97044bd0 ad350689` → 仅 3 个文档文件，0 个 `requirements` 行）。存量问题另计（见下「依赖扫描」） |
@@ -394,7 +394,7 @@ graph LR
 - **看了**：FR1-FR5 / NFR1-NFR3 逐条；`agents_api.py`（1-70 行）、`domain_api.py`（1-150 + 7 处 Agent 查询清单）、`k8s_routing_service.py`（1-60）、`models/agent.py` 全文、`AgentControlPlane.tsx` 的 `:74,156,360-490,552-700,860-870,1137`、`stores/domains.ts`、`tokens.css` token 清单、`backend/tests/` 全目录 grep、`.specs/capability-groups/` 四份工件。
 - **实跑了**：`tsc --noEmit`（32 错误，本面 0）、SQLAlchemy 谓词编译（SQLite + MySQL 方言）、内存 SQLite 三条样本的 FR1 反例复现、`visibility` 与既有 helper 的全仓 grep。
 - **没看 / 判不了（盲区）**：① 运行时 UAT —— 未启动 uvicorn/vite，任何"界面看起来对不对"都没验；② 对比度未实测（无量具）；③ MySQL 部署路径未实测 → 待确认；④ 无 `UI-DESIGN.md` → 视觉北极星与美学一致性整节跳过（非通过）；⑤ 无 `TEST.md` → 5 轮金字塔只能判缺，不能判过；⑥ 未审 `agent-domains`/`knowledge-plus`/`multi-provider`/`small-model-decisions`（均不满足预检）；⑦ 无独立 diff，按 CHANGE「变更范围」表界定审查面，可能漏掉未列在该表却被顺带改动的文件；⑧ 「未与 pre-existing 代码划清归属」的行已逐条标注，但 79 天未更新的 `CONTEXT.md` 使部分「是不是本次引入」只能靠 grep 推断。
-- **v2 因安全节新增的盲区（别当通过）**：⑨ **依赖/CVE 扫描未跑工具**（环境无 `pip-audit`/`safety`，联网扫描不属本 run 交付）→ 仅登记存量事实：`requirements.txt` 13 条全 `>=` 区间、无锁文件；⑩ **F16 只做到 in-process 直调复现，未在跑起来的实例上打过 HTTP** → 跨进程/带真 `cryptography` 密钥的端到端链未验；⑪ **A07 身份伪造链的真实部署组合行为未实测** —— `X-User-Id` 伪造与 `main.py:196-199` localhost 判定在反向代理后的实际表现未验（未起服务），`CLAUDE.md` 已记此 fail-open；⑫ OWASP 逐项是**主审自标**，其 A01/A03 两条经安全审计师独立复核（A03 由对方跑 `' OR '1'='1` 与 `'--` 负例确认），其余 8 项**无第二人复核**。
+- **v2 因安全节新增的盲区（别当通过）**：⑨ **依赖/CVE 扫描未跑工具**（环境无 `pip-audit`/`safety`，联网扫描不属本 run 交付）→ 仅登记存量事实：`requirements.txt` 13 条全 `>=` 区间、无锁文件；⑩ **F16 只做到 in-process 直调复现，未在跑起来的实例上打过 HTTP** → 跨进程/带真 `cryptography` 密钥的端到端链未验；⑪ **A07 身份伪造链的真实部署组合行为未实测** —— `X-User-Id` 伪造与 `main.py:196-199` localhost 判定在反向代理后的实际表现未验（未起服务），`CLAUDE.md` 已记此 fail-open；⑫ OWASP 逐项是**主审自标**：A03 已由主审**自跑负例**转为一手证据（v3），A01 由安全审计师首指 + 主审 in-process 复现，其余 7 项**无第二人复核**。
 
 ---
 
