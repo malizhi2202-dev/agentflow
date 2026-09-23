@@ -16,9 +16,9 @@ def _user(request: Request) -> dict:
     return request.state.user
 
 
-def _filter_owner(q, user: dict):
+def _filter_owner(q, user: dict, model=Domain):  # model 参数化：Agent 行收口复用同一条谓词（抽象沿用 storage/sqlite_backend.py:31 的 (q, model, owner_id, is_admin)）
     if user.get("role") != "admin":
-        q = q.filter(Domain.owner_id == user["id"])
+        q = q.filter(model.owner_id == user["id"])
     return q
 
 
@@ -106,8 +106,8 @@ def list_domain_capabilities(domain_id: int, request: Request = None, db: Sessio
     domain = q.first()
     if not domain:
         raise HTTPException(status_code=404, detail="域不存在")
-    # 获取域内所有 Agent
-    agents = db.query(Agent).filter(Agent.domain_id == domain_id).all()
+    # 获取域内所有 Agent —— T-FIX-04 · F4：加 owner 行收口。结论口径只能是「**入口层已加行过滤，身份层（A07 fail-open）仍待修**」，不得写「越权已修复」
+    agents = _filter_owner(db.query(Agent).filter(Agent.domain_id == domain_id), user, Agent).all()
     caps_set = set()
     for a in agents:
         cfg = a.model_config_json or {}
