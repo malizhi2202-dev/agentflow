@@ -1,7 +1,20 @@
 # STATE — 跨会话状态
 
 > 本文件记录当前进行中的工作与上次断点。**每次会话结束前更新**。
-> 最近更新：2026-09-21
+> 最近更新：2026-09-23
+
+## 状态行（6-review 子循环 · 自动写入，勿手改）
+
+| 字段 | 值 |
+|---|---|
+| 当前阶段 | **6-review**（change `capability-groups`）· 门禁 **G4 召集投票中**，未集齐 4 票不推进 |
+| 当前 task | 无（Reviewer 只出报告与 fix 任务，R3.3）· 待执行队列：`T-FIX-00`（回 5-test）→ `T-FIX-01/02/04/06/07/08/09`（🔴） |
+| 中断任务 | 无写操作中断。`REVIEW.md` + `TASK.md` 修复段已落盘；等 G4 回帖后由本阶段汇总裁决 |
+| 产物 | `.specs/capability-groups/REVIEW.md`（15 项发现：7🔴 / 5🟡 / 3🟢）· `.specs/capability-groups/TASK.md` §「修复任务」T-FIX-00~12 |
+| 出口条件 | G4 ≥3/4 放行 → 回 `5-test` 跑 T-FIX-00；🔴 全部修复或取得人工「已知接受」签字（R2.5）后才可重进 6-review。**当前禁止进 7-integration** |
+| 待人工裁定 | REVIEW.md 末尾「待人工裁定」5 条（UI 🔴 归属、无独立 diff 的审查口径、路由/扩容按钮归属、真跨模型二审、`visibility` 全量修复是否另开 CHANGE） |
+
+> 全仓 6-review 预检结论：本仓库当前**无任何 change 具备进入 6-review 的完整前置**（`capability-groups`/`agent-domains` 缺 TEST.md，`small-model-decisions` 缺 DESIGN/TASK/TEST 且无代码，`knowledge-plus`/`multi-provider` 工件不全，`agent-control-plane` 已审 4/4 通过）。选 `capability-groups` 为目标：工件最全且代码已实现。
 
 ## 当前阶段
 
