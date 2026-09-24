@@ -16,7 +16,7 @@
 
 | 轮次 | 状态 | 范围 | 部分 / 跳过理由 |
 |---|---|---|---|
-| 第 1 轮 · 功能 | ⚠️ 部分（**已复跑第 3 次**） | 现值 **29 条** = FR1 ×17 · FR2 ×6 · NFR2 ×3 · `TestCapabScaleCredentialChain` ×3（`T-FIX-13` 纯加法补的第 29 条 = 真扩容正向路径），全部入 `backend/tests/` | FR3/FR4 **已有 unit**：`T-FIX-05` 抽出 `groupByCapability` + `capabilitiesOf`，`frontend/src/__tests__/capability-group.test.tsx` **14 条**（本轮一手复跑 `npx vitest run capability-group` → `Tests 14 passed (14)`）→ §1.5 两条 UAT 升级为 unit。**`T-FIX-14` 之后前端也只剩一处定义**（§1.9）。FR5 仍 🟡：`未分类` / 默认域口径 = 待人工裁定第 6、7 条，**裁定前不写用例**（避免把未定口径冻进代码） |
+| 第 1 轮 · 功能 | ⚠️ 部分（**已复跑第 3 次**） | 现值 **29 条** = FR1 ×17 · FR2 ×6 · NFR2 ×3 · `TestCapabScaleCredentialChain` ×3（`T-FIX-13` 纯加法补的第 29 条 = 真扩容正向路径），全部入 `backend/tests/` | FR3/FR4 **已有 unit**：`T-FIX-05` 抽出 `groupByCapability` + `capabilitiesOf`，`frontend/src/__tests__/capability-group.test.tsx` **14 条**（本轮一手复跑 `npx vitest run capability-group` → `Tests 14 passed (14)`）→ §1.5 两条 UAT 升级为 unit。**`T-FIX-14` 之后前端也只剩一处定义**（§1.9）。前端 unit 现值 **16 条** = `capability-group.test.tsx` 14（纯函数/组件）+ **`agent-builder-capability-wiring.test.tsx` 2（`T-FIX-15` · 接线级行为判据，§1.10）**。FR5 仍 🟡：`未分类` / 默认域口径 = 待人工裁定第 6、7 条，**裁定前不写用例**（避免把未定口径冻进代码） |
 | 第 2 轮 · 性能 | ❌ 未跑（**阻塞待人工**） | — | `REQUIREMENT.md` 非功能性需求 NFR1/2/3 **无任何量化预算**（无 p95 / 无 bundle 上限 / 无 LCP），kit-5-test 步骤 2.1 明确「没有就停下来，让用户先补」→ 记开放项 O-1，不由 AI 自定义阈值（R18.1 ②） |
 | 第 3 轮 · 安全 | ⚠️ 部分（**本轮补上后端 CVE 数**） | 越权 / 凭据搬运 / A09 可验性负例**已进用例**（4 条；现值 **2 绿 / 1 红 / 1 skip**，`T-FIX-04` 与 `T-FIX-13` 各收口其内，见 §1.2 末行）；`pip-audit`（verify 在隔离 venv 实跑）+ `npm audit` + 秘钥模式扫描均有数 | `trufflehog` PyPI 上只有**旧 Python v2**（不是 v3 Go 扫描器）、`gitleaks`/`semgrep`/`bandit` 无 apt 候选 → 秘钥扫描仍是模式 grep，**不等价于工具**（盲区 B-3）；SAST 未跑（B-4）；Python 侧无锁文件 → CVE 基线不可固化 |
 | 第 4 轮 · 兼容 | ⚠️ 部分 | 4.3 数据迁移 = **N/A（有理由，见 §4.2）**；MySQL 方言差异记 **待确认**（§4.3） | 4.1 跨浏览器 / 4.2 视口未跑：本阶段未起 dev server，且 `npm run build` 必红（`CLAUDE.md` 既载事实，32 个 TS 错误）→ 记开放项 O-2，视觉/可达性走 UAT + 6-review 第三轮 |
@@ -271,7 +271,7 @@ TOTAL                               444  269  39%   →  454  272  40%
 | T2 Test Brittleness | 1 | 🟡1（下）|
 | T3 Test Duplication | 1 | 🟡1（下）|
 | T4 Mock Abuse | 1 | 🟡1（下）|
-| T5 Coverage Illusion | 0 | — |
+| T5 Coverage Illusion | 1（**第 3 次复跑引入，本轮已消解**） | 🟡1（下：判据侧空转 = `T-FIX-15` 补 2 条行为断言后关闭）|
 | T6 Architecture Mismatch | 1 | 🟡1（下）|
 
 **详细发现（4 要素）**
@@ -300,7 +300,8 @@ TOTAL                               444  269  39%   →  454  272  40%
   **Consequence**: 「`?capability=` 是否真被解析成那个 kwarg」这类**契约外壳**问题不在本轮证据里。
   **Remedy**: 归开放项 O-4（起服务后的 1 条 HTTP 冒烟；`TestClient` 会被既有模块级桩污染，须自带显式覆盖并在 teardown 复原 —— 这条经验记入 §1.8，避免下一个人重踩）。
 
-**处理**：命中 4 项 → 按模板须「release 前必修」；本 change 的 release 出口本身被 R2.5 拦着，故 T2/T3/T4/T6 全部**登记在下表**，其中 T4/T6 有对应开放项。
+**处理**：命中 **5** 项（第 3 次复跑引入的 T5 那条**已由 `T-FIX-15` 消解**，见 §1.10 与本表）→ 在册 4 项：T2/T3/T4/T6，其中 T4/T6 有对应开放项，全部**登记在下表**。第 2 次复跑时这里写的是「命中 4 项」，加 T5 后是 5，逐条可核。
+
 
 ### 1.8 测试质量记事（议题 / 暂缓项）
 
@@ -309,7 +310,7 @@ TOTAL                               444  269  39%   →  454  272  40%
 | `tests/test_capability_groups.py::test_capab_combined_*` | T3 | 🟡 | `T-FIX-01` 绿了之后再看是否参数化 |
 | `tests/test_capability_groups.py`（直调函数） | T6 | 🟡 | 开放项 O-4：HTTP 层冒烟 1 条（`TestClient` + 显式 `dependency_overrides` 复原） |
 | `tests/test_api_integration.py:29`（模块级桩泄漏） | T4/T5 | 🟡 | **不在本 change 面内**（属既有 41 红的根因）→ 建议随 `T-FIX-12` 议题包一并登记 |
-| `frontend/src/pages/AgentBuilder.tsx`（capability 取值接线） | T5 的镜像形态：**判据侧空转** | 🟡 | **本轮新增（`T-FIX-14`）**：该文件的能力取值改吃 `capabilitiesOf` 后**零用例引用它**（`grep -rn "AgentBuilder" frontend/src/__tests__` → 无命中，一手实跑）→ 两条【验收】grep 只钉「写法」不钉「行为」。判据强度实测见 §1.9.3，补口登记 **O-16** |
+| `frontend/src/pages/AgentBuilder.tsx`（capability 取值接线） | T5 的镜像形态：**判据侧空转** | 🟡 → **✅ 本轮消解** | **`T-FIX-14` 引入 · `T-FIX-15` 消解**：该文件的能力取值改吃 `capabilitiesOf` 后一度**零用例引用**（`grep -rn "AgentBuilder" frontend/src/__tests__` 当时无命中），两条【验收】grep 只钉「写法」不钉「行为」且实测可被同义写法绕过（§1.9.3）。现由 `frontend/src/__tests__/agent-builder-capability-wiring.test.tsx` 补 **2 条行为断言**（未修态实测红 + 对抗样本实测红，见 §1.10）→ 该维度不再命中，登记 O-16 关闭 |
 
 ### 1.9 `T-FIX-14` 交接验收轮（第 3 次复跑 · 2026-09-24 · 本阶段一手实跑，非转述）
 
@@ -372,6 +373,37 @@ var c5 = a.model_config_json?.["capabilities"] ?? [];                         �
 **裁决 B · `T-FIX-00` 的勾选账面（`TASK.md:123` 仍 `[ ]`，STATE 记「✅ 本阶段闭环」）→ 本阶段判：勾上 `[x]`，并已改。**
 - 依据 = 本阶段在 `8923c430` **一手复跑该任务五条 verify**：① 定向收集 ✅（`-k capab` → `29/210 tests collected (181 deselected)`，未修态原文是 `no tests collected`）· ② 定向数 ✅ 有源（现值 `16F/12P/1S`，与 §1.3 逐条名单一致；该条标【验收·**修复后**】，按元规则 2 它今天**本应为假**，红的 16 条全归 `T-FIX-01/02`，不是本任务未完项）· ③ 三条护栏 grep ✅（`MagicMock` / `urlopen` / `8800` 逐个 = **0**）· ④ 全量真实输出已贴 ✅（本轮补第 3 次那行，四个维度自洽）· ⑤ `_quick_test.py` 文件头「非回归基线」标注 ✅ 在位（`grep -c assert` 仍 = 0，走的正是「保留标注」那条合法出路）。
 - 勾的是**本任务自身的交付闭环**（RED 基线钉住 + 工件 + 标注），**不是**「capability 测试已全绿」——后者仍写在 §1.3 与「出口条件」里，16 条红一条没少。这条区分也写进勾选行本身，防下一个读 `[x]` 的人误判。
+
+### 1.10 `T-FIX-15` 交付轮（O-16 处置落地 · 2026-09-24 11:0x · 起点 = 评审分支 tip `57c3cc56`）
+
+主审把 §1.9.4 裁决 A 落成了 `TASK.md` 末的 **T-FIX-15**，`write_files` 含新建的 `frontend/src/__tests__/agent-builder-capability-wiring.test.tsx` → **全仓第一个拿到前端测试写权的任务**，本阶段照卡实现（此前 5-test 与 4-dev 自建同为 R6.5 越界，所以两人「只交建议不动手」都是对的）。
+**交付物**：该新测试文件（**2 条用例**，无新依赖、不起服务）+ 本工件 + 本 STATE 四行；`AgentBuilder.tsx` / `capability-group.test.tsx` / `AgentControlPlane.tsx` **一字未动**（元规则 4 单写者 + 不在 `write_files`），`git status --porcelain` 收尾只有 1 个新文件 + 2 个工件。
+
+四条 verify（一手实跑，全二值）：
+
+| # | 命令 | 结果 |
+|---|---|---|
+| ① | `npx vitest run agent-builder-capability-wiring` | **`Tests 2 passed (2)`**（元规则 3：吃用例数，不吃退出码） |
+| ② | `npx vitest run`（全量） | **7 files / 68 passed / 0 failed**（66 基线 +2，未减他人用例） |
+| ③ | `grep -Ec "model_config_json\s*\??\s*[.\[][[:space:]]*[\"']?capabilities" src/pages/AgentBuilder.tsx` | **0**（§1.9.3 加严判据，作新口径唯一出处） |
+| ④ | `npx tsc --noEmit \| grep -c "error TS"` | **恰 32**（= 基线等值；新文件贡献 **0** 条） |
+| 附 | 后端定向 / 全量（证明本任务没碰别人的靶） | **16F/12P/1S（29）** · **57/146/7（210）** · 非 capability 红 **41** 条同名同数 —— 与 §1.9.1 一字不差 |
+
+**两条断言 = 行为判据，不是写法判据**（照 §1.9.4 原文实现）：① 喂 `["   "]` → 卡片内**无「只含空白」的 chip**，且**「加载记忆」按钮不渲染**（chip 与按钮共用 `AgentBuilder.tsx:59` 那个 `length > 0` 门）；② 喂 `["a", " a "]` → chip 文本集合 = `['a']`（归一后只剩 1 个）。两条都先断言 `getByText('wiring-agent')` 存在 = **正向锚点**，挡掉「整页没渲染出来 → 按钮自然不存在」这类假绿（T5）。断言只依赖 `span` + 文本，不依赖 class / 内联样式，也**没有**往页面里加 `data-testid`（那文件不在我写权内）。
+
+**RED 证明（revert-and-rerun，一手；临时改工作树后已 `git checkout --` 复原，未入库）**：把 `AgentBuilder.tsx` 换成未接线态 `0e8ee534` 的内容 → 同一份测试 **`Tests 2 failed (2)`**，失败原文 = `expected 1 to be +0`（空白 chip 存在）与 `expected ['a', ' a '] to deeply equal ['a']`（未去重未归一）→ 两条断言真在钉行为，不是永远绿的摆设。
+
+**反同义化对抗证明（元规则 2 第 5 次同形 = F27 要求的那件事，本轮首次照规程做）**：把消费点改写成**能拿回第 4 套真相**的等价内联形状 `var capabilities = (a.model_config_json?.capabilities) || [];`，三条判据同跑 ——
+
+| 判据 | 对抗样本上的取值 | 判定 |
+|---|---|---|
+| 旧字面【验收①】 `grep -c "model_config_json.capabilities"` | **0** | ❌ **被绕过**（第 4 套真相已复活而判据仍绿 = F27 的实形） |
+| 加严【T-FIX-15 verify③】 | **1** | ✅ 抓住 |
+| 本任务新接线用例 | **2 failed** | ✅ 抓住（行为层，失败原文与 RED 证明同形） |
+
+→ **结论**：加严 grep 仍只是「钉得更死的写法判据」；天花板是这条行为用例 —— 它不看写法，所以写法换了也跑不掉。这正是 §1.9.4 判「落」要买的东西，现在有据。**O-16 关闭**。
+**与 O-18 的绑定**：断言① 锁的「chip 与记忆入口共用同一个门」这个联动本身待人工裁定（主审登记的 O-18）→ 人若拍「分门」，改的是**这条断言 + 那个门**（成对改），T-FIX-15 不重开；改判须留痕，勿静默把断言改掉（R5.3 的入口形态）。
+
 
 
 ---
@@ -481,7 +513,7 @@ backend/services/oauth_mock.py:52  "refresh_token": "mock_refresh_token_" + uuid
 ### 4.1 跨浏览器 / 视口
 
 未执行（未起 dev server；`npm run build` 必红 = 32 个 TS 错误，基线如此）。→ 开放项 **O-2**。
-本轮**自动化基线**已随 `T-FIX-05` 上移：`npx vitest run` = **6 files / 66 tests passed**（复跑一手，第 1 次是 5 files / 52）；
+本轮**自动化基线**已随 `T-FIX-05` / `T-FIX-15` 两次上移：`npx vitest run` = **7 files / 68 tests passed**（`T-FIX-15` 一手复跑；第 1 次 5 files / 52、`T-FIX-05` 后 6 files / 66）；
 `npx vitest run capability` = **14 passed**（元规则 3：判据吃用例数，不吃退出码）。
 可达性的现状（一手测，两个文件分别数）：`AgentControlPlane.tsx` `aria-expanded` = **0** / `tabIndex` = **0** / `onKeyDown` = **1**（在别处，非折叠头）；
 `components/capability/CapabilityGroupHeader.tsx` 三个全 **0** → `T-FIX-06` 的落点已从「1428 行大文件」变成这个新组件，
@@ -533,7 +565,7 @@ mysql : LIKE concat('%%', %s, '%%')
 |---|---|---|---|---|
 | `backend/tests/test_capability_groups.py`（**现值 29 条** = 本工件 28 + `T-FIX-13` 纯加法 1） | integration（真实 session） | FR1（17）· FR2（6）· NFR2（3）· `TestCapabScaleCredentialChain`（3：凭据搬运 / A09 审计 / 真扩容正向） | 前 28 条 = 5-test（本工件）· **第 29 条 = 4-dev（`T-FIX-13`，测试文件对 `0726c73b` 删除行数 = 0，纯加法）** | 1 · 3 |
 | `frontend/src/__tests__/capability-group.test.tsx`（**14 条**） | unit（纯函数 + 组件渲染） | FR3（分组/组键）· FR4（渲染 / onToggle）· FR5 前端半边（归一后落 `未分类`）· F17/F18 归一 | `T-FIX-05`（4-dev）· **本阶段复跑核对**：`npx vitest run capability-group` → 14 passed（第 3 次仍 14/14） | 1 |
-| `frontend/src/__tests__/agent-builder-capability-wiring.test.tsx`（**待建**，落点见 O-16） | unit（页面渲染 · 喂 `useAgents.setState` 种子） | 把 `T-FIX-14` 的两条 grep 判据**升级为行为判据**：`["   "]` → 无空 chip 且无「加载记忆」按钮；`["a"," a "]` → 只剩 1 个 chip | **待 4-dev**（需先有 TASK 落点：全仓无任务的 `write_files` 含前端测试文件 → 5-test 自建 = R6.5 越界） | 1 |
+| `frontend/src/__tests__/agent-builder-capability-wiring.test.tsx`（**2 条**，`T-FIX-15` 已建） | unit（页面渲染 · 喂 `useAgents.setState` 种子，无新依赖 / 不起服务） | **把 `T-FIX-14` 的两条 grep 判据升级为行为判据**：`["   "]` → 无空白 chip 且无「加载记忆」按钮（= O-18 联动的显式锁）；`["a"," a "]` → 只剩 1 个 chip。未修态 `0e8ee534` 两条**实测红**（见 §1.10） | 5-test（本工件，`T-FIX-15` 写权） | 1 |
 | `frontend/src/__tests__/agent-control-plane-a11y.test.tsx` | unit（**待建**，`T-FIX-06` 落点） | 键盘可达 / `aria-expanded`（实测页面与该头组件 `aria-expanded` / `tabIndex` 均 **0**，`onKeyDown` 只在页面别处 1 处） | 4-dev（待） | 1 · 4 |
 | `.specs/capability-groups/_quick_test.py`（仅加**文件头标注**） | 冒烟脚本 | 无（明确标为**非回归基线**，禁止当任何 verify 的证据） | 5-test（本工件） | 1 |
 
@@ -574,7 +606,7 @@ mysql : LIKE concat('%%', %s, '%%')
    **本轮补一条同族第三例（判据的"可绕性"）**：`T-FIX-14` 的两条【验收】是 grep 计数，实测把那条判断改成可选链写法
    （`model_config_json?.capabilities`）就能在第 4 套真相**复活**的同时让【验收①】仍为 0 → 见 §1.9.3 / **O-16**。
    元规则 2 管的是"取值来源"，这一例管的是"**字面 pattern 判据的覆盖面**"：写 `grep -c "<字面>"` 时须同时说明它挡不住哪些等价写法。
-3. 代码修复的阻塞状态（本轮更新）：`T-FIX-04` ✅ / `T-FIX-05` ✅ / `T-FIX-13` ✅（凭据链两条按设计收口：1 绿 + 1 skip）/ **`T-FIX-14` ✅ 本轮验收通过**
+3. 代码修复的阻塞状态（本轮更新）：`T-FIX-04` ✅ / `T-FIX-05` ✅ / `T-FIX-13` ✅（凭据链两条按设计收口：1 绿 + 1 skip）/ **`T-FIX-14` ✅ 验收通过** / **`T-FIX-15` ✅ 本阶段照卡交付（接线级行为判据已落，O-16 关闭，§1.10）**
    · `T-FIX-01` 等 `T-FIX-02` 的产物 · **`T-FIX-02` 卡在 R4.6 的人批（O-10 四选一）→ 它是当前队列头，且 4-dev 手上「不卡人工」的任务已清零**；
    每条落地后**复跑本节定向命令**，对应红应逐条转绿；任一红转不了 = 该条修复未真正落地。
    ⚠️ 判据链按 `TASK.md` v10.4 的现值走：`16F/12P/1S` →〔02〕`15F/13P/1S` →〔01〕`0F/28P/1S`（**别再按「13F」或「1F 等 A07」验收**；
@@ -616,5 +648,5 @@ mysql : LIKE concat('%%', %s, '%%')
 | O-11 | **admin 旁路与本工件护栏互斥**（= 待人工裁定第 9 条的具体化）。TASK `T-FIX-04`：「模型/模板收口默认**不带** admin 旁路」；本工件【护栏】`fr2_contract_shape_and_dedup`：admin 身份请求他人域、断言看得见其 capability → **不可同时为真**。三条出路：**(A)** 改 TASK 文本（非 admin 收口、admin 沿用既有分支）—— 代价：`auth.py:181-186` 的 fail-open 使「无身份头 = admin」，所以 A 在未鉴权路径上等于**`:110` 的收口形同未修**（A07 修好前该分支对外敞开）。**(A′)** TASK 自己给出的形态：豁免保留但须写成**显式分支 + 落审计**（现况是隐式复用 `_filter_owner` 的 admin 分支，不满足 A′）—— 选它我就补一条「admin 读他人域须落审计」的用例（现在**不写**，免得像 FR5 那样把未定口径冻进代码）。**(B)** 真要 no-bypass：**由 5-test 把该护栏的调用身份从 admin 改成域 owner 本人**（断言的两项 capability 一字不改，属**换身份不换强度**，不是 R5.3 的削弱），4-dev 再删分支。⚠️ 若 4-dev 先删分支会留下 1 条红被读成「dev 改坏了测试」→ **顺序不能反：先裁，再由 5-test 改，再删**（本轮把这条写死的原因：护栏在我手里） | 人工签（R2.5 第 9 条 · 唯一会改变代码形状的那条） |
 | O-12 | **`pip-audit` 常驻化**：verify 执行在**一次性 venv** 里装上跑出了后端 CVE 数（共享 venv 未被污染，已复核），但人人可复跑需要有人拍「装进共享 `/home/malizhi/.venv`」这一步；同时那 8 行的 **severity 未逐条取到** → 定级要补一次跑 | 人工（工具链）|
 | O-13 | **capability 第 4 套真相**：`frontend/src/pages/AgentBuilder.tsx`（原 `:48`）的 `(...).capabilities \|\| []` 不过滤空串/空白（4-dev 在 `T-FIX-05` 中发现）。F18 现写「后端 7 + 前端 1」→ 要么给 `T-FIX-01/02` 补这个落点，要么把它记进 F18 清单，**别让「前端已平」这句话停在半真的账上** | **✅ 本轮关闭**：`T-FIX-14`（`0e30fff2`）已把它换成 `capabilitiesOf`，本阶段一手验收过（§1.9）；「前端已平」现在成立、**后端 7 处仍待 `T-FIX-01/02`** |
-| O-16 | **`T-FIX-14` 的判据强度缺口（本阶段查出，非 4-dev 的偏离）**：① 该接线文件**零用例引用**（`grep -rn AgentBuilder frontend/src/__tests__` 无命中）→ 行为变更只被工件钉着；② 两条【验收】是 grep 计数，**实测可被同义写法绕过**（改成 `model_config_json?.capabilities` → 计数仍 0、第 4 套真相复活；5 种等价形状里字面 pattern 只命中 1 种）。建议出路二选一或都做：**(a)** 落一条接线级渲染用例（判据原文与本阶段核实过的可执行形状在 §1.9.4 裁决 A / 新增测试登记行，`useAgents.setState` 范式已有 5 处先例，不需要新依赖）；**(b)** 把 ① 的 pattern 换成加严版（§1.9.3 给了实测可用的那条）。**要落 TASK 才有人能写**（前端测试文件不在任何任务的 `write_files` 里 → 5-test 与 4-dev 自建同为 R6.5 越界） | **6-review / 主审**（R14 派单：建议开 `T-FIX-15`，写权 = 新前端测试文件）；本阶段不自我授权 |
+| O-16 | **✅ 本轮关闭（`T-FIX-15` 交付 · 证据见 §1.10）** —— 原缺口：**`T-FIX-14` 的判据强度**（本阶段查出，非 4-dev 的偏离）：① 该接线文件**零用例引用**（`grep -rn AgentBuilder frontend/src/__tests__` 无命中）→ 行为变更只被工件钉着；② 两条【验收】是 grep 计数，**实测可被同义写法绕过**（改成 `model_config_json?.capabilities` → 计数仍 0、第 4 套真相复活；5 种等价形状里字面 pattern 只命中 1 种）。建议出路二选一或都做：**(a)** 落一条接线级渲染用例（判据原文与本阶段核实过的可执行形状在 §1.9.4 裁决 A / 新增测试登记行，`useAgents.setState` 范式已有 5 处先例，不需要新依赖）；**(b)** 把 ① 的 pattern 换成加严版（§1.9.3 给了实测可用的那条）。**要落 TASK 才有人能写**（前端测试文件不在任何任务的 `write_files` 里 → 5-test 与 4-dev 自建同为 R6.5 越界） | **6-review / 主审**（R14 派单：建议开 `T-FIX-15`，写权 = 新前端测试文件）；本阶段不自我授权 |
 | O-17 | **后端 A2 记忆装载仍按未归一的原始数组判定**（`agents_api.py:152` 取 `cfg.get("capabilities", [])` → `:164` `if capabilities:` → `:168` `cap.lower() in m.key.lower()`）：载荷 `[""]` 时**空串对任何 key 都子串命中 → 等于不过滤、把该用户近 7 天的 20 条记忆全装进上下文**（一手语义实跑：`"" in "anything"` = True），而非字符串元素会让 `/run` 抛 `AttributeError`（`7.lower()`）→ 前端本轮收口后**同一载荷两端行为方向相反**：卡片不显示该能力，后端却按它匹配一切。该处**今天无任何用例**（`grep -n "memor" backend/tests/test_capability_groups.py` 无命中）。**归 `T-FIX-01`**（它的 action 已含 `agents_api.py:152` 改消费 `capabilities_of`，v10.2·C2）→ 不新开任务；本阶段**不提前写用例**（01 未落地，判据现在为假是设计态，且会把未收口的形状冻进代码） | `T-FIX-01` 落地时由 5-test 补 2 条用例（空串载荷须 0 装载 / 非字符串元素不得抛）· 现登记不修 |
