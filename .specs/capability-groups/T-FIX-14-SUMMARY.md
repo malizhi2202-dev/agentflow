@@ -11,19 +11,21 @@
 
 ## 做了什么（一段话）
 
-`frontend/src/pages/AgentBuilder.tsx` 卡片渲染里自己写了一份取值 `(a.model_config_json && a.model_config_json.capabilities) || []`，**不过滤空串 / 纯空白 / 非字符串、不去重、不折叠连续空白** —— 它是同一条规则的**第 4 处实现**（后端 7 处内联 + `AgentControlPlane` 1 处 + 这里 1 处）。本任务按 action 把它换成 `import { capabilitiesOf } from '../components/capability/groupByCapability'` 并**直接调用**，本文件不再自带任何判断：`capabilitiesOf` 住在 helper `:28-39`（strip + 折叠连续空白 + 非字符串丢弃 + 非数组返回 `[]` + 按序去重），与后端 `capability_service.capabilities_of` 同契约（该契约本身由 `T-FIX-05` 落地、由 `capability-group.test.tsx` 14 条用例钉着）。
+`frontend/src/pages/AgentBuilder.tsx` 卡片渲染里自己写了一份取值 `(a.model_config_json && a.model_config_json.capabilities) || []`，**不过滤空串 / 纯空白 / 非字符串、不去重、不折叠连续空白** —— 它是同一条规则的**第 4 处实现**（后端 7 处内联 + `AgentControlPlane` 1 处 + 这里 1 处）。本任务按 action 把它换成 `import { capabilitiesOf } from '../components/capability/groupByCapability'` 并**直接调用**，本文件不再自带任何判断：`capabilitiesOf` 住在 helper `:28-39`（strip + 折叠连续空白 + 非字符串丢弃 + 非数组返回 `[]` + 按序去重），语义清单由 helper 头注 `:3-9` 逐条写死（非字符串丢弃 → `strip()` → 折叠连续空白 → 空/纯空白丢弃 → 按序去重、大小写不折叠），14 条用例钉着（`capability-group.test.tsx`，本轮 `vitest run capability-group` 实跑全绿）。
 
-**改动 = 2 行**（新增 import + 替换 1 行取值，含一行「唯一具名规则住哪」的指路注释）。**未做**的事同样明确：没碰 helper 本体、没碰 `AgentControlPlane.tsx`（元规则 4 单写者）、没碰后端那 7 处内联（属 `T-FIX-01/02`，`02` 仍卡 O-10 人签）、没改任何测试文件与 `TEST.md`（单写者，F22 交 5-test）。
+⚠️ **一条给下游的反幻觉更正（R6.1，我实跑过才写）**：后端那个「唯一入口」`backend/services/capability_service.py::capabilities_of` **今天还不存在**（`ls` → 无此文件），它是 `T-FIX-02` 的交付物；今天后端真正在跑的具名规则是 `services/k8s_routing_service.py:20 _extract_capabilities`（被 `domain_api.py:9` import、`:176/:214/:291` 三处消费）+ **7 处内联 `cfg.get("capabilities"`**（`agent_knowledge_api.py:714` / `agents_api.py:152` / `domain_api.py:115` / `gateway_api.py:85` / `k8s_routing_service.py:26,:39,:108`）。所以「两端各自只有一处定义」这条不变量，**本轮之后只在前端成立**。
 
-一处**必须给下游看的事实**：这次替换不是纯搬家，行为有变（下表实测）。变的正是 F18 要修的那三面 —— 空白变体不再自成一组/自挂一个空 chip，重复项去重，且**非数组字符串载荷原先会让整张卡片抛 `TypeError`**。前端从此只剩一处定义；「前端已平」这句话现在才成立（后端 7 处仍待 01/02）。
+**改动 = 净 +1 行（`git diff --numstat` = `+2 −1`）**：1 行 import + 1 行替换后的取值。**没有任何附带注释、整理或顺手改**（实跑 `grep -n "唯一具名" frontend/src/pages/AgentBuilder.tsx` → 无命中，可复核）。**未做**的事同样明确：没碰 helper 本体、没碰 `AgentControlPlane.tsx`（元规则 4 单写者）、没碰后端那 7 处内联（属 `T-FIX-01/02`，`02` 仍卡 O-10 人签）、没改任何测试文件与 `TEST.md`（单写者，F22 交 5-test）。
+
+一处**必须给下游看的事实**：这次替换不是纯搬家，行为有变（下表实测）。变的正是 F18 要修的那三面 —— 空白变体不再自成一组/自挂一个空 chip，重复项去重，且**载荷是字符串时（`capabilities: "abc"`）原先在渲染里抛 `TypeError`**（`string.map` 不存在 → 整张卡片挂掉），现在降级为「无 chip」。前端从此只剩一处定义；「前端已平」这句话现在才成立（后端 7 处仍待 01/02）。
 
 ## 改动文件
 
 | 文件 | 性质 | 说明 |
 |---|---|---|
-| `frontend/src/pages/AgentBuilder.tsx` | 修改（本任务 `write_files` 唯一项） | `:5` 新增 `import { capabilitiesOf } from '../components/capability/groupByCapability';`；`:49` 内联表达式 → `var capabilities = capabilitiesOf(a);`（+1 行指路注释） |
+| `frontend/src/pages/AgentBuilder.tsx` | 修改（本任务 `write_files` 唯一项） | `:5` 新增 `import { capabilitiesOf } from '../components/capability/groupByCapability';`；内联表达式（原 `:48`）→ `:49` `var capabilities = capabilitiesOf(a);` |
 | `.specs/capability-groups/T-FIX-14-SUMMARY.md` | 新增（工件） | 本文件 |
-| `.specs/capability-groups/TASK.md` | 工件勾选 | `T-FIX-14` 的 `- 状态: [ ]` → `[x]`（verify 实跑通过后，R2.4），其余 14 条任务一字未改 |
+| `.specs/capability-groups/TASK.md` | 工件勾选 | `T-FIX-14` 的 `- 状态: [ ]` → `[x]`（verify 实跑通过后，R2.4）；全表 22 条 `- 状态:` 行里**只有这 1 行**变化（`git diff -U0` 实测），其余 21 条一字未改 |
 | `STATE.md` | 状态行 | 「当前阶段 / 当前 task / 中断任务 / 产物」四行前置新值（元规则 4c 显式例外，见越界检查） |
 
 `git diff --numstat`（代码，已提交前实跑）：`2 1 frontend/src/pages/AgentBuilder.tsx`。
@@ -114,12 +116,16 @@ R1.6 反重复检查：本任务是**首次**做 `T-FIX-14`（无 PROGRESS、无
 ## 沿用既有抽象 grep（R6.4 / 1.4）
 
 ```text
-# 能力：capability 取值归一规则 —— 找到了，沿用，不另起第 5 份
+# 能力：capability 取值归一规则 —— 找到了，沿用，不另起第 5 份（输出为命令原文）
 $ grep -rn "capabilitiesOf" frontend/src
 frontend/src/components/capability/groupByCapability.ts:28:export function capabilitiesOf(agent: CapabilityCarrier | null | undefined): string[] {
-frontend/src/components/capability/groupByCapability.ts:55:    const caps = capabilitiesOf(agent);     # helper 内部唯一消费者（分组）
-frontend/src/__tests__/capability-group.test.tsx:9:…from '../components/capability/groupByCapability';
-frontend/src/pages/AgentBuilder.tsx:5,49                                                            # 本次新增的两处
+frontend/src/components/capability/groupByCapability.ts:55:    const caps = capabilitiesOf(agent);
+frontend/src/pages/AgentBuilder.tsx:5:import { capabilitiesOf } from '../components/capability/groupByCapability';
+frontend/src/pages/AgentBuilder.tsx:49:            var capabilities = capabilitiesOf(a);
+frontend/src/__tests__/capability-group.test.tsx:4,50,69,73,74,78,79,80,81,82,83（11 行，全部是规则自己的用例）
+# 读法：`capability-group.test.tsx:79` 已断 `row(2, 'code-review')` → `[]`（非数组字符串载荷），
+#        :80/:81/:82/:83 断 null / {} / undefined / null → `[]` —— 即「本文件不再自带判断」这件事，规则侧早有用例，缺的只是接线侧（见「是否触发新工作」②）
+# 消费点从 1 个（helper 内部 :55）变成 2 个（:55 + AgentBuilder:49）+ 页面 `AgentControlPlane` 经 `groupByCapability` 间接消费
 
 # 既有 import 写法（同一 helper 的另一消费者）→ 沿用同一相对路径形式
 $ grep -n "groupByCapability" frontend/src/pages/AgentControlPlane.tsx
@@ -141,8 +147,8 @@ $ cd backend && grep -rn 'get("capabilities"' --include='*.py' routes/ services/
 ## 6 维自查（步骤 4 · 生产代码改动必填）
 
 ### 🟢 R1 认知过载：本次让卡片更易读，不是更难
-**Symptom**：卡片渲染函数 `agents.map(function(a) { … })` 本来就长（`:47-105`）。
-**Source**：`git diff --numstat` = `2 1`，分支与嵌套未增加。
+**Symptom**：卡片渲染函数 `{agents.map(function(a) { … })}` 本来就长（实测 `AgentBuilder.tsx:48-104`，共 57 行；本任务前后一样长）。
+**Source**：`git diff --numstat` = `+2 −1`（import 1 行 + 替换 1 行），分支与嵌套未增加。
 **Consequence**：读代码的人不需要再在此处重建「空串/空白算不算能力」的规则。
 **Remedy**：无需处置（净删判断、净加一次调用）。
 
@@ -170,7 +176,7 @@ $ cd backend && grep -rn 'get("capabilities"' --include='*.py' routes/ services/
 
 ### 🟢 R6 领域扭曲：载荷形状变了但领域词没变
 **Symptom**：变量名 `capabilities` 保留（领域词），其类型从 `any` 收紧为 `string[]`。
-**Source**：`groupByCapability.ts:28` 返回签名 + `tsc` 计数 32 未变（两处消费点 `:58/:96` 无需断言即通过）。
+**Source**：`groupByCapability.ts:28` 返回签名 + `tsc` 计数 32 未变（`capabilities.length > 0` 的两处消费点无需断言即通过 —— 实跑现居 `:59` 与 `:97`，改前 `:58` 与 `:96`，差 1 行来自新增 import；按元规则 4b 这只作提示不作判据）。
 **Consequence**：非数组载荷不再流进渲染路径（⑥ 第 6 行原先抛 `TypeError`）。
 **Remedy**：无需处置。
 
@@ -181,7 +187,7 @@ $ cd backend && grep -rn 'get("capabilities"' --include='*.py' routes/ services/
 ### 已知小问题（🟢）
 - 本文件沿用既有 `var` + ES5 风格函数写法（与全页一致），未顺手 modernize（那是另一条 task 的活）。
 - `AgentBuilder.tsx` 仍有 **1 条既有 TS 错误**（`number | null` → `number`，见 ③），它是 `tsc=32` 基线的一部分，不在本任务边界内。
-- `:49` 上方我加了一行「唯一具名规则住哪」的注释，指路用；如 5-test 或主审认为该注释多余，删掉不影响任何判据。
+- 我原想在调用点上方补一行「唯一具名规则住哪」的指路注释，最终**没加**：helper 头部 `:3-9` 已经写了语义清单与两端对齐关系，页面里重复一次就是 R3 知识重复的新副本；不加也让本任务 diff 严格等于 action 的最小面。
 
 ## 数据库迁移（R4.5 / 1.7）
 
@@ -227,7 +233,7 @@ $ cd backend && grep -rn 'get("capabilities"' --include='*.py' routes/ services/
 
 1. **TDD 例外（步骤 2）明示**：未先写 RED 用例。原因是 RED 用例必须落在 `src/__tests__/` 新文件里，而 `write_files` 不含它 —— 自我授权新建 = 同时踩 R6.5 与 R7.1。我改为**跑既有规则用例（14 绿）+ 行为差异实测（⑥）**，把「接线级断言」作为建议交测试阶段（他们拥有测试文件写权与 `TEST.md` 单写者身份）。
 2. **验收按内容锚而非行号**（元规则 4b）：action 原文写「`AgentBuilder.tsx:48`」，并附「行号以锚为准」；起点 tip 上该表达式实测在 `:48`，我改后文件行号整体 +1，判据全部走 `grep -c`，不依赖行区间。
-3. **未采纳/覆盖任何上游工件**：只在 `0e8ee534`（v10.4 tip）之上追加，因此元规则 4d 的「静默吃勾选」风险本次不存在；仍按 4d 复查了 15 条 T-FIX 勾选。
+3. **未采纳/覆盖任何上游工件**：只在 `0e8ee534`（v10.4 tip）之上追加，因此元规则 4d 的「静默吃勾选」风险本次不存在；仍按 4d 复查了全表 22 条 `- 状态:` 行（`[x]` 3 → 4，其余逐字未变）。
 4. 未偏离 action 的任何字面要求：helper 未改、判断未保留、无附带重构。
 
 ## 是否触发新工作
@@ -243,6 +249,6 @@ $ cd backend && grep -rn 'get("capabilities"' --include='*.py' routes/ services/
 ## 完成判定
 
 - TASK.md 中 `T-FIX-14` 已勾选：是（`- 状态: [x]`，时间戳 2026-09-24 10:17；`[x]` 普查 3 → 4，其余 21 条状态行逐字未变）
-- 提交 hash：代码 **`0e30fff2`**（`fix(capability-groups): T-FIX-14 …`）；工件提交 = 紧随其后的 `docs(capability-groups): T-FIX-14-SUMMARY …`（两个 sha 在出口评论里一并给出）
+- 提交 hash：代码 = **`0e30fff2`**（`fix(capability-groups): T-FIX-14 …`，唯一含代码的提交）；工件 = 其后所有 `docs(capability-groups): T-FIX-14 …` 提交。**本任务分支最终 tip 与「起点 → tip 线性可 FF」的证明一起写在出口评论里**（本工件自己也在工件提交内，故此处不写死自己的 sha）
 - 起点谱系：`0e8ee534`（G4 第五轮 4/4 门结 tip，未并 main）
 - **G3 代码门本轮未召集**（与 `T-FIX-04/13` 同口径：本 change 的 4-dev 票已在上一周期收过，单条 T-FIX 走「SUMMARY + 出口派 5-test」；主审若要单条过 G3，一句话即可）。出口 = @测试验证（5-test）。
