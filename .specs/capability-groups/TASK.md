@@ -248,4 +248,4 @@
 - **verify**: ① **【验收】** `grep -c "model_config_json.capabilities" src/pages/AgentBuilder.tsx` **1 → 0**；② **【验收】** `grep -c "capabilitiesOf" src/pages/AgentBuilder.tsx` **0 → ≥1**。两条取值均主审在 tip `50d944d5` 实跑（不是读出来的）。
 - **为什么单开一条**（元规则 1 的正用，不是加戏）：F18 原文写「后端 7 处 + 前端 1 处」，`AgentControlPlane` 那处随 `T-FIX-05` 收口后 F18 就会被读成「前端已平」→ 这条若不落任务，就只活在评论里，等于没记（R18.3 同一口径）。
 - **顺序**: 独立可做，不依赖 O-9/O-10，也不碰 `AgentControlPlane.tsx`（元规则 4 无冲突）→ 可与 `T-FIX-13` 同波由 4-dev 串行做。
-- 状态: [ ]
+- 状态: [x] **已完成**（2026-09-24 10:17 · 4-dev · `T-FIX-14-SUMMARY.md` · 起点 tip `0e8ee534` → 码提交 `0e30fff2`）：两条【验收】一手实跑 —— ① `grep -c "model_config_json.capabilities" src/pages/AgentBuilder.tsx` **1 → 0**、② `grep -c "capabilitiesOf"` **0 → 2**（起点值我在自己的 tip 上重取，与主审 `50d944d5` 的 1/0 同值 → 判据未漂）；护栏 `tsc --noEmit` 的 `error TS` **=32** 前后同值、前端 vitest `capability-group` **14/14**（元规则 3：用例数已断言 ≥1）与全量 **66/66** 同基线、后端定向 **16F/12P/1S** 与全量 **57/146/7**（非 capability 红仍 **41** 项同名）零扰动。行为差异 4 类（空串/纯空白不再渲染 · 去重 · 折叠连续空白 · 非数组字符串载荷原抛 `TypeError` 现降级为无 chip）实测表在 SUMMARY ⑥。**未附带测试改动**：`write_files` 只有该 `.tsx`，新建测试文件即 R6.5 越界 → 接线级断言作为建议交 5-test（SUMMARY「是否触发新工作」②）。
