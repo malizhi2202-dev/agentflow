@@ -2,9 +2,9 @@
 
 - **Change ID**: capability-groups
 - **审查时间**: 2026-09-23 09:08 CST
-- **审查者**: AI（Reviewer 角色）· 4.2 二审已派出但本 turn 未回收 → 该节标「待确认」（详见 4.2）
-- **总体结论**: **阻塞（不通过）** —— 2.0 金字塔门禁 🔴（`TEST.md` 与 CHANGE.md 自declared 的 `test_backend.py` 均不存在）+ **8 项** 🔴 Critical（v1 为 7 项；本文件行头曾误记「5 项」，一并订正）。按 kit-6-review 步骤 2.0：**先回 5-test 补完**，Critical 未修或未获「已知接受」签字前禁止进 7-integration（R2.5）。
-- **版本**: **v9**（2026-09-23 11:2x 修订，见「修订记录」）· **四版四票，每一版都被查出一处取证或判级错误**；v4 最重（F10 方向反了、照它修会造新 bug），v5 修的是**判据本身**（三条 verify 可在缺陷仍存活时为真 / 未修已为真）；v6 收领域专家改票 ✅ 带的 3 条文本级残留；**v7 收 Master 第二轮复核 ❌ 的 3 条（1 条活、2 条已在 v6 修）+ 更正我两次漏读票面 + 登记主审自己截断工件的操作失误**
+- **审查者**: AI（Reviewer 角色）· 4.2 二审于 v10 **已执行并回收**（fresh-context、只读；同模型 —— 环境无第二模型，待裁定第 4 条仍开放；详见 v10 第四节）
+- **总体结论**: **阻塞（不通过）** —— 2.0 金字塔门禁 🔴（`TEST.md` 与 CHANGE.md 自declared 的 `test_backend.py` 均不存在）+ **8 项** 🔴 Critical（v1 为 7 项；本文件行头曾误记「5 项」，一并订正）。按 kit-6-review 步骤 2.0：**先回 5-test 补完**，Critical 未修或未获「已知接受」签字前禁止进 7-integration（R2.5）。**v10 注**：2.0 门禁已随 `T-FIX-00` 交付降为「部分轮次」常态（见 TEST.md 声明），R2.5 台账随进度更新（`T-FIX-04/13` 转绿有据），总口径不变。
+- **版本**: **v10**（2026-09-24 09:4x 修订，见文末「v10」节）· 历史：**四版四票，每一版都被查出一处取证或判级错误**；v4 最重（F10 方向反了、照它修会造新 bug），v5 修的是**判据本身**（三条 verify 可在缺陷仍存活时为真 / 未修已为真）；v6 收领域专家改票 ✅ 带的 3 条文本级残留；**v7 收 Master 第二轮复核 ❌ 的 3 条（1 条活、2 条已在 v6 修）+ 更正我两次漏读票面 + 登记主审自己截断工件的操作失误**；v9 收「我自己造的假绿」（元规则 4b）；**v10 = 回流增补审查：T-FIX-13 代码首轮进审 + 4.2 二审首次回收 + 两条共享判据的计数重写（含否决 4-dev §6 推断与判死 v9 自己的「13F」假红判据）**
 
 ### 修订记录
 
@@ -643,3 +643,73 @@ graph LR
 **元规则 3/4 是 v8 立的（治假绿、治单写者漂移），v9 就被查出一条我亲手写的假绿**：`T-FIX-03` 判据⑤ 用行区间 `sed -n '74,75p'` 打靶 —— 这类判据的正确性依赖「文件不变」，而 `AgentControlPlane.tsx` 是六条任务的共同靶文件（元规则 4 明写了它会被人改）。结果 `T-FIX-05` 一落地，区间指向 `function OverviewCards…`，**判据打印 0、看起来「已满足」，幽灵字段 `a.health` 还在 `:76-77`**。我在 `50d944d5` 一手复现（区间版 0 / 全文版 2）后做了三件事：判据换全文件内容锚、立**元规则 4b**、在基线表把该行的取值重取并标来源 tip。
 
 **沉淀（写给别人也写给我自己）**：判据的形式必须和它的失效模式一起审查 —— 「**内容锚 + 计数差**」是能跨改动存活的形式，「**行区间 + 归零**」不是；任何打在共享文件上的判据，都假定它会被别人改。前两轮我修的是「判据在缺陷存活时为真」，这一轮修的是「判据在他人的正确改动之后为真而缺陷仍在」—— 同一族问题的第三种形态。
+
+---
+
+## v10（2026-09-24 09:4x · 回流增补审查：`T-FIX-13` 落地后的代码首轮进审）
+
+**审的是哪段 diff**：v9 的口径锚在 `a28e816f`（v8 tip），它记了下游进度但**没审过 `78117a1e` 的代码** —— 本轮 delta = `acdcda109f00` 线上晚于 v9 锚点的唯一代码提交 `78117a1e`（T-FIX-13：`domain_api.py`/`agents_api.py`，+49/−7）+ 纯加法测试 `test_capab_scale_allowed_path…` + `c7ca5bcd`（工件采纳，docs-only）。采纳线已由 4-dev 集成进 `acdcda109f00` tip `c7ca5bcd`（STATE 已指路「只读这一条」）。
+
+### 第一轮 · Spec 合规（v10 面）
+
+- F16/T-FIX-13 action 六点全部落地：候选集收口（内容锚 `Agent.owner_id == user`）· 无模板 400→404（`detail="该域没有可作为模板…"`，不复探测信息）· 模板选择确定化（`template = min(`）· 不再搬运凭据（`api_key_encrypted=encrypt(payload`）· 审计三字段（`template_id=`/`template_owner=`/`credential=`）· `agents_api` create 与 update-`domain_id` 双分支过 `_assert_domain_access`。**「不带 admin 旁路」口径在两条新谓词上被遵守**（注释明示 O-11 豁免位）。
+- 范围：**零越界** —— `git show --stat` 三个代码提交只含 write_files 内文件；测试文件对 `0726c73b` 的 diff **删除行数 = 0**（`git diff 0726c73b HEAD -- 测试文件 | grep -c '^-[^-]'` = 0，R5.3 有据）。
+- FR1-FR5 侧无新实现（本波未触碰）；无范围蔓延。**但收口在 AC 面之外产生一个用户可见副作用 → F21**。
+
+### 第二轮 · 6 维诊断（v10 新发现，四要素）
+
+#### 🟡 F21 · R6 Domain Model Distortion：修完 F16 后，UI 的「弹性扩容」退化成无凭据的配置复制 —— 代价未签字
+- **Symptom**：`frontend/src/stores/domains.ts` `scaleAgents` body 只有 `{capability, desired_replicas}`（实测，4-dev 报的 `:150-156` 行号已漂移，按 4b 用内容锚）；收口后 `domain_api.py` 副本一律落 `encrypt("not_set")`；后端**没有任何路径**特判 `not_set`（4.2 二审实查：路由只看 capability，`chat_service.py:103` 解出后才在 provider 调用处 401）。新增用例把退化**断言成契约**（`decrypt(副本)=="not_set"` 通过）。
+- **Source**：Evans · DDD · 模型须忠实业务语义 —— 「扩容」的用例语义是「得到可服务的副本」，现语义是「得到一个模板的壳」。
+- **Consequence**：F16 堵住的同时弹性缩放对用户事实停用；**不答的后果不是「保持现状」，是功能没了**（4-dev 原话，主审核实）。
+- **Remedy**：二选一见下方「待人工裁定账本 v10 · O-14」。主审技术注记：**(β) 不重开 F16** —— 收口后模板恒归调用者，「继承模板自己的 Key」= 继承自有 Key；(α) 契约上更诚实但要动前端（与 T-FIX-11 同族）。
+
+#### 🟡 F24 · R3 Knowledge Duplication（政策级）：「无 admin 旁路」现在住在 2 文件 3 处，其中 1 处政策相反、注释各自宣称「只改这一处」
+- **Symptom**：`domain_api.py` scale 入口**域门**仍走 `_filter_owner`（带 admin 旁路），**模板候选集**用严格谓词 —— 同一端点两层两套政策；O-11 若拍 (A′) 豁免，实际要同时改 3 处（域门 · 候选集 · `_assert_domain_access`），而 `agents_api` 注释「改这一处即可」与 `domain_api` 注释「改这一行」各指各的，照任一注释做都漏。
+- **Source**：Hunt&Thomas · Pragmatic Programmer · DRY（政策只该有一个陈述点）；Fowler · Refactoring · Shotgun Surgery 的反面计数。
+- **Consequence**：O-11 落地日 = 豁免只改一半、口径悄悄不对称 —— 恰是元规则 4b 想防的「看着像一处、其实三处」。
+- **Remedy**：不改代码（R3.3；且谓词对象不同，现在合并属过早抽象）；**v10 把 3 处站点清单写进 O-11 账本行与 `T-FIX-13` verify 注记**，裁定执行时按清单逐处核。
+
+#### 🟡 F23 · R2 Change Propagation：凭据「使用」面还剩一条不经 scale 的路 —— `POST /api/agents/{id}/chat` 无归属检查（**pre-existing，非本波回归**）
+- **Symptom**：`chat_api.py:18` 不校验 agent 归属，`chat_service.py:48` 裸 id 取行、`:103` decrypt 其 key 调 provider；agent id 可经 `domain_api.py:144`、`gateway_api.py:39-49` 跨 owner 枚举。任何认证用户可**消耗**他人凭据（配额/计费归因），拿不到 key 字符串本身。
+- **Source**：OWASP A01（与 F16 同族不同 sink：F16=取得，F23=使用）。
+- **Consequence**：「F16 修完 = 凭据链闭环」如果口径读成「越权者碰不到他人凭据」，这条会让口径说过头。
+- **Remedy**：本 change 不开 T-FIX（R7.1，非本 diff 引入）；**并入 `T-FIX-12` ② 议题家族具名站点**（「visibility/越权执行跨端点」正是它声明的范围），v10 已写进 T-FIX-12 action ⑨。R9.2：4.2 二审（fresh context）首指，主审逐行复核代码后确认（`send_chat_message` 无 owner 过滤，实读）。
+
+#### 🟢 F22 · 工件过时（记给 5-test，本轮不代改）：TEST.md 声明行仍写「安全负例 4 条全 RED」「28 条」，tip `c7ca5bcd` 实际 2绿/1红/1skip、29 条。按元规则 4 单写者，TEST.md 由 5-test 下轮复跑时刷。**同形疤（本工件自己的）**：「修订记录」表的 v7/v9/v8 三行在历轮编辑中混进了「G4 第三轮」代码块内部（现约 `:550-552`）→ 渲染破损、语义未损；v10 行因此不追加进该表，版本沿革以文件头「版本」行 + 本节为准。清扫属 docs 整备，不占判据、不开任务。
+#### 🟢 F25 · 存量捆绑包（4.2 二审首报，全部 pre-existing、diff 外，仅登记）：`/scale` `desired_replicas` 无上界（一次可插任意行数）· `delete_domain` 置 NULL 不滤 owner（域 owner 可把他人 Agent 踢出域）· `models/knowledge_source.py:20` 注释称加密实存明文 · `domain_id=0` 走 falsy 分支绕过 `_assert_domain_access`（仅自伤，语义与列表侧一致）。→ 并入 `T-FIX-12` 议题包，不动本 change。
+
+### 判定链重推（主审独立实跑 · 4-dev §6 推断**否决**，v9 的 T-FIX-01「13F」判据同时判死为假红）
+
+4-dev 在交接里明写「请主审确认，别按我的推断落工件」。我自己跑、自己推：
+
+- **复跑（本机一手，tip `c7ca5bcd`）**：定向 **16 failed / 12 passed / 1 skipped（29）**，与 4-dev 报数**全对上**；全量 **57/146/7**；非 capability 红 41 项（28+6+4+3 分布逐文件数出）；既有绿无变红。
+- **16 红构成（实测 FAILED 名单）**：`TestCapabFR1AgentFilter` 15 + `TestCapabFR2DomainCapabilities::test_capab_fr2_whitespace_variants_collapse_to_one_entry` 1。
+- **归因实据**：FR1 类的 `_list` helper **全部**经 `api_list_agents`（查询侧 LIKE）；FR2 端点用例经 `list_domain_capabilities`。⇒ **T-FIX-02 单落地只转 `fr2_whitespace…` 1 条**（15F），**其余 15 条（含 `percent_query_leaks_nothing`）都在 T-FIX-01 改查询时一次性转绿**。
+- `percent_query_leaks_nothing` 断言 = mallory + `?capability=%` → 0 行；字面成员判定下 `%` 自然归零，**不依赖 A07/O-11**（TEST.md 归因行 = `T-FIX-01/02`，用例 docstring 自证「修后两条同时成立」）。4-dev §6「终态 = 1F/27P/1S、剩这条红等 A07」**不成立**；v9「18F→13F」（01 只翻 5 条）同样与实测矛盾 —— 01 真落地时打印的是 0F，判据「须为 13F」会**假红**，按本仓四轮教训，假红诱导删断言（R5.3）。
+- **v10 判定链（写进 TASK.md）**：`16F/12P/1S`（tip c7ca5bcd）→〔02〕`15F/13P/1S`（转绿恰 1 条，多转 = 越界碰了查询）→〔01〕`0F/28P/1S`（转绿 15 条；skip 恒为 A09 负例那条）。O-9 若改判折叠，`query_does_not_fold_case` 与前端 `capability-group.test.tsx:74` **同批**改（v9 口径不变）。
+- **A09 覆盖提供方（4-dev §2 两案取一）**：采纳 **(甲) 实现者加法提供** —— 用例已存在且绿（真扩容路径断 `template_id`/`template_owner`/`not_set`/自备 key 四件）；其互斥案 (乙)（5-test 并回）作废，负例 skip 保留为设计语义（404 不落审计，注释自明）。
+
+### 第四轮 · 补充（v10）
+- **4.2 跨模型 spot-check：本轮回收**。以 fresh-context、只读、限 5 问的方式对 T-FIX-13 安全差做独立二审（同模型 ≠ 同上下文；环境仍无第二模型，待裁定第 4 条继续开放）。**结果：凭据取得链在非 admin 面确认闭合**（密文碎片不构成等值 oracle：`encryption_service.py:19` 每次随机 nonce，前 3 后 4 片段命中密文而非明文；审计字段无 key 材料；无端点序列化 `api_key_encrypted` 全串）。新增 F23/F25 + 确认 F21。它同时**否决**了「F16 修完 = 凭据链闭环」的过读口径（使用面 F23 还在）。
+- 4.1 技术债评估：未触发（非里程碑；`CONTEXT.md` 技术债段仍 0 条，v9 口径）。
+
+### 覆盖面声明（v10 增量 · 不把「没找到问题」当「没有问题」）
+看了：`78117a1e` 全 diff + scale_agents 全文（`domain_api.py:196-272`）+ `_assert_domain_access` 与两个调用点 + 新增用例全文 + v9→v10 工件 diff（勾选恢复实证：`T-FIX-04/05` 现 `[x]`）。实跑：定向/全量 pytest ×2、测试文件纯加法计数、归因 grep。**没看/盲区**：① 未起服务，F21 的 UI 面表现是静态 + 单测推导（与 4-dev、二审两条独立链一致，但 UAT 未做）；② vitest 未复跑（本 delta 无前端代码，上轮 66/14 基线仍有效）；③ `anthropic/gemini` SDK 错误 repr 是否回显请求头无法离线判定（二审残留不确定项，倾向无泄漏：`llm_providers.py:50-60,298` 只带 URL/status）；④ `storage/sqlite_backend.py:71-87` 的字段无关 `setattr` 是潜在旁路，当前无路由接 `get_store()`，若未来接上须重审 F16 前提。
+
+### 待人工裁定账本 v10（O-14 入账 + O-11 站点清单 + F23/F25 归属确认）
+
+| 编号 | 议题 | 选项与代价 | 主审技术注记 | 不答的后果 |
+|---|---|---|---|---|
+| **O-14**（F21） | 收口后 UI 扩容副本无凭据 | **(α)** 前端扩容入口加「自备 key」（动前端，与 T-FIX-11 同族）/ **(β)** 签「允许继承模板自己的 Key」（一行 + dev 那条 `not_set` 断言同批改） | (β) 在「模板归调用者」不变量下成立、**不重开 F16**；(α) 契约更诚实但工期长 | **弹性缩放事实停用**（不是保持现状） |
+| **O-11 站点清单（v10 补）** | 若拍 (A′) 保留豁免，改动是 **3 处 / 2 文件**：`domain_api.py` scale 域门（现 `_filter_owner`，政策相反侧）· `scale_agents` 候选集严格谓词 · `agents_api._assert_domain_access`；逐处落审计 | 两处注释「改这一处即可」各自只指自己 —— 以本清单为准（F24） | 漏改 = 口径半开 |
+| F23/F25 归属 | 全部 pre-existing、非本 diff → 不入本 change 的 T-FIX 队列，已点名进 `T-FIX-12` 议题包（②⑨⑩） | 若人认为 F23 应升 🔴 本 change 内修，属范围决定（R7.1），说一声即可 | 议题包无人读 = 白记（R18.3 由 STATE 行兜底） |
+
+### 主审自查（v10）
+
+- [x] 双轮主审都做了（第三轮 UI 对本 delta 不适用：无前端代码改动，写明理由；第二轮 6 维有 F21/22/23/24/25 五连，四要素齐）
+- [x] 4.2 触发 → 本轮回收（v1-v9 六轮里第一次）
+- [x] 每条发现带 `file:line` 或内容锚 + 严重度；本轮无新 🔴（F21 属功能代价非缺陷，判 🟡 等 O-14）；R2.5 台账不变：已结 `T-FIX-04/13` 两条转绿有据，其余 🔴 修或签字的口径不变
+- [x] 复跑后才写数（16/12/1、57/146/7、41、删除行 0 全部本进程一手）；dev 数字对上的同时**否决**了他的 §6 归因推断（按其要求）
+- [x] 票面计数规程执行：出任何 🗳️ 块前先 `--since` 数票（v7 规程）
+- [x] 报告里没有我改过的代码（R3.3：本轮触碰的文件 = 本工件 + TASK.md + STATE.md，全 docs）
