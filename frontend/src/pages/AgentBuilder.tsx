@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Trash2, Bot, Play, Square, Brain } from 'lucide-react';
 import { useAgents } from '../stores/agents';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { capabilitiesOf } from '../components/capability/groupByCapability';
 
 interface Props { onSelect?: (agent: any) => void; }
 
@@ -45,7 +46,7 @@ export default function AgentBuilder({ onSelect }: Props) {
       {loading ? <p style={{ color: 'var(--text-dim)' }}>加载中...</p> : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 12 }}>
           {agents.map(function(a) {
-            var capabilities = (a.model_config_json && a.model_config_json.capabilities) || [];
+            var capabilities = capabilitiesOf(a);
             var mems = loadedMemories[a.id] || [];
             return (
               <div key={a.id} onClick={function() { if (onSelect) onSelect(a); }} style={{ background: 'var(--color-surface)', borderRadius: 8, padding: 16, border: '1px solid var(--color-border)', cursor: onSelect ? 'pointer' : 'default' }}>
