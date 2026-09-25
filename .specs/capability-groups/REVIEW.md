@@ -768,3 +768,35 @@ graph LR
 **主审自纠（元规则 4b 实例，第 5 次同形的肇事者这次是我）**：v10.5 我在 O-17 条款里把取值点从 `:152` 「订正」成 `:151`，依据是一次 sed 窗口数行 —— 一手 `grep -n 'get("capabilities", \[\])'` 复核：**`:152`，5-test 的四点锚图（152/164/168/171）全对**。教训入 T-FIX-01 文本：行号必须 grep 直出，窗口计数连主审也会差一行。**台账好消息也入账**：5-test 用 `git log -1 --name-only` 核了我「TEST.md 归你写权」的口头承诺（`57c3cc56` 确实未碰 TEST.md）——这种对账比再一张票值钱。
 
 **账面**：`T-FIX-15` 状态 `[x]` 由 5-test 按先例勾（00/13/14 同款），验收成立即有效；**O-16 关闭**（三处同步我复核：T5 计数 4→5→在册 4 逐条可核）。**队列 = 0**：`T-FIX-00/04/05/13/14/15` ✅，5-test 无在途、4-dev 不卡人任务 0，`02→01` 与一切后续只等人签批（O-9 / O-10 / O-11 / O-14 / O-15 / O-18）。测试门 0/4 未召集按其工件自写条件维持原状（属 5-test 的门，主审不代开也不代改条件）。R2.5 / R15.2 不解除。
+
+---
+
+## v11 · 冻结态复核轮（2026-09-25 · 主审 · MALIZHI-16 · 本 turn 一手重取，非转述）
+
+**这一轮为什么存在**：MALIZHI-16 是 autopilot 09:00 为同一阶段开的新 tick（与 MALIZHI-14 同一 change、同一角色），不是新 change、不是新 diff。
+
+**审的是哪段 diff**：**没有新 diff**。全仓所有分支在 `660af684`（2026-09-24 11:17:10）之后的提交 = **0**（`git log --all --since='2026-09-24 11:18' --oneline | wc -l` → `0`）；评审 tip 仍 `660af684`，`main` = `85af408f`（2026-09-22）且为评审 tip 的祖先（`git merge-base --is-ancestor origin/main <tip>` → 真）。⇒ 本轮**不产生新发现、不改任何判据、不重开任何已结判断**，只做一件事：在冻结 tip 上独立复核 R2.5 台账是否仍然成立。
+
+**R2.5 台账独立重取（本 turn 在 `660af684` 上逐条一手，命令 + 取值如下）**
+
+| 项 | 判据命令（跑在评审 tip 上） | 本 turn 取值 | 与 v10.6 台账 |
+|---|---|---|---|
+| F2 🔴 | `git grep -n "contains(f" -- backend/routes/agents_api.py` | **1 处** = `agents_api.py:53` `contains(f'"{capability}"')` | 一致 · 仍红 |
+| F3 🔴 | `git grep -c 'get("capabilities"' -- backend` + `ls backend/services/capability_service.py` | 后端 **7 处**（`agent_knowledge_api`1 · `agents_api`1 · `domain_api`1 · `gateway_api`1 · `k8s_routing_service`**3**）；`capability_service.py` **0（不存在）** | 一致 · 仍红 |
+| F5 🔴 | `git grep -c '#fff' -- frontend/src/pages/AgentControlPlane.tsx` | **6**（`frontend/src` 全量 **79**） | 一致 · 仍红 |
+| F6 🔴 | `git grep -c -E 'var\(--(s\|r)-'` / `-E 'fontSize: *[0-9]+'` | 既有 token 引用 **0**；硬编码 `fontSize:` 数字值 **81** | 一致 · 仍红 |
+| F7 🔴 | 组头 `:585-606` 实读 + `--bg-card` / 数字 `borderRadius` 计数 | 组头仍 `background: var(--bg-card)`（全文件 `--bg-card` **8** · 数字 `borderRadius` **36**） | 一致 · 仍红（内容锚复核；**未**逐行重判三层语义，见覆盖面） |
+| F10 🔴 | `git grep -c 'a\.health' -- frontend/src` | **2**，恰在 `AgentControlPlane.tsx:76` / `:77` | 一致 · 仍红 |
+| F4 🔴→绿 | `git grep -n '_filter_owner' -- backend/routes/domain_api.py` | `:111` `_filter_owner(db.query(Agent)…)` 收口在位 | 一致 · 已结 |
+| F16 🔴→绿 | `git grep -n -E 'template = min\(\|api_key_encrypted=encrypt\(payload\|template_id='` | `:236 template = min(` · `:248 encrypt(payload.get("api_key") or "not_set")` · `:263` 审计三字段 | 一致 · 已结 |
+| F26 🟡（登记项） | `agents_api.py:112` 实读 | `if "api_key" in payload and payload["api_key"]:` = 空串静默 no-op **仍在** | 一致 |
+
+**结论（R2.5）**：9 🔴 → **3 结（F1 / F4 / F16）· 6 未修（F2 / F3 / F5 / F6 / F7 / F10）**；**人工「已知接受」签字仍为 0 份**（MALIZHI-14 全 13 条评论 `author_type` 均为 `agent`）。⇒ **禁止进 7-integration、禁止合并**：R2.5 与 R15.2 **均未解除**。
+
+**门禁口径不变**：G4 第五轮 4/4 ✅（v10.4 裁决块）授权的是**审查工件的完整性与可验证性**，不是集成许可；测试门 0/4 未召集（召集条件归 5-test，主审不代开）。
+
+**唯一解锁 = 人签六问**：O-9 / O-10 / O-11 / O-14 / O-15 / O-18 —— 账本见 v9/v10.1/v10.5/v10.6，一行摘要与主审倾向随本轮 issue 评论同步发出。
+
+**覆盖面声明（本轮，双向）**：**看了** = 上表全部 grep 直出内容 + 全 ref 谱系（`git for-each-ref --sort=-committerdate`）。**没重跑** = pytest 定向/全量（`16F/12P/1S` · `57/146/7`）、vitest（`68/68`）、`tsc`（`32`）—— 依据是 **delta = 0**（自 09-24 11:17 起零提交），且 F2/F3/F5/F6/F10/F26 这些判定项已逐条一手重取；要这几个数请按 v10.6 与 `TEST.md` §1.9.1/§1.10 的命令与 revision 复跑。**没做** = 起服务 UAT（同 v10.6 盲区）· F7 三层语义的逐行重判 · 跨模型二审（环境无第二模型，待人工裁定第 4 条）。
+
+**自检（v11 面）**：R3.3 ✓（本 turn 触碰文件 = 本工件 + `STATE.md` 状态行，**零代码、零他人工件**）· 每条取值附命令 · 无新 🔴 · 未改任何已结判断 · **未并 main、未动他人分支**（R15.2）。
