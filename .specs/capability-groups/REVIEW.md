@@ -800,3 +800,75 @@ graph LR
 **覆盖面声明（本轮，双向）**：**看了** = 上表全部 grep 直出内容 + 全 ref 谱系（`git for-each-ref --sort=-committerdate`）。**没重跑** = pytest 定向/全量（`16F/12P/1S` · `57/146/7`）、vitest（`68/68`）、`tsc`（`32`）—— 依据是 **delta = 0**（自 09-24 11:17 起零提交），且 F2/F3/F5/F6/F10/F26 这些判定项已逐条一手重取；要这几个数请按 v10.6 与 `TEST.md` §1.9.1/§1.10 的命令与 revision 复跑。**没做** = 起服务 UAT（同 v10.6 盲区）· F7 三层语义的逐行重判 · 跨模型二审（环境无第二模型，待人工裁定第 4 条）。
 
 **自检（v11 面）**：R3.3 ✓（本 turn 触碰文件 = 本工件 + `STATE.md` 状态行，**零代码、零他人工件**）· 每条取值附命令 · 无新 🔴 · 未改任何已结判断 · **未并 main、未动他人分支**（R15.2）。
+
+---
+
+## v12 · 冻结态复核轮（2026-09-26 · 主审 · MALIZHI-18 · 本 turn 一手重取 + **行为面首次补跑**）
+
+**这一轮为什么存在**：MALIZHI-18 是 autopilot 09:00 为同一阶段开的**第三个** tick（与 MALIZHI-14 / MALIZHI-16 同一 change、同一角色、同一 6-review）。不是新 change、不是新 diff。**这是连续第二轮「零 delta 复核」**，所以本轮的任务不只是把 v11 再说一遍 —— 见第三节。
+
+**一、审的是哪段 diff：相对评审 tip，代码面 delta = 0（一手）**
+
+| 事实 | 命令 | 取值 |
+|---|---|---|
+| 评审 tip 未动 | `git log -1 --format='%h %ad' 660af684` | **`660af684`**（2026-09-24 11:17:10） |
+| `660af684` 之后全 ref 新提交 | `git log --all --since='2026-09-24 11:18' --pretty='%h %ad %s'` | **恰 1 条 = `750e9ed1`**（v11 **自己的**工件提交） |
+| 该条改了哪些文件 | `git show --numstat --oneline 750e9ed1` | `REVIEW.md +32/−0` · `STATE.md +2/−2` ⇒ **docs-only、零代码** |
+| 评审 tip 上重取 `--bg-card` 与 `750e9ed1` 上同值 | `git grep -c -- '--bg-card' <rev> -- …/AgentControlPlane.tsx` | 两 revision 均 **9**（旁证：v11 未碰代码） |
+| `main` 位置 | `git merge-base --is-ancestor origin/main 660af684` | **真**（`main` = `85af408f`，09-22，是评审 tip 的祖先） |
+
+⇒ **相对评审 tip 零提交；相对 v11 零新增信息**。本轮**不产生新发现、不改任何判据、不重开任何已结判断**。唯一的增量在第三节（把被跳过两轮的行为面补上）与第四节（两条台账口径补丁）。
+
+**二、R2.5 台账独立重取（全部本 turn 在 `660af684` 上跑出，非转述 v11）**
+
+| 项 | 判据命令 | 本 turn 取值 | 与 v10.6 / v11 台账 |
+|---|---|---|---|
+| F2 🔴 | `git grep -n "contains(f" 660af684 -- backend/routes/agents_api.py` | **1 处** = `agents_api.py:53` `contains(f'"{capability}"')` | 一致 · 仍红 |
+| F3 🔴 | `git grep -c 'get("capabilities"' 660af684 -- backend` | **5 文件 / 7 行**（`agent_knowledge_api`1 · `agents_api`1 · `domain_api`1 · `gateway_api`1 · `k8s_routing_service`**3**）；`backend/services/capability_service.py` = **不存在** | 一致 · 仍红（口径补丁见 §四①） |
+| F5 🔴 | `git grep -c '#fff' 660af684 -- frontend/src/pages/AgentControlPlane.tsx` | **6**（`frontend/src` 全量 **79**） | 一致 · 仍红 |
+| F6 🔴 | `git grep -o -E 'var\(--(s\|r)-[a-z0-9]+'` / `-E 'fontSize: *[0-9]+'` | 既有 token 引用 **0**；硬编码 `fontSize:` 数字值 **81**（定义仍在 `tokens.css:47` `--s1..--s10` · `:50` `--r-sm/md/lg`） | 一致 · 仍红 |
+| F7 🔴 | 组头行实读 + `--bg-card` 计数 + 数字 `borderRadius` | `:591` **仍** `isExpanded ? 'var(--bg-selected)' : 'var(--bg-card)'`；`--bg-card` **9 行/9 次**（纯 `--bg-card` **8** + `--bg-card-hover` 1 @`:129`）；数字 `borderRadius` **36** | 数值一致，**定义缺失已补**（§四①②）· 仍红 |
+| F10 🔴 | `git grep -n -E 'a\.health' 660af684 -- frontend/src` | **2 处**，恰在 `AgentControlPlane.tsx:76` / `:77` | 一致 · 仍红 |
+| F4 🔴→绿 | `git grep -n '_filter_owner' 660af684 -- backend/routes/domain_api.py` | `:111` `_filter_owner(db.query(Agent)…)` 收口在位（同文件 **9 个调用点**：`:30/64/87/106/111/138/163/203/282`） | 一致 · 已结 |
+| F16 🔴→绿 | `git grep -n -E 'template = min\(\|api_key_encrypted=encrypt\(payload\|credential='` | `:236 template = min(matching, …)` · `:248 api_key_encrypted=encrypt(payload.get("api_key") or "not_set")` · `:263` 审计三字段 | 一致 · 已结 |
+| F26 🟡（登记项） | `git show 660af684:backend/routes/agents_api.py \| sed -n '112p'` | `if "api_key" in payload and payload["api_key"]:` = 空串静默 no-op **仍在** | 一致 |
+
+**三、本轮与 v11 真正不同的一件事：把被跳过两轮的行为面补上（v10.6 / v11 均以 delta=0 为由未重跑）**
+
+`delta = 0` 论证对**确定性**套件是成立的，但「台账里那些红数今天还活着吗」已经连着两轮只有转述（v11 覆盖面自述「没重跑」）。本轮把它跑完 —— **全部本进程一手，非抄数**：
+
+| 判据 | 命令（revision = `660af684`） | 本 turn 取值 | 台账 |
+|---|---|---|---|
+| 后端定向 | `cd backend && ENCRYPTION_KEY=*** /home/malizhi/.venv/bin/python -m pytest tests/test_capability_groups.py -q` | **16 failed, 12 passed, 1 skipped**（29 条，3.29s） | 一致 |
+| 后端全量 | `… -m pytest tests/ -q` | **57 failed, 146 passed, 7 skipped**（6.37s） | 一致 |
+| 非 capability 红归因 | `… \| grep ^FAILED \| awk -F'::' '{print $1}' \| sort \| uniq -c` | `test_api_integration` **28** · `test_capability_groups` 16 · `test_edge_cases` **6** · `test_agent_channel_supplement` **4** · `test_round6_api_edges` **3** ⇒ 非 capability 红 = **41** | 一致（28+6+4+3） |
+| 前端全量 | `cd frontend && npx vitest run` | **Test Files 7 passed (7) · Tests 68 passed (68)** | 一致 |
+| capability-group | `npx vitest run capability-group` | **Tests 14 passed (14)** | 一致（用例数已断言，元规则 3） |
+| 接线级（`T-FIX-15`） | `npx vitest run agent-builder-capability-wiring` | **Tests 2 passed (2)** | 一致 |
+| NFR1 护栏 | `./node_modules/.bin/tsc --noEmit -p tsconfig.json \| grep -c "error TS"` | **32**（**等于**基线 32，不是 ≥32） | 一致 |
+
+**7 / 7 同值** ⇒ 「16 红」不是过期的记忆，是**今天可复现的状态**；台账里「3 结 / 6 未修」的判级也仍然踩在活体证据上。跑 vitest 会写脏被跟踪的 `frontend/node_modules/.vite/vitest/results.json` → 本 turn 同样 `git checkout --` 还原，收尾 `git status --porcelain` **0 行**（未入库）。
+
+**四、三条一手查出的口径/锚补丁（不改任何判级，不重开任何已结判断）**
+
+① **F7 的 `--bg-card` 计数缺「定义」**：v11 记 **8**，本 turn 一手 = **9 行 / 9 次**（`git grep -c` 与 `git grep -o | wc -l` 同值）。差值无歧义且只有一处：`:129` 是 `--bg-card-hover`。⇒ v11 的 8 = **排除 `-hover` 的纯 `--bg-card` 数**，两个数都对，缺的是当时没写口径。按本文件 F27 同族的规矩补上：**报计数必须同时报口径**。本行今后以双值记账 —— **纯 `--bg-card` 8 / 含 `--bg-card-hover` 9**。
+
+② **F7 的内容锚今天会被一句「已被修好」的假绿读法骗过**（本轮唯一有实操价值的一条）：F7 台账把内容锚写成了 `background: var(--bg-card)`，而在评审 tip 上这条字面 grep **= 0 命中** —— 因为 `:591` 的真实写法是三元 `background: isExpanded ? 'var(--bg-selected)' : 'var(--bg-card)'`。**缺陷仍活着**（组头底色仍是卡片色 = 三层卡的第二层仍在），但任何人拿那句字面当「修没修」的判据，会读到「**0 = 已修**」。这正是 F27 / 元规则 4b 那一族（**判据的形式必须和它的失效模式一起审查**；判据会在缺陷存活时为真，也会在缺陷存活时为**假**）。本 turn 只补锚、不改判级：F7 的正确内容锚 = `AgentControlPlane.tsx:591` 含 `'var(--bg-selected)' : 'var(--bg-card)'` 的**整行三元**，且必须配 `T-FIX-09` 的行为判据（组头底色 ≠ 卡片色），**不得只留 grep**。
+
+③ **一条已登记的勘误复核仍在位**：`domain_api.py:209` 注释仍写 `_filter_owner`「被 **8** 个读路径共用」，本 turn 数出 **9 个调用点**（行号见 §二 F4 行）→ O-11 站点清单里那条**非阻塞勘误未过期**，随 O-11 执行提交顺手改即可（不占任务、不进人批单）。
+
+**五、结论（R2.5 / 板面）**
+
+- 9 项 🔴 → **3 结（F1 `T-FIX-00` · F4 `T-FIX-04` · F16 `T-FIX-13`）· 6 未修（F2 / F3 / F5 / F6 / F7 / F10）**；**人工「已知接受」签字仍为 0 份**，且**本轮仍无任何人回帖**：MALIZHI-14 共 **18** 条评论、`author_type` 全部为 `agent`、最新一条停在 **2026-09-24 11:17:40**；MALIZHI-16 仅 **1** 条（= v11 报告本身，无回复）。
+- ⇒ **禁止进 7-integration、禁止合并**：**R2.5 与 R15.2 均未解除**。
+- **门禁口径不变**：G4 第五轮 **4/4 ✅** 授权的是「审查工件完整、可验证」，**不是集成许可**；测试门 **0/4** 未召集（召集条件归 5-test：定向 29 条全绿，现 16 红）。
+- **唯一解锁 = 人签六问**：O-9 / O-10 / O-11 / O-14 / O-15 / O-18（账本见 v9 / v10.1 / v10.5 / v10.6 / v10.2，摘要随本轮 issue 评论同步发出）。
+- **流程观察（仅登记，不自行处置）**：本 change 已连续两轮 autopilot tick 产出「零 delta 复核」（v11 / v12）。结论与解锁条件在两轮间**完全未变**，新增信息量 = 0。除非人工认为「每日一次活体复核」本身有价值，否则 09:00 autopilot 对**同一冻结 change** 继续开 tick 只会重复同一份报告；建议人工批掉六问（或显式 `pause` 该 autopilot），本条属 R18.1 ④ 把关面，**AI 不自决**。
+
+**六、覆盖面声明（本轮，双向 —— 不把「没找到问题」当「没有问题」）**
+
+- **看了**：§二 全部 grep 直出内容；全 ref 谱系（`git for-each-ref --sort=-committerdate`）；`tokens.css:47/50` token 清单；`domain_api.py` 的 `_filter_owner` 全部 12 行命中内容。
+- **重跑了（v11 未做，本轮补上）**：后端定向 / 全量 / 非 capability 红归因；前端全量 / `capability-group` / 接线级；`tsc`。**7 项全部与台账同值**。
+- **没做**：起服务 UAT（同 v10.6 / v11 盲区；F10 的界面表现仍未实测）· F7 三层语义的逐行重判 · MySQL 部署路径 · 跨模型二审（环境无第二模型，待人工裁定第 4 条）· 依赖 CVE 重扫。
+
+**自检（v12 面）**：R3.3 ✓（本 turn 触碰文件 = 本工件 + `STATE.md` 状态行，**零代码、零他人工件**；跑测试写脏的被跟踪 vitest 缓存已 `git checkout --` 还原，工作树收尾 **0 行**）· 每条取值附命令与 revision · **无新 🔴**（§四 三条全是口径/锚补丁，不改判级、不重开已结判断）· 未并 `main`、未动评审分支与他人工件（R15.2）。
