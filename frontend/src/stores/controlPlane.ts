@@ -1,6 +1,23 @@
 import { create } from 'zustand';
 import { safeFetch } from '../utils/requestDedup';
 
+/**
+ * `GET /api/control-plane/probes` 的 entry（`control_plane_api.py` 的 `list_probes`）。
+ *
+ * ⚠️ **该 DTO 里有两个「幽灵字段」（F10 · T-FIX-03）**：后端构造的 entry 键集实测为
+ * `{agent_id, agent_name, status, probes, model_name, tokens_used, token_soft_limit,
+ * token_hard_limit, last_heartbeat}` —— **没有 `health`、也没有 `runtime`**。
+ *
+ * - `health`：**T-FIX-03 (a) 已收口**（前端改读 `status`）—— `status` 才是探针判定
+ *   （`if p.probe_type == "health": entry["status"] = p.status`）。本字段已无任何消费点。
+ * - `runtime`：**仍未收口**。`AgentControlPlane.tsx` 的 `DetailPanel` / `CapabilityGroupRow`
+ *   三处渲染它 ⇒ 值恒空。修它必须让后端 `list_probes` 补发该键，与 T-FIX-03 的
+ *   「后端一字不动」护栏互斥 → 登记为残留，不在本任务自查自改。
+ *
+ * 两个字段都**刻意保留为必填 `string`**（不改可选）：`AgentProbePanel.tsx` 的
+ * `HealthBadge({ health }: { health: string })` 在 `strict` 下会把 `string | undefined`
+ * 判成 `error TS`，顶破「`error TS` 恰 32」这条验收护栏。类型上的账留给补键那一轮一起还。
+ */
 export interface AgentStatus {
   agent_id: number;
   agent_name: string;

@@ -10,26 +10,36 @@ import { useDomains, Domain, RouteResult, ScaleResult } from '../stores/domains'
 import { useAgents, Agent } from '../stores/agents';
 import { groupByCapability, groupKeyOf } from '../components/capability/groupByCapability';
 import CapabilityGroupHeader from '../components/capability/CapabilityGroupHeader';
+import { isAgentHealthy, isProbeHealthy, isProbeUnhealthy } from '../lib/agentHealth';
 
 // ── 常量 ──
 type TabKey = 'agents' | 'queue' | 'reconcile' | 'domains';
 
-const STATUS_PRIORITY: Record<string, number> = {
-  dead: 0,
-  blocked: 1,
-  running: 2,
-  idle: 3,
-};
-
-const STATUS_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-  running:   { color: 'var(--green)',  bg: 'var(--green-bg)',  label: '运行中' },
-  idle:      { color: 'var(--green)',  bg: 'var(--green-bg)',  label: '空闲' },
-  blocked:   { color: 'var(--orange)', bg: 'var(--orange-bg)', label: '阻塞' },
-  dead:      { color: 'var(--red)',    bg: 'var(--red-bg)',    label: '停止' },
+/**
+ * 「运行状态」列与列表排序共用的**一张**探针判定表 —— 键集 = 探针词表（T-FIX-03 (d)）。
+ *
+ * `AgentStatus.status` 是健康探针的落库状态（`backend/services/agent_probe_service.py`：
+ * `healthy` / `degraded` / `unhealthy` / `error` / `skipped` / `unknown`），而这里原来写的是
+ * `{running, idle, blocked, dead}` —— 与探针词表**零交集** ⇒ 每一行都落 fallback：
+ * 「运行状态」列把英文状态原样吐给用户，排序优先级同理全落 99、列表排序实际失效。
+ *
+ * `priority` 越小越靠前（越需要人看一眼的越靠前）。
+ * **不并入生命周期词表**（`running/standby`）：两个词表各自具名正是 F10 的处置（见 `lib/agentHealth.ts`），
+ * 合并回一张表就是把病根种回去。文案不在这张表里 —— label 一律取自 `getHealthLabel`，免得两处漂移。
+ */
+const PROBE_STATUS: Record<string, { color: string; bg: string; priority: number }> = {
+  healthy:   { color: 'var(--green)',      bg: 'var(--green-bg)',  priority: 4 },
+  degraded:  { color: 'var(--orange)',     bg: 'var(--orange-bg)', priority: 1 },
+  unhealthy: { color: 'var(--red)',        bg: 'var(--red-bg)',    priority: 0 },
+  error:     { color: 'var(--red)',        bg: 'var(--red-bg)',    priority: 0 },
+  skipped:   { color: 'var(--text-muted)', bg: 'var(--bg-input)',  priority: 3 },
+  unknown:   { color: 'var(--text-muted)', bg: 'var(--bg-input)',  priority: 2 },
 };
 
 function getStatusConfig(status: string) {
-  return STATUS_CONFIG[status] || { color: 'var(--text-muted)', bg: 'var(--bg-input)', label: status || '未知' };
+  const style = PROBE_STATUS[status];
+  if (!style) return { color: 'var(--text-muted)', bg: 'var(--bg-input)', label: status || '未知' };
+  return { color: style.color, bg: style.bg, label: getHealthLabel(status) };
 }
 
 function getHealthLabel(status: string) {
@@ -71,10 +81,21 @@ const td: React.CSSProperties = {
 
 // ── 组件 ──
 
-function OverviewCards({ probes, queue }: { probes: AgentStatus[]; queue: QueueItem[] }) {
+// 四个模块级私有组件的 `export` 只为让 verify ①②③ 有 runner（T-FIX-03 卡面「可测性前置」）：
+// **纯加法、不改语义**，`tsc` 的 `error TS` 须仍为 32。卡面点名了两个（`OverviewCards`/`AgentRow`），
+// ③ 的另外两个渲染点住在 `CapabilityGroupRow` / `DetailPanel` 里，同一手段一并处理（零语义改动）。
+export function OverviewCards({ probes, queue }: { probes: AgentStatus[]; queue: QueueItem[] }) {
   const totalAgents = probes.length;
-  const healthyCount = probes.filter(function(a) { return a.health === 'healthy'; }).length;
-  const deadCount = probes.filter(function(a) { return a.status === 'dead' || a.health === 'unhealthy'; }).length;
+  // (a) 契约缺口收口：这两行原来读 DTO 上的 `health` 字段 —— 而 `/api/control-plane/probes`
+  // 构造的 entry 键集里**没有 `health`**（`control_plane_api.py` 的 `list_probes`），该字段恒
+  // `undefined` ⇒ 「健康」卡恒 0、「异常」卡对 `unhealthy` 恒 0。带探针判定的其实是 `status`
+  // （`if p.probe_type == "health": entry["status"] = p.status`）→ 改读 `status` + 具名谓词。
+  // 判据：全文件内容锚（幽灵字段读取点计数，卡面 verify⑤）2 → 0，行为判据见
+  // `__tests__/agent-health-contract.test.tsx` ①②。
+  const healthyCount = probes.filter(function(a) { return isProbeHealthy(a.status); }).length;
+  // `status === 'dead'` 是探针词表里不存在的死分支，**故意原样保留**（卡面 (b)：判定语义不得改变），
+  // 已登记在 SUMMARY 交主审，不在本任务自行删除。
+  const deadCount = probes.filter(function(a) { return a.status === 'dead' || isProbeUnhealthy(a.status); }).length;
   const queueCount = queue.length;
 
   var cards: { label: string; value: number; color: string; icon: React.ReactNode; sub: string }[] = [
@@ -102,7 +123,7 @@ function OverviewCards({ probes, queue }: { probes: AgentStatus[]; queue: QueueI
   );
 }
 
-function AgentRow({
+export function AgentRow({
   agent,
   isSelected,
   onClick,
@@ -155,8 +176,8 @@ function AgentRow({
         <span style={{
           display: 'inline-flex', alignItems: 'center', gap: 4,
           padding: '2px 8px', borderRadius: 3, fontSize: 10,
-          background: agent.status === 'healthy' ? 'var(--green-bg)' : 'var(--red-bg)',
-          color: agent.status === 'healthy' ? 'var(--green)' : 'var(--red)',
+          background: isProbeHealthy(agent.status) ? 'var(--green-bg)' : 'var(--red-bg)',
+          color: isProbeHealthy(agent.status) ? 'var(--green)' : 'var(--red)',
           fontWeight: 500,
         }}>
           {getHealthLabel(agent.status)}
@@ -196,8 +217,8 @@ function AgentListTab({
   onSelectAgent: (id: number) => void;
 }) {
   const sorted = probes.slice().sort(function(a, b) {
-    const pa = STATUS_PRIORITY[a.status] ?? 99;
-    const pb = STATUS_PRIORITY[b.status] ?? 99;
+    const pa = PROBE_STATUS[a.status]?.priority ?? 99;
+    const pb = PROBE_STATUS[b.status]?.priority ?? 99;
     return pa - pb;
   });
 
@@ -364,10 +385,8 @@ function ReconcileTab({ entries }: { entries: ReconcileEntry[] }) {
 }
 
 // ── 域树 Tab ──
-
-function isAgentHealthy(status: string): boolean {
-  return status === 'running' || status === 'standby';
-}
+// `isAgentHealthy`（生命周期口径，`running | standby`）已搬到 `../lib/agentHealth.ts`：
+// 两个「健康」口径必须各自具名、各自有落点（T-FIX-03 (c)），留在页面层就会继续被误接到探针行上。
 
 /** 能力组的操作态：所属域 key + 页面层的 loading/回调。排队数与自动路由开关由 GroupOpsBar 自行从 store 取。 */
 interface GroupOps {
@@ -440,7 +459,7 @@ function GroupOpsBar({ capability, ops }: { capability: string; ops: GroupOps })
  * 能力组：折叠头拆到 `CapabilityGroupHeader`（分组展示），本组件只留容器与展开的 Agent 列表；
  * 操作面走 `GroupOpsBar`。props 由 14 个降到 5 个（F11）。
  */
-function CapabilityGroupRow({
+export function CapabilityGroupRow({
   capability,
   agents,
   isExpanded,
@@ -968,7 +987,7 @@ function DomainTreeTab() {
 }
 
 // ── 详情面板 ──
-function DetailPanel({
+export function DetailPanel({
   agent,
   onClose,
   onAction,
@@ -1078,7 +1097,7 @@ function DetailPanel({
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
             <span style={{ color: 'var(--text-secondary)' }}>健康状态</span>
-            <span style={{ color: agent.status === 'healthy' ? 'var(--green)' : 'var(--red)' }}>
+            <span style={{ color: isProbeHealthy(agent.status) ? 'var(--green)' : 'var(--red)' }}>
               {getHealthLabel(agent.status)}
             </span>
           </div>
