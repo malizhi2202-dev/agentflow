@@ -321,13 +321,26 @@ $ grep -rn "\.health" frontend/src
    **它不在本任务 `write_files`**（R6.5/R7.3）⇒ 只报不修。
    ⇒ **「F10 已修」这句话只在 `AgentControlPlane.tsx` 范围内成立**；建议按同一处置（改读 `status`）**另开一条**
    或把 `AgentProbePanel.tsx` 并进 `T-FIX-03` 的 `write_files` 后追加一批。**这是本任务最该被人接手的一条。**
-2. 🟡 **`runtime` 那半边契约缺口仍未收口**（幽灵字段，共 **5** 处渲染：`AgentControlPlane.tsx:527/:1020/:1073`
-   + `AgentProbePanel.tsx:321/:510`）。卡面给的两条路里，**后端补键**与护栏「后端一字不动」互斥 ⇒ 本任务
-   只能走前端路，前端路对 `runtime` **无解**（无处派生）。③ 钉的因此是「三处接线会把喂进去的值显示出来」
-   （契约形状），**不是**「payload 已有 runtime」。修它需要**后端补键**（≈1 行 `entry["runtime"] = agent.runtime`）
-   ＝ 一次独立的小任务。请主审裁：并进后端半条，还是登记为残留。
+2. 🟡 **`runtime` 那半边契约缺口** —— **按元规则 4b 本条已订正（O-20 ②）**：原写法把**起点树**的行号
+   `:527/:1020/:1073` 当终态，且把**非幽灵**读计进了幽灵数。订正如下（**改内容锚、不写行号**）：
+   **`AgentStatus.runtime` 的幽灵读 = 4 处**（不是 5）——
+   `AgentControlPlane.tsx` 的 `DetailPanel` 两处（内容锚：头部行的 `Agent #{agent_id} · {agent.runtime}`、
+   「能力检查」卡里 `运行时` 那一行的 `{agent.runtime}`）＋ `AgentProbePanel.tsx` 两处（内容锚：
+   「运行时」列的 `{probe.runtime || '-'}`、模型分布行的 `{probe.runtime || 'unknown'}`），
+   外加类型声明 `stores/controlPlane.ts` 1 处。
+   **`AgentControlPlane.tsx` 的 `CapabilityGroupRow` 那一处不在此列** —— 它吃 `stores/agents.ts` 的 `Agent`，
+   而 `backend/models/agent.py` 的 `to_dict()` 确实发 `runtime` ⇒ 那里渲染得出来，**不是幽灵**。
+   卡面给的两条路里，**后端补键**与护栏「后端一字不动」互斥 ⇒ 本任务只能走前端路，前端路对 `runtime`
+   **无解**（无处派生）。③ 钉的因此是「三处接线会把喂进去的值显示出来」（契约形状），**不是**「payload 已有 runtime」。
+   ∎ **处置（2026-09-28）**：`T-FIX-16 (c)` 已由后端 `list_probes` 补发该键（纯加法，既有键一个不改），
+   上述 4 处幽灵读随之全部有值 —— 详见 `T-FIX-16-SUMMARY.md`。
 3. 🟢 **`.specs/LESSONS.md` 始终不存在**（见「入口门禁」）——kit 要求在缺失时创建空骨架，创建它落在
    `write_files` 之外 ⇒ 未做，登记。
+
+> ∎ **本节第 1 条的处置（2026-09-28 补记，不删原文）**：`AgentProbePanel` 那 5 处已被**扩查为 9 个错配形状 / 8 行**
+> （5-test `TEST.md` §1.11 第 1 条 + 主审 v15 一手复核），并落成 `T-FIX-16`（本 SUMMARY 所指的「另开一条」）
+> —— 已由 4-dev 交付：(a) 5 处幽灵读改读 `status` + 具名谓词、(b) `HealthBadge` 的第 3 张词表并入唯一来源。
+> 逐条证据见 `T-FIX-16-SUMMARY.md`。**本节原文保留**（元规则 4d：不静默抹掉当时的判断）。
 
 ## 决策与偏离
 
