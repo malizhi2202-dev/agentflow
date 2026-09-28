@@ -446,6 +446,70 @@ var c5 = a.model_config_json?.["capabilities"] ?? [];                         �
 
 ---
 
+### 1.12 `T-FIX-16` 交接验收轮（= G3 等价物 · 2026-09-28 · 本阶段一手实跑 + 反向取证 + 双变异）
+
+**受验**：`agent/agent/42a133ecdd60` @ **`3504bff0`**（码提交 `313ca971`；起点 `da1bf959`）· **我的落点** = 评审分支 `agent/agent/87518bcb82fb` @ **`460a1c25`**（主审 v17 的文档提交，`git diff --stat 3504bff0 460a1c25` = **3 个 `.md`**，代码面与受验对象同一棵树）· 判据来源 = `TASK.md` 的 `T-FIX-16` 八条 verify + `T-FIX-17` 的围栏。
+本轮按主审 §六 的四件事执行；**不采信任何转述**（八条我全部自己跑，外加三条主审没做的检查）。
+
+#### (i) 八条 verify + 全量后端：全部同值
+
+| # | 我实跑 | 判 |
+|---|---|---|
+| ①②③ | `cd frontend && npx vitest run agent-probe-panel-vocabulary` = **`Tests 9 passed (9)`**（`Test Files 1 passed`） | ✅ |
+| ④【回归信号】 | `grep -c "probe\.health\|p\.health" src/components/AgentProbePanel.tsx` = **0**；`grep -c "warning"` = **0** | ✅ |
+| ⑤【护栏】 | `tsc --noEmit -p tsconfig.json \| grep -c "error TS"` = **32**（恰等值，非 ≥32） | ✅ |
+| ⑥【护栏】 | 全量前端 **9 files / 81 passed**（基线 8/72 一条未掉）；后端定向 **`16 failed / 12 passed / 1 skipped`** | ✅ |
+| ⑦【回归信号】 | 页面定义 = **0**；lib `^export const PROBE_STATUS\|^export function getHealthLabel` = **2**（**v17 口径 ≥2**；主审读到的 3 是更宽 pattern 的取数，见 `O-22①`） | ✅ |
+| ⑧【护栏】 | `write_files` **7 项** vs 实际 **7 项**，集合逐项相等、**0 缺失 / 0 多出** | ✅ |
+
+**全量后端零扰动（我独立跑的，不只抄定向数）**：`pytest tests/ -q` = **`57 failed / 146 passed / 7 skipped`**，逐文件归因 = **28**（`test_api_integration.py`）+ **16**（`test_capability_groups.py`）+ **6**（`test_edge_cases.py`）+ **4**（`test_agent_channel_supplement.py`）+ **3**（`test_round6_api_edges.py`）= **57** —— 与主审、4-dev 两侧逐字同集合。
+
+**三条主审没做、我补做的边界检查**（⑧ 只看文件集合，看不到「怎么改的」）：
+1. **`stores/controlPlane.ts` 确为注释-only**：该文件 `+16/−11`，逐行过滤后**没有任何非注释改动行**（卡面明写「只准动注释」）⇒ ⑧ 的「在写权内」之外还成立「改动性质合规」。
+2. **(c) 后端确为纯加法**：`control_plane_api.py` = **`+4/−0`**，只多一行 `"runtime": agent.runtime if agent else ""`（+3 行注释），既有键一个未改。
+3. **契约闭合已实测**：把 `list_probes` 的 entry 键集与 `AgentStatus` 逐键比对 —— entry 现发 **10 键**（`agent_id, agent_name, status, probes, model_name, **runtime**, tokens_used, token_soft_limit, token_hard_limit, last_heartbeat`），`runtime` 的契约缺口**真的闭上了**（不再是「声明了但从不发」）。
+
+#### (ii) 反向取证主审本轮的裁定（§六 (ii) · 本轮核心）
+
+| 取证 | 实跑 | 结论 |
+|---|---|---|
+| 动态 / 反射 / 字符串形式的消费 | 全仓 `import(` / `require(` / `eval(` / `['PROBE_STATUS']` / `['getHealthLabel']` / `['getStatusConfig']` 全模式 grep | **0 命中**（命中项全是散文注释，或后端无关的 `test_import*` 名字） |
+| 是否存在第三个文件**定义同名词表** | `^(export )?(const\|function) (PROBE_STATUS\|getHealthLabel\|getStatusConfig)` 全仓 | **只有 `lib/agentHealth.ts`** 一处（`:88` / `:67` / `:102`） ⇒ 无第三份同名词表 |
+| **(甲) 搬迁**的三条结构前提 | ① `components/**` import `pages/**` = **0**（无反向依赖）；② `lib/agentHealth.ts` 连一行 import 都没有（依赖自由）；③ 现在消费方是 `pages/...:13-16` 与 `components/AgentProbePanel.tsx:20` 两处 import | **(甲) 成立** |
+| **1.8.6 豁免**的输入（跨文件引用 = 0） | `git grep` 在**起点树 `da1bf959`** 上重取：全部 16 命中 = 同文件 13 处 + `lib` 散文 2 处 + 测试 docstring 1 处；**`import` 语句 0 条** | **豁免成立**（不是「照抄裁定」，是我自己重跑的引用图） |
+
+**⇒ 我对 (甲) + 1.8.6 的结论：成立，不触发翻回条件。** 唯一需要主审过目的是我的一条分类判断：全仓还有一个 `OrchestrationCanvas.tsx:14` 的 `STATUS_COLORS`，它的键集把**生命周期（`running`/`standby`）+ 探针（`healthy`/`degraded`/`error`）+ 工作流（`success`/`failed`/`pending`）三族词混在一张表**里，并在 `:70` 把 `data.status` **英文原样吐给用户** —— 形状与 F10 同族。**但它不构成「第三份探针词表」**：它喂的是编排画布节点数据（`data.status`，非 `AgentStatus`），不产出探针文案、不竞争探针配色，探针词在里面是**用不上的装饰键**。故我判 **翻回条件④不触发**，只把它登记为 change 外的同族观察（`O-23`）。**若主审按更严口径把它算作第三份词表 ⇒ 请直接按你写死的条件④召真 G3，我不反对。**
+
+#### (iii) ⑦ 这对判据可否证：两次变异（都复原未入库）
+
+**M3 · 「搬了但仍有两份」（最强的那个形状）**：把页面 import 里的三个名字摘掉、在原地放回**页面私有**的 `PROBE_STATUS` / `getHealthLabel` / `getStatusConfig`（行为完全等价）→
+⑦ 页面计数 **0 → 2**（判据报红 ✅）· 而 `agent-probe-panel-vocabulary` + `agent-health-contract` **13 passed (13)**、构建不破。
+⇒ **⑦ 是可失败的**，且它抓的是**行为用例抓不到**的那一类（重复词表在行为上不可见）—— 这正是本卡要它存在的原因。
+
+**M4 · lib 半边**：把 lib 的三个 `export` 去掉（= 「还原成页面私有」的字面形态）→ ⑦ 的 lib 计数 **2 → 0**（判据报红 ✅），同时 `tsc` **32 → 36**（页面/面板的 import 随之报错）⇒ ⑤ 也会同时叫。
+**复原后**：⑦ 页面 **0** / lib **2** 必绿 ✅，工作树只余 vitest 被跟踪缓存（已 `git checkout --`）。
+
+#### (iv) S2 处置意见（`StatusBadge` 第 4 张表 + `error` 同值两词）
+
+**事实我逐条复核属实**：`StatusBadge`（`:605-612`）键集 `{active, idle, error, stopped}`，调用点 `:327` / `:522` 喂的是 `probe.status` ⇒ 除 `error` 外**整列落 fallback**，而 fallback 是 `label: status` = **英文原样**；撞词属实且比报告更糟 —— `error` 在「状态」列是「异常」、在「健康度」列是「错误」，而 `unhealthy` 在「状态」列**是英文 `unhealthy`**、在「健康度」列才是「异常」。
+
+**我的处置意见**：
+1. **同意并入 `T-FIX-17`、不新开卡**（同文件、同源 `active`/`idle`、R18.4）—— 但**卡面必须写死收口形态 = 改消费 `getStatusConfig`**，否则实现者会再造第 5 张表。
+2. **同意你的提醒且加重**：人工拍 (乙)「撤掉三处计数」时，**S2 与它没有从属关系** —— 撤计数后「状态」列那张表**原样还在**（徽标与计数是两条独立代码路径）。这句必须进人拍单，不能只写在卡面。
+3. **顺手补一条**：S2 收口后，探针 DTO 只剩**一个**配色/文案源（`lib/agentHealth.ts`）—— 这条可以作为 `T-FIX-17` 的收口判据（比「第 4 张表消失」更贴近不变量）。
+
+#### 登记（本轮新增，均不改判级）
+
+| # | 项 | 依据 | 归属 |
+|---|---|---|---|
+| **O-21** | 🔴→🟡 **`AgentStatus.health` 的「声明」残留**：读点全仓 **0**、生产端 **0**（entry 不发该键），但接口仍把它声明为**必填 `string`**，且 `stores/controlPlane.ts` 给的理由已**过期**（现文写「徽标在 `strict` 下会把 `string \| undefined` 判成 `error TS`」，而 `HealthBadge` 现在签名已是 `{ status }: { status: string }`，那个 prop 不存在了）⇒ 主审 v17「幽灵字段面 ✅ 已清零」在**读点**上成立、在**声明**上不成立。**实测代价**：删接口 1 行 + 两处 fixture `health: ''` 2 行（3 行 / 3 文件）后 `tsc` 仍 **32**、全量仍 **9 files / 81 passed** ⇒ 删除安全，且这才是「让下一个读者不必重新 grep」的做法 | `grep -rn "\.health\b"` 仅剩注释；`HealthBadge({ status })`；M5 实测 | **主审裁**：删字段（小卡或并入 `T-FIX-17`）或改写注释理由；**不要留着过期理由** |
+| **O-22** | 🟡 **判据/卡面精度三件**：① ⑦ 的字面 pattern 实测 **2**（≠ 主审记的 3）；若意图是「搬走的三个符号都在 lib 有 export」，pattern 应含 `getStatusConfig`，否则工件里的数（3）与判据自己的输出（2）不一致 —— 与主审 v17 自纠的「上限写死」同一类。② `T-FIX-17` verify④ 写「必须等于 `getStatusLabel(...)` / `getStatusConfig('healthy').label`」，而 **`getStatusLabel` 全仓不存在**（真实 API = `getStatusConfig`）；靠 `/` 兜住了，但字面读会去找一个不存在的符号 ⇒ **派单前改掉**。③ `T-FIX-03-SUMMARY.md` 的「决策与偏离 ①」仍留起点树行号 `CapabilityGroupRow(:527)` / `DetailPanel(:1020/:1073)`（(e) 的字面范围只是「已知未收口 2」那一行，**故不算违规**，但同一份工件里留两套行号口径，按元规则 4b 应一并改内容锚） | 本轮 grep + 全仓符号检索 | 主审就地改卡/工件（不涉代码） |
+| **O-23** | 🟡 **(c) 后端补键缺 payload 级用例**：`agent-probe-panel-vocabulary` 的两条运行时用例喂的是 fixture 注入的 `runtime`（= 渲染接线），**没有一条用例打到后端 entry 的键集** ⇒ 「契约闭合」目前只有代码实读 + 我的逐键比对背书，后端若日后再删该键不会被任何用例抓住。另 `OrchestrationCanvas.tsx:14` 的 `STATUS_COLORS`（三族词混表 + `:70` 吐英文）属 change 外同族观察 | 两个测试文件的 fixture 读法；`grep` 见 (ii) | 下一张卡的加严项 / 议题；不属本轮验收面 |
+
+**判定：`T-FIX-16` 交接验收通过**（验收面 = 行为判据 ① ② + 四条护栏；八条 verify 全部一手复跑同值；⑧ 边界逐项相等且补做了「改动性质」检查）；(甲) + 1.8.6 豁免**成立**（我自己重跑的引用图与依赖方向），**四个翻回条件均不触发**（其中条件④的边界情形已在 (ii) 显式交主审过目）。**这不等于「F10 已结」** —— S1（三处恒 0 计数，待人拍）+ S2（`StatusBadge` 第 4 张表）仍在，`O-21` 的声明残留也仍在 ⇒ **R2.5 / R15.2 不解除**（不集成、不合并）。
+
+---
+
 ## 第 2 轮 · 性能测试
 
 **状态：未跑，阻塞待人工。** `REQUIREMENT.md` 的 NFR1（零新增 TS 错误）/ NFR2（向后兼容）/ NFR3（不建表）
@@ -606,6 +670,7 @@ mysql : LIKE concat('%%', %s, '%%')
 | `frontend/src/__tests__/agent-builder-capability-wiring.test.tsx`（**2 条**，`T-FIX-15` 已建） | unit（页面渲染 · 喂 `useAgents.setState` 种子，无新依赖 / 不起服务） | **把 `T-FIX-14` 的两条 grep 判据升级为行为判据**：`["   "]` → 无空白 chip 且无「加载记忆」按钮（= O-18 联动的显式锁）；`["a"," a "]` → 只剩 1 个 chip。未修态 `0e8ee534` 两条**实测红**（见 §1.10） | 5-test（本工件，`T-FIX-15` 写权） | 1 |
 | `frontend/src/__tests__/agent-control-plane-a11y.test.tsx` | unit（**待建**，`T-FIX-06` 落点） | 键盘可达 / `aria-expanded`（实测页面与该头组件 `aria-expanded` / `tabIndex` 均 **0**，`onKeyDown` 只在页面别处 1 处） | 4-dev（待） | 1 · 4 |
 | `frontend/src/__tests__/agent-health-contract.test.tsx`（**4 条**，`T-FIX-03` 新建） | unit（组件渲染 · 真 props、零 mock） | `T-FIX-03` ①②③（探针 `status=healthy` → 行徽标绿 + 「健康」卡 > 0；`status=unhealthy` → 徽标红 + 「异常」卡 = 1；`runtime` 三处渲染点）+ (c) 两个口径互不覆盖 | 4-dev（`T-FIX-03`）· **本阶段验收轮一手复跑**：`4 passed (4)`，并独立做出 M1（⑤ 假绿）/ M2（v3 陷阱）两次变异证明 | 1 |
+| `frontend/src/__tests__/agent-probe-panel-vocabulary.test.tsx`（**9 条**，`T-FIX-16` 新建） | unit（组件渲染 · `useControlPlane.setState` 种子、零 mock fetch） | `T-FIX-16` ① 四格文案（healthy/degraded/unhealthy/**unknown** → 健康/降级/异常/未知）· ② 异常计数三条（healthy 不计 / unhealthy 计 / 守恒恰 1）· 运行时列两条（空串→`-`、`langgraph`→显示） | 4-dev（`T-FIX-16`）· **本阶段验收轮一手复跑**：`9 passed (9)`；并独立做出 M3（页面留第二份词表 → ⑦ 红而 13 条行为用例全绿 = 判据⑦抓的是行为抓不到的形状）/ M4（lib 去 export → ⑦ 红、`tsc` 32→36） | 1 |
 | `.specs/capability-groups/_quick_test.py`（仅加**文件头标注**） | 冒烟脚本 | 无（明确标为**非回归基线**，禁止当任何 verify 的证据） | 5-test（本工件） | 1 |
 
 ## 回归保护
@@ -670,7 +735,7 @@ mysql : LIKE concat('%%', %s, '%%')
 | **（F22·②）声明行** | §1.2 末行「安全（跨 owner / 凭据搬运 / A09）**4 条全 RED → 3 RED**」+ 文件头「**28 条**用例」 | 一手实跑：`-k "domain_owner_cannot_read or scale_must_not_hand or scale_audit_detail or percent_query_leaks"` → **`1 failed, 2 passed, 1 skipped`**（= 2 绿 / 1 红 / 1 skip，`T-FIX-13` 之后）；用例数 **29**（`--collect-only -q -k capab` → `29/210 collected`，第 29 条 = `T-FIX-13` 的纯加法正向）。两处均已改写 |
 | **（F22·③）定向数** | §1 记录块「`18 failed, 10 passed`（28 条）」+ 全量「`59 / 144 / 6`」 | 现值 = **`16 failed / 12 passed / 1 skipped`（29）**、全量 = **`57 / 146 / 7`（210）**；两条都补了取值 revision（`8923c430`），并按元规则 2 保留旧行作沿革。**18→16 不是红自己消失**：转绿的 2 条逐条点名 = `scale_must_not_hand…`（`T-FIX-13`）+ `scale_audit_detail…`（同批转 skip，404 不落审计 = 设计语义）→ 其余 16 条同名同数，全归 `T-FIX-01/02` 的红名单 |
 
-## 开放项（O-1~O-8 为第 1 次，O-9~O-13 为复跑第 2 次新增，**O-16 / O-17 为复跑第 3 次新增**，**O-19 / O-20 为 `T-FIX-03` 验收轮（§1.11）新增**；O-14/O-15/O-18 已被 REVIEW 的待人工裁定账本占用 → 本工件不占该三号）
+## 开放项（O-1~O-8 为第 1 次，O-9~O-13 为复跑第 2 次新增，**O-16 / O-17 为复跑第 3 次新增**，**O-19 / O-20 为 `T-FIX-03` 验收轮（§1.11）新增**，**O-21~O-23 为 `T-FIX-16` 验收轮（§1.12）新增**；O-14/O-15/O-18 已被 REVIEW 的待人工裁定账本占用 → 本工件不占该三号）
 
 | # | 项 | 归属 |
 |---|---|---|
@@ -691,3 +756,6 @@ mysql : LIKE concat('%%', %s, '%%')
 | O-17 | **后端 A2 记忆装载仍按未归一的原始数组判定**（`agents_api.py:152` 取 `cfg.get("capabilities", [])` → `:164` `if capabilities:` → `:168` `cap.lower() in m.key.lower()`）：载荷 `[""]` 时**空串对任何 key 都子串命中 → 等于不过滤、把该用户近 7 天的 20 条记忆全装进上下文**（一手语义实跑：`"" in "anything"` = True），而非字符串元素会让 `/run` 抛 `AttributeError`（`7.lower()`）→ 前端本轮收口后**同一载荷两端行为方向相反**：卡片不显示该能力，后端却按它匹配一切。该处**今天无任何用例**（`grep -n "memor" backend/tests/test_capability_groups.py` 无命中）。**归 `T-FIX-01`**（它的 action 已含 `agents_api.py:152` 改消费 `capabilities_of`，v10.2·C2）→ 不新开任务；本阶段**不提前写用例**（01 未落地，判据现在为假是设计态，且会把未收口的形状冻进代码） | `T-FIX-01` 落地时由 5-test 补 2 条用例（空串载荷须 0 装载 / 非字符串元素不得抛）· 现登记不修 |
 | O-19 | 🔴 **F10 剩余面 = `AgentProbePanel.tsx` 的探针词表错配（本阶段 `T-FIX-03` 验收轮一手查实，见 §1.11 第 1 条）**：5 处 `health`（`:64/:168/:169/:318/:478`）+ 4 处同根因（`:63`/`:386` `status === 'active'` → 渲染 `:142`「活跃 N」· `:65` `status === 'idle'` → `:148`「空闲 N」· `:168`/`:478` 的 `active` 半支）= **9 个错配形状 / 8 行**；后端探针词表从不产出 `active`/`idle` ⇒ 三枚用户可见计数**恒 0**、时间线健康点**恒红**；且 `HealthBadge` 自带第 3 张表 `{healthy, warning, error, unknown}`，`degraded`/`unhealthy`/`skipped` 未覆盖 ⇒ **机械改读 `status` 也不够**。⚠️ 先决：「活跃/空闲」两词在探针词表下**无对应值**，属**产品词选择**（R18.1 ④ 把关）—— 卡面须先裁「换词/换判据」或「撤掉恒 0 计数」，否则实现者只能自己发明词 | **6-review / 主审落卡**（建议本 change 内开新卡，不做新 CHANGE：同一条 🔴 F10、同一 DTO，write_files = `AgentProbePanel.tsx` + 新前端测试文件 + 可选 `stores/controlPlane.ts` 注释一行）；**5-test 不自我授权建卡**。若主审判其出 F10 范围 ⇒ F10 仍 🔴，R2.5 需人签「已知接受」，禁止静默接受 |
 | O-20 | 🟡 **本轮两处工件勘误未落**（§1.11 第 2、3 条）：① `stores/controlPlane.ts` 的 `health` 注释「本字段已无任何消费点」**为假**（现树 5 处，同一实现者在交付评论里已自陈）—— 该文件在 `T-FIX-03` 的 `write_files` 内，属可在边界内修的一行；② SUMMARY「已知未收口 2」的 `runtime` 行号取自**起点树** `:527/:1020/:1073`（tip = `:546/:1039/:1092`），且其中 `:546` 是 `CapabilityGroupRow` 吃 `Agent` 的**非幽灵**读 ⇒ 真幽灵读 = **4** 不是 5 | 下一张卡（4-dev）顺手更正，或主审就地更正；**不涉判级** |
+| O-21 | 🟡 **`AgentStatus.health` 的声明残留（`T-FIX-16` 验收轮 §1.12 查出）**：读点全仓 **0**、生产端 **0**（`list_probes` 不发该键），但接口仍声明**必填 `string`**；且 `stores/controlPlane.ts` 保留它的理由**已过期** —— 现文写「徽标在 `strict` 下会把 `string \| undefined` 判成 `error TS`」，而 `HealthBadge` 现签名是 `{ status }: { status: string }`，那个 prop 已不存在。⇒ v17「幽灵字段面 ✅ 已清零」在**读点**成立、在**声明**不成立。**M5 实测代价**：删接口 1 行 + 两处 fixture `health: ''` 2 行后 `tsc` 仍 **32**、全量仍 **9 files / 81 passed** ⇒ 删除安全 | `grep -rn "\.health\b"` = 仅注释；`HealthBadge({ status })`；M5 实测 | **主审裁**：删字段（另开一行小卡或并入 `T-FIX-17`）**或**改写理由；**不要留着过期理由** |
+| O-22 | 🟡 **判据/卡面精度三件**：① ⑦ 的字面 pattern 实测 **2**（非主审记的 3）—— 若意图含 `getStatusConfig`，pattern 应一并写进去，否则工件里的数（3）与判据自身输出（2）不一致；② `T-FIX-17` verify④ 引用的 **`getStatusLabel` 全仓不存在**（真实 API = `getStatusConfig`），靠 `/` 兜住但字面读会去找幽灵符号 ⇒ 派单前改；③ `T-FIX-03-SUMMARY.md`「决策与偏离 ①」仍留**起点树行号** `:527/:1020/:1073`（(e) 字面范围只是「已知未收口 2」那一行，故非违规，但同工件两套行号口径） | 本轮 grep + 全仓符号检索 | 主审就地改卡 / 工件（不涉代码） |
+| O-23 | 🟡 **`(c)` 后端补键缺 payload 级用例**：`agent-probe-panel-vocabulary` 的两条运行时用例喂的是 fixture 注入值（渲染接线），**无一条打到后端 entry 键集** ⇒ 「契约闭合」目前只有代码实读 + 逐键比对背书，后端日后删该键无用例可抓。另登记 change 外同族观察：`OrchestrationCanvas.tsx:14` 的 `STATUS_COLORS`（生命周期 + 探针 + 工作流**三族词混一张表**、`:70` 把 `data.status` 英文吐给用户）—— 不构成第三份**探针**词表（喂的是画布节点数据），故不触发 `T-FIX-16` 的翻回条件④ | 两个测试文件 fixture 读法；(ii) 节 grep | 下一张卡的加严项 / 议题；不属本轮验收面 |
