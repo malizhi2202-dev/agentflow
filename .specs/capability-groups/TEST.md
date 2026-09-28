@@ -408,6 +408,44 @@ var c5 = a.model_config_json?.["capabilities"] ?? [];                         �
 
 ---
 
+### 1.11 `T-FIX-03` 交接验收轮（2026-09-28 · 本阶段一手实跑，非转述 4-dev）
+
+**受验对象**：分支 `agent/agent/42a133ecdd60` @ **`a4247738`**（码提交 `c6e663c4`，起点 `04245ee7`）· 受验判据 = 卡面 `TASK.md` 的六条 verify + 四条护栏。**验收面按 4-dev 报回的口径落在行为判据 ①②**（依据 = 本节的 M1，不是我照抄他的结论）。
+
+| # | 判据（复跑命令逐字） | 期望 | 我这轮实跑 | 判定 |
+|---|---|---|---|---|
+| ①②③ | `cd frontend && npx vitest run agent-health-contract` | `4 passed (4)` | `Test Files 1 passed / Tests 4 passed (4)` | ✅ |
+| ④ | `grep -cE "isProbeHealthy\|isAgentHealthy" src/lib/agentHealth.ts` | ≥2 | **6** 命中 / `^export function` **3** 处定义（卡面点名的两个 = 2，另加 `isProbeUnhealthy`） | ✅ |
+| ⑤ | `grep -c "a\.health" src/pages/AgentControlPlane.tsx` | 2 → 0 | **0** | ✅（口径见 M1） |
+| ⑥ | `./node_modules/.bin/tsc --noEmit -p tsconfig.json \| grep -c "error TS"` | 恰 **32** | **32**，逐文件归因 = 6 个既有源码 + 4 个既有测试文件，**本次改动的 4 个文件贡献 0 条** | ✅ |
+| 护栏 | `npx vitest run`（全量前端） | 8 files / 72 | **8 passed / 72 passed**（68 基线一条未掉 = 纯 +4 加法） | ✅ |
+| 护栏 | `cd backend && python -m pytest tests/test_capability_groups.py -q` | 16F/12P/1S | **16 failed / 12 passed / 1 skipped**，失败用例名与 v14 台账同集合 | ✅ |
+
+**「零扰动」的结构性证据（比数字更硬）**：`git diff --name-only 04245ee7..a4247738` 的**代码提交恰好 4 个文件**，与卡面 `write_files` 四项**逐项相等** ⇒ **R6.5 = 0 越界**；`backend/**` 与 `DESIGN.md` / `REQUIREMENT.md` **一个文件都没进 diff**（R3.2 ✅，(c) 的作用域声明确实落在 `lib/agentHealth.ts` 的 docstring，`DESIGN.md` 一字未动）。
+**R4.6 引用图我独立 grep 复核**：`STATUS_CONFIG` / `STATUS_PRIORITY` 跨文件引用 **0**（`KnowledgeBase.tsx:35` / `Runtime.tsx:17` 的同名者是各自文件内的私有常量，无 import 关系）⇒ 1.8.6「重构内部实现」豁免成立，不误判为破坏性变更。
+
+**M1 · F27 对抗样本（我重做，不采信转述）**：把 `OverviewCards` 两行改写成 `(a as any)['health'] === 'healthy' / …'unhealthy'`（同义、而 `grep "a\.health"` 看不见）→
+⑤ = **0**（判据报「已满足」= **假绿**，幽灵字段其实还活着）· `npx vitest run agent-health-contract` = **`2 failed | 2 passed`**，失败原文 `expected 0 to be greater than 0` / `expected +0 to be 1`。`git checkout --` 复原后 `grep -c "as any"` = **0**、再跑 4 passed。
+⇒ **采纳 4-dev 的口径更正**：⑤（`grep -c` 计数）只能当**交接期廉价回归信号**，本卡验收结论建立在 ①② 上；卡面把 ⑤ 标成【验收】**建议主审改标**（改判据语义是 Reviewer 的活，R3.3）。
+
+**M2 · v3 陷阱变异（补一条 4-dev 没做的）**：把 `AgentRow` 的徽标谓词从 `isProbeHealthy(agent.status)` 换回生命周期谓词 `isAgentHealthy(agent.status)`（= v3 版要求、会把徽标永远钉红的那个坑）→ ① **红**（`expected '…' to contain 'var(--green-bg)'`），③ 与 (c) 仍绿。
+⇒ 用例不只挡「幽灵字段复活」，也挡「改坏正确代码拿分」—— 卡面「归零判据只能靠改坏正确代码通过」那句禁令我实测复现了，R5.2 意义上的天花板成立。
+
+**新增测试用例数断言（元规则 3）**：⑥ 那条 `vitest run <pattern>` 型判据**已断言用例数**（`Tests 4 passed (4)`，非「跑了 0 条」），满足 TASK 元规则 3。
+
+**测试质量 6 维（T1~T6）**：T3/T4/T6 **干净** —— 零 mock（真 `render` 组件 + 真 props，无 `fetch` 桩）、无重复用例、层级正确（组件级 unit，未拿 e2e 验组件逻辑）；T1 可读（用例名带卡面编号 + 输入/期望）。**T5 半命中**：① 断 `> 0`，同一 fixture 下 `toBe(1)` 完全可得，`>0` 放过了「健康卡多算」→ 登记。**T2 命中（登记）**：`cardValue()` 走 `parentElement.parentElement.children[1]`，且 `getByText('健康')` + `expectBadges(…, 2, …)` 把「运行状态列与探针判定列都叫健康」这个**当前布局**钉死 —— 布局一动用例必假红（反面也要看到：这正是 (d) 的行为证据，改判须**成对改**）。
+
+**四条登记/更正（请主审优先看第 1、2 条）**：
+
+1. 🔴 **F10 的剩余面比 4-dev 报的更大：`AgentProbePanel.tsx` 同源错配 **9 个形状（共涉 8 行）**，不是 5 处。** 除 5 处 `health` 读点（`:64/:168/:169/:318/:478`）外，同一文件的**探针词表**还错在：`:63` 与 `:386` 的 `status === 'active'`（渲染 `:142`「活跃 N」）、`:65` 的 `status === 'idle'`（渲染 `:148`「空闲 N」）、`:168`/`:478` 里 `|| probe.status === 'active'` 的**后半支**。`agent_probe_service.py` 产出的是 `healthy/degraded/unhealthy/error/skipped/unknown`，**从不产出 `active`/`idle`** ⇒ 三枚用户可见计数**恒 0**、时间线健康点**恒红**：与 F10 同根因、同一 DTO（`useControlPlane()` 的 `probes`）。另：`HealthBadge` 自带**第 3 张表** `{healthy, warning, error, unknown}`（`warning` 从不产出、`degraded`/`unhealthy`/`skipped` 未覆盖）⇒ **机械改读 `status` 也不够**，新卡必须连词表一起收口。**处置见 O-19。**
+2. 🟡 **`stores/controlPlane.ts` 的注释有一句为假**：`health` 条写着「本字段已无任何消费点」—— 现树实为 **5 处**（同一个 4-dev 在评论 §三-3 里也承认了）。该文件**在本任务 `write_files` 内** ⇒ 不是越界问题，是一句**会骗下一个读者**的注释（R1.4：下一个 agent 读的是这句，不是这条评论）。建议下一张卡里顺手改一行，别只在 `TASK.md` 那一行当「已完成」收账。
+3. 🟡 **§三-4 的 `runtime` 计数勘误（5 → 4）**：`AgentControlPlane.tsx` 的 3 处渲染点里只有 **2** 处是幽灵读 —— `DetailPanel` 的 `:1039`/`:1092`（喂它的是 `probes.find(...)` 的 `AgentStatus`）；**`:546` 在 `CapabilityGroupRow` 里吃 `stores/agents.ts` 的 `Agent`**，`models/agent.py:41` 的 `to_dict()` 确实发 `runtime` ⇒ 它渲染得出来，**不是幽灵**。全仓幽灵 = **4**（2 页 + `AgentProbePanel.tsx:321`/`:510`）。另：SUMMARY「已知未收口 2」给的 `:527/:1020/:1073` 是**起点树**的行号（`git show 04245ee7:…` 即该三值，tip 上 +19 = `:546/:1039/:1092`）—— 按本 change 自己的元规则 4b（内容锚优于行号）应改写或删号。
+4. ✅ **采纳 verify③ 的降级**：③ 喂的是 fixture 注入的 `runtime`，三处接线在起点树上本就正确（③ 在未修态也不为假）⇒ 按元规则 2 它是【护栏】不是【验收】。与 4-dev §三-1 一致，我复核确认。
+
+**判定：`T-FIX-03` 交接验收通过**（验收面 = 行为判据 ①② + 四条护栏全绿 + 边界 0 越界）。**这句不等于「F10 已修」**：剩余面仍在（O-19 落地前，「F10 已修」只在 `AgentControlPlane.tsx` 范围内成立）⇒ **R2.5 / R15.2 不解除**（不集成、不合并）。本轮新增 2 项待裁：**O-19 / O-20**。
+
+---
+
 ## 第 2 轮 · 性能测试
 
 **状态：未跑，阻塞待人工。** `REQUIREMENT.md` 的 NFR1（零新增 TS 错误）/ NFR2（向后兼容）/ NFR3（不建表）
@@ -567,6 +605,7 @@ mysql : LIKE concat('%%', %s, '%%')
 | `frontend/src/__tests__/capability-group.test.tsx`（**14 条**） | unit（纯函数 + 组件渲染） | FR3（分组/组键）· FR4（渲染 / onToggle）· FR5 前端半边（归一后落 `未分类`）· F17/F18 归一 | `T-FIX-05`（4-dev）· **本阶段复跑核对**：`npx vitest run capability-group` → 14 passed（第 3 次仍 14/14） | 1 |
 | `frontend/src/__tests__/agent-builder-capability-wiring.test.tsx`（**2 条**，`T-FIX-15` 已建） | unit（页面渲染 · 喂 `useAgents.setState` 种子，无新依赖 / 不起服务） | **把 `T-FIX-14` 的两条 grep 判据升级为行为判据**：`["   "]` → 无空白 chip 且无「加载记忆」按钮（= O-18 联动的显式锁）；`["a"," a "]` → 只剩 1 个 chip。未修态 `0e8ee534` 两条**实测红**（见 §1.10） | 5-test（本工件，`T-FIX-15` 写权） | 1 |
 | `frontend/src/__tests__/agent-control-plane-a11y.test.tsx` | unit（**待建**，`T-FIX-06` 落点） | 键盘可达 / `aria-expanded`（实测页面与该头组件 `aria-expanded` / `tabIndex` 均 **0**，`onKeyDown` 只在页面别处 1 处） | 4-dev（待） | 1 · 4 |
+| `frontend/src/__tests__/agent-health-contract.test.tsx`（**4 条**，`T-FIX-03` 新建） | unit（组件渲染 · 真 props、零 mock） | `T-FIX-03` ①②③（探针 `status=healthy` → 行徽标绿 + 「健康」卡 > 0；`status=unhealthy` → 徽标红 + 「异常」卡 = 1；`runtime` 三处渲染点）+ (c) 两个口径互不覆盖 | 4-dev（`T-FIX-03`）· **本阶段验收轮一手复跑**：`4 passed (4)`，并独立做出 M1（⑤ 假绿）/ M2（v3 陷阱）两次变异证明 | 1 |
 | `.specs/capability-groups/_quick_test.py`（仅加**文件头标注**） | 冒烟脚本 | 无（明确标为**非回归基线**，禁止当任何 verify 的证据） | 5-test（本工件） | 1 |
 
 ## 回归保护
@@ -631,7 +670,7 @@ mysql : LIKE concat('%%', %s, '%%')
 | **（F22·②）声明行** | §1.2 末行「安全（跨 owner / 凭据搬运 / A09）**4 条全 RED → 3 RED**」+ 文件头「**28 条**用例」 | 一手实跑：`-k "domain_owner_cannot_read or scale_must_not_hand or scale_audit_detail or percent_query_leaks"` → **`1 failed, 2 passed, 1 skipped`**（= 2 绿 / 1 红 / 1 skip，`T-FIX-13` 之后）；用例数 **29**（`--collect-only -q -k capab` → `29/210 collected`，第 29 条 = `T-FIX-13` 的纯加法正向）。两处均已改写 |
 | **（F22·③）定向数** | §1 记录块「`18 failed, 10 passed`（28 条）」+ 全量「`59 / 144 / 6`」 | 现值 = **`16 failed / 12 passed / 1 skipped`（29）**、全量 = **`57 / 146 / 7`（210）**；两条都补了取值 revision（`8923c430`），并按元规则 2 保留旧行作沿革。**18→16 不是红自己消失**：转绿的 2 条逐条点名 = `scale_must_not_hand…`（`T-FIX-13`）+ `scale_audit_detail…`（同批转 skip，404 不落审计 = 设计语义）→ 其余 16 条同名同数，全归 `T-FIX-01/02` 的红名单 |
 
-## 开放项（O-1~O-8 为第 1 次，O-9~O-13 为复跑第 2 次新增，**O-16 / O-17 为复跑第 3 次（本轮）新增**；O-14/O-15 已被 REVIEW 的待人工裁定账本占用 → 本工件不占该两号）
+## 开放项（O-1~O-8 为第 1 次，O-9~O-13 为复跑第 2 次新增，**O-16 / O-17 为复跑第 3 次新增**，**O-19 / O-20 为 `T-FIX-03` 验收轮（§1.11）新增**；O-14/O-15/O-18 已被 REVIEW 的待人工裁定账本占用 → 本工件不占该三号）
 
 | # | 项 | 归属 |
 |---|---|---|
@@ -650,3 +689,5 @@ mysql : LIKE concat('%%', %s, '%%')
 | O-13 | **capability 第 4 套真相**：`frontend/src/pages/AgentBuilder.tsx`（原 `:48`）的 `(...).capabilities \|\| []` 不过滤空串/空白（4-dev 在 `T-FIX-05` 中发现）。F18 现写「后端 7 + 前端 1」→ 要么给 `T-FIX-01/02` 补这个落点，要么把它记进 F18 清单，**别让「前端已平」这句话停在半真的账上** | **✅ 本轮关闭**：`T-FIX-14`（`0e30fff2`）已把它换成 `capabilitiesOf`，本阶段一手验收过（§1.9）；「前端已平」现在成立、**后端 7 处仍待 `T-FIX-01/02`** |
 | O-16 | **✅ 本轮关闭（`T-FIX-15` 交付 · 证据见 §1.10）** —— 原缺口：**`T-FIX-14` 的判据强度**（本阶段查出，非 4-dev 的偏离）：① 该接线文件**零用例引用**（`grep -rn AgentBuilder frontend/src/__tests__` 无命中）→ 行为变更只被工件钉着；② 两条【验收】是 grep 计数，**实测可被同义写法绕过**（改成 `model_config_json?.capabilities` → 计数仍 0、第 4 套真相复活；5 种等价形状里字面 pattern 只命中 1 种）。建议出路二选一或都做：**(a)** 落一条接线级渲染用例（判据原文与本阶段核实过的可执行形状在 §1.9.4 裁决 A / 新增测试登记行，`useAgents.setState` 范式已有 5 处先例，不需要新依赖）；**(b)** 把 ① 的 pattern 换成加严版（§1.9.3 给了实测可用的那条）。**要落 TASK 才有人能写**（前端测试文件不在任何任务的 `write_files` 里 → 5-test 与 4-dev 自建同为 R6.5 越界） | **6-review / 主审**（R14 派单：建议开 `T-FIX-15`，写权 = 新前端测试文件）；本阶段不自我授权 |
 | O-17 | **后端 A2 记忆装载仍按未归一的原始数组判定**（`agents_api.py:152` 取 `cfg.get("capabilities", [])` → `:164` `if capabilities:` → `:168` `cap.lower() in m.key.lower()`）：载荷 `[""]` 时**空串对任何 key 都子串命中 → 等于不过滤、把该用户近 7 天的 20 条记忆全装进上下文**（一手语义实跑：`"" in "anything"` = True），而非字符串元素会让 `/run` 抛 `AttributeError`（`7.lower()`）→ 前端本轮收口后**同一载荷两端行为方向相反**：卡片不显示该能力，后端却按它匹配一切。该处**今天无任何用例**（`grep -n "memor" backend/tests/test_capability_groups.py` 无命中）。**归 `T-FIX-01`**（它的 action 已含 `agents_api.py:152` 改消费 `capabilities_of`，v10.2·C2）→ 不新开任务；本阶段**不提前写用例**（01 未落地，判据现在为假是设计态，且会把未收口的形状冻进代码） | `T-FIX-01` 落地时由 5-test 补 2 条用例（空串载荷须 0 装载 / 非字符串元素不得抛）· 现登记不修 |
+| O-19 | 🔴 **F10 剩余面 = `AgentProbePanel.tsx` 的探针词表错配（本阶段 `T-FIX-03` 验收轮一手查实，见 §1.11 第 1 条）**：5 处 `health`（`:64/:168/:169/:318/:478`）+ 4 处同根因（`:63`/`:386` `status === 'active'` → 渲染 `:142`「活跃 N」· `:65` `status === 'idle'` → `:148`「空闲 N」· `:168`/`:478` 的 `active` 半支）= **9 个错配形状 / 8 行**；后端探针词表从不产出 `active`/`idle` ⇒ 三枚用户可见计数**恒 0**、时间线健康点**恒红**；且 `HealthBadge` 自带第 3 张表 `{healthy, warning, error, unknown}`，`degraded`/`unhealthy`/`skipped` 未覆盖 ⇒ **机械改读 `status` 也不够**。⚠️ 先决：「活跃/空闲」两词在探针词表下**无对应值**，属**产品词选择**（R18.1 ④ 把关）—— 卡面须先裁「换词/换判据」或「撤掉恒 0 计数」，否则实现者只能自己发明词 | **6-review / 主审落卡**（建议本 change 内开新卡，不做新 CHANGE：同一条 🔴 F10、同一 DTO，write_files = `AgentProbePanel.tsx` + 新前端测试文件 + 可选 `stores/controlPlane.ts` 注释一行）；**5-test 不自我授权建卡**。若主审判其出 F10 范围 ⇒ F10 仍 🔴，R2.5 需人签「已知接受」，禁止静默接受 |
+| O-20 | 🟡 **本轮两处工件勘误未落**（§1.11 第 2、3 条）：① `stores/controlPlane.ts` 的 `health` 注释「本字段已无任何消费点」**为假**（现树 5 处，同一实现者在交付评论里已自陈）—— 该文件在 `T-FIX-03` 的 `write_files` 内，属可在边界内修的一行；② SUMMARY「已知未收口 2」的 `runtime` 行号取自**起点树** `:527/:1020/:1073`（tip = `:546/:1039/:1092`），且其中 `:546` 是 `CapabilityGroupRow` 吃 `Agent` 的**非幽灵**读 ⇒ 真幽灵读 = **4** 不是 5 | 下一张卡（4-dev）顺手更正，或主审就地更正；**不涉判级** |
