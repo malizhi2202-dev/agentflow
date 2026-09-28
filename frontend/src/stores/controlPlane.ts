@@ -4,19 +4,24 @@ import { safeFetch } from '../utils/requestDedup';
 /**
  * `GET /api/control-plane/probes` 的 entry（`control_plane_api.py` 的 `list_probes`）。
  *
- * ⚠️ **该 DTO 里有两个「幽灵字段」（F10 · T-FIX-03）**：后端构造的 entry 键集实测为
- * `{agent_id, agent_name, status, probes, model_name, tokens_used, token_soft_limit,
- * token_hard_limit, last_heartbeat}` —— **没有 `health`、也没有 `runtime`**。
+ * ⚠️ **这个 DTO 上有两个「幽灵字段」（F10）** —— 声明了、但后端构造的 entry 从不出这两个键。
+ * 两个都已收口，键集现为
+ * `{agent_id, agent_name, status, probes, model_name, runtime, tokens_used, token_soft_limit,
+ * token_hard_limit, last_heartbeat}`：
  *
- * - `health`：**T-FIX-03 (a) 已收口**（前端改读 `status`）—— `status` 才是探针判定
- *   （`if p.probe_type == "health": entry["status"] = p.status`）。本字段已无任何消费点。
- * - `runtime`：**仍未收口**。`AgentControlPlane.tsx` 的 `DetailPanel` / `CapabilityGroupRow`
- *   三处渲染它 ⇒ 值恒空。修它必须让后端 `list_probes` 补发该键，与 T-FIX-03 的
- *   「后端一字不动」护栏互斥 → 登记为残留，不在本任务自查自改。
+ * - `health`：**已无任何消费点**。`T-FIX-03 (a)` 摘掉了 `AgentControlPlane` 的 2 处
+ *   （`OverviewCards` 的「健康 / 异常」卡），`T-FIX-16 (a)` 摘掉了 `AgentProbePanel` 的 5 处
+ *   （`:64` 异常计数、`:168`/`:478` 时间线点、`:169`、`:318` 的健康度徽标）—— 全部改读 `status`。
+ *   带探针判定的本来就是 `status`（`if p.probe_type == "health": entry["status"] = p.status`）。
+ *   字段保留只为不改既有形状，**不要**再拿它做判定。
+ * - `runtime`：**T-FIX-16 (c) 已由后端补发**（`list_probes` 构造 entry 时 `"runtime": agent.runtime`）
+ *   ⇒ 不再是幽灵字段。补键前 `AgentControlPlane.tsx` 的 `DetailPanel` **两处**渲染它、值恒空
+ *   （`CapabilityGroupRow` 那一处**不在此列** —— 它吃 `stores/agents.ts` 的 `Agent`，
+ *   `models/agent.py` 的 `to_dict()` 确实发 `runtime`，那里渲染得出来）。
  *
- * 两个字段都**刻意保留为必填 `string`**（不改可选）：`AgentProbePanel.tsx` 的
- * `HealthBadge({ health }: { health: string })` 在 `strict` 下会把 `string | undefined`
- * 判成 `error TS`，顶破「`error TS` 恰 32」这条验收护栏。类型上的账留给补键那一轮一起还。
+ * 两个字段都**刻意保留为必填 `string`**（不改可选）：`AgentProbePanel.tsx` 的徽标在 `strict` 下
+ * 会把 `string | undefined` 判成 `error TS`，顶破「`error TS` 恰 32」这条护栏；补键之后
+ * `runtime: string` 已经与后端一致，`health: string` 作为历史形状保留。
  */
 export interface AgentStatus {
   agent_id: number;

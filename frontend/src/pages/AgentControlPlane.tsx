@@ -10,46 +10,17 @@ import { useDomains, Domain, RouteResult, ScaleResult } from '../stores/domains'
 import { useAgents, Agent } from '../stores/agents';
 import { groupByCapability, groupKeyOf } from '../components/capability/groupByCapability';
 import CapabilityGroupHeader from '../components/capability/CapabilityGroupHeader';
-import { isAgentHealthy, isProbeHealthy, isProbeUnhealthy } from '../lib/agentHealth';
+import {
+  isAgentHealthy, isProbeHealthy, isProbeUnhealthy,
+  getHealthLabel, getStatusConfig, PROBE_STATUS,
+} from '../lib/agentHealth';
 
 // ── 常量 ──
 type TabKey = 'agents' | 'queue' | 'reconcile' | 'domains';
 
-/**
- * 「运行状态」列与列表排序共用的**一张**探针判定表 —— 键集 = 探针词表（T-FIX-03 (d)）。
- *
- * `AgentStatus.status` 是健康探针的落库状态（`backend/services/agent_probe_service.py`：
- * `healthy` / `degraded` / `unhealthy` / `error` / `skipped` / `unknown`），而这里原来写的是
- * `{running, idle, blocked, dead}` —— 与探针词表**零交集** ⇒ 每一行都落 fallback：
- * 「运行状态」列把英文状态原样吐给用户，排序优先级同理全落 99、列表排序实际失效。
- *
- * `priority` 越小越靠前（越需要人看一眼的越靠前）。
- * **不并入生命周期词表**（`running/standby`）：两个词表各自具名正是 F10 的处置（见 `lib/agentHealth.ts`），
- * 合并回一张表就是把病根种回去。文案不在这张表里 —— label 一律取自 `getHealthLabel`，免得两处漂移。
- */
-const PROBE_STATUS: Record<string, { color: string; bg: string; priority: number }> = {
-  healthy:   { color: 'var(--green)',      bg: 'var(--green-bg)',  priority: 4 },
-  degraded:  { color: 'var(--orange)',     bg: 'var(--orange-bg)', priority: 1 },
-  unhealthy: { color: 'var(--red)',        bg: 'var(--red-bg)',    priority: 0 },
-  error:     { color: 'var(--red)',        bg: 'var(--red-bg)',    priority: 0 },
-  skipped:   { color: 'var(--text-muted)', bg: 'var(--bg-input)',  priority: 3 },
-  unknown:   { color: 'var(--text-muted)', bg: 'var(--bg-input)',  priority: 2 },
-};
-
-function getStatusConfig(status: string) {
-  const style = PROBE_STATUS[status];
-  if (!style) return { color: 'var(--text-muted)', bg: 'var(--bg-input)', label: status || '未知' };
-  return { color: style.color, bg: style.bg, label: getHealthLabel(status) };
-}
-
-function getHealthLabel(status: string) {
-  if (status === 'healthy' || status === 'pass') return '健康';
-  if (status === 'degraded' || status === 'fail') return '降级';
-  if (status === 'unhealthy') return '异常';
-  if (status === 'error') return '错误';
-  if (status === 'skipped') return '未探测';
-  return status || '未知';
-}
+// `PROBE_STATUS` / `getStatusConfig` / `getHealthLabel`（探针词表的唯一配色 + 文案源）已搬到
+// `../lib/agentHealth.ts`（T-FIX-16 (b)）—— 原来的第二份 `HealthBadge` 词表在 `AgentProbePanel.tsx`，
+// 两份都在这里收口成一处 import。**页面不得再定义它们**：留下第二份就是 F10 的病根。
 
 // ── 样式片段 ──
 const cardBase: React.CSSProperties = {

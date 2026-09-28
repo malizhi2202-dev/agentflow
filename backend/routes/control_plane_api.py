@@ -78,6 +78,10 @@ def list_probes(request: Request, db: Session = Depends(get_db)):
                 "status": "",
                 "probes": [],
                 "model_name": agent.model_name if agent else "",
+                # T-FIX-16 (c)：前端 `stores/controlPlane.ts` 的 `AgentStatus.runtime` 声明为必填，
+                # 而此前 entry 从不发这个键 ⇒ `AgentProbePanel`/`DetailPanel` 共 4 处渲染恒空（F10 的
+                # 另一半）。这里补发，与既有的 `model_name` 同源同形状（纯加法，既有键一个不改）。
+                "runtime": agent.runtime if agent else "",
                 "tokens_used": 0,
                 "token_soft_limit": agent.token_soft_limit if agent else 0,
                 "token_hard_limit": agent.token_hard_limit if agent else 0,

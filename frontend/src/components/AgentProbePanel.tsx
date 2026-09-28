@@ -15,6 +15,9 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useControlPlane, type AgentStatus } from '../stores/controlPlane';
+// 探针词表的唯一来源（T-FIX-16 (a)(b)）：判定走具名谓词、文案与配色走 `getStatusConfig`，
+// 本文件**不得**再自带任何 `{status → 文案/颜色}` 的表。
+import { isProbeErrored, isProbeHealthy, isProbeUnhealthy, getStatusConfig } from '../lib/agentHealth';
 
 type ZoneKey = 'health' | 'tokens' | 'heartbeat' | 'models';
 
@@ -60,8 +63,14 @@ export default function AgentProbePanel() {
   };
 
   // 计算各状态统计
+  // ⚠️ `:63` / `:65` 两条 `status === 'active' | 'idle'` 计数**不是本卡的活**：`active`/`idle`
+  // 不在后端探针词表里（只有 healthy/degraded/unhealthy/error/skipped/unknown），归 `T-FIX-17`
+  // 等人拍 (甲) 换词表内状态 / (乙) 删除。本卡（T-FIX-16）**不许顺手改**（R7.1）。
   const activeCount = probes.filter((p) => p.status === 'active').length;
-  const errorCount = probes.filter((p) => p.health === 'error' || p.status === 'error').length;
+  // 「异常」= 探针判 `unhealthy` 或 `error`（原式左半支读 DTO 上的幽灵 `health` 字段、恒假，
+  // 而 `unhealthy` 从未被计入 —— 两处都由 T-FIX-16 (a) 收口；`error` 那一支原样保留，避免把
+  // 已经在「异常」里显示的 error 行挤掉）。
+  const errorCount = probes.filter((p) => isProbeUnhealthy(p.status) || isProbeErrored(p.status)).length;
   const idleCount = probes.filter((p) => p.status === 'idle').length;
 
   // ---- 样式常量 ----
@@ -165,8 +174,11 @@ export default function AgentProbePanel() {
           }}
         >
           {probes.map((probe) => {
-            const isHealthy = probe.health === 'healthy' || probe.status === 'active';
-            const isError = probe.health === 'error' || probe.status === 'error';
+            // T-FIX-16 (a)：原式左半支读 DTO 上的幽灵 `health` 字段（后端从不发），已摘掉；
+            // 改读真正带探针判定的 `status` + 具名谓词。
+            // ⚠️ `|| probe.status === 'active'` 这一支不动 —— 它是 T-FIX-17 的面（见 :63 注释）。
+            const isHealthy = isProbeHealthy(probe.status) || probe.status === 'active';
+            const isError = isProbeErrored(probe.status);
             const isSelected = selectedAgent === probe.agent_id;
             return (
               <div
@@ -315,7 +327,7 @@ function HealthZone({
                 <StatusBadge status={probe.status} />
               </td>
               <td style={td}>
-                <HealthBadge health={probe.health} />
+                <HealthBadge status={probe.status} />
               </td>
               <td style={{ ...td, fontFamily: 'var(--font-mono, monospace)', fontSize: 10 }}>
                 {probe.runtime || '-'}
@@ -475,7 +487,9 @@ function HeartbeatZone({ probes }: { probes: AgentStatus[] }) {
       {[...probes]
         .sort((a, b) => (b.last_heartbeat || '').localeCompare(a.last_heartbeat || ''))
         .map((probe, idx) => {
-          const isHealthy = probe.health === 'healthy' || probe.status === 'active';
+          // T-FIX-16 (a)：同上 —— 幽灵 `health` 字段那半支摘掉；`|| probe.status === 'active'`
+          // 那一支归 T-FIX-17，不动。
+          const isHealthy = isProbeHealthy(probe.status) || probe.status === 'active';
           const dotColor = isHealthy ? '#5cb878' : '#dc2626';
           return (
             <div
@@ -616,30 +630,36 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function HealthBadge({ health }: { health: string }) {
-  const map: Record<string, { bg: string; color: string; icon: React.ReactNode; label: string }> = {
-    healthy: { bg: 'rgba(92,184,120,0.12)', color: '#5cb878', icon: <CheckCircle2 size={10} />, label: '健康' },
-    warning: { bg: 'rgba(232,164,80,0.12)', color: '#e8a450', icon: <AlertTriangle size={10} />, label: '警告' },
-    error: { bg: 'rgba(220,38,38,0.12)', color: '#dc2626', icon: <XCircle size={10} />, label: '异常' },
-    unknown: { bg: 'rgba(156,163,175,0.12)', color: '#9ca3af', icon: <Circle size={10} />, label: '未知' },
-  };
-  const m = map[health] || map['unknown'];
+/**
+ * 「健康度」徽标（T-FIX-16 (b)）。
+ *
+ * 原来自带第 3 张词表：键集只有 4 个值（`healthy` / 一个**后端从不产出的告警态** / `error` /
+ * `unknown`），而 `degraded` / `unhealthy` / `skipped` 一格都没有 ⇒ 绝大多数行只能显示「未知」。
+ * 现在文案与配色全部走 `lib/agentHealth.ts` 的 `getStatusConfig`（= `PROBE_STATUS` + `getHealthLabel`），
+ * 与 `AgentControlPlane` 的「运行状态」列**同一份**来源。
+ *
+ * ⚠️ 视觉差异（登记在 SUMMARY，不静默）：原来每个状态有自己的图标（✓ / ⚠ / ✕ / ○），
+ * 现在统一为中性 `<Circle/>`。理由：保图标就得在组件里再枚举一遍词表（第 4 张表），
+ * 正是本卡要消灭的形状；若要恢复分状态图标，正确落点是往 `PROBE_STATUS` 一处加 `icon` 字段。
+ */
+function HealthBadge({ status }: { status: string }) {
+  const sc = getStatusConfig(status);
   return (
     <span
       style={{
         fontSize: 10,
         padding: '2px 8px',
         borderRadius: 10,
-        background: m.bg,
-        color: m.color,
+        background: sc.bg,
+        color: sc.color,
         fontWeight: 500,
         display: 'inline-flex',
         alignItems: 'center',
         gap: 4,
       }}
     >
-      {m.icon}
-      {m.label}
+      <Circle size={10} />
+      {sc.label}
     </span>
   );
 }
