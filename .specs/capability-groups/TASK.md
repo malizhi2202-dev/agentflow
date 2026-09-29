@@ -200,24 +200,27 @@
 ### T-FIX-07: 清 `#fff` 硬编码（UI 3.1 · F5）🔴
 - **read_files**: `frontend/src/styles/tokens.css`, `frontend/src/pages/AgentControlPlane.tsx`
 - **write_files**: `frontend/src/styles/tokens.css`, `frontend/src/pages/AgentControlPlane.tsx`
-- **action**: `tokens.css` 增加倾斜中性前景 token（禁纯白，ui-anti-patterns 颜色类），替换 `:457,473`（本 change 面）；`:850,962,1012,1225` 属 pre-existing 同形，一并替换须在 verify 里证明无回归
-- **verify**: **【验收】** `cd frontend && grep -c "#fff\b\|#ffffff\b" src/pages/AgentControlPlane.tsx` 由今天实测 **6**（`:457,:473` 本 change 新增 + `:850,:962,:1012,:1225` 既有）变 **0**；**【护栏】** `grep -c "#fff" src/styles/tokens.css` 不变（token 定义里的十六进制不算违规）
+- **action**: `tokens.css` 增加倾斜中性前景 token（禁纯白，ui-anti-patterns 颜色类），替换**内容锚（v19 校正）**：本 change 面 = `AgentControlPlane.tsx` 内**同行含 `padding: '4px 10px'` 且为 `background: 'var(--blue)'` / `'var(--green)'` 的两个按钮**（评审 tip `b6b4d7ce` 行号 = `:400` / `:416`）；另 4 处 pre-existing 同形 = 同文件另外 4 行 `color: '#fff'`（tip = `:796` / `:896` / `:946` / `:1159`），一并替换须在 verify 里证明无回归。
+  ⚠️ **旧锚 `:457,473` + `:850,962,1012,1225` 在评审 tip 上已全数失效，不得再照行号执行** —— 今天分别落在 `};` · `{agents.length === 0 ? (` · `<div` · `agent,` · `<button onClick={onClose}` · 一行注释，**六处无一含 `#fff`**（它们在未含任何修复的 `origin/main` 上反而成立 ⇒ 跨分支读锚必错）。取证与根因见 `REVIEW.md` **v19 §二**
+- **verify**: **【验收】** `cd frontend && grep -c "#fff\b\|#ffffff\b" src/pages/AgentControlPlane.tsx` 由今天实测 **6**（**数在 tip 上稳定为 6；锚见 action，勿照旧行号核**）变 **0**；**【护栏】** `grep -c "#fff" src/styles/tokens.css` 不变（今天 = **1**，token 定义里的十六进制不算违规）
 - 状态: [ ]
 
 ### T-FIX-08: 硬编码间距/圆角改用既有 token + 字号 scale 待决（UI 3.1 · F6）🔴
 > **v3 根因订正（G4 测试 ④，主审实测认错）**：v1/v2 写「`tokens.css` 无字号与**间距** scale token，仅 `--s1`/`--r-sm` → 「用 token」物理上不可用」。**间距与圆角的两半都是错的**，来源是我上一轮自己那条被 `head -60` 截断的 grep。全量列出后实测：`tokens.css:47` 有完整间距 scale **`--s1/2/3/4/5/6/8/10`**，`:50` 有 **`--r-sm/--r-md/--r-lg`**；tokens.css 自己用 `var(--s*)` 3 处；**`AgentControlPlane.tsx` 用 `var(--s*)`/`var(--r-*)` = 0 处**。→ 正解是「**有 token 不用**」，不是「没有 token 可用」。这个差别要紧：前者是机械替换、无需设计决策，**不该出现在给人签字的「已知接受」选项里**。字号那半仍缺（`:34-36` 的 `--text/--text-secondary/--text-muted` 是**颜色**不是字号，全仓 61 个自定义属性里无任何 font-size token）。
 - **read_files**: `frontend/src/styles/tokens.css`, `frontend/src/pages/AgentControlPlane.tsx`
 - **write_files**: `frontend/src/pages/AgentControlPlane.tsx`
-- **action · (a) 本 change 内直接做（机械、无决策）**：`CapabilityGroupRow` 内硬编码 `padding`/`margin`/`gap`/`borderRadius` 换成既有 `--s*`/`--r-*`（`gap: 12px`→`var(--s3)`、`borderRadius: 8px`→`var(--r-md)` 等），就近映射不改视觉
+- **action · (a) 本 change 内直接做（机械、无决策）**：`CapabilityGroupRow` 内硬编码 `padding`/`margin`/`gap`/`borderRadius` 换成既有 `--s*`/`--r-*`（`gap: 12px`→`var(--s3)`、`borderRadius: 8px`→`var(--r-md)` 等），就近映射不改视觉。
+  **v19 校正（作用域与锚，均为评审 tip `b6b4d7ce` 实测）**：本 task 的作用域**是 `CapabilityGroupRow` 函数体**（`:433-530`，文件内 `^}` 终行 `:530`，与 verify 的 `awk` 区间**一致、未截断**）；该区间内的命中点 = `:460`（容器整行 `marginBottom: 4, border: '1px solid var(--border)', borderRadius: 4`）· `:474`（`padding: 12`）· `:505`（`gap: 4`）· `:506`（`padding: '2px 6px', borderRadius: 3`）。**旧正文里的 `:459` / `:475` 已失效**（现为 `return (` / 文案「无 Agent」），勿照旧行号核
 - **action · (b) 需人工定调（出本任务范围则显式挂起）**：字号无 scale → 定一套非等差 font-size token 是设计决策，**不属 Reviewer 权限**（R3.3）。若人工不在本轮定，(b) 记为未闭环，**不得**因 (a) 完成就宣布 F6 关闭
-- **verify（二值；v2 的「较当前下降」不可判定，两条 ❌ 都点过）**: ① `cd frontend && awk '/function CapabilityGroupRow/,/^}$/' src/pages/AgentControlPlane.tsx | grep -cE "(gap|padding|margin): [0-9]+px|borderRadius: [0-9]+"` 为 **0**（已按 T-FIX-05 拆出组件则改对新文件全文跑同一条）；② `grep -c "var(--s[0-9]\|var(--r-" src/pages/AgentControlPlane.tsx` **> 0**（当前实测 0，这条挡住「口头改了」）；③ `./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | grep -c "error TS"` **等于 32**（不是 ≥32）
+- **verify（二值；v2 的「较当前下降」不可判定，两条 ❌ 都点过）**: ① `cd frontend && awk '/function CapabilityGroupRow/,/^}$/' src/pages/AgentControlPlane.tsx | grep -cE "(gap|padding|margin): [0-9]+px|borderRadius: [0-9]+"` 为 **0**（已按 T-FIX-05 拆出组件则改对新文件全文跑同一条；**v19 实测：awk 区间 = 98 行 / 终行 `:530`，与函数真实边界 `433-530` 一致、未截断；今天读数 = `2`（`:460` 的 `borderRadius: 4` + `:506` 的 `borderRadius: 3`），判据真红可失败**）；② `grep -c "var(--s[0-9]\|var(--r-" src/pages/AgentControlPlane.tsx` **> 0**（当前实测 0，这条挡住「口头改了」）；③ `./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | grep -c "error TS"` **等于 32**（不是 ≥32）
 - 状态: [ ]
 
 ### T-FIX-09: 三层树去卡片化（UI 3.2 · F7）🔴
 - **read_files**: `frontend/src/pages/AgentControlPlane.tsx`
 - **write_files**: `frontend/src/pages/AgentControlPlane.tsx`
-- **action**: 域卡片 > 能力组卡片 > Agent 行 = 卡片嵌套卡片（anti-pattern 布局类）。Level 2/3 去掉 `border + borderRadius`（`:402-403`），改用缩进 + 单条分隔线承载层级；若人工判定「三层卡是产品形态」→ 按 R2.5 走「已知接受」签字，不留空
-- **verify（二值）**: `cd frontend && awk '/function CapabilityGroupRow/,/^}$/' src/pages/AgentControlPlane.tsx | grep -c "boxShadow\|border: 1px\|borderRadius"` 为 **0**（能力组层去卡片化的可计数判据）；截图复核结论记 TEST.md UAT 段，**不作为通过依据**（未起服务，见盲区）
+- **action**: 域卡片 > 能力组卡片 > Agent 行 = 卡片嵌套卡片（anti-pattern 布局类）。Level 2/3 去掉 `border + borderRadius`，改用缩进 + 单条分隔线承载层级；若人工判定「三层卡是产品形态」→ 按 R2.5 走「已知接受」签字，不留空。
+  **v19 校正（锚已改内容锚 + tip 行号双记，评审 tip `b6b4d7ce` 实测）**：能力组层 = `CapabilityGroupRow` 容器**整行** `marginBottom: 4, border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden'`（tip = **`:460`**）；域头层 = `DomainAccordionRow` 内**整行** `background: isExpanded ? 'var(--bg-selected)' : 'var(--bg-card)'`（tip = **`:581`**；v12 记的 `:591` 已被 `T-FIX-16` 的 `+7/−36` 前移 10 行）。**旧锚 `:402-403` 已失效** —— 今天是按钮 style（`fontSize: 10 … gap: 3`），**不是 `border`/`borderRadius` 声明**；旧锚 `:585-605` 也不再框住那个三元。取证见 `REVIEW.md` **v19 §二**
+- **verify（二值）**: `cd frontend && awk '/function CapabilityGroupRow/,/^}$/' src/pages/AgentControlPlane.tsx | grep -c "boxShadow\|border: 1px\|borderRadius"` 为 **0**（能力组层去卡片化的可计数判据；**v19 实测该 awk 区间 = 98 行、终行 `:530`，与函数真实边界 `433-530` 一致，未截断** ⇒ 判据今天真红 = **3**，可失败）；截图复核结论记 TEST.md UAT 段，**不作为通过依据**（未起服务，见盲区）
 - 状态: [ ]
 
 ### T-FIX-10: 组顺序两端一致（F14）🟢
