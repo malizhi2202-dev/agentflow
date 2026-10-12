@@ -1,7 +1,7 @@
 # STATE — 跨会话状态
 
 > 本文件记录当前进行中的工作与上次断点。**每次会话结束前更新**。
-> 最近更新：2026-09-21
+> 最近更新：2026-09-23
 
 ## 当前阶段
 
@@ -21,22 +21,41 @@
 
 ## 进行中
 
+- 🏁 **四轨收束（2026-09-23）**：①凭据扫描完成=**无泄露无需轮换**（报告 `.specs/credential-scan/SCAN-REPORT.md`；两后续工程项：KDF 缺陷、Secret Scanning 开启）②identity-hardening **冻结于 3-task 零代码**（裁定⑦ MySQL 介质修订已入三书）③stage-model-convergence 未立项（实施冻结）④small-model 2-design 中途叫停无残骸。**裁定⑦**可计量数据 MySQL 权威库+**裁定⑧**开发冻结 → 已全量落 PRODUCT-DESIGN.html **v9（呈审中）**（15 处+Q23）与 ROADMAP §五附注
+
+- 🔍 **platform-evolution discovery 第 4 轮开轮**（2026-09-22 用户点名 8 条：五差距①-⑤+身份三连）：S8-S13 六包 ①-④ 全落盘（GD 均 3/3）→ **PRODUCT-DESIGN.html v8 呈审中**（3379 行：八项升级句+P0 参数化+建议条 P1-14/15/16+纪律 §1.6.5 扩至 13+Q21/22+新原型 p26 执行隔离/p27 对外集成+p1/p4/p16/p20/p22 注记；⚠ 修正三处：kagent v1alpha2／trace_spans 零写入声称降级／kagent HITL 引用注）；**⑤ 门已过：用户原话「通过」2026-09-23** → ROADMAP 第 4 轮节回写 + 六包/TOPICS/v8 状态标全晋级 + P1-14/15/16 正式入表；零代码改动全程遵守；**第 4 轮闭合，无第 5 轮触发条件**
+
 - 🆕 **change `small-model-decisions` 立项草案**（2026-09-22，Jev/System One 决策小模型分层 + 对话记忆微调工厂 + 自测闭环）：`.specs/small-model-decisions/CHANGE.md`，澄清已答（A+B+C 首批全要·消费级基线·域内隔离+显式开关·内置基准+用户回放），REQUIREMENT.md 已过需求门（4/4）；**P-product v4 已把产品文档+界面原型补齐并过人审门**（用户原话「通过」2026-09-22；§2.7/§5.19/§6.23/§6.24/术语/FAQ，全标「未实现」）；铁律：两步制显式启用，未绑定=零介入。v5 已过审（「好的」）；**E 层环境参谋追加**（用户原话：按机器配置自识别给可执行方案）→ 需求门第 2 轮 4/4 + **v6 呈审中**（§6.25 新页+联动 8 处）；红线升级为**参谋零执行**（用户原话「只给方案不执行」，白名单代执行取消；画像只读不上传）→ 需求门第 3 轮 4/4 → **v7 已过审（「通过」2026-09-22）· P-product 全线闭环**；**2-design 仍未动——等指令**
 
 无。**当前无未完成的写入任务。**
 
-## 待人工裁定（阻塞后续开发）
+## 人工裁定（0 项待裁 · 2026-09-23 六项全部已裁）
 
-| # | 取舍 | 来源 |
+原话一条消息连裁六项：「**1 允许 · 2 可以自动流转 · 3 独立的+连接表 · 4 接受 · 5 可以 · 6 推送**」
+
+| # | 裁定 | 落点 |
 |---|---|---|
-| 1 | **是否允许用户自定义阶段模型**（允许→改代码；不允许→改产品定位表述） | `D-stage-model-coupling/CONCLUSION.md` |
-| 2 | 门禁是否改变现有自动流转行为（Agent 不得自行置终态） | `D-collaboration-layer/` |
-| 3 | `work_items` 与 `projects` 合并还是独立 | 同上 |
-| 4 | 是否接受「未知身份一律拒绝」的可用性变化 | `D-identity-and-security/` |
-| 5 | 是否接受状态外置前先补测试导致的工期延长 | `D-single-process-state/` |
-| 6 | 该仓库是否曾推送到公共远端（决定 git 历史审查紧迫度） | 同上（`D-identity-and-security/`） |
+| 1 | 「允许」 | 允许自定义阶段模型；实施按 S7 成型解（目录表+4 语义锚，已过审）——P0-6 实施 change 可开 |
+| 2 | 「可以自动流转」 | **解读待认**：现有自动流转保持、硬门不拦；done-需证据留建议层。若原意为「接受改变」说一句即纠账 |
+| 3 | 「独立的+连接表」 | work_items 独立新表 + work_item_runs 连接表，不并入 projects——P1-4 数据模型定案 |
+| 4 | 「接受」 | 「未知身份一律拒绝」定案（缺凭证=401 + debug header 三重 opt-in/PAT 缓冲）——P0-1 执行链可开 |
+| 5 | 「可以」 | 状态外置前先补测试的工期延长被接受 |
+| 6 | 「推送」 | 确认已推送且公开（与本日照查一致）——**git 历史凭据扫描+轮换评估转立即执行项**，开链等指令 |
+
+完整裁定记录：`.specs/platform-evolution/ROADMAP.md` §五·裁定。**§五清零，阻塞项解除。**
 
 ## 下一步建议（按 discovery 的硬约束顺序）
+
+0. **v9 已「好的」过审**；**v10 呈审中**（P0-10/Q24/两档收口+README·CLAUDE·CONTEXT 同步）——等过审原话与解冻词
+0b. 🧪 **交互原型 v1 全量完成**（09-23 用户令「所有模块」）：`.specs/product-design/prototype/`＝28 页全部可点（详情抽屉/破坏性二次确认/选择弹层/toast），**跨页深链**（相关页条+`data-goto`，同一 mock 宇宙 agent-7/r-128/Notion 401/wf-42），index 全量路由；5 组并行 agent 产出约 6,000 行、自检全绿
+0c. 📌 **5173 入口已接**：`frontend/public/prototype`→原型目录软链（Vite 直服 `/prototype/index.html`）+ `App.tsx` 侧栏 Logo 下「📄 文档资料 · 原型」新标签（唯一前端微改=用户明令，其余开发仍冻结·裁定⑧）
+0i. 🎯 **⑤ 门用户意见（09-23 原话「结合现有代码…在此基础上扩充 但是没有team的概念」）已补记三包**：S14/S15 定位=纯增量（复用现有 POST/表单/六关联，仅修校验/加 draft 值/入口层改造/补白名单）；S16 Team=唯一真新实体（无旧包袱）。三包仍待审⑤等过审原话。
+0g. 🔍 **platform-evolution 第 5 轮开轮并出包**（2026-09-23 用户点名）：拆 3 子议题（TOPICS 第 5 轮表已登记·全「待审⑤」）→ 三路 subagent 五步走完 ①②③④，工件齐：`D-S14-agent-creation/`（GD 3/3 同意，创建三入口一草稿+必填集收敛 2 项+生命周期 5 态，顺带查实 api_key 是"假必填"用 not_set 字面量绕过 agents_api.py:45）、`D-S15-agent-resource-model/`（2同意1有保留，资源关联字典+四型语义+FK/JSON 规则+Agent 版本快照）、`D-S16-team-entity/`（GD 通过·反对0，一词一义裁定+Team 首批五类资产+team_quota+**CONCLUSION §5 实体关系全景**）。联网：Dify/Coze/Langfuse/n8n/Zapier/K8s/AutoGen 多页一手正文到手，Salesforce/GPTs/CrewAI 参数表等已标「未联网验证」。
+0h2. 📎 **项目×关系×资源三处体现**（09-23 用户追问）：projects.html 三详情抽屉补「关联资源（现/建议）」行；projects__agentflow.html 增 9 行「关联资源」区（含判定句 Project页=装配快照）；relations.html 增「项目可关联资源 9 类正面清单」面板（能/不能/四型语义/生命周期配额归属）。主文档侧同内容待解锁词（用户前令 444 冻结）。
+0h. 🕸 **新增原型页 relations.html**（用户「项目和他们之间的关系也没体现」）：现状 10 行代码证据（Project 三单值外键·反向零引用·Agent.project_count 死字段·trace project_id=random 假数）+ 建议 Team→Project→{work_items,conversations,产物台账,project_agents} 关系树 + 9 张实体抽屉；已挂进 prototype/index 顶部。
+0f. 🧭 **原型交互三级分层完成**（09-23 用户纪律：弹窗=简短确认｜抽屉=可完全展示的只读｜详情页=复杂/可编辑+返回上级）：5 组并行重分级 28 页——**新增约 40+ 张 `<父>__<实体>.html` 详情页**（变更详情/域详情/配置编辑/降档警告/删除检查清单/绑定表单/命令预览等全部升页），父页触发器改 data-goto、无孤儿浮层；基建 data-back+detail 样式入 proto.js/base.css；全量配平与链接可达性自检通过。主文档保持 444 未动。
+0e. 🔒 **PRODUCT-DESIGN.html 冻结保护（2026-09-23 用户令「不要动，也很重要」）**：主文档=只读基线——已 `chmod 444` + 同目录快照 `PRODUCT-DESIGN.v10-frozen.html`（checkpoint 工具故障下的兜底）。此后一切原型迭代只改 `prototype/` 文件夹；主文档若要再演进，须用户明确解锁（撤 chmod）并升 v11。
+0d. ⚠ **事故记录**：rollout 期间某 agent 组把 STATE 回滚成旧快照（14:16 写回），丢失 0b/0c 段——本次重建；教训：**并行 agent 一律禁写共享台账文件**，已属硬约束（本条入 ROADMAP 纪律候补）；等：v10 过审原话 · 开发解冻词 · 个人邮箱清史裁量
 
 1. **修复 32 个 TS 错误**，恢复 `npm run build`（当前必然失败）
 2. **`git rm --cached node_modules`**（35,517 / 35,847 个跟踪文件是依赖）

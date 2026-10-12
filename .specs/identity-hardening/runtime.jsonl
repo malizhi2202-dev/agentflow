@@ -1,0 +1,3 @@
+{"ts": "2026-09-23T13:12:33", "change": "identity-hardening", "stage": "0+1", "event": "CHANGE/REQUIREMENT 落盘；需求门 4/4；下一步 2-design（紧凑：设计空间已被 AC 锁死）"}
+{"ts": "2026-09-23T13:14:40", "change": "identity-hardening", "stage": "2+3", "event": "DESIGN/TASK 落盘；设计门 4/4；7 任务 5 波"}
+{"ts": "2026-09-23T13:23:04", "change": "identity-hardening", "stage": "冻结", "event": "裁定⑦介质修订+裁定⑧开发冻结落三书；停于 3-task，零代码"}

@@ -25,7 +25,7 @@
 | 图表 | Recharts 2.15 | `frontend/package.json` |
 | 后端框架 | FastAPI 0.110+ (Python 3.10+) | `backend/main.py` |
 | ORM | SQLAlchemy 2.0 | `backend/database.py` |
-| 数据库 | SQLite（默认）/ MySQL（可选） | `backend/database.py`, `backend/storage/` |
+| 数据库 | SQLite（本地体验档）/ MySQL（真实部署权威库 · 裁定⑦：可计量追踪数据一律 MySQL） | `backend/database.py`, `backend/storage/` |
 | 缓存 | Redis 5.0（可选） | 环境变量 `REDIS_URL` |
 
 ---

@@ -7,3 +7,4 @@
 {"ts": "2026-09-22T20:17:44", "stage": "1-requirement", "event": "用户追加 E 层原话入 CHANGE；US8+AC-E1~E5 入 REQUIREMENT；需求门第 2 轮 4/4；P-product v6 落 §6.25 环境参谋原型+8 处联动，呈审中"}
 {"ts": "2026-09-22T20:29:29", "stage": "1-requirement", "event": "用户修订「只给方案不执行+配置不上传」→ AC-E4 重写·需求门第3轮4/4·CHANGE/CONTEXT 同步·文档 v7 十五处联动呈审中"}
 {"ts": "2026-09-22T20:41:06", "stage": "P-product", "event": "⑤ v7 呈审→用户原话「通过」→ 晋级已过审；P-product（含 E 层两轮追加）闭环；2-design 仍等指令"}
+{"ts": "2026-09-23T13:23:04", "change": "small-model-decisions", "stage": "2-design-中止", "event": "用户裁定⑧不进开发：2-design agent 中途叫停，DESIGN.md 未产生无残骸；链停在 1-req 过审态等解冻"}

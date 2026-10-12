@@ -379,8 +379,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
   <span class="sep">/</span>
   <h1>产品设计文档 &amp; 界面原型</h1>
   <div class="tools">
-    <span class="chip mono">v7 · 2026-09-22</span>
-    <span class="chip mono">状态: 已过审 ✅（v7，用户原话「通过」2026-09-22；本档过审链 v4「通过」·v5「好的」·v7「通过」）</span>
+    <span class="chip mono">v10 · 2026-09-23</span>
+    <span class="chip mono">状态: 呈审中（v10 = 扫描发现落表 + 存储两档收口；v9「好的」已过审；过审链 v4·v5·v7·v8·v9 均原话晋级）</span>
     <span class="chip warn">原型内所有数据均为演示假数据</span>
     <button class="btn sm" onclick="window.print()">打印 / 存 PDF</button>
   </div>
@@ -456,6 +456,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <a href="#p23" class="planned">6.23 决策模型目录 ✱</a>
     <a href="#p24" class="planned">6.24 微调工厂 ✱</a>
     <a href="#p25" class="planned">6.25 环境参谋 ✱</a>
+      <a href="#p26" class="planned">6.26 执行隔离策略 ✱</a>
+      <a href="#p27" class="planned">6.27 对外集成面 ✱</a>
     <p class="grp">附录</p>
     <a href="#s7">7 · 角色权限矩阵</a>
     <a href="#s8">8 · 术语表</a>
@@ -581,7 +583,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr class="grp-row"><td colspan="4">可观测与治理</td></tr>
         <tr><td>观测</td><td>运行时监控</td><td>会话列表 + 状态过滤；SSE 实时推送；P50/P95/P99 延迟；Token 统计</td><td>§6.10</td></tr>
         <tr><td>观测</td><td>告警中心</td><td>三类告警：Token 超限 / Agent 死亡 / 执行失败；30s 巡检；确认与静默</td><td>§6.11</td></tr>
-        <tr><td>观测</td><td>监控仪表盘</td><td>实体级 Token 消耗与调用次数；跨 Agent 调用链追踪</td><td>§6.12</td></tr>
+        <tr><td>观测</td><td>监控仪表盘</td><td>实体级 Token 消耗与调用次数；跨 Agent 调用链追踪（表与读 API 在、<b>产生端待补</b>·09-23 实测 0 行）</td><td>§6.12</td></tr>
         <tr><td>治理</td><td>RBAC</td><td>6 个权限点；admin 全放行；普通用户按显式分配；项目级可见性过滤</td><td>§6.16</td></tr>
         <tr><td>治理</td><td>审计</td><td>全量操作留痕；轮转归档（1 万行阈值 / 保留 5 份）</td><td>§6.15</td></tr>
         <tr><td>治理</td><td>审批闸门</td><td>人工审批节点；高风险动作落盘前人工把关</td><td>§6.17</td></tr>
@@ -644,7 +646,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td><b>渐进扩容 / 配额 / 抢占</b></td><td class="c dot-eye">○ 分批拉起</td><td class="c dot-no">—</td><td class="c dot-yes">● 10x 密度</td><td class="c dot-eye">○ WarmPool</td><td class="c dot-no">—</td></tr>
         <tr><td><b>动作级审计 + 审批留痕</b></td><td class="c dot-yes">● 6 权限点</td><td class="c dot-eye">○ 仅 prompt/reply</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-yes">●</td></tr>
         <tr><td><b>工作流知识产物监控</b></td><td class="c dot-yes">● 独有</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td></tr>
-        <tr><td><b>零外部依赖可跑</b></td><td class="c dot-yes">● SQLite</td><td class="c dot-no">— K8s+PG</td><td class="c dot-no">— K8s</td><td class="c dot-no">— K8s</td><td class="c dot-eye">○ Docker/Helm</td></tr>
+        <tr><td><b>零外部依赖可跑</b></td><td class="c dot-yes">● SQLite<br><span class="tiny dim">实运档 MySQL 权威库（裁定⑦）</span></td><td class="c dot-no">— K8s+PG</td><td class="c dot-no">— K8s</td><td class="c dot-no">— K8s</td><td class="c dot-eye">○ Docker/Helm</td></tr>
         <tr><td><b>沙箱执行隔离</b></td><td class="c dot-no">— 进程内</td><td class="c dot-eye">○ 非沙箱产品</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-yes">● 用户机器</td></tr>
         <tr><td><b>可观测（OTel/Prometheus）</b></td><td class="c dot-no">— 自建</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-no">—</td><td class="c dot-yes">●</td></tr>
         <tr><td><b>A2A 委派协议</b></td><td class="c dot-no">—</td><td class="c dot-yes">● 一等公民</td><td class="c dot-eye">○</td><td class="c dot-no">—</td><td class="c dot-eye">○</td></tr>
@@ -662,11 +664,11 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       </div>
       <div class="callout warn">
         <p><b>必须承认的差距（同样有据）：</b></p>
-        <p>① <b>没有沙箱</b>——Agent 在平台进程内执行，竞品普遍 gVisor/microVM。这是安全与多租户的硬伤。<br>
-        ② <b>没有声明式 API 面</b>——有 YAML apply，但没有 CRD 那样的稳定契约与 watch 语义。<br>
-        ③ <b>没有可观测标准</b>——自建 SQLite 指标，无 OTel/Prometheus，无法接入既有可观测栈。<br>
-        ④ <b>没有 A2A</b>——协议层已收敛（A2A v1.0.1 赢家通吃，ACP 已归档），缺席意味着无法被别人的 Agent 调用。<br>
-        ⑤ <b>没有协作层</b>——无工作项、负责人、收件箱；Multica 的整个产品都建在这一层上。</p>
+        <p>① <b>没有沙箱</b>——Agent 在平台进程内执行，竞品普遍 gVisor/microVM。这是安全与多租户的硬伤。<br>　<span class="tiny dim"><b>〔09-23 第 4 轮补查〕</b>现状校准：当前执行面=同进程 LLM 调用（<span class="mono">chat_service.py:105</span>），<b>尚无任意代码执行面</b>——隔离债在工具执行面打开之日到期。阶梯 T2 容器→T3 gVisor（systrap <b>无需 KVM</b>）→T4 microVM（需 /dev/kvm；12ms/≤125ms/≤5MiB CI 规格）→T5 仅外接；Daytona OSS 停更出局。见 p26·建议条 P1-14。</span><br>
+        ② <b>没有声明式 API 面</b>——有 YAML apply，但没有 CRD 那样的稳定契约与 watch 语义。<br>　<span class="tiny dim"><b>〔09-23〕</b>两脸事实：workflow.json PUT=整包盲覆盖；编排面已有 apply/validate 雏形——契约化是<b>在半成品上加规格</b>：ETag/If-Match→412 + apiVersion 形体 + conditions/observedGeneration + change_log 同事务账本 + /api/watch SSE（恢复走应用层 cursor——MCP 07-28 撤传输层续传是先例）。见 p27。</span><br>
+        ③ <b>没有可观测标准</b>——自建 SQLite 指标，无 OTel/Prometheus，无法接入既有可观测栈。<br>　<span class="tiny dim"><b>〔09-23〕</b>更一级病实测：<span class="mono">trace_spans</span>/<span class="mono">metrics_raw</span> <b>零行零写入</b>（只有表结构和读 API）。顺序：先修产生端→A 档 /metrics 直读（~0.5d）→B 档 OTLP 可选（GenAI 语义全 Development，不冻契约）→C 档版本化延后；token 口径统一 <span class="mono">session_metrics</span>。</span><br>
+        ④ <b>没有 A2A</b>——协议层已收敛（A2A v1.0.1 赢家通吃，ACP 已归档），缺席意味着无法被别人的 Agent 调用。<br>　<span class="tiny dim"><b>〔09-23〕</b>措辞校准为「<b>收敛 + registry 留白</b>」：v1.0.1（2026-05-28）为最新发布版、ACP 并入 A2A（archived:true+官方横幅一手）、partners ~150——但官方明文不规定 curated registry，「无法被发现」比「无法被调用」更准，目录治理留白是我们地盘。建议停 M0 静态卡（~1 人日），M1-lite 以 P0-1 为硬闸。见 p4 页签·p27·Q21。</span><br>
+        ⑤ <b>没有协作层</b>——无工作项、负责人、收件箱；Multica 的整个产品都建在这一层上。<br>　<span class="tiny dim"><b>〔09-23〕</b>schema 钉死：缺口=「<b>两组表 + 一次并表</b>」——26 表无 work_items/inbox，owner_id 无双轨语义，<b>alerts 实为进程内环形 500 条重启即丢</b>（自家反面教材），双 queue 表并存。施工序：告警落表→并 queue→work_item 单表（status×triage/assignee 双轨/done 证据）→收件箱三规则。见 p20-22 注记·P1-16。</span></p>
       </div>
     </div>
 
@@ -674,9 +676,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <table class="tbl">
       <thead><tr><th>风险</th><th>事实依据</th><th>后果</th></tr></thead>
       <tbody>
-        <tr><td><b>身份是客户端自述的</b></td><td>认证中间件从 <span class="mono">X-User-Id</span> 请求头取身份，未传则<b>默认 admin</b>（<span class="mono">backend/main.py</span> 认证中间件）</td><td>任何能发请求的进程都可冒充任意用户</td></tr>
-        <tr><td><b>localhost 闸门在反代后失效</b></td><td>唯一的缓解是「来源 IP 必须是 127.0.0.1」，且<b>无 <span class="mono">X-Forwarded-For</span> / 可信代理处理</b></td><td>一旦前置同机反向代理，闸门对所有外部请求放行，叠加身份自述 → <b>可提权为 admin</b></td></tr>
-        <tr><td><b>口令与默认值</b></td><td>口令为<b>无盐 SHA-256</b>；默认口令硬编码 <span class="mono">123456</span>，且存在「缺失 password_hash 就重置为 123456」的自愈分支</td><td>弱口令 + 快速哈希，离线爆破成本极低</td></tr>
+        <tr><td><b>身份是客户端自述的</b></td><td>认证中间件从 <span class="mono">X-User-Id</span> 请求头取身份，未传则<b>默认 admin</b>（<span class="mono">backend/main.py</span> 认证中间件）</td><td>任何能发请求的进程都可冒充任意用户。<b>09-23 实测加重：共三层兜底</b>（中间件缺省 admin / get_current_user+凭空 <span class="mono">_default_admin()</span> / 6 路由 <span class="mono">_user()</span> 字面量字典）；「登录」非凭证交换——前端 localStorage 注头属 UX 层非安全层；users.json 在 git 与 SQLite 之外；中间件不校验 active</td></tr>
+        <tr><td><b>localhost 闸门在反代后失效</b></td><td>唯一的缓解是「来源 IP 必须是 127.0.0.1」，且<b>无 <span class="mono">X-Forwarded-For</span> / 可信代理处理</b></td><td>一旦前置同机反向代理，闸门对所有外部请求放行，叠加身份自述 → <b>可提权为 admin</b>。09-23 补：闸门无豁免（<span class="mono">/api/health</span> 也 403）；CORS 中间件实际最内层，403 不带 CORS 头；README 教 <span class="mono">--host 0.0.0.0</span> 直接落进危险组合</td></tr>
+        <tr><td><b>口令与默认值</b></td><td>口令为<b>无盐 SHA-256</b>；默认口令硬编码 <span class="mono">123456</span>，且存在「缺失 password_hash 就重置为 123456」的自愈分支</td><td>弱口令 + 快速哈希，离线爆破成本极低。09-23 补：登录无节流、404/401 差异可枚举、<span class="mono">/api/auth/list</span> 公开全用户、verify 非常数时间；前端建号预填与登录页文案都露 123456</td></tr>
       </tbody>
     </table>
     <p class="small muted">上表只陈述代码事实与部署条件，<b>不代表当前默认部署（localhost 单机）已被攻破</b>。列在此处是因为「不做公网暴露」这条边界（§1.4）一旦被绕过，代价是 admin 权限。</p>
@@ -688,15 +690,16 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <table class="tbl">
       <thead><tr><th>#</th><th>改进项</th><th>依据</th><th>难度</th></tr></thead>
       <tbody>
-        <tr><td>P0-1</td><td><b>身份改为服务端签发</b>：登录发会话令牌（HttpOnly Cookie 或 Bearer），中间件从令牌解析身份；<span class="mono">X-User-Id</span> 仅作调试开关且默认关闭；未认证一律 401，<b>不再回退 admin</b></td><td>1.5.3 风险①②</td><td>中</td></tr>
-        <tr><td>P0-2</td><td><b>口令改自适应哈希</b>（argon2/bcrypt）+ 移除硬编码默认口令与「重置为 123456」分支 + 首次登录强制改密</td><td>1.5.3 风险③</td><td>低</td></tr>
-        <tr><td>P0-3</td><td><b>可信代理处理</b>：显式配置可信代理来源，或改用显式部署模式开关（<span class="mono">DEPLOY_MODE=localhost|behind-proxy</span>）决定是否启用 localhost 闸门</td><td>1.5.3 风险②</td><td>低</td></tr>
+        <tr><td>P0-1</td><td><b>身份改服务端凭证交换</b>（第 4 轮参数化<span class="chip ok">已过审</span>）：login→<span class="mono">secrets.token_urlsafe(32)</span>→sessions 表（<b>MySQL · 裁定⑦</b>）只存哈希→<span class="mono">__Host-session</span> HttpOnly/Lax cookie（内网 http 退化命名+部署卡红条）；解析序 cookie &gt; Bearer PAT &gt; 无→401；<b>三层兜底一次清 + 同步校验 active</b>；X-User-Id 降三重显式 opt-in（env+localhost 模式+admit 白名单，开启=启动红条+逐请求审计）；cron 回环改直调 service；idle 30min/absolute 8h、<b>权限变更必须旋转会话</b>（OWASP）；旧测试断言反转为 401</td><td>1.5.3 风险①②；<span class="mono">D-identity-and-security-2</span>（09-23 双路 file:line 互证 + Jupyter/Gitea/OWASP 先例）</td><td>中（≈2d）</td></tr>
+        <tr><td>P0-2</td><td><b>口令 argon2id + 废出厂口令 + 删自愈分支</b>（第 4 轮参数化<span class="chip ok">已过审</span>）：<span class="mono">argon2-cffi PasswordHasher()</span>（默认 64MiB/t3/p4 高于 OWASP 最低档）+常数时间 verify+登录时 <span class="mono">check_needs_rehash</span> 静默升级；「缺 password_hash→重置 123456」分支删除→置 must_change_password+拒口令登录+审计；首启 Jupyter/Gitea 式引导（env 或随机口令仅打启动日志）；存量 sha256 混存登录时渐进迁移+幂等脚本（users.json 非 DB——<b>裁定⑦：迁 MySQL users 表、users.json 退役</b>；口令迁移与 sessions 建表两套账分开）；配套：节流 5 败/15min→429、401 泛化、list 加权限、前端 123456 痕迹全清+首登强制改密弹窗（p1）</td><td>1.5.3 风险③；OWASP Password Storage/AuthN CS；Gitea --must-change-password 默认 true</td><td>中（≈1.5d）</td></tr>
+        <tr><td>P0-3</td><td><b>部署模式与可信代理显式化</b>（第 4 轮参数化<span class="chip ok">已过审</span>）：<span class="mono">DEPLOY_MODE=localhost|lan|behind-proxy</span>；behind-proxy 强制 <span class="mono">proxy_headers + TRUSTED_PROXY_IPS</span>（默认窄）+TrustedHost；<b>未配可信代理即忽略 XFF</b>；「*」且无 TLS→拒绝启动；/api/health 闸门豁免；CORS 提最外层；p16 部署安全卡只读呈现生效值</td><td>1.5.3 风险②；uvicorn settings（forwarded_allow_ips 默认 127.0.0.1,::1）/ Gitea 反代文档</td><td>低（≈0.5d）</td></tr>
         <tr><td>P0-4</td><td><b>修复前端类型错误</b>：当前 <span class="mono">npm run build</span>（<span class="mono">tsc &amp;&amp; vite build</span>）因 <b>32 个 TS 错误</b>必然失败，等于项目<b>没有可用的生产构建</b></td><td>实测 <span class="mono">npx tsc --noEmit</span> = 32 errors</td><td>低</td></tr>
         <tr><td>P0-5</td><td><b>仓库卫生</b>：<span class="mono">node_modules</span> 已被 git 跟踪（35,847 个跟踪文件中 <b>35,517 个</b>是它，真实代码仅 273 个），且 Vite 缓存会被 dev server 改动而污染 <span class="mono">git status</span>；需 <span class="mono">git rm -r --cached</span> 清理并补全 <span class="mono">.gitignore</span></td><td><span class="mono">git ls-files | grep -c node_modules</span></td><td>低</td></tr>
-        <tr><td>P0-6</td><td><b>阶段模型收敛为单一事实源</b>：9 个阶段与产物文件名目前硬编码在 <b>13 个文件</b>（后端 <span class="mono">scanner.py</span> / <span class="mono">runtime/scanner.py</span> / <span class="mono">runtime/adapter.py</span> / <span class="mono">routes/{admin_api,search,change_detail}.py</span>；前端 <span class="mono">ArtifactTab/SearchBar/WorkflowTab/Home/Runtime/SpecsEditor</span>）。<b>这既是 R15 五层漂移的温床，也是「通用平台」定位下残留的流程绑定</b></td><td>全仓 <span class="mono">grep -l "0-change"</span> = 13 文件</td><td>中</td></tr>
+        <tr><td>P0-6</td><td><b>阶段模型收敛为单一事实源</b>：9 个阶段与产物文件名目前硬编码在 <b>13 个文件</b>（后端 <span class="mono">scanner.py</span> / <span class="mono">runtime/scanner.py</span> / <span class="mono">runtime/adapter.py</span> / <span class="mono">routes/{admin_api,search,change_detail}.py</span>；前端 <span class="mono">ArtifactTab/SearchBar/WorkflowTab/Home/Runtime/SpecsEditor</span>）。<b>这既是 R15 五层漂移的温床，也是「通用平台」定位下残留的流程绑定</b></td><td>全仓 <span class="mono">grep -l "0-change"</span> = 13 文件（09-23 双口径注：阶段字面量口径后端实测 6 文件；「13」为 0-change grep 命中口径，前端待重盘点后再引用）</td><td>中</td></tr>
         <tr><td>P0-7</td><td><b>消除 scanner 双份实现</b>：<span class="mono">scanner.py</span>(300 行) 与 <span class="mono">runtime/scanner.py</span>(274 行) 各自维护一套阶段表</td><td>两份文件的 <span class="mono">STAGE_FILES</span>/<span class="mono">STAGE_NAMES</span> 重复定义</td><td>低</td></tr>
         <tr><td>P0-8</td><td><b>引入迁移框架</b>：当前是 <span class="mono">database.py</span> 里 3 条内联 <span class="mono">ALTER TABLE</span> 的临时迁移，无版本账本、无回滚、无并发索引支持。可参照 Multica 的 <span class="mono">schema_migrations</span> + <span class="mono">NOT VALID</span> 约束 + fix-forward 纪律</td><td><span class="mono">backend/database.py</span>；Multica <span class="mono">docs/issue-status-lifecycle-rollout.md</span></td><td>中</td></tr>
         <tr><td>P0-9</td><td><b>声明「单进程」这个事实边界</b>：调度队列（<span class="mono">scheduler_service._queue</span> / <span class="mono">_task_labels</span>）、控制面限流（<span class="mono">control_plane_api._rate_limit_store</span>）、调和退避（<span class="mono">reconcile_loop._backoff_state</span>）<b>三处全是模块级/实例级内存状态</b>。这意味着「自动路由 / 渐进扩容 / 自愈」在多进程或多副本下<b>各自为政</b>。必须先在文档与界面上写明，再谈状态外置（见 P1-7）</td><td>三处代码位置已逐条核实；KEDA 官方亦承认缩容无法选择终止哪个副本</td><td>低（写明）</td></tr>
+        <tr><td>P0-10 <span class="chip warn">呈审中 · 09-23 扫描新增</span></td><td><b>密钥派生与仓库防护三件</b>（凭据扫描转出，非泄露类）：①<span class="mono">encryption_service.py:12</span> 短密钥 <span class="mono">ljust(32,'0')</span> 零填充<b>无 KDF</b>——弱/短 key 用户的渠道凭据密文可被暴力还原；修=改 scrypt/PBKDF2 派生 + 存量密文重加密策略（建议并入 identity-hardening 追加 AC）；②GitHub 开 Secret Scanning + push protection（你侧一分钟）；③提交元数据含个人邮箱——公开仓库可见，历史改写与否由你裁</td><td><span class="mono">.specs/credential-scan/SCAN-REPORT.md</span>（56 rev 全扫非抽样）</td><td>低（①中）</td></tr>
       </tbody>
     </table>
 
@@ -707,7 +710,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>P1-1</td><td><b>把「动作级审计」做成对外可验证的卖点</b>：统一 <span class="mono">audit.jsonl</span> 与 <span class="mono">audit_service</span> 两条写入路径；补齐「授权了什么 / 以谁权限 / 谁批准 / 执行证据」四要素；解决 1 万行轮转只留 5 份导致<b>历史不可查</b>的问题（改为可配置 + 可外送）</td><td>1.5.2 护城河①；Endor Labs 三层架构清单</td><td>中</td></tr>
         <tr><td>P1-2</td><td><b>把队列/路由升级为「可声明」</b>：现在优先级、并发上限靠实例字段与运行时状态，应引入 Kueue/Volcano 式的<b>配额与准入</b>（层级队列、<span class="mono">guarantee</span>/<span class="mono">deserved</span>/<span class="mono">capability</span>、公平共享、抢占、gang 语义）</td><td>1.5.2 护城河②；Kueue 2,993★ / Volcano 5,972★ 的成熟原语</td><td>高</td></tr>
         <tr><td>P1-3</td><td><b>知识产物监控升级为「可配置流程模型」</b>：把阶段/产物/门禁从代码搬到配置（复用已有的 <span class="mono">/api/admin/workflow</span> 与 <span class="mono">workflow.json</span>，让 <span class="mono">scanner</span> 与前端都从它读），使「不绑定任何开发流程」从口号变成事实</td><td>1.6.1 P0-6；§1.4「不绑定任何开发流程」</td><td>中</td></tr>
-        <tr><td>P1-4</td><td><b>补齐协作层最小集</b>：工作项（含「负责人可以是人或 Agent」）+ 状态生命周期 + 收件箱（只在需人拍板时通知）。可借鉴 Multica 的四类状态（<span class="mono">unstarted/started/done/closed</span>）与「<b>状态标签不授予行为</b>」「进入状态≠启动 Agent」两条硬规矩</td><td>1.5.2 差距⑤；Multica <span class="mono">docs/issue-status-lifecycle-rollout.md</span></td><td>高</td></tr>
+        <tr><td>P1-4</td><td><b>补齐协作层最小集</b>：工作项（含「负责人可以是人或 Agent」）+ 状态生命周期 + 收件箱（只在需人拍板时通知）。可借鉴 Multica 的四类状态（<span class="mono">unstarted/started/done/closed</span>）与「<b>状态标签不授予行为</b>」「进入状态≠启动 Agent」两条硬规矩。<b>09-23 schema 钉死（已过审 09-23）：缺口=两组表+一次并表；施工序=告警落表→并 queue→work_item 单表（status×triage 正交 · assignee 人/Agent 双轨 · done 附证据）→收件箱三规则；multica/amux 模式均轮 2/3 已审，不重查</b></td><td>1.5.2 差距⑤；Multica <span class="mono">docs/issue-status-lifecycle-rollout.md</span></td><td>高</td></tr>
         <tr><td>P1-5</td><td><b>执行日志做到可回放</b>：每次工具调用 / 命令 / 报错带时间戳、可完整重放；当前有 <span class="mono">trace_spans</span> 但无按工作项的完整回放视图</td><td>Multica「执行日志 → 可以完整回放」</td><td>中</td></tr>
         <tr><td>P1-6</td><td><b>成本归属</b>：把已采集的 token 用量做成组织/用户/会话三级预算与归因</td><td>OpenHands Enterprise 控制面四能力之一（Cost attribution）</td><td>中</td></tr>
         <tr><td>P1-7</td><td><b>调度状态外置 + 租约/心跳</b>（P0-9 的正解）：把队列、标签映射、退避、限流从进程内存搬到数据库，并引入任务租约与心跳，使多副本成为可能。这是所有「K8s 式」主张的<b>地基</b></td><td>Agno 的 <span class="mono">lock_grace_seconds</span> + 心跳；DBOS「无独立编排服务、每步一次写」</td><td>中</td></tr>
@@ -715,21 +718,24 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>P1-9</td><td><b>背压改为「等待而非失败」</b>：满载时排队等待而不是直接报错。<b>成本极低、体验差别极大</b>，是本次调研中性价比最高的一条</td><td>Amp 官方量化：「burst of 20 metered orbs… one new orb every five minutes… <b>wait instead of failing</b>」</td><td>低</td></tr>
         <tr><td>P1-10</td><td><b>commit → 会话可追溯</b>：在 Agent 产生的提交里写入会话标识（如 trailer），使任何一行代码都能追回是哪次 Agent 运行写的</td><td>Amp 的 <span class="mono">Amp-Thread-ID:</span> trailer；GitHub Copilot 每条 agent commit 带 session log 链接</td><td>低</td></tr>
         <tr><td>P1-11</td><td><b>把「隔离边界与未竟语义」写进文档</b>：明确声明哪些不是安全边界、哪些语义尚未实现。业界已把它当作产品成熟度标志；<b>2026-09-22 同型先例：multica 明写「无 OS 沙箱是产品决定」并以三条真边界自证（独立 workdir / 运行级 HOME / 短时效票）——无沙箱可以是一个说清的决定，但不能是一个没人说清的默认状态；其不可信附件预览把边界下沉到渲染端（iframe sandbox），与运行时不沙箱并不矛盾</b></td><td>OpenHands「<b>A separate conversation is not a security boundary</b>」；Roomote「不要用 Docker 沙箱做多租户隔离边界」；Pydantic AI 的 "What isn't here"</td><td>低</td></tr>
-        <tr><td>P1-12</td><td><b>人批门禁预留 A2A HITL 语义映射</b>：审批/暂停状态按「input-required 挂起 → 人类回复<b>延续同一 task</b>（不重建上下文）」的扩展语义设计状态机接口，两形态对齐 tool approval / ask user。<b>只留映射不承诺协议实现</b>（A2A v1.1 的 Elicitation/多轮 HITL #2149/#2143 仍在途，是移动靶）</td><td>kagent HITL 已升格为 A2A 扩展（kagent.dev/extensions/hitl/v1，2026-09-22 核实）；A2A roadmap 09-15 版</td><td>中</td></tr>
+        <tr><td>P1-12</td><td><b>人批门禁预留 A2A HITL 语义映射</b>：审批/暂停状态按「input-required 挂起 → 人类回复<b>延续同一 task</b>（不重建上下文）」的扩展语义设计状态机接口，两形态对齐 tool approval / ask user。<b>只留映射不承诺协议实现</b>——第 4 轮补查<b>强化而非动摇</b>该纪律（已过审 09-23）：#2149 Elicitation 已于 09-22 以 draft 未合并关闭，且正文明确<b>不改 TaskState</b>；a2a-python <span class="mono">AgentExecutor</span> 契约已把「发 INPUT_REQUIRED→return 让出→同 task 续跑」写实——映射从设计自洽升格为<b>官方契约同构</b></td><td>⚠ 引用修正：kagent.dev/extensions/hitl/v1 是扩展标识符非 URL（页面 404），规范正文=kagent 仓库 docs/architecture/human-in-the-loop.md；a2a-python AgentExecutor docstring（09-23 直读）</td><td>中</td></tr>
         <tr><td>P1-13</td><td><b>成本与授权归因到人</b>：每次运行双列记账——originator（只用于鉴权）与 accountable（只用于审计/成本）分离 + 多级归属瀑布 + <b>域策略级 fail-closed 开关</b>（解析不到精确责任人直接拒跑，而非降级记在 owner 头上）</td><td>multica <span class="mono">attribution_fail_closed</span> + 8 级 <span class="mono">originator_source</span>（models.go:1607；「no enqueue path may exist without a declared attribution」）</td><td>中</td></tr>
+        <tr><td>P1-14 <span class="chip ok">已过审</span></td><td><b>执行隔离契约先行</b>（第 4 轮 S8）：立 execution spec——tier(inproc|container|gvisor|microvm|remote) + ttl/<span class="mono">shutdownPolicy(Delete|Retain)</span>（Retain=留产物清现场，与知识产物一等公民同构）+ <span class="mono">operatingMode(Running|Suspended)</span> + egress 默认拒；fail-closed：选档探测失败=拒绝执行，界面/审计/API 三处显式 <span class="mono">isolation:none</span>；凭证（run-scoped 短票）与档位正交</td><td>agent-sandbox v1beta1 契约语义（09-23 直读）；multica 三边界+「说清不藏」先例；p26</td><td>中（契约文档级先行）</td></tr>
+        <tr><td>P1-15 <span class="chip ok">已过审</span></td><td><b>A2A M0 静态 AgentCard</b>（第 4 轮 S11）：<span class="mono">/.well-known/agent-card.json</span>（必填 8 项、protocolVersion="1.0"、capabilities 全 false、只含 public 可见域、敏感卡 MUST 走鉴权扩展卡）；M1-lite（SendMessage+GetTask+INPUT_REQUIRED 续跑，映射层自证不引 SDK）硬前置=<b>P0-1 落地+单副本承诺书面化</b>；M2（streaming/push）明确冻结</td><td>A2A spec/SDK 一手（09-23）；纪律句见 §1.6.5 ⑬；Q21·p27</td><td>低（M0 ≈1 人日）</td></tr>
+        <tr><td>P1-16 <span class="chip ok">已过审</span></td><td><b>协作层止血两件</b>（第 4 轮 S12）：①<b>告警落表</b>——现状 alert_service 进程内环形 500 条<b>重启即丢</b>，告警中心界面消费的是易失数据（告警=可计量数据，裁定⑦同向：直接落 MySQL 告警表）；②<b>scheduling_queue 与 scheduler_queue 双表并表</b>——工作项层任何设计的前置清障</td><td>R4-CODEAUDIT 议题5（file:line 实测）；「有界面没表」与 multica「有表没界面」同罪（§1.6.5 ⑨ 自家反面）</td><td>低</td></tr>
       </tbody>
     </table>
 
     <h4 class="h4">1.6.3 P2 · 跟随赛道（不做会被甩开）</h4>
-    <p class="small"><b>2026-09-22 校准：</b>agent-sandbox 已 v1.0.0 GA（08-28），kagent 运行时重建到 Agent Substrate（gVisor/microVM 默认沙箱），google/ax v0.3.0 网络围栏，K8s 阵营「隔离执行」已成立标配且互相打通——<b>本节跟随项紧迫度整体上调，执行隔离居首</b>。</p>
+    <p class="small"><b>2026-09-23 第 4 轮刷新：</b>agent-sandbox v1.0.0 GA 属实（08-28）但 <b>API 仍 v1beta1</b>；gVisor systrap <b>无需 KVM</b>=单机阶梯关键档；Firecracker 12ms/≤125ms/≤5MiB CI 强制规格（需 /dev/kvm+jailer 自研成本）；Daytona OSS 停更出局；multica 三边界一手出处钉死（security-model.mdx:12-57）。紧迫度校准：<b>契约先行、随执行面成熟逐档开放</b>（当前无任意代码执行面——见 p26 与 P1-14）。</p>
     <table class="tbl">
       <thead><tr><th>#</th><th>改进项</th><th>依据</th><th>难度</th></tr></thead>
       <tbody>
-        <tr><td>P2-1</td><td><b>接入 A2A</b>：A2A 已 v1.0.1 赢家通吃（ACP 于 2025-08-29 并入后归档），25,874★。缺席意味着 AgentFlow 里的 Agent 无法被外部 Agent 委派</td><td>1.5.2 差距④</td><td>中</td></tr>
+        <tr><td>P2-1</td><td><b>接入 A2A</b>：A2A 已 v1.0.1 且 ACP 并入（09-23 校准：措辞应为「收敛+registry 留白」——官方明文不规定 curated registry；建议停 M0 静态卡，见 P1-15·Q21）（ACP 于 2025-08-29 并入后归档），25,874★。缺席意味着 AgentFlow 里的 Agent 无法被外部 Agent 委派</td><td>1.5.2 差距④</td><td>中</td></tr>
         <tr><td>P2-2</td><td><b>MCP 对齐到 2026-07-28 规范</b>：该版本是<b>破坏性无状态化重构</b>（移除 session / initialize / GET 流 / Last-Event-ID）。若按 2025 版设计会直接不兼容</td><td>MCP 规范 2026-07-28</td><td>中</td></tr>
-        <tr><td>P2-3</td><td><b>沙箱执行隔离</b>：进程内执行是最大架构差距。业界路线<b>尚未统一</b>（Firecracker / Cloud Hypervisor / libkrun / gVisor / Kata 分裂），可先支持 RuntimeClass 式抽象，把隔离委托出去</td><td>1.5.2 差距①；agent-sandbox 的「只编排不放隔离」定位</td><td>高</td></tr>
-        <tr><td>P2-4</td><td><b>可观测标准化</b>：输出 OTel trace + Prometheus 指标，替代自建 SQLite 指标，接入既有可观测栈</td><td>1.5.2 差距③</td><td>中</td></tr>
-        <tr><td>P2-5</td><td><b>声明式 API 面</b>：给 YAML 契约加版本与 watch 语义（<span class="mono">apiVersion: ai-platform/v1</span> 已有雏形），使其可作为稳定接口被外部编排</td><td>1.5.2 差距②；kagent 的 <span class="mono">kagent.dev/v1alpha3</span></td><td>高</td></tr>
+        <tr><td>P2-3</td><td><b>沙箱执行隔离</b><span class="chip warn">第 4 轮阶梯 · 见 p26</span>：进程内执行是最大架构差距。业界路线<b>尚未统一</b>（Firecracker / Cloud Hypervisor / libkrun / gVisor / Kata 分裂），可先支持 RuntimeClass 式抽象，把隔离委托出去</td><td>1.5.2 差距①；agent-sandbox 的「只编排不放隔离」定位</td><td>高</td></tr>
+        <tr><td>P2-4</td><td><b>可观测标准化（三档<span class="chip ok">已过审</span>）</b>：<b>前置=先修产生端</b>——trace_spans/metrics_raw 实测零写入，补 INSERT+父子链列（expand-only ALTER）；A 档 <span class="mono">/metrics</span> 只读直读现表（MySQL 权威库 · 裁定⑦；instrumentator+env 门，~0.5d）；B 档 OTLP 可选（<span class="mono">gen_ai.*</span> 语义；全 Development 期不冻契约、agentflow.* 兜底；合成 trace_id 需书面声明非 W3C 原生）；C 档契约版本化延后至 semconv 晋级；token/成本口径统一切 session_metrics 拆分列</td><td>1.5.2 差距③；OTel GenAI semconv 拆仓一手（09-23）；R4-CODEAUDIT 议题3</td><td>低→中（按档）</td></tr>
+        <tr><td>P2-5</td><td><b>声明式 API 面（四件组<span class="chip ok">已过审</span>）</b>：①ETag/If-Match→412（治 workflow.json「PUT 盲覆盖」，第一批）②apiVersion/kind 入文档体 + K8s 弃用政策四则移植（<b>语义稳定，不承诺 K8s 兼容</b>）③generation/conditions 表（observedGeneration 区分「没处理」vs「处理了结果未变」）④change_log 全局单账本同事务写 + /api/watch SSE 应用层 cursor 恢复（cursor 过期→event:resync＝410 等价；明示不跟 MCP 已撤的 Last-Event-ID 路线）</td><td>1.5.2 差距②；⚠ kagent 实为 <span class="mono">v1alpha2</span>（09-23 修正 v1alpha3 之误）；RFC7232/AUTO_INCREMENT 缺口语义一手（MySQL 重启取 MAX+1 同有洞，cursor&gt;+resync 纪律两库通用）</td><td>高（分四步）</td></tr>
         <tr><td>P2-6</td><td><b>渐进发布与回滚</b>：Knative 式不可变 Revision + 流量切分；当前编排有 <span class="mono">topology_snapshots</span> / <span class="mono">workflow_snapshots</span>，可升级为可回滚的发布单元</td><td>Knative Serving 6,096★</td><td>中</td></tr>
         <tr><td>P2-7</td><td><b>工程化交付</b>：无 CI、无 Dockerfile / Helm、无 Makefile、无 LICENSE。<b>没有任何一条自动化质量门</b></td><td>仓库根目录实测均缺失</td><td>低</td></tr>
       </tbody>
@@ -747,7 +753,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       </tbody>
     </table>
 
-    <h4 class="h4">1.6.5 八条可直接照搬的工程纪律（来自竞品的一手教训，2026-09-22 由 2 条扩至 8 条）</h4>
+    <h4 class="h4">1.6.5 十三条可直接照搬的工程纪律（来自竞品与自家实测的一手教训；09-22 由 2 条扩至 8 条，09-23 第 4 轮扩至 13 条）</h4>
     <table class="tbl">
       <thead><tr><th>纪律</th><th>反面教材 / 正面示范</th><th>对 AgentFlow 的含义</th></tr></thead>
       <tbody>
@@ -1082,7 +1088,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <div class="grid g2" style="gap:var(--s2)">
           <div class="layer">
             <h5>存储</h5>
-            <div class="row"><span class="pill">SQLite（默认，26 张表）</span><span class="pill">MySQL（可选）</span><span class="pill">Redis（可选，缺失自动跳过）</span></div>
+            <div class="row"><span class="pill">SQLite（本地默认，26 张表）</span><span class="pill">MySQL（<b>可计量数据权威库 · 裁定⑦</b>）</span><span class="pill">Redis（可选，缺失自动跳过）</span></div>
           </div>
           <div class="layer">
             <h5>文件系统</h5>
@@ -1092,7 +1098,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       </div>
     </div>
     <div class="callout warn">
-      <p><b>两个跨项目共享点：</b><span class="mono">users.json</span> 与 <span class="mono">audit.jsonl</span> 存在<strong>项目扫描根目录</strong>（<span class="mono">PROJECT_ROOT</span> 的父目录），不随项目切换而改变——这保证账号与审计跨项目连续。</p>
+      <p><b>两个跨项目共享点：</b><span class="mono">users.json</span> 与 <span class="mono">audit.jsonl</span> 存在<strong>项目扫描根目录</strong>（<span class="mono">PROJECT_ROOT</span> 的父目录），不随项目切换而改变——这保证账号与审计跨项目连续。<b>〔09-23 裁定⑦〕</b>此形态为待修项：账号与审计属可计量追踪数据，目标态一律落 MySQL（users / audit 表），文件存储退役——身份三连里「users.json 在 git 与数据库之外」这条账，正由表化一并清偿。</p>
     </div>
 
     <h3 id="s3-2">3.2 组件职责</h3>
@@ -1144,7 +1150,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>指标</td><td class="mono">metrics_raw · <span class="mono">session_metrics</span> · <span class="mono">trace_spans</span></td><td>原始指标 / 会话级 Token 与时长 / 跨 Agent 调用链</td></tr>
         <tr><td>审批</td><td class="mono">human_approvals</td><td>待办审批请求与决策记录</td></tr>
         <tr><td>项目</td><td class="mono">projects</td><td>项目元数据、需求输入、绑定关系</td></tr>
-        <tr><td>用户 / 审计</td><td class="mono">users.json · <span class="mono">audit.jsonl</span></td><td><strong>非数据库</strong>：文件存储，跨项目共享（原子写 + 文件锁）</td></tr>
+        <tr><td>用户 / 审计</td><td class="mono">users.json · <span class="mono">audit.jsonl</span></td><td>现状<strong>非数据库</strong>：文件存储跨项目共享（原子写+文件锁）。<b>09-23 裁定⑦：目标态落 MySQL users/audit 表，users.json 与 audit.jsonl 退役</b></td></tr>
       </tbody>
     </table>
 
@@ -1158,7 +1164,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>编辑器</td><td>CodeMirror 6</td><td>YAML 双向同步需要可编程编辑与语法高亮</td></tr>
         <tr><td>样式</td><td>原生 CSS 变量（<span class="mono">tokens.css</span>）+ Tailwind 3.4 工具类</td><td>设计令牌必须能被 JS 读取与主题切换；工具类处理布局</td></tr>
         <tr><td>后端框架</td><td>FastAPI（Python 3.10+）</td><td>自动 OpenAPI、原生异步、SSE 直接可用</td></tr>
-        <tr><td>ORM / 存储</td><td>SQLAlchemy 2.0 + SQLite（默认）/ MySQL（可选）</td><td><strong>零外部依赖</strong>是产品主张：SQLite 等价承担状态一致性</td></tr>
+        <tr><td>ORM / 存储</td><td>SQLAlchemy 2.0 + SQLite（默认）/ MySQL（可选）</td><td><strong>零外部依赖</strong>是产品主张（本地档：clone 即跑不破门票）。<b>09-23 裁定⑦：可计量追踪数据（用户/会话/PAT/口令/错误告警/审计/变更账本/指标 trace）权威落 MySQL</b>——真实部署档用 MySQL，两档并存</td></tr>
         <tr><td>缓存</td><td>Redis 5.0（可选）</td><td>有则加速，无则自动跳过——不构成启动阻塞</td></tr>
         <tr><td>模型接入</td><td>自研 <span class="mono">BaseProvider</span> 抽象（7 个 Provider）</td><td>避免被单一 SDK 绑定；新增 Provider 只需实现并注册</td></tr>
         <tr><td>凭据保护</td><td><span class="mono">cryptography</span>（AES-GCM）+ API Key 脱敏</td><td>渠道与模型凭据落库需加密；日志与探针输出需脱敏</td></tr>
@@ -1460,7 +1466,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「用户管理」（管理区，仅 <span class="mono">user:manage</span> 可见）</td></tr>
       <tr><td><b>步骤</b></td><td>1. 查看用户列表 → 2. 新建用户（分配角色）→ 3. 为普通用户勾选 6 个权限点中的哪些 → 4. 分配可见项目 → 5. 重置密码或删除用户</td></tr>
       <tr><td><b>反馈</b></td><td>权限勾选实时显示「有效权限」汇总；危险权限点带警示标识；保存后立即生效</td></tr>
-      <tr><td><b>边界</b></td><td>普通用户<strong>默认零权限</strong>——不勾选任何权限点则看不到任何数据；admin 权限不可被削减（豁免逻辑）；账号数据存于 <span class="mono">users.json</span>（跨项目共享），采用原子写 + 文件锁防并发损坏</td></tr>
+      <tr><td><b>边界</b></td><td>普通用户<strong>默认零权限</strong>——不勾选任何权限点则看不到任何数据；admin 权限不可被削减（豁免逻辑）；账号数据存于 <span class="mono">users.json</span>（跨项目共享，原子写+文件锁）。<b>〔09-23 裁定⑦〕账号表化：迁 MySQL users 表，跨项目共享语义不变；权限目录表（阶段收敛同库）</b></td></tr>
     </tbody></table>
 
     <h3 id="s5-17">5.17 审批中心</h3>
@@ -1486,6 +1492,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <p><b>谁能用</b>：目录登记=平台管理员；用途绑定与阈值=域 owner/管理员；微调开关=域 owner（仅本域数据）；切生产=过自测门槛者。<b>操作路径</b>：①设置连接（本地 llama.cpp/LM Studio OpenAI 兼容口，或云 API+密钥）→ 目录健康态变绿；②到「域策略」把该模型绑到具体用途（三个开关独立）——<b>只做完①，一切流量仍走直通路由</b>；③低置信阈值与审计在决策页可查（每次决策记概率分布与耗时）。<b>微调</b>：开域开关 → 选对话/记忆切片 → 硬件预检（不过则灰显明说）→ 平台生成任务调用本机 LLaMA-Factory → 产物登记新版本 → 自测报告 → 过门槛一键切生产/回滚。<b>对话内入口</b>：<span class="mono">/决策模型 推荐|登记|微调|评测|状态</span>（未开对应能力的域，命令不产生效果）。<b>环境参谋</b>：<span class="mono">/决策模型 方案</span> 或 §6.25 页——画像→出方案（命令/脚本/路径），执行与否用户决定。详见 §2.7 与 §6.23-6.25。</p>
 
     <h2 class="sec"><span class="num">6</span>界面原型</h2>
+     <span class="chip info">⚡ <b>交互原型 v1 全量上线</b>：28 页全部可点（详情抽屉/二次确认/选择弹层/toast + <b>跨页深链</b>，同一 mock 数据宇宙：agent-7、r-128、Notion 401、wf-42 冲突）。入口：<a href="prototype/index.html" class="mono" style="color:inherit">prototype/index.html</a>，或 5173 前端左上角「文档资料 · 原型」（<a class="mono" href="http://127.0.0.1:5173/prototype/index.html">/prototype/</a>）</span>
     <h3 id="p0">6.0 全局交互纪律（12 条 · 所有页面的公共约束）</h3>
     <p class="lead">2026-09-22 第 3 轮过审结论（S7）：以下 12 条来自对 multica 全量 UI 层（55 路由）与协作机制的深读，是本平台全部详情页/列表页/实时视图的<b>公共交互契约</b>——先立纪律，再画页面；下文 p1–p22 的每处设计以本表为准，冲突时本表优先。</p>
     <table class="tbl compact">
@@ -1503,6 +1510,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>⑩</td><td><b>status 与 triage 两根正交轴</b>：「到哪一步」≠「这算不算活」；受理门只拦从工作项<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</td><td>p17 · p20</td></tr>
         <tr><td>⑪</td><td><b>执行时间线记账面</b>：一次运行可挂多上下文（工作项/对话/自动化/评论线程）；「计划并入」与「实际投喂」双数组（计划 vs 收据）；转录带 seq + 调用 id + <b>截断标记</b>；取消人署名；wait_reason 作一等状态渲染；每 run 显示 tokens/USD</td><td>p10 · p22</td></tr>
         <tr><td>⑫</td><td><b>通知分层</b>：只 ping 需要拍板的人；通知目录读取失败宁多发不漏发（漏发会把工作项困住）；工作项推进后旧「运行失败」通知批量自愈归档；升级重评作 deferred 调度行而非提醒</td><td>p11 · p21</td></tr>
+              <tr><td>⑬</td><td><b>身份修复前不暴露任何对外写端点</b>：fail-open 身份存在期间，A2A M1+、webhook 回传等对外写面一律冻结——协议面第一块砖只能是只读 AgentCard（P0-1 是 P1-15 的硬前置）</td><td>P1-15 · <span class="mono">D-identity-and-security-2</span></td></tr>
       </tbody>
     </table>
     <p class="q">本章回答：系统长什么样。18 张原型覆盖 §5 的全部模块，布局与真实系统一致，数据全部为演示假数据。</p>
@@ -1517,6 +1525,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <!-- ─────────── 6.1 登录 ─────────── -->
     <h3 id="p1">6.1 登录</h3>
     <p class="proto-note"><span class="chip warn">演示数据</span>无自助注册；账号由平台管理员创建。失败提示不区分「用户不存在 / 密码错误」。</p>
+    <p class="tiny dim">〔第 4 轮规划注〕P0-1/P0-2 落地后，本页新增<b>首登强制改密弹窗</b>边界态：must_change_password 驱动、后端对 /api/auth/* 外一律 403 兜住、强度条、改密成功即旋转会话（旧 cookie 作废）。登录页「默认口令 123456」文案随 P0-2 清除。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/login</span><span class="fake">演示数据</span></div>
       <div style="background:var(--bg-app);padding:var(--s10) var(--s5);display:grid;place-items:center;min-height:380px">
@@ -1710,6 +1719,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <!-- ─────────── 6.4 Agent 详情 ─────────── -->
     <h3 id="p4">6.4 Agent 详情 · 探针时间线</h3>
     <p class="proto-note"><span class="chip warn">演示数据</span>基础信息 + 探针时间线。API Key 恒为脱敏形态。</p>
+    <p class="tiny dim">〔第 4 轮规划注〕P1-15 落地后，本页新增<b>「A2A 卡片」页签</b>（与探针时间线并列）：同一 Agent 对象的对外只读视图 + ⧉复制 + 未启用 capabilities 灰态——卡片是视图不是新实体。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/agents/1</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2009,7 +2019,7 @@ edges:
 
     <!-- ─────────── 6.8 对话中心 ─────────── -->
     <h3 id="p8">6.8 对话中心</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>会话列表 + 消息流（含工具调用块）+ 输入区。登录即可用，是唯一无需额外权限的模块。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>会话列表 + 消息流（含工具调用块）+ 输入区。登录即可用，是唯一无需额外权限的模块。<b>〔09-23 补充〕</b>新增 <b>Agent 切换器</b>：新建会话先选 Agent；会话中可切换，下一条消息起生效、历史归属不变；异常/离线 Agent 灰置并给原因——「选 Agent → 发消息 → 看工具块与归属」即对话调用测试路径。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/chat</span><span class="fake">演示数据</span></div>
       <div class="app" style="grid-template-columns:196px 190px minmax(0,1fr)">
@@ -2032,7 +2042,7 @@ edges:
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <aside style="background:var(--bg-main);border-right:1px solid var(--border);padding:var(--s3);display:flex;flex-direction:column;gap:6px">
-          <button class="btn sm primary" style="justify-content:center">+ 新建会话</button>
+          <button class="btn sm primary" style="justify-content:center">+ 新建会话 ▾ 选 Agent</button>
           <p class="tiny muted" style="margin:var(--s2) 0 0;text-transform:uppercase;letter-spacing:.05em">今天</p>
           <div class="panel tight" style="background:var(--bg-selected);border-color:var(--blue-border)">
             <p class="small" style="margin:0;color:var(--text)"><b>审查 agent-domains 的变更</b></p>
@@ -2053,7 +2063,16 @@ edges:
           </div>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">审查 agent-domains 的变更</span><span class="right"><span class="chip mono">审查 Agent · 标准</span><span class="chip ok">gpt-4o</span></span></div>
+          <div class="app-top"><span class="crumb">审查 agent-domains 的变更</span><span class="right"><button class="btn sm" style="border-style:dashed">审查 Agent · 标准 ▾</button><span class="chip ok">gpt-4o</span></span></div>
+          <div class="panel tight" style="margin:8px 14px 0;border-color:var(--blue-border)"><p class="tiny dim" style="margin:0 0 6px"><b>▼ Agent 切换器 · 点击后的演示态（mock open）</b>　切换自下一条消息起生效，历史消息归属不变</p>
+            <table class="tbl compact"><tbody>
+              <tr><td><span class="dot running"></span> <b>审查 Agent · 标准</b> <span class="chip">当前</span></td><td class="mono tiny">gpt-4o</td><td class="tiny dim">知识源：架构说明.md 等 3 · 工具：read/grep · healthy</td></tr>
+              <tr><td><span class="dot idle"></span> 数据同步 Agent</td><td class="mono tiny">deepseek-v3</td><td class="tiny dim">工具：archive/oss · 上次会话 13:58</td></tr>
+              <tr><td><span class="dot dead"></span> 旧版审查 Agent <span class="chip bad">运行异常</span></td><td class="mono tiny">gpt-3.5</td><td class="tiny dim">灰置：探针 failed，选择需先「重启」（跳 p4 详情）</td></tr>
+              <tr><td><span class="dot running"></span> 审查 Agent · 备援 <span class="chip">冷备</span></td><td class="mono tiny">claude-sonnet</td><td class="tiny dim">切换=拉起冷备副本（首次调用 +8s，计费提示）</td></tr>
+            </tbody></table>
+            <p class="tiny dim" style="margin:6px 0 0">＋ 新建会话先过同一选择器（<span class="mono">agent_id</span> 随每条消息落库，p22 回放按条归属）</p>
+          </div>
           <div class="msgs" style="flex:1">
             <div class="msg-row"><div class="avatar">李</div><div class="bubble">审查一下 <span class="mono">.specs/agent-domains</span> 里的产物，重点看验收条件有没有覆盖「删除域后 Agent 回归默认域」。</div></div>
             <div class="msg-row"><div class="avatar ai">AI</div><div class="bubble">已读取 4 个产物文件（REQUIREMENT / TASK / test_backend.py / _test_import.py）。<br><br>结论：<b>验收条件已覆盖</b>该场景——<span class="mono">REQUIREMENT.md</span> 的验收清单第 3 条为「删除域后 Agent 回归默认域」，且 <span class="mono">test_backend.py</span> 中有对应用例。<br><br>但发现 1 处不一致：<span class="mono">TASK.md</span> 的 T2 提到迁移语句，而 <span class="mono">REQUIREMENT.md</span> 的数据模型小节未写 <span class="mono">ON DELETE SET NULL</span>。<div class="toolcall">⚙ read_file · .specs/agent-domains/REQUIREMENT.md → 2,822 bytes<br>⚙ read_file · .specs/agent-domains/TASK.md → 2,171 bytes<br>⚙ grep · "domain_id" → 7 hits</div></div></div>
@@ -2077,7 +2096,7 @@ edges:
 
     <!-- ─────────── 6.9 知识库 ─────────── -->
     <h3 id="p9">6.9 知识库</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>拖拽上传区 + 知识源表格（含状态与 chunk 数）。类型白名单 + 10MB 上限 + 文件名净化三重校验。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>拖拽上传区 + 知识源表格（含状态与 chunk 数）。类型白名单 + 10MB 上限 + 文件名净化三重校验。<b>〔09-23 修正 · 本地/远端职责分离〕</b>本地上传<b>没有「测试连接」</b>——无远端可测，操作列=查看/重建索引/删除；仅<b>远端知识源</b>（Confluence/Notion/URL 爬取）有测试连接·立即同步·更新凭据，且连接失败→索引冻结+红态（Notion 行即此态）。右上角旧「测试连接」按钮改为「+ 添加源」。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/knowledge</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2100,22 +2119,24 @@ edges:
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">知识库 <span class="dim">· 审查 Agent · 标准</span></span><span class="right"><span class="chip mono">7 个知识源</span><span class="chip ok">6 已索引</span><button class="btn sm">测试连接</button></span></div>
+          <div class="app-top"><span class="crumb">知识库 <span class="dim">· 审查 Agent · 标准</span></span><span class="right"><span class="chip mono">9 源 · 7 本地 / 2 远端</span><span class="chip ok">7 已索引</span><button class="btn sm primary">+ 添加源 ▾ 本地上传｜远端知识源</button></span></div>
           <div class="app-body">
             <div class="panel" style="border-style:dashed;text-align:center;padding:var(--s6);margin-bottom:var(--s4)">
               <p class="small" style="margin:0 0 4px;color:var(--text)"><b>拖拽文件到此处上传</b></p>
               <p class="tiny dim" style="margin:0">支持 .docx .js .json .md .pdf .py .txt · 单文件 ≤ 10MB</p>
             </div>
             <table class="tbl compact">
-              <thead><tr><th>文件名</th><th>来源类型</th><th>大小</th><th>状态</th><th>Chunks</th><th>标签</th><th>上传时间</th><th>操作</th></tr></thead>
+              <thead><tr><th>源名称</th><th>来源类型</th><th>大小</th><th>状态</th><th>Chunks</th><th>标签</th><th>上传时间</th><th>操作</th></tr></thead>
               <tbody>
-                <tr><td class="mono">test_knowledge.txt</td><td><span class="chip">本地文件</span></td><td class="mono">222 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">测试</span></td><td class="mono">07-06 14:02</td><td><span class="btn link">测试连接</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
-                <tr><td class="mono">架构说明.md</td><td><span class="chip">本地文件</span></td><td class="mono">168 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">设计</span></td><td class="mono">07-06 13:48</td><td><span class="btn link">测试连接</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
-                <tr><td class="mono">规范.pdf</td><td><span class="chip">本地文件</span></td><td class="mono">2.4 MB</td><td><span class="chip ok">已索引</span></td><td class="mono">100</td><td><span class="pill">规范</span> <span class="pill">必读</span></td><td class="mono">07-06 11:20</td><td><span class="btn link">测试连接</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
-                <tr><td class="mono">api-schema.json</td><td><span class="chip">本地文件</span></td><td class="mono">84 KB</td><td><span class="chip ok">已索引</span></td><td class="mono">37</td><td><span class="pill">接口</span></td><td class="mono">07-05 17:33</td><td><span class="btn link">测试连接</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
+                <tr><td class="mono">Confluence · 架构决策记录</td><td><span class="chip">远端源 · Confluence</span></td><td class="dim">—</td><td><span class="chip ok">已连接 · 30min 自动同步</span></td><td class="mono">214</td><td><span class="pill">ADR</span></td><td class="mono">09-06 10:12 同步</td><td><span class="btn link">测试连接</span><span class="btn link">立即同步</span><span class="btn link" style="color:var(--red)">断开</span></td></tr>
+                <tr><td class="mono">Notion · 产品需求库</td><td><span class="chip">远端源 · Notion</span></td><td class="dim">—</td><td><span class="chip bad">令牌过期 · 索引冻结</span></td><td class="mono">58 <span class="dim">(旧)</span></td><td><span class="pill">需求</span></td><td class="mono">09-01 08:40 最后成功</td><td><span class="btn link" style="color:var(--red)">测试连接</span><span class="btn link">更新凭据</span><span class="btn link" style="color:var(--red)">断开</span></td></tr>
+                <tr><td class="mono">test_knowledge.txt</td><td><span class="chip">本地文件</span></td><td class="mono">222 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">测试</span></td><td class="mono">07-06 14:02</td><td><span class="btn link">查看</span><span class="btn link">重建索引</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
+                <tr><td class="mono">架构说明.md</td><td><span class="chip">本地文件</span></td><td class="mono">168 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">设计</span></td><td class="mono">07-06 13:48</td><td><span class="btn link">查看</span><span class="btn link">重建索引</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
+                <tr><td class="mono">规范.pdf</td><td><span class="chip">本地文件</span></td><td class="mono">2.4 MB</td><td><span class="chip ok">已索引</span></td><td class="mono">100</td><td><span class="pill">规范</span> <span class="pill">必读</span></td><td class="mono">07-06 11:20</td><td><span class="btn link">查看</span><span class="btn link">重建索引</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
+                <tr><td class="mono">api-schema.json</td><td><span class="chip">本地文件</span></td><td class="mono">84 KB</td><td><span class="chip ok">已索引</span></td><td class="mono">37</td><td><span class="pill">接口</span></td><td class="mono">07-05 17:33</td><td><span class="btn link">查看</span><span class="btn link">重建索引</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
                 <tr><td class="mono">db-schema.sql</td><td><span class="chip">本地文件</span></td><td class="mono">31 KB</td><td><span class="chip bad">处理失败</span></td><td class="dim">—</td><td><span class="pill">数据库</span></td><td class="mono">07-05 17:30</td><td><span class="btn link">重试</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
-                <tr><td class="mono">onboarding.md</td><td><span class="chip">本地文件</span></td><td class="mono">6.1 KB</td><td><span class="chip ok">已索引</span></td><td class="mono">9</td><td><span class="pill">入门</span></td><td class="mono">07-04 09:12</td><td><span class="btn link">测试连接</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
-                <tr><td class="mono">passwd.txt</td><td><span class="chip">本地文件</span></td><td class="mono">102 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td class="dim">—</td><td class="mono">07-04 09:10</td><td><span class="btn link">测试连接</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
+                <tr><td class="mono">onboarding.md</td><td><span class="chip">本地文件</span></td><td class="mono">6.1 KB</td><td><span class="chip ok">已索引</span></td><td class="mono">9</td><td><span class="pill">入门</span></td><td class="mono">07-04 09:12</td><td><span class="btn link">查看</span><span class="btn link">重建索引</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
+                <tr><td class="mono">passwd.txt</td><td><span class="chip">本地文件</span></td><td class="mono">102 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td class="dim">—</td><td class="mono">07-04 09:10</td><td><span class="btn link">查看</span><span class="btn link">重建索引</span><span class="btn link" style="color:var(--red)">删除</span></td></tr>
               </tbody>
             </table>
             <div class="grid g2" style="align-items:start">
@@ -2255,7 +2276,7 @@ edges:
 
     <!-- ─────────── 6.12 监控仪表盘 ─────────── -->
     <h3 id="p12">6.12 监控仪表盘</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>实体级 Token 消耗排行 + 调用次数趋势 + 调用链。名称做了可读化处理（<span class="mono">类型·名称</span>）。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>实体级 Token 消耗排行 + 调用次数趋势 + 调用链。名称做了可读化处理（<span class="mono">类型·名称</span>）。<b>09-23 实测注记：</b>调用链表 trace_spans 与 metrics_raw 当前零产生端写入，本页数据均为演示；补产生端为 P2-4 前置（C10-0）。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/monitor</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2532,6 +2553,7 @@ edges:
     <!-- ─────────── 6.16 用户与权限 ─────────── -->
     <h3 id="p16">6.16 用户与权限</h3>
     <p class="proto-note"><span class="chip warn">演示数据</span>用户列表 + 6 个权限点勾选 + 项目分配。普通用户默认零权限——不勾选任何权限点则看不到任何数据。</p>
+    <p class="tiny dim">〔第 4 轮规划注〕P0-2/P0-3 落地后，本页新增<b>部署安全卡</b>：DEPLOY_MODE / TRUSTED_PROXY_IPS / debug header 开关（开=全局红条+逐请求审计）/ cookie 退化态 / 出厂口令残留计数，只读呈现生效值，改动需当前口令再认证。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/users</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2615,6 +2637,7 @@ edges:
     <!-- ─────────── 6.17 审批中心 ─────────── -->
     <h3 id="p17">6.17 审批中心</h3>
     <p class="proto-note"><span class="chip warn">演示数据</span>待办审批列表 + 上下文 + 批准/驳回。审批是阻塞式的：不决策则流程一直挂起，不会超时自动放行。</p>
+    <p class="tiny dim">〔09-23 裁定⑦注〕目标态：审计从 <span class="mono">audit.jsonl</span> 文件表化为 <b>MySQL audit 表</b>（可计量追踪数据），跨项目共享语义不变；auth:* 安全事件（debug header/自愈拒绝/节流命中）随 P0-1/2 同库落表。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/approvals</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2789,7 +2812,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
     <p class="tiny dim"><b>演示数据说明：</b>编辑内容取自真实产物 <span class="mono">.specs/agent-domains/REQUIREMENT.md</span>（65 行 / 2,822 bytes 为真实值）。「未保存」徽章演示脏状态；真实系统另有语法高亮（CodeMirror 6），此处以纯文本呈现。</p>
 
     <h3 id="p19">6.19 阶段模型配置 <span class="chip warn">规划原型 · 未实现</span></h3>
-    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P0-6 / P1-3</b>：把当前硬编码在 13 个文件里的 9 阶段与产物文件名，收敛为可编辑的配置。<b>此界面尚不存在</b>，用于表达目标形态。真实系统已有 <span class="mono">GET/PUT /api/admin/workflow</span> 与 <span class="mono">workflow.json</span> 作为落点。<b>2026-09-22（S7 过审）：业界成型解已呈——阶段做成「目录表 + 4 个语义锚（unstarted/started/done/closed）」，自定义阶段只继承生命周期、禁止继承停车/评审/失败恢复行为，锚归类建后不可改（multica 迁移 332/337 实证 + 537 对迁移的机械不变量测试护航）。原「是否允许用户自定义阶段模型」的待裁定项，决策成本由开放设计降为方案采纳。</b></p>
+    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P0-6 / P1-3</b>：把当前硬编码在 13 个文件里的 9 阶段与产物文件名，收敛为可编辑的配置。<b>此界面尚不存在</b>，用于表达目标形态。真实系统已有 <span class="mono">GET/PUT /api/admin/workflow</span> 与 <span class="mono">workflow.json</span> 作为落点。<b>2026-09-22（S7 过审）：业界成型解已呈——阶段做成「目录表 + 4 个语义锚（unstarted/started/done/closed）」，自定义阶段只继承生命周期、禁止继承停车/评审/失败恢复行为，锚归类建后不可改（multica 迁移 332/337 实证 + 537 对迁移的机械不变量测试护航）。原「是否允许用户自定义阶段模型」的待裁定项，决策成本由开放设计降为方案采纳。<b>09-23 复核：</b>「13 个文件」系 <span class="mono">grep -l "0-change"</span> 口径，阶段字面量口径后端实测 6——采纳实施前重新盘点。</b></p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/workflow-model</span><span class="fake">规划原型</span></div>
       <div class="app">
@@ -2832,6 +2855,8 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
 
     <h3 id="p20">6.20 工作项看板 <span class="chip warn">规划原型 · 未实现</span></h3>
     <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：补齐协作层最小集。<b>负责人可以是人或 Agent</b>，这是与 Multica 对齐的关键一列；状态采用四类生命周期（未开始 / 进行中 / 完成 / 关闭），并遵守「<b>状态标签不授予行为</b>」——进入「进行中」不等于自动启动 Agent。<b>2026-09-22 补（S7）：状态与「待受理」为两根正交轴——前者答「到哪一步」、后者答「这算不算活」，受理门只拦自动推导执行者的运行、不拦人点名派发（multica 483 迁移的显式反悔教训）；完成态建议按 §1.6.5 ③ 加「需证据 + 同伴复核」。</b><b>此界面尚不存在</b>。</p>
+    <p class="tiny dim">〔09-23 裁定⑦注〕告警属可计量追踪数据——P1-16 落表的表建在 <b>MySQL</b>（告警表+去重键+保留策略列），与 work_item 族同库；进程内环形 500 条形态退役。</p>
+    <p class="tiny dim">〔第 4 轮 schema 注〕目标两组表+一次并表（P1-16 前置）：work_item 单表含 status×triage 双轴、assignee 人/Agent 双轨（owner_id 保持归属语义不动）、done 附证据；运行经 work_item_runs 连接表挂多上下文。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/work-items</span><span class="fake">规划原型</span></div>
       <div class="app">
@@ -2910,6 +2935,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
 
     <h3 id="p22">6.22 执行回放 <span class="chip warn">规划原型 · 未实现</span></h3>
     <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-5</b>：把「这活哪个 Agent 动过、它到底跑了什么、花了多少」做成<b>按工作项可完整回放</b>的时间线。现有 <span class="mono">trace_spans</span> 表提供跨度数据，但缺这个视图。<b>2026-09-22 补（S7）：回放面执行 §6.0 ③⑪（健康四态/阈值入文案；多上下文挂靠、计划 vs 收据双数组、截断标记、取消人署名、wait_reason 徽标、每 run tokens/USD）；人工干预条目带变更前快照与干预时间线（§1.6.5 ④）；实时增量遵守 ⑧ 契约——推送只降延迟，形状与查询响应一致。</b><b>此界面尚不存在</b>。</p>
+    <p class="tiny dim">〔第 4 轮实测注〕本页消费的产生表 trace_spans <b>当前 0 行（无产生端写入）</b>——回放能力的前置是 P2-4 的 C10-0，先让数据真的产生。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/work-items/AF-116/runs/run-8842</span><span class="fake">规划原型</span></div>
       <div class="app">
@@ -3051,6 +3077,105 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
       </div>
     </div>
 
+    <h3 id="p26">6.26 执行隔离策略 <span class="chip warn">规划原型 · 未实现</span></h3>
+    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-14</b>（第 4 轮 S8<span class="chip ok">已过审</span>）：执行隔离<b>契约先行</b>的界面形态。当前「执行」=同进程 LLM 调用、尚无任意代码执行面——本页随首个本地工具执行面落地。三铁律：①档位<b>探测开放</b>（装不出来的档不显示可选）②<b>fail-closed</b>（选档探测失败=拒绝执行，禁止静默回退 T0）③降级<b>三处显式</b>（界面徽章+审计+API 响应同标 isolation:none，学 multica「说清不藏」）。<b>此界面尚不存在</b>。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/isolation</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <div class="nav-grp">管理</div>
+          <a class="active"><svg class="icon"><use href="#i-shield"/></svg>执行隔离</a>
+          <a><svg class="icon"><use href="#i-shield"/></svg>审计日志</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">管理 <span class="dim">· 执行隔离策略</span></span></div>
+          <div class="app-body">
+            <div class="callout err"><p><b>当前默认档：T0 · 平台进程内 —— 无隔离边界。</b>不粉饰：与宿主同 uid、同内核。任何标为「不可信」的执行请求在拿到更高档前会被<b>直接拒绝</b>（fail-closed），不会静默降级跑在 T0。</p></div>
+            <p class="h2p" style="margin-top:var(--s4)">档位阶梯与本机能力探测（灰置=当前装不出来 / 不承诺）</p>
+            <table class="tbl">
+              <thead><tr><th>档</th><th>形态</th><th>隔离强度（失效面）</th><th>冷启动</th><th>本机探测</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td><b>T0</b></td><td>平台进程内（现状）</td><td>无边界——逃逸即平台沦陷</td><td>~0</td><td>—</td><td><span class="chip bad">仅受信代码 · 常驻红条</span></td></tr>
+                <tr><td><b>T1</b></td><td>子进程 + rlimit/专用 uid</td><td class="dim">弱：防手滑不防恶意</td><td>ms</td><td>—</td><td><span class="chip">过渡带 · 永不进承诺阶梯</span></td></tr>
+                <tr><td><b>T2</b></td><td>Docker 容器（每执行一会话容器）</td><td>中：ns+cgroup，共享内核</td><td>~1s</td><td><span class="dot ok"></span>Docker 27.1 ✓</td><td><span class="chip ok">可开放</span></td></tr>
+                <tr><td><b>T3</b></td><td>Docker + gVisor(runsc)</td><td>中高：内核攻击面大缩；syscall 密集打折</td><td>~1s</td><td><span class="dot err"></span>runsc 未装（无需 KVM）</td><td><span class="chip warn">装后即可 · 指引 ⧉</span></td></tr>
+                <tr><td><b>T4</b></td><td>Firecracker microVM</td><td>高：硬件虚拟化边界</td><td>12ms VMM / ≤125ms boot</td><td><span class="dot err"></span>/dev/kvm 不可用</td><td><span class="chip">本机遇不可开放（云主机可）</span></td></tr>
+                <tr><td><b>T5</b></td><td>云沙箱外接（E2B 类）</td><td>最高：物理外移（换成网络/凭据/数据出域信任）</td><td>快照毫秒级</td><td>外部服务</td><td><span class="chip">外接选项 · 不内嵌</span></td></tr>
+              </tbody>
+            </table>
+            <p class="h2p" style="margin-top:var(--s4)">执行契约（与档位正交 · P1-14 先行段）</p>
+            <table class="tbl">
+              <thead><tr><th>字段</th><th>取值</th><th>语义来源</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">tier</td><td>T0·T2·T3·T4·T5（无 T1）</td><td>本页阶梯</td></tr>
+                <tr><td class="mono">ttl + shutdownPolicy</td><td class="mono">Delete | Retain</td><td>agent-sandbox v1beta1：<b>Retain=留产物清现场</b>——与 .specs/ 知识产物一等公民同构</td></tr>
+                <tr><td class="mono">operatingMode</td><td class="mono">Running | Suspended</td><td>Suspended=杀计算体保卷与对象，可恢复</td></tr>
+                <tr><td class="mono">egress</td><td>默认拒 · 出口白名单</td><td>agent-sandbox 威胁模型（封私网/元数据端点）单机等价</td></tr>
+                <tr><td class="mono">凭证</td><td>run-scoped 短票，绑定 (agent,run) 退场即焚</td><td>multica mat_ 票 / E2B / agent-sandbox v1.0.3 三同源；<b>与档位正交</b>（S13 PAT 同族）</td></tr>
+              </tbody>
+            </table>
+            <p class="tiny dim">域×档：策略绑定在域上（<span class="mono">域=策略容器</span>三合一的第三件）——不可信域默认 <span class="mono">min_tier=T3</span>，达不到就拒跑；降档需域 owner 显式确认并全程审计。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 id="p27">6.27 对外集成面 · 协议 / 契约 / 可观测 <span class="chip warn">规划原型 · 未实现</span></h3>
+    <p class="proto-note"><span class="chip warn">规划原型</span>第 4 轮三议题共用的对外面（<span class="chip ok">已过审</span>）：<b>协议区</b>对应 P1-15（A2A M0 静态卡）+ P2-1/P1-12；<b>契约区</b>对应 P2-5 四件组；<b>可观测区</b>对应 P2-4 三档。三区各带「未启用」如实灰态——先让承诺小于实现。§6.0 纪律适用：一切复制走 ⧉、破坏性开关二次确认。<b>此界面尚不存在</b>。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/integration</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <div class="nav-grp">管理</div>
+          <a class="active"><svg class="icon"><use href="#i-net"/></svg>对外集成面</a>
+          <a><svg class="icon"><use href="#i-gear"/></svg>系统设置</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">管理 <span class="dim">· 对外集成面</span></span><span class="tabs"><span class="tab active">协议</span><span class="tab">契约</span><span class="tab">可观测</span></span></div>
+          <div class="app-body">
+            <div class="callout"><p><b>协议 · A2A（P1-15<span class="chip ok">已过审</span>）：</b>M0 只发<b>静态 AgentCard</b>——必填 8 项、capabilities 全 false（streaming/push 未实现就不声明）、只含 public 可见域 Agent、敏感详情走鉴权扩展卡。M1-lite（SendMessage+GetTask+INPUT_REQUIRED 挂起→同 task 续跑）以 <b>P0-1 身份修复为硬闸</b>（§1.6.5 ⑬）；M2（SSE 长连+webhook 回传）冻结。registry 官方留白——目录治理是我们地盘。</p></div>
+            <table class="tbl">
+              <thead><tr><th>/.well-known/agent-card.json（预览 · 未启用）</th><th>值</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">name / description / version</td><td class="tiny">由 Agent 行生成 · ⧉</td></tr>
+                <tr><td class="mono">supportedInterfaces[0]</td><td class="mono tiny">{protocolBinding: "JSONRPC", protocolVersion: "1.0"} · 首条=优先</td></tr>
+                <tr><td class="mono">capabilities</td><td class="mono">{streaming: false, pushNotifications: false} <span class="chip">未启用项如实 false</span></td></tr>
+                <tr><td class="mono">skills[]</td><td class="tiny">id/name/description/tags —— 纯描述性；工具市场条目<b>不渲染成 skill</b>（MCP 纵向层红线）</td></tr>
+              </tbody>
+            </table>
+            <p class="h2p" style="margin-top:var(--s4)">契约 · apiVersion + watch（P2-5<span class="chip ok">已过审</span>）</p>
+            <table class="tbl">
+              <thead><tr><th>件</th><th>形态</th><th>示例 / 依据</th></tr></thead>
+              <tbody>
+                <tr><td><b>形体</b></td><td class="mono">apiVersion: agentflow.io/v1alpha1 · kind: Workflow</td><td>弃用四则移植（升版本段/两版并存/新不指旧/到期窗口+Warning 头）；<b>语义稳定，不承诺 K8s 兼容</b></td></tr>
+                <tr><td><b>并发</b></td><td class="mono">ETag: "wf-42" → PUT If-Match 不匹配 = 412</td><td>RFC7232；治「整包盲覆盖」——第一批</td></tr>
+                <tr><td><b>观测</b></td><td class="mono">Ready=True observedGeneration=12</td><td>conditions 表；区分「没处理」vs「处理了结果未变」</td></tr>
+                <tr><td><b>watch</b></td><td class="mono">GET /api/watch?cursor=1840 → SSE id:1841 event:condition</td><td>change_log 同事务全局账本（落 MySQL · 裁定⑦）；断线=客户端带 cursor 重发（<b>不跟</b> MCP 已撤的 Last-Event-ID）；过期→<span class="mono">event:resync</span>＝410 等价</td></tr>
+              </tbody>
+            </table>
+            <p class="h2p" style="margin-top:var(--s4)">可观测 · 三档（P2-4<span class="chip ok">已过审</span>）</p>
+            <table class="tbl">
+              <thead><tr><th>档</th><th>当前态</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td><b>前置</b> 产生端</td><td><span class="chip bad">trace_spans 0 行</span></td><td>先补 INSERT+父子链列，出口才有东西可导（C10-0）</td></tr>
+                <tr><td><b>A</b> /metrics 直读</td><td><span class="chip">AF_ENABLE_METRICS = 未设</span></td><td>instrumentator RED + 直读现表 Counter/Histogram，~0.5d</td></tr>
+                <tr><td><b>B</b> OTLP 可选</td><td><span class="chip">AF_OTLP_ENDPOINT = 未设</span></td><td>gen_ai.* 语义（全 Development 不冻契约）；合成 trace_id 书面声明非 W3C</td></tr>
+              </tbody>
+            </table>
+            <p class="tiny dim">开关均为 env 驱动、此页只读呈现生效值；打开任何对外写面（M1+）前，部署安全卡（p16）必须无红条。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <h2 class="sec"><span class="num">7</span>角色权限矩阵</h2>
     <p class="q">本章回答：进去之后能做什么。矩阵必须与 §5.0 的模块可见性一致。</p>
 
@@ -3156,9 +3281,10 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
         <tr><td><b>权限点</b><br><span class="tiny dim">Permission</span></td><td>6 个：project:read / project:write / project:delete / workflow:stop / user:manage / audit:view。</td><td>§2.10</td></tr>
         <tr><td><b>项目级可见性</b></td><td>由 <span class="mono">project_ids</span> 控制「能看什么」；未分配任何项目 = 看不到任何项目（不回退为全部）。</td><td>§2.10 · §5.13</td></tr>
         <tr><td><b>审计轮转</b></td><td><span class="mono">audit.jsonl</span> 超过 1 万行自动归档，仅保留最近 5 份——更早历史不可查。</td><td>§5.15</td></tr>
-        <tr><td><b>零外部依赖</b></td><td>核心主张：SQLite 等价承担状态一致性，Redis 为可选加速项，无则自动跳过。</td><td>§1.4 · §3.4</td></tr>
+        <tr><td><b>零外部依赖</b></td><td>核心主张：SQLite 等价承担状态一致性，Redis 为可选加速项，无则自动跳过。〔09-23 裁定⑦：可计量追踪数据权威库=MySQL，两档并存（§5.4）〕</td><td>§1.4 · §3.4</td></tr>
       <tr class="grp-row"><td colspan="3">决策层（已立项 · 未实现）</td></tr>
-        <tr><td><b>决策模型</b><br><span class="tiny dim">System One</span></td><td>不生成文本、只输出带校准概率类型化决策的小模型；三型 Choice/Bool/Score，选项 ≤26。范式 Jev（TypeSafe AI，2026）。</td><td>§2.7</td></tr>
+        <tr><td><b>可计量追踪数据</b></td><td>裁定⑦判据：需要被计量、被追踪、重启后还在的数据（用户/会话/PAT/口令/错误告警/审计/变更账本/指标 trace）→ MySQL 权威库；知识产物走 .specs/ 文件；SQLite=本地体验档。</td><td>§5.4 · Q23</td></tr>
+      <tr><td><b>决策模型</b><br><span class="tiny dim">System One</span></td><td>不生成文本、只输出带校准概率类型化决策的小模型；三型 Choice/Bool/Score，选项 ≤26。范式 Jev（TypeSafe AI，2026）。</td><td>§2.7</td></tr>
         <tr><td><b>直通路由</b></td><td>「标签匹配+最小连接数」确定性路由的正式名。<b>任何决策模型未显式绑定时，一切流量走它。</b></td><td>§1.4 · §2.7</td></tr>
         <tr><td><b>两步制</b></td><td>登记≠启用：目录连通后仍须按用途逐个绑定（路由/分诊/简单任务三独立开关，默认全关）。</td><td>§2.7 · §6.23</td></tr>
         <tr><td><b>升级与回退</b><br><span class="tiny dim">escalated / decision_fallback</span></td><td>top1 概率低于域阈值（默认 0.6）转大模型=升级；决策服务失败回直通=回退。两者皆审计事件。</td><td>§2.7 · §6.23</td></tr>
@@ -3230,10 +3356,19 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
     <p><b>A：</b>正因为六件套成了入场券（§1.6 定盘句），追赶的定义变了：<b>不是抄它的 board，而是守住它没有的三样</b>——画布↔YAML 双向对账（它只有 board，最强同类 AgentTeams 也只到只读 Mermaid）、产物谱系+晋级门禁（品类无对应物，multica 的 issue↔run↔diff 停在审计素材层）、域=配额+沙箱+RBAC 三合一强制边界（它明写无 OS 沙箱、真边界在执行宿主；K8s 阵营有沙箱没工作台）。三样各成一件，「multica + 画布 + 自愈」和「kagent + 工作台」这两个没人完成的组合就是我们的位置。</p>
     <h3>Q20 · 决策小模型这么香，为什么不默认开着？</h3>
     <p><b>A：</b>因为它的价值前提是<b>「校准过的概率能当置信度用」</b>——而复刻模型卡也明写：只在训练过的任务族上校准近乎完美（ECE 0.017），<b>没见过的任务类型只保持基座准确率</b>。默认替所有客户的流量做决定，等于拿一个没验证过的任务分布去赌校准仍然成立，赌输了就是无声的路由劣化。所以产品决定是（用户原话「不显性指定或没配置就不要用」）：提供能力、两步显式启用、未绑定=直通零调用（AC-0 可用审计计数=0 验证）、低置信自动升级、失败必回退——小模型上岗的每一步都有签名，退路永远是那个无聊但可靠的直通路由。另注：微调数据不显式开启就绝不出域，这条没有中间态。</p>
-  </section>
+      <h3>Q21 · 协议面为什么停在一张静态卡片，不直接做全套 A2A？</h3>
+    <p><b>A：</b>分档账：M0 静态 AgentCard ≈1 人日、零协议承诺，买掉的正是差距④的字面痛点「无法被发现」——卡片必填 8 项 v1.0 已冻结，不赌任何在途提案。M1-lite（SendMessage+GetTask+INPUT_REQUIRED 挂起续跑）有两块硬前置：<b>P0-1 身份修复</b>（fail-open 头对外=给全网开门，§1.6.5 ⑬）与单副本内存态承诺书面化；且映射层自证、不引 SDK（v1.1.5 周更节奏=供应链赌注）。M2（streaming+push）与单进程形态正面冲突——SSE 长连×单副本、webhook SSRF 面×出网默认拒，加之 SubscribeToTask 的 REST 方法规范自身 POST/GET 相矛盾，冻结到 #1991/#1995 出 v1.1 再议。顺带：官方明文不做 curated registry——目录治理留白正是我们的地盘，别只把自己想成协议的迟到者。</p>
+    <h3>Q22 · 沙箱是头号差距，为什么不立刻把执行塞进容器？</h3>
+    <p><b>A：</b>因为债还没到期：当前「执行」=同进程 httpx 调 LLM（<span class="mono">chat_service.py:105</span>），<b>没有任意代码执行面</b>；为未到期需求上容器，成本立付而收益悬空，还会制造「已隔离」的错觉（比现状更危险）。正确姿势是三件：①<b>契约先行</b>——档位/TTL/关机策略/挂起保卷/egress 默认拒现在就能写死（借 agent-sandbox 语义，其 API 仍 v1beta1 恰好说明契约比实现稳）；②<b>随执行面逐档开放</b>——首个本地工具执行立项即 T2 容器，runsc 探测到一键升 T3（无 KVM 是单机关键卖点），/dev/kvm 通过才开 T4，T5 仅外接选项（Daytona 停更、E2B 自托管全栈违背单进程）；③<b>fail-closed 三处显式</b>——静默降档禁止，界面/审计/API 同时标 isolation:none，T0 现状挂红条学 multica「说清不藏」（它甚至实装过文件级沙箱又主动移除）。T1 rlimit 只算过渡带，永不进承诺阶梯。</p>
+    <h3>Q23 · 裁定 MySQL 会不会把「零外部依赖」门票撕了？</h3>
+    <p><b>A：</b>不撕——裁定⑦是<b>两档并存</b>：本地档 SQLite 默认 clone 即跑（六件套门票保住了）；<b>可计量追踪数据在真实部署一律 MySQL 权威库</b>——用户账号（users.json 退役）、会话与 PAT、口令哈希、错误与告警（进程内环形 500 条重启即丢的账一次清偿）、审计（audit.jsonl 表化）、变更账本 change_log、metrics_raw/trace_spans。判据一句话：<b>需要被计量、被追踪、被重启后还在的，进 MySQL；知识产物仍是一等公民走 .specs/ 文件；SQLite 只是本地体验档不是权威形态</b>。连带红利：metrics/trace 直读与 /metrics 导出都变成 MySQL 上的普通查询，AUTO_INCREMENT 缺口语义与 SQLite 同治（cursor 只增 + resync，两库通用纪律）。同日的凭据扫描另落一个工程项：encryption_service 短密钥零填充无 KDF 属代码缺陷（历史无凭据泄露，56 rev 全扫，见 ROADMAP 裁定附注）。</p>
+    <h3>Q24 · 仓库是公开的，历史里到底有没有东西漏出去？</h3>
+    <p><b>A：</b>查清了——<b>没有</b>。56 个 commit（main 5 + 已推送的 agent/* 分支 50+）100% 全量扫描非抽样，node_modules 排除后 588 唯一路径全过模式集（sk-/ghp_/xoxb/AKIA/webhook/私钥块/赋值式 key）：全部命中都是测试占位符或压缩产物误匹配；users.json、.env、*.pem/id_rsa 类文件<b>从未以对象形式出现在任何历史中</b>。所以无需紧急轮换任何东西。剩下的不是「泄露」而是三件「强度与卫生」（已入 P0-10）。漏区如实声明：二进制 blob 未逐字节扫、悬空对象不可证伪、远端分支枚举受 API 限流——若你记得某次手工测试真用过线上 key，给厂商标记可按 blob 精查补录。</p>
+</section>
 
   <footer class="doc-foot">
-    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）</p>
+    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）</p>
+    <p>第 4 轮证据链：<span class="mono">.specs/platform-evolution/D-{execution-isolation-2, declarative-api, otel-observability, a2a-protocol-surface, collaboration-layer-2, identity-and-security-2}</span> + <span class="mono">R4-CODEAUDIT.md</span>（2026-09-23，六路 agent 交叉验证）</p>
     <p>单文件自包含 HTML，零外部依赖（无 CDN / 无外链字体 / 无外部图片）；设计令牌与产品源码 <span class="mono">frontend/src/styles/tokens.css</span> 同源；§6 全部数据为演示假数据，其中 6.19–6.22 为<b>明确标注的规划原型</b>。</p>
     <p>数量口径来自对当前代码库与 <span class="mono">.specs/</span> 产物的实测扫描（2026-09-21）：后端 117 个 <span class="mono">.py</span> 模块（含 8 个测试文件）/ 28 个路由模块 / 169 个端点 / 132 条路径 / 19 个 ORM 模型模块 → 26 张表 / 24 个服务 + 5 个渠道适配器 / 4 个引擎模块 / 4 个运行时适配器；前端 100 个 <span class="mono">ts/tsx</span> / 34 个页面 / 28 个组件 + 13 个 Edge 组件 / 12 个 Zustand store。凡属推测或未实现的内容已在正文标注「待确认」。</p>
     <p>上游输入：<span class="mono">.specs/CONTEXT.md</span>、<span class="mono">.specs/agent-domains/</span>、<span class="mono">.specs/capability-groups/</span>、<span class="mono">.specs/agent-control-plane/</span>、<span class="mono">.specs/knowledge-plus/</span>、<span class="mono">.specs/README-CONSISTENCY-REPORT.md</span>；竞品调研输入：<span class="mono">.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md</span>（67 个开源仓库一手实测，2026-09-21）+ 第 3 轮增量（2026-09-22 web 实抓 20+ 项目 + <span class="mono">~/project/multica</span> 全仓深读终版）。上游结论：<span class="mono">.specs/platform-evolution/ROADMAP.md</span>（第 1-3 轮 19+19 条过审结论；本版全部新增内容可指回 <span class="mono">D-harness-landscape-2026/</span> 与 <span class="mono">D-multica-borrow-wave2/</span> 证据链）；v4 决策层章上游：<span class="mono">.specs/small-model-decisions/CHANGE.md + REQUIREMENT.md</span>（需求门 4/4 通过 2026-09-22；<b>代码未实现，全部新增带「规划/未实现」标注</b>）；P-product ⑤ 人审门：<b>v4 已过审（用户原话「通过」2026-09-22）</b>。</p>

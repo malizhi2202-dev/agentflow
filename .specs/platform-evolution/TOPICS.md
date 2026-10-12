@@ -15,6 +15,12 @@
 | `harness-landscape-2026` | 多 team 协作 harness 品类 2026-08/09 新动态与空白再校准 | 用户原话（2026-09-22 重申"参考同类产品，不要 LangChain/LangGraph/Dify"）+ 67 仓库调研保鲜期 | 3 | 通过 |
 | `multica-borrow-wave2` | multica 第二波借鉴：数据模型 / 协作机制 / 运行时 harness / UI 层深读（定稿 12 条） | 用户原话点名"参考 ~/project/multica" + 第 1 轮仅采纳 9 个点（D-collaboration-layer 等），UI 与模型层未穷尽 | 3 | 通过 |
 
+| `execution-isolation-2` | 沙箱补深：可行隔离阶梯与界面（差距①） | 4 | 通过（第 4 轮） |
+| `declarative-api` | 声明式契约与 watch 语义的非 K8s 实现（差距②） | 4 | 通过（第 4 轮） |
+| `otel-observability` | OTel/Prometheus 可观测标准化路径（差距③） | 4 | 通过（第 4 轮） |
+| `a2a-protocol-surface` | A2A v1.0.1 协议面最小实现与 AgentCard（差距④） | 4 | 通过（第 4 轮） |
+| `collaboration-layer-2` | 协作层落地形态：schema 与底账（差距⑤） | 4 | 通过（第 4 轮） |
+| `identity-and-security-2` | 身份三连修复方案对照（X-User-Id/反代/弱口令） | 4 | 通过（第 4 轮） |
 > 拆题依据逐条见各 `D-<slug>/` 包头部与 `BRAINSTORM.md`「问题定义」；未过审禁止进 ROADMAP，此处全部已过审。
 
 ## 轮次记录
@@ -23,6 +29,7 @@
 |---|---|---|---|
 | 1 | .specs/ 全量工件 + 代码直接扫描 + 67 仓库竞品调研 | S1-S5 五子议题，全部走完五步并过审 | 用户批准落盘后本轮收束；第 2 轮触发条件：出现新事实底座（如 stage-model 决策落地后的代码变化） |
 | 2 | 2026-09-22 复扫：code-kit 统一改造落盘 / 文档 v2 已产出 / 用户重申竞品口径（排除 LangChain·LangGraph·Dify——经核实调研文档方法 §6 本已如此，仅提及 2/4/1 次） | **未拆出新产品子议题**：产品代码零改动、竞品无新事实（R16.4 停止不硬凑）。直接执行 3 条体系合规项：F1 R16.1「执行走新 CHANGE」与 R16.5 矛盾（kit 已修 + 5 包 REVIEW 加口径注）；F2 ROADMAP 标题残留旧编号「99 ·」（已修）；F3 HTML 缺状态标且顶栏 chip 停 v1（已补「状态: 起草中」+ 改 v2） | 循环停止，不开第 3 轮；重启触发 = 6 项待裁定任一落地，或用户点名文档重做（附录第 30 行等历史句口径以本行 F1 为准，不溯改） |
+| 4 | 用户点名 8 条（五差距原话①-⑤+身份三连「再补充这些」，2026-09-22/23）；六路 agent（web×5+本地审计×1，双路互证） | S8-S13 六包：轮1 三包的 HOW 增量（-2 后缀）+三个新面包；轮1 包不动 | ①-⑤ 全链闭合：GD 均 3/3；用户原话「通过」（09-23）→ROADMAP 第 4 轮节回写+v8 晋级；三条 ⚠ 口径修正入账；循环停止（R16.4，无第 5 轮触发） |
 
 ## 附录 · 第 1 轮拆解全文（原 00-subtopics.md，无损保留）
 
@@ -106,3 +113,13 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 | 多集群联邦 | §1.4 明确列为保留项 |
 | 多租户计费与配额结算 | §1.4 明确列为不做；但配额原语（Kueue/Volcano）已进 W-4 |
 | 32 个 TS 错误的逐个修法 | 归属 S4 的 P0-4，具体修法属实现细节，走新 CHANGE |
+
+## 第 5 轮申报（2026-09-23 · 用户点名开轮，非擅自扩轮）
+
+> 用户原话：「1 我的agent要能被创建的啊 2 agent要有team的概念的 参考一个类别的其他产品 agent里边应关联那些资源 team 可以管理由哪些资源 或者哪些实体」
+
+| slug | 一句话 | 依据 | 轮次 | 状态 |
+|---|---|---|---|---|
+| S14-agent-creation | Agent 创建链路：入口×形态×生命周期×权限——补上原型缺失的创建向导 | 用户原话① + backend/routes/agents_api.py:42 已有 POST 创建口但原型无任何创建页（roles「实例化为 Agent」只是 toast） | 5 | 待审⑤ |
+| S15-agent-resource-model | Agent 资源关联模型：一个 Agent 应挂哪些资源（模型/工具/知识/记忆/工作流/配额/闸门/渠道…） | 用户原话「agent里边应关联那些资源」+ backend/models/agent.py 24 字段实态 + agent_knowledge/agent_memory/agent_probe/scheduled/human_approval/channel_config 六张关联表已在代码 | 5 | 待审⑤ |
+| S16-team-entity | Team 组织实体：team 管哪些资源哪些实体；语义辨析（组织团队 vs 多 Agent 协作组）与 Domain 3 字段壳的关系 | 用户原话②「team 可以管理由哪些资源 或者哪些实体」+ backend/models/domain.py 仅 name/owner_id/created_at + 全仓 grep 无 team + CLAUDE.md「Domain 不是安全边界」 | 5 | 待审⑤ |

@@ -275,6 +275,23 @@ export default function App() {
           {!collapsed && <span style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap' }}>AI 开发平台</span>}
         </div>
 
+        {/* 文档资料入口 → 产品文档与交互原型（静态资源，见 .specs/product-design/prototype → public 软链） */}
+        <a
+          href="/prototype/index.html"
+          target="_blank"
+          rel="noreferrer"
+          title="产品文档与交互原型（新标签打开）"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: collapsed ? '8px 14px' : '8px 16px',
+            borderBottom: '1px solid var(--border)',
+            color: 'var(--text-secondary)', fontSize: 12.5, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
+          }}
+        >
+          <span style={{ flexShrink: 0 }}>📄</span>
+          {!collapsed && <span>文档资料 · 原型</span>}
+        </a>
+
         {/* 导航 */}
         <nav style={{ flex: 1, padding: '8px' }}>
           {visibleNav.map(item => (

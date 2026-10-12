@@ -22,6 +22,10 @@ npm run dev
 ```
 
 > 默认使用 SQLite，无需额外配置。可选环境变量见下方「配置」段。
+>
+> **存储定位（2026-09-23 裁定⑦）**：SQLite = 本地体验档（保住「零外部依赖可跑」门票）；**真实部署档中，可计量追踪数据（用户/会话/错误告警/审计/变更账本/指标）一律以 MySQL 为权威库**（设 `DATABASE_URL`）。知识产物（`.specs/`）仍是文件一等公民。账号现存 `users.json`——将随裁定表化进 MySQL `users` 表。
+>
+> ⚠ **安全现状（开发冻结未修，部署前必读）**：当前身份取自 `X-User-Id` 请求头且缺省为 admin、默认口令 `123456`、口令为无盐 SHA-256——**请勿把未修复形态暴露公网或置于未配置可信代理的反代之后**。修复方案 P0-1/2/3 已过审（v8），解冻指令后实施。git 历史已通过凭据扫描：**无凭据泄露**（56 rev 全量，报告 `.specs/credential-scan/SCAN-REPORT.md`）；建议顺手开启 GitHub Secret Scanning。
 
 ---
 
@@ -87,7 +91,7 @@ npm run dev
 | 图表 | Recharts 2.15 |
 | 后端 | FastAPI 0.110+ (Python 3.10+) |
 | ORM | SQLAlchemy 2.0 |
-| 数据库 | SQLite（默认）/ MySQL（可选） |
+| 数据库 | SQLite（本地档）/ MySQL（**真实部署权威库 · 裁定⑦**） |
 | 缓存 | Redis 5.0（可选） |
 
 **代码规模**：后端 97 .py + 前端 89 ts/tsx + 12 个测试文件
@@ -321,11 +325,11 @@ agentflow/
 | `HOST` | `127.0.0.1` | 后端监听地址 |
 | `PORT` | `8000` | 后端端口 |
 | `CORS_ORIGIN` | `http://localhost:5173` | 允许的前端源 |
-| `DATABASE_URL` | (空=SQLite) | MySQL 连接串 |
+| `DATABASE_URL` | (空=SQLite 本地档) | MySQL 连接串（真实部署权威库 · 裁定⑦） |
 | `REDIS_URL` | (空=跳过) | Redis 缓存 |
 | `PROMPTS_DIR_NAME` | `prompts` | 提示词/模板目录名（相对项目根） |
 | `SCAN_INTERVAL` | `5` | 文件扫描间隔（秒） |
-| `ENCRYPTION_KEY` | (必填) | 加密密钥（32 字节） |
+| `ENCRYPTION_KEY` | (必填) | 加密密钥（32 字节）。⚠ 短键当前被零填充且无 KDF，属已知缺陷（P0-10①）——请使用全长随机密钥 |
 | `CHANNEL_OAUTH_MOCK` | `false` | OAuth Mock 模式 |
 
 ### 数据库切换
