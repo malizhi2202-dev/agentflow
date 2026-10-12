@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>编辑阶段 1-requirement · 阶段模型配置 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<div class="detail-top"><span class="pill" data-back="stage-model.html" data-click>← 返回 阶段模型配置</span><span class="crumb"><b>管理 › 阶段模型 › 编辑 · 1-requirement</b></span><span class="chip warn">未保存 · 4 处改动</span><span class="chip bad">表单无 ETag 字段</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>表单里没有 ETag 字段</b>——保存即整包覆盖（见本页红注）。真实实现应在打开时取 <span class="mono">If-Match</span>，冲突返回 412；本页演示保留现状以便对照。</p></div>
+<dl class="kv"><dt>阶段 ID</dt><dd class="mono">1-requirement <span class="chip" style="height:16px">建后不可改</span></dd><dt>显示名</dt><dd>需求分析 <span class="chip ok">可改</span></dd><dt>语义锚</dt><dd><span class="chip info">unstarted</span> <span class="chip bad">必选 · 建后不可改</span></dd><dt>产物文件</dt><dd class="mono">REQUIREMENT.md（白名单后缀 .md）</dd><dt>必需性</dt><dd>必需 <span class="chip warn">缺失 → 阶段判不过</span></dd><dt>门禁</dt><dd>需求门 · 人批（<b>规则加在状态转换层，不只写进提示词</b>）</dd><dt>提示词</dt><dd class="mono">prompts/1-requirement.md</dd><dt>排序</dt><dd class="mono">seq 1（可拖拽；改序不改锚）</dd><dt>校验结果</dt><dd><span class="chip ok">通过</span> 无重名 · 无环 · 至少 1 个 done 锚阶段</dd><dt>改动摘要</dt><dd class="mono tiny">显示名 +1 / 门禁 无→需求门 / 提示词路径改名 / 必需性 否→是</dd></dl>
+<h4 class="blk">表单（示意）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">id      [1-requirement      ]  （灰：建后不可改）
+name    [需求分析            ]
+anchor  ( ) unstarted  ( ) started  ( ) done  ( ) closed   ← <b>必选，未选则保存按钮禁用</b>
+file    [REQUIREMENT.md      ]  required [x]
+gate    [需求门 ▾]  prompt [prompts/1-requirement.md ▾]</pre>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已选锚：unstarted（锚归类建后不可改 · 演示）">锚 = unstarted</button> <button class="btn sm" data-toast="校验失败：未选择语义锚（必选）——保存按钮保持禁用（演示）">漏选锚试试</button> <button class="btn sm primary" data-toast="已提交：整包 PUT /api/admin/workflow · 无 If-Match · 覆盖磁盘 workflow.json（演示 · 现状行为）">保存到 workflow.json</button> <button class="btn sm" style="color:var(--red)" data-click data-modal="md-reset">放弃改动</button></p>
+</div>
+<div class="modal" id="md-reset"><div style="padding:var(--s4)"><b style="color:var(--red)">重置为默认阶段模型？</b>
+<p class="small dim" style="margin:8px 0">将用出厂 9 阶段常量覆盖当前配置：<b>丢弃</b>本项目全部自定义阶段（含 2a-ui-design 与 3 处门禁改动），并把「放弃改动」的 4 处未保存编辑一并清掉。回滚只能靠 git。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">确认词: [RESET ]   理由: [回到默认，验证扫描器基线差异 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已重置为默认 9 阶段（未保存 · 保存=整包盲覆盖）· 审计 wf:reset_default（演示）" data-close>确认重置</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 stage-model.html 的 <span class="mono">dr-st-edit</span> 抽屉升格而来：任何可编辑表单（字段 + 锚必选 + 保存钮）都属 C 级，整页展示。它同时是各行「编辑」按钮的统一落点（原型以 1-requirement 为演示对象）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：锚 = unstarted / 漏选锚试试 → toast（未选锚则保存禁用）· 保存到 workflow.json → toast（写明现状整包盲覆盖、无 If-Match）· 放弃改动 → 二次确认 modal。</p>
+</body></html>

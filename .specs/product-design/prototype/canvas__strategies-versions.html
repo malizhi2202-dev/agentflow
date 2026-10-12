@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>连线策略 13 种 · 版本与快照 详情 · 编排画布 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="canvas.html" data-click>← 返回 编排画布</span><span class="crumb"><span class="dim">编排画布 /</span> <b>连线策略 13 种 · 版本与快照</b></span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="tools.html">工具市场</span><span class="pill" data-goto="stage-model.html">阶段模型</span></div>
+<div class="detail-body">
+<h4 class="blk">连线策略语义 · 13 种（后端 enum 与前端 Edge 组件一一对应）</h4>
+<table class="tbl compact"><thead><tr><th>策略</th><th>语义</th></tr></thead><tbody>
+<tr><td class="mono">sequential</td><td class="tiny">A→B 顺序执行</td></tr>
+<tr><td class="mono">pipeline</td><td class="tiny">多段流水线，逐段传递产物</td></tr>
+<tr><td class="mono">parallel</td><td class="tiny">并行执行，全部完成再汇合</td></tr>
+<tr><td class="mono">fan-out</td><td class="tiny">一分多（本图主分支）</td></tr>
+<tr><td class="mono">fan-in</td><td class="tiny">多合一，等待上游齐备</td></tr>
+<tr><td class="mono">map-reduce</td><td class="tiny">按输入集分片 + 归约</td></tr>
+<tr><td class="mono">fork</td><td class="tiny">分叉后不等待（旁路支）</td></tr>
+<tr><td class="mono">condition</td><td class="tiny">按条件表达式择路</td></tr>
+<tr><td class="mono">master-slave</td><td class="tiny">主节点分派、从节点回传</td></tr>
+<tr><td class="mono">event-trigger</td><td class="tiny">外部事件到达才走</td></tr>
+<tr><td class="mono">human-approval</td><td class="tiny">挂起等人批准（阻塞式）</td></tr>
+<tr><td class="mono">retry-fallback</td><td class="tiny">重试耗尽转备援节点</td></tr>
+<tr><td class="mono">dead-letter</td><td class="tiny">失败投递死信（须显式配置）</td></tr>
+</tbody></table>
+<h4 class="blk">版本与快照（发布即不可变 · 回滚 = 以旧快照新建草稿）</h4>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">v3 <span class="chip ok">当前草稿基线</span></td><td class="tiny">09-21 09:12 apply · 5 节点 / 5 边</td><td><span class="btn link" data-toast="⧉ 已复制 v3 YAML（演示）">复制 YAML</span><span class="btn link" data-toast="v3 是当前已部署快照 · 回滚 = 以它新建草稿（演示）">查看</span></td></tr>
+<tr><td class="mono">v2 <span class="chip">已发布快照</span></td><td class="tiny">09-18 · 4 节点 / 3 边 · 无 legacy 节点</td><td><span class="btn link" data-click data-modal="md-rollback" style="color:var(--red)">回滚</span></td></tr>
+<tr><td class="mono">v1 <span class="chip">已发布快照</span></td><td class="tiny">09-15 · 2 节点 / 1 边 · sequential</td><td><span class="btn link" data-toast="v1 快照只读可查（发布即不可变）">查看</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">每条边可独立配：重试 / 超时 / Token 上限 / 安全栅栏 / 脱敏 / IO Schema / 条件表达式 / 死信投递。</p>
+</div>
+<div class="modal" id="md-rollback"><div style="padding:var(--s4)"><b>回滚到快照 v2 并覆盖当前草稿？</b>
+<p class="small dim" style="margin:8px 0"><b>不可逆：草稿中 4 处未 apply 的改动将被 v2 快照覆盖</b>（超时 120s、max_tokens 32,000、review→legacy 边、legacy 节点）。快照不可变，故回滚=以 v2 内容新建 v5 草稿。必填原因，动作入审计。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [120s 超时导致前端分支重试放大，先回到 v2 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已以 v2 生成新草稿 · 待 apply 生效 · 审计 orch:rollback（演示）" data-close>确认覆盖</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由编排画布浮层升格：节点 / 边配置与 YAML 写回说明全宽 · 「校验」「保存」→ toast · 「移除节点」「删除该边」→ 二次确认（本页引用到的二次确认 modal 自带副本）· 改完不自动重启实例（§5.4）　按 Esc 关闭浮层。</p>
+</body></html>

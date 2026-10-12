@@ -1,0 +1,44 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>完整配置 · 审查 Agent · 标准  详情 · Agent 详情 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="agent-detail.html" data-click>← 返回 Agent 详情</span><span class="crumb"><span class="dim">Agent 详情 /</span> <b>完整配置 · 审查 Agent · 标准</b></span><span class="chip ok">running</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="runtime.html">运行时</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>只读呈现：</b>本页编辑走「编辑」弹层分区改；改完 <b>不会自动重启实例</b>（§5.4 边界），需显式重启或等下轮调和。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>Agent ID / 名称</dt><dd class="mono">1 · 审查 Agent · 标准</dd><dt>归属</dt><dd>默认域 · 能力组 <span class="mono">code-review</span> <span class="mono">python</span>（多归属：会同时出现在两个组，属预期）</dd><dt>Provider / 模型</dt><dd class="mono">openai · gpt-4o</dd><dt>运行时</dt><dd class="mono">claude_code（适配器四选一：claude_code / codex / hermes / xiaolongxia）</dd><dt>Base URL</dt><dd class="mono">https://api.openai.com/v1</dd><dt>健康端点</dt><dd class="mono">https://api.openai.com/v1/health · 解析优先 base_url+/health</dd><dt>API Key</dt><dd class="mono">sk-***（界面与日志恒脱敏 · 覆盖 sk- 与 sk-ant-）</dd><dt>并发上限 / 负载</dt><dd class="mono">4 · 2/4（负载率 0.50 · Least Connection 参与选主）</dd><dt>超时 / 重试</dt><dd class="mono">单步 120s · 重试 3 · 退避 1/2/4/8s</dd><dt>Token 上限</dt><dd class="mono">单 run 200k · 日预算 1.2M（已用 412k）</dd><dt>安全栅栏</dt><dd><span class="chip ok">已注册 6 条</span>（含类型检查绕行拦截）</dd><dt>脱敏</dt><dd><span class="chip ok">开</span> · 出参含密钥/PAT 模式匹配</dd><dt>IO Schema</dt><dd class="mono">已校验 · 3 入 2 出</dd><dt>可见性</dt><dd><span class="chip">public</span>（仅展示字段 · 鉴权源是「可调用目标」，§6.0 ⑥）</dd></dl>
+<h4 class="blk">该 Agent 的编排引用</h4>
+<table class="tbl compact"><thead><tr><th>工作流</th><th>版本</th><th>步骤</th><th>边策略</th></tr></thead><tbody>
+<tr><td class="mono">审查流水线</td><td class="mono">v3</td><td class="mono">1</td><td class="mono tiny">fan-out</td></tr>
+<tr><td class="mono">需求澄清</td><td class="mono">v2</td><td class="mono">2</td><td class="mono tiny">retry×2</td></tr>
+<tr><td class="mono">发布前检查</td><td class="mono">v1 草稿</td><td class="mono">3</td><td class="mono tiny">timeout 90s</td></tr>
+<tr><td class="mono">告警自愈</td><td class="mono">v2</td><td class="mono">2</td><td class="mono tiny">human-approval</td></tr>
+<tr><td class="mono">旧版日志采集</td><td class="mono">v9 归档</td><td class="mono">1</td><td class="mono tiny">dead-letter</td></tr>
+</tbody></table>
+<h4 class="blk">挂载知识源（3）</h4>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">架构说明.md</td><td><span class="chip ok">已索引 · 1 chunk</span></td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-kb">断开</span></td></tr>
+<tr><td class="mono">规范.pdf</td><td><span class="chip ok">已索引 · 100 chunks</span></td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-kb">断开</span></td></tr>
+<tr><td class="mono">Notion · 产品需求库</td><td><span class="chip bad">令牌过期 · 冻结</span></td><td><span class="btn link" data-toast="跳 §6.9 知识库更新凭据（演示 · 索引保持冻结）">更新凭据</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-click data-pop="pop-edit">编辑 ▾</button> <button class="btn sm" data-toast="已按当前配置重新登记快照（演示 · snap-1210）">存快照</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-goto="agent-detail__delete-agent.html">删除前置检查</button></p>
+</div>
+<div class="modal" id="md-unlink-kb"><div style="padding:var(--s4)"><b>断开本 Agent 与知识源「架构说明.md」的挂载？</b><p class="small dim" style="margin:8px 0 4px">知识源本身不删（它还被另 2 个 Agent 挂载）。断开即从本 Agent 检索范围移除，历史会话引用保持快照。</p><table class="tbl compact"><tbody>
+<tr><td>本 Agent 检索</td><td class="mono">3 源 → 2 源</td><td><span class="chip warn">上下文变薄</span></td></tr>
+<tr><td>历史会话</td><td class="mono">1,284 run 引用该源</td><td><span class="chip ok">快照不变</span></td></tr>
+<tr><td>其它挂载方</td><td class="mono">备援 Agent · 旧版 Agent</td><td><span class="chip info">不受影响</span></td></tr>
+</tbody></table><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开挂载 · 审计 kb:unmounted（演示）" data-close>确认断开</button></div></div></div>
+<div class="pop" id="pop-edit"><p class="tiny dim" style="margin:0 0 6px"><b>编辑 · 选分区</b>（改完不自动重启实例 · §5.4 边界）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">基础信息</td><td>名称 / 归属域 / 能力标签</td><td><span class="btn link" data-toast="已打开基础信息分区（多标签会同步改变能力组归属 · 演示）">改</span></td></tr>
+<tr><td class="mono">模型与凭据</td><td>Provider / 模型 / Base URL / Key</td><td><span class="btn link" data-toast="Key 输入后仅回显 sk-*** ，不可读回（演示）">改</span></td></tr>
+<tr><td class="mono">并发与容量</td><td>并发上限 / 超时 / 重试 / Token 预算</td><td><span class="btn link" data-toast="并发 4 → 6 已保存 · 等下轮生效（演示）">改</span></td></tr>
+<tr><td class="mono">探针与修复</td><td>健康端点 / 周期 / 失败阈值 / 退避</td><td><span class="btn link" data-toast="探测周期 60s → 30s · 已保存并提示限流风险（演示）">改</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">自动保存三态：<span class="chip">保存中</span> → <span class="chip ok">已存</span> / <span class="chip bad">失败（页内显示具体错误）</span>；无权限走页内 Lock read-only，不改 URL 不跳走（§6.0 ①）。</p>
+<p style="margin:6px 0 0"><button class="btn sm primary" data-toast="已保存 3 处改动 · 实例未重启（需显式重启）（演示）">保存全部</button> <button class="btn sm" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）" data-close>放弃</button></p></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由 Agent 详情浮层升格：探测上下文与原始输出全宽 · 处置钮保留原接线（复探 / 重启 → toast · 破坏性动作 → 二次确认，引用到的自带副本）· 回放跳 §6.22　按 Esc 关闭浮层。</p>
+</body></html>

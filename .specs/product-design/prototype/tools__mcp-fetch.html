@@ -1,0 +1,52 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCP fetch 详情 · 工具库 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>MCP 服务</b> · <span class="mono">fetch</span></span><span class="chip warn">MCP</span><span class="chip bad">连接失败</span><span class="chip mono">2 工具</span></div>
+<div class="detail-body">
+<p class="proto-note"><span class="chip warn">演示数据</span>连接失败态的 MCP 服务：拒因原样呈现（含退避与复探节奏）、缓存 schema 仍可读、恢复动作成组给出。</p>
+
+<div class="callout bad"><p class="tiny" style="margin:0"><b>不隐藏、不删除：</b>连接失败时卡片保持可见并标注「连接失败」+「重试连接」——避免用户误以为工具不存在。</p></div>
+
+<h4 class="blk">基础信息</h4>
+<dl class="kv"><dt>端点</dt><dd class="mono">https://mcp.internal/fetch/sse（SSE 传输）</dd>
+<dt>最后成功</dt><dd class="mono">09-20 17:12 · tools/list 2 tools</dd>
+<dt>当前错误</dt><dd class="mono" style="color:var(--red)">握手超时（10s）· 连续 4 次失败 · 退避 8s</dd>
+<dt>暴露工具</dt><dd class="mono">2 个（fetch / extract）· schema 缓存可读</dd>
+<dt>受影响引用</dt><dd class="mono">前端 Agent（联网取规范）· 2 个工作流草稿</dd>
+<dt>凭据</dt><dd class="mono">Bearer ****（AES-GCM 密文 · 界面无明文）</dd>
+<dt>自动恢复</dt><dd>每 30s 复探 · 成功即回到「已连接」并写连接日志</dd></dl>
+
+<h4 class="blk">连接日志（失败收敛）</h4>
+<div class="timeline">
+<div class="tl-item fail"><b>14:31:50</b> · 握手超时 → 第 4 次失败 · 退避 8s</div>
+<div class="tl-item fail"><b>14:31:20</b> · <span class="mono">GET /sse → 503 upstream unavailable</span></div>
+<div class="tl-item fail"><b>14:30:52</b> · <span class="mono">连接被拒 · ECONNREFUSED 10.0.4.18:8732</span></div>
+<div class="tl-item fail"><b>14:30:20</b> · 端点变更后端点解析失败（旧地址已下线）</div>
+<div class="tl-item"><b>09-20 17:12</b> · 最后一次成功 · tools/list 返回 fetch / extract</div>
+</div>
+
+<h4 class="blk">参数 schema（缓存 · 2 工具）</h4>
+<table class="tbl compact"><thead><tr><th>工具 / 参数</th><th>类型</th><th>必填</th><th>可用性</th></tr></thead><tbody>
+<tr><td class="mono">fetch.url</td><td class="mono">string</td><td><span class="chip bad">是</span></td><td><span class="chip bad">不可调用</span></td></tr>
+<tr><td class="mono">fetch.max_bytes</td><td class="mono">int</td><td><span class="chip">否</span></td><td class="tiny">默认 1,048,576</td></tr>
+<tr><td class="mono">fetch.timeout_s</td><td class="mono">int</td><td><span class="chip">否</span></td><td class="tiny">默认 10</td></tr>
+<tr><td class="mono">extract.format</td><td class="mono">enum</td><td><span class="chip">否</span></td><td class="tiny">text / markdown</td></tr>
+<tr><td class="mono">extract.selector</td><td class="mono">string</td><td><span class="chip">否</span></td><td class="tiny">CSS 选择器</td></tr>
+</tbody></table>
+
+<h4 class="blk">操作</h4>
+<p><button class="btn sm primary" data-toast="重试连接中 · 结果将写入连接日志（演示）">重试连接</button> <button class="btn sm" data-goto="tools__mcp-filesystem.html">照抄已连接服务的配置</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-unlink">断开连接</button></p>
+<p class="tiny dim">「照抄已连接服务的配置」跳 <span class="mono">filesystem</span> 详情页对照 transport / endpoint / 凭据三字段，逐项手工回填（MCP 配置不做跨服务批量复制，避免脏端点）。</p>
+
+<div class="modal" id="md-unlink"><div style="padding:var(--s4)"><b>断开 MCP 服务「fetch」连接？</b>
+<p class="small dim" style="margin:8px 0">当前已是「连接失败」态：断开 = 停止自动复探并转为「未连接」，已缓存的工具 schema 保留可查，引用它的 Agent 下次执行直接报错。必填原因。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [端点迁移中，先断开避免 30s 复探持续打空 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开 · 停止复探 · 状态转「未连接」· 审计 mcp:unlink（演示）" data-close>确认断开</button></div></div></div>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 工具库 · 重试连接→toast（结果写日志）· 照抄配置→filesystem 详情页 · 断开连接→二次确认（本页自带 modal 副本）　按 Esc 关闭所有浮层。</p>
+</body></html>

@@ -1,0 +1,89 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>阶段模型配置 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P0-6 / P1-3</b>：把当前硬编码在 13 个文件里的 9 阶段与产物文件名，收敛为可编辑的配置。<b>此界面尚不存在</b>，用于表达目标形态。真实系统已有 <span class="mono">GET/PUT /api/admin/workflow</span> 与 <span class="mono">workflow.json</span> 作为落点。<b>2026-09-22（S7 过审）：业界成型解已呈——阶段做成「目录表 + 4 个语义锚（unstarted/started/done/closed）」，自定义阶段只继承生命周期、禁止继承停车/评审/失败恢复行为，锚归类建后不可改（multica 迁移 332/337 实证 + 537 对迁移的机械不变量测试护航）。原「是否允许用户自定义阶段模型」的待裁定项，决策成本由开放设计降为方案采纳。<b>09-23 复核：</b>「13 个文件」系 <span class="mono">grep -l "0-change"</span> 口径，阶段字面量口径后端实测 6——采纳实施前重新盘点。</b></p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/workflow-model</span><span class="fake">规划原型</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="stage-model.html" class="active"><svg class="icon"><use href="#i-gear"/></svg>阶段模型</a>
+          <a data-goto="users.html"><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-shield"/></svg>审计日志</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">管理 <span class="dim">· 阶段模型 · 当前项目：agentflow</span></span><span class="right"><span class="chip mono" data-click data-pop="pp-proj">项目：agentflow ▾</span><span class="chip bad" data-click data-goto="stage-model__save-preview.html">现状：PUT 整包盲覆盖 · 无 If-Match</span><button class="btn sm" data-click data-modal="md-reset">重置为默认</button><button class="btn sm" data-click data-pop="pp-io">导入 / 导出 ▾</button><button class="btn sm primary" data-toast="已提交：整包 PUT /api/admin/workflow（未带 If-Match，直接覆盖磁盘 workflow.json）· 现状无 412 保护，他人并发修改已被吞 · P2-5 第一批将补 ETag/If-Match">保存</button></span></div>
+          <div class="app-body">
+            <p class="tiny dim" style="margin:0 0 10px">这一份配置将同时驱动后端产物扫描、阶段判定、门禁校验与前端导航。<b>改这里即改全链路</b>——不再需要在 13 个文件里同步。</p>
+            <table class="tbl compact">
+              <thead><tr><th>序</th><th>阶段 ID</th><th>显示名</th><th>产物文件</th><th>门禁</th><th>提示词</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">0</td><td class="mono" data-click data-goto="stage-model__stage-0-change.html" style="color:var(--blue);text-decoration:underline dotted">0-change</td><td>变更提案</td><td class="mono">CHANGE.md</td><td><span class="chip info">G1</span></td><td class="mono tiny">prompts/0-change.md</td><td><span class="btn link" data-click data-goto="stage-model__stage-0-change.html">编辑</span></td></tr>
+                <tr><td class="mono">1</td><td class="mono" data-click data-goto="stage-model__anchor-unstarted.html" style="color:var(--blue);text-decoration:underline dotted">1-requirement</td><td>需求分析</td><td class="mono">REQUIREMENT.md</td><td><span class="chip info">需求门</span></td><td class="mono tiny">prompts/1-requirement.md</td><td><span class="btn link" data-click data-goto="stage-model__anchor-unstarted.html">编辑</span></td></tr>
+                <tr><td class="mono">2</td><td class="mono" data-click data-goto="stage-model__anchor-unstarted.html" style="color:var(--blue);text-decoration:underline dotted">2-design</td><td>技术设计</td><td class="mono">DESIGN.md</td><td><span class="chip info">G2</span></td><td class="mono tiny">prompts/2-design.md</td><td><span class="btn link" data-click data-goto="stage-model__anchor-unstarted.html">编辑</span></td></tr>
+                <tr><td class="mono">3</td><td class="mono" data-click data-goto="stage-model__anchor-unstarted.html" style="color:var(--blue);text-decoration:underline dotted">2a-ui-design</td><td>UI 设计</td><td class="mono">UI-DESIGN.md</td><td><span class="chip info">G2a</span></td><td class="mono tiny">prompts/2a-ui-design.md</td><td><span class="btn link" data-click data-goto="stage-model__anchor-unstarted.html">编辑</span></td></tr>
+                <tr><td class="mono">4</td><td class="mono" data-click data-goto="stage-model__anchor-unstarted.html" style="color:var(--blue);text-decoration:underline dotted">3-task</td><td>任务拆分</td><td class="mono">TASK.md</td><td><span class="chip info">Task</span></td><td class="mono tiny">prompts/3-task.md</td><td><span class="btn link" data-click data-goto="stage-model__anchor-unstarted.html">编辑</span></td></tr>
+                <tr><td class="mono">5</td><td class="mono" data-click data-goto="stage-model__anchor-started.html" style="color:var(--blue);text-decoration:underline dotted">4-dev</td><td>开发执行</td><td class="mono tiny">T*-SUMMARY.md</td><td><span class="chip info">G3</span></td><td class="mono tiny">prompts/4-dev.md</td><td><span class="btn link" data-click data-goto="stage-model__anchor-started.html">编辑</span></td></tr>
+                <tr><td class="mono">6</td><td class="mono" data-click data-goto="stage-model__anchor-started.html" style="color:var(--blue);text-decoration:underline dotted">5-test</td><td>测试验证</td><td class="mono">TEST.md</td><td><span class="chip info">测试门</span></td><td class="mono tiny">prompts/5-test.md</td><td><span class="btn link" data-click data-goto="stage-model__anchor-started.html">编辑</span></td></tr>
+                <tr><td class="mono">7</td><td class="mono" data-click data-goto="stage-model__anchor-started.html" style="color:var(--blue);text-decoration:underline dotted">6-review</td><td>代码审查</td><td class="mono">REVIEW.md</td><td><span class="chip info">G4</span></td><td class="mono tiny">prompts/6-review.md</td><td><span class="btn link" data-click data-goto="stage-model__anchor-started.html">编辑</span></td></tr>
+                <tr><td class="mono">8</td><td class="mono" data-click data-goto="stage-model__anchor-done.html" style="color:var(--blue);text-decoration:underline dotted">7-integration</td><td>集成归档</td><td class="mono tiny">（无）</td><td><span class="chip">无</span></td><td class="mono tiny">prompts/7-integration.md</td><td><span class="btn link" data-click data-goto="stage-model__anchor-done.html">编辑</span></td></tr>
+                <tr><td colspan="7" style="text-align:center"><span class="btn link" data-click data-goto="stage-model__stage-new.html">+ 新增阶段</span> <span class="btn link" data-click data-pop="pp-io">导入 / 导出 JSON</span> <span class="btn link" data-toast="已按当前配置导出 workflow.json（演示）">导出当前配置</span></td></tr>
+              </tbody>
+            </table>
+            <div class="callout warn" style="margin-top:10px"><p><b>「不绑定任何开发流程」的落地检验：</b>当这张表可以被改成一个 5 阶段或 12 阶段的模型、且不需要改任何代码时，§1.4 的这条边界才算成立。当前不成立。</p></div>
+            <div class="callout bad" style="margin-top:10px"><p><b>保存动作的现状（必须写明）：</b>「保存」走的是 <span class="mono">PUT /api/admin/workflow</span>，语义为<b>整包盲覆盖</b>——请求体就是新的 <span class="mono">workflow.json</span> 全文，服务端不比对版本，谁最后点保存谁吃掉前面所有人的改动。<b>本表单打开后拿不到 ETag</b>，多人（或 Agent）同时编辑不会有任何提示。<span class="mono">P2-5 第一批</span>（ETag/If-Match→412）落地后，本页保存遇到冲突应改为 412 + 冲突抽屉，而不是当前的静默覆盖。</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="modal" id="md-reset"><div style="padding:var(--s4)"><b style="color:var(--red)">重置为默认阶段模型？</b>
+<p class="small dim" style="margin:8px 0">将用出厂 9 阶段常量覆盖当前配置：<b>丢弃</b>本项目全部自定义阶段（含 2a-ui-design 与 3 处门禁改动），并把「放弃改动」的 4 处未保存编辑一并清掉。回滚只能靠 git。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">确认词: [RESET ]   理由: [回到默认，验证扫描器基线差异 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已重置为默认 9 阶段（未保存 · 保存=整包盲覆盖）· 审计 wf:reset_default（演示）" data-close>确认重置</button></div></div></div>
+
+
+<div class="pop" id="pp-io"><p class="tiny muted" style="margin:2px 4px 6px">导入 / 导出阶段模型</p>
+<table class="tbl compact"><tbody>
+<tr><td>导出当前配置</td><td class="tiny dim mono">workflow.json · 9 阶段</td><td><span class="btn link" data-toast="已导出 workflow.json（演示）">导出</span></td></tr>
+<tr><td>导出为默认模型</td><td class="tiny dim">出厂常量</td><td><span class="btn link" data-toast="已导出默认模型 JSON（演示）">导出</span></td></tr>
+<tr><td>导入（覆盖当前表单）</td><td class="tiny dim" style="color:var(--red)">无冲突检查 · 校验锚必选与 ID 唯一</td><td><span class="btn link" data-toast="导入校验失败：阶段 x-design 未归入任何语义锚（必选）——已拒绝（演示）">选文件</span></td></tr>
+<tr><td>从其他项目复制</td><td class="tiny dim">agentflow-lite · 5 阶段</td><td><span class="btn link" data-toast="已复制 5 阶段模型到表单（未保存 · 演示）">复制</span></td></tr>
+</tbody></table></div>
+
+<div class="pop" id="pp-proj"><p class="tiny muted" style="margin:2px 4px 6px">切换项目（阶段模型按项目独立一份）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">agentflow</td><td class="tiny">9 阶段 · 含 2a · 4 门禁</td><td><span class="chip ok">当前</span></td></tr>
+<tr><td class="mono">agentflow-lite</td><td class="tiny">5 阶段 · 无 UI 设计</td><td><span class="btn link" data-toast="已切到 agentflow-lite（配置随之重载 · 演示）">切换</span></td></tr>
+<tr><td class="mono">legacy-monolith</td><td class="tiny">12 阶段 · 2 终态锚</td><td><span class="btn link" data-toast="已切到 legacy-monolith（演示）">切换</span></td></tr>
+<tr><td class="tiny dim">新建项目模型</td><td class="tiny dim">从默认 9 阶段起步</td><td><span class="btn link" data-toast="已按默认模型创建新项目配置（演示）">创建</span></td></tr>
+</tbody></table></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为<b>规划原型</b>（6.19 界面尚不存在）。9 行阶段、产物文件名、门禁编号（G1 / 需求门 / G2 / G2a / Task / G3 / 测试门 / G4）与提示词路径逐条取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.19 与 §1.6 P0-6 / P1-3；4 语义锚（unstarted / started / done / closed）、「锚归类建后不可改」「自定义阶段禁止继承停车 / 评审 / 失败恢复行为」取自 09-22 S7 过审结论；「13 个文件」与「阶段字面量后端实测 6 处」两种口径同时保留（09-23 复核）。「整包盲覆盖」「不带 If-Match」「Agent 14:04 覆盖人工改动」是对<b>现状</b> <span class="mono">workflow.json</span> PUT 的演示化表述；ETag 式基线值、变更时间线、diff 行数与「2b-perf-baseline」示例阶段为编造。删除终态锚的下游影响清单按 §6.19 / §6.20 / §6.21 的映射关系推演，非已实现行为。</p>
+可点区演示（本轮交互重分级后）：阶段 ID 单元格 / 行内「编辑」→ <b>独立页</b>：0-change 行 → stage-model__stage-0-change，1-requirement / 2-design / 2a-ui-design / 3-task → stage-model__anchor-unstarted，4-dev / 5-test / 6-review → stage-model__anchor-started，7-integration → stage-model__anchor-done（终态锚下游影响清单）· 表单类一律整页：编辑表单 stage-model__stage-edit、新增表单 stage-model__stage-new、保存前覆盖面预览 stage-model__save-preview · 顶栏 chip「PUT 整包盲覆盖」→ save-preview 页 · 「重置为默认」/ 删除阶段 / 删除终态锚 / 仍然整包覆盖 → 一屏读得完的二次确认 modal· 「导入 / 导出 ▾」「项目 ▾」→ 选择器 pop　按 Esc 关闭所有浮层。
+</body></html>

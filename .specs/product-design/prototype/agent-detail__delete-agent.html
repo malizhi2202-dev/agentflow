@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>删除前置检查 · 审查 Agent · 标准 详情 · Agent 详情 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="agent-detail.html" data-click>← 返回 Agent 详情</span><span class="crumb"><span class="dim">Agent 详情 /</span> <b>删除前置检查 · 审查 Agent · 标准</b></span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="runtime.html">运行时</span></div>
+<div class="detail-body">
+<p class="small dim" style="margin:8px 0">删除不可从界面恢复。以下<b>在途任务检查清单</b>必须逐项处置后才会放开确认钮（演示态直接给结论）。必填原因。</p>
+<h4 class="blk">删除前置检查清单（9 项 · 逐项处置后才放开确认钮）</h4>
+<table class="tbl compact"><tbody>
+<tr><td>在途任务</td><td class="mono">2（task-1 assigned · task-9 在跑 31m）</td><td><span class="chip bad">阻断 · 先改派或等收敛</span></td></tr>
+<tr><td>并发占用</td><td class="mono">2/4</td><td><span class="chip warn">随删除释放</span></td></tr>
+<tr><td>编排引用</td><td class="mono">5 条边（含 1 条 human-approval · 1 条 dead-letter）</td><td><span class="chip bad">需先改指目标 Agent</span></td></tr>
+<tr><td>能力组影响</td><td class="mono">code-review 期望 3 → 2 · python 唯一健康副本消失</td><td><span class="chip bad">将产生新漂移</span></td></tr>
+<tr><td>域内记忆</td><td class="mono">5 条</td><td><span class="chip ok">属域不属 Agent · 保留</span></td></tr>
+<tr><td>知识源挂载</td><td class="mono">3</td><td><span class="chip info">仅解绑 · 不删源</span></td></tr>
+<tr><td>历史 run / 审计</td><td class="mono">1,284 次运行</td><td><span class="chip ok">保留（留痕一等 · §6.0 ⑨）</span></td></tr>
+<tr><td>告警</td><td class="mono">2 条未确认指向本 Agent</td><td><span class="chip warn">删除后转「已消失目标」需人工归档</span></td></tr>
+<tr><td>调和</td><td class="mono">caution 漂移 1</td><td><span class="chip warn">删除会被判为人为缩容 · 需暂停调和</span></td></tr>
+</tbody></table>
+<h4 class="blk">必填原因（入审计）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [已被 gpt-4o 备援实例取代，旧版下线 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="先解在途：task-1 改派 agent-2 · task-9 等收敛（演示）">处置在途</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="仍有 2 个在途任务 → 服务端拒绝删除（演示 · 拒因原样呈现不粉饰，§6.0 ④）">确认删除</button></div>
+</div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由 Agent 详情浮层升格：探测上下文与原始输出全宽 · 处置钮保留原接线（复探 / 重启 → toast · 破坏性动作 → 二次确认，引用到的自带副本）· 回放跳 §6.22　按 Esc 关闭浮层。</p>
+</body></html>

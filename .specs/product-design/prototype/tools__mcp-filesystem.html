@@ -1,0 +1,52 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCP filesystem 详情 · 工具库 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>MCP 服务</b> · <span class="mono">filesystem</span></span><span class="chip warn">MCP</span><span class="chip ok">已连接</span><span class="chip mono">6 工具</span></div>
+<div class="detail-body">
+<p class="proto-note"><span class="chip warn">演示数据</span>MCP 服务详情：握手信息 / tools/list 结果 / 连接日志 / 配置与断链操作。同库另有 <span class="mono">postgres</span>（形态一致）与 <span class="mono">fetch</span>（失败态样本）。</p>
+
+<h4 class="blk">基础信息</h4>
+<dl class="kv"><dt>传输 / 端点</dt><dd class="mono">stdio · npx -y @modelcontextprotocol/server-filesystem /specs</dd>
+<dt>握手</dt><dd class="mono">initialize 成功 · protocol 2025-06-18 · server v0.6.2</dd>
+<dt>暴露工具</dt><dd class="mono">6 个（read_file / write_file / list_directory / search_files / create_directory / move_file）</dd>
+<dt>被引用</dt><dd class="mono">数据同步 Agent · 汇总 Agent · 编排 sync 分支</dd>
+<dt>近 7 天</dt><dd class="mono">388 次调用 · 失败 2 · 平均 41ms · 1 次超时（8s）</dd>
+<dt>凭据</dt><dd class="mono">无（本地 stdio 子进程）· 远端形态走 AES-GCM 加密落库</dd>
+<dt>P2-2 风险</dt><dd><span class="chip warn">未对齐 2026-07-28 规范</span> 该版为破坏性无状态化重构</dd></dl>
+
+<h4 class="blk">工具清单（tools/list 结果 · 6）</h4>
+<table class="tbl compact"><thead><tr><th>工具</th><th>参数</th><th>只读</th><th>备注</th></tr></thead><tbody>
+<tr><td class="mono">read_file</td><td class="mono">path</td><td><span class="dot-yes">●</span></td><td class="tiny">越界返回 404</td></tr>
+<tr><td class="mono">write_file</td><td class="mono">path,content</td><td><span class="dot-no">—</span></td><td class="tiny">需 project:write</td></tr>
+<tr><td class="mono">list_directory</td><td class="mono">path</td><td><span class="dot-yes">●</span></td><td class="tiny">深度 1</td></tr>
+<tr><td class="mono">search_files</td><td class="mono">path,pattern</td><td><span class="dot-yes">●</span></td><td class="tiny">glob</td></tr>
+<tr><td class="mono">create_directory</td><td class="mono">path</td><td><span class="dot-no">—</span></td><td class="tiny">禁穿越</td></tr>
+<tr><td class="mono">move_file</td><td class="mono">from,to</td><td><span class="dot-no">—</span></td><td class="tiny">目标须在白名单</td></tr>
+</tbody></table>
+
+<h4 class="blk">连接日志（最近 6 条）</h4>
+<div class="timeline">
+<div class="tl-item"><b>14:31:02</b> · <span class="mono">tools/call read_file · /specs/agent-domains/REQUIREMENT.md → 2,822 B · 18ms</span></div>
+<div class="tl-item"><b>14:23:40</b> · <span class="mono">tools/list → 6 tools · 缓存命中</span></div>
+<div class="tl-item"><b>14:02:11</b> · <span class="mono">initialized → tools/list 6 · 握手 240ms</span></div>
+<div class="tl-item"><b>14:02:10</b> · <span class="mono">stdio 子进程拉起 pid 2418</span></div>
+<div class="tl-item fail"><b>09-22 18:02</b> · <span class="mono">tools/call write_file → -32001 未在白名单路径</span></div>
+<div class="tl-item fail"><b>09-21 08:55</b> · <span class="mono">连接超时 8s → 自动重连 1 次成功</span></div>
+</div>
+
+<h4 class="blk">配置与操作</h4>
+<p class="tiny dim">配置面三字段可编辑：<span class="mono">transport</span>（stdio / SSE）· <span class="mono">endpoint / command</span> · <span class="mono">credential</span>（远端形态，AES-GCM 加密落库，界面不回显明文）。</p>
+<p><button class="btn sm" data-toast="重连成功 · tools/list 6 个 · 240ms（演示）">重试连接</button> <button class="btn sm" data-toast="配置区进入编辑态：stdio / endpoint / 凭据三字段（演示）">编辑配置</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-unlink">断开连接</button></p>
+
+<div class="modal" id="md-unlink"><div style="padding:var(--s4)"><b>断开 MCP 服务「filesystem」连接？</b>
+<p class="small dim" style="margin:8px 0">断开后卡片保持可见并转为「未连接」；已缓存的工具 schema 保留可查，调用即失败。引用它的 Agent 在下次执行时报错（与禁用同理：不隐藏）。必填原因。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [端点迁移中，先断开避免脏调用 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开 · 状态转「未连接」· 审计 mcp:unlink（演示）" data-close>确认断开</button></div></div></div>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 工具库 · 重试连接 / 编辑配置→toast · 断开连接→二次确认（本页自带 modal 副本，含必填原因）· 失败态服务见 <span class="mono">tools__mcp-fetch.html</span>　按 Esc 关闭所有浮层。</p>
+</body></html>

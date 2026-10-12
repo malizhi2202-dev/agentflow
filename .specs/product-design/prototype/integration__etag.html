@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>乐观并发 ETag/If-Match/412 详情 · 对外集成面 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p27" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="integration.html" data-click>← 返回 对外集成面</span><span class="crumb"><b>乐观并发 · ETag / If-Match / 412</b> · P2-5 契约区</span><span class="chip ok">第一批要落</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="integration__watch.html">watch 契约</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="isolation.html">执行隔离</span></div>
+<div class="detail-body">
+<div class="callout ok"><p class="tiny" style="margin:0"><b>为什么第一批：</b>现状 PUT 是「整包盲覆盖」——两个人同时改同一 workflow，后写的静默吃掉先写的。ETag 一行成本，治的是真实在流的病。</p></div>
+<h4 class="blk">读 → 带版本 → 写回</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.7">GET /api/workflows/code-review
+  → 200  ETag: "wf-42"
+
+PUT /api/workflows/code-review
+  If-Match: "wf-41"                      # 客户端手里是旧版
+  → 412 Precondition Failed（RFC7232 MUST 语义）
+  → 响应带当前 ETag: "wf-42" + 差异提示，客户端合并后重试</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制 ETag 请求对（演示）· 未发起请求">⧉ 复制</span> <span class="btn link" data-click data-toast="已复制 apply（YAML 整包）版本（演示）：同样认 If-Match">⧉ 复制 apply 版</span></p>
+<h4 class="blk">口径与约束</h4>
+<dl class="kv"><dt>ETag 形态</dt><dd class="mono">"&lt;name&gt;-&lt;revision&gt;"（不是内容哈希，便于人读与审计对齐）</dd><dt>写口分工</dt><dd class="mono">PUT 只接 spec，status 走独立 /status 写口（意图/观测分离）</dd><dt>conditions 表</dt><dd class="mono">workflow_condition · UNIQUE(workflow_id,type) · True|False|Unknown + reason + observed_generation</dd><dt>版本段策略</dt><dd class="mono">v1alpha1 → v1beta1 → v1：破坏性只升版本段 · 两版并存无损互转 · 新版不指旧版 · 到期窗口 + Warning 头</dd><dt>不承诺什么</dt><dd class="mono">不承诺 K8s 兼容（只借语义稳定性）</dd><dt>与隔离/审计的关系</dt><dd>写口鉴权仍走身份层——<b>P0-1 修完前这是只读呈现，不开写</b></dd></dl>
+<h4 class="blk">现状 → 加了 ETag 后</h4>
+<table class="tbl compact"><thead><tr><th>现状</th><th>加了 ETag 后</th></tr></thead><tbody>
+<tr><td class="tiny">两人同时 PUT → 后者静默覆盖</td><td class="tiny">后者 412，被迫看见冲突</td></tr>
+<tr><td class="tiny">「我改的那版」无凭据</td><td class="tiny">revision 可追，与 change_log seq 对齐</td></tr>
+<tr><td class="tiny">整包 YAML 往返易丢字段</td><td class="tiny">未知字段保留策略 + 版本段决定兼容性</td></tr>
+</tbody></table>
+<h4 class="blk">操作</h4>
+<p><button class="btn sm" data-back="integration.html" data-click>返回集成面</button> <span class="btn link" data-click data-goto="integration__watch.html">看 watch 账本</span></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为「乐观并发 ETag / If-Match / 412」升格详情页（规划原型 · 6.27 界面尚不存在）。RFC7232 语义、spec/status 写口分离、conditions 表结构、版本段弃用四则、P0-1 修完前只读呈现均为 §6.27 / P2-5 原文实值；ETag 值与请求样例为演示拼装，未发起任何写。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：请求对 ⧉ 复制 / apply 版 → toast（零请求）· 「看 watch 账本」跳 integration__watch.html · 顶部「← 返回」回 integration.html　按 Esc 关闭浮层。</p>
+</body></html>

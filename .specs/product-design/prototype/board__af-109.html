@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工作项 AF-109 阶段模型可配置化 · 工作项看板 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p20" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="workbench.html">工作台</span></div>
+<div class="detail-top"><span class="pill" data-back="board.html" data-click>← 返回 工作项看板</span><span class="crumb"><b>工作项 › AF-109 阶段模型可配置化</b></span><span class="chip">进行中</span><span class="chip info">负责人 = Agent · code-reviewer</span><span class="chip mono">$6.40 / 上限 $12.00</span></div>
+<div class="detail-body">
+<dl class="kv"><dt>标识 / 标题</dt><dd class="mono">AF-109 · 阶段模型可配置化</dd><dt>status</dt><dd><span class="chip">进行中 started</span> · 审核内容：配置面 6.19 原型已过审</dd><dt>triage</dt><dd><span class="chip ok">accepted</span> · 09-21 李工受理</dd><dt>assignee</dt><dd><span class="dot running"></span> <b>Agent · code-reviewer</b>（人/Agent 双轨的 Agent 轨）</dd><dt>owner_id / creator</dt><dd class="mono">user:1 李工 / user:1 李工</dd><dt>可调用目标校验</dt><dd><span class="chip ok">通过</span> 四道门：权限 ✓ 运行时 ✓ 配额 ✓ 归因 ✓（§6.0 ④）</dd><dt>优先级 / 标签</dt><dd><span class="chip warn">中</span> <span class="pill">P0-6</span> <span class="pill">配置面</span></dd><dt>产物</dt><dd class="mono tiny">DESIGN.md ✓ · TASK.md ✓（12 任务 / 9 完成）· T1-SUMMARY.md ✗</dd><dt>子任务</dt><dd class="mono tiny">AF-116（受阻）· AF-124 · AF-125</dd><dt>最后运行</dt><dd class="mono">run-8839 · <span class="chip ok">进行中</span> · 18.2k tok</dd><dt>预算</dt><dd class="mono tiny">$6.40 / 上限 $12.00（P1-6 成本归因）</dd><dt>done 证据</dt><dd><span class="chip warn">待补</span>：6 处阶段字面量盘点 + 迁移脚本演练记录</dd></dl>
+<h4 class="blk">在跑的运行（点击 → 回放）</h4>
+<table class="tbl compact"><thead><tr><th>run</th><th>步</th><th>状态</th><th>tokens</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">run-8839</td><td class="mono tiny">7 / 12</td><td><span class="dot running"></span> running</td><td class="mono tiny">18.2k</td><td><span class="btn link" data-goto="replay.html">回放</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop-run">停止</span></td></tr>
+<tr><td class="mono">run-8830</td><td class="mono tiny">12 / 12</td><td><span class="chip ok">成功</span></td><td class="mono tiny">31.7k</td><td><span class="btn link" data-goto="replay.html">回放</span></td></tr>
+<tr><td class="mono">run-8802</td><td class="mono tiny">3 / 12</td><td><span class="chip bad">失败</span></td><td class="mono tiny">9.8k</td><td><span class="btn link" data-toast="从失败步重跑（演示 · 见 6.22 二次确认）">重跑</span></td></tr>
+</tbody></table>
+<div class="callout warn" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>「已指派」不等于「在运行」：</b>本项的 Agent 负责人只表达归属与默认可执行者；取消指派、或把负责人改成另一个人，都不会中断在跑的运行——要中断得显式点「停止」。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="负责人已改为 Agent · planner（在跑的运行不受影响）（演示）">改派负责人</button> <button class="btn sm" data-pop="pp-assignee" data-click>指派给… ▾</button> <button class="btn sm primary" data-click data-goto="board__mark-done.html">完成（需证据）</button></p>
+</div>
+<div class="modal" id="md-stop-run"><div style="padding:var(--s4)"><b>停止 run-8839？</b><p class="small dim" style="margin:8px 0">只中断<b>运行</b>，不改工作项状态（状态与行为解耦）。已发出的外部副作用（1 次 commit、2 次文件写）<b>不回滚</b>；取消人将署名进回放时间线。</p><div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="run-8839 已取消 · 取消人 李工 · 回放记 wait_reason:cancelled（演示）" data-close>确认停止</button></div></div></div>
+<div class="pop" id="pp-assignee"><p class="tiny muted" style="margin:2px 4px 6px">负责人：人 / Agent 双轨（同一列，两种轨）</p>
+<table class="tbl compact"><tbody>
+<tr><td><b>李工</b> user:1</td><td class="tiny dim">人轨 · 不消耗 token 预算</td><td><span class="btn link" data-toast="已派给 李工（人轨）· 仍需显式运行请求（演示）">指派</span></td></tr>
+<tr><td><b>王工</b> user:2</td><td class="tiny dim">人轨 · 可作 done 复核人</td><td><span class="btn link" data-toast="已派给 王工（演示）">指派</span></td></tr>
+<tr><td><span class="dot running"></span> <b>Agent · code-fixer</b></td><td class="tiny dim mono">可调用目标 ✓ · 域 默认域</td><td><span class="btn link" data-toast="已派给 Agent · code-fixer（人点名 → 过四道门，仍不自动跑）（演示）">指派</span></td></tr>
+<tr><td><span class="dot dead"></span> <b>Agent · repo-hygiene</b></td><td class="tiny dim" style="color:var(--red)">offline（心跳 &gt; 75s）</td><td><span class="btn link" data-toast="拒：目标离线 · 400「runtime offline」（§6.0 ④ 四道门之二，拒因原样给出不粉饰）">指派</span></td></tr>
+<tr><td class="tiny dim">无（取消指派）</td><td class="tiny dim">在跑的运行不受影响</td><td><span class="btn link" data-toast="已取消指派；run-8839 继续（演示）">取消</span></td></tr>
+</tbody></table></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 board.html 的 <span class="mono">dr-wi-agent</span> 抽屉升格而来：字段 kv + 在跑运行表（停止 / 重跑操作链）+ 成本预算 + 改派与验收操作。「已指派」不等于「在运行」——取消指派不会中断在跑的运行，要中断得显式点停止。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：回放 → replay.html · 停止 → 二次确认 modal（不改状态）· 重跑 → toast · 改派负责人 → toast · 指派给… ▾ → 人/Agent 双轨选择器 pop（含离线拒因）· 完成（需证据）→ 整页表单 board__mark-done。</p>
+</body></html>

@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>阶段 0-change 详情 · 阶段模型配置 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<div class="detail-top"><span class="pill" data-back="stage-model.html" data-click>← 返回 阶段模型配置</span><span class="crumb"><b>管理 › 阶段模型 › 0-change 变更提案</b></span><span class="chip info">锚 unstarted</span><span class="chip mono">seq 0</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>这一行改的是一条链路：</b>阶段 ID + 产物文件名 + 门禁 + 提示词，同时驱动后端产物扫描、阶段判定、门禁校验与前端导航。<b>改这里即改全链路</b>，不再需要改 13 个文件（09-23 复核：阶段字面量口径后端实测 6 处）。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>序 / 阶段 ID</dt><dd class="mono">0 · 0-change（ID 建后不可改，被历史产物引用）</dd><dt>显示名</dt><dd>变更提案</dd><dt>产物文件</dt><dd class="mono">CHANGE.md<span class="chip ok" style="height:16px">必需</span></dd><dt>语义锚</dt><dd><span class="chip info">unstarted 未开始</span> · <b>归类建后不可改</b>（multica 迁移 332/337 实证 + 537 机械不变量测试护航）</dd><dt>门禁</dt><dd><span class="chip info">G1</span> 变更提案人批后才进需求阶段 · 规则写在<b>状态转换层</b>（动作者类型 × 目标状态）</dd><dt>提示词</dt><dd class="mono">prompts/0-change.md（6 行引用此阶段字面量）</dd><dt>停车 / 评审 / 失败恢复行为</dt><dd><span class="chip bad">禁止继承</span> 自定义阶段只继承生命周期，不继承这三类行为</dd><dt>前端导航</dt><dd class="mono">侧导航「项目 · 阶段筛选」下拉第 1 项</dd><dt>扫描规则</dt><dd class="mono">存在 CHANGE.md 且非空 → 视为已越过本阶段（缓存 5s）</dd><dt>当前实例产物</dt><dd class="mono">agent-domains/CHANGE.md · 22 行 · 09-18 16:05 · 李工</dd><dt>被引用于</dt><dd class="mono">workflow.json · 决策模型目录 D-1 · 审计 wf:stage_config_updated ×4</dd><dt>配置落点</dt><dd class="mono">GET/PUT /api/admin/workflow ⇄ workflow.json（唯一写端点）</dd></dl>
+<h4 class="blk">4 语义锚归类（本阶段所属行高亮）</h4>
+<table class="tbl compact"><thead><tr><th>锚</th><th>语义（到哪一步）</th><th>本模型内阶段</th><th>可否改归类</th></tr></thead><tbody>
+<tr><td class="mono" style="color:var(--blue)">unstarted</td><td class="tiny">还没动</td><td class="mono tiny">0-change · 1-requirement · 2-design · 2a-ui-design · 3-task</td><td><span class="chip bad">否</span></td></tr>
+<tr><td class="mono">started</td><td class="tiny">正在做</td><td class="mono tiny">4-dev · 5-test · 6-review</td><td><span class="chip bad">否</span></td></tr>
+<tr><td class="mono">done</td><td class="tiny">做完了（需证据）</td><td class="mono tiny">7-integration</td><td><span class="chip bad">否</span></td></tr>
+<tr><td class="mono">closed</td><td class="tiny">不再推进（重复/作废）</td><td class="tiny dim">（本模型未挂任何阶段）</td><td><span class="chip bad">否</span></td></tr>
+</tbody></table>
+<h4 class="blk">阶段配置变更时间线</h4>
+<div class="timeline"><p class="tl-item"><b>09-23 10:12</b> 李工 · 门禁 G1 由「无」改为「人批」· 审计 wf:stage_config_updated</p><p class="tl-item">09-22 18:02 王工 · 提示词路径 prompts/change.md → prompts/0-change.md</p><p class="tl-item fail">09-21 09:40 Agent · planner · 整包 PUT 覆盖了当日 08:10 的人工改动（<b>盲覆盖事故，无 412 拦下</b>）</p><p class="tl-item">09-18 16:05 李工 · 初始化：从后端常量导入 9 阶段</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-click data-goto="stage-model__stage-edit.html">编辑本行</button> <button class="btn sm" data-toast="已复制该阶段配置 JSON（演示）">复制 JSON</button> <button class="btn sm" style="color:var(--red)" data-click data-modal="md-del-stage">删除阶段</button></p>
+</div>
+<div class="modal" id="md-del-stage"><div style="padding:var(--s4)"><b>删除阶段 <span class="mono">0-change</span>？</b>
+<p class="small dim" style="margin:8px 0">删除后：产物扫描不再认领 <span class="mono">CHANGE.md</span>（历史 42 份变孤儿）；门禁 G1 一并失效；提示词 <span class="mono">prompts/0-change.md</span> 保留但不被引用。受影响 change 目录 <b>42</b> 个。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">理由: [变更提案已并入需求文档，不再单设阶段         ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="阶段已删除（未保存 · 整包 PUT 时才落盘）· 审计 wf:stage_deleted（演示）" data-close>确认删除</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 stage-model.html 的 <span class="mono">dr-st-change</span> 抽屉升格而来（12 行配置 kv + 4 语义锚归类表 + 变更时间线 + 删除阶段操作链）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：编辑本行 → stage-model__stage-edit（表单整页）· 复制 JSON → toast · 删除阶段 → 必填理由二次确认 modal。</p>
+</body></html>

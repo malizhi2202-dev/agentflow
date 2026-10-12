@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审计事件 · CREATE users/zhangsan 详情 · 审计日志</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p15" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="audit.html" data-click>← 返回 审计日志</span><span class="crumb"><b>审计事件 · CREATE users/zhangsan（权限变更）</b></span><span class="chip bad">敏感操作 · 权限变更</span><span class="chip mono">af-aud-0921-1302-5e07</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+<div class="detail-body">
+<h4 class="blk">事件快照</h4>
+<dl class="kv">
+<dt>事件 ID</dt><dd class="mono">af-aud-0921-1302-5e07 · 行号 9,212</dd>
+<dt>actor</dt><dd class="mono">admin · 李工 · 需 <span class="mono">user:manage</span>（危险权限点）</dd>
+<dt>动作 / 目标</dt><dd class="mono">CREATE · users/zhangsan（显示名「张三」· 登录名 testuser）</dd>
+<dt>结果</dt><dd><span class="chip ok">成功</span> · 201 · 22ms</dd>
+<dt>落点</dt><dd class="mono">users.json <span class="chip warn">裁定⑦ → 迁 MySQL users 表后此条为表行</span></dd>
+<dt>trace_id</dt><dd class="mono">af-aud-0921-1302-5e07 <span class="chip warn">合成 · 非 W3C</span></dd>
+</dl>
+<h4 class="blk">变更前后</h4>
+<div class="grid g2" style="gap:var(--s3)">
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">变更前</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--red);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">// 账号不存在
+// users.json 2 个账号</pre></div>
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">变更后</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--green);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "username": "testuser",
+  "display_name": "张三",
+  "role": "user",
+  "custom_permissions": [],
+  "project_ids": [1],
+  "password_hash": "sha256:（不写入审计）"
+}</pre></div>
+</div>
+<h4 class="blk">权限演进（该目标后续事件）</h4>
+<table class="tbl compact"><thead><tr><th>时间</th><th>动作</th><th>差异</th><th>操作者</th></tr></thead><tbody>
+<tr><td class="mono tiny">09-21 13:02</td><td><span class="badge post">CREATE</span></td><td class="tiny">零权限 · 可见项目 [agentflow]</td><td class="mono tiny">admin（本条）</td></tr>
+<tr><td class="mono tiny">09-21 13:06</td><td><span class="badge put">UPDATE</span></td><td class="tiny">+ project:read</td><td class="mono tiny">admin</td></tr>
+<tr><td class="mono tiny">09-21 13:07</td><td><span class="badge put">UPDATE</span></td><td class="tiny">+ project:write</td><td class="mono tiny">admin</td></tr>
+<tr><td class="mono tiny">09-21 13:58</td><td><span class="badge del">DELETE</span></td><td class="tiny">被拒 403（本人试删角色）</td><td class="mono tiny">testuser</td></tr>
+<tr><td class="mono tiny">09-22 09:31</td><td><span class="badge put">UPDATE</span></td><td class="tiny">角色 user → user（未变 · 仅改备注）</td><td class="mono tiny">admin</td></tr>
+</tbody></table>
+<div class="callout bad" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>口令永不明文入审计：</b><span class="mono">password_hash</span> 在写审计前被剔除；导出 CSV 同列整列留空并注明「已剔除」。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="跳 §6.16 用户与权限 · testuser 详情（演示）">看用户详情</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：看用户详情→toast · 变更前后对照与权限演进表全宽展示 · 口令永不明文入审计的红线注记保留　按 Esc 关闭浮层。</p>
+</body></html>

@@ -1,0 +1,52 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>部署方案 L2 · 跨平台稳妥（llama.cpp · Metal）详情 · 环境参谋</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p25" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="env-advisor.html" data-click>← 返回 环境参谋</span><span class="crumb"><b>方案详情 · L2 跨平台稳妥（llama.cpp · Metal）</b></span><span class="chip">次选</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="finetune.html">微调工厂</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>选它的理由不是快，是稳：</b>Q8_0 与 bf16 的<b>决策一致率 99.4%</b>，而体积只有 2.1GB；换机 / 换 OS 都能跑，跨端可复现。<b>微调不在这条轨上</b>——要微调走 LLaMA-Factory 另配（L1 或达标独显机）。</p></div>
+<h4 class="blk">探测依据 · 成本 · 边界</h4>
+<dl class="kv"><dt>探测依据</dt><dd class="mono">Metal ✓ · llama.cpp 未安装 · brew 可用（/opt/homebrew/bin/brew 命中）</dd><dt>内存预算</dt><dd class="mono">Q8_0 权重 2.1GB + KV 余量 ≈ 3GB（32GB 统一内存宽裕）</dd><dt>模型 · 量化</dt><dd class="mono">Jev-Style-Qwen3.5-2B · Q8_0（2.1GB）</dd><dt>延迟估算</dt><dd class="mono">~110ms/决策（P95 目标 ≤300ms 内）</dd><dt>决策一致率</dt><dd class="mono">99.4% vs bf16（L1）——路由结论几乎不变</dd><dt>能 / 不能</dt><dd>推理 ✓ · 微调 ✗ · 双轨备援 ✓（与 §6.23 云轨互为备）</dd><dt>成本</dt><dd class="mono">磁盘 2.1GB · 0 元 · 数据不出域</dd><dt>安装耗时估算</dt><dd class="mono">brew 拉取 ≈2–4min（网络相关）· 不占用训练窗口</dd><dt>端点</dt><dd class="mono">llama-server --port 8080（与 L1 同端口，二选一）</dd><dt>当前缺失步骤</dt><dd>2 项（装 llama.cpp / 下 GGUF）</dd><dt>采用后写什么</dt><dd class="mono">同上：仅写建议配置草案，不写 config、不启进程</dd></dl>
+<h4 class="blk">命令清单</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75"># ① 装引擎
+brew install llama.cpp
+
+# ② 下模型（含校验）
+huggingface-cli download Qwen/Qwen3.5-2B-GGUF Qwen3.5-2B-Q8_0.gguf \
+  --local-dir ~/models     # sha256 校验行随命令给出
+
+# ③ 起服务 + ④ 只读校验
+llama-server -m ~/models/Qwen3.5-2B-Q8_0.gguf --port 8080
+curl -s http://127.0.0.1:8080/v1/models</pre>
+<p style="margin-top:var(--s3)"><span class="btn link" data-click data-toast="✓ 已复制 L2 全部命令（演示）· 未执行任何动作">⧉ 复制全部命令</span><span class="btn link" data-click data-toast="已下载 advisor-L2.sh（演示）">⭳ 下载脚本</span><span class="btn link" data-click data-toast="L2 与 L1 共用 :8080：采用 L2 时页面会提示端口占用（演示）">端口冲突提示</span></p>
+<h4 class="blk">L1 ↔ L2 取舍账</h4>
+<table class="tbl compact"><thead><tr><th>维度</th><th>L1 · MLX bf16</th><th>L2 · llama.cpp Q8_0</th></tr></thead><tbody>
+<tr><td>磁盘</td><td class="mono">7.8GB</td><td class="mono">2.1GB</td></tr>
+<tr><td>延迟</td><td class="mono">~80ms</td><td class="mono">~110ms</td></tr>
+<tr><td>决策一致率</td><td class="mono">基准</td><td class="mono">99.4%</td></tr>
+<tr><td>本机微调</td><td><span class="chip ok">可</span></td><td><span class="chip bad">不可</span></td></tr>
+<tr><td>跨平台</td><td><span class="chip bad">仅 Apple</span></td><td><span class="chip ok">mac/linux/win</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-back="env-advisor.html">只要方案不采用 · 返回对比表</button> <button class="btn sm primary" data-click data-modal="md-adopt">采用此方案 ▸ 写配置建议</button></p>
+</div>
+<div class="modal" id="md-adopt"><div style="padding:var(--s4)"><b>采用 L1 · 本机最优（MLX）？</b>
+<p class="small dim" style="margin:8px 0"><b>这一步只写建议，不执行</b>（AC-E4）：平台不会装引擎、不会下模型、不会改配置，也不会因此启用任何决策用途。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75"># 将写入 .specs/small-model-decisions/advisor-plan.md（草案 · 待人审）
+layer: L1
+engine: mlx + mlx-lm
+model: Qwen3.5-2B bf16 (7.8GB, Apache-2.0)
+endpoint: http://127.0.0.1:8080/v1   # 建议值，未启动
+steps_unchecked: [装引擎, 下模型, 配端点, 连通校验]
+applied_by: admin · 演示
+</pre>
+<ul class="small dim" style="margin:8px 0 8px 18px">
+<li>影响：无运行时变化 · 仅产出一份草案文档 + 审计记录 <span class="mono">advisor_plan_adopted</span></li>
+<li>可撤销：删除草案即回到现状（不改任何既有配置）</li>
+<li>仍需人工：逐条复制命令去终端执行，回来勾 ☐ 记进度</li>
+</ul>
+<div style="text-align:right"><button class="btn sm" data-close>再想想</button> <button class="btn sm primary" data-toast="已写入建议草案 advisor-plan.md（演示）· 平台未执行任何安装/下载" data-close>确认采用（写建议）</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：⧉ 复制命令 / ⭳ 下载脚本 / 端口冲突提示→toast · L1↔L2 取舍账全宽展示 · 「采用此方案」→二次确认（只写建议草案）　按 Esc 关闭浮层。</p>
+</body></html>

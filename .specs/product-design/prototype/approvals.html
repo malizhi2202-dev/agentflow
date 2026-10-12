@@ -1,0 +1,145 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审批中心 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p17" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="control-plane.html">Agent 管控</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="audit.html">审计日志</span></div>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>这里是 <b>HITL 人机协同审批</b>：Agent 执行到需要人工把关的动作时<b>暂停请求人批</b>，人做出决策后<b>回到同一 task 上下文续跑</b>，不重建运行。审批为阻塞式：不决策则 run 一直挂起，不会超时自动放行。</p>
+<p class="tiny dim" style="padding:0 18px">〔09-23 裁定⑦注〕决策落 <span class="mono">human_approvals</span>（<span class="mono">agent_id / task_id / form_data / response_data / pending|approved|rejected</span>），权威库 = <b>MySQL</b>；审批挂起 ⇄ A2A <span class="mono">TASK_STATE_INPUT_REQUIRED</span>，回复 = 同一 task 的续跑（P1-12）。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/approvals</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html" class="active"><svg class="icon"><use href="#i-shield"/></svg>审批 <span class="chip warn" style="height:16px;padding:0 5px">2</span></a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">审批中心</span><span class="right"><span class="chip warn">2 条待决策</span><span class="pill mono" data-click data-pop="pp-mode" title="Never / On-Request / Smart / Unless-Trusted">审批模式：Smart ▾</span><button class="btn sm" data-click data-pop="pp-assign">转派审批人</button></span></div>
+          <div class="app-body">
+            <div class="callout" style="margin-top:0"><p><b>这里审批的是「Agent 执行中暂停请求人工」的 HITL 人机协同，不是「调和引擎危险动作」。</b>两者是<b>两个不同入口</b>：本页单据来自运行中的 Agent（run / task 上下文 + 待批工具调用 + 决策 + 拒绝理由），而调和引擎的自愈修复动作（终止 / 替换实例等）已并入 <span class="mono">Agent 管控</span> 的调和时间线。HITL 的响应<b>回到同一 task 上下文续跑</b>，不重建运行。</p></div>
+            <div class="tabs"><span class="tab active">待决策 <span class="chip warn" style="height:16px">2</span></span><span class="tab" data-toast="切到「已处理」：AP-29 已批准 / AP-28 已驳回（演示）">已处理 <span class="chip" style="height:16px">2</span></span></div>
+            <div class="grid g3" style="align-items:start;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,0.85fr)">
+              <div class="panel tight" style="padding:0;overflow:hidden">
+                <div class="tree">
+                  <div class="tree-row l1">待决策 <span class="chip warn" style="height:16px;padding:0 5px">2</span></div>
+                  <div class="tree-row" style="background:var(--bg-selected)" data-click>
+                    <span class="dot running"></span><span class="name">AP-31 · 写文件需要 project:write</span><span class="chip bad">dangerous</span>
+                  </div>
+                  <div class="tree-row" data-click data-toast="切到 AP-30 · 执行 rm -rf（危险动作 · 演示）">
+                    <span class="dot running"></span><span class="name">AP-30 · 执行 rm -rf</span><span class="chip bad">dangerous</span>
+                  </div>
+                  <div class="tree-row l1" style="opacity:.75">已处理 <span class="chip" style="height:16px;padding:0 5px">2</span></div>
+                  <div class="tree-row" style="opacity:.75" data-click data-toast="切到 AP-29 · 调用外部 API 发送数据（已批准 · 演示）">
+                    <span class="dot idle"></span><span class="name">AP-29 · 调用外部 API 发送数据</span><span class="chip ok">已批准</span>
+                  </div>
+                  <div class="tree-row" style="opacity:.75" data-click data-toast="切到 AP-28 · 安装依赖（已驳回 · 演示）">
+                    <span class="dot idle"></span><span class="name">AP-28 · 安装依赖</span><span class="chip bad">已驳回</span>
+                  </div>
+                </div>
+                <p class="tiny dim" style="margin:var(--s3)">每条 = 一张<b>审批单（HITL）</b>，带稳定 id（AP-xx）与归属 task 上下文。</p>
+              </div>
+              <div class="panel">
+                <div style="display:flex;gap:6px;align-items:center;margin-bottom:var(--s3);flex-wrap:wrap"><span class="h2p" style="margin:0;color:var(--blue)">AP-31 · 写文件需要 project:write</span><span class="chip bad">dangerous</span><span class="chip warn" style="margin-left:auto">pending · 等待审批</span></div>
+                <dl class="kv">
+                  <dt>稳定 ID</dt><dd class="mono">AP-31（审批单 id 全程稳定，决策复用同一单据，不换号）</dd>
+                  <dt>归属</dt><dd class="mono">run r-128 · task-1 · agent 审查 Agent · 标准</dd>
+                  <dt>任务上下文</dt><dd class="mono">工作项 AF-104「收件箱聚合规则」· 执行到 seq 14</dd>
+                  <dt>执行模式</dt><dd><span class="chip warn">Smart</span> 仅高风险动作请求（写产物 / rm / 网络发送）</dd>
+                  <dt>发起时间</dt><dd class="mono">09-22 14:32:07 · 已挂起 8m 12s</dd>
+                </dl>
+                <p class="h2p" style="margin-top:var(--s4)">待批动作 <span class="tiny dim">（1 项 · 审批卡覆盖工具调用内容）</span></p>
+                <div class="toolcall">write_file(path=&quot;/work-items/AF-104/REVIEW.md&quot;, content=&quot;# 收件箱聚合规则 · 审查结论\n…（4.2KB · 截断展示）&quot;, append=false)<br><span class="dim">— 需 project:write · 把审查结论写回工作项产物快照</span></div>
+                <div class="callout warn" style="margin-top:var(--s3)">
+                  <p><b>触发审批的原因：</b>审查 Agent · 标准的角色仅有 <span class="mono">project:read</span>（只读），而写产物文件需要 <span class="mono">project:write</span>；Smart 模式下「写产物」属高写风险动作 → <b>暂停请求人工</b>，不自动放行。</p>
+                </div>
+                <div class="callout ok" style="margin-top:var(--s2)">
+                  <p><b>回到同一任务上下文：</b>决策只写 <span class="mono">human_approvals.response_data</span>，不重建 run。批准后执行从 <span class="mono">seq 14</span> 继续，沿用同一 <span class="mono">run r-128 / task-1</span>；驳回则 agent 携拒绝理由改选方案，仍是同一 task——<b>都不新起一次运行</b>（P1-12 · A2A <span class="mono">INPUT_REQUIRED</span> 续跑）。</p>
+                </div>
+                <div class="grid g2" style="margin-top:var(--s3)">
+                  <div class="panel tight" style="background:var(--bg-input)">
+                    <p class="tiny muted" style="margin:0 0 4px">若批准</p>
+                    <p class="small" style="margin:0">write_file 以原参数落盘，run r-128 从 seq 14 续跑 seq 15…</p>
+                  </div>
+                  <div class="panel tight" style="background:var(--bg-input)">
+                    <p class="tiny muted" style="margin:0 0 4px">若驳回</p>
+                    <p class="small" style="margin:0">write_file 不下发，agent 携拒绝理由改选方案（改人工合并）。</p>
+                  </div>
+                </div>
+                <div style="margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap">
+                  <button class="btn sm primary" data-toast="已批准 · 决策落 human_approvals/31 · 执行从 seq 14 继续（演示）"><svg class="icon"><use href="#i-check"/></svg>批准</button>
+                  <button class="btn sm" data-click data-modal="md-edit"><svg class="icon"><use href="#i-file"/></svg>编辑后批准</button>
+                  <button class="btn sm" style="color:var(--red)" data-click data-modal="md-reject"><svg class="icon"><use href="#i-x"/></svg>驳回</button>
+                  <span class="tiny dim" style="flex:1;text-align:right">决策写入 <span class="mono">response_data</span> · 落审计 <span class="mono">approval:approved|rejected</span></span>
+                </div>
+              </div>
+              <div class="panel tight">
+                <p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">决策记录（已处理）</p>
+                <div class="timeline" style="margin:0">
+                  <div class="tl-item" data-click data-toast="AP-29 详情：调用外部 API 发送数据 · 已批准（演示）"><b>已批准</b> · AP-29 调用外部 API 发送数据<br><span class="dim tiny">admin · 09-22 15:10 · 从 seq 9 继续</span></div>
+                  <div class="tl-item fail" data-click data-toast="AP-28 详情：安装依赖 · 已驳回（演示）"><b>已驳回</b> · AP-28 安装依赖<br><span class="dim tiny">admin · 09-22 11:47 · 理由：改用锁定版本清单</span></div>
+                  <div class="tl-item" data-click data-toast="AP-27 详情：读生产密钥 · 已驳回（演示）"><b>已驳回</b> · AP-27 读取生产密钥<br><span class="dim tiny">admin · 09-21 18:02 · 理由：越权，密钥不下发</span></div>
+                </div>
+                <p class="tiny dim" style="margin:var(--s3) 0 0">决策详情落库 <span class="mono">human_approvals</span>（agent_id / task_id / form_data / response_data / status），且本身写入审计。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="modal" id="md-reject"><div style="padding:var(--s4)"><b>驳回 AP-31「写文件需要 project:write」？</b>
+<p class="small dim" style="margin:8px 0"><b style="color:var(--red)">理由必填</b>（破坏性决策二次确认 + 理由入 <span class="mono">human_approvals.response_data.deny_reason</span> 与审计）。驳回后 write_file <b>不下发</b>，run r-128 转异常分支：agent 携拒绝理由改选方案（如改人工合并 REVIEW.md），task 仍是同一 task-1，不重建。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>本审批单</td><td><span class="chip bad">status=rejected · 闭合不可改</span></td></tr>
+<tr><td>待批动作 write_file</td><td><span class="chip bad">不下发</span> · 参数不落盘</td></tr>
+<tr><td>run r-128 / task-1</td><td><span class="chip warn">转异常分支</span> · agent 收到拒绝理由</td></tr>
+<tr><td>A2A 语义映射</td><td><span class="chip info">同 task 续跑 · <b>非</b> TaskState.rejected</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">拒绝理由（必填）: [审查结论应交由人复核后手动合并，勿自动写产物 ]</pre>
+<p class="tiny" style="margin:8px 0 0;color:var(--text-muted)"><b>映射注：</b>「拒绝」写的是<b>决策字段</b>（<span class="mono">status=rejected</span>），不等于把 task 标成 A2A 的 <span class="mono">rejected</span>——后者表示<b>受理方拒绝承接</b>；这里是<b>已承接后由人否决一个动作</b>，task 延续同一上下文（P1-12）。</p>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已驳回 · 理由已记 · 审计 approval:rejected · run r-128 转异常分支（演示）" data-close>确认驳回</button></div></div></div>
+
+<div class="modal" id="md-edit"><div style="padding:var(--s4)"><b>编辑后批准 · AP-31「write_file」</b>
+<p class="small dim" style="margin:8px 0">回填要覆盖的工具参数（覆盖后即作为批准执行的实际入参写回 <span class="mono">response_data</span>），不改审批单 id 与 task 上下文。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">write_file(path=&quot;/work-items/AF-104/REVIEW.md&quot;, content=&quot;…&quot;, append=false)
+path:   /work-items/AF-104/REVIEW.md        （只读展示，禁改路径）
+content: [审查结论全文（可编辑 · 4.2KB）…]   （可回填）
+append: false</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已编辑批准 · 参数已回填 · 决策落 human_approvals/31 · 从 seq 14 继续（演示）" data-close>确认批准</button></div></div></div>
+
+<div class="pop" id="pp-mode" style="max-width:480px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ 审批模式（intent-os 四态 · 逐 Agent 可配）</b>　当前 <span class="mono">审查 Agent · 标准 = Smart</span></p>
+<table class="tbl compact"><thead><tr><th>模式</th><th>语义</th><th>请求人批的时机</th></tr></thead><tbody>
+<tr><td class="mono">Never</td><td class="tiny">永不打断</td><td class="tiny dim">任何动作都不请求批准，直接执行</td></tr>
+<tr><td class="mono">On-Request</td><td class="tiny">每次工具调用都请求批准</td><td class="tiny dim">逐 call 请求（含只读）</td></tr>
+<tr><td class="mono" style="color:var(--blue)">Smart</td><td class="tiny">仅高风险动作请求</td><td class="tiny dim">写产物 / rm / 网络发送等危险动作</td></tr>
+<tr><td class="mono">Unless-Trusted</td><td class="tiny">除非受信任否则请求</td><td class="tiny dim">来源 / 域不受信即请求；受信放行</td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">审批卡<b>覆盖工具调用内容</b>：卡片内展示工具名 + 参数，人工可在批准前回填（编辑后批准）。</p></div>
+
+<div class="pop" id="pp-assign" style="max-width:400px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ 转派审批人</b>　改的是<b>可决策人</b>，不改单据内容与挂起时长；只 ping 新决策人</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">admin · 李工</td><td class="mono tiny">project:read + write</td><td><span class="chip info">当前</span></td></tr>
+<tr><td class="mono">wangwu · 王五</td><td class="mono tiny">project:read + audit:view</td><td><span class="btn link" data-toast="已转派 AP-31 → wangwu（审计角色可决策 · 但会削弱独立性，已给黄条提示）（演示）" data-close>转派</span></td></tr>
+<tr><td class="mono">testuser · 张三</td><td class="mono tiny">project:read + write</td><td><span class="btn link" data-toast="已转派 AP-31 → testuser · 通知只 ping 新决策人（演示）" data-close>转派</span></td></tr>
+<tr><td class="mono">lisi · 李四</td><td class="mono tiny">project:read</td><td><span class="btn link" data-toast="✗ 不可转派给 lisi：缺 project:write（审批决策需写权限）（演示）" data-close>转派</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">dangerous 级转派需二次确认（可决策人变更本身就是权限动作）。</p></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+
+<p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明：</b>AP-31「写文件需要 project:write」对应 run r-128（审查 Agent · 标准）在 AF-104 执行到 seq 14 时的高写风险动作——与「执行回放」页 run r-128 的 <span class="mono">human_approval</span> 等待段是<b>同一件事的两种视角</b>。审批为阻塞式，无超时放行；响应<b>回到同一 task 上下文续跑、不重建 run</b>（P1-12 / A2A INPUT_REQUIRED）。单号 AP-31/30/29/28、挂起时长与留言内容为演示值。</p>
+<p class="tiny dim" style="padding:0 18px 14px">可点区演示：顶栏「审批模式：Smart ▾」→ pop 语义表（Never / On-Request / Smart / Unless-Trusted）·「转派审批人」→ pop ·「批准」→ toast ·「编辑后批准」→ 回填参数的确认 modal ·「驳回」→ 一屏读得完的二次确认 modal（影响清单 + 必填理由 + 拒绝 ≠ REJECTED 映射注）· 左树其余审批单 / 右列时间线 → toast（切到该单 · 演示）· 页签「已处理」→ toast　按 Esc 关闭所有浮层。</p>
+</body></html>

@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审计事件 · DELETE roles/custom/7 → 403 详情 · 审计日志</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p15" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="audit.html" data-click>← 返回 审计日志</span><span class="crumb"><b>审计事件 · DELETE roles/custom/7 → 403 拒绝</b></span><span class="chip bad">敏感操作</span><span class="chip bad">拒绝</span><span class="chip mono">af-aud-0921-1358-90de</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>权限拦截同样入审计：</b>失败请求不是「没发生」——被拒也要留痕，否则无法回答「谁试过删什么」。</p></div>
+<h4 class="blk">事件快照</h4>
+<dl class="kv" style="margin-top:var(--s3)">
+<dt>事件 ID</dt><dd class="mono">af-aud-0921-1358-90de · 行号 9,231</dd>
+<dt>actor</dt><dd class="mono">testuser · 张三 <span class="chip">user</span> · 人</dd>
+<dt>actor 有效权限</dt><dd class="mono tiny">project:read · project:write（2 项）</dd>
+<dt>所需权限</dt><dd class="mono tiny" style="color:var(--red)">project:delete <span class="chip bad">危险权限点 · 未持有</span></dd>
+<dt>动作 / 目标</dt><dd class="mono">DELETE · roles/custom/7</dd>
+<dt>结果</dt><dd><span class="chip bad">403 拒绝</span> · 6ms（未进业务层）</dd>
+<dt>来源</dt><dd class="mono">127.0.0.1 · X-User-Id: testuser</dd>
+<dt>trace_id</dt><dd class="mono">af-aud-0921-1358-90de <span class="chip warn">合成 · 非 W3C</span></dd>
+</dl>
+<h4 class="blk">变更前后（被拒 → 资源零变化）</h4>
+<div class="grid g2" style="gap:var(--s3)">
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">请求前</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "custom_role_id": 7,
+  "name": "试验角色 A",
+  "created_by": "admin"
+}</pre></div>
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">请求后（未变）</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--green);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">// 授权中间件短路返回 403
+// 资源状态：完全未变
+// 差异：无（0 字段）
+// 响应体：{"detail":"需要 project:delete 权限"}</pre></div>
+</div>
+<h4 class="blk">该 actor 当日尝试序列</h4>
+<table class="tbl compact"><thead><tr><th>时间</th><th>动作</th><th>目标</th><th>结果</th></tr></thead><tbody>
+<tr><td class="mono tiny">13:52:04</td><td><span class="badge put">UPDATE</span></td><td class="mono tiny">roles/custom/3</td><td><span class="chip ok">成功</span></td></tr>
+<tr><td class="mono tiny">13:55:41</td><td><span class="badge del">DELETE</span></td><td class="mono tiny">agents/12</td><td><span class="chip bad">403</span></td></tr>
+<tr><td class="mono tiny">13:57:18</td><td><span class="badge del">DELETE</span></td><td class="mono tiny">domains/3</td><td><span class="chip bad">403</span></td></tr>
+<tr><td class="mono tiny">13:58:02</td><td><span class="badge del">DELETE</span></td><td class="mono tiny">roles/custom/7</td><td><span class="chip bad">403</span>（本条）</td></tr>
+<tr><td class="mono tiny">14:12:33</td><td><span class="badge post">CREATE</span></td><td class="mono tiny">agents/12</td><td><span class="chip ok">成功</span></td></tr>
+</tbody></table>
+<div class="callout" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>连拒三次同类动作</b>后仍继续 CREATE——这类模式适合在监控侧设「权限拒绝聚集」告警（当前未实装，见 §6.11 告警中心）。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已复制脱敏 JSON（演示）">复制 JSON</button> <button class="btn sm primary" data-toast="已按 actor=testuser + 结果=403 重建筛选（演示）">查该用户全部被拒事件</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：复制 JSON / 查该用户全部被拒事件→toast · 被拒请求资源零变化的对照与当日尝试序列表全宽展示（失败也留痕）　按 Esc 关闭浮层。</p>
+</body></html>

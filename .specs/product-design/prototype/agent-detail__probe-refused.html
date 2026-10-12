@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>探针失败 refused · agent-1 详情 · Agent 详情 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="agent-detail.html" data-click>← 返回 Agent 详情</span><span class="crumb"><span class="dim">Agent 详情 /</span> <b>探针失败 refused · agent-1</b></span><span class="chip bad">第 3 连败</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="runtime.html">运行时</span></div>
+<div class="detail-body">
+<dl class="kv"><dt>时刻</dt><dd class="mono">14:30:10</dd><dt>探测目标</dt><dd class="mono">https://api.openai.com/v1/health</dd><dt>错误</dt><dd><span class="chip bad">connection refused</span> · <span class="mono">elapsed 6ms</span>（TCP 层即被拒）</dd><dt>与 timeout 的区别</dt><dd>refused = 端点未监听 / 网关断开；timeout = 已连接但无响应，处置方向不同</dd><dt>触发动作</dt><dd><span class="chip warn">连续 3 败</span> → 按 <span class="mono">caution</span> 自动重启（非 dangerous，故不转人工）</dd><dt>重启结果</dt><dd class="mono">14:30:22 下发 · 14:33:10 复探通过 · 期间 2 次探测未计入通过率</dd><dt>拓扑检查</dt><dd><span class="chip ok">通过</span> · 修复本实例不阻断下游 agent-5（汇总）</dd><dt>归因</dt><dd>网络出口抖动 · 同窗 <span class="mono">agent-3</span> refused</dd></dl>
+<h4 class="blk">三败时间线（本轮自愈完整链路）</h4>
+<div class="timeline">
+  <div class="tl-item fail"><b>14:30:10</b> · 第 3 败 refused → 判定 caution</div>
+  <div class="tl-item fail"><b>14:31:10</b> · 第 2 败 timeout（重启已下发，此处为重叠记录）</div>
+  <div class="tl-item fail"><b>14:32:10</b> · 第 1 败 timeout</div>
+  <div class="tl-item"><b>14:30:22</b> · <span class="chip ok">safe</span> 重启完成 → 恢复上报</div>
+  <div class="tl-item"><b>14:33:10</b> · 复探通过 51ms → healthy</div>
+  <div class="tl-item"><b>审计</b> · <span class="mono">reconcile.autorestart</span> 含变更前快照 snap-1198</div>
+</div>
+<h4 class="blk">该端点近 10 次探测</h4>
+<table class="tbl compact"><thead><tr><th>时间</th><th>结果</th><th>耗时</th></tr></thead><tbody>
+<tr><td class="mono">14:35:10</td><td><span class="chip ok">200</span></td><td class="mono">42ms</td></tr>
+<tr><td class="mono">14:34:10</td><td><span class="chip ok">200</span></td><td class="mono">38ms</td></tr>
+<tr><td class="mono">14:33:10</td><td><span class="chip ok">200</span></td><td class="mono">51ms</td></tr>
+<tr><td class="mono">14:32:10</td><td><span class="chip bad">timeout</span></td><td class="mono">5001ms</td></tr>
+<tr><td class="mono">14:31:10</td><td><span class="chip bad">timeout</span></td><td class="mono">5000ms</td></tr>
+<tr><td class="mono">14:30:10</td><td><span class="chip bad">refused</span></td><td class="mono">6ms</td></tr>
+<tr><td class="mono">14:29:10</td><td><span class="chip ok">200</span></td><td class="mono">40ms</td></tr>
+<tr><td class="mono">14:28:10</td><td><span class="chip ok">200</span></td><td class="mono">39ms</td></tr>
+<tr><td class="mono">14:27:10</td><td><span class="chip ok">200</span></td><td class="mono">44ms</td></tr>
+<tr><td class="mono">14:26:10</td><td><span class="chip ok">200</span></td><td class="mono">41ms</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已复制探测上下文（含脱敏凭据）（演示）">复制上下文</button> <span class="btn link" data-toast="跳 §6.11 告警中心：本实例 2 条已确认告警（演示）">看相关告警</span></p>
+</div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由 Agent 详情浮层升格：探测上下文与原始输出全宽 · 处置钮保留原接线（复探 / 重启 → toast · 破坏性动作 → 二次确认，引用到的自带副本）· 回放跳 §6.22　按 Esc 关闭浮层。</p>
+</body></html>

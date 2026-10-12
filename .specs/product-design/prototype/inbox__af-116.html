@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AF-116 需决策 详情 · 收件箱 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p21" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="inbox.html" data-click>← 返回 收件箱</span><span class="crumb"><b>需决策 · AF-116 修复 32 个 TS 错误</b></span><span class="chip bad">需决策</span><span class="chip">受阻 2h</span><span class="chip mono">run-8842</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="replay.html">执行回放</span></div>
+<div class="detail-body">
+<h4 class="blk">为什么现在才打扰你（规则①）</h4>
+<div class="callout"><p class="tiny" style="margin:0">这条推送的前提是「Agent 自己已经不会选」——它把两个方案都试到边界后升级，而不是每一步都来问。信息不足的选项不会推给你（下面两个方案各带代价）。</p></div>
+<h4 class="blk">来龙去脉</h4>
+<dl class="kv"><dt>来源</dt><dd><span class="dot running"></span> Agent · code-fixer（run-8842 · 第 3 次失败后升级）</dd><dt>类型 / 级别</dt><dd><span class="chip bad">需决策</span> · escalation（不是「运行失败」——失败通知另有 4 条，见下）</dd><dt>工作项</dt><dd class="mono">AF-116 · status 进行中(started) × triage accepted · 受阻 wait_reason blocked_on:类型冲突</dd><dt>创建者 / 复核</dt><dd class="mono tiny">Agent · planner（自动推导）/ 王工</dd><dt>项目 · 迭代 · 标签</dt><dd class="mono tiny">agentflow · 2026-W39 · P0-4 / 前端构建</dd><dt>推给了谁</dt><dd class="tiny">李工（owner）· 王工（复核人）· 共 2 人，<b>未群发</b></dd><dt>首次推送</dt><dd class="mono tiny">09-23 14:09（第 1 次）· 14:41 因目录读取失败<b>重复推送</b>（规则②宁多发不漏发）</dd><dt>处理后果</dt><dd>方案 A 改类型 → 影响 3 处调用方；方案 B 改调用方 → 需补迁移说明</dd><dt>不处理会怎样</dt><dd><span class="chip warn">不自动放行</span> 工作项停在受阻，运行不再重试（<b>不会</b>偷偷按 Agent 的猜测继续）</dd><dt>门禁位置</dt><dd class="mono tiny">规则写在状态转换层：(actor=agent, target=5-test 通过) → 需人批</dd><dt>关联产物</dt><dd class="mono tiny">.specs/agent-domains/REQUIREMENT.md · TASK.md（3 任务未完）</dd></dl>
+<h4 class="blk">上下文跳转（同一工作项的四张脸）</h4>
+<table class="tbl compact"><thead><tr><th>去处</th><th>定位</th><th>动作</th></tr></thead><tbody>
+<tr><td>工作项看板</td><td class="mono tiny">AF-116 · 进行中等</td><td><span class="btn link" data-toast="跳转 6.20 工作项看板 → AF-116 详情（演示）">打开</span></td></tr>
+<tr><td>执行回放</td><td class="mono tiny">run-8842 · 14:06 失败步</td><td><span class="btn link" data-toast="跳转 6.22 执行回放 → 失败步（trace_spans 当前 0 行 · 依赖 C10-0 先修产生端）（演示）">打开</span></td></tr>
+<tr><td>对话中心</td><td class="mono tiny">sess-2214（升级来的一条对话）</td><td><span class="btn link" data-toast="跳转 6.8 对话中心 → sess-2214（多上下文挂靠 · 演示）">打开</span></td></tr>
+<tr><td>产物编辑</td><td class="mono tiny">REQUIREMENT.md@wf-45</td><td><span class="btn link" data-toast="跳转 6.18 产物编辑 → REQUIREMENT.md（演示）">打开</span></td></tr>
+</tbody></table>
+<h4 class="blk">待你选的三件套（§6.0 ④）</h4>
+<table class="tbl compact"><thead><tr><th>方案</th><th>内容</th><th>代价</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">A</td><td class="tiny">给 <span class="mono">ProjectManager.tsx</span> 的类型补 <span class="mono">workflow_ids: string[]</span></td><td class="tiny">3 处调用方需同步；DESIGN.md 需补一句</td><td><span class="btn sm primary" data-toast="方案 A 已放行 · 携你的选择作为运行请求入队（不是「自动重跑」）· 审计 inbox:decision（演示）">选 A 并放行</span></td></tr>
+<tr><td class="mono">B</td><td class="tiny">改调用方为单值 <span class="mono">workflow_id</span></td><td class="tiny">与 6.23 决策模型目录的多选中期规划冲突</td><td><span class="btn sm" data-toast="方案 B 已放行（演示 · 同上，需显式运行请求）">选 B 并放行</span></td></tr>
+<tr><td class="mono tiny">改高级表单</td><td class="tiny">回填 Agent 原始入参自己改（Edit as advanced form）</td><td class="tiny dim">你手写，不消耗 Agent 预算</td><td><span class="btn sm" data-toast="已回填原入参到高级表单（演示）">回填编辑</span></td></tr>
+<tr><td class="mono tiny">升级到人</td><td class="tiny">转派给王工（前端 owner），本条从你的收件箱移走</td><td class="tiny">王工的待决策 +1</td><td><span class="btn sm" data-toast="已转派给王工 · 本条移出你的收件箱（演示）">转派</span></td></tr>
+</tbody></table>
+<h4 class="blk">同类通知（工作项推进后会自动归档 · 规则③）</h4>
+<div class="timeline"><p class="tl-item fail">14:06 run-8842 失败 · max_retries=3 触发 · 待自愈归档</p><p class="tl-item fail">13:52 run-8839 失败 · 同因（类型冲突）· 待自愈归档</p><p class="tl-item fail">13:31 run-8836 失败 · 同因 · 待自愈归档</p><p class="tl-item">14:09 升级为本条「需决策」——三条失败通知不再单独打扰你</p></div>
+<h4 class="blk">本条处理</h4>
+<p><button class="btn sm" data-toast="已标记已读（演示）">标已读</button> <button class="btn sm" data-toast="已归档本条 · 工作项仍在受阻，不会因此解冻（演示）">归档</button> <button class="btn sm" style="color:var(--red)" data-click data-modal="md-ignore">忽略（静音 24h）</button> <button class="btn sm primary" data-toast="方案已放行 · 携运行请求入队 · 审计 inbox:decision（演示）">选方案并放行</button></p>
+</div>
+<div class="modal" id="md-ignore"><div style="padding:var(--s4)"><b>忽略这条「需决策」通知？</b><p class="small dim" style="margin:8px 0"><b>忽略只影响通知，不影响工作项：</b>AF-116 会继续停在受阻、不会自动放行。规则②（宁多发不漏发）意味着<b>到期后还会再推</b>；要彻底不再打扰需改派负责人或关闭工作项。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">静音到: [24 小时 ▾]   理由（可空）: [在会议中，稍后处理 ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已静音 24 小时 · 工作项仍受阻（演示）">确认忽略</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为收件箱「需决策」条目 AF-116 的升格详情页（规划原型 · 6.21 界面尚不存在）。上下文四张脸、三件套方案（选 A/B、回填高级表单、升级到人）、通知分层三规则与「挂起→同任务延续」逐字取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.21 / §6.0 ④⑫；run id 与推送时刻为编造。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：三件套方案表 → 选 A/B 放行 · 回填编辑 · 转派（均 toast · 演示）· 「忽略」→ 二次确认模态（静音 + 理由）· 左上「← 返回 收件箱」回 inbox.html　按 Esc 关闭浮层。</p>
+</body></html>

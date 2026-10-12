@@ -1,0 +1,41 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审计事件 · UPDATE control-plane/schedule 详情 · 审计日志</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p15" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="audit.html" data-click>← 返回 审计日志</span><span class="crumb"><b>审计事件 · UPDATE control-plane/schedule</b></span><span class="chip mono">af-aud-0921-1341-b8f5</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+<div class="detail-body">
+<h4 class="blk">事件快照</h4>
+<dl class="kv">
+<dt>actor</dt><dd class="mono">admin · 李工 · 人</dd>
+<dt>动作 / 目标</dt><dd class="mono">UPDATE · control-plane/schedule（调度参数）</dd>
+<dt>结果 / 来源</dt><dd><span class="chip ok">成功</span> · 127.0.0.1 · 38ms</dd>
+<dt>生效范围</dt><dd><span class="chip bad">进程内存态</span> · 重启即回退默认（三处关键状态未持久化）</dd>
+<dt>trace_id</dt><dd class="mono">af-aud-0921-1341-b8f5 <span class="chip warn">合成 · 非 W3C</span></dd>
+</dl>
+<h4 class="blk">变更前后</h4>
+<div class="grid g2" style="gap:var(--s3)">
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">变更前</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--red);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "queue_max": 200,
+  "starve_boost_after_s": 300,
+  "rate_limit_per_min": 120
+}</pre></div>
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">变更后</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--green);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "queue_max": 400,
+  "starve_boost_after_s": 300,
+  "rate_limit_per_min": 240
+}</pre></div>
+</div>
+<table class="tbl compact"><thead><tr><th>字段</th><th>前</th><th>后</th></tr></thead><tbody>
+<tr><td class="mono">queue_max</td><td class="mono tiny">200</td><td class="mono tiny">400</td></tr>
+<tr><td class="mono">rate_limit_per_min</td><td class="mono tiny">120</td><td class="mono tiny">240</td></tr>
+<tr><td class="mono">starve_boost_after_s</td><td class="mono tiny">300</td><td class="mono tiny">300（未变）</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="跳 §6.3 Agent 管控面 · 调度队列（演示）">看生效值</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：看生效值→toast（控制面调度为进程内存态 · 重启回退默认）· 变更前后对照与字段表全宽展示　按 Esc 关闭浮层。</p>
+</body></html>

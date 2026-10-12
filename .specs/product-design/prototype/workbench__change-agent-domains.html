@@ -1,0 +1,73 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>变更 agent-domains 详情 · 工作台 · 变更总览 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p2" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="workbench.html" data-click>← 返回 工作台 · 变更总览</span><span class="crumb"><span class="dim">工作台 · 变更总览 /</span> <b>变更 agent-domains</b></span><span class="chip info">4-dev</span><span class="chip">风险 —</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="detail-body">
+<dl class="kv" style="margin-top:var(--s3)"><dt>Change ID / 标题</dt><dd class="mono">agent-domains · 隔离域（Domain）</dd><dt>当前阶段</dt><dd><span class="chip info">4-dev 开发执行</span> · 下一站 <span class="mono">5-test</span></dd><dt>任务进度</dt><dd class="mono">8/11（done 8 · in_progress 2 · blocked 1）</dd><dt>风险 / 阻塞</dt><dd><span class="chip ok">无风险标签</span> · 1 张卡 blocked 待解</dd><dt>范围</dt><dd class="mono">v1 域 CRUD · v2 域级配额 · out 域作为安全边界</dd><dt>更新时间</dt><dd class="mono">12 分钟前 · 李工</dd><dt>扫描来源</dt><dd class="mono">.specs/agent-domains/ · TTL 5s</dd></dl>
+<h4 class="blk">阶段进度（9 阶段 · 实测阶段名与门禁）</h4>
+<table class="tbl compact"><thead><tr><th>阶段</th><th>门禁</th><th>态</th><th>说明</th></tr></thead><tbody>
+<tr><td class="mono">0-change</td><td class="mono">G1</td><td><span class="chip ok">过</span></td><td class="tiny dim">4/4 票</td></tr>
+<tr><td class="mono">1-requirement</td><td class="mono">需求门</td><td><span class="chip ok">过</span></td><td class="tiny dim">验收准则 32 条</td></tr>
+<tr><td class="mono">2-design</td><td class="mono">G2</td><td><span class="chip ok">过</span></td><td class="tiny dim">3✅ 1⚪</td></tr>
+<tr><td class="mono">2a-ui-design</td><td class="mono">G2a</td><td><span class="chip ok">过</span></td><td class="tiny dim">管控面三层树基线</td></tr>
+<tr><td class="mono">3-task</td><td class="mono">Task</td><td><span class="chip ok">过</span></td><td class="tiny dim">11 卡 · 波次 3</td></tr>
+<tr><td class="mono">4-dev</td><td class="mono">G3</td><td><span class="chip warn">未过 3/4</span></td><td class="tiny dim">安全审计师 ❌：越权探测面未统一 404</td></tr>
+<tr><td class="mono">5-test</td><td class="mono">测试门</td><td><span class="chip">未达</span></td><td class="tiny dim">—</td></tr>
+<tr><td class="mono">6-review</td><td class="mono">G4</td><td><span class="chip">未达</span></td><td class="tiny dim">—</td></tr>
+<tr><td class="mono">7-integration</td><td class="mono">—</td><td><span class="chip">未达</span></td><td class="tiny dim">归档即写变更账本</td></tr>
+</tbody></table>
+<h4 class="blk">产物清单</h4>
+<table class="tbl compact"><thead><tr><th>文件</th><th>状态</th><th>大小</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">CHANGE.md</td><td><span class="chip ok">存在</span></td><td class="mono">3.1 KB</td><td><span class="btn link" data-toast="打开产物编辑器（§6.18 · 保存前自动备份保留 5 版）（演示）">编辑</span></td></tr>
+<tr><td class="mono">REQUIREMENT.md</td><td><span class="chip ok">存在</span></td><td class="mono">12.4 KB</td><td><span class="btn link" data-toast="打开产物编辑器（演示）">编辑</span></td></tr>
+<tr><td class="mono">DESIGN.md</td><td><span class="chip ok">存在</span></td><td class="mono">9.8 KB</td><td><span class="btn link" data-toast="打开产物编辑器（演示）">编辑</span></td></tr>
+<tr><td class="mono">TASK.md</td><td><span class="chip warn">1 卡 blocked</span></td><td class="mono">6.2 KB</td><td><span class="btn link" data-toast="已定位任务页签 T07 · blocked（演示）">定位 T07</span></td></tr>
+<tr><td class="mono">runtime.jsonl</td><td><span class="chip info">增量采集</span></td><td class="mono">41 KB</td><td><span class="btn link" data-toast="跳 §6.22 执行回放（依赖 trace 产生端 C10-0）（演示）">回放</span></td></tr>
+<tr><td class="mono">TEST.md / REVIEW.md</td><td><span class="chip">未生成</span></td><td class="mono">—</td><td class="tiny dim">5-test / 6-review 后出现</td></tr>
+</tbody></table>
+<h4 class="blk">最近活动</h4>
+<div class="timeline">
+  <div class="tl-item"><b>14:22</b> · Agent · code-reviewer 提交 T08 实现 · 26 文件</div>
+  <div class="tl-item fail"><b>14:05</b> · 李工 在 G3 投 ❌（安全审计师位）：越权应统一 404</div>
+  <div class="tl-item"><b>13:41</b> · T07 置 blocked · 等待 <span class="mono">get_specs_dir()</span> 统一改点</div>
+  <div class="tl-item"><b>昨天 18:12</b> · 阶段推进 3-task → 4-dev（人批）</div>
+  <div class="tl-item"><b>昨天 17:50</b> · Task 门 4/4 通过 · 波次 3 拆分确认</div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已请求推进 4-dev → 5-test：G3 门禁 3/4 未过，服务端在状态转换层拒绝（演示）">进入下一阶段</button> <button class="btn sm" data-toast="已按票型生成整改卡 T12（演示）">按门禁意见建卡</button> <span class="btn link" style="color:var(--red)" data-click data-modal="md-rollback">回退阶段</span> <span class="btn link" style="color:var(--red)" data-click data-modal="md-delchange">删除变更</span></p>
+<div class="callout" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>门禁在状态转换层（§1.6.5 ①）：</b>「必须人批」不写在给 Agent 的提示词里，灰置与拒绝都由服务端判定；本页按钮态只是同一判据的两种呈现。</p></div>
+</div>
+<div class="modal" id="md-rollback"><div style="padding:var(--s4)">
+<b>回退「agent-control-plane」6-review → 4-dev？</b>
+<p class="small dim" style="margin:8px 0">回退是<b>破坏性</b>操作：阶段回退不删产物，但门禁记录作废、变更账本追加一条回退事件。<b>必填原因</b>。</p>
+<p class="tiny" style="margin:0 0 4px"><b>影响清单</b></p>
+<table class="tbl compact"><tbody>
+<tr><td>G4 审查门记录</td><td class="mono">3 票</td><td><span class="chip bad">作废并留痕</span></td></tr>
+<tr><td>REVIEW.md</td><td class="mono">已存在</td><td><span class="chip warn">变只读快照 · 不删</span></td></tr>
+<tr><td>扫描器阶段判定</td><td class="mono">按文件存在性</td><td><span class="chip warn">重扫后仍显 6-review，需手改产物集</span></td></tr>
+<tr><td>进行中的 Agent 运行</td><td class="mono">1（人点名派发）</td><td><span class="chip info">继续 · 不随回退终止</span></td></tr>
+<tr><td>工作台与收件箱</td><td class="mono">2 条待办</td><td><span class="chip">旧通知自愈归档</span></td></tr>
+<tr><td>审计</td><td class="mono">chg:phase_rollback</td><td><span class="chip info">必写 · 含变更前快照</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [前置 SPEC 缺失，先补产物再走门禁   ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已回退到 4-dev · 门禁记录作废 · 审计 chg:phase_rollback（演示）" data-close>确认回退</button></div></div></div>
+<div class="modal" id="md-delchange"><div style="padding:var(--s4)">
+<b>删除变更目录「agent-control-plane」？</b>
+<p class="small dim" style="margin:8px 0">删除 <span class="mono">.specs/agent-control-plane/</span> 下全部产物（7 个文件 · 含 runtime.jsonl 1,842 行）。知识产物是本项目一等数据，删除不可从界面恢复。<b>必填原因</b>。</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">CHANGE / REQUIREMENT</td><td><span class="chip bad">缺失 · 无损失</span></td></tr>
+<tr><td class="mono">DESIGN.md</td><td class="mono">9.8 KB</td><td><span class="chip bad">将删</span></td></tr>
+<tr><td class="mono">TEST.md · REVIEW.md</td><td class="mono">14.1 KB</td><td><span class="chip bad">将删</span></td></tr>
+<tr><td class="mono">runtime.jsonl</td><td class="mono">1,842 行</td><td><span class="chip bad">指标来源断链</span></td></tr>
+<tr><td class="mono">_test_api.py 等 3 个脚本</td><td class="mono">—</td><td><span class="chip warn">不在产物白名单 · 保留</span></td></tr>
+<tr><td>保存前自动备份</td><td>最近 5 版</td><td><span class="chip info">备份仍在 backup/ · 非界面可恢复</span></td></tr>
+<tr><td>审计</td><td class="mono">chg:deleted</td><td><span class="chip info">必写</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [误建 · 已并入 agent-domains 作为子卡 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除 · 工作台不再显示该变更（下次扫描生效）· 审计 chg:deleted（演示）" data-close>确认删除</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由工作台变更浮层升格：小节全宽展示 · 「进入下一阶段 / 按门禁意见建卡」→ toast（写明服务端判据）· 「回退阶段」「删除变更」→ 影响清单 + 必填原因二次确认（本页引用到的二次确认 modal 自带副本）· 产物「编辑」→ toast 跳 §6.18 形态　按 Esc 关闭浮层。</p>
+</body></html>

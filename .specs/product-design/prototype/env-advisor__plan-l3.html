@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>部署方案 L3 · 兜底（云 API）详情 · 环境参谋</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p25" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="env-advisor.html" data-click>← 返回 环境参谋</span><span class="crumb"><b>方案详情 · L3 兜底（云 API）</b></span><span class="chip warn">数据出域需单独确认</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="finetune.html">微调工厂</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>红线：</b>走 L3 等于把决策输入送出本机。平台只给操作路径让用户自填 Key，<b>不代填、不代传、不默认启用</b>；与 §6.24「训练数据不出本域」是两条独立约束（推理出域 ≠ 训练出域）。</p></div>
+<h4 class="blk">探测依据 · 成本 · 数据边界</h4>
+<dl class="kv"><dt>探测依据</dt><dd class="mono">出网可达（只读 HEAD 探测 · 200）· 无需本地算力</dd><dt>引擎</dt><dd class="mono">云 API（OpenAI-compatible 三兼容形态之一）</dd><dt>模型</dt><dd class="mono">intent-cls-mini（0.6B 类 · Choice 12 类）</dd><dt>能 / 不能</dt><dd>推理 ✓ · 微调 ✗ · 本地离线 ✗（断网即 <span class="mono">decision_fallback</span> 直通）</dd><dt>延迟估算</dt><dd class="mono">网络往返（实测样本 P95 89ms · 抖动大）</dd><dt>成本</dt><dd class="mono">0GB 磁盘 · 按 token 计费 · 决策调用高频时先看本地档（L1/L2 一次付费）</dd><dt>数据边界</dt><dd>出域范围=state 摘要 + 选项集；<b>需域 owner 单独确认</b>并在审计留痕</dd><dt>凭据</dt><dd class="mono">Key 用户自填 → 存权威库（裁定⑦）· 界面永不明文回显</dd><dt>失败退路</dt><dd class="mono">超时/限流 → 直通路由 + <span class="mono">decision_fallback</span>，不阻塞主调度</dd><dt>当前缺失步骤</dt><dd>1 项（登记 API Key）</dd></dl>
+<h4 class="blk">操作路径（本页唯一交付形态：没有命令可复制）</h4>
+<div class="timeline">
+<div class="tl-item"><b>①</b> 管理 › 决策模型 › 登记模型 › 轨道选「云 API」（§6.23 pop 里有这条）</div>
+<div class="tl-item"><b>②</b> 粘贴 <span class="mono">base_url + api_key + model_id</span> · 平台不落明文</div>
+<div class="tl-item"><b>③</b> 点「测试连接」→ 412ms 内返回 healthy 才入目录</div>
+<div class="tl-item"><b>④</b> 回 §6.23 跑「两步制」绑定：第一步启用、第二步按用途绑定（默认全关）</div>
+<div class="tl-item"><b>⑤</b> 出域确认弹窗：勾选「本域决策输入含项目术语」后方可保存</div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-back="env-advisor.html">只要方案不采用 · 返回对比表</button> <button class="btn sm primary" data-click data-modal="md-adopt-l3">采用此方案 ▸ 出域确认 + 写建议</button></p>
+</div>
+<div class="modal" id="md-adopt-l3"><div style="padding:var(--s4)"><b style="color:var(--orange)">采用 L3 · 云 API —— 数据出域确认</b>
+<p class="small dim" style="margin:8px 0">与 L1/L2 不同，这一档会把<b>决策输入（state 摘要 + 选项集）送出本机</b>。确认前请看清范围：不含会话原文与凭据，但含项目术语。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>☐ 已读：出域范围 = state 摘要 + options（≤26 项）</li>
+<li>☐ 已知：Key 由用户自填、平台不落明文、可随时停用</li>
+<li>☐ 已知：失败即 <span class="mono">decision_fallback</span> 回退直通，不阻塞主调度</li>
+<li>☐ 仍需两步制绑定（本采用动作不启用任何用途）</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b>（本机不达标或明确放弃本地算力时才走云）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [手头只有这台轻薄本，先跑通链路 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已记录出域确认 + 写入建议草案（演示）· 审计 advisor_egress_confirmed · 未发起任何网络调用" data-close>确认出域并采用</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：操作路径五步时间线全宽展示 · 「采用此方案」→出域确认 modal（勾选说明 + 原因必填）· 返回对比表→回环境参谋　按 Esc 关闭浮层。</p>
+</body></html>

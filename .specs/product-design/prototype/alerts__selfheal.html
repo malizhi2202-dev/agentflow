@@ -1,0 +1,39 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>告警 agent_dead · agent-2（已自愈）详情 · 告警中心</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="alerts.html" data-click>← 返回 告警中心</span><span class="crumb"><b>告警详情 · agent_dead / agent-2（已自愈）</b></span><span class="chip">info</span><span class="chip ok">已确认</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="metrics.html">仪表盘</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="detail-body">
+<div class="callout ok"><p class="tiny" style="margin:0"><b>级别降为 info：</b>调和已自动收敛（<span class="mono">caution</span> 级自动重启 → 复探通过），故不再占 critical；这类「自愈成功」的记录正是告警落表后最该留档的一段。</p></div>
+<h4 class="blk">事件快照</h4>
+<dl class="kv"><dt>规则</dt><dd class="mono">agent_dead · _check_agent_dead</dd>
+<dt>目标</dt><dd class="mono">agent-2 · 数据同步 Agent · deepseek-v3</dd>
+<dt>触发链</dt><dd class="mono">3 次失败 → 判 drift → caution 自动重启 → 复探通过</dd>
+<dt>恢复时刻</dt><dd class="mono">14:30:22（探针 #1 pass · 55ms）</dd>
+<dt>收敛判定</dt><dd>复探确认后才更新状态灯（非点击即绿）</dd>
+<dt>确认人 / 时间</dt><dd class="mono">admin 李工 · 14:31:05 · 备注「自愈，无需处理」</dd>
+<dt>退避</dt><dd class="mono">[1,2,4,8]s · 连续失败 3 次暂停本轮该实例调和</dd>
+<dt>拓扑感知</dt><dd class="mono">_topology_safe_pause → 修复未卡住 fan-in 下游</dd>
+<dt>存储位置</dt><dd class="mono">进程内环形 500 条（重启即丢）</dd></dl>
+<h4 class="blk">自愈链</h4>
+<div class="timeline">
+<div class="tl-item fail"><b>14:29:00</b> · 探针 #1 失败 · 上游写入时子进程无响应</div>
+<div class="tl-item fail"><b>14:29:30</b> · 探针 #2 失败 · 退避 2s</div>
+<div class="tl-item fail"><b>14:30:00</b> · 探针 #3 失败 → 判 dead · 出告警（critical）</div>
+<div class="tl-item"><b>14:30:22</b> · <span class="chip ok">caution</span> 调和自动重启 → 恢复上报</div>
+<div class="tl-item"><b>14:31:00</b> · 复探通过 → 漂移清零 → 告警级别降 info</div>
+<div class="tl-item"><b>14:31:05</b> · admin 确认（附自愈结论，根因仍待查子进程挂起）</div>
+</div>
+<h4 class="blk">与它同窗的告警</h4>
+<table class="tbl compact"><thead><tr><th>时间</th><th>类型</th><th>目标</th><th>状态</th></tr></thead><tbody>
+<tr><td class="mono">14:30:10</td><td class="mono">agent_dead</td><td class="mono">agent-7</td><td><span class="chip bad">critical · 未确认</span></td></tr>
+<tr><td class="mono">14:30:22</td><td class="mono">agent_dead</td><td class="mono">agent-2</td><td><span class="chip ok">info · 已自愈</span></td></tr>
+<tr><td class="mono">14:22:41</td><td class="mono">execution_failed</td><td class="mono">rt-2-1783349021</td><td><span class="chip ok">重跑成功 · 未生成</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="跳 §6.4 该 Agent 探针时间线（演示）">看探针时间线</button> <button class="btn sm" data-toast="撤销确认 · 回到未确认并恢复角标（演示）">撤销确认</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：看探针时间线 / 撤销确认→toast · 自愈链与同窗告警全宽展示（只读，无二次确认动作）　按 Esc 关闭浮层。</p>
+</body></html>

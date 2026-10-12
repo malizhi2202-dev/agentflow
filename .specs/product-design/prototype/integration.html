@@ -1,0 +1,122 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>对外集成面 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}body{padding-top:34px}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p27" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="tools.html">工具市场</span><span class="pill" data-goto="env-advisor.html">环境参谋</span></div>
+    <p class="proto-note"><span class="chip warn">规划原型</span>第 4 轮三议题共用的对外面（<span class="chip ok">已过审</span>）：<b>协议区</b>对应 P1-15（A2A M0 静态卡）+ P2-1/P1-12；<b>契约区</b>对应 P2-5 四件组；<b>可观测区</b>对应 P2-4 三档。三区各带「未启用」如实灰态——先让承诺小于实现。§6.0 纪律适用：一切复制走 ⧉、破坏性开关二次确认。<b>此界面尚不存在</b>。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/integration</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="integration.html" class="active"><svg class="icon"><use href="#i-net"/></svg>对外集成面</a>
+          <a><svg class="icon"><use href="#i-gear"/></svg>系统设置</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">管理 <span class="dim">· 对外集成面</span></span><span class="right"><button class="btn sm" data-click data-pop="pop-copy">⧉ 复制集成片段 ▾</button></span><span class="tabs"><span class="tab active" data-click data-toast="协议区（当前视图）：A2A M0 静态卡 + M1-lite 闸口状态">协议</span><span class="tab" data-click data-toast="契约区：apiVersion / ETag / conditions / watch 四件组（本视图已同页展示，演示不切页）">契约</span><span class="tab" data-click data-toast="可观测区：前置 + A/B 三档（本视图已同页展示）">可观测</span></span></div>
+          <div class="app-body">
+            <div class="callout"><p><b>协议 · A2A（P1-15<span class="chip ok">已过审</span>）：</b>M0 只发<b>静态 AgentCard</b>——必填 8 项、capabilities 全 false（streaming/push 未实现就不声明）、只含 public 可见域 Agent、敏感详情走鉴权扩展卡。M1-lite（SendMessage+GetTask+INPUT_REQUIRED 挂起→同 task 续跑）以 <b>P0-1 身份修复为硬闸</b>（§1.6.5 ⑬）；M2（SSE 长连+webhook 回传）冻结。registry 官方留白——目录治理是我们地盘。</p></div>
+            <table class="tbl">
+              <thead><tr><th>/.well-known/agent-card.json（预览 · 未启用）</th><th>值</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">name / description / version</td><td class="tiny">由 Agent 行生成 · <span class="btn link" data-click data-toast="✓ 已复制本行生成的 JSON 片段（演示）">⧉</span></td></tr>
+                <tr><td class="mono">supportedInterfaces[0]</td><td class="mono tiny">{protocolBinding: "JSONRPC", protocolVersion: "1.0"} · 首条=优先</td></tr>
+                <tr><td class="mono">capabilities</td><td class="mono">{streaming: false, pushNotifications: false} <span class="chip">未启用项如实 false</span></td></tr>
+                <tr><td class="mono">skills[]</td><td class="tiny">id/name/description/tags —— 纯描述性；工具市场条目<b>不渲染成 skill</b>（MCP 纵向层红线）</td></tr>
+                <tr><td class="mono" data-click data-goto="integration__card.html">整卡 JSON（只读）</td><td class="tiny"><span class="btn link" data-click data-goto="integration__card.html">查看卡片 →</span><span class="btn link" data-click data-toast="✓ 已复制 AgentCard JSON（演示）· 未创建任何端点">⧉ 复制</span></td></tr>
+                <tr><td class="mono">M1-lite（SendMessage + GetTask）</td><td class="tiny"><span class="chip bad">被拦 · 等 P0-1 身份修复</span> <span class="btn link" data-click data-drawer="dr-m1">开启 M1-lite</span></td></tr>
+              </tbody>
+            </table>
+            <p class="h2p" style="margin-top:var(--s4)">契约 · apiVersion + watch（P2-5<span class="chip ok">已过审</span>）</p>
+            <table class="tbl">
+              <thead><tr><th>件</th><th>形态</th><th>示例 / 依据</th></tr></thead>
+              <tbody>
+                <tr><td><b>形体</b></td><td class="mono">apiVersion: agentflow.io/v1alpha1 · kind: Workflow</td><td>弃用四则移植（升版本段/两版并存/新不指旧/到期窗口+Warning 头）；<b>语义稳定，不承诺 K8s 兼容</b></td></tr>
+                <tr><td><b>并发</b></td><td class="mono">ETag: "wf-42" → PUT If-Match 不匹配 = 412</td><td>RFC7232；治「整包盲覆盖」——第一批　<span class="btn link" data-click data-goto="integration__etag.html">看请求/响应原文</span></td></tr>
+                <tr><td><b>观测</b></td><td class="mono">Ready=True observedGeneration=12</td><td>conditions 表；区分「没处理」vs「处理了结果未变」</td></tr>
+                <tr><td><b>watch</b></td><td class="mono">GET /api/watch?cursor=1840 → SSE id:1841 event:condition</td><td>change_log 同事务全局账本（落 MySQL · 裁定⑦）；断线=客户端带 cursor 重发（<b>不跟</b> MCP 已撤的 Last-Event-ID）；过期→<span class="mono">event:resync</span>＝410 等价　<span class="btn link" data-click data-goto="integration__watch.html">看 watch curl →</span></td></tr>
+              </tbody>
+            </table>
+            <p class="h2p" style="margin-top:var(--s4)">可观测 · 三档（P2-4<span class="chip ok">已过审</span>）</p>
+            <table class="tbl">
+              <thead><tr><th>档</th><th>当前态</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td><b>前置</b> 产生端</td><td><span class="chip bad">trace_spans 0 行</span></td><td>先补 INSERT+父子链列，出口才有东西可导（C10-0）　<span class="btn link" data-click data-toast="重查产生端（演示）：SELECT count(*) FROM trace_spans → 0 → 前置仍未完成">重查</span></td></tr>
+                <tr><td><b>A</b> /metrics 直读</td><td><span class="chip">AF_ENABLE_METRICS = 未设</span></td><td>instrumentator RED + 直读现表 Counter/Histogram，~0.5d　<span class="btn link" data-click data-modal="md-metrics">开启开关</span><span class="btn link" data-click data-goto="integration__obs.html">档位详情</span></td></tr>
+                <tr><td><b>B</b> OTLP 可选</td><td><span class="chip">AF_OTLP_ENDPOINT = 未设</span></td><td>gen_ai.* 语义（全 Development 不冻契约）；合成 trace_id 书面声明非 W3C　<span class="btn link" data-click data-modal="md-otlp">配置端点</span></td></tr>
+              </tbody>
+            </table>
+            <p class="tiny dim">开关均为 env 驱动、此页只读呈现生效值；打开任何对外写面（M1+）前，部署安全卡（p16）必须无红条。</p>
+            <div class="grid g2" style="align-items:start">
+              <div class="callout warn" style="margin:0"><p><b>三区共同的灰态诚实：</b>本页所有对外面当前状态 = <span class="chip">未启用</span>。<b>宁缺页不空挂</b>：卡片里的 URL 指向不存在的端点=信誉成本，所以 M0 卡片连 published 时间都不写死（由生成时刻决定）。</p></div>
+              <div class="callout ok" style="margin:0"><p><b>目录治理是我们的地盘：</b>官方明文不做 curated registry → 我们的「按可见域生成卡片 + 鉴权扩展卡」不是补协议缺漏，是差异化。协议面第一块砖只能是<b>只读</b>卡片。</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="pop" id="pop-copy" style="max-width:400px"><p class="tiny dim" style="margin:0 0 6px"><b>复制对外集成片段（⧉ 一律走复制，不代执行）</b></p>
+<table class="tbl compact"><tbody>
+<tr data-click data-toast="✓ 已复制 AgentCard JSON（演示）· 未挂载端点"><td>AgentCard（M0 静态卡）</td><td><span class="chip">只读</span></td><td><span class="btn link">⧉</span></td></tr>
+<tr data-click data-toast="✓ 已复制 watch curl（演示）· 未发起请求"><td>watch 起流 curl</td><td><span class="chip">未启用</span></td><td><span class="btn link">⧉</span></td></tr>
+<tr data-click data-toast="✓ 已复制 ETag 请求对（演示）"><td>ETag / If-Match 请求对</td><td><span class="chip">未启用</span></td><td><span class="btn link">⧉</span></td></tr>
+<tr data-click data-toast="✓ 已复制 env 片段（演示）· 写入需二次确认"><td>AF_ENABLE_METRICS env 片段</td><td><span class="chip">未设</span></td><td><span class="btn link">⧉</span></td></tr>
+<tr style="opacity:.5"><td>webhook 回传配置</td><td><span class="chip bad">M2 冻结</span></td><td><span class="btn link" data-click data-toast="✗ 不提供：M2（streaming+push）冻结到 A2A v1.1 再议；SSRF 面 + 单进程长连正面冲突">为何没有</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s2)"><button class="btn sm" data-close>关闭</button></p></div>
+
+<div class="drawer" id="dr-m1"><header><b style="color:var(--red)">开启 M1-lite —— 被拦下（这就是演示）</b><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body"><div class="callout bad" style="margin:10px 0"><p class="tiny" style="margin:0"><b>§1.6.5 纪律 ⑬：</b>身份修复前不暴露任何对外写端点。当前 <span class="mono">X-User-Id</span> 身份为 <b>fail-open</b>（缺身份即回退 admin），把它挂到对外写面 = 给全网开门。所以 M1 的硬前置是 <b>P0-1 落地 + 单副本承诺书面化</b>，不是工作量。</p></div>
+<dl class="kv"><dt>被拦动作</dt><dd class="mono">挂载 POST /a2a（SendMessage · GetTask · INPUT_REQUIRED 续跑）</dd><dt>前置 ①</dt><dd class="mono">P0-1 身份修复 <span class="chip bad">未完成 · fail-open 在</span></dd><dt>前置 ②</dt><dd class="mono">三处进程内状态（调度队列/限流/退避）单副本承诺书面化 <span class="chip warn">未写</span></dd><dt>前置 ③</dt><dd class="mono">映射层自证、<b>不引 a2a-sdk</b>（v1.1.5 周更节奏=供应链赌注）</dd><dt>仍然可用</dt><dd>M0 静态 AgentCard（只读）→ 已在上方预览，未挂载</dd><dt>M2</dt><dd class="mono">streaming + push 冻结（SSE 长连×单副本、webhook SSRF×出网默认拒）</dd><dt>本模态有没有「强制开启」</dt><dd><b>没有</b>——门禁在服务端状态转换层，界面不提供绕过入口（自家应用 §1.6.5 ①）</dd></dl>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.7">POST /a2a  →  403 { "error":"external_write_disabled",
+  "blocking_findings":["P0-1 身份 fail-open","单副本承诺未书面化"],
+  "unblock":"完成 identity-hardening P0-1 后本页自动出现可选开关" }</pre>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-close>知道了 · 保持 M0 只读</button> <button class="btn sm" data-click data-toast="演示：只读卡片可继续用；本页不记录任何对外写端点开启尝试（未落地）" data-close>复制这份拦截说明</button></p></div></div>
+
+<div class="modal" id="md-metrics"><div style="padding:var(--s4)"><b>开启 A 档 · <span class="mono">AF_ENABLE_METRICS=true</span>？</b>
+<p class="small dim" style="margin:8px 0"><b>env 开关 = 对外面变化</b>，按纪律二次确认。此页只读呈现生效值，确认结果是<b>生成写入建议</b>（供部署侧应用），本平台不热改自身进程环境。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>打开后 <span class="mono">GET /metrics</span> 对外可读：RED 指标 + 直读现表 Counter/Histogram（MySQL）</li>
+<li>暴露内容：域/能力名、运行计数、耗时直方图、token 汇总（<b>不含</b>会话原文与凭据）</li>
+<li>需配 <span class="mono">excluded_handlers</span>（健康检查与 /metrics 自身不打点）</li>
+<li>不改变 <span class="mono">trace_spans</span> 仍 0 行的事实——B 档此刻打开也无东西可导（前置 C10-0）</li>
+<li>撤销成本低：清 env 重启即下架（见「撤销已开的对外面」）</li>
+</ul>
+<div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已生成写入建议 AF_ENABLE_METRICS=true（演示）· 进程环境未改变 · 审计 integration_flag_changed" data-close>确认并生成写入建议</button></div></div></div>
+
+<div class="modal" id="md-otlp"><div style="padding:var(--s4)"><b style="color:var(--orange)">配置 B 档 · <span class="mono">AF_OTLP_ENDPOINT</span>？</b>
+<p class="small dim" style="margin:8px 0">这会把 span <b>推到外部采集器</b>——一次跨网出面的动作，且当前前置未满足。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>前置未达：<span class="chip bad">trace_spans 0 行</span> → 打开后导出为空，只会看到「管道通了没水」</li>
+<li>语义：OTel GenAI（<span class="mono">invoke_agent / execute_tool / usage.*_tokens</span>）· 全 Development 期<b>不冻结对外契约</b>，允许 <span class="mono">agentflow.*</span> 兜底</li>
+<li>trace_id 为合成值 · 需在接入文档书面声明「非 W3C 原生」</li>
+<li>egress：出口需加入白名单（§6.26 执行隔离页 · 新增即入审计）</li>
+<li>可选翻译层 OpenInference 只在接 Phoenix 时开</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b>（跨网出 + 契约未稳，无理由不开）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">端点: [http://otel-collector:4318 ]   原因: [先验通管道，只接测试采集器 · 不接厂商 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消 · 先修产生端</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已生成建议：AF_OTLP_ENDPOINT + egress 白名单待批（演示）· 未发起任何外连" data-close>确认并生成写入建议</button></div></div></div>
+
+<div class="modal" id="md-disable"><div style="padding:var(--s4)"><b>撤销已开启的对外面？</b>
+<p class="small dim" style="margin:8px 0">破坏性=对<b>外部消费者</b>破坏：一旦有 scrape 或采集器接上，下架会让对方的看板断流。当前状态：A/B 均未设、M0 未挂载 → 无外部消费方，撤销零影响。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>将下架：<span class="mono">/metrics</span>（若已开）· <span class="mono">/api/watch</span>（若已开）· <span class="mono">/.well-known/agent-card.json</span>（若已挂载）</li>
+<li>保留：历史指标与 change_log 记录（可计量数据走权威库，裁定⑦）</li>
+<li>重开需再次二次确认；对外承诺文档同步标注「已撤回」</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b></p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [承诺先行过大，先收回到只读卡片 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已生成下架建议 + 承诺撤回记录（演示）· 审计 integration_surface_revoked" data-close>确认撤销</button></div></div></div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px 6px"><b>演示数据说明：</b>三区承诺与拦阻理由均为 §6.27 原文（§1.6 P1-15 / P2-4 / P2-5 已过审条目、§1.6.5 ⑬ 纪律句、必填 8 项与 capabilities 全 false、change_log 同事务 + cursor 重发 + resync、AF_ENABLE_METRICS / AF_OTLP_ENDPOINT 未设、trace_spans 0 行）。卡片 JSON 的具体内容（Agent 名、skills 两条、token 计数、指标名与样本值 1191 等）为按 §6.12 口径拼装的演示值，真实实现尚未产生该端点；M1-lite 的 403 响应体、watch 帧样例同样是形态演示。本页不存在任何挂载 / 写 env / 外连动作。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：协议表「整卡 JSON」行 / 「查看卡片」→ 独立详情页 <span class="mono">integration__card.html</span>（只读 · 逐字段核对 + ⧉ 复制 toast）· 「开启 M1-lite」→ <b>被拦抽屉</b>（§1.6.5 ⑬ 拦截文案即演示，无绕过入口）· 契约表「看 watch curl」「看请求/响应原文」→ 独立详情页 <span class="mono">integration__watch.html</span> / <span class="mono">integration__etag.html</span>（curl / SSE 帧 / resync + ⧉ 复制）· 可观测表「档位详情」→ 独立详情页 <span class="mono">integration__obs.html</span> · 「开启开关 / 配置端点」→ 二次确认模态（暴露面与前置未达清单 + 原因输入）· 「撤销已开的对外面」→ 破坏性二次确认 · 顶栏 tabs / 复制片段 → toast 与 pop · Esc 关闭所有浮层。</p>
+</body></html>

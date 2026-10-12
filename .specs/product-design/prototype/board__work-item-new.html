@@ -1,0 +1,23 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>新建工作项 · 工作项看板 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p20" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="workbench.html">工作台</span></div>
+<div class="detail-top"><span class="pill" data-back="board.html" data-click>← 返回 工作项看板</span><span class="crumb"><b>工作项 › 新建（POST /api/work-items）</b></span><span class="chip warn">未提交</span><span class="chip bad">创建 ≠ 派单</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>注意：创建 ≠ 派单。</b>保存只写 work_item 行（status=unstarted、triage=untriaged）；要跑 Agent 需<b>另外</b>产生运行请求，且要过受理门与四道门。</p></div>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">title    [知识库支持 .xlsx 白名单          ]
+status   ( ) unstarted (*) started ( ) done ( ) closed   ← 语义锚，与 triage 正交
+triage   (*) untriaged  ( ) accepted  ( ) not-needed
+assignee ( ) 人：[李工 ▾]   (*) Agent：[code-fixer ▾]   ← 人 / Agent 双轨
+creator  [user:1 李工（当前用户，服务端写死）]
+project  [agentflow ▾]   iteration [2026-W39 ▾]   priority [低 ▾]
+labels   [知识库] [+1]      证据要求 [x] done 需证据 + 同伴复核</pre>
+<dl class="kv" style="margin-top:var(--s3)"><dt>校验</dt><dd><span class="chip ok">通过</span> · 标题非空 · 锚已选 · project 存在</dd><dt>若 assignee=Agent</dt><dd><span class="chip warn">不自动跑</span> 仍需显式运行请求 + 可调用目标校验</dd><dt>若 triage=untriaged</dt><dd>自动派单池不含本项（受理门生效）</dd><dt>done 需证据</dt><dd>勾选后，进 done 前必须附证据并指定复核人</dd><dt>重复检测</dt><dd><span class="chip warn">相似 2 项</span> AF-121 · AF-118（先看看是否合并）</dd><dt>提交动作</dt><dd class="mono tiny">POST /api/work-items（单表 · MySQL 权威库，裁定⑦）</dd></dl>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已创建 AF-126（未开始 · 待受理 · 无运行请求）（演示）">创建</button> <button class="btn sm" data-toast="草稿已存入共享草稿槽（§6.0 ⑦ · 演示）">存为草稿</button> <button class="btn sm" data-goto="board.html#dr-wi-un">看看相似项</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 board.html 顶栏「+ 新建工作项」的抽屉升格而来：7 个字段 + 双轴单选 + 校验说明，属可编辑表单（纪律 C）。保存只写 work_item 行（status=unstarted · triage=untriaged）；要跑 Agent 需另外产生运行请求，且过受理门与四道门。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：创建 → toast（生成 AF-126，未派单）· 存为草稿 → toast（共享草稿槽）· 看看相似项 → 回看板并展开 AF-118 只读详情。</p>
+</body></html>

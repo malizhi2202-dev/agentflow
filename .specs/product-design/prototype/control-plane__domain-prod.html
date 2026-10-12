@@ -1,0 +1,54 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>域 生产域 详情 · Agent 管控面 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p3" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="control-plane.html" data-click>← 返回 Agent 管控面</span><span class="crumb"><span class="dim">Agent 管控面 /</span> <b>域 生产域</b></span><span class="chip ok">3 healthy / 3</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="isolation.html">执行隔离</span></div>
+<div class="detail-body">
+<dl class="kv"><dt>域 ID / 名称</dt><dd class="mono">2 · 生产域</dd><dt>owner</dt><dd class="mono">@wang.gong（王工）</dd><dt>成员</dt><dd class="mono">3 个 Agent · code-review 2 / frontend 1</dd><dt>健康</dt><dd><span class="chip ok">3 healthy</span> · 无漂移</dd><dt>期望副本</dt><dd class="mono">code-review=2 · frontend=1（实际一致）</dd><dt>策略绑定</dt><dd>路由决策 <span class="chip ok">开</span>（阈值 0.55 收紧）· 其余两开关 <span class="chip">关</span></dd><dt>跨域入口</dt><dd class="mono">网关按域路由；开发域与生产域互不可见</dd><dt>变更窗口</dt><dd class="mono">工作日 10:00–18:00 · 窗外 dangerous 动作仅审批不执行</dd></dl>
+<h4 class="blk">Agent 列表（3）</h4>
+<table class="tbl compact"><thead><tr><th>Agent</th><th>灯</th><th>模型</th><th>负载</th><th>组</th></tr></thead><tbody>
+<tr><td class="mono">审查 Agent · 生产主</td><td><span class="dot running"></span></td><td class="mono tiny">gpt-4o</td><td class="mono tiny">3/4</td><td class="tiny">code-review</td></tr>
+<tr><td class="mono">审查 Agent · 生产备</td><td><span class="dot running"></span></td><td class="mono tiny">claude-sonnet</td><td class="mono tiny">1/4</td><td class="tiny">code-review</td></tr>
+<tr><td class="mono">前端 Agent</td><td><span class="dot running"></span></td><td class="mono tiny">gpt-4o-mini</td><td class="mono tiny">1/2</td><td class="tiny">frontend</td></tr>
+</tbody></table>
+<h4 class="blk">最近调和</h4>
+<div class="timeline">
+  <div class="tl-item"><b>13:20</b> · <span class="chip ok">safe</span> 无漂移 · 本轮不动作</div>
+  <div class="tl-item"><b>11:48</b> · <span class="chip warn">caution</span> frontend 期望 1 → 实际 0 → 自动拉起 · 复探通过</div>
+  <div class="tl-item"><b>09-22 21:04</b> · owner 变更 @li → @wang · 旧决策绑定失效已重绑（审计 AF-9K2）</div>
+  <div class="tl-item"><b>09-22 21:04</b> · <span class="chip">通知</span> 只 ping 新 owner，未广播全群（§6.0 ⑫）</div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已复制本域策略到测试域（演示）">复制策略</button> <button class="btn sm" data-click data-modal="md-pause">暂停本域调和</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-del-domain">删除域</button></p>
+</div>
+<div class="modal" id="md-pause"><div style="padding:var(--s4)">
+<b>暂停调和循环（全部域 · 含 1 个未收敛漂移）？</b>
+<p class="small dim" style="margin:8px 0">暂停后系统<b>不再自动收敛任何漂移</b>，故障要靠人发现。<b>必填原因</b>（§6.0 纪律：破坏性操作二次确认 + 理由入审计）。</p>
+<p class="tiny" style="margin:0 0 4px"><b>影响清单</b></p>
+<table class="tbl compact"><tbody>
+<tr><td>未收敛漂移</td><td class="mono">1 · 默认域/code-review 期望 3 实际 2</td><td><span class="chip bad">保持不修</span></td></tr>
+<tr><td>dangerous 审批</td><td class="mono">AP-118 等待中</td><td><span class="chip warn">暂停不撤审批</span></td></tr>
+<tr><td>退避计时</td><td class="mono">agent-4 处于 8s 档</td><td><span class="chip">冻结</span></td></tr>
+<tr><td>在途任务</td><td class="mono">2</td><td><span class="chip info">继续跑 · 不被打断</span></td></tr>
+<tr><td>探针</td><td class="mono">60s 周期</td><td><span class="chip ok">继续（独立于调和）</span></td></tr>
+<tr><td>告警</td><td class="mono">3 未确认</td><td><span class="chip warn">仍产生 · 但无自愈兜底</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [正在做探针—调和联调，避免自愈干扰 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="调和循环已暂停 · 顶栏转红态 · 审计 reconcile:paused（演示）" data-close>确认暂停</button></div></div></div>
+<div class="modal" id="md-del-domain"><div style="padding:var(--s4)">
+<b>删除域「测试域」？</b>
+<p class="small dim" style="margin:8px 0"><b>不级联删除 Agent</b>：域内 3 个 Agent 回归默认域（§5.3 边界）。必填原因。</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">agent-9 · agent-10</td><td>健康 2</td><td><span class="chip info">迁入默认域</span></td></tr>
+<tr><td class="mono">agent-11</td><td>不可探活</td><td><span class="chip warn">随域迁移 · 仍不可探活</span></td></tr>
+<tr><td>域级共享记忆</td><td class="mono">3 条</td><td><span class="chip bad">随域删除（先导出）</span></td></tr>
+<tr><td>决策绑定</td><td>三开关全关</td><td><span class="chip ok">无失效绑定</span></td></tr>
+<tr><td>在途运行</td><td class="mono">1</td><td><span class="chip warn">等收敛或改指派</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [测试环境合并进默认域，减少域数   ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除测试域 · 3 个 Agent 回归默认域 · 记忆已随删（备份 snap-1199）· 审计 domain:deleted（演示）" data-close>确认删除</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由管控面浮层升格：域 / 能力组信息全宽 · 操作钮保留原接线（扩容 / 绑定 / 重命名 → toast 入审计 · 暂停调和与删除域 → 影响清单 + 必填原因二次确认，引用到的自带副本）　按 Esc 关闭浮层。</p>
+</body></html>

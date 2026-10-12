@@ -1,0 +1,218 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent 详情 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="runtime.html">运行时</span></div>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>基础信息 + 探针时间线。API Key 恒为脱敏形态。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/agents/1</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html" class="active"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="users.html"><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-file"/></svg>审计日志</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb"><span class="dim">Agent /</span> 审查 Agent · 标准</span><span class="right"><span class="chip ok" data-click data-drawer="dr-health"><span class="dot running" style="margin-right:4px"></span>running</span><button class="btn sm" data-toast="重启指令已下发 · 状态灯不即时改，等下一轮复探通过才转 healthy（演示）">重启</button><button class="btn sm" data-click data-pop="pop-edit">编辑 ▾</button><button class="btn sm" data-toast="已基于「审查 Agent · 标准」复制出新草稿（演示）">复制</button><button class="btn sm" style="color:var(--red)" data-click data-goto="agent-detail__delete-agent.html">删除</button></span></div>
+          <div class="app-body">
+            <div class="grid g2" style="align-items:start">
+              <div>
+                <p class="h2p">基础信息 <span class="pill mono" data-goto="agent-detail__config.html" data-click>完整配置 ▸</span></p>
+                <div class="panel">
+                  <p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">标识与描述</p>
+                  <dl class="kv">
+                    <dt>名称</dt><dd><b>审查 Agent · 标准</b></dd>
+                    <dt>Agent ID</dt><dd class="mono">1</dd>
+                    <dt>描述</dt><dd>前端 PR 代码审查主实例，按规范检查变更并产出审查发现（演示）</dd>
+                    <dt>Owner</dt><dd>李工 <span class="mono">@li.gong</span></dd>
+                    <dt>创建时间</dt><dd class="mono">2026-06-12 10:24（演示）</dd>
+                  </dl>
+                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">指令 Instructions</p>
+                  <details>
+                    <summary class="tiny" style="cursor:pointer;color:var(--blue)">展开 / 收起（职责 · 边界 · 交付要求）</summary>
+                    <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:8px">你审查前端 PR。只读 diff 与相关测试，不得直接改代码。
+职责：按严重度排序输出发现，先列阻断项再列建议。
+边界：不改代码、不合并、不回复外部评论。
+交付：产出 REVIEW.md（含逐条位置 / severity / 建议）。</pre>
+                  </details>
+                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">技能</p>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap">
+                    <span class="pill mono">代码审查</span>
+                    <span class="pill mono">需求拆解</span>
+                    <span class="pill mono" style="opacity:.6">浏览器自动化 <span class="chip bad" style="height:16px;padding:0 5px">禁用绑定</span></span>
+                  </div>
+                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">对话启动语（≤3）</p>
+                  <dl class="kv">
+                    <dt>帮我审查这个 PR</dt><dd class="tiny muted">对当前 diff 执行标准审查</dd>
+                    <dt>列出高优先级发现</dt><dd class="tiny muted">按 severity 降序列出阻断项</dd>
+                    <dt>总结本次审查</dt><dd class="tiny muted">输出一句话结论与建议</dd>
+                  </dl>
+                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">执行配置</p>
+                  <dl class="kv">
+                    <dt>运行时</dt><dd class="mono">LangGraph</dd>
+                    <dt>模型 Provider</dt><dd class="mono">openai</dd>
+                    <dt>模型</dt><dd class="mono">gpt-4o</dd>
+                    <dt>thinking</dt><dd class="mono">高</dd>
+                    <dt>并发上限</dt><dd class="mono">4</dd>
+                    <dt>环境变量</dt><dd class="mono">3 项（仅显示 count · 值恒脱敏）</dd>
+                    <dt>CLI 参数</dt><dd class="mono">--review --format md</dd>
+                    <dt>MCP</dt><dd class="mono">filesystem · fetch（2 个）</dd>
+                  </dl>
+                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">Access</p>
+                  <dl class="kv"><dt>可见性</dt><dd><span class="chip">指定成员</span> 李工 · 王五（可运行）</dd></dl>
+                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">状态（双灯）</p>
+                  <dl class="kv">
+                    <dt>可用性</dt><dd><span class="chip ok">online</span></dd>
+                    <dt>负载</dt><dd><span class="chip info">working</span> <span class="bar" style="display:inline-block;width:80px;vertical-align:middle"><i class="g" style="width:50%"></i></span> <span class="mono tiny">2/4</span></dd>
+                  </dl>
+                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">安全闸门</p>
+                  <dl class="kv">
+                    <dt>gate_pre</dt><dd class="mono">开 · diff 可读 + 测试通过</dd>
+                    <dt>gate_post</dt><dd class="mono">开 · 发现数 ≥ 1 才可交付</dd>
+                    <dt>io_filter</dt><dd class="mono">sanitize</dd>
+                  </dl>
+                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">凭据与探活</p>
+                  <dl class="kv">
+                    <dt>Base URL</dt><dd class="mono">https://api.openai.com/v1</dd>
+                    <dt>健康端点</dt><dd class="mono">https://api.openai.com/v1/health</dd>
+                    <dt>API Key</dt><dd class="mono">sk-***</dd>
+                  </dl>
+                  <p class="tiny dim" style="margin:6px 0 0">凭据不进指令，仅运行时使用；界面与日志恒脱敏。</p>
+                </div>
+                <p class="h2p" style="margin-top:var(--s4)">域内共享记忆 <span class="chip info">同域可加载</span></p>
+                <div class="panel">
+                  <p class="small muted" style="margin:0 0 6px">同域 Agent 可加载以下前序上下文：</p>
+                  <div class="timeline" style="margin:0">
+                    <div class="tl-item" data-click data-drawer="dr-mem"><b>2026-07-06</b> · capability-groups 设计结论：虚拟分组不建表</div>
+                    <div class="tl-item"><b>2026-07-05</b> · 管控面探针限流器为进程内实现（单进程适用）</div>
+                    <div class="tl-item"><b>2026-07-05</b> · Reconcile 修复前须过拓扑安全检查</div>
+                  </div>
+                  <p class="tiny" style="margin:8px 0 0"><span class="btn link" data-toast="已加入本 Agent 的检索挂载：审查 Agent · 备援 也能读到这 3 条（演示）">全量挂载</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-mem">断开记忆共享</span></p>
+                </div>
+              </div>
+              <div>
+                <p class="h2p">探针时间线（最近 8 次） <span class="chip bad">fail 行可点 → 探针失败详情页</span> <span class="pill" data-click data-pop="pop-probe-range">范围：最近 8 次 ▾</span></p>
+                <div class="panel">
+                  <div class="timeline" style="margin:0">
+                    <div class="tl-item"><b>14:35:10</b> · 通过 · <span class="mono">200 OK · 42ms</span></div>
+                    <div class="tl-item"><b>14:34:10</b> · 通过 · <span class="mono">200 OK · 38ms</span></div>
+                    <div class="tl-item"><b>14:33:10</b> · 通过 · <span class="mono">200 OK · 51ms</span></div>
+                    <div class="tl-item fail" data-click data-goto="agent-detail__probe-timeout.html"><b>14:32:10</b> · 失败 · <span class="mono">timeout after 5000ms</span></div>
+                    <div class="tl-item fail" data-click data-goto="agent-detail__probe-timeout.html"><b>14:31:10</b> · 失败 · <span class="mono">timeout after 5000ms</span></div>
+                    <div class="tl-item fail" data-click data-goto="agent-detail__probe-refused.html"><b>14:30:10</b> · 失败 · <span class="mono">connection refused</span></div>
+                    <div class="tl-item"><b>14:30:22</b> · <span class="chip ok">safe</span> 调和动作：自动重启 → 恢复上报 <span class="btn link" data-toast="退避序列 1s→2s→4s→8s · 复探 14:33:10 通过后才回到 healthy（演示）">退避与复探</span></div>
+                    <div class="tl-item"><b>14:29:10</b> · 通过 · <span class="mono">200 OK · 40ms</span></div>
+                  </div>
+                </div>
+                <p class="h2p" style="margin-top:var(--s4)">近期会话 <span class="chip info">行可点 → 执行回放（p22）</span></p>
+                <table class="tbl compact">
+                  <thead><tr><th>会话</th><th>模型</th><th>Token</th><th>状态</th><th>耗时</th></tr></thead>
+                  <tbody>
+                    <tr data-click data-toast="跳 §6.22 执行回放 · run rt-1-14:31（按工作项聚合视图 · 依赖 trace 产生端 C10-0）（演示）"><td class="mono">rt-1-14:31</td><td class="mono">gpt-4o</td><td class="mono">12,480</td><td><span class="chip ok">success</span></td><td class="mono">8.2s</td></tr>
+                    <tr data-click data-toast="跳 §6.22 执行回放 · run rt-1-14:12（演示）"><td class="mono">rt-1-14:12</td><td class="mono">gpt-4o</td><td class="mono">9,120</td><td><span class="chip ok">success</span></td><td class="mono">6.4s</td></tr>
+                    <tr data-click data-goto="agent-detail__run-failed.html"><td class="mono">rt-1-13:58</td><td class="mono">gpt-4o</td><td class="mono">21,004</td><td><span class="chip bad">error</span></td><td class="mono">31.7s</td></tr>
+                    <tr data-click data-toast="跳 §6.22 执行回放 · run rt-1-13:40（演示）"><td class="mono">rt-1-13:40</td><td class="mono">gpt-4o</td><td class="mono">7,860</td><td><span class="chip ok">success</span></td><td class="mono">5.1s</td></tr>
+                  </tbody>
+                </table>
+                <div class="callout bad" style="margin-top:0">
+                  <p><b>错误态示例：</b>无 <span class="mono">base_url</span> 也无 <span class="mono">health_url</span> 的 Agent 不可探活，此区域显示「该 Agent 未配置健康端点，无法探活」而非空列表。</p>
+                </div>
+                <p class="h2p" style="margin-top:var(--s4)">在途任务（2）<span class="chip warn">删除前必查</span></p>
+                <table class="tbl compact">
+                  <thead><tr><th>Task</th><th>标签</th><th>来源</th><th>已跑</th><th>态</th></tr></thead>
+                  <tbody>
+                    <tr data-click data-toast="跳 §6.22 执行回放 · task-1 → run rt-1-14:31（演示）"><td class="mono">task-1</td><td class="mono">code-review</td><td>人点名 · 李工</td><td class="mono">4m12s</td><td><span class="chip info">assigned</span></td></tr>
+                    <tr data-click data-toast="跳 §6.22 执行回放 · task-9 → run rt-1-13:40（演示）"><td class="mono">task-9</td><td class="mono">code-review</td><td>工作项 AF-104</td><td class="mono">31m</td><td><span class="chip warn">在途 · 探针失败未中断</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>基础信息面板按 Multica 式 Agent 模型分区（标识 / 指令 / 技能 / 对话启动语 / 执行配置 / Access / 双状态 / 安全闸门 / 凭据与探活）；时间线的失败—重启—恢复序列演示了 §4.3 的自愈链路。真实系统中「重启」按钮点击后需等待复探确认才更新状态灯。</p>
+
+
+
+
+
+<div class="drawer" id="dr-mem"><header><b>共享记忆条目 · 2026-07-06</b><span class="chip info">域内可读</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>条目</dt><dd>capability-groups 设计结论：虚拟分组<b>不建表</b></dd><dt>来源</dt><dd class="mono">.specs/capability-groups/DESIGN.md · 结论段</dd><dt>写入者</dt><dd class="mono">@li.gong（人批后落）· 07-06 14:02</dd><dt>作用域</dt><dd>默认域 · 5 个 Agent 可读（同域即共享，不跨域）</dd><dt>消费方式</dt><dd>运行时作为前序上下文并入（计划并入 vs 实际投喂分开记账）</dd><dt>失效条件</dt><dd><span class="chip warn">来源产物被删或改写 → 条目转待复核</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">本域记忆条目（5）</p>
+<table class="tbl compact"><thead><tr><th>日期</th><th>结论</th><th>态</th></tr></thead><tbody>
+<tr><td class="mono">07-06</td><td>能力分组不建表，按 capabilities 派生</td><td><span class="chip ok">生效</span></td></tr>
+<tr><td class="mono">07-05</td><td>探针限流器为进程内实现（单进程适用）</td><td><span class="chip ok">生效</span></td></tr>
+<tr><td class="mono">07-05</td><td>Reconcile 修复前须过拓扑安全检查</td><td><span class="chip ok">生效</span></td></tr>
+<tr><td class="mono">06-28</td><td>删除域不级联删除 Agent</td><td><span class="chip ok">生效</span></td></tr>
+<tr><td class="mono">06-20</td><td>Domain 可作安全边界（早期设想）</td><td><span class="chip bad">已废止 · 明写不是安全边界</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="跳 §6.18 产物编辑器打开来源段落（演示 · 保存前自动备份）">看来源</span> <span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-mem">从本 Agent 断开</span></p></div></div>
+
+<div class="drawer" id="dr-health"><header><b>健康与探活配置</b><span class="chip ok"><span class="dot running" style="margin-right:4px"></span>healthy</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>状态灯</dt><dd><span class="chip ok">running</span> · 5 态之一（idle / running / blocked / dead / failed）</dd><dt>周期 / 超时</dt><dd class="mono">60s · 5000ms</dd><dt>连续失败阈值</dt><dd class="mono">3 → 触发 caution 自动重启</dd><dt>退避</dt><dd class="mono">[1,2,4,8]s · 超阈值暂停本轮</dd><dt>本轮结果</dt><dd class="mono">14:35:10 · 200 OK · 42ms</dd><dt>近 1h 通过率</dt><dd><span class="chip warn">83%</span> 50/60（含 3 次已知抖动）</dd><dt>P50 / P95</dt><dd class="mono">41ms / 55ms</dd><dt>健康端点来源</dt><dd class="mono">base_url + /health（未用显式 health_url）</dd><dt>下游依赖</dt><dd class="mono">agent-5（汇总）· 拓扑安全检查已计入</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">近 12 轮（3 败窗）</p>
+<div class="timeline">
+  <div class="tl-item"><b>14:35:10</b> · 通过 · <span class="mono">42ms</span></div>
+  <div class="tl-item"><b>14:34:10</b> · 通过 · <span class="mono">38ms</span></div>
+  <div class="tl-item"><b>14:33:10</b> · 通过 · <span class="mono">51ms</span></div>
+  <div class="tl-item fail"><b>14:32:10</b> · timeout · <span class="mono">5001ms</span></div>
+  <div class="tl-item fail"><b>14:31:10</b> · timeout · <span class="mono">5000ms</span></div>
+  <div class="tl-item fail"><b>14:30:10</b> · refused · <span class="mono">6ms</span></div>
+  <div class="tl-item"><b>14:29:10</b> · 通过 · 40ms</div>
+  <div class="tl-item"><b>14:28:10</b> · 通过 · 39ms</div>
+  <div class="tl-item"><b>14:27:10</b> · 通过 · 44ms</div>
+  <div class="tl-item"><b>14:26:10</b> · 通过 · 41ms</div>
+  <div class="tl-item"><b>14:25:10</b> · 通过 · 43ms</div>
+  <div class="tl-item"><b>14:24:10</b> · 通过 · 40ms</div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已手动复探：200 OK · 43ms（演示）">立即复探</button> <button class="btn sm" data-toast="已改探测窗口为 30s（演示 · 审计 agent:probed_updated · 下轮生效）">调探测周期</button></p></div></div>
+
+
+<div class="modal" id="md-unlink-mem"><div style="padding:var(--s4)"><b>断开本 Agent 的域内共享记忆？</b><p class="small dim" style="margin:8px 0 4px">断开后本 Agent 不再加载同域前序上下文（5 条），等价于关掉「记忆」这一路输入。必填原因。</p><table class="tbl compact"><tbody>
+<tr><td>受影响计划并入</td><td class="mono">3 → 2 上下文</td><td><span class="chip warn">推理质量可能变化</span></td></tr>
+<tr><td>其它同域 Agent</td><td class="mono">4</td><td><span class="chip ok">保留</span></td></tr>
+<tr><td>记忆条目本身</td><td class="mono">5</td><td><span class="chip info">不删（属域）</span></td></tr>
+</tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [A/B 对照：验证记忆对审查结论的影响 ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开记忆共享 · 下轮运行生效 · 审计 mem:detached（演示）" data-close>确认断开</button></div></div></div>
+
+<div class="pop" id="pop-edit"><p class="tiny dim" style="margin:0 0 6px"><b>编辑 · 选分区</b>（改完不自动重启实例 · §5.4 边界）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">基础信息</td><td>名称 / 归属域 / 能力标签</td><td><span class="btn link" data-toast="已打开基础信息分区（多标签会同步改变能力组归属 · 演示）">改</span></td></tr>
+<tr><td class="mono">模型与凭据</td><td>Provider / 模型 / Base URL / Key</td><td><span class="btn link" data-toast="Key 输入后仅回显 sk-*** ，不可读回（演示）">改</span></td></tr>
+<tr><td class="mono">并发与容量</td><td>并发上限 / 超时 / 重试 / Token 预算</td><td><span class="btn link" data-toast="并发 4 → 6 已保存 · 等下轮生效（演示）">改</span></td></tr>
+<tr><td class="mono">探针与修复</td><td>健康端点 / 周期 / 失败阈值 / 退避</td><td><span class="btn link" data-toast="探测周期 60s → 30s · 已保存并提示限流风险（演示）">改</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">自动保存三态：<span class="chip">保存中</span> → <span class="chip ok">已存</span> / <span class="chip bad">失败（页内显示具体错误）</span>；无权限走页内 Lock read-only，不改 URL 不跳走（§6.0 ①）。</p>
+<p style="margin:6px 0 0"><button class="btn sm primary" data-toast="已保存 3 处改动 · 实例未重启（需显式重启）（演示）">保存全部</button> <button class="btn sm" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）" data-close>放弃</button></p></div>
+
+<div class="pop" id="pop-probe-range"><p class="tiny dim" style="margin:0 0 6px"><b>探针时间线范围</b></p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">最近 8 次</td><td><span class="chip">当前</span></td><td><span class="btn link" data-toast="已切到最近 8 次（演示）">选</span></td></tr>
+<tr><td class="mono">最近 1 小时</td><td class="mono">60 次 · 通过率 83%</td><td><span class="btn link" data-toast="已切到最近 1 小时 · 3 败集中在 14:30–14:32（演示）">选</span></td></tr>
+<tr><td class="mono">最近 24 小时</td><td class="mono">1,440 次 · 12 败</td><td><span class="btn link" data-toast="已切到 24 小时 · 12 败中 9 次与同源上游抖动同窗（演示）">选</span></td></tr>
+<tr><td class="mono">仅失败</td><td class="mono">过滤后 3 条</td><td><span class="btn link" data-toast="已筛 status=failed · 3 条（演示）">选</span></td></tr>
+<tr><td class="mono">不可探活</td><td class="mono">仅显示未配置健康端点的实例</td><td><span class="btn link" data-toast="本 Agent 有 health 端点，此筛选下为空（非错误态）（演示）">选</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">保存筛选 = 视图快照 + <span class="mono">?view=</span>（§6.0 ②）。</p>
+<p style="margin:6px 0 0"><button class="btn sm" data-toast="视图已存为 v-41（agent-1 · 仅失败 · 24h）（演示）">存为视图</button></p></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：探针 3 条 fail 行 → <b>探针失败详情页</b>（agent-detail__probe-timeout / __probe-refused · 原始输出 + 同窗 run + 处置钮）· error 会话行 <span class="mono">rt-1-13:58</span> → <b>失败运行详情页</b>（三件套：Retry / Edit as advanced form / 升级到人）· 基础信息面板 → <b>完整配置详情页</b> · 「删除」→ <b>删除前置检查详情页</b>（9 项清单 + 处置在途分支，modal 一屏读不完）· 其余会话与在途行 → toast 跳 §6.22 执行回放 · 顶栏「重启」→ toast（状态灯等复探才更新）· 「删除」→ 在途任务检查清单 + 必填原因二次确认（仍有在途则确认钮给出真实拒因）· 「编辑」→ 分区 pop（4 项选择器 · 合规）· 状态灯 chip → 健康抽屉 · 记忆条目 → 记忆详情抽屉（kv + 1 张子表 · 保留）· 断开知识挂载与记忆共享、暂停本实例自动修复 → 二次确认　按 Esc 关闭所有浮层。</p>
+</body></html>

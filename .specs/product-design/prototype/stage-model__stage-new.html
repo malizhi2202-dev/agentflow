@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>新增阶段 2b-perf-baseline · 阶段模型配置 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<div class="detail-top"><span class="pill" data-back="stage-model.html" data-click>← 返回 阶段模型配置</span><span class="crumb"><b>管理 › 阶段模型 › 新增阶段（锚必选）</b></span><span class="chip warn">未选锚 · 无法保存</span></div>
+<div class="detail-body">
+<p class="tiny dim" style="margin:0 0 8px">新阶段<b>只继承生命周期</b>，不继承停车 / 评审 / 失败恢复行为。必须先归入 4 个语义锚之一；归类<b>建后不可改</b>。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">id      [2b-perf-baseline   ]   ← 建议 &lt;seq&gt;&lt;字母后缀&gt;，避免撞历史 ID
+name    [性能基线            ]
+anchor  (*) unstarted   ( ) started   ( ) done   ( ) closed      ← 必选
+file    [PERF.md          ]  required [ ]
+gate    [无 ▾]   prompt [prompts/2b-perf.md ▾]
+seq     [3 ]  （插到 2a-ui-design 之后，不影响既有判定链）</pre>
+<h4 class="blk">4 语义锚选择</h4>
+<table class="tbl compact"><thead><tr><th>锚</th><th>含义</th><th>当前阶段数</th><th>新阶段放进去会得到什么</th></tr></thead><tbody>
+<tr><td class="mono">unstarted</td><td class="tiny">还没动</td><td class="mono">5</td><td class="tiny">看板「未开始」列 + 进度缺口计入</td></tr>
+<tr><td class="mono">started</td><td class="tiny">正在做</td><td class="mono">3</td><td class="tiny">「进行中」列 · <b>不会</b>自动启动 Agent</td></tr>
+<tr><td class="mono">done</td><td class="tiny">完成（需证据）</td><td class="mono">1</td><td class="tiny">终态 · 触发收件箱自愈归档</td></tr>
+<tr><td class="mono">closed</td><td class="tiny">关闭（重复/作废）</td><td class="mono">0</td><td class="tiny">终态 · 不计入进度分母</td></tr>
+</tbody></table>
+<div class="callout" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>落地检验：</b>把这张表改成 5 阶段或 12 阶段模型且不改任何代码，§1.4「不绑定任何开发流程」才算成立。<b>当前不成立</b>（配置面尚未接上，后端仍有 6 处阶段字面量）。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已选锚 started（演示）">锚 = started</button> <button class="btn sm" data-toast="未选语义锚 → 400「anchor is required」，保存被禁（演示）">不选锚直接保存</button> <button class="btn sm primary" data-toast="新增阶段 2b-perf-baseline 已入表单（未保存 · 整包 PUT 时才落盘）（演示）">加入配置并保存</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 stage-model.html 的 <span class="mono">dr-new</span> 抽屉升格而来：新增阶段是带校验的可编辑表单（6 个字段 + 锚选择表），不能塞在浮层里。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：锚 = started / 不选锚直接保存 → toast（400「anchor is required」）· 加入配置并保存 → toast（未保存态，整包 PUT 时才落盘）。</p>
+</body></html>

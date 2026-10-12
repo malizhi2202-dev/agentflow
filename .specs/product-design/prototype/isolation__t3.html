@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>档位详情 T3 gVisor 详情 · 执行隔离策略 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p26" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="isolation.html" data-click>← 返回 执行隔离策略</span><span class="crumb"><b>档位详情 · T3 Docker + gVisor（runsc）</b></span><span class="chip warn">装后即可 · 当前不可选</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="isolation__runsc.html">安装 runsc 指引</span><span class="pill" data-goto="isolation__downgrade.html">降档执行确认</span><span class="pill" data-goto="control-plane.html">管控面</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>无 KVM 是这一档在单机上的关键卖点</b>（systrap 默认平台，无需内核改动、不需要 /dev/kvm）——所以 runsc 一装就能把 <span class="mono">min_tier=T3</span> 的不可信域跑起来。</p></div>
+<h4 class="blk">形态与契约</h4>
+<dl class="kv"><dt>形态</dt><dd class="mono">Docker + gVisor 运行时（--runtime=runsc）</dd><dt>隔离强度 / 失效面</dt><dd class="mono">中高：应用内核接管 syscall → 内核攻击面大幅缩小；<b>失效面转到 gVisor 自身</b> · syscall 密集任务性能打折</dd><dt>冷启动</dt><dd class="mono">~1s（与 T2 同级，大头仍在 Docker）</dd><dt>KVM 依赖</dt><dd><b>无需</b>（systrap 默认平台 · ptrace 平台已停支）</dd><dt>本机探测</dt><dd><span class="dot dead"></span> <span class="mono">docker info Runtimes 无 runsc → 不可选</span></dd><dt>性能特征（如实说）</dt><dd class="mono">CPU 密集≈零损失 · syscall/文件路径密集打折（官方给定性描述与 CSV，无固定倍数）</dd><dt>切换成本</dt><dd class="mono">一键：装 runsc → 复探 → 域策略 min_tier 提到 T3</dd><dt>契约不变项</dt><dd class="mono">ttl / shutdownPolicy / egress / 短票 —— 与档位正交，升档不影响这些</dd><dt>开放条件</dt><dd>探测到 runsc 即转「可开放」（探测开放铁律 ①，不提前宣称）</dd><dt>不可达时的行为</dt><dd><b>拒绝执行</b>并三处标 <span class="mono">isolation:none</span>，禁止静默回退 T0/T2</dd></dl>
+<h4 class="blk">探测输出</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75">$ docker info --format '{{json .Runtimes}}'
+{"io.containerd.runc.v2":{...}}        # 无 runsc 条目 → T3 不可选
+$ ls /run/containerd/runtime/runc        # （探测用只读命令）</pre>
+<h4 class="blk">哪些域在等这一档</h4>
+<table class="tbl compact"><thead><tr><th>域</th><th>min_tier</th><th>现在</th><th>装完后</th></tr></thead><tbody>
+<tr><td class="mono">integrations-untrusted</td><td class="mono">T3</td><td><span class="chip bad">拒跑</span></td><td><span class="chip ok">可执行</span></td></tr>
+<tr><td class="mono">quant-research</td><td class="mono">T2</td><td><span class="chip ok">T2 够</span></td><td>可选升档</td></tr>
+<tr><td class="mono">默认域</td><td class="mono">T0</td><td><span class="chip bad">红条</span></td><td>需域 owner 主动改策略</td></tr>
+</tbody></table>
+<h4 class="blk">操作</h4>
+<p><button class="btn sm primary" data-click data-goto="isolation__runsc.html">打开安装 runsc 指引</button> <span class="btn link" data-click data-toast="复探（演示）：仍未检测到 runsc → T3 保持不可选">复探</span> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-goto="isolation__downgrade.html">降档执行（红色警告）</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为档位 T3 升格详情页（规划原型 · 6.26 界面尚不存在）。gVisor 失效面、systrap 平台、KVM 无需、契约正交项与三处显式规则为 §6.26 / §1.6 P1-14 原文实值；docker Runtimes 输出为演示拼装。本页不安装、不执行。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：「打开安装 runsc 指引」跳 isolation__runsc.html · 「降档执行」跳 isolation__downgrade.html（红色警告确认）· 复探 → toast · 顶部「← 返回」回 isolation.html　按 Esc 关闭浮层。</p>
+</body></html>

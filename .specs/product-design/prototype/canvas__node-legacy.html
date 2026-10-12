@@ -1,0 +1,44 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>节点 legacy（旧版审查 Agent） 详情 · 编排画布 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="canvas.html" data-click>← 返回 编排画布</span><span class="crumb"><span class="dim">编排画布 /</span> <b>节点 legacy（旧版审查 Agent）</b></span><span class="chip bad"><span class="dot failed" style="margin-right:4px"></span>引用已禁用工具</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="tools.html">工具市场</span><span class="pill" data-goto="stage-model.html">阶段模型</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>校验警告原文：</b><span class="mono">旧版审查 Agent</span> 引用的工具已被禁用，执行时将失败。<b>校验不拦截</b>——这是 §5.5 的边界：禁用是全局生效，已引用它的编排在<b>下次执行</b>时才失败。</p></div>
+<dl class="kv"><dt>节点 ID / 类型</dt><dd class="mono">legacy · agent 节点（备援支路）</dd>
+<dt>绑定 Agent</dt><dd>旧版审查 Agent <span class="mono dim">agent-7</span> <span class="chip bad">探针连续 5 次失败 · dead</span></dd>
+<dt>模型</dt><dd class="mono">gpt-3.5（低价备援档）</dd>
+<dt>归属域 / 能力组</dt><dd class="mono">默认域 / code-review（冷备）</dd>
+<dt>被引用的边</dt><dd class="mono">review → legacy（retry-fallback · on_exhausted: dead-letter）</dd>
+<dt>引用的工具</dt><dd><span class="chip bad">浏览器自动化 · Skill 已禁用</span> <span class="chip">grep</span> <span class="chip">read_file</span></dd>
+<dt>工具禁用信息</dt><dd class="mono">09-22 17:40 · admin 王工 · 原因：依赖镜像不兼容</dd>
+<dt>边配置</dt><dd class="mono">重试 2 次 / 超时 60s / Token 上限 8,000</dd>
+<dt>死信投递</dt><dd>已显式配置 <span class="mono">dead-letter</span> <span class="chip ok">失败任务有处可去</span></dd>
+<dt>健康四态</dt><dd><span class="chip bad">offline</span> 心跳丢失 &gt; 75s（阈值写进文案 · §6.0 ③）</dd>
+<dt>最近执行</dt><dd class="mono">09-22 之后 0 次 · 上次 error（工具不可用）</dd></dl>
+<h4 class="blk">失败时的行为链</h4>
+<div class="flow" style="flex-direction:column;align-items:stretch;gap:5px">
+<div class="step">主边 review→frontend 重试 3 次耗尽</div><span class="to">↓</span>
+<div class="step">retry-fallback 派发到 legacy 节点</div><span class="to">↓</span>
+<div class="step">工具「浏览器自动化」已禁用 → 执行即报错（非校验期）</div><span class="to">↓</span>
+<div class="step hi">on_exhausted: dead-letter → 投递死信 + execution_failed 告警（≤30s）</div>
+</div>
+<h4 class="blk">该节点历史执行</h4>
+<table class="tbl compact"><thead><tr><th>时间</th><th>状态</th><th>说明</th></tr></thead><tbody>
+<tr><td class="mono">09-22 18:02</td><td><span class="chip bad">error</span></td><td class="tiny">工具被禁用 · 调用未建立</td></tr>
+<tr><td class="mono">09-21 22:47</td><td><span class="chip ok">success</span></td><td class="tiny">fallback 接管主边耗尽 · 6.1s</td></tr>
+<tr><td class="mono">09-19 07:31</td><td><span class="chip ok">success</span></td><td class="tiny">冷备首次拉起 · 首调 +8s</td></tr>
+<tr><td class="mono">09-18 11:11</td><td><span class="chip">节点创建</span></td><td class="tiny">自 v2 快照迁移</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="跳转 §6.4 重启该 Agent（静态原型不跨页 · 演示）">重启 Agent</button> <button class="btn sm" data-click data-modal="md-delnode" style="color:var(--red);border-color:var(--red)">移除节点</button></p>
+</div>
+<div class="modal" id="md-delnode"><div style="padding:var(--s4)"><b>从画布移除「旧版审查 Agent」节点？</b>
+<p class="small dim" style="margin:8px 0">移除即删除 1 个节点与 1 条边（<span class="mono">review → legacy · retry-fallback</span>），YAML 同步重写。<b>已部署快照 v3 不受影响</b>——只有再 apply 才改变期望状态。必填原因。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [备援支路长期不可用，改由 备援 Agent 承接 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="节点与 retry-fallback 边已移除 · 草稿未 apply（演示）" data-close>确认移除</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由编排画布浮层升格：节点 / 边配置与 YAML 写回说明全宽 · 「校验」「保存」→ toast · 「移除节点」「删除该边」→ 二次确认（本页引用到的二次确认 modal 自带副本）· 改完不自动重启实例（§5.4）　按 Esc 关闭浮层。</p>
+</body></html>

@@ -1,0 +1,51 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgentCard JSON 详情 · 对外集成面 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p27" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="integration.html" data-click>← 返回 对外集成面</span><span class="crumb"><b>AgentCard JSON · 只读预览</b> · /.well-known/agent-card.json</span><span class="chip">M0 静态卡 · 未启用</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="integration__watch.html">watch 契约</span><span class="pill" data-goto="integration__etag.html">ETag/412</span><span class="pill" data-goto="isolation.html">执行隔离</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>只读页：本页不写文件、不建路由。</b>卡片由 <span class="mono">Agent / Workflow</span> 行生成；capabilities 里未实现的能力一律 <span class="mono">false</span>——承诺必须小于实现（§6.0 ③）。</p></div>
+<h4 class="blk">卡片口径</h4>
+<dl class="kv"><dt>端点</dt><dd class="mono">GET /.well-known/agent-card.json（当前<b>未挂载</b>）</dd><dt>必填 8 项</dt><dd class="mono">name · description · version · supportedInterfaces[] · capabilities · defaultInputModes · defaultOutputModes · skills</dd><dt>protocolVersion</dt><dd class="mono">"1.0"（v0.3→v1.0 已把该字段从卡片下沉到每个 interface，别写错层）</dd><dt>可见范围</dt><dd>只含 <b>public 可见域</b> 的 Agent；含内部地址/敏感 skill 的卡 MUST 走鉴权扩展卡</dd><dt>skills 语义</dt><dd>纯描述性（规范自称 "largely a descriptive concept"）· <b>工具市场条目不渲染成 skill</b></dd><dt>不支持项</dt><dd class="mono">streaming=false · pushNotifications=false · extendedAgentCard 未实现</dd><dt>版本串口径</dt><dd class="mono">写 protocolVersion "1.0"，与发布 tag v1.0.1 分开——避免被追问</dd><dt>生成来源</dt><dd class="mono">Agent.name/description · 平台 version · Workflow/角色条目 → skills[]</dd><dt>撤销方式</dt><dd class="mono">摘掉路由即下架（无状态、无订阅方），比 M1+ 好收口</dd></dl>
+<h4 class="blk">整卡 JSON（只读）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.7">{
+  "name": "AgentFlow · 审查 Agent（标准）",
+  "description": "通用 Agent 编排与管控平台对外暴露的审查能力（只读发现面）。",
+  "version": "0.1.0",
+  "supportedInterfaces": [
+    { "url": "http://127.0.0.1:8000/a2a", "protocolBinding": "JSONRPC", "protocolVersion": "1.0" }
+  ],
+  "capabilities": { "streaming": false, "pushNotifications": false },
+  "defaultInputModes": ["text/plain", "application/json"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    { "id": "spec-review", "name": "工作流知识产物审查", "description": "对 .specs/ 六件套做验收覆盖与一致性检查。", "tags": ["review","specs"] },
+    { "id": "explain-run", "name": "执行回放解释", "description": "按工作项解释哪个 Agent 动过、跑了什么工具。", "tags": ["replay","trace"] }
+  ],
+  "provider": { "organization": "agentflow", "url": "http://127.0.0.1:8000" }
+}</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制 AgentCard JSON（演示）· 卡片未挂载、未对外暴露">⧉ 复制整卡</span> <span class="btn link" data-click data-toast="✓ 已复制为 jq 校验命令（演示）：jq '.capabilities' agent-card.json">⧉ 复制校验片段</span> <span class="btn link" data-click data-toast="演示：本页只读——挂载路由属实现动作，不提供">为什么没有「发布」按钮</span></p>
+<h4 class="blk">必填项核对（逐条对着规范）</h4>
+<table class="tbl compact"><thead><tr><th>字段</th><th>来源</th><th>状态</th></tr></thead><tbody>
+<tr><td class="mono">name / description / version</td><td class="tiny">Agent 行直映射</td><td><span class="chip ok">齐</span></td></tr>
+<tr><td class="mono">supportedInterfaces[0]</td><td class="tiny">首条=优先（JSONRPC）</td><td><span class="chip ok">齐</span></td></tr>
+<tr><td class="mono">capabilities</td><td class="tiny">未实现项如实 false</td><td><span class="chip ok">齐 · 不吹</span></td></tr>
+<tr><td class="mono">defaultInput/OutputModes</td><td class="tiny">text + json</td><td><span class="chip ok">齐</span></td></tr>
+<tr><td class="mono">skills[]</td><td class="tiny">描述性 · 无工具市场条目</td><td><span class="chip ok">齐</span></td></tr>
+<tr><td class="mono">provider / iconUrl / securitySchemes</td><td class="tiny">选填</td><td><span class="chip">给了 provider，其余留白</span></td></tr>
+</tbody></table>
+<h4 class="blk">操作</h4>
+<p><button class="btn sm" data-back="integration.html" data-click>返回集成面</button> <button class="btn sm primary" data-click data-drawer="md-m1">试着开启 M1-lite</button></p>
+</div>
+<div class="drawer" id="md-m1"><header><b style="color:var(--red)">开启 M1-lite —— 被拦下（这就是演示）</b><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>§1.6.5 纪律 ⑬：</b>身份修复前不暴露任何对外写端点。当前 <span class="mono">X-User-Id</span> 身份为 <b>fail-open</b>（缺身份即回退 admin），把它挂到对外写面 = 给全网开门。所以 M1 的硬前置是 <b>P0-1 落地 + 单副本承诺书面化</b>，不是工作量。</p></div>
+<dl class="kv"><dt>被拦动作</dt><dd class="mono">挂载 POST /a2a（SendMessage · GetTask · INPUT_REQUIRED 续跑）</dd><dt>前置 ①</dt><dd class="mono">P0-1 身份修复 <span class="chip bad">未完成 · fail-open 在</span></dd><dt>前置 ②</dt><dd class="mono">三处进程内状态（调度队列/限流/退避）单副本承诺书面化 <span class="chip warn">未写</span></dd><dt>前置 ③</dt><dd class="mono">映射层自证、<b>不引 a2a-sdk</b>（v1.1.5 周更节奏=供应链赌注）</dd><dt>仍然可用</dt><dd>M0 静态 AgentCard（只读）→ 已在上方预览，未挂载</dd><dt>M2</dt><dd class="mono">streaming + push 冻结（SSE 长连×单副本、webhook SSRF×出网默认拒）</dd><dt>本模态有没有「强制开启」</dt><dd><b>没有</b>——门禁在服务端状态转换层，界面不提供绕过入口（自家应用 §1.6.5 ①）</dd></dl>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-close>知道了 · 保持 M0 只读</button> <button class="btn sm" data-toast="演示：只读卡片可继续用；本页不记录任何对外写端点开启尝试（未落地）">复制这份拦截说明</button></p></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为 AgentCard「整卡 JSON」升格详情页（规划原型 · 6.27 界面尚不存在）。必填 8 项、capabilities 全 false、protocolVersion 下沉、工具市场条目不渲染成 skill（MCP 纵向层红线）、§1.6.5 ⑬ 拦截纪律均为 §6.27 原文实值；卡片具体字段值与 skills 两条为按 §6.12 口径拼装的演示值，真实实现尚未产生该端点。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：⧉ 复制整卡 / 校验片段 → toast（零执行）· 「试着开启 M1-lite」→ 拦截抽屉（§1.6.5 ⑬ 说明 + 无绕过入口）· 顶部「← 返回」回 integration.html　按 Esc 关闭浮层。</p>
+</body></html>

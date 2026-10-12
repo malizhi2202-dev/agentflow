@@ -1,0 +1,65 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>文件读写详情 · 工具库 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>工具</b> · <span class="mono">fs.read_write</span></span><span class="chip info">Plugin</span><span class="chip ok">启用</span><span class="chip mono">8 参数</span></div>
+<div class="detail-body">
+<p class="proto-note"><span class="chip warn">演示数据</span>Plugin 工具详情：参数 schema / 被引用编排 / 启用历史。禁用为全局操作，卡片保持可见——故整页承载，不塞侧栏。本页为 Plugin 类样本（「Shell 执行」「Git 操作」同形态，原型共用一份数据未逐条区分）。</p>
+
+<h4 class="blk">基础信息</h4>
+<dl class="kv"><dt>标识 / 类型</dt><dd class="mono">fs.read_write · Plugin（内置注册）</dd>
+<dt>能力</dt><dd>本地文件系统读写，路径白名单 + 越界拦截</dd>
+<dt>参数 / 返回</dt><dd class="mono">8 参数 · {ok, content|bytes_written, path}</dd>
+<dt>安全栅栏</dt><dd class="mono">path_allowlist: .specs/**, backend/** · 拒绝 .. 穿越</dd>
+<dt>被引用</dt><dd>2 个工作流 · 3 个 Agent · 编排 <span class="mono">审查流水线 v3</span></dd>
+<dt>近 7 天调用</dt><dd class="mono">412 次 · 失败 3 · P95 62ms</dd>
+<dt>注册 / 最后修改</dt><dd class="mono">09-15 10:02 · 09-21 16:40（加白名单）</dd>
+<dt>权限要求</dt><dd><span class="chip">project:write 才可写</span> 无权限时调用返回 404 而非 403</dd></dl>
+
+<h4 class="blk">参数 schema（8）</h4>
+<table class="tbl compact"><thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead><tbody>
+<tr><td class="mono">path</td><td class="mono">string</td><td><span class="chip bad">是</span></td><td class="tiny">相对项目根；越界即拒</td></tr>
+<tr><td class="mono">mode</td><td class="mono">enum</td><td><span class="chip bad">是</span></td><td class="tiny">read / write / append</td></tr>
+<tr><td class="mono">content</td><td class="mono">string</td><td><span class="chip">否</span></td><td class="tiny">write/append 必填，≤1MB</td></tr>
+<tr><td class="mono">offset</td><td class="mono">int</td><td><span class="chip">否</span></td><td class="tiny">读起始行，默认 1</td></tr>
+<tr><td class="mono">limit</td><td class="mono">int</td><td><span class="chip">否</span></td><td class="tiny">最大行数，默认 2000</td></tr>
+<tr><td class="mono">encoding</td><td class="mono">string</td><td><span class="chip">否</span></td><td class="tiny">utf-8（默认）/ gbk</td></tr>
+<tr><td class="mono">backup</td><td class="mono">bool</td><td><span class="chip">否</span></td><td class="tiny">写前自动备份，留 5 版</td></tr>
+<tr><td class="mono">create_parent</td><td class="mono">bool</td><td><span class="chip">否</span></td><td class="tiny">父目录不存在时是否创建</td></tr>
+</tbody></table>
+
+<h4 class="blk">被引用的工作流 / 编排（3）</h4>
+<table class="tbl compact"><thead><tr><th>引用方</th><th>类型</th><th>状态</th><th>禁用后影响</th></tr></thead><tbody>
+<tr><td class="mono" data-click data-goto="workflows__review-pipeline.html">审查流水线 v3</td><td>编排</td><td><span class="chip ok">已发布</span></td><td class="tiny">下次执行才失败（校验不拦截）</td></tr>
+<tr><td class="mono">需求澄清 v2</td><td>工作流</td><td><span class="chip ok">已发布</span></td><td class="tiny">同上 · 卡片仍可见</td></tr>
+<tr><td class="mono">知识入库 v5</td><td>工作流</td><td><span class="chip warn">草稿</span></td><td class="tiny">未 apply，不影响线上</td></tr>
+</tbody></table>
+
+<h4 class="blk">启用历史</h4>
+<div class="timeline">
+<div class="tl-item"><b>09-21 16:40</b> · 修改：新增 <span class="mono">backup</span> 参数（默认 true）</div>
+<div class="tl-item"><b>09-18 09:10</b> · admin 李工 <b>恢复启用</b> · 原因：白名单已补齐</div>
+<div class="tl-item fail"><b>09-17 22:05</b> · admin 王工 <b>禁用</b> · 原因：误写生产配置目录</div>
+<div class="tl-item"><b>09-15 10:02</b> · 注册进工具库 · 类型 Plugin · 6 参数</div>
+</div>
+
+<h4 class="blk">操作</h4>
+<div class="callout warn"><p class="tiny" style="margin:0"><b>纪律：</b>禁用<b>全局生效</b>且<b>卡片保持可见</b>——已引用它的编排在<b>下次执行</b>时才失败，隐藏会让用户以为工具不存在。</p></div>
+<p><button class="btn sm" data-toast="demo 包已下载（样例 + 假凭据 · 演示）">下载 demo</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-disable">禁用</button></p>
+
+<div class="modal" id="md-disable"><div style="padding:var(--s4)"><b>禁用工具「文件读写」？</b>
+<p class="small dim" style="margin:8px 0">禁用<b>全局生效</b>：卡片保持可见（不隐藏），已引用它的 <b>3 处编排在下次执行时才失败</b>。<b>必填原因</b>——理由与操作人入审计（§6.0 纪律）。</p>
+<table class="tbl compact"><thead><tr><th>受影响引用</th><th>类型</th><th>状态</th></tr></thead><tbody>
+<tr><td class="mono">审查流水线 v3</td><td>编排</td><td><span class="chip ok">已发布 · 下次执行失败</span></td></tr>
+<tr><td class="mono">需求澄清 v2</td><td>工作流</td><td><span class="chip ok">已发布 · 下次执行失败</span></td></tr>
+<tr><td class="mono">知识入库 v5</td><td>工作流</td><td><span class="chip warn">草稿 · 暂不影响</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:8px">原因: [写路径白名单待重配，先停用避免误写 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已禁用 · 卡片仍可见 · 审计 tool:disable（演示）" data-close>确认禁用</button></div></div></div>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 工具库 · 引用方「审查流水线 v3」→ 工作流详情页 · 下载 demo→toast · 禁用→二次确认（本页自带 modal 副本，含必填原因）　按 Esc 关闭所有浮层。</p>
+</body></html>

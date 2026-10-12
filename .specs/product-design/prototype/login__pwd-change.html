@@ -1,0 +1,36 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>首登强制改密 详情 · 登录 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p1" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="login.html" data-click>← 返回 登录</span><span class="crumb"><span class="dim">登录 /</span> <b>首登强制改密</b></span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="audit.html">审计日志</span></div>
+<div class="detail-body">
+<p class="small dim" style="margin:8px 0">由 <span class="mono">must_change_password=true</span> 驱动：口令已通过校验，但<b>未签业务会话</b>；改密前访问 <span class="mono">/api/auth/*</span> 之外一律 403。</p>
+<h4 class="blk">票据与账号</h4>
+<dl class="kv"><dt>账号</dt><dd class="mono">admin · id=1</dd><dt>原因</dt><dd>管理员建号时未设口令（出厂口令已随 P0-2 废除）</dd><dt>票据</dt><dd class="mono">scope=pwd-change · 剩余 9m42s</dd></dl>
+<h4 class="blk">新口令 · 强度与策略核对</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">当前口令 [                        ]
+新口令   [  Tru3bl#2026-malzhi   ]
+确认    [  Tru3bl#2026-malzhi   ]</pre>
+<p class="tiny muted" style="margin:8px 0 2px">强度 · <b style="color:var(--green)">4/4 强</b></p>
+<div class="bar"><i class="g" style="width:100%"></i></div>
+<table class="tbl compact" style="margin-top:var(--s2)"><tbody>
+<tr><td>长度 ≥ 12</td><td><span class="chip ok">通过</span></td><td class="mono tiny">实测 19</td></tr>
+<tr><td>不在泄露口令库 / 非弱口令表</td><td><span class="chip ok">通过</span></td><td class="mono tiny">0 命中</td></tr>
+<tr><td>非用户名 / 邮箱派生</td><td><span class="chip ok">通过</span></td><td class="mono tiny">相似度 0.11</td></tr>
+<tr><td>≠ 上一口令 · ≠ 出厂口令</td><td><span class="chip ok">通过</span></td><td class="mono tiny">diff ok</td></tr>
+<tr><td>argon2id 参数不低于默认档</td><td><span class="chip info">服务端判定</span></td><td class="mono tiny">m=64MiB t=3 p=4</td></tr>
+</tbody></table>
+<div class="callout warn" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>成功即旋转会话：</b>本会话换新 id，<span class="mono">must_change_password</span> 置 false，其余设备旧 cookie 全部作废（旧 cookie 再请求 → 401，不回退 admin）。全程入审计。</p></div>
+<div class="grid g2" style="margin-top:var(--s3)">
+  <div class="callout ok" style="margin:0"><p class="tiny" style="margin:0"><b>正例：</b>改完密直接落工作台，导航按角色重绘，旧设备掉线需重登。</p></div>
+  <div class="callout bad" style="margin:0"><p class="tiny" style="margin:0"><b>反例：</b>前端灰置按钮就当「已挡住」，服务端仍发业务会话——真实缺陷由自愈分支「缺 hash→重置 123456」造成，本改密页即该分支删除后的替代形态。</p></div>
+</div>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-toast="已取消：不签会话，页面停在 /login（演示）" data-close>稍后再说</button> <button class="btn sm primary" data-toast="口令已更新 · 会话已旋转（旧 cookie 作废）· 审计 auth:password_changed（演示）" data-close>确认改密</button></div>
+</div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由登录页强制改密浮层升格（含表单 + 强度条 + 策略核对，modal 装不下）：改完「确认改密」→ toast 写明会话旋转与审计 · 「稍后再说」→ 返回登录页 · 强度条 0/4 阻断提交　按 Esc 关闭浮层。</p>
+</body></html>

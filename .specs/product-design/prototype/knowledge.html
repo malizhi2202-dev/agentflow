@@ -1,0 +1,74 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>知识库 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/knowledge</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html" class="active"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">知识库 <span class="dim">· 审查 Agent · 标准</span></span><span class="right"><span class="chip mono">9 源 · 7 本地 / 2 远端</span><span class="chip ok">7 已索引</span><button class="btn sm primary">+ 添加源 ▾ 本地上传｜远端知识源</button></span></div>
+          <div class="app-body">
+            <div class="panel" style="border-style:dashed;text-align:center;padding:var(--s6);margin-bottom:var(--s4)">
+              <p class="small" style="margin:0 0 4px;color:var(--text)"><b>拖拽文件到此处上传</b></p>
+              <p class="tiny dim" style="margin:0">支持 .docx .js .json .md .pdf .py .txt · 单文件 ≤ 10MB</p>
+            </div>
+            <table class="tbl compact">
+              <thead><tr><th>源名称</th><th>来源类型</th><th>大小</th><th>状态</th><th>Chunks</th><th>标签</th><th>上传时间</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">Confluence · 架构决策记录</td><td><span class="chip">远端源 · Confluence</span></td><td class="dim">—</td><td><span class="chip ok">已连接 · 30min 自动同步</span></td><td class="mono">214</td><td><span class="pill">ADR</span></td><td class="mono">09-06 10:12 同步</td><td><span class="btn link" data-toast="✓ 连接测试通过 · Confluence 可达 · 214 页 · 42ms">测试连接</span><span class="btn link" data-toast="立即同步已排队（演示）">立即同步</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink">断开</span></td></tr>
+                <tr><td class="mono">Notion · 产品需求库</td><td><span class="chip">远端源 · Notion</span></td><td class="dim">—</td><td><span class="chip bad">令牌过期 · 索引冻结</span></td><td class="mono">58 <span class="dim">(旧)</span></td><td><span class="pill">需求</span></td><td class="mono">09-01 08:40 最后成功</td><td><span class="btn link" style="color:var(--red)" data-toast="✗ 连接测试失败 · 401 Unauthorized（令牌过期）——索引保持冻结">测试连接</span><span class="btn link" data-click data-goto="knowledge__notion-source.html">更新凭据</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink">断开</span></td></tr>
+                <tr><td class="mono">test_knowledge.txt</td><td><span class="chip">本地文件</span></td><td class="mono">222 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">测试</span></td><td class="mono">07-06 14:02</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td class="mono">架构说明.md</td><td><span class="chip">本地文件</span></td><td class="mono">168 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">设计</span></td><td class="mono">07-06 13:48</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td class="mono">规范.pdf</td><td><span class="chip">本地文件</span></td><td class="mono">2.4 MB</td><td><span class="chip ok">已索引</span></td><td class="mono">100</td><td><span class="pill">规范</span> <span class="pill">必读</span></td><td class="mono">07-06 11:20</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td class="mono">api-schema.json</td><td><span class="chip">本地文件</span></td><td class="mono">84 KB</td><td><span class="chip ok">已索引</span></td><td class="mono">37</td><td><span class="pill">接口</span></td><td class="mono">07-05 17:33</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td class="mono">db-schema.sql</td><td><span class="chip">本地文件</span></td><td class="mono">31 KB</td><td><span class="chip bad">处理失败</span></td><td class="dim">—</td><td><span class="pill">数据库</span></td><td class="mono">07-05 17:30</td><td><span class="btn link">重试</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td class="mono">onboarding.md</td><td><span class="chip">本地文件</span></td><td class="mono">6.1 KB</td><td><span class="chip ok">已索引</span></td><td class="mono">9</td><td><span class="pill">入门</span></td><td class="mono">07-04 09:12</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td class="mono">passwd.txt</td><td><span class="chip">本地文件</span></td><td class="mono">102 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td class="dim">—</td><td class="mono">07-04 09:10</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+              </tbody>
+            </table>
+            <div class="grid g2" style="align-items:start">
+              <div class="callout bad" style="margin:0">
+                <p><b>错误态：</b>上传 <span class="mono">.exe</span> / <span class="mono">.sh</span> / 无后缀文件 → 400「不支持的文件类型: .exe」；上传 11MB 文件 → 400「文件过大: 11534336 bytes，最大允许 10485760 bytes (10MB)」。</p>
+              </div>
+              <div class="callout ok" style="margin:0">
+                <p><b>安全示例：</b>第 7 行 <span class="mono">passwd.txt</span> 原本是上传 <span class="mono">../../../etc/passwd.txt</span>——文件名已被净化，实际落在 <span class="mono">uploads/1/…_passwd.txt</span>，未逃逸目录。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><div class="drawer" id="dr-kb"><header><b>知识源详情 · 架构说明.md</b><span class="chip">本地文件</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>本地文件无「测试连接」</b>——没有远端可测；本地源的操作面=查看 chunks / 重建索引 / 编辑标签 / 删除。</p></div>
+<dl class="kv"><dt>大小 / 类型</dt><dd class="mono">168 B · .md（白名单内）</dd><dt>上传</dt><dd class="mono">07-06 13:48 · 李工</dd><dt>状态</dt><dd><span class="chip ok">已索引</span> · 1 chunk · 嵌入模型 <span class="mono">bge-m3</span></dd><dt>标签</dt><dd><span class="pill">设计</span></dd><dt>挂载于</dt><dd>审查 Agent · 标准（知识源 3 之一）· 对话检索时生效</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">Chunk 预览（1/1）</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">## 架构说明
+系统分编排引擎 / 运行时适配器 / 存储抽象三层……</pre>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="重建索引任务已提交（演示）">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></p></div></div>
+
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除知识源「架构说明.md」？</b>
+<p class="small dim" style="margin:8px 0">删除即从所有挂载 Agent 的检索范围移除，历史会话引用保持快照。<b>必填原因</b>（§6.0 纪律：破坏性操作二次确认+理由入审计）。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [被规范.pdf 取代            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除 + 审计 auth:knowledge_deleted（演示）" data-close>确认删除</button></div></div></div>
+<div class="modal" id="md-unlink"><div style="padding:var(--s4)"><b>断开远端源「Confluence」？</b><p class="small dim" style="margin:8px 0">断开将保留已索引 214 chunks 为只读快照；重连后增量同步。</p><div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已断开 · 快照转只读（演示）" data-close>确认断开</button></div></div></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：行操作「查看」→ 详情抽屉（只读 · 侧栏可容） · 远端「更新凭据」→ 整页详情（可编辑表单：<span class="mono">knowledge__notion-source.html</span>） · 「测试连接」→ 结果反馈 · 删除/断开 → 二次确认模态　按 Esc 关闭所有浮层。</p>
+</body></html>

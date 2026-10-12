@@ -1,0 +1,88 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>用户 testuser（张三）详情 · 用户与权限 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p16" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="audit.html">审计日志</span><span class="pill" data-goto="login.html">登录</span><span class="pill" data-goto="approvals.html">审批中心</span></div>
+<div class="detail-top"><span class="pill" data-back="users.html" data-click>← 返回 用户与权限</span><span class="crumb"><b>用户管理 › 用户 · testuser（张三）</b></span><span class="chip">user</span><span class="chip mono">2 项有效权限</span><span class="chip warn">存量无盐 sha256</span></div>
+<div class="detail-body">
+<div style="display:flex;gap:6px"><span class="pill" style="border-color:var(--blue-border);color:var(--blue)">概览</span><span class="pill">权限点（可编辑 · 保存即旋转会话）</span><span class="pill">活跃会话 (2)</span><span class="pill">变更历史</span></div>
+<dl class="kv" style="margin-top:var(--s3)">
+<dt>登录名 / 显示名</dt><dd class="mono">testuser · 张三</dd>
+<dt>角色</dt><dd><span class="chip">user</span> <span class="btn link" data-click data-modal="md-role">改角色 ▾</span></dd>
+<dt>创建</dt><dd class="mono">09-21 13:02 · 由 admin 建（审计 CREATE users/zhangsan）</dd>
+<dt>有效权限</dt><dd class="mono tiny">project:read · project:write（2 / 6）</dd>
+<dt>可见项目（project_ids）</dt><dd><span class="pill">agentflow</span> <span class="tiny dim">1 个 · 其余项目不可见</span></dd>
+<dt>最后活跃</dt><dd class="mono">09-21 14:12 · CREATE agents/12</dd>
+<dt>口令状态</dt><dd><span class="chip warn">存量无盐 sha256 · 待渐进迁移</span></dd>
+</dl>
+<div class="callout bad" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>存储权威（裁定⑦ · 2026-09-23）：</b>本账号现读自 <span class="mono">users.json</span>（跨项目共享 · 原子写 + 文件锁）；目标态迁 <b>MySQL <span class="mono">users</span> 表</b>，<span class="mono">users.json</span> 退役。<b>下方「活跃会话」为 P0-1 规划态</b>——当前实现的身份来自 <span class="mono">X-User-Id</span> 请求头，<b>没有服务端会话表可撤销</b>。</p></div>
+<h4 class="blk">权限点勾选（本页可编辑 · 保存即旋转会话）</h4>
+<table class="tbl compact"><thead><tr><th>权限点</th><th>名称</th><th>勾选</th><th>危险</th></tr></thead><tbody>
+<tr><td class="mono">project:read</td><td>查看项目</td><td><span class="chip ok">已勾选</span></td><td class="dim">—</td></tr>
+<tr><td class="mono">project:write</td><td>编辑项目</td><td><span class="chip ok">已勾选</span></td><td class="dim">—</td></tr>
+<tr><td class="mono">project:delete</td><td>删除项目</td><td><span class="chip bad">未勾选</span></td><td><span class="chip bad">危险</span></td></tr>
+<tr><td class="mono">workflow:stop</td><td>停止流程</td><td><span class="chip bad">未勾选</span></td><td><span class="chip bad">危险</span></td></tr>
+<tr><td class="mono">user:manage</td><td>用户管理</td><td><span class="chip bad">未勾选</span></td><td><span class="chip bad">危险</span></td></tr>
+<tr><td class="mono">audit:view</td><td>查看审计</td><td><span class="chip bad">未勾选</span></td><td class="dim">—</td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:var(--s3)">未勾选 = 该模块对该用户<b>不渲染</b>（不是「点了报错」）；13:58 那次 403 正是缺 <span class="mono">project:delete</span> 被拦（§6.15 可见）。</p>
+<h4 class="blk">活跃会话（P0-1 规划态 · 单条可撤销）</h4>
+<table class="tbl compact"><thead><tr><th>会话</th><th>来源</th><th>登录时间</th><th>idle / 绝对上限</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono tiny">sess_9f2c…a1</td><td class="mono tiny">127.0.0.1</td><td class="mono tiny">09-21 13:55</td><td class="mono tiny">12m / 8h</td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-rev">撤销</span></td></tr>
+<tr><td class="mono tiny">sess_4b7e…c8</td><td class="mono tiny">127.0.0.1</td><td class="mono tiny">09-21 09:02</td><td class="mono tiny">6h11m / 8h</td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-rev">撤销</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:var(--s3)"><span class="mono">__Host-session</span> HttpOnly/Lax · 只存哈希 · idle 30min / absolute 8h（P0-1 参数化已过审）。</p>
+<h4 class="blk">变更历史</h4>
+<div class="timeline" style="margin:0">
+<div class="tl-item"><b>09-21 13:02</b> · CREATE users/zhangsan · 零权限 · project_ids=[agentflow]</div>
+<div class="tl-item"><b>09-21 13:06</b> · 授权 <span class="mono">project:read</span> · 会话已旋转</div>
+<div class="tl-item"><b>09-21 13:07</b> · 授权 <span class="mono">project:write</span> · 会话已旋转</div>
+<div class="tl-item fail"><b>09-21 13:58</b> · 本人试删 <span class="mono">roles/custom/7</span> → 403（缺 project:delete）</div>
+<div class="tl-item"><b>09-22 09:31</b> · 仅改显示名备注 · <b>未</b>旋转会话（非权限变更）</div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已保存到 users.json（原子写 + 文件锁）· 权限变更旋转该用户全部会话（演示）">保存权限</button> <button class="btn sm" data-click data-modal="md-pwd">重置密码</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-del">删除用户</button></p>
+</div>
+<div class="modal" id="md-role"><div style="padding:var(--s4)"><b>改角色：testuser · user → admin？</b>
+<p class="small dim" style="margin:8px 0">需 <span class="mono">user:manage</span>。<b style="color:var(--red)">权限变更必旋转会话</b>（P0-1 · OWASP）：该用户<b>所有</b>活跃会话立即失效，须重新登录；否则旧会话继续持有变更前权限即为权限提升窗口。<b>必填原因</b>。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>旋转会话（2 个活跃）</td><td><span class="chip bad">立即作废 · 需重登</span></td></tr>
+<tr><td>custom_permissions 勾选</td><td><span class="chip warn">被忽略 · admin 走豁免</span></td></tr>
+<tr><td>可见项目</td><td><span class="chip warn">project_ids 未指定 → 变全部可见</span></td></tr>
+<tr><td>审计</td><td><span class="chip">记 user:role_changed（敏感 · 标红）</span></td></tr>
+<tr><td>唯一 admin 保护</td><td><span class="chip ok">仍允许（成为第二个 admin）· 界面须红字提示</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">这些二次确认弹层统一以 <span class="mono">testuser</span> 为演示对象，其他行打开同一弹层仅为演示接线。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [接替休假的管理员，负责权限发放            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="角色已改 · 该用户 2 个会话已旋转 · 审计 user:role_changed（演示）" data-close>确认改角色并旋转会话</button></div></div></div>
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除用户「testuser」？</b>
+<p class="small dim" style="margin:8px 0">需 <span class="mono">user:manage</span>。删除<b>只删账号</b>：其历史动作留在 <span class="mono">audit.jsonl</span>（追加写不可改删），产物 <span class="mono">created_by</span> 留原署名。<b>必填原因</b>。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>users.json 该账号</td><td><span class="chip bad">移除 · 无法登录</span></td></tr>
+<tr><td>其活跃会话</td><td><span class="chip bad">全部作废</span></td></tr>
+<tr><td>历史审计</td><td><span class="chip ok">保留（ actor=testuser 仍可查）</span></td></tr>
+<tr><td>其创建的 Agent / 产物</td><td><span class="chip ok">保留 · 署名不变</span></td></tr>
+<tr><td>可见项目分配</td><td><span class="chip warn">project_ids 随账号消失</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">弹层以 <span class="mono">testuser</span> 为演示对象；其他行打开同一弹层仅为演示接线。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [账号已停用，改用新账号            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除账号 · 会话已清空 · 审计 user:deleted（演示）" data-close>确认删除</button></div></div></div>
+<div class="modal" id="md-pwd"><div style="padding:var(--s4)"><b>重置 testuser 的口令？</b>
+<p class="small dim" style="margin:8px 0"><b style="color:var(--red)">不再生成任何出厂口令</b>（P0-2）：重置后生成随机一次性口令，仅打印在启动日志（Jupyter/Gitea 式引导），并置 <span class="mono">must_change_password=true</span> 强制首登改密。口令属权限变更邻域——重置同样<b>旋转会话</b>。<b>必填原因</b>。</p>
+<table class="tbl compact"><thead><tr><th>动作</th><th>结果</th></tr></thead><tbody>
+<tr><td>旧口令哈希（无盐 sha256）</td><td><span class="chip bad">作废 · 新哈希 argon2id</span></td></tr>
+<tr><td>一次性口令</td><td><span class="chip warn">只在启动日志 · 不入审计、不入界面</span></td></tr>
+<tr><td>会话</td><td><span class="chip bad">全部旋转</span></td></tr>
+<tr><td>「缺 password_hash → 重置 123456」自愈分支</td><td><span class="chip ok">已删除（P0-2）· 不再有 123456</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">弹层以 <span class="mono">testuser</span> 为演示对象；其他行打开同一弹层仅为演示接线。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [疑似凭据外泄，按轮换流程处理            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已重置：一次性口令见启动日志 · must_change_password=true · 会话已旋转（演示）" data-close>确认重置</button></div></div></div>
+<div class="modal" id="md-rev"><div style="padding:var(--s4)"><b>撤销单个会话 <span class="mono">sess_9f2c…a1</span>？</b>
+<p class="small dim" style="margin:8px 0"><b>P0-1 规划态</b>：当前实现无服务端会话表可撤销（身份来自 <span class="mono">X-User-Id</span> 头）；此处为 P0-1 落地后的目标交互。仅撤销<b>这一条</b>，该用户其他会话不受影响。若撤销的是<b>你当前会话</b>，本页会立刻掉登录。</p>
+<p class="tiny dim" style="margin-top:6px">弹层以 <span class="mono">testuser</span> 为演示对象；其他行打开同一弹层仅为演示接线。</p><table class="tbl compact"><thead><tr><th>会话</th><th>来源 / 登录</th><th>撤销后</th></tr></thead><tbody>
+<tr><td class="mono tiny">sess_9f2c…a1</td><td class="mono tiny">127.0.0.1 · 09-21 13:55</td><td><span class="chip bad">cookie 作废 · 下次请求 401</span></td></tr>
+<tr><td class="mono tiny dim">sess_4b7e…c8</td><td class="mono tiny dim">127.0.0.1 · 09-21 09:02</td><td><span class="chip ok">不受影响</span></td></tr>
+</tbody></table>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已撤销该会话（sessions 表行标记 revoked）· 审计 auth:session_revoked（演示）" data-close>确认撤销</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 users.html 的 <span class="mono">dr-user</span> 抽屉升格而来（09-23 交互分层纪律：含 2 张子表 + 时间线 + 保存 / 撤销操作链 → 整页展示）。「改角色 / 删除 / 重置密码 / 撤销会话」仍是一屏读得完的二次确认 modal，其影响清单以 <span class="mono">testuser</span> 为演示对象。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：改角色 ▾ / 撤销 / 重置密码 / 删除用户 → modal · 保存权限 → toast · 左上「← 返回 用户与权限」回列表页（原型内用浏览器后退，直链时回父页）。</p>
+</body></html>

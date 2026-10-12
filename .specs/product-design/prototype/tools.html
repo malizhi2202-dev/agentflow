@@ -1,0 +1,87 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工具市场 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}.card-foot{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<p class="proto-note"><span class="chip warn">演示数据</span>三类工具（Plugin / Skill / MCP）卡片网格 + 类型筛选。admin 可新建 / 删除；每张卡片带被引用计数，删除走二次确认（禁用=可逆 / 彻底删除=断链）。工具详情（参数 schema / 被引用 / 历史）升级为独立详情页，卡片点击即整页打开。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/tools</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html" class="active"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">工具库</span><span class="right"><button class="btn sm" data-toast="demo 包已下载 · 只给样例与假凭据，不给真实凭据（演示）">下载 demo</button><button class="btn sm primary" data-goto="tools__new.html">+ 注册工具</button></span></div>
+          <div class="app-body">
+            <div style="display:flex;gap:var(--s2);margin-bottom:var(--s3)">
+              <span class="pill" style="border-color:var(--blue-border);color:var(--blue)" data-click data-pop="pp-type">全部 <b>12</b> ▾</span>
+              <span class="pill" data-click data-pop="pp-type">Plugin <b>5</b></span><span class="pill" data-click data-pop="pp-type">Skill <b>4</b></span><span class="pill" data-click data-pop="pp-type">MCP <b>3</b></span>
+              <span style="flex:1"></span><span class="pill mono">🔍 搜索工具…</span>
+            </div>
+            <div class="grid g3">
+              <div class="panel"><div data-click data-goto="tools__fs-read-write.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">文件读写</span><span class="chip info">Plugin</span></div><p class="tiny muted" style="margin:5px 0">本地文件系统读写，支持路径白名单</p><div style="margin-top:6px"><span class="chip mono">8 参数</span> <span class="chip ok">启用</span></div></div><div class="card-foot"><span class="chip">被 3 个 Agent 引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
+              <div class="panel"><div data-click data-goto="tools__fs-read-write.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">Shell 执行</span><span class="chip info">Plugin</span></div><p class="tiny muted" style="margin:5px 0">受安全栅栏约束的命令执行</p><div style="margin-top:6px"><span class="chip mono">5 参数</span> <span class="chip ok">启用</span></div></div><div class="card-foot"><span class="chip">被 2 个 Agent 引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
+              <div class="panel"><div data-click data-goto="tools__fs-read-write.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">Git 操作</span><span class="chip info">Plugin</span></div><p class="tiny muted" style="margin:5px 0">提交 / 分支 / diff，带安全检查</p><div style="margin-top:6px"><span class="chip mono">11 参数</span> <span class="chip ok">启用</span></div></div><div class="card-foot"><span class="chip">被 1 个 Agent 引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
+              <div class="panel"><div data-click data-goto="tools__code-review-skill.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">代码审查</span><span class="chip purple">Skill</span></div><p class="tiny muted" style="margin:5px 0">按规范检查变更并产出 REVIEW.md</p><div style="margin-top:6px"><span class="chip mono">4 参数</span> <span class="chip ok">启用</span></div></div><div class="card-foot"><span class="chip">被 3 个 Agent 引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
+              <div class="panel"><div data-click data-goto="tools__code-review-skill.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">需求拆解</span><span class="chip purple">Skill</span></div><p class="tiny muted" style="margin:5px 0">把需求文档拆成可执行任务列表</p><div style="margin-top:6px"><span class="chip mono">3 参数</span> <span class="chip ok">启用</span></div></div><div class="card-foot"><span class="chip">被 2 个 Agent 引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
+              <div class="panel" style="opacity:.6"><div data-click data-goto="tools__skill-browser.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">浏览器自动化</span><span class="chip purple">Skill</span></div><p class="tiny muted" style="margin:5px 0">驱动无头浏览器完成端到端操作</p><div style="margin-top:6px"><span class="chip mono">7 参数</span> <span class="chip bad">已禁用</span></div></div><div class="card-foot"><span class="chip" style="color:var(--text-muted)">零引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--text-muted);cursor:default">删除</span></div></div>
+              <div class="panel"><div data-click data-goto="tools__mcp-filesystem.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">filesystem</span><span class="chip warn">MCP</span></div><p class="tiny muted" style="margin:5px 0">MCP 标准文件服务（stdio）</p><div style="margin-top:6px"><span class="chip mono">6 工具</span> <span class="chip ok">已连接</span></div></div><div class="card-foot"><span class="chip">被 2 个 Agent 引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
+              <div class="panel"><div data-click data-goto="tools__mcp-filesystem.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">postgres</span><span class="chip warn">MCP</span></div><p class="tiny muted" style="margin:5px 0">数据库查询 MCP 服务</p><div style="margin-top:6px"><span class="chip mono">3 工具</span> <span class="chip ok">已连接</span></div></div><div class="card-foot"><span class="chip">被 1 个 Agent 引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
+              <div class="panel"><div data-click data-goto="tools__mcp-fetch.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">fetch</span><span class="chip warn">MCP</span></div><p class="tiny muted" style="margin:5px 0">HTTP 抓取与正文提取</p><div style="margin-top:6px"><span class="chip mono">2 工具</span> <span class="chip bad">连接失败</span></div></div><div class="card-foot"><span class="chip" style="color:var(--text-muted)">零引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
+            </div>
+            <div class="callout bad" style="margin-top:var(--s4)">
+              <p><b>错误态示例：</b>MCP 服务连接失败时卡片保持可见但标注「连接失败」，并提示「重试连接」——不隐藏、不删除，避免用户误以为工具不存在。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim"><b>演示数据说明：</b>工具名称、参数数量与被引用计数为演示值。「已禁用」卡片整体降透明度并保留在列表中（真实行为：禁用后编排执行时才失败，故必须可见），禁用态卡片删除置灰。「删除」统一走二次确认模态（禁用=可逆 / 彻底删除=断链），列受影响 Agent + 必填原因。</p>
+
+<div class="pop" id="pp-type"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">按类型筛选（三类语义不同，勿混用）</p>
+<table class="tbl compact"><thead><tr><th>类型</th><th>数量</th><th>形态</th></tr></thead><tbody>
+<tr><td><span class="chip info">Plugin</span></td><td class="mono">5</td><td class="tiny">平台内置代码实现 · 带参数 schema</td></tr>
+<tr><td><span class="chip purple">Skill</span></td><td class="mono">4</td><td class="tiny">描述性登记 · 由 Agent 按提示词执行</td></tr>
+<tr><td><span class="chip warn">MCP</span></td><td class="mono">3</td><td class="tiny">外部服务（stdio / SSE）· tools/list 发现</td></tr>
+<tr><td class="mono">全部</td><td class="mono">12</td><td class="tiny">含已禁用 1 项（禁用后仍可见）</td></tr>
+</tbody></table>
+<p class="tiny muted" style="margin:8px 0 4px;text-transform:uppercase;letter-spacing:.05em">状态筛选</p>
+<table class="tbl compact"><tbody>
+<tr><td><span class="chip ok">启用 / 已连接</span></td><td class="mono">8</td><td><span class="btn link" data-toast="已按「启用 / 已连接」筛选（演示）">应用</span></td></tr>
+<tr><td><span class="chip bad">已禁用 / 连接失败</span></td><td class="mono">2</td><td><span class="btn link" data-toast="已按「异常态」筛选（演示）">应用</span></td></tr>
+<tr><td><span class="chip">被引用 = 0</span></td><td class="mono">2</td><td><span class="btn link" data-toast="已按「零引用」筛选——清理候选（演示）">应用</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">MCP 工具条目<b>不渲染成 Skill</b>（纵向层红线）；筛选只改变列表可见集，不改变工具状态。</p></div>
+
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除工具「文件读写」？</b>
+<p class="tiny dim" style="margin:3px 0 0">演示共享副本 · 实际标题随所选卡片填充</p>
+<p class="small dim" style="margin:8px 0 4px">选一种处理方式（破坏性动作 · 必填原因 · 入审计）：</p>
+<ul class="tiny" style="margin:0 0 8px;padding-left:18px"><li><b>禁用（可逆）</b>——仅停用，编排执行时才失败，可随时恢复启用；</li><li><b>彻底删除</b>——清除注册，会断掉引用它的 Agent（不可逆）。</li></ul>
+<p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">受影响 Agent（演示 2 个）</p>
+<table class="tbl compact"><thead><tr><th>Agent</th><th>引用位置</th><th>删除后影响</th></tr></thead><tbody>
+<tr><td class="mono">前端 Agent</td><td class="tiny">联网取规范</td><td class="tiny" style="color:var(--red)">下次执行报错</td></tr>
+<tr><td class="mono">代码审查 Agent</td><td class="tiny">审查流水线 v3</td><td class="tiny" style="color:var(--red)">下次执行报错</td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:8px">原因（必填）: [ 已被新工具替代，先停用观察 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="已禁用工具「文件读写」· 可逆 · 卡片仍可见（演示）" data-close>仅禁用</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除工具「文件读写」· 断掉 2 个引用 Agent（演示）" data-close>彻底删除</button></div></div></div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：卡片→详情页（Plugin 样本 <span class="mono">tools__fs-read-write.html</span> · Skill 样本 <span class="mono">tools__code-review-skill.html</span> · 禁用态 <span class="mono">tools__skill-browser.html</span> · MCP <span class="mono">tools__mcp-filesystem.html</span> / <span class="mono">tools__mcp-fetch.html</span>）· 卡片「删除」→ 二次确认模态（禁用=可逆 / 彻底删除=断链 · 列受影响 Agent · 必填原因）· 「+ 注册工具」→ 新建页 <span class="mono">tools__new.html</span>（Plugin / Skill / MCP 三类分型表单）· 类型与状态筛选 pill→弹层　按 Esc 关闭浮层。</p>
+</body></html>

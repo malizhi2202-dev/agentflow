@@ -1,0 +1,129 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>决策模型目录 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}body{padding-top:34px}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p23" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="finetune.html">微调工厂</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+    <p class="proto-note"><span class="chip warn">规划原型</span>change <span class="mono">small-model-decisions</span>：决策模型的登记、双轨连接、健康态与<b>域用途绑定两步制</b>面板。核心形态是「未绑定 ⇒ 直通」的每一处显式表达。<b>此界面尚不存在</b>。演示数据。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/decision-models</span><span class="fake">规划原型</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="decision-models.html" class="active"><svg class="icon"><use href="#i-layers"/></svg>决策模型</a>
+          <a data-goto="users.html"><svg class="icon"><use href="#i-users"/></svg>用户与权限</a>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-shield"/></svg>审计日志</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">管理 <span class="dim">· 决策模型目录 · 演示数据</span></span><span class="right"><button class="btn sm" data-click data-pop="pop-filter">筛选：全部轨道 · 全部健康态 ▾</button><button class="btn sm" data-click data-drawer="dr-recommend">/决策模型 推荐</button><button class="btn sm primary" data-click data-goto="decision-models__register.html">登记模型 ▾</button></span></div>
+          <div class="app-body">
+            <div class="callout"><p><b>AC-0 状态横幅：</b>quant-research 域今日决策调用 <b>0</b> 次 · 路由 100% 走直通（标签匹配+最小连接数）——「已登记」不等于「在用」，绑定开关在下方每行右侧。</p></div>
+            <table class="tbl">
+              <thead><tr><th>模型</th><th>轨道</th><th>类型</th><th>健康态</th><th>延迟 P95</th><th>用途绑定（独立开关 · 默认全关）</th></tr></thead>
+              <tbody>
+                <tr><td data-click data-goto="decision-models__jev.html" ><b>Jev-Style-Qwen3.5-2B</b> <span class="tiny dim">Q4_K_M · 1.3GB</span></td><td>本地 · llama.cpp :8080</td><td>Choice/Bool/Score</td><td><span class="chip ok">healthy</span></td><td>112ms</td><td>路由决策 <b>开</b> · 对话分诊 关 · 简单任务 关　<span class="tiny dim">阈值 0.60 · 今日 escalated 14 · fallback 0</span>　<span class="btn link" data-click data-goto="decision-models__bind.html">绑定到域 ▾</span><span class="btn link" data-toast="健康探测已发起（演示）：GET :8080/v1/models → 200 OK · 37ms · 心跳已刷新">重探</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-offline">下线</span></td></tr>
+                <tr><td data-click data-drawer="dr-m-intent" ><b>intent-cls-mini</b> <span class="tiny dim">0.6B · 云 API 备轨</span></td><td>云 API（Key 已托管）</td><td>Choice(12 类)</td><td><span class="chip ok">healthy</span></td><td>89ms</td><td>三项全关 <span class="tiny dim">（仅登记）</span>　<span class="btn link" data-click data-goto="decision-models__bind.html">绑定到域 ▾</span><span class="btn link" data-toast="云轨连通校验（演示）：Key 由平台托管 · 不落明文 · 412ms · healthy">重探</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-offline">下线</span></td></tr>
+                <tr style="opacity:.5"><td data-click data-drawer="dr-m-v3ft" ><b>dept-router-v3-ft</b> <span class="tiny dim">本域微调 · 血缘 Qwen3.5-2B+LoRA16</span></td><td>本地 · LM Studio</td><td>Choice</td><td><span class="chip warn">未过门槛 · 不可生产</span></td><td>97ms</td><td>路由决策 <b>关</b> <span class="tiny dim">待 §6.24 复核：ECE 0.061&gt;0.05</span>　<span class="btn link" data-click data-toast="✗ 禁止绑定：三指标未过门槛（accuracy 79.4% &lt; 80% · ECE 0.061 &gt; 0.05）——门禁在服务端状态转换层，界面只是如实呈现（AC-C2）。可回 §6.24 用 v4 配方复核">绑定到域（灰置）</span><span class="btn link" data-toast="灰置原因：该版本被服务端拒绝设为生产版本；换轨/复核入口在 §6.24">为何灰置</span></td></tr>
+                <tr><td data-click data-drawer="dr-m-mbert" ><span class="mono">modernbert-310m-jev</span></td><td>本地</td><td>Bool</td><td><span class="chip err">offline · 75s 未心跳</span></td><td>—</td><td>对话分诊 开 <span class="tiny dim">→ 决策失败即 decision_fallback 回退直通，不阻塞主调度</span>　<span class="btn link" data-click data-toast="重连失败（演示）：:8081 连接被拒 · 保持 offline · 分诊走 decision_fallback">重连</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unbind">解绑用途</span></td></tr>
+              </tbody>
+            </table>
+            <p class="small dim">边界态示例已含两枚：offline 行的健康四态与阈值（45s/75s/24h 直接写进行内，§6.0 ③）；「80% 就是 80%」的校准语义为常驻文案不藏 hover（§6.0 交互纪律）。</p>
+            <div class="grid g2" style="align-items:start">
+              <div class="callout ok" style="margin:0"><p><b>两步制（AC-0b）：</b>①登记进目录（连通+健康态）②按用途逐个绑定（路由决策 / 对话分诊 / 简单任务派发 · 三个独立开关，默认全关）。<b>两步全过才生效</b>；未绑定 = 决策代码路径零调用，界面无「建议启用」骚扰。</p></div>
+              <div class="callout warn" style="margin:0"><p><b>域 owner 变更后旧绑定失效需重绑</b>（不可变 principal 纪律 §1.6.5 ⑤）；训练数据不出本域（§6.24）。当前生产版本 = <span class="mono">Jev-Style-Qwen3.5-2B</span>（v4-ft 已过门槛待切）。</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="drawer" id="dr-m-intent"><header><b>模型详情 · intent-cls-mini</b><span class="chip ok">healthy · 仅登记</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>登记 ≠ 评测 ≠ 绑定</b>——三步各自留痕；本模型停在第一步，故任何用途零调用（AC-0）。</p></div>
+<dl class="kv"><dt>模型 / 规模</dt><dd class="mono">intent-cls-mini · 0.6B</dd><dt>轨道</dt><dd>云 API（Key 已托管 · 平台不落明文）· 角色=<span class="mono">Jev-Style-Qwen3.5-2B</span> 的备轨（AC-A5）</dd><dt>类型 / 上限</dt><dd class="mono">Choice(12 类) · 选项集 ≤26</dd><dt>版本</dt><dd class="mono">v0.3 · 2026-09-21 登记 · 登记者 admin</dd><dt>健康态</dt><dd><span class="chip ok">healthy</span> · 最近校验 412ms（网络往返，无本地显存占用）</dd><dt>延迟</dt><dd class="mono">P95 89ms</dd><dt>评测：accuracy</dt><dd class="dim">未评测 —— 目录不显示猜测值（跑自测走 §6.24 评测任务）</dd><dt>评测：ECE</dt><dd class="dim">未评测</dd><dt>评测：决策一致率</dt><dd class="dim">未评测</dd><dt>已绑定用途</dt><dd>三项全关 <span class="tiny dim">（对话分诊 / 路由决策 / 简单任务均未绑定）</span></dd><dt>切换语义</dt><dd>本地轨不可达时自动切云并标 <span class="mono">source=cloud_api_fallback</span>；<b>数据出域需单独确认</b>（§6.25 L3 红线）</dd><dt>门槛</dt><dd class="mono">默认 accuracy ≥80% 且 ECE ≤0.05（服务端门禁）</dd><dt>审计</dt><dd class="mono">AF-2B8 登记 · 凭据写入 users/secret 表（裁定⑦）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">下一步（本页不代做）</p>
+<div class="timeline">
+<div class="tl-item"><b>①</b> 跑三指标自测 → §6.24 新建评测任务（内置公开基准子集 + 本域回放样例）</div>
+<div class="tl-item"><b>②</b> 过门槛后在目录里按用途绑定 → 两步制第 2 步</div>
+<div class="tl-item"><b>③</b> 观察 <span class="mono">escalated / fallback</span> 计数（p12 仪表盘）</div>
+</div>
+<p style="margin-top:var(--s4)"><span class="btn link" data-click data-goto="decision-models__bind.html">绑定到域 ▾</span><span class="btn link" data-toast="云轨连通校验（演示）：412ms · healthy">重探</span></p></div></div>
+
+<div class="drawer" id="dr-m-v3ft"><header><b>模型详情 · dept-router-v3-ft</b><span class="chip bad">禁止切产</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>为什么灰置：</b>ECE 0.061 &gt; 门槛 0.05，服务端在状态转换层拒绝设为生产版本（AC-C2）——不是提示词约定，界面无绕过入口。故本行「绑定到域」同步灰置。</p></div>
+<dl class="kv"><dt>模型</dt><dd class="mono">dept-router-v3-ft</dd><dt>血缘</dt><dd class="mono">基座 Qwen3.5-2B + LoRA r16 · log-score 损失</dd><dt>轨道</dt><dd>本地 · LM Studio（不出域）</dd><dt>类型</dt><dd class="mono">Choice · 选项集 ≤26</dd><dt>训练数据台账</dt><dd class="mono">会话 412 · 记忆条目 88 · 指纹 a91f…（脱敏后 · 可回放「哪些会话被用过」）</dd><dt>训练</dt><dd class="mono">本机 LLaMA-Factory 0.9.x · 完成 41min</dd><dt>评测：accuracy</dt><dd class="mono">79.4%　<span class="chip bad">&lt; 门槛 80%</span>　<span class="tiny dim">基线（未微调同任务）68.2% → 净赚 +11.2pt</span></dd><dt>评测：ECE</dt><dd class="mono">0.061　<span class="chip bad">&gt; 门槛 0.05</span></dd><dt>评测：决策一致率</dt><dd class="mono">91%（vs 前一生产版本 Jev-Style-Qwen3.5-2B）</dd><dt>已绑定用途</dt><dd>三项全关 · <b>不可绑定</b>（灰置）</dd><dt>延迟</dt><dd class="mono">P95 97ms</dd><dt>出路</dt><dd>① 用 v4 配方（温度修正样本 +3k → 83.1% / 0.023 / 88% 已过门槛）②换基座重训 ③只做离线实验不切产</dd><dt>审计</dt><dd class="mono">AF-5D1 训练完成 · AF-6E3 服务端拒绝设产（拒绝也入审计）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">三指标 vs 门槛（一眼账）</p>
+<table class="tbl compact"><thead><tr><th>指标</th><th>本版本</th><th>门槛</th><th>基线（未微调）</th><th>判定</th></tr></thead><tbody>
+<tr><td>accuracy</td><td class="mono">79.4%</td><td class="mono">≥80%</td><td class="mono">68.2%</td><td><span class="chip bad">未达</span></td></tr>
+<tr><td>ECE</td><td class="mono">0.061</td><td class="mono">≤0.05</td><td class="mono">0.104</td><td><span class="chip bad">未达</span></td></tr>
+<tr><td>决策一致率</td><td class="mono">91%</td><td class="mono">参考项</td><td class="dim">—</td><td><span class="chip ok">可参考</span></td></tr>
+<tr><td>切产结论</td><td colspan="4"><span class="chip bad">禁止切产 · 服务端拒绝（AC-C2）</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="✗ 禁止绑定：未过门槛（服务端拒绝）">绑定到域（灰置）</span><span class="btn link" data-click data-drawer="dr-recommend">看推荐配方</span></p></div></div>
+
+<div class="drawer" id="dr-m-mbert"><header><b>模型详情 · modernbert-310m-jev</b><span class="chip bad">offline</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>offline ≠ 主调度受阻：</b>该模型只绑了「对话分诊」，失败即 <span class="mono">decision_fallback</span> 回退直通，<b>不阻塞</b>调度与在途任务——快慢分层的退路。</p></div>
+<dl class="kv"><dt>模型</dt><dd class="mono">modernbert-310m-jev · 310M</dd><dt>类型</dt><dd class="mono">Bool（命题为真概率）</dd><dt>轨道</dt><dd>本地 · :8081（推理服务未拉起）</dd><dt>版本</dt><dd class="mono">v2.0 · 2026-09-18 登记</dd><dt>健康态四态</dt><dd><span class="chip bad">offline</span> · 判定：45s 无心跳→caution · 75s→offline · 24h→stale</dd><dt>延迟</dt><dd class="mono">—（无心跳）</dd><dt>评测：accuracy</dt><dd class="mono">—（本页不猜：未评测或未上报）</dd><dt>评测：ECE</dt><dd class="dim">—</dd><dt>评测：决策一致率</dt><dd class="dim">—</dd><dt>已绑定用途</dt><dd>对话分诊 <b>开</b>（quant-research）· 其余两项关</dd><dt>今日决策</dt><dd class="mono">fallback 全量 · 成功 0 次</dd><dt>影响面</dt><dd>新消息分流转为「全部走现状直通」，不产生分类标签</dd><dt>恢复动作</dt><dd>拉起 <span class="mono">:8081</span> 后自动心跳恢复 → 健康态回 healthy（无需重绑）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">掉线与回退时间线</p>
+<div class="timeline">
+<div class="tl-item"><b>14:02:11</b> · 最后一次心跳成功</div>
+<div class="tl-item fail"><b>14:02:56</b> · 45s → <span class="chip warn">caution</span> 计数告警，未降态</div>
+<div class="tl-item fail"><b>14:03:26</b> · 75s → <span class="chip bad">offline</span> 写入目录与 p11 告警中心</div>
+<div class="tl-item fail"><b>14:03:27</b> · 分诊请求 <span class="mono">decision_fallback</span> → 直通（第 1 条）</div>
+<div class="tl-item"><b>14:05–14:40</b> · <span class="mono">fallback</span> 累计 27 条 · escalated 0</div>
+<div class="tl-item"><b>待人工</b> · 拉起服务或解绑该用途（解绑走二次确认 + 审计）</div>
+</div>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="重连失败（演示）：:8081 连接被拒 · 保持 offline">重连</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unbind">解绑用途</span></p></div></div>
+
+<div class="drawer" id="dr-recommend"><header><b>/决策模型 推荐 · 只给方案不代装</b><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0">命令来自对话中心斜杠命令（AC-D1，仅对已开能力的域生效）；<b>本页零执行</b>——复制即可，装不装由你定（§6.25 AC-E4）。</p></div>
+<dl class="kv"><dt>机器画像</dt><dd class="mono">macOS 15 · Apple M1 Max · 32GB 统一内存 · Metal ✓</dd><dt>判定</dt><dd>本地推理 + 本地微调均可用（AC-B3 通过）</dd><dt>推荐 ①</dt><dd>先用已过的 <span class="mono">Jev-Style-Qwen3.5-2B</span> 做路由决策，阈值 0.60</dd><dt>推荐 ②</dt><dd>分诊任务族缺模型 → 用 §6.24 v4 配方微调，勿复用未过的 v3</dd><dt>不推荐</dt><dd>云轨承担 quant-research 分诊：数据出域需单独确认（L3 兜底）</dd></dl>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px"># ① 起本地推理（示例 · 平台不代执行）
+llama-server -m ./Qwen3.5-2B-Q4_K_M.gguf --port 8080
+
+# ② 连通校验
+curl -s http://127.0.0.1:8080/v1/models | head -c 200</pre>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="✓ 已复制推荐命令块（演示）· 未执行任何安装动作">⧉ 复制命令</span><span class="btn link" data-click data-goto="decision-models__jev.html">回到模型详情</span></p></div></div>
+
+<div class="pop" id="pop-filter" style="max-width:420px"><p class="tiny dim" style="margin:0 0 6px"><b>筛选 · 轨道 / 健康态（演示态 mock open）</b></p>
+<table class="tbl compact"><thead><tr><th>轨道</th><th>命中</th></tr></thead><tbody>
+<tr data-click data-toast="筛选：本地（演示）· 3 个模型"><td>本地 · llama.cpp / LM Studio</td><td class="mono">3</td></tr>
+<tr data-click data-toast="筛选：云 API（演示）· 1 个模型 · 含数据出域标注"><td>云 API</td><td class="mono">1</td></tr>
+</tbody></table>
+<table class="tbl compact"><thead><tr><th>健康态</th><th>命中</th></tr></thead><tbody>
+<tr data-click data-toast="筛选：healthy（演示）· 2"><td><span class="chip ok">healthy</span></td><td class="mono">2</td></tr>
+<tr data-click data-toast="筛选：未过门槛（演示）· 1 · 灰置行不参与绑定"><td><span class="chip warn">未过门槛</span></td><td class="mono">1</td></tr>
+<tr data-click data-toast="筛选：offline（演示）· 1 · 该用途走 decision_fallback"><td><span class="chip bad">offline</span></td><td class="mono">1</td></tr>
+<tr data-click data-toast="筛选：只看已绑定用途（演示）· 2 行"><td>只看已绑定用途</td><td class="mono">2</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s2)"><button class="btn sm" data-toast="已重置筛选（演示）· 回到全部 4 行" data-close>重置</button> <button class="btn sm primary" data-toast="演示：筛选仅改列表视图，不写任何状态" data-close>应用</button></p></div>
+
+<div class="modal" id="md-offline"><div style="padding:var(--s4)"><b>下线模型「Jev-Style-Qwen3.5-2B」？</b>
+<p class="small dim" style="margin:8px 0"><b>影响清单</b>（下线即从所有域的可用集移除，非仅隐藏）：</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>quant-research「路由决策」绑定将自动关闭 → 当日 41 次决策调用回退直通路由</li>
+<li>该模型是 <span class="mono">intent-cls-mini</span> 的主轨 → 双轨关系解除，云备轨升为主轨需重新确认数据出域</li>
+<li>历史决策台账与 <span class="mono">runtime.jsonl</span> 记录保持快照不改写</li>
+<li>门槛评测结论作废（重新上线需重跑自测）</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b>（§6.0 纪律：破坏性操作二次确认 + 理由入审计）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [换基座重训 · 先停生产      ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已下线 + 用途绑定全关 + 审计 decision_model_offline（演示）" data-close>确认下线</button></div></div></div>
+
+<div class="modal" id="md-unbind"><div style="padding:var(--s4)"><b>解绑「对话分诊 · modernbert-310m-jev」？</b>
+<p class="small dim" style="margin:8px 0">解绑 = 回到两步制之前的状态：分诊零调用、全部走现状直通（AC-0）。offline 期间解绑不影响主调度。</p>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b></p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [服务长期未恢复，先摘掉红条  ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已解绑 + 该用途决策调用计数归 0 · 审计 decision_model_unbound（演示）" data-close>确认解绑</button></div></div></div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px 6px"><b>演示数据说明：</b>模型名、量化、三指标数值、阈值与台账计数取自 §2.7 / §6.23–6.25 与 <span class="mono">.specs/small-model-decisions/REQUIREMENT.md</span> 的 AC 原文（accuracy ≥80% · ECE ≤0.05 · Q4 1.3GB · P95 112ms 均为文档实值）；决策样例时间线、域清单第 3 行与审计号为演示值。未评测处一律显示「—」不猜数。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：Jev 模型行/名称 → 独立详情页 <span class="mono">decision-models__jev.html</span>（三指标+绑定域清单+决策时间线）· 「绑定到域」→ 独立详情页 <span class="mono">decision-models__bind.html</span>（两步开关 · 可编辑保存）· 「登记模型」→ 独立详情页 <span class="mono">decision-models__register.html</span>（轨道选择表单）· intent/v3ft/mbert 行 → 详情抽屉（只读 kv + 时间线）· 灰置行 → 原因 toast · 重探/回退 → toast · 下线/解绑 → 二次确认模态（原因必填+影响清单）· 顶栏「筛选」→ pop · Esc 关闭所有浮层。</p>
+</body></html>

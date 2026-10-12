@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Notion 产品需求库详情 · 知识库 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="detail-top"><span class="pill" data-back="knowledge.html" data-click>← 返回 知识库</span><span class="crumb"><b>远端知识源</b> · <span class="mono">Notion · 产品需求库</span></span><span class="chip">远端源 · Notion</span><span class="chip bad">令牌过期 · 索引冻结</span><span class="chip mono">58 chunks（旧）</span></div>
+<div class="detail-body">
+<p class="proto-note"><span class="chip warn">演示数据</span>远端知识源凭据页：可编辑表单 + 保存钮 + 状态回写，故整页承载（不入侧栏）。凭据只写不读，界面恒为密文形态。</p>
+
+<h4 class="blk">源信息</h4>
+<dl class="kv"><dt>接入形态</dt><dd class="mono">Notion API · Internal Integration Token</dd>
+<dt>同步范围</dt><dd class="mono">page-tree: /requirements/**</dd>
+<dt>最后成功</dt><dd class="mono">09-01 08:40（冻结 22 天）</dd>
+<dt>失败原因</dt><dd class="mono" style="color:var(--red)">401 Unauthorized · token revoked</dd>
+<dt>当前索引</dt><dd class="mono">58 chunks（旧快照 · 检索仍可用，不再增量）</dd>
+<dt>标签 / 挂载</dt><dd><span class="pill">需求</span> · 审查 Agent · 标准（知识源之一）</dd></dl>
+
+<h4 class="blk">更新凭据（表单）</h4>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">integration_key</td><td class="mono">[●●●●●●●●●●●●] 粘贴新令牌</td><td><span class="chip">必填</span></td></tr>
+<tr><td class="mono">page-tree</td><td class="mono">/requirements/**（同步范围可改）</td><td><span class="chip">可选</span></td></tr>
+<tr><td class="mono">sync_interval</td><td class="mono">30min（与 Confluence 源同频）</td><td><span class="chip">可选</span></td></tr>
+</tbody></table>
+<p class="tiny dim">保存行为：<b>成功</b> → 解冻索引并立即全量重同步；<b>失败</b> → 保持冻结 + 红态，拒因原样写回「失败原因」字段（§6.0 ④ 不粉饰）。新令牌落库为 AES-GCM 密文，界面无回显。</p>
+<p><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="✗ 连接测试失败 · 401 Unauthorized（令牌过期）——索引保持冻结">测试连接</button> <button class="btn sm" data-goto="knowledge.html">取消（返回源列表）</button> <button class="btn sm primary" data-toast="演示：新令牌验证通过 · 索引解冻 · 全量重同步排队" data-goto="knowledge.html">保存并测试连接</button></p>
+
+<h4 class="blk">破坏性操作</h4>
+<p class="tiny dim">断开保留快照、删除清空索引——两者的二次确认（含必填原因）仍在源列表页 <span class="mono">knowledge.html</span> 的行操作上，本页不重复承载。</p>
+<p><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-goto="knowledge.html">断开该远端源（回列表确认）</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 知识库 · 测试连接→toast（红态拒因原样）· 保存并测试连接→toast + 回列表 · 取消 / 断开→回列表页走二次确认　按 Esc 关闭所有浮层。</p>
+</body></html>

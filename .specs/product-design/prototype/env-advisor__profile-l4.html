@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>画像不完整 · Windows 轻薄本（无独显 · 8GB）详情 · 环境参谋</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p25" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="env-advisor.html" data-click>← 返回 环境参谋</span><span class="crumb"><b>画像不完整 · Windows 轻薄本（无独显 · 8GB）</b></span><span class="chip bad">不凑方案</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="finetune.html">微调工厂</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>AC-E5：测不出就不猜。</b>本页对这台机器<b>只推 L3 云档 + 手动方案</b>，缺因原样写在这里，不给「勉强能跑」的模糊答案。</p></div>
+<h4 class="blk">画像与判定</h4>
+<dl class="kv"><dt>探测到</dt><dd class="mono">Windows 11 · 8GB 内存 · 磁盘余 86GB · 无独显（Vulkan 走 CPU 兜底）</dd><dt>探测失败项</dt><dd class="mono">GPU 型号：无设备可询 · 统一内存/显存基线：不满足（8GB &lt; 16GB）</dd><dt>缺因原文</dt><dd>无驱动可询 + 内存低于微调基线 → 画像完整性=<span class="mono">不完整</span></dd><dt>CPU 档延迟实测估算</dt><dd class="mono">~1.4s/决策（Q4_K_M）</dd><dt>与预算对比</dt><dd class="mono">SLA ≤300ms → 超预算 <b>4.7 倍</b></dd><dt>参谋原话</dt><dd>CPU 档不推荐承担路由决策 → <b>只推 L3 云档</b></dd><dt>微调</dt><dd><span class="chip bad">不可用</span>（内存不达基线 · 训练操作返回 403 + 缺因）</dd><dt>推理</dt><dd>可跑（1.3GB 权重装得下）但延迟超预算 → 不建议绑用途</dd><dt>给这台机器的方案</dt><dd>L3 云档 + 手动方案（登记 Key 走 §6.23）· 不提供本地装机脚本</dd><dt>不做什么</dt><dd>不推荐「换更小的模型凑延迟」（会破坏与 Jev 卡的可比性）、不推荐降门槛</dd></dl>
+<h4 class="blk">换轨账（为什么劝它走云）</h4>
+<table class="tbl compact"><thead><tr><th>方案</th><th>延迟</th><th>能微调</th><th>数据出域</th><th>判定</th></tr></thead><tbody>
+<tr><td>L1 · MLX</td><td class="dim">—</td><td class="dim">—</td><td>否</td><td><span class="chip bad">非 Apple 平台</span></td></tr>
+<tr><td>L2 · llama.cpp Q4</td><td class="mono">~1.4s</td><td><span class="chip bad">否</span></td><td>否</td><td><span class="chip bad">超预算 4.7×</span></td></tr>
+<tr><td>L3 · 云 API</td><td class="mono">~90ms+抖动</td><td><span class="chip bad">否</span></td><td><span class="chip warn">是（需确认）</span></td><td><span class="chip ok">唯一推荐</span></td></tr>
+<tr><td>换 <span class="mono">0.6B</span> 本地小模型</td><td class="mono">~520ms</td><td><span class="chip bad">否</span></td><td>否</td><td><span class="chip warn">仍超预算 · 指标不可比</span></td></tr>
+</tbody></table>
+<p class="tiny dim">这台机器的正确角色：只跑平台与对话，决策交给达标的 M 系机或云轨——「能装」不等于「该用」。</p>
+<p style="margin-top:var(--s4)"><span class="btn link" data-click data-toast="已按缺因重新探测（演示）：仍为不完整 → 保持只推 L3">重探缺因</span><span class="btn link" data-click data-toast="✓ 已复制手动方案说明（演示）· 无任何安装动作">⧉ 复制手动方案</span></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：重探缺因 / ⧉ 复制手动方案→toast（零执行）· 换轨账表全宽展示 · AC-E5「测不出就不猜」缺因置顶　按 Esc 关闭浮层。</p>
+</body></html>

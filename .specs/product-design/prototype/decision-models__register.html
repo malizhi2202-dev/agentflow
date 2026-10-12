@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>登记模型 · 两步制第一步 详情 · 决策模型目录 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p23" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="decision-models.html" data-click>← 返回 决策模型目录</span><span class="crumb"><b>登记模型 · 两步制第一步</b></span><span class="chip warn">登记后用途仍全关</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="decision-models.html">决策模型</span><span class="pill" data-goto="decision-models__bind.html">两步绑定</span><span class="pill" data-goto="finetune.html">微调工厂</span><span class="pill" data-goto="env-advisor.html">环境参谋</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>登记 ≠ 评测 ≠ 绑定</b>——本页只做第①步（登记 + 连通校验），用途绑定在「两步绑定」页。平台只登记与探测，<b>不代装推理引擎</b>（AC-B4）——缺引擎请去 §6.25 环境参谋拿方案。</p></div>
+<h4 class="blk">必填项</h4>
+<dl class="kv"><dt>连接形态</dt><dd>本地 OpenAI-compatible / LM Studio / 云 API（三兼容）</dd><dt>必填字段</dt><dd class="mono">name · base_url · model_id · type(Choice|Bool|Score)</dd><dt>选项上限</dt><dd class="mono">≤26（超出即畸形响应 → fallback）</dd></dl>
+<h4 class="blk">选择轨道</h4>
+<table class="tbl compact"><thead><tr><th>轨道</th><th>示例</th><th>操作</th></tr></thead><tbody>
+<tr data-click data-toast="已选：本地 llama.cpp :8080（演示）· 登记后需连通校验才转 healthy"><td><span class="dot running"></span> 本地</td><td class="mono tiny">http://127.0.0.1:8080/v1</td><td><span class="btn link">选</span></td></tr>
+<tr data-click data-toast="已选：LM Studio（演示）· 与微调工厂共用推理口"><td><span class="dot idle"></span> LM Studio</td><td class="mono tiny">http://127.0.0.1:1234/v1</td><td><span class="btn link">选</span></td></tr>
+<tr data-click data-toast="已选：云 API（演示）· 需确认数据出域边界（§6.25 L3）"><td><span class="dot idle"></span> 云 API</td><td class="mono tiny">Key 托管 · 不落明文</td><td><span class="btn link">选</span></td></tr>
+</tbody></table>
+<h4 class="blk">提交</h4>
+<p><button class="btn sm" data-back="decision-models.html" data-click>取消</button> <button class="btn sm primary" data-toast="演示：登记请求已提交 → 校验连通后入目录（用途绑定仍全关）">提交登记</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为「登记模型（两步制第一步）」升格详情页（规划原型 · 6.23 界面尚不存在）。必填四字段、选项上限 ≤26、三兼容轨道、不代装引擎（AC-B4）与云轨数据出域（§6.25 L3）均取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.23；端口与示例为演示值。本页不写任何文件、不建端点。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：轨道行 / 「选」→ toast（记当前选择）· 「提交登记」→ toast（真实实现需校验连通后入目录，用途仍全关）· 「两步绑定」跳 decision-models__bind.html · 顶部「← 返回」回 decision-models.html　按 Esc 关闭浮层。</p>
+</body></html>

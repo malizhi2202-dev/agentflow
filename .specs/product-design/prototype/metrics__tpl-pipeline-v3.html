@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>模板 · 审查流水线 v3 详情 · 监控仪表盘</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="metrics.html" data-click>← 返回 监控仪表盘</span><span class="crumb"><b>实体下钻 · 模板 · 审查流水线 v3</b></span><span class="chip info">模板</span><span class="chip mono">近 7 天</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+<div class="detail-body">
+<h4 class="blk">实体指标快照</h4>
+<dl class="kv"><dt>实体标识</dt><dd class="mono">workflow:review-pipeline@v3（发布=不可变快照，按版本分账）</dd>
+<dt>调用 / Token</dt><dd class="mono">120 次 · 241,060（占 10.0%）· 平均 2,009 / 次</dd>
+<dt>节点数 / 边数</dt><dd class="mono">5 / 5 · fan-out ×2 · fan-in ×2 · retry-fallback ×1</dd>
+<dt>成功率</dt><dd><span class="chip ok">98%</span> <span class="mono">2 次 error（均为 fallback 耗尽）</span></dd>
+<dt>版本对比</dt><dd class="mono">v3 120 次 / 241,060 · v2 63 次 / 108,420 · v1 未计入（已归档）</dd>
+<dt>人工闸门</dt><dd class="mono">human-approval 挂起 7 次 · 平均等待 22m · 无超时放行</dd>
+<dt>死信</dt><dd class="mono">dead-letter 投递 2 条（review→legacy 边耗尽）</dd>
+<dt>最贵的一步</dt><dd><span class="chip bad">不可知</span> <span class="mono">trace_spans 0 行</span>，边粒度耗时无法归因</dd>
+<dt>环比</dt><dd><span class="chip warn">Token +18%</span> <span class="chip ok">调用 +5%</span>（v3 换的 120s 超时未生效于统计）</dd>
+<dt>最近运行</dt><dd class="mono">14:31:27 · r-128 进行中 · 快照 v3</dd></dl>
+<h4 class="blk">按日拆分（近 7 天）</h4>
+<table class="tbl compact"><thead><tr><th>日期</th><th class="c">run</th><th class="c">Token</th><th>趋势</th></tr></thead><tbody>
+<tr><td class="mono">09-15</td><td class="c mono">12</td><td class="c mono">22,140</td><td><span class="bar" style="display:block"><i style="width:41%"></i></span></td></tr>
+<tr><td class="mono">09-16</td><td class="c mono">18</td><td class="c mono">33,900</td><td><span class="bar" style="display:block"><i style="width:63%"></i></span></td></tr>
+<tr><td class="mono">09-17</td><td class="c mono">15</td><td class="c mono">27,120</td><td><span class="bar" style="display:block"><i style="width:50%"></i></span></td></tr>
+<tr><td class="mono">09-18</td><td class="c mono">20</td><td class="c mono">39,480</td><td><span class="bar" style="display:block"><i style="width:73%"></i></span></td></tr>
+<tr><td class="mono">09-19</td><td class="c mono">14</td><td class="c mono">24,600</td><td><span class="bar" style="display:block"><i style="width:46%"></i></span></td></tr>
+<tr><td class="mono">09-20</td><td class="c mono">22</td><td class="c mono">44,860</td><td><span class="bar" style="display:block"><i style="width:83%"></i></span></td></tr>
+<tr><td class="mono">09-21</td><td class="c mono">19</td><td class="c mono">48,960</td><td><span class="bar" style="display:block"><i style="width:91%"></i></span></td></tr>
+</tbody></table>
+<h4 class="blk">节点贡献拆分（角色粒度 · 非跨度粒度）</h4>
+<table class="tbl compact"><thead><tr><th>节点</th><th>角色</th><th class="c">Token</th><th class="c">占本模板</th></tr></thead><tbody>
+<tr><td class="mono">review</td><td>审查 Agent · 标准</td><td class="c mono">103,240</td><td class="c mono">42.8%</td></tr>
+<tr><td class="mono">frontend</td><td>前端 Agent</td><td class="c mono">58,110</td><td class="c mono">24.1%</td></tr>
+<tr><td class="mono">sync</td><td>数据同步 Agent</td><td class="c mono">44,890</td><td class="c mono">18.6%</td></tr>
+<tr><td class="mono">merge</td><td>汇总 Agent</td><td class="c mono">26,740</td><td class="c mono">11.1%</td></tr>
+<tr><td class="mono">legacy</td><td>旧版审查 Agent</td><td class="c mono">8,080</td><td class="c mono">3.4% <span class="chip bad">全是失败白跑</span></td></tr>
+</tbody></table>
+<div class="callout bad"><p class="tiny" style="margin:0"><b>可点破的一笔钱：</b>legacy 节点 09-22 之后仍消耗 <span class="mono">8,080</span> token 却零产出——引用的工具已禁用，每次都在 fallback 处失败。<b>下钻只能到节点粒度</b>（trace_spans 0 行），再往下「哪一步最贵」看不见。去画布处理该节点，或 apply 前先看漂移 diff。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="导出本模板 run 明细 CSV（演示）">导出明细</button> <button class="btn sm" data-toast="跳 §6.6 工作流列表看发布快照（演示）">看快照</button> <button class="btn sm" data-toast="跳 §6.5 画布（v3 · 1 条校验警告）（演示）">去画布处理 legacy</button> <button class="btn sm" data-toast="跳 §6.22 执行回放（依赖 trace 产生端 · C10-0）（演示）">看回放</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：导出明细 / 看快照 / 去画布处理 legacy / 看回放→toast 跳转说明 · legacy 白跑 8,080 token 的警示置顶　按 Esc 关闭浮层。</p>
+</body></html>

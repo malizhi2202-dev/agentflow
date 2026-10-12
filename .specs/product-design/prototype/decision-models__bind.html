@@ -1,0 +1,36 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>绑定到域 · 两步制 详情 · 决策模型目录 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p23" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="decision-models.html" data-click>← 返回 决策模型目录</span><span class="crumb"><b>绑定到域 · Jev-Style-Qwen3.5-2B</b> · 两步制</span><span class="chip warn">默认全关</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="decision-models.html">决策模型</span><span class="pill" data-goto="decision-models__jev.html">模型详情</span><span class="pill" data-goto="control-plane.html">管控面</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>两步制（AC-0b）：</b>①登记进目录（连通+健康态）②按用途逐个绑定（路由决策 / 对话分诊 / 简单任务派发 · 三个独立开关，默认全关）。<b>两步全过才生效</b>；未绑定 = 决策代码路径零调用，界面无「建议启用」骚扰。保存需二次确认并入审计，本页不代执行。</p></div>
+<h4 class="blk">选择域（域=策略容器）</h4>
+<table class="tbl compact"><tbody>
+<tr data-click data-toast="已选域 quant-research（演示）· 域 owner @liang"><td><span class="dot running"></span> <b>quant-research</b> <span class="chip">当前</span></td><td class="tiny dim mono">owner @liang · 微调开关已开（AF-9K2）</td></tr>
+<tr data-click data-toast="已选域 默认域（演示）· 未开微调：任何训练操作返回 403"><td><span class="dot idle"></span> 默认域</td><td class="tiny dim mono">owner admin · 决策能力未开</td></tr>
+<tr style="opacity:.5"><td><span class="dot blocked"></span> frontend</td><td class="tiny dim mono">域 owner 09-21 变更 → 旧绑定已失效，需重绑（§1.6.5 ⑤）</td></tr>
+</tbody></table>
+<h4 class="blk">第一步 · 在本域启用该模型（默认关）</h4>
+<table class="tbl compact"><tbody>
+<tr><td>quant-research × <span class="mono">Jev-Style-Qwen3.5-2B</span></td><td><span class="chip ok">已启用</span></td><td><span class="btn link" data-toast="第 1 步已启用（演示）：模型进入本域可用集，但用途仍未生效">关闭第一步</span></td></tr>
+<tr><td>quant-research × <span class="mono">dept-router-v3-ft</span></td><td><span class="chip bad">不可启用</span></td><td><span class="btn link" data-toast="✗ 第一步即拒：未过门槛（ECE 0.061 &gt; 0.05）">为何灰置</span></td></tr>
+</tbody></table>
+<h4 class="blk">第二步 · 按用途绑定（三个独立开关 · 默认全关 · 未绑定=零调用）</h4>
+<table class="tbl compact"><thead><tr><th>用途</th><th>当前</th><th>操作</th></tr></thead><tbody>
+<tr><td>路由决策</td><td><span class="chip ok">开</span> 阈值 0.60</td><td><span class="btn link" data-toast="演示：路由决策已关闭 → 该用途回退直通路由，decision_fallback 计数归零">关闭此用途</span></td></tr>
+<tr><td>对话分诊</td><td><span class="chip">关</span></td><td><span class="btn link" data-toast="演示：对话分诊已绑定 → Choice(12 类) 生效，消息详情将显示分类与概率">绑定此用途</span></td></tr>
+<tr><td>简单任务派发</td><td><span class="chip">关</span></td><td><span class="btn link" data-toast="演示：白名单未开启 → 服务端枚举校验拒绝派发（不靠提示词）">绑定此用途</span></td></tr>
+</tbody></table>
+<p class="tiny dim">两步全过才生效；任一开关关闭 = 零介入。阈值语义（校准概率≈真实置信）常驻文案，不藏 hover。</p>
+<h4 class="blk">保存</h4>
+<p><button class="btn sm" data-back="decision-models.html" data-click>取消</button> <button class="btn sm primary" data-toast="演示：保存需二次确认 → 写入审计 decision_model_bound（本页不执行）">保存两步绑定</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为「绑定到域 · 两步制」升格详情页（规划原型 · 6.23 界面尚不存在）。两步制语义（AC-0b）、三个独立开关默认全关、域 owner 变更旧绑定失效（§1.6.5 ⑤）、门槛服务端判定（AC-C2）逐字取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.23；域清单与审计号为演示值。所有开关与保存均不产生真实写入。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：选域行 → toast（切当前域）· 第一步启用/关闭 → toast · 第二步按用途绑定 → toast（灰置项给拒因）· 「保存两步绑定」→ toast（真实需二次确认入审计）· 顶部「← 返回」回 decision-models.html　按 Esc 关闭浮层。</p>
+</body></html>

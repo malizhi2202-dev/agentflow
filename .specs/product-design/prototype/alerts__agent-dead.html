@@ -1,0 +1,56 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>告警 agent_dead · agent-7 详情 · 告警中心</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="alerts.html" data-click>← 返回 告警中心</span><span class="crumb"><b>告警详情 · agent_dead / agent-7</b></span><span class="chip bad">critical</span><span class="chip bad">未确认</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="metrics.html">仪表盘</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>先说清现状：</b>告警存于 <span class="mono">alert_service</span> <b>进程内环形缓冲 500 条</b>——<b>重启即丢</b>、超 500 条按最旧覆盖。本页列出的「未确认 / 已确认」状态同样会随重启消失。<b>P1-16（已过审）落表规划</b>：告警属可计量追踪数据（裁定⑦同向）→ 直接落 <b>MySQL 告警表 + 去重键 + 保留策略列</b>，进程内环形形态退役；与 work_item 族同库，是协作层施工序的第一步（告警落表 → 并 queue → work_item 单表 → 收件箱）。「有界面没表」与「有表没界面」同罪。</p></div>
+<h4 class="blk">规则 · 阈值 · 当前态</h4>
+<dl class="kv"><dt>规则</dt><dd class="mono">agent_dead · 判定函数 _check_agent_dead</dd>
+<dt>触发条件</dt><dd class="mono">探针连续失败 ≥ 5 次 且 心跳丢失 &gt; 75s → 判 dead</dd>
+<dt>目标</dt><dd class="mono">agent-7 · 旧版审查 Agent · gpt-3.5 · 默认域 / code-review</dd>
+<dt>级别</dt><dd><span class="chip bad">critical</span> 色标：Agent 死亡=红（Token 超限=橙）</dd>
+<dt>首次 / 最近</dt><dd class="mono">14:30:10 · 复发至 14:32:10（去重层压制重复告警）</dd>
+<dt>健康四态</dt><dd><span class="chip bad">offline</span> 阈值写进文案：心跳 45s / 离线 75s（§6.0 ③）</dd>
+<dt>调和判定</dt><dd><span class="chip bad">dangerous</span> 异常数 &gt; expected/2 → 转人工审批，<b>不自动执行</b></dd>
+<dt>确认状态</dt><dd class="mono">未确认 · 导航角标 +1 · 确认人 无</dd>
+<dt>静默</dt><dd class="mono">未静默（静默 24h 只压通知，不改根因）</dd>
+<dt>存储位置</dt><dd class="mono">进程内环形 500 条（重启即丢）<span class="chip warn">P1-16 待落 MySQL</span></dd></dl>
+<h4 class="blk">触发链（探针 → 判定 → 巡检 → 告警）</h4>
+<div class="timeline">
+<div class="tl-item fail"><b>14:28:10</b> · 探针 #1 失败 · <span class="mono">ECONNREFUSED 10.0.4.31:9007</span></div>
+<div class="tl-item fail"><b>14:28:40</b> · 探针 #2 失败 · 退避 [1,2,4,8]s</div>
+<div class="tl-item fail"><b>14:29:10</b> · 探针 #3 失败 · <span class="chip warn">caution</span> 尝试自动重启</div>
+<div class="tl-item fail"><b>14:29:40</b> · 重启后复探仍失败 · #4</div>
+<div class="tl-item fail"><b>14:30:10</b> · 探针 #5 失败 + 心跳丢失 &gt; 75s → <b>判 dead</b></div>
+<div class="tl-item fail"><b>14:30:22</b> · 调和分类 dangerous → 生成审批请求（阻塞式）</div>
+<div class="tl-item"><b>14:30:40</b> · 巡检周期到 → 写入环形缓冲 + 角标 2→3</div>
+<div class="tl-item"><b>14:32:10</b> · 复探仍失败 · 去重层压制重复告警（不再新增行）</div>
+</div>
+<h4 class="blk">关联对象</h4>
+<table class="tbl compact"><thead><tr><th>对象</th><th>状态</th><th>入口</th></tr></thead><tbody>
+<tr><td class="mono">编排节点 legacy（旧版审查 Agent）</td><td><span class="chip bad">引用工具已禁用</span></td><td><span class="btn link" data-toast="跳 §6.5 画布 legacy 节点（演示）">去画布</span></td></tr>
+<tr><td class="mono">审批 req-88 · 终止并替换 agent-7</td><td><span class="chip warn">挂起等人 · 无超时放行</span></td><td><span class="btn link" data-toast="跳 §6.17 审批中心（演示）">去审批</span></td></tr>
+<tr><td class="mono">retry-fallback 边 review→legacy</td><td><span class="chip ok">已配 dead-letter</span></td><td><span class="btn link" data-toast="失败任务有处可去，未滞留（演示）">查看边</span></td></tr>
+<tr><td class="mono">会话 rt-1-1783346200</td><td><span class="chip bad">error</span></td><td><span class="btn link" data-click data-goto="alerts__exec-fail.html">同因告警</span></td></tr>
+<tr><td class="mono">同能力组备援 审查 Agent · 备援</td><td><span class="chip ok">冷备可用</span></td><td><span class="btn link" data-toast="切流量到备援副本（演示）">切流量</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已确认 · 角标 3→2（演示）">确认</button> <button class="btn sm" data-toast="已重启实例 · 状态灯待复探确认才更新（演示）">重启实例</button> <button class="btn sm" data-click data-modal="md-silence">静默 24h</button></p>
+</div>
+<div class="modal" id="md-silence"><div style="padding:var(--s4)"><b>静默该告警 24 小时？</b>
+<p class="small dim" style="margin:8px 0 6px">静默只压<b>通知与角标</b>：规则仍在跑，事件仍进环形缓冲，只是不再打扰。<b>这不是修复</b>，24h 后若仍触发会重新出现在列表。</p>
+<table class="tbl compact"><thead><tr><th>影响项</th><th>静默后</th></tr></thead><tbody>
+<tr><td>导航角标 / 未确认数</td><td>不计入（3→2）</td></tr>
+<tr><td>通知分层（§6.0 ⑫）</td><td>24h 内不再 ping 负责人</td></tr>
+<tr><td>同签名重复告警</td><td>仍记录「最近发生」，不新增行</td></tr>
+<tr><td>根因（工具禁用 / 探针失败）</td><td><span class="chip bad">不变 · 仍存在</span></td></tr>
+<tr><td>到期后</td><td>自动恢复可见，未确认状态回置</td></tr>
+</tbody></table>
+<p class="small" style="margin:8px 0 4px"><b>必填原因</b>（静默等同暂时压告警，须留痕）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [已知问题 · 等 15:00 维护窗口处理 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已静默 24h 至明天 14:32 · 审计 alert:silence（演示）" data-close>确认静默 24h</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：确认 / 重启实例→toast · 「静默 24h」→二次确认含必填原因 · 「同因告警」→执行失败告警详情页 · 关联对象「去画布 / 去审批」→toast 跳转说明　按 Esc 关闭浮层。</p>
+</body></html>

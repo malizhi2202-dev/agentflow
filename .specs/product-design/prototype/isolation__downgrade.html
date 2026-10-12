@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>降档执行确认 T3→T2 详情 · 执行隔离策略 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p26" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="isolation.html" data-click>← 返回 执行隔离策略</span><span class="crumb"><b>降档执行确认 · 域 integrations-untrusted · T3 → T2</b></span><span class="chip bad">破坏性 · 承诺变小</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="isolation__t3.html">T3 档位详情</span><span class="pill" data-goto="isolation__runsc.html">安装 runsc 指引</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>这不是「降级运行」，是承诺变小：</b>该域按策略应跑在 gVisor，降到 T2 意味着共享内核的执行面承接不可信输入。fail-closed 的默认答案是<b>拒绝执行</b>，降档是唯一的人工例外，且必须<b>三处同时显式</b>——界面徽章、审计事件、API 响应一起标 <span class="mono">isolation:none</span>。</p></div>
+<h4 class="blk">三处显式演示（本次降档会同时出现）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75">① 界面：执行详情徽章 → <span class="chip bad">isolation:none</span>（常驻，不 hover、不折叠）
+② 审计：isolation_downgrade_confirmed
+   actor=@liang domain=integrations-untrusted from=T3 to=T2
+   reason="runsc 未装，先跑通链路" ttl=900s
+③ API：POST /api/executions → 409 / 200+isolation 字段（视策略）
+   {"accepted": true, "isolation": "none", "requested_tier": "T3",
+    "executed_tier": "T2", "warn": "degraded per explicit human approval"}</pre>
+<h4 class="blk">确认前请核对</h4>
+<ul class="small dim" style="margin:0;padding-left:18px">
+<li>不可信输入 × T2 组合的残余风险：内核 LPE、挂载卷读取面、egress 由白名单而非 gVisor 兜底</li>
+<li>降档<b>不写进策略</b>：一次性，域 <span class="mono">min_tier</span> 保持 T3，下次执行仍要求 T3</li>
+<li>可随时中止：该 run 的 <span class="mono">operatingMode</span> 置 Suspended，产物按 <span class="mono">Retain</span> 保留、现场清理</li>
+</ul>
+<h4 class="blk">必填原因 + 输入域名字确认（§6.0 破坏性操作纪律）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [runsc 今晚装不了，先验证工具链路 ]
+确认: [integrations-untrusted ]</pre>
+<h4 class="blk">操作</h4>
+<p><button class="btn sm" data-back="isolation.html" data-click>取消（保持 fail-closed 拒跑）</button> <button class="btn sm primary" data-click data-goto="isolation__runsc.html">去装 runsc（推荐）</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已一次性降档执行 · 三处已标 isolation:none · 审计 isolation_downgrade_confirmed（演示）" data-back="isolation.html">确认降档并留痕</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为「降档执行确认」升格详情页（规划原型 · 6.26 界面尚不存在）。fail-closed 默认拒绝、三处显式 isolation:none、审计事件 isolation_downgrade_confirmed、API 409 与 operatingMode=Suspended 均为 §6.26 / P1-14 原文实值；actor 与 reason 为演示。本页不产生真实降档执行。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：三处显式与残余风险只读摊开 · 「去装 runsc」跳 isolation__runsc.html · 「确认降档并留痕」→ toast 并返回 isolation.html · 「取消」保持 fail-closed 拒跑并返回　按 Esc 关闭浮层。</p>
+</body></html>

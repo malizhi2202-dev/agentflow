@@ -1,0 +1,78 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>项目 · agentflow 详情 · 项目管理</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p13" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="projects.html" data-click>← 返回 项目管理</span><span class="crumb"><b>项目详情 · agentflow</b></span><span class="chip info">当前</span><span class="chip ok">has_prompts</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="users.html">用户与权限</span></div>
+<div class="detail-body">
+<div style="display:flex;gap:6px"><span class="pill" style="border-color:var(--blue-border);color:var(--blue)">概览</span><span class="pill">扫描结果 (11)</span><span class="pill">成员 (4)</span><span class="pill">扫描历史</span></div>
+<h4 class="blk">目录与登记信息</h4>
+<dl class="kv" style="margin-top:var(--s3)">
+<dt>标识 / 名称</dt><dd class="mono">projects/1 · agentflow</dd>
+<dt>项目路径</dt><dd class="mono tiny">/home/malizhi/project/agentflow</dd>
+<dt>产物目录（.specs）</dt><dd class="mono tiny">…/agentflow/.specs <span class="chip ok">已发现 11 个 change 目录</span></dd>
+<dt>提示词目录</dt><dd class="mono tiny">…/agentflow/prompts <span class="chip ok">prompts/ 存在</span></dd>
+<dt>备份目录</dt><dd class="mono tiny">…/agentflow/backup <span class="chip">写入前自动备份</span></dd>
+<dt>数据根目录</dt><dd class="mono tiny">/home/malizhi/project <span class="chip warn">users.json / audit.jsonl 在此</span></dd>
+<dt>变更数 / Agent 数</dt><dd class="mono">14 · 11 <span class="tiny dim">（登记口径 14；下表为实扫 .specs/ 现存 11 个 change 目录）</span></dd>
+<dt>最后扫描</dt><dd class="mono">09-23 13:20 · 手动（admin）· 340ms</dd>
+<dt>可见性</dt><dd>admin 全部可见；普通用户按 <span class="mono">project_ids</span> 分配（见下表）</dd>
+</dl>
+<h4 class="blk">扫描结果 · change 目录与产物</h4>
+<table class="tbl compact"><thead><tr><th>change 目录</th><th>已识别产物</th><th>阶段</th><th>runtime.jsonl</th></tr></thead><tbody>
+<tr><td class="mono">agent-control-plane</td><td class="tiny">REVIEW · TEST · _test_api.py</td><td><span class="chip ok">REVIEW</span></td><td class="mono tiny dim">—</td></tr>
+<tr><td class="mono">agent-domains</td><td class="tiny">REQUIREMENT · TASK · test_backend.py</td><td><span class="chip warn">TEST</span></td><td class="mono tiny dim">—</td></tr>
+<tr><td class="mono">capability-groups</td><td class="tiny">CHANGE · REQUIREMENT · DESIGN · TASK</td><td><span class="chip warn">TASK</span></td><td class="mono tiny dim">—</td></tr>
+<tr><td class="mono">credential-scan</td><td class="tiny">SCAN-REPORT.md</td><td><span class="chip ok">归档</span></td><td class="mono tiny dim">—</td></tr>
+<tr><td class="mono">identity-hardening</td><td class="tiny">CHANGE · REQUIREMENT · DESIGN · TASK</td><td><span class="chip warn">TASK</span></td><td class="mono">有 <span class="chip ok">追加写</span></td></tr>
+<tr><td class="mono">k8s-final</td><td class="tiny">test_backend.sh</td><td><span class="chip">TEST</span></td><td class="mono tiny dim">—</td></tr>
+<tr><td class="mono">knowledge-plus</td><td class="tiny">TEST.md</td><td><span class="chip">TEST</span></td><td class="mono tiny dim">—</td></tr>
+<tr><td class="mono">multi-provider</td><td class="tiny">test_api.py · debug_api.py</td><td><span class="chip bad">缺前置产物</span></td><td class="mono tiny dim">—</td></tr>
+<tr><td class="mono">platform-evolution</td><td class="tiny">ROADMAP.md + D-〈子议题〉.md 文件包</td><td><span class="chip info">discovery</span></td><td class="mono tiny dim">—</td></tr>
+<tr><td class="mono">product-design</td><td class="tiny">PRODUCT-DESIGN.html · prototype/</td><td><span class="chip info">product</span></td><td class="mono tiny dim">—</td></tr>
+<tr><td class="mono">small-model-decisions</td><td class="tiny">CHANGE · REQUIREMENT · runtime.jsonl</td><td><span class="chip warn">REQUIREMENT</span></td><td class="mono">有 <span class="chip ok">追加写</span></td></tr>
+</tbody></table>
+<h4 class="blk">成员（按 project_ids 分配）</h4>
+<table class="tbl compact"><thead><tr><th>成员</th><th>角色</th><th>本项目权限</th><th>状态</th></tr></thead><tbody>
+<tr><td class="mono">admin · 李工</td><td><span class="chip bad">admin</span></td><td class="mono tiny">全部 6 项（豁免 · 不可削减）</td><td><span class="chip info">Owner</span></td></tr>
+<tr><td class="mono">testuser · 张三</td><td><span class="chip">user</span></td><td class="mono tiny">project:read + project:write</td><td><span class="chip ok">活跃 14:31</span></td></tr>
+<tr><td class="mono">lisi · 李四</td><td><span class="chip">user</span></td><td class="mono tiny">project:read</td><td><span class="chip ok">活跃 昨天</span></td></tr>
+<tr><td class="mono">wangwu · 王五</td><td><span class="chip">user</span></td><td class="mono tiny">project:read + audit:view</td><td><span class="chip">只读</span></td></tr>
+<tr><td class="mono tiny dim">newbie · 赵六</td><td><span class="chip">user</span></td><td class="mono tiny dim">未分配（零权限）</td><td><span class="chip bad">本项目不可见</span></td></tr>
+</tbody></table>
+<div class="callout bad" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>最后一行为反例：</b>未被分配的账号在该项目任何列表中都看不到该资源；<b>不回退为「全部可见」</b>。</p></div>
+<h4 class="blk">扫描历史</h4>
+<div class="timeline" style="margin:0">
+<div class="tl-item"><b>09-23 13:20</b> · 手动扫描（admin）：11 change 目录 · 1 个产物缺失提示（multi-provider 缺 CHANGE）</div>
+<div class="tl-item"><b>09-21 09:00</b> · 启动扫描：新发现 <span class="mono">credential-scan</span>，登记 +1</div>
+<div class="tl-item fail"><b>09-19 17:04</b> · 提示词目录校验：<span class="mono">demo-sandbox</span> / <span class="mono">legacy-monitor</span> 无 <span class="mono">prompts/</span> → 标「缺失」并回退全局默认</div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已切换当前项目 → agentflow（演示）">切换到此项目</button> <button class="btn sm" data-toast="重新扫描已排队（演示）">重新扫描</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-del">删除项目</button></p>
+</div>
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除项目登记「demo-sandbox」？</b>
+<p class="small dim" style="margin:8px 0">需要 <span class="mono">project:delete</span>（危险权限点）。<b>只解除平台内登记</b>：路径映射 · 成员分配 · 变更索引。<span style="color:var(--red)"><b>不删除盘上任何文件</b></span>——<span class="mono">/tmp/demo-sandbox</span> 与其 <span class="mono">.specs/</span> 产物、<span class="mono">prompts/</span> 原样保留，重新登记即可复现视图。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>盘上项目目录 / 产物文件</td><td><span class="chip ok">不改动</span></td></tr>
+<tr><td>该项目下的变更索引</td><td><span class="chip warn">平台内解除登记</span></td></tr>
+<tr><td>已挂载 Agent 的 <span class="mono">project_ids</span></td><td><span class="chip warn">同步移除该分配</span></td></tr>
+<tr><td>历史会话与审计</td><td><span class="chip ok">保留快照</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [沙盒已废弃，索引清理            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已解除登记（盘上文件未删除）· 审计 project:unregistered（演示）" data-close>确认删除登记</button></div></div></div>
+<h4 class="blk">关联资源（现状=代码事实 · 建议=S16 §5 待审⑤）</h4>
+<table class="tbl compact"><thead><tr><th>资源</th><th>现状</th><th>建议语义</th></tr></thead><tbody>
+<tr><td><b>Agent</b></td><td>✅ 单值外键 <span class="mono tiny">project.py:16</span>（一个项目只能挑一个）</td><td>N:N <span class="mono">project_agents</span> 连接表：参与角色+时段；本页按 Agent 分栏展示各自的工作项数与 token 成本</td></tr>
+<tr><td><b>工作流</b></td><td>✅ workflow_id 单值 <span class="mono tiny">:17</span></td><td>保留 1:N（一次工作多阶段可挂多版本）；快照=发布版不可变</td></tr>
+<tr><td><b>编排实例</b></td><td>✅ orchestration_id <span class="mono tiny">:18</span></td><td>不变；画布跳转</td></tr>
+<tr><td><b>产物文档</b></td><td><span class="chip bad">账面零关联</span>（文件在 .specs/&lt;change&gt;/，无 project 台账）</td><td>artifact_index 台账：path+project_id+版本+checksum；文件本体仍走文件态（裁定⑦两档）</td></tr>
+<tr><td><b>工作项</b></td><td><span class="chip warn">未落地</span>（S7 裁定#3：独立表+连接表）</td><td>work_items.project_id N:1；看板即本项目的任务视图（p20）</td></tr>
+<tr><td><b>会话</b></td><td><span class="chip bad">互不相认</span>（conversation 无 project_id）</td><td>可空关联列：从项目上下文发起的对话回填；对话中心可按项目过滤</td></tr>
+<tr><td><b>知识源</b></td><td><span class="chip bad">无项目维度</span></td><td>项目级临时知识→经产物「晋升」为团队资产（引用快照型，S15 四型）</td></tr>
+<tr><td><b>指标/trace</b></td><td><span class="chip bad">假数</span> <span class="mono tiny">metrics_scheduler.py:83 random(1,3)</span></td><td>真实 project_id 口径三级聚合 team→project→agent；成本账进 team_quota 同表</td></tr>
+<tr><td><b>团队</b></td><td><span class="chip bad">不存在</span></td><td>Project N:1 Team（S16-R2）；本页头部将出现所属团队徽章</td></tr>
+</tbody></table>
+<div class="callout"><p class="tiny" style="margin:0">判定句：<b>Project 页 = 该次工作的装配快照</b>——用了谁(Agent)·走哪条线(Workflow)·留下什么(产物)·花多少(成本)，一眼看全；归属容器是 Team，运行时隔离才是 Domain。</p></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：切换到此项目 / 重新扫描→toast · 「删除项目」→二次确认（声明不删盘上文件 · 必填原因）· 扫描结果 11 行与成员表全宽展示　按 Esc 关闭浮层。</p>
+</body></html>

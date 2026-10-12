@@ -1,0 +1,56 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>新建工作流 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}.radio{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-2px;margin-right:6px}.radio.on{border:2px solid var(--blue);position:relative}.radio.on i{position:absolute;inset:2px;border-radius:50%;background:var(--blue);display:block}.radio.off{border:2px solid var(--border-strong)}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="workflows.html" data-click>← 返回 工作流</span><span class="crumb"><b>新建工作流</b></span><span class="chip warn">演示数据</span></div>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<div class="detail-body">
+<p class="proto-note"><span class="chip warn">演示数据</span>新建工作流起始页：基本信息 + 起始点三选一（空白画布 / 从模板 / 从 Markdown 导入）。创建后进入画布为<b>草稿态</b>，发布才生成不可变快照。</p>
+
+<h4 class="blk">基本信息</h4>
+<div class="grid" style="max-width:640px;gap:var(--s2)">
+  <div><div class="tiny muted" style="margin-bottom:4px">名称 <span style="color:var(--red)">＊必填</span></div><div class="panel tight mono" style="background:var(--bg-input);padding:8px 10px" data-click data-toast="名称必填 · 用于生成标识与画布标题（演示）">新审查流水线</div></div>
+  <div><div class="tiny muted" style="margin-bottom:4px">描述 <span class="dim">（可选）</span></div><div class="panel tight mono" style="background:var(--bg-input);padding:8px 10px;color:var(--text-muted)">描述该工作流的用途、输入输出与安全闸门…</div></div>
+</div>
+
+<h4 class="blk">起始点（三选一）</h4>
+<div class="grid" style="gap:var(--s2)">
+  <div class="card" data-click data-toast="已选起始点：空白画布 → 进入 canvas 草稿态，从左侧 Agent/工具面板拖节点（演示）">
+    <p style="margin:0"><span class="radio on"><i></i></span><b>空白画布</b> <span class="chip ok">推荐</span></p>
+    <p class="tiny dim" style="margin:4px 0 0">进入 canvas 草稿态，从左侧 Agent / 工具面板拖拽节点自由编排；发布才生成不可变快照。</p>
+  </div>
+  <div class="card" data-click data-toast="已选起始点：从模板 → 下拉选择预置模板，带入预置节点与连线（演示）">
+    <p style="margin:0"><span class="radio off"></span><b>从模板</b> <span class="tiny dim">带入预置节点与连线，可再改</span></p>
+    <div class="panel tight mono" style="background:var(--bg-input);padding:8px 10px;max-width:340px;cursor:pointer" data-click data-pop="pp-template">审查流水线 ▾</div>
+  </div>
+  <div class="card" data-click data-toast="已选起始点：从 Markdown 导入 → 双向解析成画布节点与连线（演示）">
+    <p style="margin:0"><span class="radio off"></span><b>从 Markdown 导入</b></p>
+    <pre class="mono tiny" style="background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:8px;margin:6px 0 0;white-space:pre-wrap"># 我的工作流
+
+## 节点
+- n1: 天气查询 (plugin)
+- n2: 代码审查 (skill)
+
+## 连线
+- n1 → n2 (顺序)
+- n2 → n3 (IF/ELSE: 风险等级>3)
+
+## 安全闸门
+- 前置校验: 输入必须包含 project_id</pre>
+    <p class="tiny dim" style="margin:4px 0 0">Markdown 双向解析成画布节点与连线。</p>
+  </div>
+</div>
+
+<p style="margin-top:var(--s4)"><button class="btn sm" data-back="workflows.html" data-click>取消</button> <button class="btn sm primary" data-goto="canvas.html" data-click>创建并进入画布</button> <span class="tiny dim" style="margin-left:8px">草稿态，发布才生成不可变快照</span></p>
+</div>
+<div class="pop" id="pp-template"><p class="tiny muted" style="margin:2px 4px 6px">选择模板（带入预置节点）</p>
+<table class="tbl compact"><tbody>
+<tr><td><b>审查流水线</b></td><td class="tiny dim">6 步 · review / frontend / sync / merge</td><td><span class="btn link" data-toast="已选模板：审查流水线 · 带入 6 步预置节点（演示）">应用</span></td></tr>
+<tr><td>需求澄清</td><td class="tiny dim">4 步 · clarify / refine / gate</td><td><span class="btn link" data-toast="已选模板：需求澄清 · 带入 4 步预置节点（演示）">应用</span></td></tr>
+<tr><td>发布前检查</td><td class="tiny dim">5 步 · 检查 / 合规 / 审批</td><td><span class="btn link" data-toast="已选模板：发布前检查 · 带入 5 步预置节点（演示）">应用</span></td></tr>
+</tbody></table></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：三张卡片（radio）切换起始点 → toast · 「从模板」下拉 → pp-template 选择模板 → toast · 「创建并进入画布」→ canvas.html（草稿态 · 发布才生成不可变快照）· 「取消」/顶部「← 返回」→ workflows.html　按 Esc 关闭所有浮层。</p>
+</body></html>

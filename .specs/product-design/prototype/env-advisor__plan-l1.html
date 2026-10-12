@@ -1,0 +1,53 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>部署方案 L1 · 本机最优（MLX）详情 · 环境参谋</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p25" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="env-advisor.html" data-click>← 返回 环境参谋</span><span class="crumb"><b>方案详情 · L1 本机最优（MLX）</b></span><span class="chip ok">推荐</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="finetune.html">微调工厂</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>为什么排第一：</b>M1 Max 32GB 统一内存 + Metal 原生后端，bf16 不必量化即跑得动，且是<b>唯一同时满足推理与本机微调</b>的档（MLX 后端可接 LLaMA-Factory）。</p></div>
+<h4 class="blk">探测依据 · 成本 · 边界</h4>
+<dl class="kv"><dt>探测依据 · OS</dt><dd class="mono">macOS 15 · arm64</dd><dt>探测依据 · 芯片</dt><dd class="mono">Apple M1 Max（10 核 CPU / 24 核 GPU）</dd><dt>探测依据 · 内存</dt><dd class="mono">32GB 统一内存 · 当前可用 18.4GB（≥16GB 微调基线通过，AC-B3）</dd><dt>探测依据 · 后端</dt><dd class="mono">Metal ✓（system_profiler SPDisplaysDataType 只读）· CUDA ✗ · Vulkan ✗</dd><dt>探测依据 · 磁盘</dt><dd class="mono">余 412GB ≥ 需求 7.8GB + 训练工作区 ≈15GB</dd><dt>探测方式</dt><dd>启动或手动触发 · 单次 ≤5s · 全为只读命令 · <b>默认不上传</b>（AC-E1）</dd><dt>引擎</dt><dd class="mono">MLX（Apple 原生）+ mlx-lm</dd><dt>模型 · 量化</dt><dd class="mono">Jev-Style-Qwen3.5-2B · bf16 · 7.8GB</dd><dt>延迟估算</dt><dd class="mono">~80ms/决策（复刻卡实测 77ms · SLA ≤300ms 富余）</dd><dt>能 / 不能</dt><dd>推理 ✓ · 微调 ✓（本域 LoRA）· 跨平台一致性 ✗（换机需重下）</dd><dt>成本</dt><dd class="mono">一次性磁盘 7.8GB · 电费≈0（本机）· 无 API 费用 · 数据不出域</dd><dt>许可证 / 校验</dt><dd class="mono">模型 Apache-2.0 · sha256 已随下载命令给出</dd><dt>当前缺失步骤</dt><dd>3 项未勾选（装引擎 / 下模型 / 配端点+校验）</dd><dt>采用后写什么</dt><dd class="mono">仅写「建议配置」到 <span class="mono">.specs/…/advisor-plan.md</span>（草案）· 不写 config、不启进程</dd></dl>
+<h4 class="blk">命令清单（复制自跑 · 平台不代执行）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75"># ① 装引擎
+pip install mlx mlx-lm
+
+# ② 下模型（源 + 许可证 + 校验值随行）
+huggingface-cli download mlx-community/Qwen3.5-2B-bf16 \
+  --local-dir ~/models/qwen35-2b-bf16        # Apache-2.0 · sha256 见页面行内
+
+# ③ 起 OpenAI-compatible 端点
+python -m mlx_lm server --model ~/models/qwen35-2b-bf16 --port 8080
+
+# ④ 连通校验（只读）
+curl -s http://127.0.0.1:8080/v1/models</pre>
+<p style="margin-top:var(--s3)"><span class="btn link" data-click data-toast="✓ 已复制 L1 全部命令（4 段 · 演示）· 未执行任何安装/下载">⧉ 复制全部命令</span><span class="btn link" data-click data-toast="已下载 advisor-L1.sh（演示）· 脚本仍需用户自行执行并自查内容">⭳ 下载装机脚本 .sh</span><span class="btn link" data-click data-toast="操作路径：终端逐条执行上面 4 段 · 每完成一项回本页勾 ☐（演示）">看操作路径</span></p>
+<h4 class="blk">逐项确认（人工勾选 = 进度账，不是执行回执）</h4>
+<table class="tbl compact"><thead><tr><th>步骤</th><th>状态</th><th>操作</th></tr></thead><tbody>
+<tr><td>装引擎 <span class="mono">pip install mlx mlx-lm</span></td><td><span class="chip">未完成</span></td><td><span class="btn link" data-toast="已勾选「装引擎」（演示）· 下次只读探测会自动核对该项">勾掉这步</span></td></tr>
+<tr><td>下模型 <span class="mono">bf16 7.8GB</span></td><td><span class="chip">未完成</span></td><td><span class="btn link" data-click data-toast="✓ 已复制下载命令（演示）">⧉ 复制</span></td></tr>
+<tr><td>配端点 <span class="mono">:8080 + 平台登记</span></td><td><span class="chip">未完成</span></td><td><span class="btn link" data-click data-toast="✓ 已复制端点配置片段（演示）· 登记入口在 §6.23 决策模型目录">⧉ 复制</span></td></tr>
+<tr><td>连通校验</td><td><span class="chip dim">待前序</span></td><td><span class="btn link" data-click data-toast="校验为只读动作：完成前序后可点「重探一次」自动核对（演示）">怎么验</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-back="env-advisor.html">只要方案不采用 · 返回对比表</button> <button class="btn sm primary" data-click data-modal="md-adopt">采用此方案 ▸ 写配置建议</button></p>
+</div>
+<div class="modal" id="md-adopt"><div style="padding:var(--s4)"><b>采用 L1 · 本机最优（MLX）？</b>
+<p class="small dim" style="margin:8px 0"><b>这一步只写建议，不执行</b>（AC-E4）：平台不会装引擎、不会下模型、不会改配置，也不会因此启用任何决策用途。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75"># 将写入 .specs/small-model-decisions/advisor-plan.md（草案 · 待人审）
+layer: L1
+engine: mlx + mlx-lm
+model: Qwen3.5-2B bf16 (7.8GB, Apache-2.0)
+endpoint: http://127.0.0.1:8080/v1   # 建议值，未启动
+steps_unchecked: [装引擎, 下模型, 配端点, 连通校验]
+applied_by: admin · 演示
+</pre>
+<ul class="small dim" style="margin:8px 0 8px 18px">
+<li>影响：无运行时变化 · 仅产出一份草案文档 + 审计记录 <span class="mono">advisor_plan_adopted</span></li>
+<li>可撤销：删除草案即回到现状（不改任何既有配置）</li>
+<li>仍需人工：逐条复制命令去终端执行，回来勾 ☐ 记进度</li>
+</ul>
+<div style="text-align:right"><button class="btn sm" data-close>再想想</button> <button class="btn sm primary" data-toast="已写入建议草案 advisor-plan.md（演示）· 平台未执行任何安装/下载" data-close>确认采用（写建议）</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：⧉ 复制命令 / ⭳ 下载脚本 / 看操作路径→toast（平台零执行）· 逐项确认表勾选→toast 记进度 · 「采用此方案」→二次确认（只写建议草案）· 返回对比表→回环境参谋　按 Esc 关闭浮层。</p>
+</body></html>

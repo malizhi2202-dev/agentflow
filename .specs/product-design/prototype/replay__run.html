@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>整轮回放 run-8842 详情 · 执行回放 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p22" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="replay.html" data-click>← 返回 执行回放</span><span class="crumb"><b>整轮回放 · run-8842（AF-116）</b></span><span class="chip bad">失败</span><span class="chip mono">41.2k tok · $0.38</span><span class="chip">Agent: code-fixer</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="replay__rerun.html">从失败步重跑</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="metrics.html">仪表盘</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>数据面事实：</b><span class="mono">trace_spans</span> 当前 0 行（无产生端写入）——本页是把「应该有」的形状画出来，落地前置 = P2-4 <span class="mono">C10-0</span> 先修产生端（补 INSERT + 父子链列）。</p></div>
+<h4 class="blk">运行概况</h4>
+<dl class="kv"><dt>run / 工作项</dt><dd class="mono">run-8842 · AF-116 修复 32 个 TS 错误（status 进行中 × triage accepted）</dd><dt>Agent / 模型</dt><dd><span class="dot running"></span> code-fixer · <span class="mono tiny">claude-sonnet-4 · 心跳 12s · online</span></dd><dt>触发方式</dt><dd>人点名派发（李工 14:02）· <b>非</b>状态变更自动启动（6.20 硬规矩）</dd><dt>挂靠上下文（多上下文）</dt><dd class="mono tiny">work_item:AF-116 · chat:sess-2214 · automation:ts-gate · thread:cmt-31</dd><dt>计划 vs 收据</dt><dd class="mono tiny">计划并入 [TASK.md, REVIEW.md] · 实际投喂 [TASK.md, ProjectManager.tsx, types/agent.ts]（<b>REVIEW.md 未投喂</b>）</dd><dt>步数 / 工具调用</dt><dd class="mono">8 行动作记录（seq 1–8 · 中止于 seq 8）· 17 次工具调用 · 2 次 edit</dd><dt>耗时 / token / USD</dt><dd class="mono">4m12s · 38.4k 入 / 6.1k 出 · $0.38（预算 $12 · 本项累计 $1.42）</dd><dt>截断标记</dt><dd class="mono tiny">seq 12、seq 19 出参被截断（<span class="chip warn">truncated</span> 原文 4.2KB / 留 2KB）</dd><dt>wait_reason</dt><dd class="mono tiny">终态 failed:no-progress（前一次为 blocked_on:AF-109）</dd><dt>取消 / 署名</dt><dd class="tiny dim">无人取消（自动中止）· 若人工中止则署名进时间线</dd><dt>数据可得性</dt><dd><span class="chip bad">trace_spans 0 行</span> 本页内容全为演示 · 前置 C10-0</dd></dl>
+<h4 class="blk">步骤树（父子链 · 点击步 → 该步详情回父页深链）</h4>
+<table class="tbl compact"><thead><tr><th>seq</th><th>步</th><th>父子</th><th>结果</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">1</td><td class="tiny">路由决策 · 小模型打分</td><td class="mono tiny">root</td><td><span class="chip warn">escalated（top1 0.52 &lt; 阈值 0.60）</span></td><td><span class="btn link" data-goto="decision-models.html" data-click>看</span></td></tr>
+<tr><td class="mono">2</td><td class="tiny">think · 规划修复范围</td><td class="mono tiny">1 → 2</td><td><span class="chip ok">ok</span></td><td><span class="btn link" data-goto="replay.html#dr-step-think" data-click>看</span></td></tr>
+<tr><td class="mono">3</td><td class="tiny">tool · grep workflow_ids</td><td class="mono tiny">2 → 3.1</td><td><span class="chip ok">3 处命中</span></td><td><span class="btn link" data-goto="replay.html#dr-step-grep" data-click>看</span></td></tr>
+<tr><td class="mono">4</td><td class="tiny">tool · read types/agent.ts</td><td class="mono tiny">2 → 3.2</td><td><span class="chip ok">ok</span></td><td><span class="btn link" data-goto="replay.html#dr-step-grep" data-click>看</span></td></tr>
+<tr><td class="mono">5</td><td class="tiny">edit · ProjectManager.tsx:29</td><td class="mono tiny">2 → 4</td><td><span class="chip ok">+1 / −1</span></td><td><span class="btn link" data-goto="replay.html#dr-step-edit" data-click>看</span></td></tr>
+<tr><td class="mono">6</td><td class="tiny">tool · npx tsc --noEmit</td><td class="mono tiny">2 → 5</td><td><span class="chip bad">31 errors</span></td><td><span class="btn link" data-goto="replay.html#dr-step-tsc" data-click>看</span></td></tr>
+<tr><td class="mono">7</td><td class="tiny">edit · 引入 as any</td><td class="mono tiny">2 → 6（重试 2/3）</td><td><span class="chip bad">被安全栅栏拦截</span></td><td><span class="btn link" data-goto="replay.html#dr-step-edit2" data-click>看</span></td></tr>
+<tr><td class="mono">8</td><td class="tiny">error · max_retries=3</td><td class="mono tiny">2 → abort</td><td><span class="chip bad">failed:no-progress</span></td><td><span class="btn link" data-goto="replay.html#dr-step-fail" data-click>看</span></td></tr>
+</tbody></table>
+<h4 class="blk">每步 token 瀑布（seq 6 是本 run 的成本大头）</h4>
+<table class="tbl compact"><thead><tr><th>步</th><th>类型</th><th>tokens（入 / 出）</th><th>瀑布</th><th>USD</th><th>灯</th></tr></thead><tbody>
+<tr><td class="mono tiny">seq 1 · 14:02:08</td><td class="tiny">decision</td><td class="mono tiny">312 / 24</td><td><span class="bar"><i class="g" style="width:6%"></i></span></td><td class="mono tiny">$0.004</td><td>g</td></tr>
+<tr><td class="mono tiny">seq 2 · 14:02:11</td><td class="tiny">think</td><td class="mono tiny">8,412 / 386</td><td><span class="bar"><i class="" style="width:68%"></i></span></td><td class="mono tiny">$0.079</td><td></td></tr>
+<tr><td class="mono tiny">seq 3 · 14:02:13</td><td class="tiny">tool · grep</td><td class="mono tiny">1,024 / 62</td><td><span class="bar"><i class="o" style="width:9%"></i></span></td><td class="mono tiny">$0.011</td><td>o</td></tr>
+<tr><td class="mono tiny">seq 4 · 14:02:15</td><td class="tiny">tool · read</td><td class="mono tiny">4,206 / 88</td><td><span class="bar"><i class="" style="width:36%"></i></span></td><td class="mono tiny">$0.043</td><td></td></tr>
+<tr><td class="mono tiny">seq 5 · 14:02:40</td><td class="tiny">edit</td><td class="mono tiny">9,140 / 512</td><td><span class="bar"><i class="" style="width:78%"></i></span></td><td class="mono tiny">$0.096</td><td></td></tr>
+<tr><td class="mono tiny">seq 6 · 14:03:02</td><td class="tiny">tool · tsc</td><td class="mono tiny">12,300 / 4,120</td><td><span class="bar"><i class="r" style="width:100%"></i></span></td><td class="mono tiny">$0.164</td><td>r</td></tr>
+<tr><td class="mono tiny">seq 7 · 14:04:20</td><td class="tiny">edit（被栅栏拦）</td><td class="mono tiny">3,880 / 96</td><td><span class="bar"><i class="r" style="width:33%"></i></span></td><td class="mono tiny">$0.041</td><td>r</td></tr>
+<tr><td class="mono tiny">seq 8 · 14:06:23</td><td class="tiny">error · 中止</td><td class="mono tiny">0 / 0</td><td><span class="bar"><i class="o" style="width:3%"></i></span></td><td class="mono tiny">$0.000</td><td>o</td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">瀑布按「步 token ÷ 最大步（seq 6 = 16,420）」归一。入参占大头即说明<b>上下文投喂过宽</b>（seq 6 把 tsc 全文错误倒回上下文）；可折叠的原始出参在每步详情里。</p>
+<h4 class="blk">实时增量（⑧ 契约：推送只降延迟，形状与查询响应一致）</h4>
+<div class="timeline"><p class="tl-item"><b>seq 8 14:06:23</b> failed:no-progress · 收尾写入 7 步 · 3 条同类失败通知待自愈归档</p><p class="tl-item fail">seq 7 14:04:20 edit 被 gate_registry 拦截（<span class="mono">as any</span>）</p><p class="tl-item">seq 6 14:03:02 tsc 31 errors · 出参截断标记 truncated（留 2KB / 原 4.2KB）</p><p class="tl-item">SSE 增量：本 run 推送 6 次 · 与 GET 全量一致（<b>推送不改变形状</b>）</p></div>
+<h4 class="blk">操作</h4>
+<p><button class="btn sm primary" data-click data-goto="replay__rerun.html">从失败步重跑</button> <button class="btn sm" data-toast="已导出 JSONL（含 17 次工具调用入出参 · 演示）">导出 JSONL</button> <button class="btn sm" data-toast="已按工作项聚合视图：AF-116 全部 6 个 run（演示）">看工作项全部 run</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为执行回放「整轮」升格详情页（规划原型 · 6.22 界面尚不存在）。8 行动作记录、<span class="mono">workflow_ids</span>、<span class="mono">as any</span> 被 <span class="mono">gate_registry</span> 拦下、41.2k tok / 38.4k+6.1k、<span class="mono">max_retries=3</span> 逐条取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.22。<b>关键事实：本页消费的产生表 <span class="mono">trace_spans</span> 实测 0 行</b>——每步 token 瀑布、父子链、seq 编号、截断标记、USD 与耗时全部为编造；前置是 P2-4 的 <span class="mono">C10-0</span>（先补 INSERT + 父子链列，expand-only ALTER），顺序不可颠倒。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：步骤树「看」→ 回 replay.html 深链该步抽屉 · 顶部「← 返回 执行回放」回 replay.html · 「从失败步重跑」→ 独立详情页 <span class="mono">replay__rerun.html</span>（起点/补投/预算/理由）· 「导出」→ toast　按 Esc 关闭浮层。</p>
+</body></html>

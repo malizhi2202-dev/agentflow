@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>只出方案 · 零执行（命令预览）详情 · 微调工厂 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p24" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="finetune.html" data-click>← 返回 微调工厂</span><span class="crumb"><b>只出方案 · 零执行</b> · LLaMA-Factory 命令预览</span><span class="chip warn">平台不代装不代跑</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="finetune.html">微调工厂</span><span class="pill" data-goto="finetune__new.html">新建微调任务</span><span class="pill" data-goto="decision-models.html">决策模型</span><span class="pill" data-goto="env-advisor.html">环境参谋</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0">下面的原文是<b>给你复制去跑的</b>：装不装、何时装由用户决定；平台侧只在「检测到 CLI 可用」后才把训练任务交给它（能力探测，不硬判版本号）。交付三形态齐了：可复制命令 / 可下载脚本 / 操作路径，三者都不产生执行。</p></div>
+<h4 class="blk">① 安装 LLaMA-Factory（本机 · 用户自跑）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75">pip install "llamafactory[torch,metrics]==0.9.*"
+llamafactory-cli version        # 平台探测这一条：能跑通即视为可用</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制安装命令（演示）· 平台未执行任何安装动作">⧉ 复制</span></p>
+<h4 class="blk">② 数据集（本域脱敏导出 · 指纹入台账）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75"># data/dept_router_v5.jsonl（468 条 · 字段: state / question / options / label_scores）
+# sha256 前缀 a91f… 写入数据台账，可回放「哪些会话被用过」</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制数据集说明（演示）">⧉ 复制</span></p>
+<h4 class="blk">③ 训练（LoRA r16 · log-score 损失）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75">llamafactory-cli train \
+  --stage sft --finetuning_type lora --lora_rank 16 \
+  --lora_target o_proj,q_proj,k_proj,v_proj \
+  --model_name_or_path Qwen/Qwen3.5-2B \
+  --dataset dept_router_v5 --template qwen \
+  --num_train_epochs 3 --learning_rate 1e-4 --cutoff_len 2048 \
+  --per_device_train_batch_size 4 --gradient_accumulation_steps 8 \
+  --output_dir .specs/small-model-decisions/artifacts/dept-router-v5-ft/adapter</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制训练命令（演示）· 未启动任何训练">⧉ 复制训练命令</span> <span class="btn link" data-click data-toast="✓ 已复制为 yaml 变体（演示）· configs/dept_router_v5_lora.yaml">⧉ 复制 yaml 版</span></p>
+<h4 class="blk">④ 三指标自测（过门槛才允许切产）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75">llamafactory-cli eval \
+  --model_name_or_path Qwen/Qwen3.5-2B --adapter_name_or_path artifacts/dept-router-v5-ft/adapter \
+  --task router_choice --metric accuracy,ece,agreement --baseline v1.2
+# 门槛（服务端判定 · 域策略可审计项）：accuracy ≥80% 且 ECE ≤0.05</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制评测命令（演示）">⧉ 复制</span> <span class="btn link" data-click data-toast="已下载方案脚本 finetune-plan.sh（演示）· 仍需用户自己执行">⭳ 下载装机脚本 .sh</span></p>
+<p class="tiny dim">连通与硬件状态由<b>只读探测</b>刷新，本页不写任何文件、不发起任何训练或安装。</p>
+<h4 class="blk">操作</h4>
+<p><button class="btn sm" data-back="finetune.html" data-click>返回微调工厂</button> <span class="btn link" data-click data-toast="操作路径：管理 › 决策模型 › 微调工厂 › 新建任务（演示）">看操作路径</span></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为「只出方案零执行 · 命令预览」升格详情页（规划原型 · 6.24 界面尚不存在）。四条 LLaMA-Factory 命令形态取自其通用 CLI（非平台内置实现），门槛 accuracy ≥80% / ECE ≤0.05 为 §6.24 AC-C2 原文实值；数据集路径、指纹与 adapter 目录为演示值。本页所有 ⧉ 复制 / ⭳ 下载均不执行任何动作（AC-E4）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：各段 ⧉ 复制 / ⭳ 下载 → toast（平台零执行）· 「看操作路径」→ toast · 顶部「← 返回」回 finetune.html　按 Esc 关闭浮层。</p>
+</body></html>

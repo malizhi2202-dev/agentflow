@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>角色 · 审查 Agent · 标准 详情 · 监控仪表盘</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="metrics.html" data-click>← 返回 监控仪表盘</span><span class="crumb"><b>实体下钻 · 角色 · 审查 Agent · 标准</b></span><span class="chip purple">角色</span><span class="chip mono">近 7 天</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>数字是演示值。</b><span class="mono">metrics_raw</span> 与 <span class="mono">trace_spans</span> 当前<b>零产生端写入（0 行）</b>——本页有界面、下游没数据；补产生端为 P2-4 前置（C10-0），存储按裁定⑦入 MySQL 权威库。下钻链（实体 → 会话 → 跨度）因此暂时无法在真实系统里贯通。</p></div>
+<h4 class="blk">实体指标快照</h4>
+<dl class="kv"><dt>实体标识</dt><dd class="mono">role:1（可读化为「角色 · 审查 Agent · 标准」· 前缀已剥离）</dd>
+<dt>调用 / Token</dt><dd class="mono">412 次 · 980,240（占总量 40.6%）</dd>
+<dt>平均单次</dt><dd class="mono">2,379 tokens · 中位 2,110 · P95 6,420</dd>
+<dt>绑定模型</dt><dd class="mono">gpt-4o（主）· claude-sonnet（备援）</dd>
+<dt>归属域 / 能力组</dt><dd class="mono">默认域 / code-review · 期望 3 healthy 实际 2</dd>
+<dt>成本归因</dt><dd class="mono">accountable 李工 · originator 王工（P1-13 双列，演示）</dd>
+<dt>环比</dt><dd><span class="chip warn">Token +12%</span> <span class="chip ok">调用 -3%</span> · 单次变重</dd>
+<dt>破软限次数</dt><dd class="mono">2（&gt; 20,000）→ 已出 token_exceeded 告警</dd>
+<dt>知识源消耗</dt><dd class="mono">检索并入 61,200 tokens（占本实体 6.2%）</dd>
+<dt>最近活跃</dt><dd class="mono">14:31:27 · rt-1-1783349487（running）</dd></dl>
+<h4 class="blk">按日拆分（近 7 天）</h4>
+<table class="tbl compact"><thead><tr><th>日期</th><th class="c">调用</th><th class="c">Token</th><th>趋势</th></tr></thead><tbody>
+<tr><td class="mono">09-15</td><td class="c mono">48</td><td class="c mono">102,300</td><td><span class="bar" style="display:block"><i style="width:44%"></i></span></td></tr>
+<tr><td class="mono">09-16</td><td class="c mono">61</td><td class="c mono">138,420</td><td><span class="bar" style="display:block"><i style="width:60%"></i></span></td></tr>
+<tr><td class="mono">09-17</td><td class="c mono">52</td><td class="c mono">121,080</td><td><span class="bar" style="display:block"><i style="width:52%"></i></span></td></tr>
+<tr><td class="mono">09-18</td><td class="c mono">70</td><td class="c mono">168,900</td><td><span class="bar" style="display:block"><i style="width:73%"></i></span></td></tr>
+<tr><td class="mono">09-19</td><td class="c mono">58</td><td class="c mono">134,760</td><td><span class="bar" style="display:block"><i style="width:58%"></i></span></td></tr>
+<tr><td class="mono">09-20</td><td class="c mono">78</td><td class="c mono">186,540</td><td><span class="bar" style="display:block"><i style="width:81%"></i></span></td></tr>
+<tr><td class="mono">09-21</td><td class="c mono">45</td><td class="c mono">128,240</td><td><span class="bar" style="display:block"><i style="width:55%"></i></span></td></tr>
+</tbody></table>
+<h4 class="blk">最近会话（点条看运行时详情）</h4>
+<table class="tbl compact"><thead><tr><th>会话</th><th>时间</th><th>状态</th><th>Token</th><th>耗时</th></tr></thead><tbody>
+<tr><td class="mono">rt-1-1783349487</td><td class="mono">14:31:27</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">4,120</td><td class="mono">进行中</td></tr>
+<tr><td class="mono">rt-1-1783348100</td><td class="mono">14:08:20</td><td><span class="chip ok">success</span></td><td class="mono">12,480</td><td class="mono">8.2s</td></tr>
+<tr><td class="mono">rt-1-1783346200</td><td class="mono">13:36:40</td><td><span class="chip bad">error</span></td><td class="mono">21,004</td><td class="mono">31.7s</td></tr>
+<tr><td class="mono">rt-1-1783344120</td><td class="mono">12:55:03</td><td><span class="chip ok">success</span></td><td class="mono">11,902</td><td class="mono">7.6s</td></tr>
+<tr><td class="mono">rt-1-1783341880</td><td class="mono">12:11:44</td><td><span class="chip ok">success</span></td><td class="mono">13,410</td><td class="mono">9.1s</td></tr>
+</tbody></table>
+<h4 class="blk">变重原因（本页可讲的三条）</h4>
+<div class="timeline">
+<div class="tl-item"><b>+12% Token 的主因</b> · 知识检索并入：规范.pdf 重建索引（100 chunks）后命中变多</div>
+<div class="tl-item"><b>会话结构</b> · review→legacy 的 retry-fallback 在 09-22 后新增，每次失败多跑一段备援</div>
+<div class="tl-item"><b>采集口径</b> · 30s 增量 + 游标去重；同一条 runtime.jsonl 不会重复计数</div>
+<div class="tl-item fail"><b>不可下钻</b> · trace_spans 0 行 → 无法把「哪一步最贵」拆开看（P2-4 前置）</div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="导出该实体明细 CSV · 近 7 天（演示）">导出明细</button> <button class="btn sm" data-toast="跳 §6.10 运行时并按 Agent=agent-1 过滤（演示）">看会话</button> <button class="btn sm" data-toast="跳 §6.5 画布看该 Agent 的边配置（演示）">看编排</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：导出明细 / 看会话 / 看编排→toast 跳转说明 · 按日拆分与最近会话全宽展示 · trace_spans 0 行声明置顶　按 Esc 关闭浮层。</p>
+</body></html>

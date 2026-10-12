@@ -1,0 +1,54 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>告警 token_exceeded · agent-1 详情 · 告警中心</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="alerts.html" data-click>← 返回 告警中心</span><span class="crumb"><b>告警详情 · token_exceeded / agent-1</b></span><span class="chip warn">warning</span><span class="chip bad">未确认</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="metrics.html">仪表盘</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="detail-body">
+<h4 class="blk">规则 · 阈值 · 成本</h4>
+<dl class="kv"><dt>规则</dt><dd class="mono">token_exceeded · 判定函数 _check_token_exceeded</dd>
+<dt>触发条件</dt><dd class="mono">单会话 tokens &gt; 软限 20,000（硬限在边 max_tokens 32,000）</dd>
+<dt>目标</dt><dd class="mono">agent-1 · 审查 Agent · 标准 · gpt-4o</dd>
+<dt>实测值</dt><dd class="mono">21,004 / 20,000（超 5.0%）· 边上限 32,000 未触</dd>
+<dt>级别</dt><dd><span class="chip warn">warning</span> 橙 · 只标软限，未中断执行</dd>
+<dt>阈值来源</dt><dd class="mono">域软限（20,000）+ 边 max_tokens（32,000）两处独立</dd>
+<dt>成本口径</dt><dd class="mono">≈ 0.063 USD（演示单价）· 归因 accountable 李工</dd>
+<dt>复发</dt><dd class="mono">近 7 天 6 次 · 均值 21,480 · 全部集中在同一编排</dd>
+<dt>确认状态</dt><dd class="mono">未确认 · 角标 1</dd>
+<dt>存储位置</dt><dd class="mono">进程内环形 500 条 · 重启即丢（P1-16 落表）</dd></dl>
+<h4 class="blk">触发链</h4>
+<div class="timeline">
+<div class="tl-item"><b>13:36:40</b> · 会话开始 · prompt 注入 540</div>
+<div class="tl-item"><b>13:36:55</b> · 累计破 20,000 → 记录超限事件</div>
+<div class="tl-item"><b>13:37:12</b> · 会话结束 21,004（同时 execution_failed）</div>
+<div class="tl-item"><b>13:37:20</b> · 巡检写告警 · 级别 warning</div>
+<div class="tl-item"><b>14:02:11</b> · 同 Agent 再次超限 → 去重压成 1 条</div>
+</div>
+<h4 class="blk">Top 会话（该 Agent 近 7 天）</h4>
+<table class="tbl compact"><thead><tr><th>会话</th><th>Token</th><th>软限</th><th>结果</th></tr></thead><tbody>
+<tr><td class="mono">rt-1-1783346200</td><td class="mono">21,004</td><td class="mono">20,000</td><td><span class="chip warn">超限</span></td></tr>
+<tr><td class="mono">rt-1-1783347411</td><td class="mono">15,720</td><td class="mono">20,000</td><td><span class="chip ok">正常</span></td></tr>
+<tr><td class="mono">rt-1-1783348100</td><td class="mono">12,480</td><td class="mono">20,000</td><td><span class="chip ok">正常</span></td></tr>
+<tr><td class="mono">rt-1-1783344120</td><td class="mono">11,902</td><td class="mono">20,000</td><td><span class="chip ok">正常</span></td></tr>
+<tr><td class="mono">rt-1-1783341880</td><td class="mono">13,410</td><td class="mono">20,000</td><td><span class="chip ok">正常</span></td></tr>
+<tr><td class="mono">rt-1-1783339021</td><td class="mono">22,180</td><td class="mono">20,000</td><td><span class="chip warn">超限 · 已确认</span></td></tr>
+</tbody></table>
+<div class="callout"><p class="tiny" style="margin:0"><b>调阈值有两个落点，别只改一处：</b>边配置 <span class="mono">max_tokens</span>（硬限 · 触发即拒）与域软限（告警线）。同一不变量在两处独立校验（§6.0 纪律）。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已确认 · 角标清零（演示）">确认</button> <button class="btn sm" data-toast="软限 20,000→26,000 需审批，草稿已提交（演示）">调阈值</button> <button class="btn sm" data-click data-modal="md-silence">静默 24h</button></p>
+</div>
+<div class="modal" id="md-silence"><div style="padding:var(--s4)"><b>静默该告警 24 小时？</b>
+<p class="small dim" style="margin:8px 0 6px">静默只压<b>通知与角标</b>：规则仍在跑，事件仍进环形缓冲，只是不再打扰。<b>这不是修复</b>，24h 后若仍触发会重新出现在列表。</p>
+<table class="tbl compact"><thead><tr><th>影响项</th><th>静默后</th></tr></thead><tbody>
+<tr><td>导航角标 / 未确认数</td><td>不计入（3→2）</td></tr>
+<tr><td>通知分层（§6.0 ⑫）</td><td>24h 内不再 ping 负责人</td></tr>
+<tr><td>同签名重复告警</td><td>仍记录「最近发生」，不新增行</td></tr>
+<tr><td>根因（工具禁用 / 探针失败）</td><td><span class="chip bad">不变 · 仍存在</span></td></tr>
+<tr><td>到期后</td><td>自动恢复可见，未确认状态回置</td></tr>
+</tbody></table>
+<p class="small" style="margin:8px 0 4px"><b>必填原因</b>（静默等同暂时压告警，须留痕）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [已知问题 · 等 15:00 维护窗口处理 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已静默 24h 至明天 14:32 · 审计 alert:silence（演示）" data-close>确认静默 24h</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：确认→toast · 调阈值→toast（两处落点需先定）· 「静默 24h」→二次确认含必填原因 · 触发链与 Top 会话全宽展示　按 Esc 关闭浮层。</p>
+</body></html>

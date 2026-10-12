@@ -1,0 +1,34 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Apply 部署 · 审查流水线 v3 → v4 详情 · 编排画布 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="canvas.html" data-click>← 返回 编排画布</span><span class="crumb"><span class="dim">编排画布 /</span> <b>Apply 部署 · 审查流水线 v3 → v4</b></span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="tools.html">工具市场</span><span class="pill" data-goto="stage-model.html">阶段模型</span></div>
+<div class="detail-body">
+<p class="small dim" style="margin:8px 0 6px">apply 前先看<b>漂移 diff</b>：期望状态（画布草稿）与实际状态（已部署快照 v3）的差值。校验有 1 条警告（不拦截），apply 后拓扑入库并生成不可变快照。</p>
+<h4 class="blk">漂移 diff · 已部署 v3 vs 草稿 v4</h4>
+<table class="tbl compact"><thead><tr><th>对象</th><th>已部署 v3</th><th>草稿 v4</th><th>漂移</th></tr></thead><tbody>
+<tr><td class="mono">edges[review→frontend].timeout</td><td class="mono">180s</td><td class="mono">120s</td><td><span class="chip warn">变更</span></td></tr>
+<tr><td class="mono">edges[review→frontend].max_tokens</td><td class="mono">未设</td><td class="mono">32,000</td><td><span class="chip info">新增</span></td></tr>
+<tr><td class="mono">edges[review→legacy]</td><td class="mono">不存在</td><td class="mono">retry-fallback · dead-letter</td><td><span class="chip info">新增</span></td></tr>
+<tr><td class="mono">nodes[legacy]</td><td class="mono">gpt-3.5</td><td class="mono">gpt-3.5</td><td><span class="chip bad">引用工具已禁用</span></td></tr>
+<tr><td class="mono">nodes[merge]</td><td class="mono">汇总 Agent</td><td class="mono">汇总 Agent</td><td><span class="chip">无变更</span></td></tr>
+<tr><td class="mono">快照版本</td><td class="mono">v3</td><td class="mono">v4（不可变）</td><td><span class="chip ok">+1</span></td></tr>
+</tbody></table>
+<h4 class="blk">影响清单</h4>
+<ul class="tiny" style="margin:0 0 8px;padding-left:18px">
+<li>在途 2 个 run（rt-1-1783349487 / rt-2-1783349021）继续按 <span class="mono">v3</span> 执行完，不热切。</li>
+<li><span class="mono">human-approval</span> 边会在此挂起等人——阻塞式，不超时自动放行。</li>
+<li>校验失败则不落库、画布高亮出错边；apply 动作写审计 <span class="mono">orch:apply</span>。</li>
+<li>必填原因（§6.0 纪律：破坏性操作二次确认 + 理由入审计）。</li>
+</ul>
+<h4 class="blk">必填原因（apply 写审计 orch:apply）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [前端分支超时收短，避免 P95 拖高 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已 apply · 快照 v4 入库 · 拓扑入队（演示）" data-close>确认部署</button></div>
+</div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由编排画布浮层升格：节点 / 边配置与 YAML 写回说明全宽 · 「校验」「保存」→ toast · 「移除节点」「删除该边」→ 二次确认（本页引用到的二次确认 modal 自带副本）· 改完不自动重启实例（§5.4）　按 Esc 关闭浮层。</p>
+</body></html>

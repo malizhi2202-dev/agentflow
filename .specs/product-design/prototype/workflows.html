@@ -1,0 +1,63 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工作流 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/workflows</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html" class="active"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">工作流</span><span class="right"><button class="btn sm">导入</button><button class="btn sm primary" data-goto="workflows__new.html">+ 新建工作流</button></span></div>
+          <div class="app-body">
+            <div class="panel tight" style="display:flex;gap:var(--s2);align-items:center;margin-bottom:var(--s3)">
+              <span class="pill">全部 <b>9</b></span><span class="pill">已发布 <b>5</b></span><span class="pill">草稿 <b>3</b></span><span class="pill">已归档 <b>1</b></span>
+              <span style="flex:1"></span>
+              <span class="pill mono">🔍 搜索工作流…</span>
+            </div>
+            <table class="tbl compact">
+              <thead><tr><th>名称</th><th>状态</th><th>版本</th><th>步骤</th><th>最后执行</th><th>成功率</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td><b data-click data-goto="workflows__review-pipeline.html" style="color:var(--blue)">审查流水线</b><br><span class="tiny dim">review-pipeline</span></td><td><span class="chip ok">已发布</span></td><td class="mono">v3</td><td class="mono">6</td><td class="mono">14:31</td><td><span class="chip ok">98%</span></td><td><span class="btn link" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</span><span class="btn link" data-toast="进入编辑 → 跳转编排画布（画布双向同步见文档 §6.5）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">停止</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>需求澄清</b><br><span class="tiny dim">requirement-clarify</span></td><td><span class="chip ok">已发布</span></td><td class="mono">v2</td><td class="mono">4</td><td class="mono">13:02</td><td><span class="chip ok">95%</span></td><td><span class="btn link" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</span><span class="btn link" data-toast="进入编辑 → 跳转编排画布（画布双向同步见文档 §6.5）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">停止</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>知识入库</b><br><span class="tiny dim">knowledge-ingest</span></td><td><span class="chip ok">已发布</span></td><td class="mono">v5</td><td class="mono">3</td><td class="mono">12:40</td><td><span class="chip ok">100%</span></td><td><span class="btn link" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</span><span class="btn link" data-toast="进入编辑 → 跳转编排画布（画布双向同步见文档 §6.5）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">停止</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>数据同步对账</b><br><span class="tiny dim">sync-reconcile</span></td><td><span class="chip warn">草稿</span></td><td class="mono">v1</td><td class="mono">8</td><td class="dim">从未执行</td><td class="dim">—</td><td><span class="btn link" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</span><span class="btn link" data-toast="进入编辑 → 跳转编排画布（画布双向同步见文档 §6.5）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">停止</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>发布前检查</b><br><span class="tiny dim">pre-release-gate</span></td><td><span class="chip warn">草稿</span></td><td class="mono">v1</td><td class="mono">5</td><td class="dim">从未执行</td><td class="dim">—</td><td><span class="btn link" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</span><span class="btn link" data-toast="进入编辑 → 跳转编排画布（画布双向同步见文档 §6.5）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">停止</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>告警自愈</b><br><span class="tiny dim">alert-selfheal</span></td><td><span class="chip ok">已发布</span></td><td class="mono">v2</td><td class="mono">7</td><td class="mono">11:18</td><td><span class="chip warn">82%</span></td><td><span class="btn link" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</span><span class="btn link" data-toast="进入编辑 → 跳转编排画布（画布双向同步见文档 §6.5）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">停止</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>旧版日志采集</b><br><span class="tiny dim">legacy-log</span></td><td><span class="chip">已归档</span></td><td class="mono">v9</td><td class="mono">4</td><td class="mono">30 天前</td><td><span class="chip bad">41%</span></td><td><span class="btn link" style="opacity:.5">执行</span><span class="btn link">查看</span><span class="btn link" style="opacity:.5">停止</span><span class="btn link" style="opacity:.5">删除</span></td></tr>
+                <tr><td><b>周报汇总</b><br><span class="tiny dim">weekly-digest</span></td><td><span class="chip ok">已发布</span></td><td class="mono">v4</td><td class="mono">3</td><td class="mono">昨天</td><td><span class="chip ok">99%</span></td><td><span class="btn link" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</span><span class="btn link" data-toast="进入编辑 → 跳转编排画布（画布双向同步见文档 §6.5）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">停止</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>接口回归</b><br><span class="tiny dim">api-regression</span></td><td><span class="chip warn">草稿</span></td><td class="mono">v1</td><td class="mono">12</td><td class="dim">从未执行</td><td class="dim">—</td><td><span class="btn link" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</span><span class="btn link" data-toast="进入编辑 → 跳转编排画布（画布双向同步见文档 §6.5）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">停止</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+              </tbody>
+            </table>
+            <div style="display:flex;align-items:center;gap:var(--s2);font-size:12px;color:var(--text-muted)">
+              <span>共 9 条</span><span style="flex:1"></span>
+              <span class="pill">上一页</span><span class="pill" style="border-color:var(--blue-border);color:var(--blue)">1</span><span class="pill">2</span><span class="pill">下一页</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><div class="modal" id="md-stop"><div style="padding:var(--s4)"><b>停止「审查流水线」进行中的 2 个 run？</b><p class="small dim" style="margin:8px 0">在途任务收敛后停止；已发出的外部副作用不回滚。理由入审计。</p><div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="停止指令下发 · 审计 wf:stop（演示）" data-close>确认停止</button></div></div></div><div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除工作流「审查流水线」？</b>
+<p class="small dim" style="margin:8px 0"><b>运行中的工作流不可删除</b>；删除 = 软删入归档，版本快照与运行历史保留、可随时恢复。彻底清除快照请进入画布执行「彻底删除」。<b>必填原因</b>，动作入审计。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [ 必填 · 例如：业务下线，保留快照备查                        ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已归档工作流「审查流水线」· 版本快照保留（演示）" data-close>确认删除</button></div></div></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：工作流名→详情页（workflows__review-pipeline.html） · 执行→入队反馈 · 停止→二次确认 · 「+ 新建工作流」→新建起始页（workflows__new.html）· 删除→二次确认（软删入归档 · 版本快照保留 · 可恢复 · 必填原因）　按 Esc 关闭所有浮层。</p>
+</body></html>

@@ -1,0 +1,53 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>用户 lisi（李四）详情 · 用户与权限 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p16" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="audit.html">审计日志</span><span class="pill" data-goto="login.html">登录</span><span class="pill" data-goto="approvals.html">审批中心</span></div>
+<div class="detail-top"><span class="pill" data-back="users.html" data-click>← 返回 用户与权限</span><span class="crumb"><b>用户管理 › 用户 · lisi（李四）</b></span><span class="chip">user</span><span class="chip mono">1 项有效权限</span></div>
+<div class="detail-body">
+<dl class="kv">
+<dt>登录名 / 显示名</dt><dd class="mono">lisi · 李四 · 业务</dd>
+<dt>角色</dt><dd><span class="chip">user</span> <span class="btn link" data-click data-modal="md-role">改角色 ▾</span></dd>
+<dt>有效权限</dt><dd class="mono">project:read（1 / 6）</dd>
+<dt>可见项目</dt><dd><span class="pill">agentflow</span> <span class="pill">demo-sandbox</span></dd>
+<dt>最后活跃</dt><dd class="mono">09-20 16:20 · 只读浏览产物</dd>
+</dl>
+<h4 class="blk">权限点勾选（含未勾选的可见性后果）</h4>
+<table class="tbl compact"><thead><tr><th>权限点</th><th>勾选</th><th>可见性后果</th></tr></thead><tbody>
+<tr><td class="mono">project:read</td><td><span class="chip ok">已勾选</span></td><td class="tiny">项目 / 变更 / 文档可读</td></tr>
+<tr><td class="mono">project:write</td><td><span class="chip bad">未勾选</span></td><td class="tiny">编辑器只读态（Lock read-only，不改 URL）</td></tr>
+<tr><td class="mono">project:delete</td><td><span class="chip bad">未勾选</span></td><td class="tiny">删除按钮不渲染</td></tr>
+<tr><td class="mono">workflow:stop</td><td><span class="chip bad">未勾选</span></td><td class="tiny">「停止」不渲染</td></tr>
+<tr><td class="mono">user:manage</td><td><span class="chip bad">未勾选</span></td><td class="tiny">管理区导航整块不渲染</td></tr>
+<tr><td class="mono">audit:view</td><td><span class="chip bad">未勾选</span></td><td class="tiny">审计页 404 等价（不泄露存在性）</td></tr>
+</tbody></table>
+<div class="callout" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>项目归属差异：</b>lisi 能看 <span class="mono">demo-sandbox</span>（该项目 prompts 缺失），但只有只读——所以缺失标注可见、初始化按钮不可见（需 write）。</p></div>
+<h4 class="blk">活跃会话（P0-1 规划态）</h4>
+<table class="tbl compact"><thead><tr><th>会话</th><th>来源</th><th>登录</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono tiny">sess_cc10…42</td><td class="mono tiny">127.0.0.1</td><td class="mono tiny">09-20 16:02</td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-rev">撤销</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已保存 · 权限变更旋转 lisi 的 1 个会话（演示）">保存权限</button> <button class="btn sm" data-click data-modal="md-role">改角色</button></p>
+</div>
+<div class="modal" id="md-role"><div style="padding:var(--s4)"><b>改角色：testuser · user → admin？</b>
+<p class="small dim" style="margin:8px 0">需 <span class="mono">user:manage</span>。<b style="color:var(--red)">权限变更必旋转会话</b>（P0-1 · OWASP）：该用户<b>所有</b>活跃会话立即失效，须重新登录；否则旧会话继续持有变更前权限即为权限提升窗口。<b>必填原因</b>。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>旋转会话（2 个活跃）</td><td><span class="chip bad">立即作废 · 需重登</span></td></tr>
+<tr><td>custom_permissions 勾选</td><td><span class="chip warn">被忽略 · admin 走豁免</span></td></tr>
+<tr><td>可见项目</td><td><span class="chip warn">project_ids 未指定 → 变全部可见</span></td></tr>
+<tr><td>审计</td><td><span class="chip">记 user:role_changed（敏感 · 标红）</span></td></tr>
+<tr><td>唯一 admin 保护</td><td><span class="chip ok">仍允许（成为第二个 admin）· 界面须红字提示</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">这些二次确认弹层统一以 <span class="mono">testuser</span> 为演示对象，其他行打开同一弹层仅为演示接线。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [接替休假的管理员，负责权限发放            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="角色已改 · 该用户 2 个会话已旋转 · 审计 user:role_changed（演示）" data-close>确认改角色并旋转会话</button></div></div></div>
+<div class="modal" id="md-rev"><div style="padding:var(--s4)"><b>撤销单个会话 <span class="mono">sess_9f2c…a1</span>？</b>
+<p class="small dim" style="margin:8px 0"><b>P0-1 规划态</b>：当前实现无服务端会话表可撤销（身份来自 <span class="mono">X-User-Id</span> 头）；此处为 P0-1 落地后的目标交互。仅撤销<b>这一条</b>，该用户其他会话不受影响。若撤销的是<b>你当前会话</b>，本页会立刻掉登录。</p>
+<p class="tiny dim" style="margin-top:6px">弹层以 <span class="mono">testuser</span> 为演示对象；其他行打开同一弹层仅为演示接线。</p><table class="tbl compact"><thead><tr><th>会话</th><th>来源 / 登录</th><th>撤销后</th></tr></thead><tbody>
+<tr><td class="mono tiny">sess_9f2c…a1</td><td class="mono tiny">127.0.0.1 · 09-21 13:55</td><td><span class="chip bad">cookie 作废 · 下次请求 401</span></td></tr>
+<tr><td class="mono tiny dim">sess_4b7e…c8</td><td class="mono tiny dim">127.0.0.1 · 09-21 09:02</td><td><span class="chip ok">不受影响</span></td></tr>
+</tbody></table>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已撤销该会话（sessions 表行标记 revoked）· 审计 auth:session_revoked（演示）" data-close>确认撤销</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 users.html 的 <span class="mono">dr-user-lisi</span> 抽屉升格而来（权限点表 + 会话撤销两张子表 + 保存钮 → 整页）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：改角色 ▾ / 撤销会话 → 二次确认 modal · 保存权限 → toast。</p>
+</body></html>

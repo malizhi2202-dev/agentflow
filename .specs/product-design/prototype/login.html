@@ -1,0 +1,275 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>登录 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p1" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="audit.html">审计日志</span></div>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>无自助注册；账号由平台管理员创建。失败提示不区分「用户不存在 / 密码错误」。</p>
+<p class="tiny dim" style="padding:0 18px">〔第 4 轮规划注〕P0-1/P0-2 落地后，本页新增<b>首登强制改密页</b>边界态（09-23 重分级：表单 + 强度条 + 策略核对，modal 装不下 → 独立页 login__pwd-change.html）：must_change_password 驱动、后端对 /api/auth/* 外一律 403 兜住、强度条、改密成功即旋转会话（旧 cookie 作废）。登录页「默认口令 123456」文案随 P0-2 清除。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/login</span><span class="fake">演示数据</span></div>
+      <div style="background:var(--bg-app);padding:var(--s10) var(--s5);display:grid;place-items:center;min-height:380px">
+        <div class="panel" style="width:330px;padding:var(--s5)">
+          <div class="app-brand" style="padding:0 0 var(--s4);font-size:15px"><i style="width:24px;height:24px">AF</i><span><span style="color:var(--blue)">Agent</span>Flow</span></div>
+          <div class="grid" style="gap:var(--s3)">
+            <div><div class="tiny muted" style="margin-bottom:4px">用户名</div><div class="panel tight mono" style="background:var(--bg-input);padding:8px 10px" data-click data-pop="pop-account">admin ▾ 切换演示账号</div></div>
+            <div><div class="tiny muted" style="margin-bottom:4px">密码</div><div class="panel tight mono" style="background:var(--bg-input);padding:8px 10px">••••••••</div></div>
+            <button class="btn primary" style="justify-content:center;height:32px" data-click data-goto="login__pwd-change.html">登录</button>
+          </div>
+          <p class="tiny dim" style="margin:var(--s4) 0 0">登录即写入审计；连续失败不锁号，但会持续留痕。</p>
+          <div class="grid" style="gap:var(--s2);margin-top:var(--s3)">
+            <div class="callout warn" style="margin:0;padding:8px 10px">
+              <p class="tiny" style="margin:0"><b>演示：连败计数 4 / 5</b>（15 分钟滑动窗口）<br><span class="btn link" data-toast="✗ 401 用户名或密码错误 · 连败 5/5（演示）">第 5 次失败</span><span class="btn link" style="color:var(--red)" data-toast="✗ 429 Too Many Requests · 连败达阈值 → 节流 15 分钟，不锁号；本条已写审计 auth:login_throttled（演示）">第 6 次尝试 → 429</span></p>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px" class="tiny muted">
+              <span>调试模式（<span class="mono">X-User-Id</span> 身份头）</span>
+              <span class="chip bad">关</span>
+              <span class="btn link" data-click data-drawer="dr-debug">三重 opt-in 条件 →</span>
+              <span class="btn link" data-toast="拒绝开启：三重条件未同时满足（缺 admit 白名单）。开启态=启动红条 + 逐请求审计（演示）">尝试开启</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>账号 admin / 演示密码已脱敏。真实系统还有「未登录自动跳转」与「按角色渲染导航」两个隐式行为，此处不体现。</p>
+
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>以下为登录页的两个配套面板（P0-1/P0-2 落地后的目标形态）：登录与口令审计流水（行可点 → 事件详情抽屉）、活跃会话与设备（吊销 = 破坏性操作 → 二次确认）。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/login · 审计与会话（演示拼装区）</span><span class="fake">演示数据</span></div>
+      <div style="background:var(--bg-app);padding:var(--s5);display:grid;gap:var(--s4)">
+        <div class="panel">
+          <p class="h2p">登录与口令审计流水（近 12 条 · 行可点）</p>
+          <table class="tbl compact">
+            <thead><tr><th>时间</th><th>事件</th><th>账号</th><th>来源</th><th>结果</th><th>连败</th></tr></thead>
+            <tbody>
+              <tr data-click data-drawer="dr-av-1"><td class="mono">14:31:52</td><td class="mono">auth:password_changed</td><td class="mono">admin</td><td class="mono">127.0.0.1</td><td><span class="chip ok">成功 · 会话已旋转</span></td><td class="mono">0</td></tr>
+              <tr data-click data-drawer="dr-av-2"><td class="mono">14:31:40</td><td class="mono">auth:login</td><td class="mono">admin</td><td class="mono">127.0.0.1</td><td><span class="chip warn">口令通过 · 转强制改密</span></td><td class="mono">0</td></tr>
+              <tr data-click data-drawer="dr-av-3"><td class="mono">14:31:12</td><td class="mono">auth:forbidden_unrotated</td><td class="mono">admin</td><td class="mono">127.0.0.1</td><td><span class="chip bad">403 · 未改密访问 /api/agents</span></td><td class="mono">0</td></tr>
+              <tr data-click data-drawer="dr-av-4"><td class="mono">14:29:58</td><td class="mono">auth:login_failed</td><td class="mono">admin</td><td class="mono">127.0.0.1</td><td><span class="chip bad">401 · 泛化提示</span></td><td class="mono">3</td></tr>
+              <tr data-click data-drawer="dr-av-5"><td class="mono">14:29:41</td><td class="mono">auth:login_failed</td><td class="mono">admin</td><td class="mono">127.0.0.1</td><td><span class="chip bad">401 · 泛化提示</span></td><td class="mono">2</td></tr>
+              <tr data-click data-drawer="dr-av-6"><td class="mono">14:29:24</td><td class="mono">auth:login_failed</td><td class="mono">admin</td><td class="mono">127.0.0.1</td><td><span class="chip bad">401 · 泛化提示</span></td><td class="mono">1</td></tr>
+              <tr data-click data-drawer="dr-av-7"><td class="mono">14:22:03</td><td class="mono">auth:login_throttled</td><td class="mono">li.gong</td><td class="mono">10.12.4.31</td><td><span class="chip bad">429 · 5 败/15min</span></td><td class="mono">5</td></tr>
+              <tr data-click data-drawer="dr-av-8"><td class="mono">14:18:47</td><td class="mono">auth:login</td><td class="mono">li.gong</td><td class="mono">10.12.4.31</td><td><span class="chip ok">成功 · cookie __Host-session</span></td><td class="mono">0</td></tr>
+              <tr data-click data-drawer="dr-av-9"><td class="mono">14:05:19</td><td class="mono">auth:header_identity_used</td><td class="mono">svc-cron</td><td class="mono">127.0.0.1</td><td><span class="chip warn">调试模式 · 逐请求审计</span></td><td class="mono">0</td></tr>
+              <tr data-click data-drawer="dr-av-10"><td class="mono">13:58:02</td><td class="mono">auth:pat_used</td><td class="mono">wang.gong</td><td class="mono">10.12.7.8</td><td><span class="chip info">Bearer PAT · afp_…k3</span></td><td class="mono">0</td></tr>
+              <tr data-click data-drawer="dr-av-11"><td class="mono">13:41:30</td><td class="mono">auth:session_idle_expired</td><td class="mono">wang.gong</td><td class="mono">10.12.7.8</td><td><span class="chip">idle 30min 到期</span></td><td class="mono">0</td></tr>
+              <tr data-click data-drawer="dr-av-12"><td class="mono">13:30:11</td><td class="mono">auth:user_created</td><td class="mono">wang.gong</td><td class="mono">127.0.0.1</td><td><span class="chip ok">管理员建号 · must_change=true</span></td><td class="mono">0</td></tr>
+            </tbody>
+          </table>
+          <div class="grid g2" style="margin-top:var(--s3)">
+            <div class="callout"><p class="tiny" style="margin:0"><b>口令策略（P0-2）：</b>argon2id 64MiB/t3/p4 · 常数时间 verify · 登录时 <span class="mono">check_needs_rehash</span> 静默升级 · 存量 sha256 渐进迁移 ·「缺 hash→重置 123456」自愈分支已删（改为置 <span class="mono">must_change_password</span> + 拒口令登录）。</p></div>
+            <div class="callout"><p class="tiny" style="margin:0"><b>解析序（P0-1）：</b><span class="mono">cookie &gt; Bearer PAT &gt; 无身份→401</span>；<span class="mono">X-User-Id</span> 仅在三重 opt-in 同时满足时参与，且开启态挂启动红条。</p></div>
+          </div>
+        </div>
+        <div class="panel">
+          <p class="h2p">活跃会话与设备（<span class="mono">sessions</span> 表只存哈希 · 权限变更必须旋转会话）</p>
+          <table class="tbl compact">
+            <thead><tr><th>会话</th><th>账号</th><th>设备 / UA</th><th>签发</th><th>剩余</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">0f3c…a91</td><td class="mono">admin</td><td class="tiny">Chrome 128 · 本机</td><td class="mono">14:31:52</td><td class="mono">idle 29m / abs 7h59m</td><td><span class="chip ok">当前</span></td><td><span class="btn link" data-toast="已复制会话指纹（演示）· 不复制令牌本身">复制指纹</span></td></tr>
+              <tr><td class="mono">7b21…c40</td><td class="mono">admin</td><td class="tiny">Safari 17 · iPad</td><td class="mono">11:02:10</td><td class="mono">idle 12m / abs 4h31m</td><td><span class="chip info">活跃</span></td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-revoke">吊销</span></td></tr>
+              <tr><td class="mono">c904…11e</td><td class="mono">li.gong</td><td class="tiny">Firefox 130 · 10.12.4.31</td><td class="mono">09-22 18:44</td><td class="mono">abs 超期</td><td><span class="chip bad">待清理</span></td><td><span class="btn link" data-toast="已按绝对寿命 8h 回收（演示）· 审计 auth:session_reaped">回收</span></td></tr>
+              <tr><td class="mono">d55a…7f2</td><td class="mono">wang.gong</td><td class="tiny">PAT · ci-runner</td><td class="mono">09-20 10:01</td><td class="mono">PAT 剩余 118d</td><td><span class="chip purple">Bearer PAT</span></td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-revoke">吊销</span></td></tr>
+            </tbody>
+          </table>
+          <p class="tiny dim" style="margin-top:var(--s2)">吊销 = 破坏性操作：二次确认 + 影响清单 + 必填原因（§6.0 纪律 · 理由入审计）。改密成功或角色变更后，除当前会话外全部旧 cookie 作废。</p>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>本节为登录页配套面板的形态演示（真实系统里审计在 §6.15 审计日志、会话在 §6.16 用户与权限），事件名与阈值取自 §1.6.1 P0-1/P0-2 已过审参数化方案；账号、IP、会话哈希、时间均为演示假数据，不代表真实运行记录。</p>
+
+<div class="drawer" id="dr-av-2"><header><b>审计事件 · auth:login</b><span class="chip warn">转强制改密</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>事件 / 时间</dt><dd class="mono">auth:login · 14:31:40 +08:00</dd><dt>账号</dt><dd class="mono">admin（id=1 · 角色 admin）</dd><dt>来源</dt><dd class="mono">127.0.0.1 · DEPLOY_MODE=localhost</dd><dt>口令校验</dt><dd><span class="chip ok">argon2id 通过</span> · 耗时 <span class="mono">61ms</span> · <span class="mono">check_needs_rehash=false</span></dd><dt>must_change_password</dt><dd><span class="chip bad">true</span> · 原因：管理员建号时未设口令（出厂口令已随 P0-2 废除）</dd><dt>会话签发</dt><dd class="mono">未签业务会话 · 仅发一次性改密票据（scope=pwd-change）</dd><dt>兜底行为</dt><dd class="mono">此时访问 /api/auth/* 之外一律 403</dd><dt>trace</dt><dd class="mono">tr-9c14f0 · 可跳 §6.22 执行回放</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">同账号时间线（前后 6 条）</p>
+<div class="timeline">
+  <div class="tl-item"><b>14:31:52</b> · <span class="chip ok">auth:password_changed</span> 强度 4/4 · 会话已旋转（旧 cookie 作废）</div>
+  <div class="tl-item fail"><b>14:31:12</b> · <span class="chip bad">403</span> 未改密即访问 <span class="mono">/api/agents</span>——被服务端兜住</div>
+  <div class="tl-item"><b>14:31:40</b> · <span class="chip warn">本条</span> 口令通过 → 弹首登强制改密</div>
+  <div class="tl-item fail"><b>14:29:58</b> · <span class="chip bad">401</span> 泛化提示「用户名或密码错误」· 连败 3/5</div>
+  <div class="tl-item"><b>13:30:11</b> · <span class="chip">auth:user_created</span> 由管理员创建 · 置 must_change=true</div>
+  <div class="tl-item"><b>13:30:11</b> · 审计链上一环：<span class="mono">actor=admin · reason=新环境初始化</span></div>
+</div>
+<div class="callout"><p class="tiny" style="margin:0"><b>为什么不区分「用户不存在 / 密码错误」：</b>401 文案泛化是 P0-2 已过审项——避免用提示语探测账号存在性；节流与留痕在 <span class="mono">auth:login_throttled</span> 侧承担定位职责。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="原始事件 JSON：{event:auth:login, actor:admin, must_change:true, scope:pwd-change}（演示）">查看原始 JSON</button> <span class="btn link" data-toast="已按 trace tr-9c14f0 跳转 §6.22 执行回放（演示 · 回放依赖 trace 产生端 C10-0）">跳回放</span></p></div></div>
+
+<div class="drawer" id="dr-av-1"><header><b>审计事件 · auth:password_changed</b><span class="chip ok">会话已旋转</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>事件 / 时间</dt><dd class="mono">auth:password_changed · 14:31:52</dd><dt>账号</dt><dd class="mono">admin（id=1）</dd><dt>强度校验</dt><dd><span class="chip ok">4/4 通过</span> 长度 ≥12 · 非泄露口令库命中 · 非用户名派生 · 非出厂口令</dd><dt>哈希</dt><dd class="mono">argon2id(m=64MiB,t=3,p=4) · 已覆盖旧 hash</dd><dt>must_change_password</dt><dd class="mono">true → false（服务端置位）</dd><dt>会话处理</dt><dd><span class="chip warn">旋转</span> 本会话换新 id · 其余 3 个旧 cookie 全部作废</dd><dt>兜底</dt><dd class="mono">旧 cookie 再请求 → 401（不再回退 admin）</dd><dt>审计要素</dt><dd class="mono">授权了什么 / 以谁权限 / 谁批准 / 执行证据 → 四要素齐</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">强度条落定态</p>
+<div class="bar" style="margin-top:4px"><i class="g" style="width:100%"></i></div>
+<p class="tiny dim" style="margin:4px 0 0">4/4 · 阈值 3/4 可提交 · 0/4 阻断「确认改密」</p>
+<p class="h2p" style="margin-top:var(--s4)">被旋转掉的会话</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">7b21…c40</td><td>Safari · iPad</td><td><span class="chip bad">已作废</span></td></tr>
+<tr><td class="mono">c904…11e</td><td>Firefox · 10.12.4.31</td><td><span class="chip bad">已作废</span></td></tr>
+<tr><td class="mono">d55a…7f2</td><td>PAT · ci-runner（PAT 不随会话旋转）</td><td><span class="chip info">保留</span></td></tr>
+<tr><td class="mono">0f3c…a91</td><td>Chrome · 本机（当前）</td><td><span class="chip ok">新 id</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="跳转 §6.15 审计日志（按 actor=admin · 前缀 auth:* 过滤 · 演示）">在审计日志中筛选同类</span></p></div></div>
+
+<div class="drawer" id="dr-av-3"><header><b>审计事件 · 403 未改密访问</b><span class="chip bad">auth:forbidden_unrotated</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>请求</dt><dd class="mono">GET /api/agents?domain=default</dd><dt>判定</dt><dd>中间件第二道校验（入口 + 中间件各一次，§1.6.5 ②）</dd><dt>原因</dt><dd class="mono">票据 scope=pwd-change · 不在 /api/auth/* 白名单</dd><dt>响应</dt><dd><span class="chip bad">403</span> · 与「资源不存在」统一 404 的规则只用于越权探测面，本例属未激活身份</dd><dt>会话</dt><dd class="mono">无业务会话 · 未写入 sessions 表</dd><dt>下一步</dt><dd>前端把用户弹回强制改密模态，不改 URL 不跳走（§6.0 ①）</dd><dt>trace</dt><dd class="mono">tr-9c14d8</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">白名单（仅这些端点在改密前可达）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">POST /api/auth/change-password</td><td><span class="badge post">POST</span></td><td><span class="chip ok">放行</span></td></tr>
+<tr><td class="mono">GET /api/auth/me</td><td><span class="badge get">GET</span></td><td><span class="chip ok">放行（返回 must_change=true）</span></td></tr>
+<tr><td class="mono">POST /api/auth/logout</td><td><span class="badge post">POST</span></td><td><span class="chip ok">放行</span></td></tr>
+<tr><td class="mono">GET /api/health</td><td><span class="badge get">GET</span></td><td><span class="chip info">闸门豁免</span></td></tr>
+<tr><td class="mono">GET /api/agents</td><td><span class="badge get">GET</span></td><td><span class="chip bad">403</span></td></tr>
+<tr><td class="mono">POST /api/chat/sessions</td><td><span class="badge post">POST</span></td><td><span class="chip bad">403</span></td></tr>
+<tr><td class="mono">GET /api/audit</td><td><span class="badge get">GET</span></td><td><span class="chip bad">403</span></td></tr>
+<tr><td class="mono">DELETE /api/domains/3</td><td><span class="badge del">DEL</span></td><td><span class="chip bad">403</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已跳回登录页并恢复改密票据（演示）">回到改密</button></p></div></div>
+
+<div class="drawer" id="dr-av-7"><header><b>审计事件 · 节流触发</b><span class="chip bad">auth:login_throttled · 429</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>时间 / 账号</dt><dd class="mono">14:22:03 · li.gong（id=4）</dd><dt>窗口</dt><dd class="mono">5 败 / 15min（滑动窗口）</dd><dt>实际计数</dt><dd class="mono">5 次 · 首败 14:07:41 · 末败 14:21:58</dd><dt>响应</dt><dd><span class="chip bad">429</span> · <span class="mono">Retry-After: 443s</span> · 文案仍泛化，不透露是否存在</dd><dt>锁号</dt><dd><span class="chip">不锁号</span> 账号状态仍 active（§5.1 边界）</dd><dt>计数存储</dt><dd class="mono">进程内滑动窗口（已知限制：多副本各自计数）</dd><dt>IP 维度</dt><dd class="mono">未做（仅按账号）——防锁号攻击留待 P0-3 复核</dd><dt>是否通知</dt><dd>不 ping 全员；仅进安全待办队列（§6.0 ⑫）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">计数轨迹（同窗口）</p>
+<table class="tbl compact"><thead><tr><th>#</th><th>时间</th><th>结果</th><th>距上次</th></tr></thead><tbody>
+<tr><td class="mono">1</td><td class="mono">14:07:41</td><td><span class="chip bad">401</span></td><td class="mono">—</td></tr>
+<tr><td class="mono">2</td><td class="mono">14:11:02</td><td><span class="chip bad">401</span></td><td class="mono">3m21s</td></tr>
+<tr><td class="mono">3</td><td class="mono">14:15:37</td><td><span class="chip bad">401</span></td><td class="mono">4m35s</td></tr>
+<tr><td class="mono">4</td><td class="mono">14:19:10</td><td><span class="chip bad">401</span></td><td class="mono">3m33s</td></tr>
+<tr><td class="mono">5</td><td class="mono">14:21:58</td><td><span class="chip bad">401</span></td><td class="mono">2m48s</td></tr>
+<tr><td class="mono">6</td><td class="mono">14:22:03</td><td><span class="chip bad">429</span></td><td class="mono">5s</td></tr>
+</tbody></table>
+<div class="callout warn" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>灰置示例：</b>节流期内「登录」按钮在前端灰置但仍以 429 兜底（前端灰置不等于服务端已拒）。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已解除该账号节流计数（演示 · 需 project:write · 审计 auth:throttle_cleared）">解除节流</button></p></div></div>
+
+<div class="drawer" id="dr-av-9"><header><b>审计事件 · 调试身份头被使用</b><span class="chip warn">auth:header_identity_used</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>时间 / 身份</dt><dd class="mono">14:05:19 · X-User-Id: svc-cron（id=9）</dd><dt>三重 opt-in</dt><dd><span class="chip ok">env 已开</span> <span class="chip ok">localhost 模式</span> <span class="chip ok">admit 白名单含 127.0.0.1</span></dd><dt>代价</dt><dd><span class="chip bad">启动红条常挂</span> · 每个带该头的请求逐条入审计</dd><dt>cookie / PAT</dt><dd class="mono">皆无 → 头身份才生效（解析序 cookie &gt; PAT &gt; header）</dd><dt>cron 的正确姿势</dt><dd class="mono">回环改直调 service，不该依赖此头（P0-1）</dd><dt>lan / behind-proxy</dt><dd><span class="chip">禁用</span> 两种模式下该路径整段失效</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">本次调用留痕</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">14:05:19.204</td><td class="mono">GET /api/metrics/rollup</td><td><span class="chip ok">200</span></td><td class="tiny dim">actor=svc-cron（头）</td></tr>
+<tr><td class="mono">14:05:19.412</td><td class="mono">POST /api/alerts/sweep</td><td><span class="chip ok">200</span></td><td class="tiny dim">逐请求审计</td></tr>
+<tr><td class="mono">14:06:00.008</td><td class="mono">GET /api/agents</td><td><span class="chip ok">200</span></td><td class="tiny dim">同上</td></tr>
+<tr><td class="mono">14:07:00.011</td><td class="mono">POST /api/reconcile/tick</td><td><span class="chip info">202</span></td><td class="tiny dim">同上</td></tr>
+</tbody></table>
+<div class="callout bad" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>风险提示（原文级）：</b>fail-open 身份存在期间不得暴露任何对外写端点（§6.0 ⑬）；本页所有对外写面按该纪律灰置。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已关闭调试模式 · 启动红条撤除 · 后续请求缺身份 → 401（演示）">立即关闭调试模式</button></p></div></div>
+
+<div class="drawer" id="dr-av-10"><header><b>审计事件 · Bearer PAT</b><span class="chip purple">auth:pat_used</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>时间 / 账号</dt><dd class="mono">13:58:02 · wang.gong（id=6）</dd><dt>令牌</dt><dd class="mono">afp_…k3（表内仅存哈希 · 前缀留证）</dd><dt>解析序位置</dt><dd class="mono">cookie 缺 → PAT 命中 → 放行</dd><dt>作用域</dt><dd><span class="chip">project:read</span> <span class="chip">project:write</span> <span class="chip bad">未含 workflow:stop</span></dd><dt>本次尝试</dt><dd class="mono">POST /api/workflows/3/stop → 403（缺权限点，不改判 404 因目标可见）</dd><dt>旋转</dt><dd class="mono">权限变更需旋转会话；PAT 的授权位实时查 active 状态</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">该 PAT 近期调用</p>
+<table class="tbl compact"><thead><tr><th>时间</th><th>端点</th><th>结果</th></tr></thead><tbody>
+<tr><td class="mono">13:58:02</td><td class="mono">POST /api/workflows/3/run</td><td><span class="chip ok">202</span></td></tr>
+<tr><td class="mono">13:58:05</td><td class="mono">GET /api/workflows/3/runs</td><td><span class="chip ok">200</span></td></tr>
+<tr><td class="mono">13:58:19</td><td class="mono">POST /api/workflows/3/stop</td><td><span class="chip bad">403</span></td></tr>
+<tr><td class="mono">13:59:02</td><td class="mono">GET /api/domains/1/agents</td><td><span class="chip ok">200</span></td></tr>
+<tr><td class="mono">14:01:44</td><td class="mono">DELETE /api/domains/3</td><td><span class="chip bad">404</span>（越权与不存在统一）</td></tr>
+<tr><td class="mono">14:04:10</td><td class="mono">GET /api/knowledge/sources</td><td><span class="chip ok">200</span></td></tr>
+<tr><td class="mono">14:07:33</td><td class="mono">POST /api/knowledge/upload</td><td><span class="chip bad">400</span> 不支持的文件类型 .exe</td></tr>
+<tr><td class="mono">14:12:01</td><td class="mono">GET /api/probes</td><td><span class="chip warn">429</span> 探针端点限流</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已跳 §6.16 撤销该 PAT（演示 · 撤销需二次确认）">去撤销 PAT</button></p></div></div>
+
+<div class="drawer" id="dr-av-4"><header><b>审计事件 · 401 泛化提示</b><span class="chip bad">auth:login_failed</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>时间 / 账号</dt><dd class="mono">14:29:58 · admin</dd><dt>提示语</dt><dd class="mono">「用户名或密码错误」——不区分账号是否存在</dd><dt>连败</dt><dd class="mono">3/5 · 窗口 15min · 距 429 还有 2 次</dd><dt>耗时</dt><dd class="mono">58ms（常数时间 verify · 不泄露账号存在性）</dd><dt>锁号</dt><dd><span class="chip">否</span> §5.1 边界：持续留痕不锁号</dd><dt>是否泄露</dt><dd>不记录用户提交的口令明文（含失败）· 只记结果与计数</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">留痕链（该会话前 5 条）</p>
+<div class="timeline">
+  <div class="tl-item fail"><b>14:29:58</b> · 401 · 连败 3</div>
+  <div class="tl-item fail"><b>14:29:41</b> · 401 · 连败 2</div>
+  <div class="tl-item fail"><b>14:29:24</b> · 401 · 连败 1</div>
+  <div class="tl-item"><b>14:29:20</b> · 页面加载 <span class="mono">GET /api/auth/me → 401</span>（缺身份）</div>
+  <div class="tl-item"><b>14:29:20</b> · <span class="mono">DEPLOY_MODE=localhost</span> 生效值快照已随事件写入</div>
+</div>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="演示：真实系统此处不展示「剩余尝试次数」以外的任何口令线索">为何不提示「再错 2 次将锁定」</span></p></div></div>
+
+<div class="drawer" id="dr-av-5"><header><b>审计事件 · 401（连败 2/5）</b><span class="chip bad">auth:login_failed</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>时间</dt><dd class="mono">14:29:41</dd><dt>账号</dt><dd class="mono">admin · 来源 127.0.0.1</dd><dt>结果 / 计数</dt><dd><span class="chip bad">401</span> · 连败 2/5</dd><dt>校验分支</dt><dd class="mono">哈希存在 → argon2id verify=false（走满常数时间）</dd><dt>下一步</dt><dd class="mono">第 5 次失败触发 429 + Retry-After</dd></dl>
+<p class="tiny dim" style="margin-top:var(--s3)">本抽屉与「连败 1」「连败 3」同构，演示态下各自独立留痕，不合并为一条。</p>
+<p style="margin-top:var(--s3)"><span class="btn link" data-toast="已按 actor=admin · 前缀 auth:login_failed 跳审计日志（演示）">查同类</span></p></div></div>
+
+<div class="drawer" id="dr-av-6"><header><b>审计事件 · 401（连败 1/5）</b><span class="chip bad">auth:login_failed</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>时间</dt><dd class="mono">14:29:24</dd><dt>账号</dt><dd class="mono">admin · 来源 127.0.0.1</dd><dt>结果 / 计数</dt><dd><span class="chip bad">401</span> · 连败 1/5（窗口开启）</dd><dt>窗口到期</dt><dd class="mono">14:44:24（若无新失败则计数归零）</dd></dl>
+<p class="tiny dim" style="margin-top:var(--s3)">窗口按账号计，IP 维度未做——见节流事件抽屉的「未做」项。</p>
+<p style="margin-top:var(--s3)"><span class="btn link" data-toast="演示：不提供「清空他人连败」入口（仅账号 owner 或 admin 经审批）">能否自行清零</span></p></div></div>
+
+<div class="drawer" id="dr-av-8"><header><b>审计事件 · 正常登录</b><span class="chip ok">auth:login · cookie 签发</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>时间 / 账号</dt><dd class="mono">14:18:47 · li.gong（id=4 · 角色 user + project:write）</dd><dt>口令</dt><dd><span class="chip ok">argon2id 通过</span> · 需重哈希=<span class="mono">false</span></dd><dt>must_change_password</dt><dd class="mono">false（09-21 首登已改密）</dd><dt>会话</dt><dd class="mono">__Host-session · HttpOnly · SameSite=Lax · 仅存哈希</dd><dt>寿命</dt><dd class="mono">idle 30min / absolute 8h</dd><dt>解析序</dt><dd class="mono">本次 cookie 命中（优先级最高）</dd><dt>导航</dt><dd>按角色渲染：无 <span class="mono">audit:view</span> → 审计日志项不渲染（§5.1）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">该账号近 6 次登录</p>
+<table class="tbl compact"><thead><tr><th>时间</th><th>方式</th><th>结果</th></tr></thead><tbody>
+<tr><td class="mono">14:18:47</td><td>口令 + cookie</td><td><span class="chip ok">成功</span></td></tr>
+<tr><td class="mono">14:22:03</td><td>同窗口后续尝试</td><td><span class="chip bad">429 节流</span></td></tr>
+<tr><td class="mono">09-22 18:44</td><td>口令 + cookie</td><td><span class="chip ok">成功</span></td></tr>
+<tr><td class="mono">09-22 09:12</td><td>Bearer PAT</td><td><span class="chip info">成功（PAT）</span></td></tr>
+<tr><td class="mono">09-21 22:40</td><td>口令</td><td><span class="chip bad">401</span></td></tr>
+<tr><td class="mono">09-21 22:41</td><td>首登改密</td><td><span class="chip ok">成功 · 会话旋转</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="跳转 §6.21 收件箱（该用户有 1 条待拍板 · 演示）">看他的待办</span></p></div></div>
+
+<div class="drawer" id="dr-av-11"><header><b>审计事件 · 空闲过期</b><span class="chip">auth:session_idle_expired</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>时间 / 账号</dt><dd class="mono">13:41:30 · wang.gong</dd><dt>判定</dt><dd class="mono">last_seen 13:11:30 + idle 30min</dd><dt>动作</dt><dd class="mono">服务端删除该 session 行 · cookie 失效</dd><dt>下一次请求</dt><dd><span class="chip bad">401</span> → 前端落回 <span class="mono">/login?next=/control-plane</span></dd><dt>绝对寿命</dt><dd class="mono">abs 8h 未到期（11:41 前不受此限）</dd><dt>是否通知</dt><dd>不通知；过期属常规回收</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">未保存工作是否受影响</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">草稿：DESIGN.md 编辑中</td><td><span class="chip ok">保留</span>（草稿是一等状态 · §6.0 ⑦）</td><td class="tiny dim">重登后恢复</td></tr>
+<tr><td class="mono">滚动位：变更列表第 14 行</td><td><span class="chip ok">保留</span> memento</td><td class="tiny dim">§6.0 ⑦</td></tr>
+<tr><td class="mono">视图：?view=v-88</td><td><span class="chip ok">在 URL 上</span></td><td class="tiny dim">§6.0 ②</td></tr>
+<tr><td class="mono">进行中的对话流</td><td><span class="chip warn">服务端继续跑</span></td><td class="tiny dim">重登接回原会话</td></tr>
+<tr><td class="mono">未提交的上传（8MB）</td><td><span class="chip bad">丢弃</span> 需重传</td><td class="tiny dim">附件池未含上传缓冲</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="演示：无「延长会话」自助入口——寿命由服务端策略决定">能否延长</span></p></div></div>
+
+<div class="drawer" id="dr-av-12"><header><b>审计事件 · 管理员建号</b><span class="chip ok">auth:user_created</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>时间 / 操作者</dt><dd class="mono">13:30:11 · admin（李工）</dd><dt>新账号</dt><dd class="mono">wang.gong（id=6 · 角色 user）</dd><dt>口令</dt><dd><span class="chip warn">未设</span> 无自助注册；由随机口令仅打启动日志 / 管理员代设</dd><dt>must_change_password</dt><dd><span class="chip bad">true</span> 首登必须改密（Gitea 式默认）</dd><dt>自愈分支</dt><dd><span class="chip ok">已删</span>「缺 password_hash→重置 123456」不再存在</dd><dt>项目可见性</dt><dd class="mono">project_ids=[2]（未分配=看不到任何项目，不回退为全部）</dd><dt>审计四要素</dt><dd class="mono">授权了什么=project:read/write · 以谁权限=admin · 谁批准=李工 · 证据=tr-8a02</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">该账号当前权限点（6 点模型）</p>
+<table class="tbl compact"><thead><tr><th>权限点</th><th>授予</th><th>说明</th></tr></thead><tbody>
+<tr><td class="mono">project:read</td><td><span class="chip ok">有</span></td><td class="tiny dim">查看项目 / 变更 / 文档</td></tr>
+<tr><td class="mono">project:write</td><td><span class="chip ok">有</span></td><td class="tiny dim">配置 · 文件 · 门禁</td></tr>
+<tr><td class="mono">project:delete</td><td><span class="chip">无</span></td><td class="tiny dim">危险位 · 未授</td></tr>
+<tr><td class="mono">workflow:stop</td><td><span class="chip">无</span></td><td class="tiny dim">危险位 · 未授</td></tr>
+<tr><td class="mono">audit:view</td><td><span class="chip">无</span></td><td class="tiny dim">导航不渲染（非隐藏）</td></tr>
+<tr><td class="mono">admin:manage</td><td><span class="chip">无</span></td><td class="tiny dim">用户与权限页不可见</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已重置该账号口令并再次置 must_change=true · 旧会话全部作废（演示）">重置口令</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-disable">禁用账号</button></p></div></div>
+
+
+<div class="modal" id="md-revoke"><div style="padding:var(--s4)">
+<b>吊销会话 <span class="mono">7b21…c40</span>（及同 PAT 派生的 1 个会话）？</b>
+<p class="small dim" style="margin:8px 0">吊销不可撤销：该设备下一次请求即 401，需重新登录。<b>必填原因</b>（破坏性操作二次确认 · 理由入审计）。</p>
+<p class="tiny" style="margin:0 0 4px"><b>影响清单</b></p>
+<table class="tbl compact"><tbody>
+<tr><td>设备</td><td>Safari 17 · iPad · 10.12.4.31</td><td><span class="chip warn">立即掉线</span></td></tr>
+<tr><td>在途</td><td>1 个对话正在流式输出（会话 42）</td><td><span class="chip bad">输出继续但不可读</span></td></tr>
+<tr><td>草稿</td><td>2 份未完成草稿（DESIGN.md / TASK.md）</td><td><span class="chip ok">保留</span></td></tr>
+<tr><td>运行</td><td>1 个 Agent 运行由该用户点发（人点名派发）</td><td><span class="chip info">继续跑（不随身份终止）</span></td></tr>
+<tr><td>PAT</td><td><span class="mono">d55a…7f2</span> ci-runner</td><td><span class="chip">不在本次范围</span></td></tr>
+<tr><td>审计</td><td>auth:session_revoked · 含 actor / 目标 / 原因</td><td><span class="chip info">必写</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [设备丢失 · 临时离岗             ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已吊销 2 个会话 · 审计 auth:session_revoked（演示）" data-close>确认吊销</button></div></div></div>
+
+<div class="modal" id="md-disable"><div style="padding:var(--s4)"><b>禁用账号 wang.gong？</b>
+<p class="small dim" style="margin:8px 0 4px">禁用即 <span class="mono">active=false</span>：会话与 PAT 解析时同步校验，立刻失效（不是「登录被拒」而是「已授权会话也被拒」）。<b>必填原因</b>。</p>
+<table class="tbl compact"><tbody>
+<tr><td>活跃会话</td><td class="mono">2</td><td><span class="chip bad">随禁用失效</span></td></tr>
+<tr><td>有效 PAT</td><td class="mono">1</td><td><span class="chip bad">随禁用失效</span></td></tr>
+<tr><td>其发起的在途运行</td><td class="mono">1</td><td><span class="chip warn">继续 · 归因保留</span></td></tr>
+<tr><td>历史审计</td><td class="mono">184</td><td><span class="chip">不删（留痕一等）</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [外包合同结束 · 账号回收         ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已禁用 · 2 会话 + 1 PAT 即刻失效 · 审计 auth:user_disabled（演示）" data-close>确认禁用</button></div></div></div>
+
+<div class="pop" id="pop-account"><p class="tiny dim" style="margin:0 0 6px"><b>切换演示账号</b>（仅切演示态 · 无自助注册 · 真实账号由管理员创建）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">admin</td><td>李工 · admin</td><td><span class="chip bad">must_change=true</span></td><td><span class="btn link" data-toast="已切到 admin（首登需改密 · 登录即弹强制改密）（演示）">选</span></td></tr>
+<tr><td class="mono">li.gong</td><td>user + project:write</td><td><span class="chip ok">false</span></td><td><span class="btn link" data-toast="已切到 li.gong（正常登录 · 导航按角色渲染，无 audit:view）（演示）">选</span></td></tr>
+<tr><td class="mono">wang.gong</td><td>user · 外包（回收中）</td><td><span class="chip ok">false</span></td><td><span class="btn link" data-toast="已切到 wang.gong（Bearer PAT 场景 · 见审计流水第 10 行）（演示）">选</span></td></tr>
+<tr><td class="mono">svc-cron</td><td>服务号 · 无口令</td><td><span class="chip warn">仅头身份可登</span></td><td><span class="btn link" data-toast="已切到 svc-cron（cron 应直调 service，不依赖头身份）（演示）">选</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">口令一律已脱敏；本弹层不校验、不写入任何真实凭据。</p></div>
+
+<div class="drawer" id="dr-debug"><header><b>调试模式 · <span class="mono">X-User-Id</span> 三重显式 opt-in</b><span class="chip bad">关</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<p class="tiny dim" style="margin:0 0 6px"><b>调试模式 · <span class="mono">X-User-Id</span> 三重显式 opt-in</b>（三者<b>同时</b>满足才生效 · P0-1）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">① env</td><td>显式开启头身份（默认关）</td><td><span class="chip ok">已满足</span></td></tr>
+<tr><td class="mono">② 部署模式</td><td><span class="mono">DEPLOY_MODE=localhost</span>（lan / behind-proxy 一律失效）</td><td><span class="chip ok">已满足</span></td></tr>
+<tr><td class="mono">③ admit 白名单</td><td>来源必须落在白名单内</td><td><span class="chip bad">未满足 · 空白名单</span></td></tr>
+<tr><td class="mono">④ 解析序</td><td>cookie / PAT 存在时头身份<b>不参与</b></td><td><span class="chip info">生效前提</span></td></tr>
+</tbody></table>
+<p class="tiny" style="margin:6px 0"><b>开启代价（不可隐藏）：</b>启动红条常挂 + 逐请求审计；缺身份一律 <span class="mono">401</span>（原「回退 admin」后门随 P0-1 删除，旧测试断言反转为 401）。</p>
+<p style="margin:0"><button class="btn sm" data-toast="已补 admit 白名单 127.0.0.1/32 · 三重条件齐 · 启动红条已挂（演示）">补第 ③ 条</button> <button class="btn sm" data-toast="调试模式保持关闭（演示）" data-close>保持关闭</button></p>
+</div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：「登录」→ toast + 跳 <span class="mono">login__pwd-change.html</span> 首登强制改密页（表单 + 强度条 + 策略核对 · 已升页）· 用户名行 → 演示账号切换 pop · 「调试模式」→ 三重 opt-in 条件抽屉（pop 装实质内容 → 按 B 重级为 drawer） · 连败计数 → 429 toast · 审计流水 12 行 → 事件详情抽屉（kv + 时间线 / 子表）· 会话「吊销」/「禁用账号」→ 影响清单 + 必填原因二次确认　按 Esc 关闭所有浮层。</p>
+</body></html>

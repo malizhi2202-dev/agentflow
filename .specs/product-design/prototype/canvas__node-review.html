@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>节点 review（审查 Agent · 标准） 详情 · 编排画布 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="canvas.html" data-click>← 返回 编排画布</span><span class="crumb"><span class="dim">编排画布 /</span> <b>节点 review（审查 Agent · 标准）</b></span><span class="chip ok">healthy</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="tools.html">工具市场</span><span class="pill" data-goto="stage-model.html">阶段模型</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>节点 = Agent 引用，边 = 连线策略。</b>这里改的每一项都会写回底部 YAML；改 YAML 画布跟着重绘（双向同步）。</p></div>
+<dl class="kv"><dt>节点 ID / 类型</dt><dd class="mono">review · agent 节点（入口）</dd>
+<dt>绑定 Agent</dt><dd>审查 Agent · 标准 <span class="mono dim">agent-1</span> <span class="chip ok"><span class="dot idle" style="margin-right:4px"></span>探针通过 14:30:58</span></dd>
+<dt>模型 / Provider</dt><dd class="mono">gpt-4o · OpenAI 兼容口（API Key 恒为 sk-***）</dd>
+<dt>运行时</dt><dd>平台进程内执行 <span class="chip warn">无沙箱</span> · 域不是安全边界</dd>
+<dt>归属域 / 能力组</dt><dd class="mono">默认域 / code-review</dd>
+<dt>能力标签（路由用）</dt><dd><span class="pill mono">capability: code-review</span> <span class="pill mono">tier: standard</span></dd>
+<dt>知识源挂载</dt><dd>3 源 · 架构说明.md / 规范.pdf(100 chunks) / Confluence ADR(214 chunks)</dd>
+<dt>绑定工具</dt><dd><span class="pill mono">文件读写 · Plugin</span> <span class="pill mono">代码审查 · Skill</span> <span class="pill mono">read_file</span> <span class="pill mono">grep</span></dd>
+<dt>入边 / 出边</dt><dd class="mono">0 条 / 3 条（fan-out ×2 · retry-fallback ×1）</dd>
+<dt>节点 Token 预算</dt><dd class="mono">上限 32,000 · 软限 20,000（超出出 token_exceeded 告警）</dd>
+<dt>副本与扩容</dt><dd class="mono">期望 3 healthy · 实际 2 <span class="chip warn">漂移 1 · caution 等待收敛</span></dd>
+<dt>最后修改</dt><dd class="mono">09-23 11:02 · admin 李工 · 草稿未 apply</dd></dl>
+<h4 class="blk">出边（点击 → 边配置）</h4>
+<table class="tbl compact"><thead><tr><th>目标</th><th>策略</th><th>重试 / 超时</th><th>Token</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">frontend</td><td><span class="chip info">fan-out</span></td><td class="mono">3 次 / 120s</td><td class="mono">32,000</td><td><span class="btn link" data-goto="canvas__edge-review-frontend.html">配置</span></td></tr>
+<tr><td class="mono">sync</td><td><span class="chip info">fan-out</span></td><td class="mono">3 次 / 180s</td><td class="mono">—</td><td><span class="btn link" data-toast="fan-out 分支配置见边配置详情页（canvas__edge-review-frontend.html · 演示）">配置</span></td></tr>
+<tr><td class="mono">merge</td><td><span class="chip">fan-in（下游）</span></td><td class="mono">—</td><td class="mono">—</td><td><span class="btn link" data-toast="fan-in 由下游节点配置等待策略">配置</span></td></tr>
+<tr><td class="mono">legacy</td><td><span class="chip bad">retry-fallback</span></td><td class="mono">2 次 / 60s · on_exhausted: dead-letter</td><td class="mono">8,000</td><td><span class="btn link" data-goto="canvas__node-legacy.html">配置</span></td></tr>
+</tbody></table>
+<h4 class="blk">节点事件（最近 4 条）</h4>
+<div class="timeline">
+<div class="tl-item fail"><b>09-23 11:02</b> · 边 <span class="mono">review→frontend</span> 超时 <span class="mono">180s → 120s</span>（草稿）</div>
+<div class="tl-item fail"><b>09-22 17:40</b> · 引用的工具「浏览器自动化」被 admin 禁用 → 执行时失败</div>
+<div class="tl-item"><b>09-21 09:12</b> · apply 生成快照 <span class="mono">v3</span>（不可变）· 审计 <span class="mono">orch:apply</span></div>
+<div class="tl-item"><b>09-20 15:03</b> · 知识源「规范.pdf」重建索引 100 chunks → 节点可检索</div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="定位到 YAML 第 4 行 nodes[review]（演示）">在 YAML 中定位</button> <button class="btn sm" data-toast="跳转 §6.4 Agent 详情看探针时间线（演示）">看 Agent 详情</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-delnode">移除节点</button></p>
+</div>
+<div class="modal" id="md-delnode"><div style="padding:var(--s4)"><b>从画布移除「旧版审查 Agent」节点？</b>
+<p class="small dim" style="margin:8px 0">移除即删除 1 个节点与 1 条边（<span class="mono">review → legacy · retry-fallback</span>），YAML 同步重写。<b>已部署快照 v3 不受影响</b>——只有再 apply 才改变期望状态。必填原因。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [备援支路长期不可用，改由 备援 Agent 承接 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="节点与 retry-fallback 边已移除 · 草稿未 apply（演示）" data-close>确认移除</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由编排画布浮层升格：节点 / 边配置与 YAML 写回说明全宽 · 「校验」「保存」→ toast · 「移除节点」「删除该边」→ 二次确认（本页引用到的二次确认 modal 自带副本）· 改完不自动重启实例（§5.4）　按 Esc 关闭浮层。</p>
+</body></html>

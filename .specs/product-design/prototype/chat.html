@@ -1,0 +1,81 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>对话中心 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="knowledge.html">知识库</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="replay.html">执行回放</span></div>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/chat</span><span class="fake">演示数据</span></div>
+      <div class="app" style="grid-template-columns:196px 190px minmax(0,1fr)">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html" class="active"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <aside style="background:var(--bg-main);border-right:1px solid var(--border);padding:var(--s3);display:flex;flex-direction:column;gap:6px">
+          <button class="btn sm primary" style="justify-content:center" data-pop="agent-pop" data-click>+ 新建会话 ▾ 选 Agent</button>
+          <p class="tiny muted" style="margin:var(--s2) 0 0;text-transform:uppercase;letter-spacing:.05em">今天</p>
+          <div class="panel tight" style="background:var(--bg-selected);border-color:var(--blue-border)">
+            <p class="small" style="margin:0;color:var(--text)"><b>审查 agent-domains 的变更</b></p>
+            <p class="tiny dim" style="margin:3px 0 0"><span class="mono">审查 Agent · 标准</span> · 14:31</p>
+          </div>
+          <div class="panel tight" data-click data-toast="切换会话：加载该会话消息流与 Agent 归属（演示）">
+            <p class="small" style="margin:0"><b>帮我把这批日志归档</b></p>
+            <p class="tiny dim" style="margin:3px 0 0"><span class="mono">数据同步 Agent</span> · 13:58</p>
+          </div>
+          <div class="panel tight">
+            <p class="small" style="margin:0"><b>生成周报要点</b></p>
+            <p class="tiny dim" style="margin:3px 0 0"><span class="mono">汇总 Agent</span> · 11:02</p>
+          </div>
+          <p class="tiny muted" style="margin:var(--s2) 0 0;text-transform:uppercase;letter-spacing:.05em">昨天</p>
+          <div class="panel tight">
+            <p class="small" style="margin:0"><b>检查生产域 Agent 健康</b></p>
+            <p class="tiny dim" style="margin:3px 0 0"><span class="mono">审查 Agent · 备援</span> · 昨天 18:20</p>
+          </div>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">审查 agent-domains 的变更</span><span class="right"><button class="btn sm" style="border-style:dashed" data-pop="agent-pop" data-click>审查 Agent · 标准 ▾</button><span class="chip ok">gpt-4o</span></span></div>
+          <div id="agent-pop" class="pop" style="max-width:520px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ Agent 切换器 · 点击后的演示态（mock open）</b>　切换自下一条消息起生效，历史消息归属不变</p>
+            <table class="tbl compact"><tbody>
+              <tr><td><span class="dot running"></span> <b>审查 Agent · 标准</b> <span class="chip">当前</span></td><td class="mono tiny">gpt-4o</td><td class="tiny dim">知识源：架构说明.md 等 3 · 工具：read/grep · healthy</td></tr>
+              <tr><td><span class="dot idle"></span> 数据同步 Agent</td><td class="mono tiny">deepseek-v3</td><td class="tiny dim">工具：archive/oss · 上次会话 13:58</td></tr>
+              <tr><td><span class="dot dead"></span> 旧版审查 Agent <span class="chip bad">运行异常</span></td><td class="mono tiny">gpt-3.5</td><td class="tiny dim">灰置：探针 failed，选择需先「重启」（跳 p4 详情）</td></tr>
+              <tr><td><span class="dot running"></span> 审查 Agent · 备援 <span class="chip">冷备</span></td><td class="mono tiny">claude-sonnet</td><td class="tiny dim">切换=拉起冷备副本（首次调用 +8s，计费提示）</td></tr>
+            </tbody></table>
+            <p class="tiny dim" style="margin:6px 0 0">＋ 新建会话先过同一选择器（<span class="mono">agent_id</span> 随每条消息落库，p22 回放按条归属）</p>
+          </div>
+          <div class="msgs" style="flex:1">
+            <div class="msg-row"><div class="avatar">李</div><div class="bubble">审查一下 <span class="mono">.specs/agent-domains</span> 里的产物，重点看验收条件有没有覆盖「删除域后 Agent 回归默认域」。</div></div>
+            <div class="msg-row"><div class="avatar ai">AI</div><div class="bubble">已读取 4 个产物文件（REQUIREMENT / TASK / test_backend.py / _test_import.py）。<br><br>结论：<b>验收条件已覆盖</b>该场景——<span class="mono">REQUIREMENT.md</span> 的验收清单第 3 条为「删除域后 Agent 回归默认域」，且 <span class="mono">test_backend.py</span> 中有对应用例。<br><br>但发现 1 处不一致：<span class="mono">TASK.md</span> 的 T2 提到迁移语句，而 <span class="mono">REQUIREMENT.md</span> 的数据模型小节未写 <span class="mono">ON DELETE SET NULL</span>。<div class="toolcall" data-click data-toast="工具调用详情已展开（演示态：真实系统内联展开 JSON I/O）">⚙ read_file · .specs/agent-domains/REQUIREMENT.md → 2,822 bytes<br>⚙ read_file · .specs/agent-domains/TASK.md → 2,171 bytes<br>⚙ grep · "domain_id" → 7 hits</div></div></div>
+            <div class="msg-row me"><div class="avatar">李</div><div class="bubble me">把这条不一致写成 REVIEW 的发现项。</div></div>
+            <div class="msg-row"><div class="avatar ai">AI</div><div class="bubble">已生成发现项草稿（待你确认后落盘）：<br><br><b>F1 · Minor</b> · 数据模型描述缺外键删除行为<br>位置：<span class="mono">REQUIREMENT.md</span> §数据模型<br>建议：补一行 <span class="mono">domain_id INTEGER REFERENCES domains(id) ON DELETE SET NULL</span>。<div class="toolcall" data-click data-toast="工具调用详情已展开（演示态：真实系统内联展开 JSON I/O）">⚙ write_file · 待确认（需 project:write 权限）</div><span style="color:var(--blue)">▌</span></div></div>
+          </div>
+          <div style="margin:0 14px 6px;border:1px solid var(--blue-border);background:var(--bg-card);border-radius:8px;padding:8px 11px;font-size:12px;line-height:1.7">
+            <div class="tiny dim">输入 <b class="mono">/</b> 唤出命令 · 当前域：quant-research</div>
+            <b class="mono">/决策模型</b> <b style="color:var(--blue)">推荐</b> · 登记 · 微调 · 评测 · 状态 · <b style="color:var(--blue)">方案</b>　<span class="tiny dim">——命令仅对已开对应能力的域生效（AC-D1），未开的域不产生效果（AC-0）</span>
+            <div class="tiny dim" style="margin-top:2px">「状态」示例：路由决策=<b style="color:var(--green)">开</b>（Jev-Style-Qwen3.5-2B · 阈值 0.60 · 今日 escalated 14 · fallback 0）· 对话分诊=关 · 简单任务=关</div>
+          </div>
+          <div class="composer">
+            <div class="input"><b class="mono">/决策模型 状态</b>　<span class="dim">（继续输入…Enter 发送，Shift+Enter 换行）</span></div>
+            <button class="btn sm">附件</button>
+            <button class="btn sm primary">发送</button>
+          </div>
+        </div>
+      </div>
+    </div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：Agent 切换器▾ / 新建会话▾ / 会话列表项 / 工具调用块　按 Esc 关闭所有浮层。</p>
+</body></html>

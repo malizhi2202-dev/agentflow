@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>新增 egress 白名单项 详情 · 执行隔离策略 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p26" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="isolation.html" data-click>← 返回 执行隔离策略</span><span class="crumb"><b>新增 egress 白名单项</b> · 域 integrations-untrusted</span><span class="chip warn">默认拒 · 新增需域 owner 批准</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="isolation__t2.html">T2 档位详情</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0">egress 是<b>域级白名单</b>（不给全局放行）：新增项默认<b>需域 owner 批准</b>才生效，变更写审计 <span class="mono">isolation_egress_changed</span>。全量放行（0.0.0.0/0）直接拒——那等于取消 egress 契约。</p></div>
+<h4 class="blk">填写目标与作用域</h4>
+<dl class="kv"><dt>目标</dt><dd class="mono">host[:port] · 例 registry.npmjs.org:443</dd><dt>作用域</dt><dd class="mono">域级（不给全局放行）· 可限定到单个 run</dd><dt>禁止项</dt><dd class="mono">私网段 · 169.254.169.254 · 任意 CIDR 通配 0.0.0.0/0</dd><dt>生效时机</dt><dd class="mono">批准后下一个执行请求（在途不受影响）</dd></dl>
+<h4 class="blk">候选项（点一条填入目标）</h4>
+<table class="tbl compact"><tbody>
+<tr data-click data-toast="已填 registry.npmjs.org:443（演示）· 需域 owner 批准后生效 → 入审计 isolation_egress_changed"><td>registry.npmjs.org:443</td><td><span class="chip">候选</span></td><td><span class="btn link">选</span></td></tr>
+<tr data-click data-toast="已填 api.github.com:443（演示）· 批准前列表显示为待批"><td>api.github.com:443</td><td><span class="chip">候选</span></td><td><span class="btn link">选</span></td></tr>
+<tr style="opacity:.5"><td class="mono">0.0.0.0/0</td><td><span class="chip bad">直接拒</span></td><td><span class="btn link" data-click data-toast="✗ 拒绝：全量放行等于取消 egress 契约（无审批路径存在）">为何拒</span></td></tr>
+</tbody></table>
+<h4 class="blk">提交</h4>
+<p><button class="btn sm" data-back="isolation.html" data-click>取消</button> <button class="btn sm primary" data-toast="已提交白名单项 → 域 owner 批准前不生效 · 审计 isolation_egress_changed（演示）" data-back="isolation.html">提交新增</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为「新增 egress 白名单项」升格详情页（规划原型 · 6.26 界面尚不存在）。域级作用域、批准生效、禁止 0.0.0.0/0 与 169.254.169.254、审计事件名 isolation_egress_changed 均为 §6.26 / agent-sandbox 威胁模型原文实值；候选目标与在途不受影响语义为演示。本页不写任何策略。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：候选行 / 「选」→ toast（填入目标 · 待批）· 0.0.0.0/0 行 → 拒因 toast · 「提交新增」→ toast 并返回 isolation.html · 顶部「← 返回」回执行隔离页　按 Esc 关闭浮层。</p>
+</body></html>

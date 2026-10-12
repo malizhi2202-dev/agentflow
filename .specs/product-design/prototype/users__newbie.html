@@ -1,0 +1,66 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>用户 newbie（赵六）详情 · 用户与权限 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p16" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="audit.html">审计日志</span><span class="pill" data-goto="login.html">登录</span><span class="pill" data-goto="approvals.html">审批中心</span></div>
+<div class="detail-top"><span class="pill" data-back="users.html" data-click>← 返回 用户与权限</span><span class="crumb"><b>用户管理 › 用户 · newbie（赵六 · 待分配）</b></span><span class="chip">user</span><span class="chip bad">零权限</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>零权限是默认值，不是 bug：</b>该账号登录后左侧导航只剩「对话中心」，项目 / 变更 / 审计 / 用户管理<b>全部不渲染</b>，也不会回退成「看到全部项目」。</p></div>
+<dl class="kv" style="margin-top:var(--s3)">
+<dt>登录名 / 显示名</dt><dd class="mono">newbie · 赵六 · 待分配</dd>
+<dt>角色</dt><dd><span class="chip">user</span> <span class="btn link" data-click data-modal="md-role">改角色 ▾</span></dd>
+<dt>有效权限</dt><dd class="mono" style="color:var(--red)">0 / 6（custom_permissions 为空）</dd>
+<dt>可见项目</dt><dd><span class="chip bad">无</span> <span class="tiny dim">project_ids 未分配</span></dd>
+<dt>创建</dt><dd class="mono">09-22 10:05 · admin</dd>
+<dt>最后活跃</dt><dd class="mono">从未登录</dd>
+<dt>口令状态</dt><dd><span class="chip warn">must_change_password=true · 首登强制改密</span></dd>
+</dl>
+<h4 class="blk">权限点勾选（只读 · 全 0）</h4>
+<table class="tbl compact"><thead><tr><th>权限点</th><th>勾选</th><th>该用户看到什么</th></tr></thead><tbody>
+<tr><td class="mono">project:read</td><td><span class="chip bad">未勾选</span></td><td class="tiny">项目页空态 + 联系管理员提示</td></tr>
+<tr><td class="mono">project:write</td><td><span class="chip bad">未勾选</span></td><td class="tiny">无编辑入口</td></tr>
+<tr><td class="mono">project:delete</td><td><span class="chip bad">未勾选</span></td><td class="tiny">无删除入口</td></tr>
+<tr><td class="mono">workflow:stop</td><td><span class="chip bad">未勾选</span></td><td class="tiny">无停止入口</td></tr>
+<tr><td class="mono">user:manage</td><td><span class="chip bad">未勾选</span></td><td class="tiny">管理区导航不渲染</td></tr>
+<tr><td class="mono">audit:view</td><td><span class="chip bad">未勾选</span></td><td class="tiny">审计页不可达</td></tr>
+</tbody></table>
+<h4 class="blk">活跃会话（P0-1 规划态）</h4>
+<p class="tiny dim" style="margin:0">无会话（从未登录）· 空态文案：「该用户还没有登录记录」。</p>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="本页下方「分配权限点」区块即此操作（原弹层已按分层纪律升格为页内表单）（演示）">分配权限点 ↓</button> <button class="btn sm" data-click data-modal="md-del">删除该账号</button></p>
+<h4 class="blk">分配权限点（原弹层已升格为页内表单 · 保存即旋转会话）</h4>
+
+<table class="tbl compact"><tbody>
+<tr><td class="mono tiny">project:read</td><td><span class="chip ok">拟勾选</span></td><td><span class="btn link" data-toast="勾选 project:read（演示）">勾</span></td></tr>
+<tr><td class="mono tiny">project:write</td><td><span class="chip">不勾</span></td><td><span class="btn link" data-toast="勾选 project:write（演示）">勾</span></td></tr>
+<tr><td class="mono tiny">project:delete</td><td><span class="chip bad">危险</span></td><td><span class="btn link" data-toast="勾选危险权限点需再确认一次（演示）">勾</span></td></tr>
+<tr><td class="mono tiny">audit:view</td><td><span class="chip">不勾</span></td><td><span class="btn link" data-toast="勾选 audit:view（演示）">勾</span></td></tr>
+</tbody></table>
+<p class="tiny" style="margin:8px 0 0"><button class="btn sm primary" data-toast="已保存 1 项权限 · 零权限 → 有权限属权限变更 → 会话已旋转（演示）">保存并旋转会话</button> <button class="btn sm">取消</button></p>
+</div>
+<div class="modal" id="md-role"><div style="padding:var(--s4)"><b>改角色：testuser · user → admin？</b>
+<p class="small dim" style="margin:8px 0">需 <span class="mono">user:manage</span>。<b style="color:var(--red)">权限变更必旋转会话</b>（P0-1 · OWASP）：该用户<b>所有</b>活跃会话立即失效，须重新登录；否则旧会话继续持有变更前权限即为权限提升窗口。<b>必填原因</b>。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>旋转会话（2 个活跃）</td><td><span class="chip bad">立即作废 · 需重登</span></td></tr>
+<tr><td>custom_permissions 勾选</td><td><span class="chip warn">被忽略 · admin 走豁免</span></td></tr>
+<tr><td>可见项目</td><td><span class="chip warn">project_ids 未指定 → 变全部可见</span></td></tr>
+<tr><td>审计</td><td><span class="chip">记 user:role_changed（敏感 · 标红）</span></td></tr>
+<tr><td>唯一 admin 保护</td><td><span class="chip ok">仍允许（成为第二个 admin）· 界面须红字提示</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">这些二次确认弹层统一以 <span class="mono">testuser</span> 为演示对象，其他行打开同一弹层仅为演示接线。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [接替休假的管理员，负责权限发放            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="角色已改 · 该用户 2 个会话已旋转 · 审计 user:role_changed（演示）" data-close>确认改角色并旋转会话</button></div></div></div>
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除用户「testuser」？</b>
+<p class="small dim" style="margin:8px 0">需 <span class="mono">user:manage</span>。删除<b>只删账号</b>：其历史动作留在 <span class="mono">audit.jsonl</span>（追加写不可改删），产物 <span class="mono">created_by</span> 留原署名。<b>必填原因</b>。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>users.json 该账号</td><td><span class="chip bad">移除 · 无法登录</span></td></tr>
+<tr><td>其活跃会话</td><td><span class="chip bad">全部作废</span></td></tr>
+<tr><td>历史审计</td><td><span class="chip ok">保留（ actor=testuser 仍可查）</span></td></tr>
+<tr><td>其创建的 Agent / 产物</td><td><span class="chip ok">保留 · 署名不变</span></td></tr>
+<tr><td>可见项目分配</td><td><span class="chip warn">project_ids 随账号消失</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">弹层以 <span class="mono">testuser</span> 为演示对象；其他行打开同一弹层仅为演示接线。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [账号已停用，改用新账号            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除账号 · 会话已清空 · 审计 user:deleted（演示）" data-close>确认删除</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 users.html 的 <span class="mono">dr-user-new</span> 抽屉升格而来：可编辑的权限点勾选弹层（<span class="mono">pp-grant</span>）已并入本页下方区块——抽屉里再套一个可保存的勾选面板属多层操作，按纪律整页展示。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：勾 → toast（危险权限点需再确认一次）· 保存并旋转会话 → toast · 改角色 ▾ / 删除该账号 → 二次确认 modal。</p>
+</body></html>

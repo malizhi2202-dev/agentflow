@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>能力组 默认域 / code-review 详情 · Agent 管控面 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p3" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="control-plane.html" data-click>← 返回 Agent 管控面</span><span class="crumb"><span class="dim">Agent 管控面 /</span> <b>能力组 默认域 / code-review</b></span><span class="chip ok">2 healthy / 3</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="isolation.html">执行隔离</span></div>
+<div class="detail-body">
+<dl class="kv"><dt>派生方式</dt><dd>由成员 <span class="mono">capability_tags</span> 自动派生 · <b>零新增表</b></dd><dt>成员</dt><dd class="mono">3（含 1 个多标签 Agent 同时出现在 python 组）</dd><dt>期望</dt><dd class="mono">3 healthy · 实际 2 → <span class="chip warn">caution 漂移</span></dd><dt>路由</dt><dd>标签匹配 → 最小连接数（负载率 &lt; 1.0 才入选）</dd><dt>队列</dt><dd class="mono">2 pending（task-3 · 与 task-1 assigned 同标签）</dd><dt>组级操作</dt><dd>组不持有策略；暂停 / 扩容都落到具体 Agent</dd></dl>
+<h4 class="blk">候选打分（本组路由视角）</h4>
+<table class="tbl compact"><thead><tr><th>Agent</th><th>负载率</th><th>可接</th><th>选择</th></tr></thead><tbody>
+<tr><td class="mono">审查 Agent · 标准</td><td class="mono">2/4 = 0.50</td><td><span class="chip ok">是</span></td><td><span class="chip info">本应中选</span></td></tr>
+<tr><td class="mono">审查 Agent · 备援</td><td class="mono">0/2 = 0.00</td><td><span class="chip ok">是</span></td><td><span class="chip ok">负载最低 · 中选</span></td></tr>
+<tr><td class="mono">审查 Agent · 旧版</td><td class="mono">0/1</td><td><span class="chip bad">否 · dead</span></td><td class="tiny dim">健康失败，不参与匹配</td></tr>
+<tr><td class="mono">数据同步 Agent</td><td class="mono">1/2</td><td><span class="chip">不属本组</span></td><td class="tiny dim">标签不含 code-review</td></tr>
+<tr><td class="mono">生产域 · 审查 Agent · 生产主</td><td class="mono">3/4</td><td><span class="chip bad">跨域不可见</span></td><td class="tiny dim">需经统一入口</td></tr>
+</tbody></table>
+<h4 class="blk">task-3 为什么还在排队</h4>
+<div class="timeline">
+  <div class="tl-item"><b>14:31:02</b> · 入队 · 优先级 200（本组最高）</div>
+  <div class="tl-item fail"><b>14:31:02</b> · 匹配到 3 候选 · 可接 2 · 但两者均被 <span class="mono">task-1</span> 占用中（渐进扩容避免冲击配额）</div>
+  <div class="tl-item"><b>14:33:02</b> · 排队 120s · 未达防饥饿阈值 <span class="mono">max_wait_seconds=300</span></div>
+  <div class="tl-item"><b>预计 14:36:02</b> · 超阈值后自动提升优先级（+10/次 · 上限 100 视配置）</div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已为本组拉起 1 个备援副本（渐进扩容 · 观察后继续）（演示）">扩容 +1</button> <span class="btn link" data-toast="跳转 §6.5 编排画布查看本组拓扑（演示）">看拓扑</span></p>
+</div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由管控面浮层升格：域 / 能力组信息全宽 · 操作钮保留原接线（扩容 / 绑定 / 重命名 → toast 入审计 · 暂停调和与删除域 → 影响清单 + 必填原因二次确认，引用到的自带副本）　按 Esc 关闭浮层。</p>
+</body></html>

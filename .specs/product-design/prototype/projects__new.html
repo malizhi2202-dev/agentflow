@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>新建项目 · 项目管理</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p13" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="users.html">用户与权限</span></div>
+<div class="detail-top"><span class="pill" data-back="projects.html" data-click>← 返回 项目管理</span><span class="crumb"><b>新建项目 · 登记 + 关联</b></span><span class="chip">与「删除」对称：只动平台内登记，不动盘上文件</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0">登记语义与「删除」对称：新建只写平台内记录（路径映射 · 成员分配 · 关联对象台账），<b>不在盘上创建目录</b>；下方「本地目录」需已存在或稍后补齐。</p></div>
+
+<h4 class="blk">① 标识</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">名称（必填）  [ 我的新项目                        ]
+图标         [ i-folder ▾ ]  <span class="tiny dim">图标 id：i-folder / i-users / i-bot / i-branch / i-chart / i-book / i-layers</span>
+描述         [ 登记 + 关联 Agent 与工作流        ]
+             <span class="tiny dim">描述会进入项目内 Agent 的执行上下文</span></pre>
+
+<h4 class="blk">② 计划</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">状态     [ planned ▾ in_progress paused completed cancelled ]  (•) in_progress
+优先级   [ urgent ▾ high medium low none ]  (•) high
+Lead     (•) 成员：[李工 ▾]   ( ) Agent：[审查 Agent·标准 ▾]   <span class="tiny dim">成员或 Agent 二选一（演示下拉：李工 / 王工 / 审查 Agent·标准）</span>
+开始日期 [ 2026-09-23 ]   目标日期 [ 2026-10-10 ]</pre>
+
+<h4 class="blk">③ 资源</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">GitHub 仓库 [ owner/repo                 ]  ref（可选）[ main ]  →  <span class="tiny dim">owner/repo@main</span>
+本地目录    [ /home/malizhi/project/agentflow ]  <span class="tiny dim">绝对路径</span></pre>
+
+<h4 class="blk">④ 成员与可见性</h4>
+<p class="tiny dim" style="margin:0 0 6px">成员分配（成员名 + 角色 owner/admin/member + 本项目权限）：</p>
+<table class="tbl compact"><thead><tr><th>成员名</th><th>角色</th><th>本项目权限</th></tr></thead><tbody>
+<tr><td class="mono">admin · 李工</td><td><span class="chip bad">owner</span></td><td class="mono tiny">全部 6 项（豁免 · 不可削减）</td></tr>
+<tr><td class="mono">lisi · 李四</td><td><span class="chip info">member</span></td><td class="mono tiny">project:read + project:write</td></tr>
+<tr><td class="mono dim">wangwu · 王五</td><td><span class="chip">—（未分配）</span></td><td class="mono tiny dim">不可见</td></tr>
+</tbody></table>
+<p class="tiny" style="margin:6px 0 0">可见性：(•) private　( ) public　<span class="tiny dim">未分配成员不可见（不回退为全部可见）</span></p>
+
+<h4 class="blk">⑤ 关联对象（多选）</h4>
+<p style="margin:0 0 6px"><span class="pill" data-click style="border-color:var(--blue-border);color:var(--blue)">☑ Agent（多选）</span> <span class="pill" data-click style="border-color:var(--blue-border);color:var(--blue)">☑ 工作流</span> <span class="pill" data-click style="border-color:var(--blue-border);color:var(--blue)">☑ 知识库</span> <span class="pill" data-click>☐ 对话会话</span> <span class="pill" data-click>☐ 工作项</span></p>
+<div class="callout"><p class="tiny" style="margin:0">关联语义：<b>一 Agent 可属多项目，一项目可绑多 Agent</b>（N:N 连接表）；工作流 1:N 快照；知识库 / 对话会话 / 工作项 以 project_id 关联列挂靠。</p></div>
+
+<p style="margin-top:var(--s4)"><button class="btn primary" data-toast="已创建项目「我的新项目」并登记关联与成员（演示）">创建项目</button> <button class="btn" data-back="projects.html">取消 · 返回列表</button></p>
+<p class="tiny dim" style="margin:6px 0 0">创建仅写平台内登记（路径映射 · 成员分配 · 关联台账），<b>不在盘上创建目录</b>；审计 <span class="mono">project:register</span>（演示）。</p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立表单页）：「创建项目」→ toast（已创建 + 登记关联与成员）· 取消 / 顶部「← 返回」→ 回项目列表　按 Esc 关闭浮层。</p>
+</body></html>

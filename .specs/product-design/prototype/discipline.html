@@ -1,0 +1,270 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>全局交互纪律 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p0" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>§6.0 是全部页面的公共契约。本节为「条文 → 详解」的接线演示：<b>表格每一行可点</b>，抽屉内给出正例 / 反例各一段（条文原文以文档 §6.0 为准，抽屉演绎不入库）。</p>
+<div class="proto">
+  <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/design-baseline/interaction-rules（§6.0 · 非路由）</span><span class="fake">演示数据</span></div>
+  <div style="padding:var(--s4);background:var(--bg-app)">
+    <p class="lead">2026-09-22 第 3 轮过审结论（S7）：以下 12 条来自对 multica 全量 UI 层（55 路由）与协作机制的深读，是本平台全部详情页/列表页/实时视图的<b>公共交互契约</b>——先立纪律，再画页面；下文 p1–p22 的每处设计以本表为准，冲突时本表优先。</p>
+    <div class="panel tight" style="display:flex;gap:var(--s2);align-items:center;margin:var(--s3) 0">
+      <span class="chip info">13 行 · 逐行可点 → 条文详解</span>
+      <span class="chip">表头「12 条」为过审时口径，⑬ 为 09-23 追加</span>
+      <span style="flex:1"></span>
+      <span class="pill" data-click data-pop="pop-filter">落点页：全部 ▾</span>
+      <span class="pill" data-click data-pop="pop-state">核对状态：未筛 ▾</span>
+      <span class="btn link" data-click data-modal="md-gate-fail">自检受阻？</span>
+      <button class="btn sm primary" data-click data-pop="pop-new">+ 新增纪律 ▾</button>
+    </div>
+    <table class="tbl compact">
+      <thead><tr><th>#</th><th>纪律</th><th>落点页</th></tr></thead>
+      <tbody>
+        <tr data-click data-drawer="dr-d01"><td>①</td><td><b>统一详情骨架</b>：左 inspector（自动保存三态：保存中/已存/失败）+ 右 <span class="mono">?view=</span> 分段；无权限走页内 CapabilityBanner / Lock read-only，<b>不改 URL 不跳走</b></td><td>p4 · p7 · p14 · p18 及所有详情页</td></tr>
+        <tr data-click data-drawer="dr-d02"><td>②</td><td><b>视图即链接</b>：保存视图 = 筛选快照（status/priority/assignee/creator/project/label/property 等字段全集）+ <span class="mono">?view=&lt;id&gt;</span> URL 双向同步，天然可分享；自定义属性可作分组维</td><td>p6 · p12 · p15 · p20</td></tr>
+        <tr data-click data-drawer="dr-d03"><td>③</td><td><b>Runtime 健康四态</b> online / recently_lost / offline / long_offline；<b>判定阈值写进产品文案</b>（如心跳 45s/离线 75s 式明说）；工作量折进健康列；Cost·7d 带环比；缺价模型显式告警</td><td>p10 · p22</td></tr>
+        <tr data-click data-drawer="dr-d04"><td>④</td><td><b>失败卡片固定三件套</b>：Retry with context / Edit as advanced form（回填原输入）/ 升级到人；一键运行先过<b>权限·运行时·配额·归因四道门</b>，拒因原样 toast 不粉饰</td><td>p8 · p11 · p17</td></tr>
+        <tr data-click data-drawer="dr-d05"><td>⑤</td><td><b>Quick Actions</b>：管理员把命名 prompt 绑定为 Agent 动作，点击即跑、无输入框，public/private + 用量计数 + 可归档；「并入已有运行」用中性措辞，不谎报新启动</td><td>p7 · p14 · p19</td></tr>
+        <tr data-click data-drawer="dr-d06"><td>⑥</td><td><b>权限渲染纯函数化</b>：<span class="mono">{allowed, reason}</span> 稳定枚举决定 UI 变体（不解析字符串）；<b>private 连管理员也不旁路</b>；未实装的授权位显式 INERT；鉴权源唯一为「可调用目标」，visibility 降为展示字段</td><td>p16 · 全站</td></tr>
+        <tr data-click data-drawer="dr-d07"><td>⑦</td><td><b>草稿与滚动位是一等状态</b>：不同创建形态用互不覆盖的草稿槽 + 共享附件池；未完成草稿在入口页聚合提示；详情页返回时恢复滚动 memento</td><td>p8 · p18 · p19</td></tr>
+        <tr data-click data-drawer="dr-d08"><td>⑧</td><td><b>不可信内容渲染边界下沉到显示端</b>：产物/附件预览一律 <span class="mono">iframe sandbox="allow-scripts" + srcdoc</span>——<span class="mono">.specs/</span> 的 HTML 预览必须照做（与运行时暂无沙箱不矛盾，见 §1.6.5 ① 与 P1-11）</td><td>p9 · p18</td></tr>
+        <tr data-click data-drawer="dr-d09"><td>⑨</td><td><b>留痕要「表 + 界面」两步齐</b>：规则/编排版本、干预快照必须有可见消费界面（multica 有版本表却无展示页，为戒）；UI 可隐藏的调度行（如未启用升级）表必须保留供审计</td><td>p17 · p19</td></tr>
+        <tr data-click data-drawer="dr-d10"><td>⑩</td><td><b>status 与 triage 两根正交轴</b>：「到哪一步」≠「这算不算活」；受理门只拦从工作项<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</td><td>p17 · p20</td></tr>
+        <tr data-click data-drawer="dr-d11"><td>⑪</td><td><b>执行时间线记账面</b>：一次运行可挂多上下文（工作项/对话/自动化/评论线程）；「计划并入」与「实际投喂」双数组（计划 vs 收据）；转录带 seq + 调用 id + <b>截断标记</b>；取消人署名；wait_reason 作一等状态渲染；每 run 显示 tokens/USD</td><td>p10 · p22</td></tr>
+        <tr data-click data-drawer="dr-d12"><td>⑫</td><td><b>通知分层</b>：只 ping 需要拍板的人；通知目录读取失败宁多发不漏发（漏发会把工作项困住）；工作项推进后旧「运行失败」通知批量自愈归档；升级重评作 deferred 调度行而非提醒</td><td>p11 · p21</td></tr>
+        <tr data-click data-drawer="dr-d13"><td>⑬</td><td><b>身份修复前不暴露任何对外写端点</b>：fail-open 身份存在期间，A2A M1+、webhook 回传等对外写面一律冻结——协议面第一块砖只能是只读 AgentCard（P0-1 是 P1-15 的硬前置）</td><td>P1-15 · <span class="mono">D-identity-and-security-2</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn" style="margin-top:var(--s4)">
+      <p><b>本页自身的接线示范：</b>行 → 详情抽屉（纪律 ① 的「统一详情骨架」）· 抽屉内破坏性动作「废止本条纪律」→ 二次确认模态 + 必填原因 · 核对状态变更 → toast 并写明入审计 · 筛选与新建 → pop 弹层。</p>
+    </div>
+  </div>
+</div>
+<p class="tiny dim" style="padding:12px 18px"><b>演示数据说明：</b>13 行条文逐字取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.0（含 09-23 追加的 ⑬）；抽屉内的正例 / 反例、落点核对表与「已核对 / 未核对」徽标为演示演绎，不回写文档。真实系统中本表是设计基线清单，不存在对应路由与写接口。</p>
+
+<div class="drawer" id="dr-d01"><header><b>纪律 ① · 统一详情骨架</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>条文原文以 §6.0 为准；下方正例 / 反例是为对齐形态写的演绎，不是文档正文。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>左 inspector（自动保存三态）+ 右 <span class="mono">?view=</span> 分段</dd><dt>落点页</dt><dd class="mono">p4 · p7 · p14 · p18 及所有详情页</dd><dt>适用面</dt><dd>全部详情形态：Agent / 工具 / 角色 / 产物编辑器</dd><dt>违反后果</dt><dd>同一产品在四处给出四种详情结构，用户每次都要重新学；无权限被跳走导致筛选与滚动全丢</dd><dt>关联纪律</dt><dd>⑥（权限渲染）· ⑦（滚动 memento）</dd><dt>核对状态</dt><dd><span class="chip ok">p4 p7 已自检</span> <span class="chip warn">p18 未核</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">§6.4 Agent 详情：左侧 inspector 呈现基础信息并显示<b>已存</b>，右侧 <span class="mono">?view=probe</span> 分段切探针 / 记忆；账号无 <span class="mono">project:write</span> 时页内挂 Lock read-only，URL 与分段选择都不变，返回后仍在原位置。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">点进一个无权的知识源详情，服务端 302 弹回列表页；用户此前在列表里的筛选、翻页与滚动位置全部丢失，且以为自己「点错了」。详情骨架各自发挥：一版用抽屉、一版用新页、一版用弹窗。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">dr-kb</td><td>知识库详情抽屉</td><td><span class="chip ok">已接</span></td><td class="tiny dim">knowledge.html</td></tr>
+<tr><td class="mono">dr-ag</td><td>Agent 详情抽屉</td><td><span class="chip ok">已接</span></td><td class="tiny dim">agent-detail.html</td></tr>
+<tr><td class="mono">?view=</td><td>分段 URL 同步</td><td><span class="chip">未实装 · 原型内不体现</span></td><td class="tiny dim">§6.0 ① 目标形态</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已标记「纪律 ① · p18 已自检」· 写入设计基线台账（演示）">标记本页已自检</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d02"><header><b>纪律 ② · 视图即链接</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>正例 / 反例为对齐形态的演绎；筛选字段全集以 §6.0 条文列举为准。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>保存视图 = 筛选快照 + <span class="mono">?view=&lt;id&gt;</span> 双向同步</dd><dt>落点页</dt><dd class="mono">p6 · p12 · p15 · p20</dd><dt>字段全集</dt><dd class="mono">status / priority / assignee / creator / project / label / property</dd><dt>违反后果</dt><dd>分享出去的链接是默认全量视图，同事看到的与自己看到的不一样，评审结论无法复现</dd><dt>关联纪律</dt><dd>⑨（版本与快照要能被消费）</dd><dt>核对状态</dt><dd><span class="chip ok">p15 已自检</span> <span class="chip warn">p12 未核</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">§6.15 审计日志把「近 7 天 · 动作 admin:* · 结果 失败」存为视图 <span class="mono">v-88</span>，地址栏变 <span class="mono">?view=v-88</span>；粘给安全同事直接落在同一份筛选快照上，视图本身可另存为不同版本。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">筛选条件只活在组件内存里：链接不带参数，刷新即回默认；自定义属性只能排序不能当分组维，看板按团队分组要靠导出表格手做。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">pop-filter</td><td>本页「落点页」筛选 pop</td><td><span class="chip ok">已接</span></td><td class="tiny dim">演示态：不写 URL</td></tr>
+<tr><td class="mono">v-88</td><td>保存视图 → URL 双向同步</td><td><span class="chip">未实装 · 原型内不体现</span></td><td class="tiny dim">目标形态</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已标记「纪律 ② · p12 已自检」（演示）">标记本页已自检</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d03"><header><b>纪律 ③ · Runtime 健康四态</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>阈值数字（45s / 75s）取自条文的「式明说」示例，非本平台实测配置；真实配置在探针服务。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>四态 <span class="mono">online / recently_lost / offline / long_offline</span>，判定阈值写进产品文案</dd><dt>落点页</dt><dd class="mono">p10 · p22</dd><dt>附加要求</dt><dd>工作量折进健康列 · <span class="mono">Cost·7d</span> 带环比 · 缺价模型显式告警</dd><dt>关联自家事实</dt><dd>§2.6 探针优先 <span class="mono">base_url + /health</span>，两者皆无 = 不可探活（返回 None）</dd><dt>违反后果</dt><dd>75 秒空窗内挂掉的实例仍显绿灯，值班据此判断「一切正常」</dd><dt>核对状态</dt><dd><span class="chip warn">p10 未铺 · 现为文档静态图</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">运行时监控的健康列写全：<span class="chip ok">online · 心跳 12s（阈值 45s 内）</span>；<span class="chip warn">recently_lost · 心跳 61s（45–75s）</span>；<span class="chip bad">offline · 心跳 4min（&gt;75s）</span>；<span class="chip">long_offline · 27h</span>。同一格右侧折进「2 在途 / 并发 4」，缺价模型行显式标 <span class="chip bad">无价目 · Cost 不可计</span>。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">只有「在线 / 离线」两个绿灯红灯，且阈值藏在后端常量里，界面文案写「运行正常」；心跳丢失 50 秒的实例仍显示在线，用户把「最近掉线」与「长期掉线」当成同一件事处理。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">dot running/idle/blocked/dead/failed</td><td>状态灯五态（§5.3 口径）</td><td><span class="chip ok">已接</span></td><td class="tiny dim">control-plane.html · agent-detail.html</td></tr>
+<tr><td class="mono">recently_lost</td><td>四态命名与阈值入文案</td><td><span class="chip bad">未实装 · 两口径冲突需裁定</span></td><td class="tiny dim">§6.0 ③ vs §5.3 五态灯</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已提交「健康态口径对齐」议题（演示）">提议题</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d04"><header><b>纪律 ④ · 失败卡片固定三件套</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>拒因文案示例为演绎；四道门顺序与 §6.5「校验不通过不落库」一致。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>三件套</dt><dd>Retry with context · Edit as advanced form（回填原输入）· 升级到人</dd><dt>四道门</dt><dd class="mono">权限 → 运行时 → 配额 → 归因</dd><dt>落点页</dt><dd class="mono">p8 · p11 · p17</dd><dt>措辞纪律</dt><dd>拒因<b>原样 toast 不粉饰</b></dd><dt>关联自家事实</dt><dd>§1.6.5 ①「提示词契约 ≠ 门禁」：门要落在状态转换层</dd><dt>核对状态</dt><dd><span class="chip warn">p11 未铺</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">run-8842 失败卡：三枚按钮齐全，Retry with context 沿用同一上下文快照；Edit as advanced form 回填原入参（含 <span class="mono">timeout=120s</span>）；升级到人则生成审批中心的待批工作项并署名。一键运行被配额门拒 → toast 原样写「429 配额：本日 Token 预算已用尽 1.2M/1.2M」，不改写成「操作失败请稍后重试」。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">失败只有一句「运行失败，请重试」+ 一枚重试按钮；用户点重试再次撞同一个 429，循环三次后被限流；原始入参丢失，无法回填只能重打。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">md-gate-fail</td><td>本页失败原因模态示例</td><td><span class="chip ok">已接</span></td><td class="tiny dim">见本页抽屉操作</td></tr>
+<tr><td class="mono">升级到人</td><td>失败 → 审批工作项</td><td><span class="chip">未实装 · 见 §6.17</span></td><td class="tiny dim">目标形态</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已记录「p11 失败卡三件套」走查项（演示）">记走查项</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d05"><header><b>纪律 ⑤ · Quick Actions</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>动作名与用量数字为演示值；「并入已有运行」的中性措辞是本条核心，不得改写成「已新启动」。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>管理员把命名 prompt 绑定为 Agent 动作 · 点击即跑 · 无输入框</dd><dt>属性</dt><dd>public / private + 用量计数 + 可归档</dd><dt>落点页</dt><dd class="mono">p7 · p14 · p19</dd><dt>措辞红线</dt><dd>并入已有运行要说「已并入」，不谎报新启动</dd><dt>关联纪律</dt><dd>⑥（private 连管理员也不旁路）· ④（失败三件套）</dd><dt>核对状态</dt><dd><span class="chip warn">p7 未铺</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">工具详情挂 Quick Action「按 R16 归档议题」：点击即跑，按钮旁显示 <span class="mono">用量 128 · 最近 09-23 14:11</span>；<span class="chip">private · 仅 owner 可见</span>，管理员同样不旁路；不再使用时「归档」，动作从列表消失但用量账保留。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">把动作实现成弹一个输入框让用户重写 prompt（等于没有 Quick Action）；运行被并入已有 run 时提示「已为你新启动一次运行」，用户重复扣费才发现是同一 run。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">toast 措辞</td><td>「已并入 run-8842」式中性提示</td><td><span class="chip ok">已接（本页 toast 示范）</span></td><td class="tiny dim">纪律 ⑤</td></tr>
+<tr><td class="mono">qa-archive</td><td>动作绑定与用量计数</td><td><span class="chip">未实装 · 见 §6.7</span></td><td class="tiny dim">目标形态</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已标记「纪律 ⑤ · p7 待铺」（演示）">标记待铺</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d06"><header><b>纪律 ⑥ · 权限渲染纯函数化</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b><span class="mono">reason</span> 枚举值为演绎；自家事实「越权与不存在统一 404」来自 §1.6.5 ②（已过审）。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd><span class="mono">{allowed, reason}</span> 稳定枚举决定 UI 变体，不解析字符串</dd><dt>硬约束</dt><dd>private 连管理员也不旁路 · 未实装授权位显式 INERT</dd><dt>鉴权源</dt><dd>唯一为「可调用目标」，visibility 降为展示字段</dd><dt>落点页</dt><dd class="mono">p16 · 全站</dd><dt>关联自家事实</dt><dd>现行 <span class="mono">X-User-Id</span> fail-open 回退 admin（P0-1 待修）</dd><dt>核对状态</dt><dd><span class="chip bad">全站未核 · 依赖 P0-1</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">接口回 <span class="mono">{allowed:false, reason:"PRIVATE_NOT_OWNER"}</span>，前端 <span class="mono">switch(reason)</span> 渲染对应 Lock 变体（文案说明「private 资源仅 owner 可读」）；未实装的 <span class="mono">workflow:stop</span> 授权位显式标 <span class="chip">INERT · 暂不生效</span>；越权与不存在统一 404，无法用状态码探测他人资源。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">前端用 <span class="mono">msg.includes("not found")</span> 决定灰置还是隐藏：后端文案一改（改错别字）UI 就退化成「可点击的报错」；管理员以自身权限绕过 private 读取他人 Agent 的会话；授权位先在前端放开、服务端未实现，用户点了没反应。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">INERT 标注</td><td>未实装授权位显式声明</td><td><span class="chip ok">本页示范</span></td><td class="tiny dim">纪律 ⑥</td></tr>
+<tr><td class="mono">401 / 403 / 404</td><td>登录与越权码</td><td><span class="chip bad">未实装 · P0-1/P0-2 前置</span></td><td class="tiny dim">见 login.html</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已生成「权限渲染枚举盘点」待办（演示）">生成待办</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d07"><header><b>纪律 ⑦ · 草稿与滚动位是一等状态</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>「3 份未完成草稿」为演示值；共享附件池的语义以条文为准。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>不同创建形态用互不覆盖的草稿槽 + 共享附件池</dd><dt>聚合提示</dt><dd>未完成草稿在入口页汇总</dd><dt>memento</dt><dd>详情页返回时恢复滚动位置</dd><dt>落点页</dt><dd class="mono">p8 · p18 · p19</dd><dt>违反后果</dt><dd>写了一半的产物被另一入口覆盖，用户丢失不可重来的输入</dd><dt>核对状态</dt><dd><span class="chip warn">p18 未核</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">从看板进入 <span class="mono">REVIEW.md</span> 编辑与从对话中心进入用两个草稿槽（<span class="mono">draft:kanban:AF-104</span> / <span class="mono">draft:chat:12</span>），附件池共用；工作台顶栏聚合「3 份未完成草稿」；返回列表时滚动位置恢复到自己上次的那一行。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">一个全局 <span class="mono">localStorage.draft</span> 承载所有入口，第二个入口把第一份覆盖；附件各自复制成三份且不同步；返回时永远从列表顶部看起，用户靠肉眼找上次那行。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">草稿槽分离</td><td>按创建形态命名</td><td><span class="chip">未实装 · 见 §6.18</span></td><td class="tiny dim">目标形态</td></tr>
+<tr><td class="mono">scroll memento</td><td>返回恢复位</td><td><span class="chip">未实装</span></td><td class="tiny dim">目标形态</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已标记「纪律 ⑦ · p18 未核」并挂到走查清单（演示）">挂走查清单</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d08"><header><b>纪律 ⑧ · 不可信内容渲染边界下沉到显示端</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>本条与「运行时暂无沙箱」并不矛盾（§1.6.5 ① 与 P1-11 已写清），边界落在渲染端。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>产物 / 附件预览一律 <span class="mono">iframe sandbox="allow-scripts" + srcdoc</span></dd><dt>硬要求</dt><dd><span class="mono">.specs/</span> 的 HTML 预览必须照做</dd><dt>落点页</dt><dd class="mono">p9 · p18</dd><dt>为什么</dt><dd>产物是 Agent 与外人可写的数据，属不可信输入；显示端是最后一道可控边界</dd><dt>关联自家事实</dt><dd>Agent 在平台进程内执行、Domain 非安全边界（CLAUDE.md 已核实）</dd><dt>核对状态</dt><dd><span class="chip bad">p9 / p18 未核</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">预览 <span class="mono">.specs/product-design/PRODUCT-DESIGN.html</span> 时用 <span class="mono">srcdoc</span> 注入 + <span class="mono">sandbox="allow-scripts"</span>：脚本能跑但不给同源权限，拿不到页面 cookie 与 <span class="mono">localStorage</span>；界面上明写「预览沙箱 · 无同源能力」。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0"><span class="mono">dangerouslySetInnerHTML</span> 直接把产物 HTML 插进主文档：一段来自 Agent 写的产物里的脚本以登录态调用 <span class="mono">/api/agents/1 DELETE</span>；「反正运行时也没沙箱」被当成不做渲染端隔离的理由。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">prototype/*.html</td><td>零外部资源 · 无远程脚本</td><td><span class="chip ok">已守</span></td><td class="tiny dim">本组 5 页一致</td></tr>
+<tr><td class="mono">srcdoc sandbox</td><td>产物预览容器</td><td><span class="chip">未实装 · 见 §6.9 §6.18</span></td><td class="tiny dim">目标形态</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已把「渲染边界核验」加入 P1-11 走查（演示）">加入走查</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d09"><header><b>纪律 ⑨ · 留痕要「表 + 界面」两步齐</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>反面教材（有版本表无展示页）为 multica 实测结论，见 §6.0 引文。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>规则 / 编排版本、干预快照必须有可见消费界面</dd><dt>硬要求</dt><dd>UI 可隐藏的调度行，表必须保留供审计</dd><dt>落点页</dt><dd class="mono">p17 · p19</dd><dt>自家落点</dt><dd><span class="mono">GET/PUT /api/admin/workflow</span> + <span class="mono">workflow.json</span>（已存在未接上）</dd><dt>违反后果</dt><dd>「有表没脸」：出事只能查库，评审与合规无从下手</dd><dt>核对状态</dt><dd><span class="chip ok">p19 有规划原型</span> <span class="chip warn">p17 未核</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">§6.19 阶段模型配置页把 <span class="mono">workflow.json</span> 的每次改动出版本行（v7 09-21 · 谁 · 改了哪一阶段门禁），可 diff 可回滚；未启用的「升级重评」调度行 UI 折叠，但表与只读 API 保留供审计。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">迁移把规则版本写进 <span class="mono">rule_versions</span> 表，全站没有任何页面读它；三周后没人能回答「这条门禁是谁在哪天开的」，只能翻数据库；同时把未启度的调度行从表里删掉以「保持一致」，审计线索断掉。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">p19</td><td>阶段模型配置（文档静态图）</td><td><span class="chip ok">已有形态基线</span></td><td class="tiny dim">PRODUCT-DESIGN#p19</td></tr>
+<tr><td class="mono">p15</td><td>审计日志消费界面</td><td><span class="chip ok">已有形态基线</span></td><td class="tiny dim">PRODUCT-DESIGN#p15</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已记录「规则版本消费界面」缺口至 P1 清单（演示）">记缺口</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d10"><header><b>纪律 ⑩ · status 与 triage 两根正交轴</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>「到哪一步 ≠ 这算不算活」为条文原话的口语化复述。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>两轴</dt><dd><span class="mono">status</span>：到哪一步 · <span class="mono">triage</span>：这算不算活</dd><dt>受理门</dt><dd>只拦从工作项<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</dd><dt>落点页</dt><dd class="mono">p17 · p20</dd><dt>关联裁定</dt><dd>§6.20 〔09-23 裁定⑦注〕与 <span class="mono">work_item</span> 双轴表结构</dd><dt>违反后果</dt><dd>「不算活」只能靠把状态改成关闭表达，工作项历史被污染</dd><dt>核对状态</dt><dd><span class="chip warn">p20 未铺</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">看板列仍是「未开始 / 进行中 / 审核中 / 已完成」，<span class="chip">待受理</span> 作为独立徽标叠加；值班在对话中心点名某 Agent 处理临时问题时，运行不经受理门直接起（人点名 = 已受理），自动推导执行者的运行才受拦。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">把「不算活」塞进 status：新增 <span class="mono">status=not_work</span>，于是「关闭」与「不算活」混成一个值，统计里凭空少了工作项；对话派发的运行也被受理门拦下，值班被迫先建工作项才能问一句问题。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">work_item.status</td><td>四类生命周期锚</td><td><span class="chip">未实装 · 见 §6.20</span></td><td class="tiny dim">目标形态</td></tr>
+<tr><td class="mono">work_item.triage</td><td>受理轴 + 受理门</td><td><span class="chip">未实装 · 门禁落状态转换层</span></td><td class="tiny dim">目标形态</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已把「受理门位置」标为需人批动作盘点（演示）">盘点门禁</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d11"><header><b>纪律 ⑪ · 执行时间线记账面</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>自家事实：回放消费表 <span class="mono">trace_spans</span> 当前 0 行（无产生端），故本条落地前置为 C10-0。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>多上下文挂靠</dt><dd>一次运行可挂工作项 / 对话 / 自动化 / 评论线程</dd><dt>双数组</dt><dd>「计划并入」vs「实际投喂」＝计划 vs 收据</dd><dt>转录要求</dt><dd class="mono">seq + 调用 id + 截断标记</dd><dt>一等状态</dt><dd><span class="mono">wait_reason</span> 渲染 · 取消人署名 · 每 run tokens/USD</dd><dt>落点页</dt><dd class="mono">p10 · p22</dd><dt>核对状态</dt><dd><span class="chip bad">p22 规划中 · 产生端未落</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">run-8842 回放头显示 <span class="mono">41.2k tok · $0.38 · 取消人 @王工 14:06</span>；每条转录带 <span class="mono">seq=17 · call_id=tc_9f2 · [已截断 3.2KB]</span>；「计划并入 3 上下文 / 实际投喂 2」并排显示，差集即证据；等待审批时 <span class="chip">wait_reason: human_approval</span> 是一等徽标而不是灰色一行小字。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">时间线只有一句「失败 ×3」，没有 seq 与调用 id，无法对齐工具入参出参；截断静默发生不留标记，用户以为看到全量；取消没署名，事后无人可问；成本只在报表里出现总数，单 run 无从核对。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">timeline / tl-item</td><td>本页与 control-plane、agent-detail 已用</td><td><span class="chip ok">已接</span></td><td class="tiny dim">形态一致</td></tr>
+<tr><td class="mono">wait_reason 徽标</td><td>一等渲染</td><td><span class="chip bad">未实装 · 依赖 trace 产生端</span></td><td class="tiny dim">C10-0 前置</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已把「timeline 记账面字段」写进 p22 铺页清单（演示）">同步到铺页清单</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d12"><header><b>纪律 ⑫ · 通知分层</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>「宁多发不漏发」的失败策略是条文的显式取向，示例数字为演绎。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>分层规则</dt><dd>只 ping 需要拍板的人</dd><dt>失败策略</dt><dd>通知目录读取失败<b>宁多发不漏发</b>（漏发会把工作项困住）</dd><dt>自愈</dt><dd>工作项推进后旧「运行失败」通知批量归档</dd><dt>升级重评</dt><dd>作 deferred 调度行，而非再发提醒</dd><dt>落点页</dt><dd class="mono">p11 · p21</dd><dt>核对状态</dt><dd><span class="chip warn">p21 未铺</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">AF-116 需人拍板 → 只 ping 门禁负责人李工；通知目录接口 500 时按「全部相关人」发（多发 6 条可被忽略，漏发 1 条会卡死工作项）；AF-116 推进到 6-review 后，其历史 3 条「运行失败」通知被批量自愈归档并标注原因。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">全群广播每次失败，一周 240 条后所有人静音（等于没有通知）；目录读取失败即静默跳过，唯一该拍板的人没收到，工作项原地卡 3 天；升级重评又发一遍提醒，同一件事被 ping 两次且互相不知道。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">告警入口角标 3</td><td>未确认告警数（control-plane.html）</td><td><span class="chip ok">已接</span></td><td class="tiny dim">§5.1 底部告警入口</td></tr>
+<tr><td class="mono">批量自愈归档</td><td>旧通知随工作项推进归档</td><td><span class="chip">未实装 · 见 §6.21</span></td><td class="tiny dim">目标形态</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已按分层规则重算收件人：1 人（演示）">试算收件人</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="drawer" id="dr-d13"><header><b>纪律 ⑬ · 身份修复前不暴露任何对外写端点</b><span class="chip warn">09-23 追加 · S7 后</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>本条是硬前置关系（P0-1 → P1-15），不是功能排期；灰置示例为演示。</p></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>fail-open 身份存在期间，对外写面一律冻结</dd><dt>冻结对象</dt><dd class="mono">A2A M1+ · webhook 回传</dd><dt>唯一允许的协议砖</dt><dd>只读 <span class="mono">AgentCard</span></dd><dt>前置关系</dt><dd>P0-1（服务端凭证交换）是 P1-15 的<b>硬前置</b></dd><dt>落点页</dt><dd class="mono">P1-15 · D-identity-and-security-2</dd><dt>核对状态</dt><dd><span class="chip bad">现行 X-User-Id 默认 admin → 冻结生效中</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
+<div class="callout ok"><p class="tiny" style="margin:0">§6.27 对外集成面：只读 AgentCard 已发布；「webhook 回传」「A2A M1+ 任务写入」两行灰置并显式写 <span class="chip bad">INERT · 待 P0-1 落地</span>，鼠标悬停说明「身份仍来自 X-User-Id 头，开写面即可被伪造」。P0-1 落地并验证后，两行才变可点。</p></div>
+<p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
+<div class="callout bad"><p class="tiny" style="margin:0">先把 webhook 回传打开「联调方便」：外部方带上 <span class="mono">X-User-Id: admin</span> 即可以管理员身份写入任务；协议面第一块砖做成双向端点，回退要收回已发出去的凭据，成本数倍于当初等 P0-1。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">p1 · login.html</td><td>会话 / 口令改造（P0-1 P0-2 驱动）</td><td><span class="chip ok">本页已铺</span></td><td class="tiny dim">见 login.html</td></tr>
+<tr><td class="mono">p27</td><td>对外集成面 · 写面冻结呈现</td><td><span class="chip">文档静态图</span></td><td class="tiny dim">PRODUCT-DESIGN#p27</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已核对：当前无对外写端点被打开（演示）">复核冻结态</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
+
+<div class="modal" id="md-abolish"><div style="padding:var(--s4)"><b>废止纪律 ①「统一详情骨架」？</b>
+<p class="small dim" style="margin:8px 0">这是公共契约，废止即影响全部已按它铺设的详情页。<b>必填原因</b>（本节自身的纪律：破坏性操作二次确认 + 理由入台账）。</p>
+<p class="tiny" style="margin:0 0 6px"><b>影响清单（演示）</b></p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">p4 · p7 · p14 · p18</td><td>已按本条铺设的详情页</td><td><span class="chip warn">4 页需重做</span></td></tr>
+<tr><td class="mono">§6.0 冲突优先规则</td><td>「冲突时本表优先」的判据失效</td><td><span class="chip bad">评审依据断裂</span></td></tr>
+<tr><td class="mono">D-identity-and-security-2</td><td>引用本条的议题文档</td><td><span class="chip">1 处需改注</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [详情页形态统一收益不明显，改按模块自定  ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已提交废止提案 · 需 ⑤ 人工审核门通过 · 入设计基线台账（演示）" data-close>提交废止提案</button></div></div></div>
+<div class="modal" id="md-gate-fail"><div style="padding:var(--s4)"><b>本条纪律无法自检通过？</b><p class="small dim" style="margin:8px 0">缺证据即标记为「未核」，不得为了清零状态而勾过。</p><div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已标记「未核 · 待补对照原型」并生成走查项（演示）" data-close>标记未核</button></div></div></div>
+
+<div class="pop" id="pop-filter"><p class="tiny dim" style="margin:0 0 6px"><b>筛选 · 落点页</b>（演示态：真实系统写入 <span class="mono">?view=&lt;id&gt;</span>，见纪律 ②）</p>
+<table class="tbl compact"><tbody>
+<tr><td><span class="chip ok">已勾选</span></td><td class="mono">详情页（p4 · p7 · p14 · p18）</td><td class="tiny dim">5 条纪律命中</td></tr>
+<tr><td><span class="chip">未选</span></td><td class="mono">列表与视图（p6 · p12 · p15 · p20）</td><td class="tiny dim">2 条命中</td></tr>
+<tr><td><span class="chip">未选</span></td><td class="mono">运行时与回放（p10 · p22）</td><td class="tiny dim">2 条命中</td></tr>
+<tr><td><span class="chip">未选</span></td><td class="mono">告警与通知（p11 · p21）</td><td class="tiny dim">2 条命中</td></tr>
+<tr><td><span class="chip">未选</span></td><td class="mono">权限与对外面（p16 · p27）</td><td class="tiny dim">2 条命中</td></tr>
+</tbody></table>
+<p style="margin:6px 0 0"><button class="btn sm" data-toast="已按「详情页」筛选：命中 5 条（演示）">应用</button> <button class="btn sm" data-toast="已存为视图 v-04 · 链接 ?view=v-04（演示）">存为视图</button></p></div>
+
+<div class="pop" id="pop-state"><p class="tiny dim" style="margin:0 0 6px"><b>筛选 · 核对状态</b></p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">已自检</td><td><span class="chip ok">4 条</span></td><td class="tiny dim">① ② ⑨ ⑬</td></tr>
+<tr><td class="mono">未核</td><td><span class="chip warn">7 条</span></td><td class="tiny dim">③ ④ ⑤ ⑦ ⑩ ⑫ ⑧</td></tr>
+<tr><td class="mono">受阻（前置未落）</td><td><span class="chip bad">2 条</span></td><td class="tiny dim">⑥ 依赖 P0-1 · ⑪ 依赖 trace 产生端</td></tr>
+</tbody></table>
+<p style="margin:6px 0 0"><button class="btn sm" data-toast="已筛选「受阻 2 条」并列出前置件（演示）">应用</button></p></div>
+
+<div class="pop" id="pop-new"><p class="tiny dim" style="margin:0 0 6px"><b>新增纪律草案 · 选类型</b>（演示态：草案不入库，过审后才进 §6.0）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">交互契约</td><td>约束某类页面的共同形态</td><td><span class="chip info">→ 走 ⑤ 人工审核门</span></td></tr>
+<tr><td class="mono">状态语义</td><td>定义新状态/新枚举</td><td><span class="chip warn">需与 §5.3 灯态对齐</span></td></tr>
+<tr><td class="mono">安全边界</td><td>声明什么不是边界</td><td><span class="chip bad">关联 P1-11</span></td></tr>
+</tbody></table>
+<p style="margin:6px 0 0"><button class="btn sm" data-toast="草案已建：需引用至少 1 个一手依据（自家实测或竞品实报）（演示）">建「交互契约」草案</button> <button class="btn sm" data-toast="已取消（演示）" data-close>取消</button></p></div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：纪律行 / 「展开」→ 条文详解抽屉（13 个）· 抽屉内「申请废止本条」→ 二次确认模态 + 影响清单 + 必填原因 · 「标记已自检 / 记走查项 / 应用筛选」→ toast · 顶栏「落点页」「核对状态」「新增纪律」→ pop 弹层　按 Esc 关闭所有浮层。</p>
+</body></html>

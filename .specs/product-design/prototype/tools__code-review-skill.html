@@ -1,0 +1,56 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>代码审查详情 · 工具库 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>工具</b> · <span class="mono">skill.code_review</span></span><span class="chip purple">Skill</span><span class="chip ok">启用</span><span class="chip mono">4 参数</span></div>
+<div class="detail-body">
+<p class="proto-note"><span class="chip warn">演示数据</span>Skill 类工具（描述性登记，由 Agent 按提示词执行）：输入输出 / 落盘路径 / 调用示例 / 启用历史。同类的「需求拆解」形态一致，此处以「代码审查」为样本。</p>
+
+<h4 class="blk">基础信息</h4>
+<dl class="kv"><dt>标识 / 类型</dt><dd class="mono">skill.code_review · Skill（描述性登记）</dd>
+<dt>能力</dt><dd>按规范检查变更并产出 <span class="mono">REVIEW.md</span></dd>
+<dt>输入 / 输出</dt><dd class="mono">change_id, scope, ruleset, severity_gate → REVIEW.md</dd>
+<dt>落盘路径</dt><dd class="mono">.specs/&lt;change-id&gt;/REVIEW.md（经 get_specs_dir()）</dd>
+<dt>门禁语义</dt><dd>产出 ⑤ 人审门结论；过审前禁止进 ROADMAP</dd>
+<dt>被引用</dt><dd data-click><span class="pill" data-goto="agent-detail.html">审查 Agent · 标准</span> <span class="pill" data-goto="agent-detail.html">审查 Agent · 备援</span> · 编排 <span class="mono">审查流水线 v3</span></dd>
+<dt>近 7 天调用</dt><dd class="mono">96 次 · 失败 1 · 平均 11.7s</dd>
+<dt>注册</dt><dd class="mono">09-16 14:20 · admin 李工</dd></dl>
+
+<h4 class="blk">参数 schema（4）</h4>
+<table class="tbl compact"><thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead><tbody>
+<tr><td class="mono">change_id</td><td class="mono">string</td><td><span class="chip bad">是</span></td><td class="tiny">目录名，如 agent-domains</td></tr>
+<tr><td class="mono">scope</td><td class="mono">enum</td><td><span class="chip">否</span></td><td class="tiny">all / backend / frontend</td></tr>
+<tr><td class="mono">ruleset</td><td class="mono">string</td><td><span class="chip">否</span></td><td class="tiny">规范.pdf 索引版本，默认最新</td></tr>
+<tr><td class="mono">severity_gate</td><td class="mono">enum</td><td><span class="chip">否</span></td><td class="tiny">blocker / major / none</td></tr>
+</tbody></table>
+
+<h4 class="blk">调用示例</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">{ "tool": "skill.code_review",
+  "args": { "change_id": "agent-domains", "scope": "backend", "severity_gate": "major" } }
+→ { "ok": true, "artifacts": [".specs/agent-domains/REVIEW.md"], "findings": 3 }</pre>
+
+<h4 class="blk">启用历史</h4>
+<div class="timeline">
+<div class="tl-item"><b>09-22 10:15</b> · ruleset 升到规范.pdf（100 chunks 重建索引后）</div>
+<div class="tl-item"><b>09-16 14:20</b> · 注册并启用 · admin 李工</div>
+</div>
+
+<h4 class="blk">操作</h4>
+<p><button class="btn sm" data-toast="试调用已发起 · 沙箱内只读跑一次（演示）">试调用</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-disable">禁用</button></p>
+
+<div class="modal" id="md-disable"><div style="padding:var(--s4)"><b>禁用工具「代码审查」？</b>
+<p class="small dim" style="margin:8px 0">禁用<b>全局生效</b>：卡片保持可见（不隐藏），已引用它的 Agent 与编排<b>在下次执行时才失败</b>。<b>必填原因</b>——理由与操作人入审计（§6.0 纪律）。</p>
+<table class="tbl compact"><thead><tr><th>受影响引用</th><th>类型</th><th>状态</th></tr></thead><tbody>
+<tr><td class="mono">审查 Agent · 标准</td><td>Agent</td><td><span class="chip ok">healthy · 下次执行失败</span></td></tr>
+<tr><td class="mono">审查 Agent · 备援</td><td>Agent</td><td><span class="chip">冷备 · 拉起即失败</span></td></tr>
+<tr><td class="mono">审查流水线 v3</td><td>编排</td><td><span class="chip ok">已发布 · 下次执行失败</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:8px">原因: [ruleset 与最新规范不一致，先停用避免产出误判 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已禁用 · 卡片仍可见 · 审计 tool:disable（演示）" data-close>确认禁用</button></div></div></div>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 工具库 · 被引用 Agent → Agent 详情 · 试调用→toast · 禁用→二次确认（本页自带 modal 副本，含必填原因）　按 Esc 关闭所有浮层。</p>
+</body></html>

@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jev-Style-Qwen3.5-2B 详情 · 决策模型目录 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p23" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="decision-models.html" data-click>← 返回 决策模型目录</span><span class="crumb"><b>Jev-Style-Qwen3.5-2B</b> · 本地 · llama.cpp :8080</span><span class="chip ok">healthy</span><span class="chip">Q4_K_M · 1.3GB</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="decision-models.html">决策模型</span><span class="pill" data-goto="decision-models__bind.html">绑定到域</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="finetune.html">微调工厂</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>校准是它敢上岗的执照：</b>「说 80% 就真的 80% 对」→ 概率可直接当置信度用；<b>只在训练过的任务族上</b>校准近乎完美，没见过的任务类型只保持基座准确率。</p></div>
+<h4 class="blk">登记与评测</h4>
+<dl class="kv"><dt>模型 / 量化</dt><dd class="mono">Jev-Style-Qwen3.5-2B · Q4_K_M · 1.3GB</dd><dt>血缘</dt><dd class="mono">基座 Qwen3.5-2B（Apache-2.0 复刻）· 无 LoRA</dd><dt>轨道</dt><dd>本地 · llama.cpp :8080（OpenAI-compatible）· 备轨 = <span class="mono">intent-cls-mini</span>（云 API）</dd><dt>类型 / 上限</dt><dd class="mono">Choice / Bool / Score · 选项集 ≤26</dd><dt>版本</dt><dd class="mono">v1.2 · 2026-09-20 登记 · 登记者 admin</dd><dt>健康态四态</dt><dd><span class="chip ok">healthy</span> · 阈值 45s caution / 75s offline / 24h stale · 上次心跳 12s 前</dd><dt>延迟</dt><dd class="mono">P95 112ms（含 HTTP 往返 · SLA ≤300ms，AC-A1）</dd><dt>评测：accuracy</dt><dd class="mono">82.3%　<span class="chip ok">≥ 门槛 80%</span></dd><dt>评测：ECE</dt><dd class="mono">0.017　<span class="chip ok">≤ 门槛 0.05</span></dd><dt>评测：决策一致率</dt><dd class="mono">99.4%（bf16 ↔ Q8_0 对照 · §6.25 L2 实测）· 前一生产版本对照：—（本域首版）</dd><dt>已绑定用途</dt><dd>路由决策 <b style="color:var(--green)">开</b>（阈值 0.60）· 对话分诊 关 · 简单任务派发 关</dd><dt>今日决策台账</dt><dd class="mono">41 次 · escalated 14 · fallback 0 · decision_fallback 0</dd><dt>升级 / 回退策略</dt><dd>top1 &lt; 0.60 → <span class="mono">escalated</span> 转大模型；超时或畸形响应 → <span class="mono">decision_fallback</span> 回退直通路由</dd><dt>审计</dt><dd class="mono">AF-7C4 登记 · AF-9K2 域微调开关 · 决策全量落 runtime.jsonl（AC-A6）</dd></dl>
+<h4 class="blk">绑定域清单（域=策略容器）</h4>
+<table class="tbl compact"><thead><tr><th>域</th><th>用途</th><th>状态</th><th>阈值</th><th>今日调用</th></tr></thead><tbody>
+<tr><td class="mono">quant-research</td><td>路由决策</td><td><span class="chip ok">开</span></td><td class="mono">0.60</td><td class="mono">41 · esc 14 · fb 0</td></tr>
+<tr><td class="mono">quant-research</td><td>对话分诊</td><td><span class="chip">关</span></td><td class="dim">—</td><td class="mono dim">0（未绑定=零调用）</td></tr>
+<tr><td class="mono">默认域</td><td>路由决策</td><td><span class="chip">关</span></td><td class="dim">—</td><td class="mono dim">0</td></tr>
+</tbody></table>
+<h4 class="blk">今日决策样例（可点入 p22 回放）</h4>
+<div class="timeline">
+<div class="tl-item"><b>14:31</b> · <span class="chip ok">采用</span> top1=<span class="mono">agent-3</span> p=0.78 · 112ms</div>
+<div class="tl-item"><b>14:29</b> · <span class="chip info">escalated</span> p=0.52 &lt; 阈值 0.60 → 转大模型</div>
+<div class="tl-item"><b>14:22</b> · <span class="chip ok">采用</span> top1=<span class="mono">agent-1</span> p=0.91 · 96ms</div>
+<div class="tl-item fail"><b>13:58</b> · <span class="chip warn">fallback</span> 响应畸形（选项数 31 &gt; 26）→ 直通路由 + <span class="mono">decision_fallback</span></div>
+<div class="tl-item"><b>13:40</b> · <span class="chip ok">采用</span> Score 型 · 期望档位 2 · 104ms</div>
+</div>
+<h4 class="blk">操作</h4>
+<p><button class="btn sm primary" data-click data-goto="decision-models__bind.html">绑定到域</button> <button class="btn sm" data-toast="健康探测已发起（演示）">重探</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-offline">下线</button></p>
+</div>
+<div class="modal" id="md-offline"><div style="padding:var(--s4)"><b>下线模型「Jev-Style-Qwen3.5-2B」？</b>
+<p class="small dim" style="margin:8px 0"><b>影响清单</b>（下线即从所有域的可用集移除，非仅隐藏）：</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>quant-research「路由决策」绑定将自动关闭 → 当日 41 次决策调用回退直通路由</li>
+<li>该模型是 <span class="mono">intent-cls-mini</span> 的主轨 → 双轨关系解除，云备轨升为主轨需重新确认数据出域</li>
+<li>历史决策台账与 <span class="mono">runtime.jsonl</span> 记录保持快照不改写</li>
+<li>门槛评测结论作废（重新上线需重跑自测）</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b>（§6.0 纪律：破坏性操作二次确认 + 理由入审计）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [换基座重训 · 先停生产      ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已下线 + 用途绑定全关 + 审计 decision_model_offline（演示）" data-close>确认下线</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为决策模型「Jev-Style-Qwen3.5-2B」升格详情页（规划原型 · 6.23 界面尚不存在）。模型名、量化、三指标（82.3% / 0.017 / 99.4%）、阈值 0.60、P95 112ms 取自 §2.7 / §6.23–6.25 AC 原文实值；决策样例时间线、域清单第 3 行与审计号为演示值。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：绑定域清单只读呈现 · 「绑定到域」→ 两步制详情页 <span class="mono">decision-models__bind.html</span>（第一步启用 / 第二步按用途绑定）· 「重探」→ toast · 「下线」→ 二次确认模态（影响清单 + 必填原因）· 顶部「← 返回」回 decision-models.html　按 Esc 关闭浮层。</p>
+</body></html>

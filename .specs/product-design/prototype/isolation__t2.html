@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>档位详情 T2 Docker 容器 详情 · 执行隔离策略 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p26" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="isolation.html" data-click>← 返回 执行隔离策略</span><span class="crumb"><b>档位详情 · T2 Docker 容器</b> · 每执行一会话容器</span><span class="chip ok">可开放</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="isolation__t3.html">T3 · gVisor</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="env-advisor.html">环境参谋</span></div>
+<div class="detail-body">
+<div class="callout ok"><p class="tiny" style="margin:0"><b>开放顺序 T2→T3→T4：</b>T2 随首个本地工具执行立项落地（每执行一会话容器 + 预构建镜像，不现场 build）。共享内核是它承认的天花板，syscall 密集与内核漏洞仍在面上。</p></div>
+<h4 class="blk">形态与契约</h4>
+<dl class="kv"><dt>形态</dt><dd class="mono">Docker 容器 · 每次执行起一个会话容器（不复用）</dd><dt>隔离强度 / 失效面</dt><dd class="mono">中：namespace + cgroup；<b>共享内核</b> → 内核 LPE 即逃逸 · 挂载卷内可读 · 出网受 egress 约束</dd><dt>冷启动</dt><dd class="mono">~1s（大头在 Docker 本身；镜像已预构建 → 无拉取）</dd><dt>本机探测</dt><dd><span class="dot running"></span> <span class="mono">docker info → Server 27.1.1 · Runtimes: runc ✓</span></dd><dt>镜像</dt><dd class="mono">agentflow/runner:py311（预构建 · digest 固定，不用 latest）</dd><dt>挂载</dt><dd class="mono">仅本次 run 工作区 + .specs 产物目录按需只读/读写（域策略决定）</dd><dt>egress</dt><dd>默认拒 · 只允许白名单（pypi / 本地推理口）· 封私网与元数据端点</dd><dt>ttl / shutdownPolicy</dt><dd class="mono">ttl=900s · Delete（默认）/ Retain（留产物清现场）</dd><dt>operatingMode</dt><dd class="mono">Running / Suspended（保卷与对象，可恢复）</dd><dt>凭证</dt><dd class="mono">run-scoped 短票绑定 (agent,run) · 退场即焚 · 与档位正交</dd><dt>性能账</dt><dd class="mono">syscall 密集任务比 T0 慢（数量级仍在 ms）· CPU 密集≈零损失</dd><dt>状态</dt><dd><span class="chip ok">可开放</span> · 待首个本地工具执行面立项即接</dd></dl>
+<h4 class="blk">探测输出（只读 · 原样贴，不美化）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75">$ docker info --format '{{.ServerVersion}}|{{.Runtimes}}'
+27.1.1|map[runc:{...} true]
+$ docker run --rm agentflow/runner:py311 python -c 'print(1)'
+1                       # 冷启动实测 1.2s · 镜像命中本地缓存</pre>
+<h4 class="blk">域×档现状（谁在用这一档）</h4>
+<table class="tbl compact"><thead><tr><th>域</th><th>min_tier</th><th>实际执行档</th></tr></thead><tbody>
+<tr><td class="mono">默认域</td><td class="mono">T0</td><td><span class="chip bad">T0 · isolation:none</span></td></tr>
+<tr><td class="mono">quant-research</td><td class="mono">T2</td><td><span class="chip ok">T2 可开放 · 待执行面落地</span></td></tr>
+<tr><td class="mono">integrations-untrusted</td><td class="mono">T3</td><td><span class="chip bad">拒跑（runsc 未装）</span></td></tr>
+</tbody></table>
+<h4 class="blk">操作</h4>
+<p><span class="btn link" data-click data-toast="✓ 已复制探测命令（演示）· 只读，不创建容器">⧉ 复制探测命令</span> <span class="btn link" data-click data-toast="复探完成（演示）：Docker 27.1.1 ✓ · runc ✓ → T2 维持可开放">复探</span> <button class="btn sm primary" data-click data-goto="isolation__t3.html">看 T3（gVisor）</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为档位 T2 升格详情页（规划原型 · 6.26 界面尚不存在）。契约字段（tier / ttl+shutdownPolicy / operatingMode / egress / run-scoped 短票）与失效面措辞为 §6.26 与 <span class="mono">.specs/platform-evolution/D-execution-isolation-2/CONCLUSION.md</span> 原文实值；Docker 版本号、镜像名与探测输出为演示值。本页不创建容器、不产生执行。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：探测输出只读呈现 · ⧉ 复制 / 复探 → toast · 「看 T3」跳 isolation__t3.html · 顶部「← 返回」回 isolation.html　按 Esc 关闭浮层。</p>
+</body></html>

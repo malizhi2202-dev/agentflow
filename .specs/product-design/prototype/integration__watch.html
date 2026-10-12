@@ -1,0 +1,49 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>watch 契约 · curl 与断线恢复 详情 · 对外集成面 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p27" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="integration.html" data-click>← 返回 对外集成面</span><span class="crumb"><b>watch · curl 示例与断线恢复</b> · P2-5 契约区</span><span class="chip">未启用</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="integration__etag.html">ETag/412</span><span class="pill" data-goto="integration__obs.html">可观测三档</span><span class="pill" data-goto="replay.html">执行回放</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0">账本 <span class="mono">change_log(seq)</span> 与业务写<b>同事务</b>（落 MySQL 权威库 · 裁定⑦）；恢复走<b>应用层 cursor 重发</b>——不跟 MCP 已撤销的传输层 Last-Event-ID。</p></div>
+<h4 class="blk">① 起流（cursor 从上次见到的 seq 续）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.7">curl -N "http://127.0.0.1:8000/api/watch?cursor=1840" \
+  -H "Accept: text/event-stream" -H "X-User-Id: admin"</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制起流 curl（演示）· 未发起任何请求">⧉ 复制</span></p>
+<h4 class="blk">② 帧形态（id 就是 seq · 与查询响应同形状）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.7">id: 1841
+event: condition
+data: {"kind":"Workflow","name":"code-review","generation":12,
+       "condition":{"type":"Ready","status":"True","observedGeneration":12}}
+
+id: 1842
+event: spec
+data: {"kind":"Workflow","name":"sync-reconcile","revision":3}</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制帧样例（演示）">⧉ 复制</span> <span class="btn link" data-click data-toast="演示：推送只降延迟，形状与查询响应一致（§6.0 ⑧ 契约）">为什么形状要跟查询一致</span></p>
+<h4 class="blk">③ 断线 / cursor 过期</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.7"># 客户端职责：断线后带自己的 cursor 重发（无传输层重放承诺）
+curl -N "http://127.0.0.1:8000/api/watch?cursor=1200"      # 早于保留窗口
+
+event: resync
+data: {"snapshot":"...","startingSeq":2010}   # ＝ 410 Gone 等价：别补洞，重取快照</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制重连 curl（演示）">⧉ 复制</span> <span class="btn link" data-click data-toast="已切长轮询备选（演示）：GET /api/changes?cursor=…（无 SSE 环境用）">长轮询备选</span></p>
+<h4 class="blk">游标语义与当前状态</h4>
+<dl class="kv"><dt>游标语义</dt><dd class="mono">seq 只增、可跳号（MySQL AUTOINCREMENT 缺口语义与 SQLite 同治）</dd><dt>保留窗口</dt><dd class="mono">建议 7 天 / 10 万条（策略项 · 可审计）</dd><dt>并发写法</dt><dd>配合 ETag 做乐观并发，watch 只通知不裁决</dd><dt>权限</dt><dd class="mono">按域可见性裁剪帧内容（不可见实体不产生帧）</dd><dt>当前状态</dt><dd><span class="chip">未启用</span> · change_log 表化是前置（P1-16 并表清障）</dd><dt>本页不提供</dt><dd>挂载该路由、改保留窗口、生成 SDK</dd></dl>
+<h4 class="blk">事件 → 触发 → 消费方</h4>
+<table class="tbl compact"><thead><tr><th>事件</th><th>触发</th><th>消费方</th></tr></thead><tbody>
+<tr><td class="mono">spec</td><td class="tiny">spec/apply 写入</td><td class="tiny">外部同步器、CI</td></tr>
+<tr><td class="mono">status</td><td class="tiny">执行状态变化</td><td class="tiny">仪表盘、看板</td></tr>
+<tr><td class="mono">condition</td><td class="tiny">条件翻转（Ready/Progressing）</td><td class="tiny">声明式收敛循环</td></tr>
+<tr><td class="mono">approval</td><td class="tiny">人批事件</td><td class="tiny">收件箱、外部工单</td></tr>
+<tr><td class="mono">resync</td><td class="tiny">cursor 过期</td><td class="tiny">所有消费者（重取快照）</td></tr>
+</tbody></table>
+<h4 class="blk">操作</h4>
+<p><button class="btn sm" data-back="integration.html" data-click>返回集成面</button> <span class="btn link" data-click data-goto="integration__etag.html">看配套的 ETag/412</span></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为 watch 契约「curl + 断线恢复」升格详情页（规划原型 · 6.27 界面尚不存在）。change_log 同事务 + cursor 重发 + resync＝410 等价、⑧ 契约（推送只降延迟、形状与查询一致）、按域可见性裁剪均为 §6.27 / P2-5 原文实值；SSE 帧样例与 seq 数字为演示拼装，未发起任何请求。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：各段 ⧉ 复制 / 长轮询备选 → toast（零请求）· 「看配套的 ETag/412」跳 integration__etag.html · 顶部「← 返回」回 integration.html　按 Esc 关闭浮层。</p>
+</body></html>

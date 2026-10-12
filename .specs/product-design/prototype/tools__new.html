@@ -1,0 +1,98 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>注册工具 · 工具库 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}.frm{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.form-panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s4);margin-bottom:var(--s4)}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>注册工具</b> · 新工具</span><span class="chip warn">三类分型 · 不共表单</span></div>
+<div class="detail-body">
+<p class="proto-note"><span class="chip warn">演示数据</span>工具库「新建」升格页：Plugin / Skill / MCP 三类<b>分型表单</b>，语义不同、字段不同、不共用一张表单（业界共识）。顶部 tabs 为静态展示，各 tab 点击即说明语义；四种导入方式只决定初始值来源，不改变表单结构。</p>
+
+<div class="tabs">
+  <span class="tab active" data-click data-toast="Plugin：平台内置代码实现，带参数 schema + 权限标签 + token 双限 + 安全闸门，注册即注入运行时（代码级能力）">Plugin</span>
+  <span class="tab" data-click data-toast="Skill：描述性登记（SKILL.md + 支持文件），由 Agent 按提示词执行，无代码注入">Skill</span>
+  <span class="tab" data-click data-toast="MCP：外部服务（stdio / SSE），运行时 tools/list 发现工具后勾选启用">MCP</span>
+</div>
+<div class="tabs">
+  <span class="tab active" data-click data-toast="手工：逐字段填写本页表单（默认，改动最细）">手工</span>
+  <span class="tab" data-click data-toast="从本地导入：上传 SKILL.md / manifest / MCP 配置等文件包，解包后回填表单">从本地导入</span>
+  <span class="tab" data-click data-toast="从 URL 导入：粘贴 git / http 地址拉取清单与支持文件，校验来源后回填">从 URL 导入</span>
+  <span class="tab" data-click data-toast="从运行时拷贝：从已在运行的 Agent / 服务拷一份配置再改（不改原实例）">从运行时拷贝</span>
+</div>
+<div class="callout"><p class="tiny" style="margin:0"><b>三类语义不混：</b>Plugin = 平台内置代码实现；Skill = 描述性登记由 Agent 按提示词执行；MCP = 外部服务 <span class="mono">tools/list</span> 运行时发现。四种导入方式对三类通用，但<b>表单字段分型</b>——导入只决定初始值来源。</p></div>
+
+<h4 class="blk">① Plugin 表单 <span class="chip info">Plugin</span></h4>
+<div class="form-panel">
+  <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">名称   [ 文件读写 v2                              ]
+描述   [ 本地文件系统读写，支持路径白名单           ]</pre>
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">参数 schema（JSON · 提交时校验）</p>
+  <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0">{"path":{"type":"string","required":true},"encoding":{"type":"string","default":"utf-8"}}</pre>
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">权限标签（chips 增删）</p>
+  <div class="frm"><span class="chip info" data-click data-toast="已移除权限标签 read（演示）">read ×</span><span class="chip info" data-click data-toast="已移除权限标签 write（演示）">write ×</span><span class="chip info" data-click data-toast="已移除权限标签 execute（演示）">execute ×</span><span class="chip" style="border-style:dashed" data-click data-toast="已添加权限标签 network（演示）">+ 添加标签</span></div>
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">Token 双限</p>
+  <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0">软限制 [ 80000 ]    硬限制 [ 100000 ]</pre>
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">安全闸门（三件套）</p>
+  <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0">gate_pre  [ 路径越界即拒 · 白名单 .specs/**     ]
+gate_post [ 写入后重读校验                          ]
+IO 过滤    ( ) none   (*) sanitize   ( ) strict</pre>
+</div>
+
+<h4 class="blk">② Skill 表单 <span class="chip purple">Skill</span></h4>
+<div class="form-panel">
+  <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">名称   [ 代码审查 skill                    ]
+描述   [ 按规范检查变更并产出 REVIEW.md      ]</pre>
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">SKILL.md Markdown 编辑器（多行）</p>
+  <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0"># 代码审查
+## 何时适用
+- 变更需要人工审查时
+## 开始前检查
+- 确认 diff 范围与规范版本
+## 步骤
+1. 读取变更 2. 逐条对照规范
+## 结果形式
+- REVIEW.md
+## 何时停下问人
+- 规范冲突 / 证据不足时</pre>
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">支持文件（随 SKILL.md 一并投喂）</p>
+  <table class="tbl compact" style="margin:0"><thead><tr><th>目录</th><th>文件</th><th>说明</th></tr></thead><tbody>
+  <tr><td class="mono">references/</td><td class="mono">style-guide.md</td><td class="tiny">编码规范（审查依据）</td></tr>
+  <tr><td class="mono">templates/</td><td class="mono">REVIEW.md.tpl</td><td class="tiny">审查报告模板</td></tr>
+  <tr><td class="mono">scripts/</td><td class="mono">lint.sh</td><td class="tiny">辅助校验脚本</td></tr>
+  </tbody></table>
+  <p class="tiny dim" style="margin:8px 0 0">支持文件清单随 SKILL.md 一并登记并投喂；导入方式（本地 / URL / 运行时拷贝）会把这些文件打包解包后回填此处。</p>
+</div>
+
+<h4 class="blk">③ MCP 表单 <span class="chip warn">MCP</span></h4>
+<div class="form-panel">
+  <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">名称      [ postgres                          ]
+URL       [ https://mcp.internal/postgres     ]
+transport [ SSE ▾ ]（stdio / SSE 二选一）</pre>
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">Headers（键值 · 值脱敏）</p>
+  <table class="tbl compact" style="margin:0"><thead><tr><th>键</th><th>值</th><th></th></tr></thead><tbody>
+  <tr><td class="mono">Authorization</td><td class="mono">***</td><td><span class="btn link" data-click data-toast="已移除 header Authorization（演示）">删</span></td></tr>
+  <tr><td class="mono">X-Tenant</td><td class="mono">demo</td><td><span class="btn link" data-click data-toast="已移除 header X-Tenant（演示）">删</span></td></tr>
+  <tr><td colspan="3"><span class="btn link" data-click data-toast="已添加 header（演示）">+ 添加 header</span></td></tr>
+  </tbody></table>
+  <dl class="kv" style="margin-top:12px"><dt>密钥（Secret 引用）</dt><dd class="mono">${secret:POSTGRES_DSN} → *** <span class="tiny dim">AES-GCM 加密存储 · 界面无明文</span></dd></dl>
+  <p style="margin-top:var(--s3)"><button class="btn sm primary" data-toast="tools/list 发现 6 个工具（演示）">连接测试</button></p>
+  <p class="tiny muted" style="margin:10px 0 4px;text-transform:uppercase;letter-spacing:.05em">发现的工具（勾选启用 / 禁用 · 默认全启用）</p>
+  <table class="tbl compact" style="margin:0"><thead><tr><th>启用</th><th>工具</th><th>说明</th></tr></thead><tbody>
+  <tr><td><span class="chip ok" data-click data-toast="已禁用工具 query（演示）">✓ 启用</span></td><td class="mono">query</td><td class="tiny">执行 SQL 查询</td></tr>
+  <tr><td><span class="chip ok" data-click data-toast="已禁用工具 list_tables（演示）">✓ 启用</span></td><td class="mono">list_tables</td><td class="tiny">列出表</td></tr>
+  <tr><td><span class="chip ok" data-click data-toast="已禁用工具 explain（演示）">✓ 启用</span></td><td class="mono">explain</td><td class="tiny">执行计划</td></tr>
+  <tr><td><span class="chip ok" data-click data-toast="已禁用工具 schema（演示）">✓ 启用</span></td><td class="mono">schema</td><td class="tiny">读取表结构</td></tr>
+  <tr><td><span class="chip ok" data-click data-toast="已禁用工具 migrate（演示）">✓ 启用</span></td><td class="mono">migrate</td><td class="tiny">执行迁移</td></tr>
+  <tr><td><span class="chip ok" data-click data-toast="已禁用工具 ping（演示）">✓ 启用</span></td><td class="mono">ping</td><td class="tiny">健康检查</td></tr>
+  </tbody></table>
+  <p class="tiny dim" style="margin:8px 0 0">MCP 工具条目<b>不渲染成 Skill</b>（纵向层红线）；密钥仅存密文，运行时经 <span class="mono">${secret:NAME}</span> 注入，不落明文。</p>
+</div>
+
+<h4 class="blk">提交</h4>
+<p><button class="btn sm" data-back="tools.html" data-click>取消</button> <button class="btn sm primary" data-click data-toast="已创建工具「文件读写 v2」· 需绑定到 Agent 才生效（演示）">创建</button></p>
+<p class="tiny dim" style="margin:8px 0 0">创建只登记到工具库，<b>需绑定到 Agent</b> 才会进入编排执行；绑定前不计入引用、不被调用。</p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px"><b>页脚说明：</b>三类语义不混——Plugin = 平台内置代码实现；Skill = 描述性登记由 Agent 按提示词执行；MCP = 外部服务 <span class="mono">tools/list</span> 运行时发现。可点区演示：顶部 tabs → toast（语义说明）· 权限标签 / header / 发现工具 → toast（增删、启停）· 连接测试 → toast（tools/list 发现 6 个工具）· 「取消」/ 顶部「← 返回」→ 回 tools.html · 「创建」→ toast（需绑定到 Agent 才生效）　按 Esc 关闭浮层。</p>
+</body></html>

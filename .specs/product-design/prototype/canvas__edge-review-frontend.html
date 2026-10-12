@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>边 review → frontend 详情 · 编排画布 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="canvas.html" data-click>← 返回 编排画布</span><span class="crumb"><span class="dim">编排画布 /</span> <b>边 review → frontend</b></span><span class="chip info">fan-out</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="tools.html">工具市场</span><span class="pill" data-goto="stage-model.html">阶段模型</span></div>
+<div class="detail-body">
+<dl class="kv"><dt>边标识</dt><dd class="mono">e1 · review → frontend</dd>
+<dt>连线策略</dt><dd><span class="chip info">fan-out</span> 13 种之一（后端 enum 与前端 Edge 组件一一对应）</dd>
+<dt>重试</dt><dd class="mono">3 次 / 指数退避 [1,2,4,8]s</dd>
+<dt>超时</dt><dd class="mono">120s（单边时限）</dd>
+<dt>Token 上限</dt><dd class="mono">32,000（硬限）· 软限 20,000</dd>
+<dt>安全栅栏</dt><dd class="mono">pre-check:v1（前置检查 · 后置检查：无）</dd>
+<dt>数据脱敏</dt><dd class="mono">api_key, token（IO 过滤器）</dd>
+<dt>IO Schema</dt><dd class="mono">ReviewInput → Patch[]</dd>
+<dt>条件表达式</dt><dd class="dim">不适用（仅 condition 边可配）</dd>
+<dt>死信投递</dt><dd class="dim">未配置（非 dead-letter 边）</dd>
+<dt>最近一次执行</dt><dd class="mono">8.2s · success · 12,480 tokens · run r-128</dd>
+<dt>生效方式</dt><dd>改此项即写回 YAML；<b>校验不通过不落库</b></dd></dl>
+<h4 class="blk">该边最近执行</h4>
+<table class="tbl compact"><thead><tr><th>会话 / 时间</th><th>状态</th><th>耗时</th><th>Token</th></tr></thead><tbody>
+<tr><td class="mono">rt-1-1783349487 · 14:31:27</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">进行中</td><td class="mono">4,120</td></tr>
+<tr><td class="mono">rt-1-1783348100 · 14:08:20</td><td><span class="chip ok">success</span></td><td class="mono">8.2s</td><td class="mono">12,480</td></tr>
+<tr><td class="mono">rt-1-1783346200 · 13:36:40</td><td><span class="chip bad">error</span></td><td class="mono">31.7s</td><td class="mono">21,004 <span class="chip warn">超软限</span></td></tr>
+</tbody></table>
+<h4 class="blk">边配置变更史</h4>
+<div class="timeline">
+<div class="tl-item fail"><b>09-23 11:02</b> · 超时 <span class="mono">180s → 120s</span>（李工 · 草稿）</div>
+<div class="tl-item fail"><b>09-22 16:20</b> · 新增 <span class="mono">max_tokens: 32000</span></div>
+<div class="tl-item"><b>09-20 10:05</b> · 挂载安全栅栏 <span class="mono">pre-check:v1</span></div>
+<div class="tl-item"><b>09-18 11:11</b> · 边创建 · 策略 <span class="mono">fan-out</span></div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="✓ 校验通过 · 1 警告：旧版审查 Agent 引用的工具已被禁用，执行时将失败（工具禁用不拦截校验）">校验</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-deledge">删除该边</button></p>
+</div>
+<div class="modal" id="md-deledge"><div style="padding:var(--s4)"><b>删除边「review → frontend」？</b>
+<p class="small dim" style="margin:8px 0">该边是 <span class="mono">fan-out</span> 主分支：删除后前端 Agent 无可达入边，<span class="mono">merge</span> 的 fan-in 等待数由 2 变 1。若失败无处可去（未配 dead-letter），失败任务将滞留。必填原因。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [前端改造移出本流水线，单独建流 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="边已删除 · YAML 同步 · 校验重跑：0 错误 1 警告（演示）" data-close>确认删除</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由编排画布浮层升格：节点 / 边配置与 YAML 写回说明全宽 · 「校验」「保存」→ toast · 「移除节点」「删除该边」→ 二次确认（本页引用到的二次确认 modal 自带副本）· 改完不自动重启实例（§5.4）　按 Esc 关闭浮层。</p>
+</body></html>

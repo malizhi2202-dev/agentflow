@@ -1,0 +1,59 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审计事件 · DELETE domains/3 详情 · 审计日志</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p15" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="audit.html" data-click>← 返回 审计日志</span><span class="crumb"><b>审计事件 · DELETE domains/3（敏感操作）</b></span><span class="chip bad">敏感操作</span><span class="chip mono">af-aud-0921-1430-a7f2</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+<div class="detail-body">
+<div class="callout warn"><p class="tiny" style="margin:0"><b>合成 trace_id：</b><span class="mono">af-aud-0921-1430-a7f2</span> 由「日期 + 时间 + 随机后缀」拼成，<b>非 W3C Trace Context 原生格式</b>（无 32 位 trace-id / 无 parent-id 链），不能与 OTel 导出器对齐（P2-4 B 档要求书面声明这一点）。</p></div>
+<h4 class="blk">事件快照</h4>
+<dl class="kv" style="margin-top:var(--s3)">
+<dt>事件 ID</dt><dd class="mono">af-aud-0921-1430-a7f2 · 行号 9,241 / audit.jsonl</dd>
+<dt>actor（用户）</dt><dd class="mono">admin · 李工 <span class="chip bad">admin</span>（全部 6 权限点 · 豁免）</dd>
+<dt>actor 类型</dt><dd>人（非 Agent · 非 reconcile_loop）</dd>
+<dt>动作 / 目标</dt><dd class="mono">DELETE · domains/3「测试域」</dd>
+<dt>结果 / 状态码</dt><dd><span class="chip ok">成功</span> · 200 · 耗时 63ms</dd>
+<dt>来源 / 身份解析序</dt><dd class="mono">127.0.0.1 · X-User-Id: admin</dd>
+<dt>审批关联</dt><dd class="mono">human_approvals/18（删除测试域 → <span class="btn link" data-toast="跳 §6.17 审批中心 · 该单已于 09-20 17:45 被驳回（演示）">已驳回 → 本次绕过？</span>）</dd>
+<dt>项目</dt><dd class="mono">agentflow</dd>
+<dt>时间</dt><dd class="mono">09-21 14:30:12.884（UTC+8）</dd>
+</dl>
+<h4 class="blk">变更前后对照</h4>
+<div class="grid g2" style="gap:var(--s3)">
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">变更前（存在）</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--red);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "domain_id": 3,
+  "name": "测试域",
+  "owner_id": "admin",
+  "agents": [9, 10, 11],
+  "scale_policy": {"min": 1, "max": 3}
+}</pre></div>
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">变更后（已删除）</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--green);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">// 行记录整条移除
+// 关联副作用：
+//   agents[9,10,11].domain_id → null
+//   （回归默认域）
+// 快照留存：domains_archive/3.json</pre></div>
+</div>
+<h4 class="blk">字段级差异</h4>
+<table class="tbl compact"><thead><tr><th>字段</th><th>前</th><th>后</th></tr></thead><tbody>
+<tr><td class="mono">domains/3</td><td class="mono tiny">存在</td><td class="mono tiny" style="color:var(--red)">删除</td></tr>
+<tr><td class="mono">agents/9.domain_id</td><td class="mono tiny">3</td><td class="mono tiny">null</td></tr>
+<tr><td class="mono">agents/10.domain_id</td><td class="mono tiny">3</td><td class="mono tiny">null</td></tr>
+<tr><td class="mono">agents/11.domain_id</td><td class="mono tiny">3</td><td class="mono tiny">null</td></tr>
+<tr><td class="mono">domains.size</td><td class="mono tiny">4</td><td class="mono tiny">3</td></tr>
+</tbody></table>
+<h4 class="blk">同目标时间线（domains/3）</h4>
+<div class="timeline" style="margin:0">
+<div class="tl-item"><b>09-20 17:45</b> · 审批「删除测试域」被 <b>驳回</b> · 理由：域内仍有 3 个 Agent 在用</div>
+<div class="tl-item"><b>09-21 13:41</b> · UPDATE control-plane/schedule（同会话前序动作）</div>
+<div class="tl-item"><b>09-21 14:28</b> · UPDATE domains/3 · agents 已迁出 → 空域</div>
+<div class="tl-item fail"><b>09-21 14:30</b> · <b>DELETE domains/3 成功</b>（本条）</div>
+</div>
+<div class="callout bad" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>读法提示：</b>审批驳回在前、删除成功在后，说明驳回只拦住了那一张单，未拦住后续空域直删——这是<b>门禁应加在状态转换层</b>的反例（CLAUDE.md 约定）。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已复制事件 JSON（脱敏形态：不含 password_hash / 完整凭据）（演示）">复制 JSON</button> <button class="btn sm" data-toast="按 actor=admin + 目标前缀 domains/ 重建筛选（演示）">查同类事件</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：复制 JSON / 查同类事件→toast · 变更前后对照、字段级差异、同目标时间线全宽展示 · 合成 trace_id 声明置顶　按 Esc 关闭浮层。</p>
+</body></html>

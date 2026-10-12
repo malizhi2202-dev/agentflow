@@ -1,0 +1,53 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审计事件 · UPDATE agents/1 详情 · 审计日志</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p15" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="audit.html" data-click>← 返回 审计日志</span><span class="crumb"><b>审计事件 · UPDATE agents/1</b></span><span class="chip mono">af-aud-0921-1422-c41b</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+<div class="detail-body">
+<h4 class="blk">事件快照</h4>
+<dl class="kv">
+<dt>事件 ID</dt><dd class="mono">af-aud-0921-1422-c41b · 行号 9,238</dd>
+<dt>actor</dt><dd class="mono">admin · 李工 <span class="chip bad">admin</span> · 人</dd>
+<dt>动作 / 目标</dt><dd class="mono">UPDATE · agents/1「审查 Agent · 标准」</dd>
+<dt>结果</dt><dd><span class="chip ok">成功</span> · 200 · 41ms</dd>
+<dt>来源</dt><dd class="mono">127.0.0.1 · X-User-Id: admin</dd>
+<dt>trace_id</dt><dd class="mono">af-aud-0921-1422-c41b <span class="chip warn">合成 · 非 W3C</span></dd>
+</dl>
+<h4 class="blk">变更前后（父页下方「展开行」示例即本事件的节选）</h4>
+<div class="grid g2" style="gap:var(--s3)">
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">变更前</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--red);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "name": "测试域",
+  "owner_id": "admin",
+  "domain_id": null
+}</pre></div>
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">变更后</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--green);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "name": "测试域",
+  "owner_id": "admin",
+  "domain_id": 3
+}</pre></div>
+</div>
+<h4 class="blk">字段级差异</h4>
+<table class="tbl compact"><thead><tr><th>字段</th><th>前</th><th>后</th><th>敏感</th></tr></thead><tbody>
+<tr><td class="mono">domain_id</td><td class="mono tiny">null</td><td class="mono tiny">3</td><td><span class="chip">否</span></td></tr>
+<tr><td class="mono">api_key</td><td class="mono tiny">sk-***（旧）</td><td class="mono tiny">sk-***（新）</td><td><span class="chip warn">是 · 仅存脱敏尾 4 位</span></td></tr>
+<tr><td class="mono">probe_interval</td><td class="mono tiny">30s</td><td class="mono tiny">15s</td><td><span class="chip">否</span></td></tr>
+<tr><td class="mono">updated_by / at</td><td class="mono tiny">admin 09-18</td><td class="mono tiny">admin 09-21 14:22</td><td><span class="chip">否</span></td></tr>
+<tr><td class="mono">model</td><td class="mono tiny">gpt-4o</td><td class="mono tiny">gpt-4o（未变）</td><td><span class="chip">无差异</span></td></tr>
+</tbody></table>
+<h4 class="blk">因果链（同 actor 同窗口）</h4>
+<div class="timeline" style="margin:0">
+<div class="tl-item"><b>14:20:11</b> · GET /api/agents?probe=health · admin · 200</div>
+<div class="tl-item"><b>14:22:07</b> · <b>UPDATE agents/1</b>（本条）</div>
+<div class="tl-item"><b>14:22:09</b> · 调和读取新配置 · 期望副本数不变</div>
+<div class="tl-item"><b>14:31:00</b> · 审查流水线 v3 调用 agents/1 · success · token 12,480</div>
+</div>
+<p class="tiny dim" style="margin-top:var(--s3)">审计为<b>追加写</b>：不支持修改或删除本条；需要更正只能新增一条更正事件并在备注引用原行号。</p>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已复制脱敏 JSON（演示）">复制 JSON</button> <button class="btn sm" data-toast="跳 §6.4 Agent 详情 · 探针时间线（演示）">看 Agent 详情</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：复制 JSON / 看 Agent 详情→toast · 字段级差异（api_key 仅脱敏尾 4 位）与因果链时间线全宽展示 · 追加写不可改删的注记保留　按 Esc 关闭浮层。</p>
+</body></html>

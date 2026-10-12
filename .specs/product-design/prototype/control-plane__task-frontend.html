@@ -1,0 +1,42 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>任务 task-7（frontend · 排队中） 详情 · Agent 管控面 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p3" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="control-plane.html" data-click>← 返回 Agent 管控面</span><span class="crumb"><span class="dim">Agent 管控面 /</span> <b>任务 task-7（frontend · 排队中）</b></span><span class="chip warn">pending</span><span class="chip mono">优先级 50</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="isolation.html">执行隔离</span></div>
+<div class="detail-body">
+<dl class="kv"><dt>Task ID</dt><dd class="mono">task-7 · <span class="mono">wi-2411</span></dd><dt>标签</dt><dd><span class="pill mono">frontend</span></dd><dt>入队</dt><dd class="mono">14:19:38 · 已排 5m24s</dd><dt>候选</dt><dd class="mono">1（默认域内无 frontend）→ <span class="chip bad">域内无候选</span></dd><dt>跨域</dt><dd>生产域有 <span class="mono">前端 Agent</span>，但未开统一入口 → 不跨域派发</dd><dt>决策记录</dt><dd class="mono">未触发决策模型（该用途无绑定 → 直通）</dd></dl>
+<h4 class="blk">可选路径</h4>
+<table class="tbl compact"><thead><tr><th>方案</th><th>代价</th><th>操作</th></tr></thead><tbody>
+<tr><td>默认域建 frontend Agent</td><td>新增 1 个实例 + 探针</td><td><span class="btn link" data-toast="已发起建 Agent 向导（演示 · §6.4 表单形态）">建</span></td></tr>
+<tr><td>开跨域统一入口</td><td>生产域负载上升 · 需 owner 同意</td><td><span class="btn link" data-click data-modal="md-crossdomain">申请</span></td></tr>
+<tr><td>留在队列等空闲</td><td>预计 14:41 后有槽</td><td><span class="btn link" data-toast="已标记等待（演示 · 不发通知，到点自行出队）">等待</span></td></tr>
+<tr><td>取消</td><td>上下文丢弃</td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-cancel-task">取消</span></td></tr>
+</tbody></table>
+</div>
+<div class="modal" id="md-crossdomain"><div style="padding:var(--s4)">
+<b>申请开跨域统一入口（默认域 → 生产域）？</b><p class="small dim" style="margin:8px 0">跨域派发会占用生产域槽位，需生产域 owner 王工审批。</p>
+<table class="tbl compact"><tbody>
+<tr><td>受影响任务</td><td class="mono">task-7</td><td><span class="chip info">1 条</span></td></tr>
+<tr><td>生产域负载</td><td class="mono">前端 Agent 1/2 → 2/2</td><td><span class="chip warn">打满</span></td></tr>
+<tr><td>隔离声明</td><td>域是逻辑分组非安全边界</td><td><span class="chip bad">需在文档注明</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [默认域无 frontend 标签 Agent，临时借道 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="申请已提交王工审批 · 记 deferred 调度行（演示）" data-close>提交申请</button></div></div></div>
+<div class="modal" id="md-cancel-task"><div style="padding:var(--s4)">
+<b>取消队列任务 <span class="mono">task-3</span>？</b>
+<p class="small dim" style="margin:8px 0">该任务由人点名派发（李工），取消即丢弃其上下文投喂计划。必填原因。</p>
+<table class="tbl compact"><tbody>
+<tr><td>状态</td><td class="mono">pending · 未出队</td><td><span class="chip ok">无在途副作用</span></td></tr>
+<tr><td>计划并入上下文</td><td class="mono">3（工作项 + 对话 + 评论线程）</td><td><span class="chip warn">实际投喂 0</span></td></tr>
+<tr><td>关联运行</td><td class="mono">无</td><td><span class="chip ok">无 run 需终止</span></td></tr>
+<tr><td>提交人</td><td>@li.gong</td><td><span class="chip info">取消人署名入审计（§6.0 ⑪）</span></td></tr>
+<tr><td>通知</td><td>不广播</td><td><span class="chip">仅 ping 提交人</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [已改为在生产域手工执行          ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已从队列移除 task-3 · 审计 cp:task_cancelled · 取消人已署名（演示）" data-close>确认取消</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由管控面浮层升格：域 / 能力组信息全宽 · 操作钮保留原接线（扩容 / 绑定 / 重命名 → toast 入审计 · 暂停调和与删除域 → 影响清单 + 必填原因二次确认，引用到的自带副本）　按 Esc 关闭浮层。</p>
+</body></html>

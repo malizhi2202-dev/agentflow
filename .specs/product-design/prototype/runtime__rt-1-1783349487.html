@@ -1,0 +1,62 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>会话 rt-1-1783349487 详情 · 运行时监控 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="metrics.html">仪表盘</span></div>
+<div class="detail-top"><span class="pill" data-back="runtime.html" data-click>← 返回 运行时监控</span><span class="crumb"><b>会话</b> · <span class="mono">rt-1-1783349487</span></span><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span><span class="chip mono">4,120 / 32,000 token</span><span class="chip mono">step 3 / 6</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>本页为查询面，不是执行面。</b>会话在平台进程内执行，无沙箱；停止与中断需 <span class="mono">workflow:stop</span> 权限。SSE 在线时增量推送，token 流与事件流随之追加。</p></div>
+
+<h4 class="blk">会话概览</h4>
+<dl class="kv"><dt>Session / Agent</dt><dd class="mono">rt-1-1783349487 · <span class="pill" data-click data-goto="agent-detail.html">审查 Agent · 标准</span>（agent-1）</dd>
+<dt>模型 / Provider</dt><dd class="mono">gpt-4o · OpenAI 兼容口（sk-***）</dd>
+<dt>状态</dt><dd><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span> 已跑 <span class="mono">2m14s</span> · 心跳 <span class="mono">: heartbeat 1783349487</span></dd>
+<dt>Token 累计</dt><dd class="mono">4,120 / 32,000（边上限）· 软限 20,000</dd>
+<dt>当前步</dt><dd class="mono">step 3 / 6 · 工具调用 skill.code_review</dd>
+<dt>归属编排 / run</dt><dd class="mono">审查流水线 v3 · run r-128 · 边 review→frontend (fan-out)</dd>
+<dt>上下文挂靠</dt><dd><span class="chip">工作项 AF-104</span> <span class="chip">对话 c-338</span> <span class="tiny dim">一次运行可挂多上下文（§6.0 ⑪）</span></dd>
+<dt>归因</dt><dd class="mono">originator 李工 · accountable 李工（P1-13 双列）</dd>
+<dt>知识源命中</dt><dd class="mono">规范.pdf chunk_41 / 架构说明.md chunk_0 · 3 源已检索</dd>
+<dt>截断标记</dt><dd><span class="chip">转录未截断</span> 完整 seq 1–17</dd></dl>
+
+<h4 class="blk">Token 流（增量 · 最近 8 段 · seq 10–17）</h4>
+<table class="tbl compact"><thead><tr><th>seq</th><th>时间</th><th>事件</th><th>Δtoken</th><th>累计</th></tr></thead><tbody>
+<tr><td class="mono">10</td><td class="mono">14:31:27</td><td>session_started（prompt 注入）</td><td class="mono">+612</td><td class="mono">612</td></tr>
+<tr><td class="mono">11</td><td class="mono">14:31:29</td><td>知识检索结果并入</td><td class="mono">+288</td><td class="mono">900</td></tr>
+<tr><td class="mono">12</td><td class="mono">14:31:34</td><td>llm.chat 流式输出（chunk 1-42）</td><td class="mono">+840</td><td class="mono">1,740</td></tr>
+<tr><td class="mono">13</td><td class="mono">14:31:41</td><td>tool_call read_file · REQUIREMENT.md</td><td class="mono">+1,180</td><td class="mono">2,920</td></tr>
+<tr><td class="mono">14</td><td class="mono">14:31:48</td><td>tool_result 并入（2,822 B）</td><td class="mono">+310</td><td class="mono">3,230</td></tr>
+<tr><td class="mono">15</td><td class="mono">14:31:55</td><td>llm.chat 流式输出（chunk 43-96）</td><td class="mono">+420</td><td class="mono">3,650</td></tr>
+<tr><td class="mono">16</td><td class="mono">14:32:03</td><td>tool_call grep "domain_id" → 7 hits</td><td class="mono">+340</td><td class="mono">3,990</td></tr>
+<tr><td class="mono">17</td><td class="mono">14:32:11</td><td>tool_call skill.code_review（进行中）</td><td class="mono">+130</td><td class="mono">4,120</td></tr>
+</tbody></table>
+
+<h4 class="blk">当前步与后续</h4>
+<div class="timeline">
+<div class="tl-item"><b>14:32:11</b> · <b>step 3 进行中</b> <span class="chip warn">skill.code_review</span> · 已用 6.2s / 超时余 113.8s</div>
+<div class="tl-item"><b>下一步</b> · step 4 · fan-out 并行派发 → 前端 Agent（rt-4）/ 数据同步 Agent（rt-2）</div>
+<div class="tl-item"><b>step 5</b> · fan-in 等待 2 个上游完成（当前 1 个已回）</div>
+<div class="tl-item"><b>step 6</b> · human-approval 挂起等人（阻塞式 · 不超时放行）</div>
+<div class="tl-item"><b>14:31:27</b> · 入队 · <span class="mono">dequeued 最高 priority 100 → agent-1</span></div>
+</div>
+
+<h4 class="blk">操作</h4>
+<p><button class="btn sm" data-toast="已复制 transcript URL · ?view=rt-1-1783349487（演示）">⧉ 复制会话链接</button> <button class="btn sm" data-toast="跳转 §6.22 执行回放（trace 产生端待补 · C10-0）">看回放</button> <button class="btn sm" data-toast="重启指令已下发 · 单进程内执行（演示）">重启</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-stop">中断会话</button></p>
+
+<div class="modal" id="md-stop"><div style="padding:var(--s4)"><b>中断会话 rt-1-1783349487？</b>
+<p class="small dim" style="margin:8px 0">需 <span class="mono">workflow:stop</span> 权限。影响清单：</p>
+<ul class="tiny" style="margin:0 0 8px;padding-left:18px">
+<li>进行中的 <span class="mono">step 3</span> 工具调用直接终止；已发出的外部副作用（已写入的文件）<b>不回滚</b>。</li>
+<li>下游 <span class="mono">fan-in</span> 等待数少 1，<span class="mono">merge</span> 节点可能永远等不齐 → 需同时中止整条 run r-128。</li>
+<li>已消耗 <span class="mono">4,120</span> token 已入账（metrics_raw），不可撤销。</li>
+<li>会话在平台进程内执行：中断只结束本次调用，<b>不重启 Agent 实例</b>。</li>
+<li>必填原因，动作入审计 <span class="mono">rt:interrupt</span>。</li>
+</ul>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [审查范围写错，改为整条 run 重跑 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="会话已中断 status=error · 审计 rt:interrupt（演示）" data-close>确认中断</button></div></div></div>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 运行时监控 · Agent chip→Agent 详情 · 复制链接 / 看回放 / 重启→toast · 中断会话→二次确认（本页自带含影响清单与必填原因的 modal 副本）　按 Esc 关闭所有浮层。</p>
+</body></html>

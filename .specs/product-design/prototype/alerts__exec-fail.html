@@ -1,0 +1,58 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>告警 execution_failed · rt-1-1783346200 详情 · 告警中心</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="alerts.html" data-click>← 返回 告警中心</span><span class="crumb"><b>告警详情 · execution_failed / rt-1-1783346200</b></span><span class="chip bad">critical</span><span class="chip bad">未确认</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="metrics.html">仪表盘</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="detail-body">
+<h4 class="blk">规则 · 根因 · 去重</h4>
+<dl class="kv"><dt>规则</dt><dd class="mono">execution_failed · 判定函数 _check_execution_failed</dd>
+<dt>触发条件</dt><dd class="mono">会话以 status=error 结束（巡检扫描 runtime.jsonl / 会话表增量）</dd>
+<dt>目标</dt><dd class="mono">rt-1-1783346200 · 审查 Agent · 标准 · gpt-4o</dd>
+<dt>详情</dt><dd class="mono">error · 31.7s · 21,004 tokens</dd>
+<dt>根因</dt><dd class="mono" style="color:var(--red)">引用的工具「浏览器自动化」已禁用（09-22 17:40 全局禁用）→ 调用即报错</dd>
+<dt>同因批量</dt><dd class="mono">近 24h 共 3 次同签名失败 · 已按去重键合并为 1 条</dd>
+<dt>落点</dt><dd class="mono">on_exhausted: dead-letter → 未滞留</dd>
+<dt>确认 ≠ 修复</dt><dd>确认后仍会再次触发，直到工具恢复或编排改掉该引用</dd>
+<dt>存储位置</dt><dd class="mono">进程内环形 500 条（P1-16 落表后带签名与保留策略）</dd></dl>
+<h4 class="blk">触发链</h4>
+<div class="timeline">
+<div class="tl-item"><b>13:36:40</b> · 会话开始（run r-127 · 边 review→legacy）</div>
+<div class="tl-item fail"><b>13:37:08</b> · <span class="mono">tool 浏览器自动化 → 不可用（已禁用）</span></div>
+<div class="tl-item fail"><b>13:37:11</b> · retry-fallback 耗尽 → dead-letter</div>
+<div class="tl-item fail"><b>13:37:12</b> · 会话以 error 结束</div>
+<div class="tl-item"><b>13:37:20</b> · 下一次巡检采样到 → 生成 critical 告警（≤30s 延迟）</div>
+<div class="tl-item"><b>13:36:55</b> · 同会话另出 <span class="chip warn">token_exceeded</span>（两告警不同签名，未合并）</div>
+<div class="tl-item fail"><b>14:02:11</b> · 同签名再次失败 → 去重层压制，仅刷新「最近发生」</div>
+</div>
+<h4 class="blk">失败处置三件套（§6.0 ④）</h4>
+<table class="tbl compact"><thead><tr><th>动作</th><th>前置</th><th>效果</th></tr></thead><tbody>
+<tr><td>带上下文重跑</td><td class="tiny">需工具恢复可用</td><td><span class="chip warn">当前会同样失败</span></td></tr>
+<tr><td>改高级表单重填</td><td class="tiny">回填原输入</td><td class="tiny">可换备援 Agent 与可用工具</td></tr>
+<tr><td>升级到人</td><td class="tiny">转工作项 / 审批</td><td><span class="chip ok">推荐 · 禁用属人工决策</span></td></tr>
+</tbody></table>
+<h4 class="blk">同类告警（近 24h · 去重前）</h4>
+<table class="tbl compact"><thead><tr><th>时间</th><th>会话</th><th>状态</th><th>去重结果</th></tr></thead><tbody>
+<tr><td class="mono">13:37:12</td><td class="mono">rt-1-1783346200</td><td><span class="chip bad">error</span></td><td><span class="chip info">本条（首见）</span></td></tr>
+<tr><td class="mono">14:02:11</td><td class="mono">rt-1-1783347411</td><td><span class="chip bad">error</span></td><td>压制 · 刷新最近发生</td></tr>
+<tr><td class="mono">14:18:30</td><td class="mono">rt-4-1783348712</td><td><span class="chip warn">timeout→success</span></td><td>不生成（终态非 error）</td></tr>
+<tr><td class="mono">昨天 22:47</td><td class="mono">rt-7-1783312200</td><td><span class="chip bad">error</span></td><td>已确认 · 环形内</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已确认 · 角标 2→1（演示）">确认</button> <button class="btn sm" data-toast="跳 §6.10 会话详情 · 处置三件套（演示）">看会话</button> <button class="btn sm" data-toast="跳 §6.7 工具库恢复「浏览器自动化」（演示）">去恢复工具</button> <button class="btn sm" data-click data-modal="md-silence">静默 24h</button></p>
+</div>
+<div class="modal" id="md-silence"><div style="padding:var(--s4)"><b>静默该告警 24 小时？</b>
+<p class="small dim" style="margin:8px 0 6px">静默只压<b>通知与角标</b>：规则仍在跑，事件仍进环形缓冲，只是不再打扰。<b>这不是修复</b>，24h 后若仍触发会重新出现在列表。</p>
+<table class="tbl compact"><thead><tr><th>影响项</th><th>静默后</th></tr></thead><tbody>
+<tr><td>导航角标 / 未确认数</td><td>不计入（3→2）</td></tr>
+<tr><td>通知分层（§6.0 ⑫）</td><td>24h 内不再 ping 负责人</td></tr>
+<tr><td>同签名重复告警</td><td>仍记录「最近发生」，不新增行</td></tr>
+<tr><td>根因（工具禁用 / 探针失败）</td><td><span class="chip bad">不变 · 仍存在</span></td></tr>
+<tr><td>到期后</td><td>自动恢复可见，未确认状态回置</td></tr>
+</tbody></table>
+<p class="small" style="margin:8px 0 4px"><b>必填原因</b>（静默等同暂时压告警，须留痕）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [已知问题 · 等 15:00 维护窗口处理 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已静默 24h 至明天 14:32 · 审计 alert:silence（演示）" data-close>确认静默 24h</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：确认→toast（确认 ≠ 修复）· 「静默 24h」→二次确认含必填原因 · 看会话 / 去恢复工具→toast 跳转说明　按 Esc 关闭浮层。</p>
+</body></html>

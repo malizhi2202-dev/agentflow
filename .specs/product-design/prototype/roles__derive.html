@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>派生角色 · 角色市场</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p14" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="roles.html" data-click>← 返回 角色市场</span><span class="crumb"><b>派生角色 · 内置模板只读，改动落在派生副本</b></span><span class="chip">派生 = 复制父模板后再编辑</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<div class="detail-body">
+<h4 class="blk">派生表单</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0">父模板   [ builtin/reviewer ▾ ]
+新角色名 [ 我的审查角色          ]
+覆盖段   [☑ 职责 ☑ 评估框架 ☑ 触发场景 ☐ 性情 ☐ 能做 ☐ 不能做 ☐ 输入文件 ☐ 输出格式]
+参数槽   + spec_ref (必填)
+安全闸门 [ gate_pre: —   gate_post: —   io_filter: none ]  <span class="tiny dim">自定义角色才可编辑</span>
+标签     [Review] [自定义]</pre>
+<p class="tiny" style="margin:8px 0 0"><button class="btn sm primary" data-toast="已派生 custom_roles/4 · 8 段已复制，可在详情页编辑（演示）">派生并进入编辑</button> <button class="btn sm" data-back="roles.html">取消 · 返回角色市场</button></p>
+<p class="tiny dim" style="margin:6px 0 0">派生关系会显示在卡片「派生自」pill 与详情页「与父模板差异表」（8 段口径）中。</p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立表单页）：「派生并进入编辑」→toast（派生关系写入卡片与详情页差异表）· 取消 / 顶部「← 返回」→回角色市场　按 Esc 关闭浮层。</p>
+</body></html>

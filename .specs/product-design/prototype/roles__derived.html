@@ -1,0 +1,57 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>角色 · 审查 Agent 专用 详情 · 角色市场</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p14" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="roles.html" data-click>← 返回 角色市场</span><span class="crumb"><b>角色详情 · 审查 Agent 专用</b></span><span class="chip info">自定义</span><span class="chip mono">custom_roles/1</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<div class="detail-body">
+<h4 class="blk">标识与派生</h4>
+<dl class="kv">
+<dt>标识 / 类型</dt><dd class="mono">custom_roles/1 · <span class="chip info">自定义</span></dd>
+<dt>派生自</dt><dd class="mono">builtin/reviewer <span class="chip info">继承</span>（内置模板不可改，改动落在派生副本）</dd>
+<dt>实例化次数</dt><dd class="mono">3 次 · 最近 09-21 14:22</dd>
+<dt>参数槽</dt><dd class="mono">severity_required · spec_ref（新增）· severity_gate（继承）</dd>
+</dl>
+<h4 class="blk">与父模板的差异（追加项 · 8 段口径）</h4>
+<table class="tbl compact"><thead><tr><th>段</th><th>父模板</th><th>派生后</th></tr></thead><tbody>
+<tr><td>① 性情</td><td class="tiny">只信证据</td><td class="tiny">未变（继承）</td></tr>
+<tr><td>② 职责</td><td class="tiny">给出位置 + 严重度 + 依据</td><td class="tiny">同上，<b>并引用本项目规范条目</b></td></tr>
+<tr><td>③ 触发场景</td><td class="tiny"><span class="pill mono">G3代码门</span> 代码质量 · <span class="pill mono">G4审查门</span> 审查充分性</td><td class="tiny">未变（继承）</td></tr>
+<tr><td>④ ✅ 能做</td><td class="tiny">只信证据 · 给出行级定位与严重度</td><td class="tiny">同上，<b>每条发现附规范出处</b></td></tr>
+<tr><td>⑤ ❌ 不能做</td><td class="tiny">不直接改代码</td><td class="tiny">未变（继承）</td></tr>
+<tr><td>⑥ 评估框架</td><td class="tiny"><b>step1 可定位性</b>：可定位到行 · <b>step2 无误报</b>：有无误报</td><td class="tiny">同上，<b>未引用规范条目视为不完整</b></td></tr>
+<tr><td>⑦ 输入文件</td><td class="mono tiny">git diff · 全部SUMMARY.md</td><td class="tiny">同上 + <span class="mono">{spec_ref}</span></td></tr>
+<tr><td>⑧ 输出格式</td><td class="tiny">位置 + 严重度 + 依据</td><td class="tiny">同上，<b>强制附规范出处</b></td></tr>
+</tbody></table>
+<h4 class="blk">⑨ 安全闸门（自定义角色可编辑）</h4>
+<table class="tbl compact"><tbody>
+<tr><td style="width:96px"><b>gate_pre</b></td><td class="mono tiny">—</td></tr>
+<tr><td><b>gate_post</b></td><td class="tiny">门禁类意见必须有 <span class="mono">{spec_ref}</span> 出处，否则降级为建议</td></tr>
+<tr><td><b>io_filter</b></td><td class="mono tiny">none</td></tr>
+</tbody></table>
+<h4 class="blk">提示词预览（含追加段）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">（继承 builtin/reviewer 全文）
++ 每条发现必须附规范出处：{spec_ref}
++ 本项目现行规范：CLAUDE.md 约定 / .specs/CONTEXT.md
++ 无规范出处的门禁类意见一律降级为建议（非阻塞）</pre>
+<h4 class="blk">实例化记录</h4>
+<table class="tbl compact"><thead><tr><th>Agent</th><th>域 / 能力组</th><th>状态</th></tr></thead><tbody>
+<tr><td class="mono">审查 Agent · 标准</td><td class="tiny">默认域 · code-review</td><td><span class="dot running"></span> healthy · 绑定审查流水线 v3</td></tr>
+<tr><td class="mono">审查 Agent · 备援</td><td class="tiny">默认域 · code-review</td><td><span class="dot idle"></span> 冷备（首调 +8s）</td></tr>
+<tr><td class="mono">审查 Agent · 生产域</td><td class="tiny">生产域 · code-review</td><td><span class="dot running"></span> healthy</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="实例化为 Agent → 跳转编排画布（演示）">实例化为 Agent</button> <button class="btn sm" data-toast="进入编辑（演示）">编辑</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-del">删除角色</button></p>
+</div>
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除自定义角色「审查 Agent 专用」？</b>
+<p class="small dim" style="margin:8px 0">需要 <span class="mono">project:delete</span>（危险权限点）。内置模板不可删除（只读参考）。<b>必填原因</b>。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>已实例化的 3 个 Agent</td><td><span class="chip ok">不级联删除</span> · 保留实例化时提示词快照</td></tr>
+<tr><td>编排中引用该角色的节点</td><td><span class="chip warn">标记失效引用</span> · 需人工换绑</td></tr>
+<tr><td>审计</td><td><span class="chip">记 role:deleted</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [与内置模板已无差异            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除角色（Agent 未被级联删除）· 审计 role:deleted（演示）" data-close>确认删除</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：实例化 / 编辑→toast · 「删除角色」→二次确认（不级联 · 必填原因）· 与父模板差异表全宽展示　按 Esc 关闭浮层。</p>
+</body></html>

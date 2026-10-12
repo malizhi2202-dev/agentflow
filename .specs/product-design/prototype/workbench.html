@@ -1,0 +1,201 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工作台 · 变更总览 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p2" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>登录后默认首页。变更卡片按最近活动排序；每张卡片显示阶段条、任务进度与风险标签。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/（工作台）</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html" class="active"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="users.html"><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-file"/></svg>审计日志</a>
+          <div class="spacer"></div>
+          <a data-goto="alerts.html" style="color:var(--red)"><svg class="icon"><use href="#i-bell"/></svg>告警 <span class="chip bad" style="height:16px;padding:0 5px">3</span></a>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">工作台 <span class="dim">· 变更总览</span></span><span class="right"><span class="chip mono" data-click data-pop="pop-project">agentflow ▾ 切项目</span><button class="btn sm" data-toast="已重扫 .specs/（TTL 5s 缓存已生效 · 刚改完文件可能延迟可见）（演示）">刷新</button><button class="btn sm primary" data-click data-pop="pop-newchange">+ 新建变更 ▾</button></span></div>
+          <div class="app-body">
+            <div class="grid g4" style="margin-bottom:var(--s4)">
+              <div class="stat" data-click data-drawer="dr-stat-doing"><div class="stat-label">进行中</div><div class="stat-value" style="color:var(--blue)">6</div><div class="stat-sub">共 14 个变更</div></div>
+              <div class="stat" data-click data-drawer="dr-stat-blocked"><div class="stat-label">阻塞</div><div class="stat-value" style="color:var(--red)">2</div><div class="stat-sub">需人工介入</div></div>
+              <div class="stat" data-click data-drawer="dr-stat-week"><div class="stat-label">本周完成</div><div class="stat-value" style="color:var(--green)">5</div><div class="stat-sub">↑ 较上周 +2</div></div>
+              <div class="stat" data-click data-drawer="dr-stat-agent"><div class="stat-label">Agent 在线</div><div class="stat-value">9<span class="dim" style="font-size:14px">/11</span></div><div class="stat-sub">2 个离线</div></div>
+            </div>
+            <p class="h2p">进行中的变更 <span class="chip info">卡片标题可点 → 变更详情页（已升格 · 非抽屉）</span> <span style="flex:1"></span><span class="pill" data-click data-pop="pop-filter">筛选：进行中 · 全部阶段 ▾</span></p>
+            <div class="grid g3" style="margin-bottom:var(--s4)">
+              <div class="panel">
+                <div style="display:flex;align-items:center;gap:6px"><span class="h2p" style="margin:0" data-click data-goto="workbench__change-agent-domains.html">agent-domains</span><span class="chip info">4-dev</span></div>
+                <p class="tiny muted" style="margin:4px 0 8px">为 Agent 控制面板增加隔离域，支持按域分组管理</p>
+                <div class="bar"><i style="width:72%"></i></div>
+                <p class="tiny dim" style="margin:6px 0 0"><span class="mono">8/11</span> 任务完成 · 更新于 12 分钟前</p>
+                <p class="tiny" style="margin:8px 0 0"><button class="btn sm primary" data-toast="G3 代码门未过（3/4 票）→ 阶段未推进；拒因原样呈现不粉饰（演示）">进入下一阶段 ▸ 4-dev→5-test</button></p>
+              </div>
+              <div class="panel">
+                <div style="display:flex;align-items:center;gap:6px"><span class="h2p" style="margin:0" data-click data-goto="workbench__change-capability-groups.html">capability-groups</span><span class="chip warn">2a-ui-design</span></div>
+                <p class="tiny muted" style="margin:4px 0 8px">域内按 capabilities 自动派生能力分组三层树</p>
+                <div class="bar"><i class="o" style="width:45%"></i></div>
+                <p class="tiny dim" style="margin:6px 0 0"><span class="mono">3/7</span> 任务完成 · 更新于 2 小时前</p>
+                <p class="tiny" style="margin:8px 0 0"><button class="btn sm" disabled style="opacity:.5">进入下一阶段 · G2a 未过</button> <span class="tiny dim">灰置：门禁未过</span></p>
+              </div>
+              <div class="panel" style="border-color:rgba(224,85,85,.3)">
+                <div style="display:flex;align-items:center;gap:6px"><span class="h2p" style="margin:0" data-click data-goto="workbench__change-agent-control-plane.html">agent-control-plane</span><span class="chip bad">阻塞</span></div>
+                <p class="tiny muted" style="margin:4px 0 8px">管控面探针 / 调度 / 调和；SPEC 文件缺失</p>
+                <div class="bar"><i class="r" style="width:88%"></i></div>
+                <p class="tiny dim" style="margin:6px 0 0"><span class="mono">5/5</span> 测试通过 · 待补 CHANGE/REQUIREMENT</p>
+                <p class="tiny" style="margin:8px 0 0"><button class="btn sm" data-toast="缺失前置产物：CHANGE.md · REQUIREMENT.md ——阶段推进被服务端拒绝（演示）">进入下一阶段 · 被挡</button> <span class="btn link" style="color:var(--red)" data-click data-modal="md-rollback">回退阶段</span></p>
+              </div>
+            </div>
+            <p class="h2p">全部变更 <span class="chip info">行可点 → 同一变更的详情页</span></p>
+            <table class="tbl compact">
+              <thead><tr><th>Change ID</th><th>标题</th><th>阶段</th><th>任务进度</th><th>风险</th><th>更新时间</th></tr></thead>
+              <tbody>
+                <tr data-click data-goto="workbench__change-agent-domains.html"><td class="mono">agent-domains</td><td>隔离域（Domain）</td><td><span class="chip info">4-dev</span></td><td><span class="mono">8/11</span></td><td>—</td><td class="mono">12 分钟前</td></tr>
+                <tr data-click data-goto="workbench__change-capability-groups.html"><td class="mono">capability-groups</td><td>能力分组三层树</td><td><span class="chip warn">2a-ui-design</span></td><td><span class="mono">3/7</span></td><td>—</td><td class="mono">2 小时前</td></tr>
+                <tr data-click data-goto="workbench__change-agent-control-plane.html"><td class="mono">agent-control-plane</td><td>Agent 管控面</td><td><span class="chip">6-review</span></td><td><span class="mono">5/5</span></td><td><span class="chip bad">SPEC 缺失</span></td><td class="mono">昨天</td></tr>
+                <tr data-click data-goto="workbench__change-knowledge-plus.html"><td class="mono">knowledge-plus</td><td>知识库增强 + 缺陷修复</td><td><span class="chip ok">7-integration</span></td><td><span class="mono">21/21</span></td><td>—</td><td class="mono">3 天前</td></tr>
+                <tr data-click data-goto="workbench__change-multi-provider.html"><td class="mono">multi-provider</td><td>多 LLM Provider 接入</td><td><span class="chip info">4-dev</span></td><td><span class="mono">6/9</span></td><td><span class="chip warn">待确认</span></td><td class="mono">4 天前</td></tr>
+                <tr data-click data-goto="workbench__change-k8s-final.html"><td class="mono">k8s-final</td><td>K8s 式管控收尾</td><td><span class="chip ok">7-integration</span></td><td><span class="mono">12/12</span></td><td>—</td><td class="mono">5 天前</td></tr>
+                <tr><td class="mono">agent-domains</td><td colspan="5" style="padding:0"><div style="padding:7px 10px;color:var(--text-muted);font-size:11.5px">… 另有 8 个变更（分页）</div></td></tr>
+              </tbody>
+            </table>
+            <div class="panel" style="border-style:dashed;text-align:center;color:var(--text-muted);padding:var(--s4)">
+              <p class="small" style="margin:0">在 <code>.specs/</code> 下新建一个 Change 即可开始 · 扫描有 5 秒缓存</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>Change ID 取自项目真实 <span class="mono">.specs/</span> 目录名，标题与进度为演示值。空态样式见表格底部虚线框（真实系统在无任何变更时展示）。阶段推进 / 门禁票型 / 产物清单在变更详情页内为演示演绎；阶段与门禁名取后端 <span class="mono">DEFAULT_WORKFLOW</span> 实测值（9 阶段 · G1 / 需求门 / G2 / G2a / Task / G3 / 测试门 / G4）。</p>
+
+
+
+
+
+
+
+<div class="drawer" id="dr-stat-doing"><header><b>指标 · 进行中 6</b><span class="chip info">共 14 个变更</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>口径</dt><dd>阶段 ≠ <span class="mono">7-integration</span> 且未归档</dd><dt>分布</dt><dd class="mono">0-change 1 · 2a-ui-design 1 · 4-dev 3 · 6-review 1</dd><dt>最久未动</dt><dd class="mono">multi-provider · 4 天</dd><dt>今日推进请求</dt><dd class="mono">3 次（通过 1 · 拒 2）</dd></dl>
+<table class="tbl compact" style="margin-top:var(--s3)"><thead><tr><th>Change</th><th>阶段</th><th>进度</th></tr></thead><tbody>
+<tr><td class="mono">agent-domains</td><td class="mono">4-dev</td><td class="mono">8/11</td></tr>
+<tr><td class="mono">capability-groups</td><td class="mono">2a-ui-design</td><td class="mono">3/7</td></tr>
+<tr><td class="mono">agent-control-plane</td><td class="mono">6-review</td><td class="mono">5/5</td></tr>
+<tr><td class="mono">multi-provider</td><td class="mono">4-dev</td><td class="mono">6/9</td></tr>
+<tr><td class="mono">identity-hardening</td><td class="mono">1-requirement</td><td class="mono">2/6</td></tr>
+<tr><td class="mono">small-model-decisions</td><td class="mono">0-change</td><td class="mono">1/4</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s3)"><button class="btn sm" data-toast="已保存为视图 v-12（status=进行中）· 链接 ?view=v-12 可分享（§6.0 ②）（演示）">存为视图</button></p></div></div>
+
+<div class="drawer" id="dr-stat-blocked"><header><b>指标 · 阻塞 2（需人工介入）</b><span class="chip bad">阻塞</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>口径</dt><dd>风险标签 =「阻塞」或存在 <span class="mono">blocked</span> 卡且无人接</dd><dt>平均滞留</dt><dd class="mono">19h</dd><dt>通知态</dt><dd><span class="chip ok">已只 ping 拍板人</span>（§6.0 ⑫）</dd><dt>自愈</dt><dd>旧「运行失败」通知未自愈归档 · 因工作项未推进</dd></dl>
+<table class="tbl compact" style="margin-top:var(--s3)"><thead><tr><th>Change</th><th>因</th><th>责任</th></tr></thead><tbody>
+<tr><td class="mono">agent-control-plane</td><td>SPEC 前置产物缺 2 份</td><td class="mono">李工</td></tr>
+<tr><td class="mono">multi-provider</td><td>T09 等 Q1 裁定</td><td class="mono">王工</td></tr>
+<tr><td class="mono">capability-groups</td><td>G2a 缺无障碍票（未计入阻塞）</td><td class="mono">UI 组</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s3)"><button class="btn sm" data-toast="已升级到审批中心 · 记 deferred 调度行而非提醒（演示）">升级到人</button></p></div></div>
+
+<div class="drawer" id="dr-stat-week"><header><b>指标 · 本周完成 5</b><span class="chip ok">↑ 较上周 +2</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>口径</dt><dd>本周写入归档的变更数</dd><dt>环比</dt><dd class="mono">5 vs 3（+66.7%）</dd><dt>门禁一次通过率</dt><dd class="mono">4/5</dd><dt>平均周期</dt><dd class="mono">6.2 天</dd></dl>
+<table class="tbl compact" style="margin-top:var(--s3)"><thead><tr><th>Change</th><th>完成日</th><th>任务</th></tr></thead><tbody>
+<tr><td class="mono">knowledge-plus</td><td class="mono">09-20</td><td class="mono">21/21</td></tr>
+<tr><td class="mono">k8s-final</td><td class="mono">09-18</td><td class="mono">12/12</td></tr>
+<tr><td class="mono">credential-scan</td><td class="mono">09-23</td><td class="mono">7/7</td></tr>
+<tr><td class="mono">product-design</td><td class="mono">09-22</td><td class="mono">33/33</td></tr>
+<tr><td class="mono">platform-evolution</td><td class="mono">09-19</td><td class="mono">9/9</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s3)"><span class="btn link" data-toast="跳 §6.12 监控仪表盘看吞吐（演示）">看吞吐曲线</span></p></div></div>
+
+<div class="drawer" id="dr-stat-agent"><header><b>指标 · Agent 在线 9/11</b><span class="chip warn">2 个离线</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>口径</dt><dd>最近一轮探针通过数 / Agent 总数（§2.6 端点解析）</dd><dt>离线明细</dt><dd class="mono">agent-7 dead · agent-3 不可探活</dd><dt>折进工作量</dt><dd class="mono">在途 5 · 队列 4</dd><dt>Cost·7d</dt><dd class="mono">¥184.20（环比 +12%）</dd></dl>
+<table class="tbl compact" style="margin-top:var(--s3)"><thead><tr><th>Agent</th><th>灯</th><th>域</th></tr></thead><tbody>
+<tr><td class="mono">审查 Agent · 标准</td><td><span class="dot running"></span> running</td><td class="tiny">默认域</td></tr>
+<tr><td class="mono">审查 Agent · 备援</td><td><span class="dot idle"></span> idle</td><td class="tiny">默认域</td></tr>
+<tr><td class="mono">审查 Agent · 旧版</td><td><span class="dot dead"></span> dead</td><td class="tiny">默认域</td></tr>
+<tr><td class="mono">数据同步 Agent</td><td><span class="dot failed"></span> failed</td><td class="tiny">默认域/python</td></tr>
+<tr><td class="mono">前端 Agent</td><td><span class="dot running"></span> running</td><td class="tiny">生产域</td></tr>
+<tr><td class="mono">归档 Agent</td><td><span class="dot blocked"></span> blocked</td><td class="tiny">测试域</td></tr>
+<tr><td class="mono">规划 Agent</td><td><span class="dot running"></span> running</td><td class="tiny">生产域</td></tr>
+<tr><td class="mono">repo-hygiene</td><td><span class="dot idle"></span> idle</td><td class="tiny">测试域</td></tr>
+<tr><td class="mono">doc-keeper</td><td><span class="dot running"></span> running</td><td class="tiny">默认域/未分类</td></tr>
+<tr><td class="mono">test-runner</td><td><span class="dot running"></span> running</td><td class="tiny">测试域</td></tr>
+<tr><td class="mono">code-fixer</td><td><span class="dot dead"></span> dead</td><td class="tiny">生产域</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s3)"><a class="btn sm" href="control-plane.html">去管控面</a> <span class="btn link" data-toast="缺价模型已显式告警：doc-keeper 无价目 → Cost 不可计（§6.0 ③）（演示）">看缺价告警</span></p></div></div>
+
+<div class="modal" id="md-rollback"><div style="padding:var(--s4)">
+<b>回退「agent-control-plane」6-review → 4-dev？</b>
+<p class="small dim" style="margin:8px 0">回退是<b>破坏性</b>操作：阶段回退不删产物，但门禁记录作废、变更账本追加一条回退事件。<b>必填原因</b>。</p>
+<p class="tiny" style="margin:0 0 4px"><b>影响清单</b></p>
+<table class="tbl compact"><tbody>
+<tr><td>G4 审查门记录</td><td class="mono">3 票</td><td><span class="chip bad">作废并留痕</span></td></tr>
+<tr><td>REVIEW.md</td><td class="mono">已存在</td><td><span class="chip warn">变只读快照 · 不删</span></td></tr>
+<tr><td>扫描器阶段判定</td><td class="mono">按文件存在性</td><td><span class="chip warn">重扫后仍显 6-review，需手改产物集</span></td></tr>
+<tr><td>进行中的 Agent 运行</td><td class="mono">1（人点名派发）</td><td><span class="chip info">继续 · 不随回退终止</span></td></tr>
+<tr><td>工作台与收件箱</td><td class="mono">2 条待办</td><td><span class="chip">旧通知自愈归档</span></td></tr>
+<tr><td>审计</td><td class="mono">chg:phase_rollback</td><td><span class="chip info">必写 · 含变更前快照</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [前置 SPEC 缺失，先补产物再走门禁   ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已回退到 4-dev · 门禁记录作废 · 审计 chg:phase_rollback（演示）" data-close>确认回退</button></div></div></div>
+
+<div class="pop" id="pop-project"><p class="tiny dim" style="margin:0 0 6px"><b>切换项目</b>（工作台只显示当前项目 <span class="mono">.specs/</span> 下的变更）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">agentflow</td><td><span class="chip">当前</span></td><td class="tiny dim">14 变更 · 9 Agent</td><td><span class="btn link" data-toast="已在 agentflow（演示）">—</span></td></tr>
+<tr><td class="mono">agentflow-web</td><td><span class="chip info">可见</span></td><td class="tiny dim">6 变更 · 3 Agent</td><td><span class="btn link" data-toast="已切到 agentflow-web · 变更列表与指标随之切换 · URL 带 ?project=（演示）">切</span></td></tr>
+<tr><td class="mono">quant-research</td><td><span class="chip info">可见</span></td><td class="tiny dim">2 变更 · 1 Agent</td><td><span class="btn link" data-toast="已切到 quant-research（演示）">切</span></td></tr>
+<tr><td class="mono">demo-shop</td><td><span class="chip bad">不可见</span></td><td class="tiny dim">未分配项目 → 看不到任何项目</td><td><span class="btn link" data-toast="403：无 project:read（越权与不存在统一 404 由列表侧保证）（演示）">拒绝</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">+ 新建项目 → 由管理员在 §6.13 项目管理创建；工作台入口只提供切换与筛选。</p>
+<p style="margin:0"><button class="btn sm" data-toast="已按「最近活动」重排卡片（演示）">仅当前项目 · 确认</button></p></div>
+
+<div class="pop" id="pop-filter"><p class="tiny dim" style="margin:0 0 6px"><b>筛选与保存视图</b>（字段全集 · 保存即 <span class="mono">?view=&lt;id&gt;</span>，§6.0 ②）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">status</td><td><span class="chip ok">进行中</span> <span class="chip">已完成</span> <span class="chip">全部</span></td><td><span class="btn link" data-toast="status=进行中 · 命中 6（演示）">选</span></td></tr>
+<tr><td class="mono">阶段</td><td><span class="chip">未筛（9 阶段）</span></td><td><span class="btn link" data-toast="阶段=4-dev · 命中 3（演示）">4-dev</span></td></tr>
+<tr><td class="mono">风险</td><td><span class="chip bad">阻塞</span> <span class="chip warn">待确认</span></td><td><span class="btn link" data-toast="风险=阻塞 · 命中 2（演示）">阻塞</span></td></tr>
+<tr><td class="mono">assignee</td><td>人 / Agent 双轨</td><td><span class="btn link" data-toast="负责人=Agent · code-reviewer · 命中 2（演示）">Agent</span></td></tr>
+<tr><td class="mono">label</td><td>ADR · 规范 · 迁移</td><td><span class="btn link" data-toast="label=迁移 · 命中 1（演示）">迁移</span></td></tr>
+<tr><td class="mono">property（自定义）</td><td>可作分组维</td><td><span class="btn link" data-toast="按自定义属性「模块=管控」分组（演示）">分组</span></td></tr>
+</tbody></table>
+<p style="margin:6px 0 0"><button class="btn sm" data-toast="视图已存为 v-15 · 链接可分享（演示）">存为视图</button> <button class="btn sm" data-toast="已重置筛选（演示）" data-close>重置</button></p></div>
+
+<div class="pop" id="pop-newchange"><p class="tiny dim" style="margin:0 0 6px"><b>新建变更</b>（等价于在 <span class="mono">.specs/&lt;change-id&gt;/</span> 下建 CHANGE.md · 5 秒扫描后可见）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">空白 CHANGE.md</td><td>标题 / 优先级 / 范围 v1·v2·out</td><td><span class="btn link" data-toast="已在 .specs/new-change-1/ 建 CHANGE.md 草稿 · 等待扫描（演示）">建</span></td></tr>
+<tr><td class="mono">从模板</td><td>缺陷修复 · 增强 · 调研（议题即 change）</td><td><span class="btn link" data-toast="已用「缺陷修复」模板建草稿（演示）">建</span></td></tr>
+<tr><td class="mono">导入已有目录</td><td>从别处拷入 <span class="mono">.specs/</span></td><td><span class="btn link" data-toast="导入将触发目录覆盖检查——同名冲突需先确认（演示）· 打开覆盖确认模态" data-click data-modal="md-import-overwrite">导入</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">草稿槽按创建形态分离、互不覆盖（§6.0 ⑦）；未完成草稿在入口页聚合提示。</p></div>
+
+<div class="modal" id="md-import-overwrite"><div style="padding:var(--s4)">
+<b>覆盖同名变更目录「agent-domains」？</b>
+<p class="small dim" style="margin:8px 0">导入包内 <span class="mono">agent-domains/</span> 与现有目录同名。覆盖 = 丢弃现有 4 份产物与 <span class="mono">runtime.jsonl</span>。<b>必填原因</b>。</p>
+<table class="tbl compact"><tbody>
+<tr><td>现有 TASK.md</td><td class="mono">6.2 KB · 8/11</td><td><span class="chip bad">将被覆盖</span></td></tr>
+<tr><td>导入 TASK.md</td><td class="mono">5.4 KB · 6/11</td><td><span class="chip warn">进度更旧</span></td></tr>
+<tr><td>runtime.jsonl</td><td class="mono">41 KB</td><td><span class="chip bad">指标断链</span></td></tr>
+<tr><td>自动备份</td><td>保存前自动备份 · 保留 5 版</td><td><span class="chip info">本次也备份</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [迁移到新机器 · 以导入包为准       ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已合并而非覆盖：按文件逐个确认后写入 · 审计 chg:imported（演示）" data-close>逐文件合并</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已覆盖 · 旧产物进 backup/ · 审计 chg:overwritten（演示）" data-close>确认覆盖</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：变更卡片标题 / 表格 6 行 → <b>变更详情页</b>（阶段进度 + 门禁票型 + 产物清单 + 操作钮全宽，共 6 页 workbench__change-*.html）· 4 张统计卡 → 指标下钻抽屉（kv + 1 张子表，抽屉可容 · 保留） · 顶栏项目 chip → 切换 pop · 进行中筛选 → pop · 「+ 新建变更」→ pop 选择器（3 项 · 合规）· 导入 → 覆盖二次确认 modal· 「进入下一阶段」→ toast（G2a / SPEC 缺失的灰置与被挡示例）· 「回退阶段」「删除变更」→ 影响清单 + 必填原因二次确认（modal 合规 · 变更详情页内自带副本）　按 Esc 关闭所有浮层。</p>
+</body></html>

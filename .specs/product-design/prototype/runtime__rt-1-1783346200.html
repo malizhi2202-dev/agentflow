@@ -1,0 +1,55 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>失败会话 rt-1-1783346200 详情 · 运行时监控 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="metrics.html">仪表盘</span></div>
+<div class="detail-top"><span class="pill" data-back="runtime.html" data-click>← 返回 运行时监控</span><span class="crumb"><b>失败会话</b> · <span class="mono">rt-1-1783346200</span></span><span class="chip bad">error</span><span class="chip mono">31.7s</span><span class="chip bad">21,004 token</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>失败三件套（§6.0 ④）：</b>带上下文重试 / 改高级表单重填 / 升级到人。拒因原样呈现，不粉饰。</p></div>
+
+<h4 class="blk">会话概览</h4>
+<dl class="kv"><dt>Session / Agent</dt><dd class="mono">rt-1-1783346200 · <span class="pill" data-click data-goto="agent-detail.html">审查 Agent · 标准</span>（agent-1）</dd>
+<dt>结束态</dt><dd><span class="chip bad">error</span> 13:36:40 → 13:37:12 · 31.7s</dd>
+<dt>Token</dt><dd class="mono">21,004（超软限 20,000 → 同时出 token_exceeded 告警）</dd>
+<dt>失败点</dt><dd class="mono">step 4 · 边 review→legacy 的 retry-fallback 耗尽</dd>
+<dt>根因</dt><dd class="mono" style="color:var(--red)">引用的工具「浏览器自动化」已禁用 · 调用即报错</dd>
+<dt>告警关联</dt><dd><span class="chip bad">execution_failed</span> <span class="chip warn">token_exceeded</span> 均未确认</dd>
+<dt>死信投递</dt><dd class="mono">已配 dead-letter → 失败任务未滞留</dd>
+<dt>落库产物</dt><dd class="mono">无（写入前的失败，未产生 REVIEW.md）</dd></dl>
+
+<h4 class="blk">事件流（失败收敛）</h4>
+<table class="tbl compact"><thead><tr><th>时间</th><th>事件</th><th>状态</th><th>Δtoken</th></tr></thead><tbody>
+<tr><td class="mono">13:36:40</td><td class="mono">session_started</td><td><span class="chip ok">ok</span></td><td class="mono">+540</td></tr>
+<tr><td class="mono">13:36:47</td><td class="mono">tool_call read_file</td><td><span class="chip ok">ok</span></td><td class="mono">+1,860</td></tr>
+<tr><td class="mono">13:36:55</td><td class="mono">llm.chat 主模型超时 120s → 重试 1/3</td><td><span class="chip warn">retry</span></td><td class="mono">+6,420</td></tr>
+<tr><td class="mono">13:37:01</td><td class="mono">retry-fallback → 旧版审查 Agent</td><td><span class="chip warn">fallback</span></td><td class="mono">+2,180</td></tr>
+<tr><td class="mono">13:37:08</td><td class="mono">tool 浏览器自动化 不可用</td><td><span class="chip bad">fail</span></td><td class="mono">+0</td></tr>
+<tr><td class="mono">13:37:11</td><td class="mono">on_exhausted → dead-letter</td><td><span class="chip bad">dead-letter</span></td><td class="mono">+0</td></tr>
+<tr><td class="mono">13:37:12</td><td class="mono">session_finished status=error</td><td><span class="chip bad">error</span></td><td class="mono">累计 21,004</td></tr>
+</tbody></table>
+
+<h4 class="blk">同一 Agent 近 5 次</h4>
+<table class="tbl compact"><thead><tr><th>会话</th><th>时间</th><th>状态</th><th>耗时</th><th>Token</th></tr></thead><tbody>
+<tr><td class="mono" data-click data-goto="runtime__rt-1-1783349487.html">rt-1-1783349487</td><td class="mono">14:31:27</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">进行中</td><td class="mono">4,120</td></tr>
+<tr><td class="mono">rt-1-1783348100</td><td class="mono">14:08:20</td><td><span class="chip ok">success</span></td><td class="mono">8.2s</td><td class="mono">12,480</td></tr>
+<tr><td class="mono">rt-1-1783346200</td><td class="mono">13:36:40</td><td><span class="chip bad">error</span></td><td class="mono">31.7s</td><td class="mono">21,004</td></tr>
+<tr><td class="mono">rt-1-1783344120</td><td class="mono">12:55:03</td><td><span class="chip ok">success</span></td><td class="mono">7.6s</td><td class="mono">11,902</td></tr>
+<tr><td class="mono">rt-1-1783341880</td><td class="mono">12:11:44</td><td><span class="chip ok">success</span></td><td class="mono">9.1s</td><td class="mono">13,410</td></tr>
+</tbody></table>
+
+<h4 class="blk">处置（失败三件套）</h4>
+<div class="flow" style="flex-direction:column;align-items:stretch;gap:5px">
+<div class="step">① 带上下文重跑（复用 seq 1-3 的工具结果，省 2,400 token）</div>
+<div class="step">② 改为高级表单重填（回填原输入 · 换备援 Agent 与可用工具）</div>
+<div class="step hi">③ 升级到人：转审批 / 工作项指派（工具已禁用属人工决策）</div>
+</div>
+<p class="tiny dim">根因指向的工具现场见 <span class="mono">tools__skill-browser.html</span>（禁用原因 · 受影响引用 · 恢复条件）。</p>
+
+<h4 class="blk">操作</h4>
+<p><button class="btn sm primary" data-toast="带上下文重跑已入队 · 新会话 rt-1-1783350120（演示）">带上下文重试</button> <button class="btn sm" data-toast="已回填原输入到高级表单（演示）">改表单重填</button> <button class="btn sm" data-toast="已确认执行失败告警 · 角标 3→2（演示）">确认关联告警</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 运行时监控 · running 行→在途会话详情 · 带上下文重试 / 改表单重填 / 确认关联告警→toast（告警现场见相关页条「告警中心」）　按 Esc 关闭所有浮层。</p>
+</body></html>

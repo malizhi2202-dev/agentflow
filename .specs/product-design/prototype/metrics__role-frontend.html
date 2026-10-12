@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>角色 · 前端 Agent 详情 · 监控仪表盘</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="metrics.html" data-click>← 返回 监控仪表盘</span><span class="crumb"><b>实体下钻 · 角色 · 前端 Agent</b></span><span class="chip purple">角色</span><span class="chip mono">近 7 天</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+<div class="detail-body">
+<h4 class="blk">实体指标快照</h4>
+<dl class="kv"><dt>实体标识</dt><dd class="mono">role:3 →「角色 · 前端 Agent」</dd>
+<dt>调用 / Token</dt><dd class="mono">205 次 · 512,880（占 21.3%）</dd>
+<dt>平均单次</dt><dd class="mono">2,502 tokens · P95 7,110</dd>
+<dt>绑定模型</dt><dd class="mono">claude-sonnet</dd>
+<dt>入边 / 出边</dt><dd class="mono">review→frontend (fan-out · 超时 120s · 上限 32,000) / frontend→merge (fan-in)</dd>
+<dt>依赖工具</dt><dd><span class="chip warn">fetch · MCP 连接失败</span> <span class="chip ok">文件读写</span></dd>
+<dt>破软限次数</dt><dd class="mono">0（最高单次 15,720 为备援会话）</dd>
+<dt>失败率</dt><dd><span class="chip warn">1.5%</span> <span class="mono">3 / 205 · 其中 2 次为 MCP 超时</span></dd>
+<dt>归属</dt><dd class="mono">默认域 / frontend · 1 healthy</dd>
+<dt>最近活跃</dt><dd class="mono">14:18:32 · rt-4-1783348712（running）</dd></dl>
+<h4 class="blk">Top 会话（按 Token）</h4>
+<table class="tbl compact"><thead><tr><th>会话</th><th>时间</th><th>状态</th><th>Token</th><th>耗时</th></tr></thead><tbody>
+<tr><td class="mono">rt-4-1783348712</td><td class="mono">14:18:32</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">9,340</td><td class="mono">进行中</td></tr>
+<tr><td class="mono">rt-4-1783347020</td><td class="mono">13:51:02</td><td><span class="chip ok">success</span></td><td class="mono">8,410</td><td class="mono">6.8s</td></tr>
+<tr><td class="mono">rt-4-1783344900</td><td class="mono">13:15:44</td><td><span class="chip ok">success</span></td><td class="mono">7,905</td><td class="mono">5.9s</td></tr>
+<tr><td class="mono">rt-4-1783342500</td><td class="mono">12:35:10</td><td><span class="chip bad">error</span></td><td class="mono">6,120</td><td class="mono">10.2s</td></tr>
+<tr><td class="mono">rt-4-1783340100</td><td class="mono">11:58:22</td><td><span class="chip ok">success</span></td><td class="mono">5,480</td><td class="mono">4.4s</td></tr>
+</tbody></table>
+<h4 class="blk">消耗构成（按调用类型）</h4>
+<table class="tbl compact"><thead><tr><th>类型</th><th class="c">次数</th><th class="c">Token</th><th>占比</th></tr></thead><tbody>
+<tr><td class="mono">llm.chat</td><td class="c mono">205</td><td class="c mono">421,300</td><td><span class="bar" style="display:block"><i style="width:82%"></i></span></td></tr>
+<tr><td class="mono">tool read_file</td><td class="c mono">178</td><td class="c mono">58,240</td><td><span class="bar" style="display:block"><i style="width:11%"></i></span></td></tr>
+<tr><td class="mono">mcp fetch（失败仍计入 prompt）</td><td class="c mono">12</td><td class="c mono">22,180</td><td><span class="bar" style="display:block"><i class="o" style="width:5%"></i></span></td></tr>
+<tr><td class="mono">知识检索并入</td><td class="c mono">96</td><td class="c mono">11,160</td><td><span class="bar" style="display:block"><i class="g" style="width:2%"></i></span></td></tr>
+</tbody></table>
+<div class="callout"><p class="tiny" style="margin:0"><b>读法提醒：</b>「调用类型」这一列在真实系统里来自 <span class="mono">trace_spans</span>——<b>当前 0 行</b>，因此这张表是设计意图演示，不是可查数据。补产生端前，下钻只能到会话粒度。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="导出该实体明细 CSV（演示）">导出明细</button> <button class="btn sm" data-toast="跳 §6.10 按 Agent=前端 Agent 过滤（演示）">看会话</button> <button class="btn sm" data-toast="跳 §6.7 处理 fetch MCP 连接失败（演示）">看依赖工具</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：导出明细 / 看会话 / 看依赖工具→toast 跳转说明 · Top 会话与消耗构成全宽展示（构成表依赖 trace 产生端，为设计意图演示）　按 Esc 关闭浮层。</p>
+</body></html>

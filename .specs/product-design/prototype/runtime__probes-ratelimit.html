@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>管控面探针限流详情 · 运行时监控 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="metrics.html">仪表盘</span></div>
+<div class="detail-top"><span class="pill" data-back="runtime.html" data-click>← 返回 运行时监控</span><span class="crumb"><b>管控面探针</b> · <span class="mono">/api/control-plane/probes</span></span><span class="chip warn">进程内实现 · 单进程适用</span><span class="chip mono">窗口 60s · 上限 60</span><span class="chip mono">当前第 12 次</span></div>
+<div class="detail-body">
+<div class="callout warn"><p class="tiny" style="margin:0"><b>单进程适用。</b><span class="mono">/probes</span> 的滑动窗口限流器是<strong>进程内内存</strong>实现（<span class="mono">control_plane_api._rate_limit_store</span>）——多进程 / 多副本部署时各进程<strong>各自计数</strong>，等于窗口被放大 N 倍。当前必须按单副本部署理解（P0-9 写明，P1-7 状态外置为正解）。</p></div>
+
+<h4 class="blk">限流与解析规则</h4>
+<dl class="kv"><dt>端点</dt><dd class="mono">GET /api/control-plane/probes（滑动窗口限流）</dd>
+<dt>窗口 / 上限</dt><dd class="mono">60s · 60 次</dd>
+<dt>当前计数</dt><dd class="mono">第 12 次 · 余 48（本进程内）</dd>
+<dt>超限返回</dt><dd class="mono">429 Too Many Requests + 界面错误提示条</dd>
+<dt>状态存储</dt><dd class="mono">进程内存（重启清零，不落库）</dd>
+<dt>健康端点解析</dt><dd class="mono">base_url + /health → 回退 health_url → 皆无则不可探活（None）</dd>
+<dt>凭据脱敏</dt><dd class="mono">sk-*** / sk-ant-*** 两种前缀均覆盖</dd>
+<dt>同类进程内状态</dt><dd>调度队列 <span class="mono">scheduler_service._queue</span> · 调和退避 <span class="mono">reconcile_loop._backoff_state</span></dd></dl>
+
+<h4 class="blk">最近探活记录（本进程窗口内 · 8 条）</h4>
+<table class="tbl compact"><thead><tr><th>时间</th><th>Agent</th><th>结果</th><th>耗时</th><th>说明</th></tr></thead><tbody>
+<tr><td class="mono">14:32:10</td><td class="mono">agent-1 审查 Agent · 标准</td><td><span class="chip ok">pass</span></td><td class="mono">42ms</td><td class="tiny">GET /health → 200</td></tr>
+<tr><td class="mono">14:31:40</td><td class="mono">agent-2 数据同步 Agent</td><td><span class="chip ok">pass</span></td><td class="mono">55ms</td><td class="tiny">恢复后第 1 次通过</td></tr>
+<tr><td class="mono">14:31:10</td><td class="mono">agent-4 汇总 Agent</td><td><span class="chip ok">pass</span></td><td class="mono">38ms</td><td class="tiny">health_url 显式配置</td></tr>
+<tr><td class="mono">14:30:40</td><td class="mono">agent-3 前端 Agent</td><td><span class="chip ok">pass</span></td><td class="mono">61ms</td><td class="tiny">—</td></tr>
+<tr><td class="mono">14:30:22</td><td class="mono">agent-2 数据同步 Agent</td><td><span class="chip ok">pass</span></td><td class="mono">120ms</td><td class="tiny">调和自动重启后复探</td></tr>
+<tr><td class="mono">14:30:10</td><td class="mono">agent-7 旧版审查 Agent</td><td><span class="chip bad">fail</span></td><td class="mono">—</td><td class="tiny">连续第 5 次 → 判 dead → 告警</td></tr>
+<tr><td class="mono">14:29:40</td><td class="mono">agent-5 审查 Agent · 备援</td><td><span class="chip warn">未探活</span></td><td class="mono">—</td><td class="tiny">无 base_url / health_url → 时间线为空（非错误）</td></tr>
+<tr><td class="mono">14:29:10</td><td class="mono">窗口统计</td><td><span class="chip warn">接近上限</span></td><td class="mono">58/60</td><td class="tiny">前端把 4 张卡合并轮询后回落</td></tr>
+</tbody></table>
+
+<h4 class="blk">限流时间线</h4>
+<div class="timeline">
+<div class="tl-item"><b>14:29:20</b> · 前端切到批量端点，窗口占用 58 → 12</div>
+<div class="tl-item fail"><b>14:24:03</b> · <b>429</b> 触发 · 提示条显示「探针接口限流，已自动降频」</div>
+<div class="tl-item fail"><b>14:24:02</b> · 连续轮询 61 次 / 60s 超窗（本页 + 管控面 + 告警页同开）</div>
+<div class="tl-item"><b>09-22 起</b> · 探针周期统一 30s（与告警巡检同频）</div>
+</div>
+
+<h4 class="blk">操作</h4>
+<p><button class="btn sm" data-toast="429 提示条示例：已显示并自动降频（演示）">演示限流提示</button> <button class="btn sm" data-goto="control-plane.html">去管控面</button></p>
+<p class="tiny dim">「去管控面」看三层树的健康概要（窗口占用为聚合值）；本页只解释限流本身为何存在、以及它在多副本下为何失效。</p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 运行时监控 · 演示限流提示→toast（429 提示条示例）· 去管控面→整页跳转　按 Esc 关闭所有浮层。</p>
+</body></html>

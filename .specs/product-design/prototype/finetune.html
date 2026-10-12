@@ -1,0 +1,134 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>微调工厂与三指标自测 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}body{padding-top:34px}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p24" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="decision-models.html">决策模型</span><span class="pill" data-goto="env-advisor.html">环境参谋</span></div>
+    <p class="proto-note"><span class="chip warn">规划原型</span>域内数据 → LLaMA-Factory 编排 → 三指标门禁的闭环控制台；含<b>未过门槛</b>与<b>硬件不达标</b>两个边界态。<b>此界面尚不存在</b>。演示数据。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/decision-models/finetune</span><span class="fake">规划原型</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="decision-models.html" class="active"><svg class="icon"><use href="#i-layers"/></svg>决策模型</a>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-shield"/></svg>审计日志</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">决策模型 <span class="dim">· 微调工厂 · 域：quant-research（训练数据不出本域）</span></span><span class="right"><button class="btn sm primary" data-click data-goto="finetune__new.html">新建微调任务 ▾</button></span></div>
+          <div class="app-body">
+            <div class="callout"><p><b>域微调开关：已开</b>（域 owner @liang · 2026-09-22，审计 AF-9K2）——默认关；关闭时本页全灰，任何训练操作返回 403 并给出开启指引（AC-B1）。历史每条训练数据可回放「哪些会话被用过」（AC-B2）。</p></div>
+            <table class="tbl">
+              <thead><tr><th>任务</th><th>数据台账（脱敏后）</th><th>引擎</th><th>硬件预检</th><th>状态</th><th>自测：准确 / ECE / 一致率</th><th>生产</th></tr></thead>
+              <tbody>
+                <tr><td data-click data-drawer="dr-tr-v3" ><b>dept-router-v3-ft</b><br><span class="tiny dim">基座 Qwen3.5-2B · LoRA r16 · log-score 损失</span></td><td>会话 412 · 记忆条目 88 · 指纹 <span class="mono">a91f…</span><br><span class="tiny dim">「哪些会话被用过」可回放清单</span></td><td>本机 LLaMA-Factory 0.9.x<br><span class="tiny dim">能力探测通过 · 平台仅编排不代装</span></td><td><span class="chip ok">显存 10GB ≥ 8GB</span></td><td><span class="chip info">完成 41min</span></td><td>79.4% / <b class="mono">0.061</b> / 91%<br><span class="tiny dim">基线（未微调同任务）68.2% / 0.104 —— 微调净赚 +11.2pt</span></td><td><span class="chip err">禁止切产</span><br><span class="tiny dim">ECE 0.061 &gt; 门槛 0.05 · 服务端拒绝（AC-C2）</span><br><span class="btn link" data-click data-drawer="dr-tr-v3">训练详情</span><span class="btn link" data-click data-toast="✗ 设产被服务端拒绝：ECE 0.061 &gt; 门槛 0.05（不是提示词约定，界面不提供绕过入口）">为何禁止</span></td></tr>
+                <tr><td data-click data-drawer="dr-tr-v4" >dept-router-v4-ft<br><span class="tiny dim">同配方 · 温度修正样本 +3k</span></td><td>会话 455 · 记忆 90 · 指纹 <span class="mono">c207…</span></td><td>同上</td><td><span class="chip ok">通过</span></td><td><span class="chip ok">完成</span></td><td>83.1% / <b class="mono">0.023</b> / 88%</td><td><button class="btn sm primary" data-click data-modal="md-prod">切生产</button> <span class="tiny dim">过门槛 · 血缘可回滚</span><br><span class="btn link" data-click data-drawer="dr-tr-v4">训练详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-rollback">回滚 v3</span></td></tr>
+                <tr><td data-click data-drawer="dr-tr-hw" ><span class="dim">（另一台 · 用户的轻薄本）</span></td><td>—</td><td>检测：LLaMA-Factory 未安装</td><td><span class="chip err">统一内存 12GB &lt; 16GB</span><br><span class="tiny dim">灰显文案：微调需 ≥16GB 统一内存或 ≥8GB 显存；推理不受此限（Q4 仅 1.3GB）；缺什么、换机还是换轨，明写在此不藏 hover</span></td><td>—</td><td>—</td><td>—<br><span class="btn link" data-click data-drawer="dr-tr-hw">为何灰显</span></td></tr>
+              </tbody>
+            </table>
+            <p class="small dim">评测集 = 内置公开基准子集（GLUE/BoolQ/AG News 同款口径，与 Jev 模型卡指标可比）+ 本域回放样例；三指标与门槛含义见 §2.7。切产后旧版本留血缘可回滚（AC-B5）。</p>
+            <div class="grid g2" style="align-items:start">
+              <div class="callout warn" style="margin:0"><p><b>平台只编排、不代装（AC-B4）：</b>本页生成任务（基座 / LoRA 配方 / 数据指纹）后调用本机 <span class="mono">llamafactory-cli</span>；检测不到 CLI 时只给安装指引并<b>拒绝代装</b>。要看命令原文 → <span class="btn link" data-click data-goto="finetune__cmd.html">⧉ 只出方案零执行 · 命令预览</span></p></div>
+              <div class="callout ok" style="margin:0"><p><b>资源账先说清：</b>v4 实测 41min · 峰值显存 9.2GB · 产物 <span class="mono">adapter 268MB</span>（LoRA 不产出整份权重）。发起训练前必过二次确认：重跑一次<b>只读</b>硬件预检并把占用清单摊开。当前无排队任务 · 同机串行（一次只跑一个）。<span class="btn link" data-click data-modal="md-start">开始训练 v5 ▸ 先看资源占用</span></p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="drawer" id="dr-tr-v3"><header><b>训练详情 · dept-router-v3-ft</b><span class="chip bad">禁止切产</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>门禁判据（AC-C2 · 服务端）：</b>默认门槛 accuracy ≥80% 且 ECE ≤0.05（参考 Jev 复刻版 82.3% / 0.017 量级定标）。本版本两项均未达 → 设产请求被拒绝，拒绝本身亦入审计。</p></div>
+<dl class="kv"><dt>任务 / 状态</dt><dd class="mono">finetune-2026q3-v3 · <span class="chip info">完成 41min</span></dd><dt>域 / 数据边界</dt><dd class="mono">quant-research · 训练数据不出本域（AC-B2）</dd><dt>配方</dt><dd class="mono">基座 Qwen3.5-2B · LoRA r16 · target=o,q,k,v · log-score 损失 · epochs 3 · lr 1e-4 · batch 4（累积 8）· cutoff 2048</dd><dt>数据台账</dt><dd class="mono">会话 412 · 记忆条目 88 · 脱敏后条数 468 · 指纹 a91f…（sha256 前缀）</dd><dt>引擎 / 版本窗口</dt><dd class="mono">本机 LLaMA-Factory 0.9.x · 能力探测通过（版本漂移用探测不用号硬判）</dd><dt>硬件预检</dt><dd class="mono">显存 10GB ≥ 8GB · 磁盘余 412GB · 峰值占用 9.2GB</dd><dt>产物路径</dt><dd class="mono">.specs/small-model-decisions/artifacts/dept-router-v3-ft/adapter/ · <span class="tiny dim">（LoRA 增量 268MB · 不产出整份权重）</span></dd><dt>合并评测产物</dt><dd class="mono">artifacts/dept-router-v3-ft/merged/q8_0.gguf（4.1GB · 仅评测用）</dd><dt>训练 loss（文本态 · 尾段）</dt><dd class="mono">step 31 · 0.412 → 155 · 0.088 · 末 8 点 0.0691 0.0644 0.0602 0.0587 0.0579 0.0571 0.0568 0.0566</dd><dt>eval loss</dt><dd class="mono">0.0559 → 0.0574（step 155 起回升 · 轻度过拟合信号）</dd><dt>自测三指标</dt><dd class="mono">accuracy 79.4%（&lt;80%）· ECE 0.061（&gt;0.05）· 与前一生产版本一致率 91%</dd><dt>基线对比（AC-C3）</dt><dd class="mono">未微调同任务 68.2% / 0.104 → 净赚 +11.2pt，但校准仍差</dd><dt>血缘 / 回滚</dt><dd class="mono">父版本 Qwen3.5-2B(v1.2) · 本版本未设产，无需回滚</dd><dt>日志与审计</dt><dd class="mono">train.log（同目录）· AF-5D1 完成 · AF-6E3 设产被拒</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">训练时间线</p>
+<div class="timeline">
+<div class="tl-item"><b>13:02</b> · 预检通过（显存 10GB · 磁盘足）· 二次确认由 @liang 点击</div>
+<div class="tl-item"><b>13:03</b> · 构造数据集：会话 412 + 记忆 88 → 脱敏 468 条 → 指纹 <span class="mono">a91f…</span> 入台账</div>
+<div class="tl-item"><b>13:04</b> · <span class="mono">llamafactory-cli train …</span> 启动（平台侧仅记录 PID 与日志路径）</div>
+<div class="tl-item"><b>13:20</b> · step 80 · loss 0.121 · 显存峰值 9.2GB · 无 OOM</div>
+<div class="tl-item"><b>13:43</b> · step 155 完成 · adapter 落盘 · 合并评测权重</div>
+<div class="tl-item"><b>13:43</b> · 三指标自测：内置公开基准子集 + 本域回放样例 60 条</div>
+<div class="tl-item fail"><b>13:52</b> · 报告出：79.4% / <b>0.061</b> / 91% → <span class="chip bad">未过门槛</span> · 设产入口灰置</div>
+</div>
+<p style="margin-top:var(--s4)"><span class="btn link" data-click data-toast="评测任务已重跑（演示）：只读回放样例 · 不动生产版本">重跑自测</span><span class="btn link" data-click data-goto="finetune__cmd.html">⧉ 命令预览（零执行）</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除产物</span></p></div></div>
+
+<div class="drawer" id="dr-tr-v4"><header><b>训练详情 · dept-router-v4-ft</b><span class="chip ok">已过门槛 · 待切产</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout ok"><p class="tiny" style="margin:0"><b>这一版可以上岗：</b>accuracy 83.1% ≥80% · ECE 0.023 ≤0.05 · 与当前生产版本决策一致率 88%。切产后 v3 仍在目录留血缘（AC-B5），可一键回滚。</p></div>
+<dl class="kv"><dt>任务 / 状态</dt><dd class="mono">finetune-2026q3-v4 · <span class="chip ok">完成</span>（38min）</dd><dt>配方差异</dt><dd class="mono">同 v3 配方 + 温度修正样本 3,000 条（专治 v3 的校准偏高）</dd><dt>数据台账</dt><dd class="mono">会话 455 · 记忆 90 · 脱敏后 543 条 · 指纹 c207…</dd><dt>硬件预检</dt><dd class="mono">通过（显存 10GB ≥ 8GB · 峰值 9.4GB · 用时 38min）</dd><dt>训练 loss（文本态）</dt><dd class="mono">step 31 · 0.398 → 155 · 0.071 · 末段 0.0552 0.0548 0.0544 0.0541 0.0540 0.0539 0.0538 0.0538（平稳收敛）</dd><dt>eval loss</dt><dd class="mono">0.0561 → 0.0558（无回升 · 过拟合信号消失）</dd><dt>产物路径</dt><dd class="mono">.specs/small-model-decisions/artifacts/dept-router-v4-ft/adapter/（268MB）</dd><dt>自测三指标</dt><dd class="mono">accuracy 83.1% · ECE 0.023 · 一致率 88%</dd><dt>门槛判定</dt><dd><span class="chip ok">通过</span> · <span class="tiny dim">门槛数值本身是域策略可审计项（AC-C2）</span></dd><dt>切产影响</dt><dd>quant-research「路由决策」绑定的模型版本由 v1.2 切至 v4 · 阈值 0.60 不变 · 在途决策不受影响</dd><dt>回滚窗口</dt><dd class="mono">留 30 天血缘 · 一键回滚需二次确认</dd><dt>审计</dt><dd class="mono">AF-7F2 完成 · 切产将写 decision_model_promoted（含操作人与门槛快照）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">三指标逐版对照（微调赚了多少）</p>
+<table class="tbl compact"><thead><tr><th>版本</th><th>accuracy</th><th>ECE</th><th>一致率</th><th>判定</th></tr></thead><tbody>
+<tr><td class="mono">基线（未微调）</td><td class="mono">68.2%</td><td class="mono">0.104</td><td class="dim">—</td><td><span class="chip">参照</span></td></tr>
+<tr><td class="mono">v1.2 Jev 复刻（当前生产）</td><td class="mono">82.3%</td><td class="mono">0.017</td><td class="mono">100%（自身）</td><td><span class="chip ok">生产</span></td></tr>
+<tr><td class="mono">v3-ft</td><td class="mono">79.4%</td><td class="mono">0.061</td><td class="mono">91%</td><td><span class="chip bad">禁止切产</span></td></tr>
+<tr><td class="mono">v4-ft</td><td class="mono">83.1%</td><td class="mono">0.023</td><td class="mono">88%</td><td><span class="chip ok">可切产</span></td></tr>
+</tbody></table>
+<p class="tiny dim">一致率 88% 不是坏消息：意味着 12% 的决策与现生产版本不同——切产后需观察 <span class="mono">escalated / fallback</span> 曲线（§6.12），别只看单点指标。</p>
+<p style="margin-top:var(--s4)"><span class="btn link" data-click data-toast="评测任务已重跑（演示）">重跑自测</span><span class="btn link" data-click data-goto="finetune__cmd.html">⧉ 命令预览</span><button class="btn sm primary" data-click data-modal="md-prod">切生产</button></p></div></div>
+
+<div class="drawer" id="dr-tr-hw"><header><b>硬件不达标 · 用户轻薄本（统一内存 12GB）</b><span class="chip bad">微调不可用</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>灰显而不是报错，且缺因明写不藏 hover（AC-B3 / §6.0 ③）：</b>推理轨不受此限——Q4_K_M 仅 1.3GB，这台机器跑推理够；只有微调入口关闭。</p></div>
+<dl class="kv"><dt>画像</dt><dd class="mono">Windows 11 · 无独显 · 统一内存 12GB · 磁盘余 86GB</dd><dt>预检结论</dt><dd><span class="chip bad">统一内存 12GB &lt; 16GB</span> · 基线：2B 级 LoRA 需 显存 ≥8GB 或 Apple 统一内存 ≥16GB</dd><dt>引擎探测</dt><dd class="mono">LLaMA-Factory 未安装（PATH 与配置路径均未命中）</dd><dt>影响面</dt><dd>微调入口灰显 · 训练操作返回 <span class="mono">403 未达基线</span> · 推理与绑定不受影响</dd><dt>三条出路</dt><dd>①换机（本机只做推理）②升云 API 轨（数据出域需单独确认，§6.25 L3）③在达标的 M 系机上训完，产物再登记进目录</dd><dt>不做什么</dt><dd>平台不代装 LLaMA-Factory、不降门槛数值凑通过、不静默改推云轨</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">预检逐项</p>
+<table class="tbl compact"><thead><tr><th>项</th><th>要求</th><th>本机实测</th><th>判定</th></tr></thead><tbody>
+<tr><td>统一内存 / 显存</td><td class="mono">≥16GB / ≥8GB</td><td class="mono">12GB / 无独显</td><td><span class="chip bad">未达</span></td></tr>
+<tr><td>推理轨</td><td class="mono">Q4 ≤2GB</td><td class="mono">1.3GB</td><td><span class="chip ok">达</span></td></tr>
+<tr><td>磁盘余量</td><td class="mono">≥15GB（基座+adapter+评测）</td><td class="mono">86GB</td><td><span class="chip ok">达</span></td></tr>
+<tr><td>训练引擎</td><td class="mono">llamafactory-cli 可用</td><td class="mono">未安装</td><td><span class="chip bad">未达</span></td></tr>
+<tr><td>后端能力</td><td class="mono">Metal / CUDA / Vulkan 之一</td><td class="mono">Vulkan（CPU 兜底）</td><td><span class="chip warn">仅推理</span></td></tr>
+<tr><td>预计耗时（若达标）</td><td class="mono">≈40min</td><td class="mono">CPU 估算 &gt;9h</td><td><span class="chip bad">不推荐</span></td></tr>
+</tbody></table>
+<p class="tiny dim">要看装什么、怎么装 → §6.25 环境参谋给分层方案（可复制命令 / 可下载脚本 / 操作路径），<b>参谋零执行</b>。</p>
+<p style="margin-top:var(--s4)"><span class="btn link" data-click data-toast="重新预检已发起（演示）：只读探测 · 不改配置">重新预检</span><span class="btn link" data-click data-goto="finetune__cmd.html">⧉ 只出方案的安装命令</span></p></div></div>
+
+<div class="modal" id="md-start"><div style="padding:var(--s4)"><b>开始训练 · dept-router-v5-ft？</b>
+<p class="small dim" style="margin:8px 0"><b>资源与影响提示</b>（本机训练 · 平台只编排，不代装引擎）：</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>显存：<b>峰值约 9.4GB</b>（基线 ≥8GB · 预检只读复跑 <span class="mono">nvidia-smi / memory.free</span>）</li>
+<li>耗时：<b>约 40min</b>（v3 41min · v4 38min 实测）· 期间同机<b>不可并发</b>第二个训练任务</li>
+<li>磁盘：adapter 268MB + 合并评测权重 4.1GB · 目标卷余 412GB</li>
+<li>算力抢占：推理轨共享同一 GPU → 决策 P95 可能从 112ms 抬到 ~180ms（观察期提示）</li>
+<li>数据边界：仅本域会话 + 记忆条目（脱敏后 543 条）· <b>训练数据不出本域</b> · 指纹入台账可回放</li>
+<li>可中断：中断即作废本次产物（不留半成品版本），台账标 <span class="mono">aborted</span></li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b>（§6.0：训练是占资源动作 + 理由入审计）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [v4 校准已达，补温度样本再压 ECE ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-click data-toast="✗ 引擎缺失时代码路径拒绝启动：检测本机 LLaMA-Factory CLI 未命中 → 只给安装指引，拒绝代装（AC-B4）" data-close>先跑预检 + 探测引擎</button> <button class="btn sm primary" data-toast="任务已入队 finetune-2026q3-v5（演示）· 审计 finetune_started · 平台仅编排 CLI 执行" data-close>确认开始训练</button></div></div></div>
+
+<div class="modal" id="md-prod"><div style="padding:var(--s4)"><b>切生产版本 → dept-router-v4-ft？</b>
+<p class="small dim" style="margin:8px 0"><b>影响清单</b>（这一步会真的改变线上决策路径）：</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>quant-research「路由决策」版本 v1.2 → <span class="mono">v4-ft</span>；阈值 0.60 与绑定关系不变</li>
+<li>与现生产版本决策一致率 <b>88%</b> → 约 12% 决策会改变，观察期内 <span class="mono">escalated / fallback</span> 曲线需盯（§6.12）</li>
+<li>旧版本 <span class="mono">v1.2</span> 保留血缘，30 天内可一键回滚（AC-B5）</li>
+<li>门禁判定已在服务端通过：accuracy 83.1% ≥80% · ECE 0.023 ≤0.05</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b>（§6.0：破坏性/切产操作二次确认 + 理由入审计）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [v4 校准达标且样本更全，替换 v1.2 观察两周]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已切产 + 旧版本留血缘可回滚 · 审计 decision_model_promoted（演示）" data-close>确认切产</button></div></div></div>
+
+<div class="modal" id="md-rollback"><div style="padding:var(--s4)"><b style="color:var(--red)">回滚生产版本 → v3-ft？</b>
+<p class="small dim" style="margin:8px 0"><span class="chip bad">不建议</span> v3 未过门槛（accuracy 79.4% · ECE 0.061）。回滚到未过门槛的版本需显式写明理由，且服务端会拒绝把它设为生产——本操作只会把绑定退回 <b>v1.2 Jev 复刻</b>。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>可选回滚目标：<span class="mono">v1.2（当前可回滚的最近过门槛版本）</span></li>
+<li>回滚后今日决策台账计数继续累加，历史不重写</li>
+<li>留审计 <span class="mono">decision_model_rollback</span>（操作人 + 门槛快照）</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b></p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [一致率波动超预期，先退回 v1.2 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已退回 v1.2（v3 未过门槛不可设产）· 审计 decision_model_rollback（演示）" data-close>确认回滚到 v1.2</button></div></div></div>
+
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除训练产物 dept-router-v3-ft？</b>
+<p class="small dim" style="margin:8px 0">删除仅清磁盘 adapter / merged 权重（约 4.4GB），<b>数据台账与三指标报告保留</b>（可计量数据走权威库，裁定⑦）。重跑需重新训练。</p>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b></p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [配方已作废，腾磁盘             ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除产物 + 血缘记录保留 · 审计 finetune_artifact_deleted（演示）" data-close>确认删除</button></div></div></div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px 6px"><b>演示数据说明：</b>三指标数值（79.4% / 0.061 / 91%、83.1% / 0.023 / 88%、基线 68.2% / 0.104、门槛 80%/0.05）与硬件基线（显存 ≥8GB 或统一内存 ≥16GB · Q4 1.3GB）均为 §6.24 / §2.7 与 <span class="mono">.specs/small-model-decisions/REQUIREMENT.md</span> AC-B3/C1/C2 原文实值；loss 文本序列、产物路径、耗时分钟数、审计号与 LLaMA-Factory 命令行参数为演示值（参数形态取自 LLaMA-Factory 通用 CLI，非平台内置实现）。本页「⧉ 复制 / 下载脚本」均不执行任何动作（AC-E4）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：任务行任务名/「训练详情」→ 训练详情抽屉（loss 文本态 + 产物路径 + 时间线）· 「新建微调任务」→ 独立详情页 <span class="mono">finetune__new.html</span>（基座选择 + 数据集勾选，跨域取数拒绝）· 「开始训练 v5」→ 二次确认模态（显存 / 耗时 / 磁盘 / 抢占 / 可中断 + 原因必填 + 引擎缺失即拒的演示）· 「切生产 / 回滚 / 删除产物」→ 二次确认模态（影响清单 + 原因必填）· 「⧉ 只出方案零执行 · 命令预览」→ 独立详情页 <span class="mono">finetune__cmd.html</span>（LLaMA-Factory 命令块 + ⧉ 复制 toast）· 未达门禁处 → 灰置 + 原因 toast · 重探/重跑/预检 → toast · Esc 关闭所有浮层。</p>
+</body></html>

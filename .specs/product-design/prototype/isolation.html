@@ -1,0 +1,160 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>执行隔离策略 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}body{padding-top:34px}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p26" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="env-advisor.html">环境参谋</span><span class="pill" data-goto="integration.html">对外集成</span></div>
+    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-14</b>（第 4 轮 S8<span class="chip ok">已过审</span>）：执行隔离<b>契约先行</b>的界面形态。当前「执行」=同进程 LLM 调用、尚无任意代码执行面——本页随首个本地工具执行面落地。三铁律：①档位<b>探测开放</b>（装不出来的档不显示可选）②<b>fail-closed</b>（选档探测失败=拒绝执行，禁止静默回退 T0）③降级<b>三处显式</b>（界面徽章+审计+API 响应同标 isolation:none，学 multica「说清不藏」）。<b>此界面尚不存在</b>。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/isolation</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="isolation.html" class="active"><svg class="icon"><use href="#i-shield"/></svg>执行隔离</a>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-shield"/></svg>审计日志</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">管理 <span class="dim">· 执行隔离策略</span></span><span class="right"><button class="btn sm" data-click data-toast="能力重探已发起（演示）：docker info / runsc / /dev/kvm 三项只读探测 · ≤2s">重探档位能力</button><button class="btn sm primary" data-click data-pop="pop-domain">域 × 档 策略 ▾</button></span></div>
+          <div class="app-body">
+            <div class="callout err"><p><b>当前默认档：T0 · 平台进程内 —— 无隔离边界。</b>不粉饰：与宿主同 uid、同内核。任何标为「不可信」的执行请求在拿到更高档前会被<b>直接拒绝</b>（fail-closed），不会静默降级跑在 T0。</p></div>
+            <p class="h2p" style="margin-top:var(--s4)">档位阶梯与本机能力探测（灰置=当前装不出来 / 不承诺）</p>
+            <table class="tbl">
+              <thead><tr><th>档</th><th>形态</th><th>隔离强度（失效面）</th><th>冷启动</th><th>本机探测</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td data-click data-drawer="dr-t0" style="cursor:pointer"><b>T0</b></td><td>平台进程内（现状）</td><td>无边界——逃逸即平台沦陷</td><td>~0</td><td>—</td><td><span class="chip bad">仅受信代码 · 常驻红条</span>　<span class="btn link" data-click data-drawer="dr-t0">看失效面</span></td></tr>
+                <tr><td data-click data-drawer="dr-t1" style="cursor:pointer"><b>T1</b></td><td>子进程 + rlimit/专用 uid</td><td class="dim">弱：防手滑不防恶意</td><td>ms</td><td>—</td><td><span class="chip">过渡带 · 永不进承诺阶梯</span>　<span class="btn link" data-click data-drawer="dr-t1">为什么不承诺</span></td></tr>
+                <tr><td data-click data-goto="isolation__t2.html" style="cursor:pointer"><b>T2</b></td><td>Docker 容器（每执行一会话容器）</td><td>中：ns+cgroup，共享内核</td><td>~1s</td><td><span class="dot ok"></span>Docker 27.1 ✓</td><td><span class="chip ok">可开放</span>　<span class="btn link" data-click data-goto="isolation__t2.html">档位详情</span><span class="btn link" data-click data-toast="T2 探测复跑（演示）：docker info → Server 27.1.1 · 预构建镜像 agentflow/runner:py311 命中缓存">复探</span></td></tr>
+                <tr><td data-click data-goto="isolation__t3.html" style="cursor:pointer"><b>T3</b></td><td>Docker + gVisor(runsc)</td><td>中高：内核攻击面大缩；syscall 密集打折</td><td>~1s</td><td><span class="dot err"></span>runsc 未装（无需 KVM）</td><td><span class="chip warn">装后即可 · 指引 ⧉</span>　<span class="btn link" data-click data-goto="isolation__runsc.html">安装 runsc 指引 ▾</span><span class="btn link" data-click data-toast="T3 探测复跑（演示）：docker info Runtimes 无 runsc → 维持不可选（不猜、不假装可开放）">复探</span></td></tr>
+                <tr><td data-click data-drawer="dr-t4" style="cursor:pointer"><b>T4</b></td><td>Firecracker microVM</td><td>高：硬件虚拟化边界</td><td>12ms VMM / ≤125ms boot</td><td><span class="dot err"></span>/dev/kvm 不可用</td><td><span class="chip">本机遇不可开放（云主机可）</span>　<span class="btn link" data-click data-drawer="dr-t4">档位详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-kvm">为何本机不可</span></td></tr>
+                <tr><td data-click data-drawer="dr-t5" style="cursor:pointer"><b>T5</b></td><td>云沙箱外接（E2B 类）</td><td>最高：物理外移（换成网络/凭据/数据出域信任）</td><td>快照毫秒级</td><td>外部服务</td><td><span class="chip">外接选项 · 不内嵌</span>　<span class="btn link" data-click data-drawer="dr-t5">换的是什么信任</span></td></tr>
+              </tbody>
+            </table>
+            <p class="h2p" style="margin-top:var(--s4)">执行契约（与档位正交 · P1-14 先行段）</p>
+            <table class="tbl">
+              <thead><tr><th>字段</th><th>取值</th><th>语义来源</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">tier</td><td>T0·T2·T3·T4·T5（无 T1）</td><td>本页阶梯</td></tr>
+                <tr><td class="mono">ttl + shutdownPolicy</td><td class="mono">Delete | Retain</td><td>agent-sandbox v1beta1：<b>Retain=留产物清现场</b>——与 .specs/ 知识产物一等公民同构</td></tr>
+                <tr><td class="mono">operatingMode</td><td class="mono">Running | Suspended</td><td>Suspended=杀计算体保卷与对象，可恢复</td></tr>
+                <tr><td class="mono">egress</td><td>默认拒 · 出口白名单</td><td>agent-sandbox 威胁模型（封私网/元数据端点）单机等价</td></tr>
+                <tr><td class="mono">凭证</td><td>run-scoped 短票，绑定 (agent,run) 退场即焚</td><td>multica mat_ 票 / E2B / agent-sandbox v1.0.3 三同源；<b>与档位正交</b>（S13 PAT 同族）</td></tr>
+              </tbody>
+            </table>
+            <p class="tiny dim">域×档：策略绑定在域上（<span class="mono">域=策略容器</span>三合一的第三件）——不可信域默认 <span class="mono">min_tier=T3</span>，达不到就拒跑；降档需域 owner 显式确认并全程审计。</p>
+            <div class="grid g2" style="align-items:start">
+              <div class="panel">
+                <p class="h2p" style="margin:0 0 var(--s2)">egress 出口白名单（默认拒 · 新增即入审计）</p>
+                <table class="tbl compact">
+                  <thead><tr><th>目标</th><th>用途</th><th>状态</th></tr></thead>
+                  <tbody>
+                    <tr><td class="mono tiny">pypi.org · 443</td><td class="tiny">依赖安装（受信域）</td><td><span class="chip ok">放行</span> <span class="btn link" style="color:var(--red)" data-click data-modal="md-egress-del">移除</span></td></tr>
+                    <tr><td class="mono tiny">127.0.0.1:8080</td><td class="tiny">本地决策模型推理口</td><td><span class="chip ok">放行</span> <span class="btn link" style="color:var(--red)" data-click data-modal="md-egress-del">移除</span></td></tr>
+                    <tr><td class="mono tiny">169.254.169.254</td><td class="tiny">云元数据端点</td><td><span class="chip bad">永久封（SSRF 面）</span></td></tr>
+                    <tr><td class="mono tiny">10.0/8 · 192.168/16</td><td class="tiny">私网段</td><td><span class="chip bad">默认拒</span></td></tr>
+                  </tbody>
+                </table>
+                <p class="tiny dim" style="margin:var(--s2) 0 0"><button class="btn sm" data-click data-goto="isolation__egress.html">+ 新增白名单项 ▾</button> <span class="tiny dim">新项默认 <b>需域 owner 批准</b> 才生效 · 变更写审计 <span class="mono">isolation_egress_changed</span></span></p>
+              </div>
+              <div class="panel">
+                <p class="h2p" style="margin:0 0 var(--s2)">最近执行请求（含被拒的）</p>
+                <div class="timeline">
+                  <div class="tl-item"><b>14:38</b> · <span class="mono">task-12</span> 请求 <span class="mono">tier=T2</span> · 探测通过 → 已放行（Docker · egress 拒 · 短票 run-scoped）</div>
+                  <div class="tl-item fail"><b>14:36</b> · <span class="mono">task-11</span> 请求 <span class="mono">tier=T3</span> · <span class="chip bad">拒绝执行</span> runsc 缺失 → <b>不回退 T0</b>（三处显式 isolation:none）</div>
+                  <div class="tl-item fail"><b>14:20</b> · 域 <span class="mono">integrations-untrusted</span> 请求 T2，但 <span class="mono">min_tier=T3</span> 未达 → 拒跑 + 通知域 owner</div>
+                  <div class="tl-item"><b>13:55</b> · <span class="mono">ttl=900s · shutdownPolicy=Retain</span> → 产物已收、现场已清（<span class="mono">operatingMode=Suspended</span> 保卷 1 例）</div>
+                  <div class="tl-item"><b>11:02</b> · 探测任务：runsc 安装后复探 → T3 转「可开放」（演示）</div>
+                </div>
+                <p class="tiny dim" style="margin:0"><span class="btn link" data-click data-toast="已按 fail-closed 重放最近 3 条被拒请求（演示）：结果仍为拒绝，除非档位能力变化">重放被拒请求</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="drawer" id="dr-t0"><header><b>档位详情 · T0 平台进程内（现状）</b><span class="chip bad">无隔离边界</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>不粉饰（学 multica「说清不藏」）：</b>T0 与宿主<b>同 uid、同内核</b>。它的失效面不是「容器逃逸」，是<b>整个平台进程沦陷</b>——包括读任意 <span class="mono">.specs/</span> 产物、拿库凭据、以 admin 身份调内部 API。</p></div>
+<dl class="kv"><dt>形态</dt><dd class="mono">平台进程内直接调用（现状「执行」= 同进程 LLM 调用）</dd><dt>失效面</dt><dd>无边界：进程内任意代码 → 宿主同权限沦陷 · 无 fs / net / syscall 约束</dd><dt>承诺范围</dt><dd>仅受信代码（平台自带工具与内置逻辑），<b>不可信输入禁止落此档</b></dd><dt>冷启动</dt><dd class="mono">~0（无额外开销）</dd><dt>本机探测</dt><dd class="mono">无需探测（恒可用）· 因此本页不提供「探测 T0」按钮</dd><dt>界面徽章</dt><dd>常驻红条 + 每条执行详情标 <span class="mono">isolation:none</span>（不允许被读成「已隔离」）</dd><dt>审计标注</dt><dd class="mono">execution.requested_tier=T3 · executed_tier=none · reason=probe_failed</dd><dt>API 响应标注</dt><dd class="mono">{"isolation":"none","requested_tier":"T3","accepted":false}</dd><dt>开放条件</dt><dd>不适用（这是退路，不是目标档）</dd><dt>与 fail-closed 的关系</dt><dd><b>禁止静默降回 T0</b>；只有受信代码路径可留在此档</dd><dt>T0 期的正确姿势</dt><dd>契约先行（tier/ttl/shutdownPolicy/egress/短票先写死）+ 随执行面逐档开放（T2→T3→T4）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">三处显式演示（同一次降级）</p>
+<table class="tbl compact"><thead><tr><th>面</th><th>看到什么</th></tr></thead><tbody>
+<tr><td>界面</td><td>执行详情徽章 <span class="chip bad">isolation:none</span> + 顶栏红条常驻（不折叠、不 hover）</td></tr>
+<tr><td>审计</td><td class="mono tiny">isolation_downgrade_confirmed actor=@liang from=T3 to=T0 reason=…</td></tr>
+<tr><td>API</td><td class="mono tiny">响应体 isolation:"none" · 状态码 409（非 200 加个提示）</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-click data-toast="演示：跳到 §1.6.5 纪律 ①——门禁写进状态转换层，不写进提示词">看纪律原文</span><button class="btn sm" data-close>关闭</button></p></div></div>
+
+<div class="drawer" id="dr-t1"><header><b>档位详情 · T1 子进程 + rlimit / 专用 uid（过渡带）</b><span class="chip">不承诺</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout warn"><p class="tiny" style="margin:0"><b>为什么写出来又不进阶梯：</b>契约的 tier 枚举里没有 T1（inproc|container|gvisor|microvm|remote）。它的定位是给「不想上容器但要比 T0 好一点」的过渡实现用，<b>界面与文档都禁止把它当安全边界宣称</b>。</p></div>
+<dl class="kv"><dt>形态</dt><dd class="mono">子进程 + setrlimit（CPU/内存/文件数）+ 专用 uid</dd><dt>失效面</dt><dd class="dim">弱：防手滑不防恶意——同内核、同文件系统可达面，越权读与提权不挡</dd><dt>冷启动</dt><dd class="mono">ms（无镜像拉取）</dd><dt>本机探测</dt><dd class="mono">不适用（不提供可选）</dd><dt>能挡住的</dt><dd>失控 fork、内存吃满、跑飞的死循环、单用户文件配额</dd><dt>挡不住的</dt><dd>任意读盘、内核漏洞利用、ptrace 同 uid 进程、网络外联（需另配 netns）</dd><dt>出现在哪</dt><dd>只出现在「过渡带」段落与实测注记里，档位下拉不给它选项</dd><dt>为什么不给徽章</dt><dd>一旦给「已隔离」徽章就会被误读成边界，比现状更危险</dd><dt>晋级路径</dt><dd>要么直接 T2（Docker 已在），要么留 T0 + fail-closed 拒跑不可信输入</dd></dl>
+<table class="tbl compact"><thead><tr><th>对比项</th><th>T0</th><th>T1</th><th>T2</th></tr></thead><tbody>
+<tr><td>uid 隔离</td><td><span class="chip bad">无</span></td><td><span class="chip warn">有（专用 uid）</span></td><td><span class="chip ok">有 + ns</span></td></tr>
+<tr><td>文件系统视野</td><td>全宿主</td><td>同宿主（权限位）</td><td>挂载卷白名单</td></tr>
+<tr><td>内核共享</td><td>是</td><td>是</td><td>是</td></tr>
+<tr><td>恶意代码假设</td><td>不承受</td><td>不承受</td><td>部分承受</td></tr>
+<tr><td>对外承诺</td><td>「无边界」红条</td><td><b>不承诺</b></td><td>进阶梯</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-click data-toast="T1 不在可选档位内（探测开放铁律 ①）：本页不提供「选 T1 执行」">能选 T1 吗</span><button class="btn sm" data-close>关闭</button></p></div></div>
+
+<div class="drawer" id="dr-t4"><header><b>档位详情 · T4 Firecracker microVM</b><span class="chip">本机不可开放（云主机可）</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>12ms VMM / ≤125ms boot 的数字很诱人，但前置被低估过：</b>jailer、rootfs 与镜像工具链要自研，架构师意见明确要求阶梯文档带上「T4 前置 = 专员工时」的诚实标签。</p></div>
+<dl class="kv"><dt>形态</dt><dd class="mono">Firecracker microVM（硬件虚拟化边界）</dd><dt>隔离强度 / 失效面</dt><dd class="mono">高：guest 内核独立 · 失效面转到 VMM/jailer 与 virtio 设备面</dd><dt>冷启动</dt><dd class="mono">12ms（VMM）/ ≤125ms（boot）· 内存 5MiB 级起</dd><dt>本机探测</dt><dd><span class="dot dead"></span> <span class="mono">/dev/kvm 不可用</span>（Apple Silicon 无 KVM · macOS 上的 Docker 也不暴露）</dd><dt>开放条件</dt><dd>/dev/kvm 通过（云主机 / 裸金属 Linux）+ 自研编排与镜像链</dd><dt>额外成本</dt><dd class="mono">专职人力（jailer 配置 · rootfs 构建 · 快照管理）· 非「装个包」量级</dd><dt>快照</dt><dd class="mono">支持 → 与 <span class="mono">operatingMode=Suspended</span> 语义天然咬合（杀计算体保卷可恢复）</dd><dt>本机可选吗</dt><dd><b>不可</b>（探测开放铁律 ①：装不出来的档不给选，也不灰成一个诱饵）</dd><dt>当前建议</dt><dd>有 KVM 的部署面再谈；单机场景 T3（无 KVM）已覆盖大部分需求</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">探测输出</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75">$ test -r /dev/kvm && test -w /dev/kvm && echo KVM_OK
+# 无输出 → 不可读写 /dev/kvm
+$ docker run --rm alpine sh -c 'ls -l /dev/kvm'
+ls: /dev/kvm: No such file or directory</pre>
+<p style="margin-top:var(--s4)"><span class="btn link" data-click data-toast="演示：T4 不提供安装指引——不是装包问题，需要 KVM 主机 + 自研编排（诚实标注）">能装出来吗</span><button class="btn sm" data-close>关闭</button></p></div></div>
+
+<div class="drawer" id="dr-t5"><header><b>档位详情 · T5 云沙箱外接（E2B 类）</b><span class="chip">外接选项 · 不内嵌</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout warn"><p class="tiny" style="margin:0"><b>「最高隔离强度」≠ 没有代价：</b>物理外移把技术失效面换成了<b>网络、凭据与数据出域</b>三件信任账。<span class="mono">E2B 自托管全栈违背单进程承诺；Daytona 因停更出局</span>——所以只作外接选项。</p></div>
+<dl class="kv"><dt>形态</dt><dd class="mono">外部沙箱服务（E2B 类）· 平台侧只做客户端</dd><dt>隔离强度 / 失效面</dt><dd class="mono">最高：代码物理不在本机执行；失效面 = 服务商边界 + 网络传输 + 凭据</dd><dt>冷启动</dt><dd class="mono">快照毫秒级恢复</dd><dt>本机探测</dt><dd class="mono">外部服务（不适用本机能力探测 · 需手工登记端点与凭据）</dd><dt>数据出域</dt><dd><b>必然出域</b>：工作区文件、命令、产物全部过第三方 → 域 owner 显式确认 + 审计</dd><dt>凭据</dt><dd class="mono">外部 API Key（平台托管不落明文）· run-scoped 短票仍与档位正交</dd><dt>egress</dt><dd class="mono">本机侧可全拒；出网发生在服务商侧 → <b>我们的白名单不再适用</b>，需书面写清责任边界</dd><dt>产物回传</dt><dd class="mono">Retain 语义下产物落回 <span class="mono">.specs/</span>，现场清理在服务商侧（需可核验日志）</dd><dt>为什么单进程平台不做内嵌</dt><dd class="mono">自托管全栈 = 引入一整套外部编排依赖，与「单进程可控」承诺正面冲突</dd><dt>选型注记</dt><dd class="mono">E2B（外接可选）· Daytona（停更，出局）</dd><dt>状态</dt><dd><span class="chip">外接选项 · 不内嵌</span> · 界面不显示为「本机可开放」</dd></dl>
+<table class="tbl compact"><thead><tr><th>信任维度</th><th>T3 本机 gVisor</th><th>T5 云沙箱</th></tr></thead><tbody>
+<tr><td>内核/宿主沦陷</td><td><span class="chip ok">大幅缩小</span></td><td><span class="chip ok">不适用（不在本机）</span></td></tr>
+<tr><td>数据出域</td><td><span class="chip ok">否</span></td><td><span class="chip bad">是（必然）</span></td></tr>
+<tr><td>凭据面</td><td><span class="chip ok">仅 run-scoped 短票</span></td><td><span class="chip warn">第三方长期凭据 + 短票</span></td></tr>
+<tr><td>egress 可控</td><td><span class="chip ok">本机白名单生效</span></td><td><span class="chip bad">服务商侧，需另立约定</span></td></tr>
+<tr><td>成本形态</td><td>本机算力 + 一次性安装</td><td>按量计费 + 网络抖动</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-click data-toast="演示：接 T5 需先在「部署安全卡」（§6.16）无红条，再走域策略确认">开启条件是什么</span><button class="btn sm" data-close>关闭</button></p></div></div>
+
+<div class="pop" id="pop-domain" style="max-width:480px"><p class="tiny dim" style="margin:0 0 6px"><b>域 × 档 策略（域=策略容器 · min_tier 达不到就拒跑）</b></p>
+<table class="tbl compact"><thead><tr><th>域</th><th>min_tier</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">默认域</td><td><span class="chip bad">T0</span></td><td><span class="btn link" data-toast="默认域建议提到 T2（本机已可开放）：需域 owner 确认，写审计（演示）">建议 T2</span></td></tr>
+<tr><td class="mono">quant-research</td><td><span class="chip ok">T2</span></td><td><span class="btn link" data-toast="quant-research 可升 T3 —— 但需先装 runsc（当前探测未通过，禁止提前宣称）">升 T3</span></td></tr>
+<tr><td class="mono">integrations-untrusted</td><td><span class="chip warn">T3</span></td><td><span class="btn link" data-click data-toast="✗ 不可降档：该域标记为不可信，降到 T2 需域 owner 显式确认（本项不提供绕过入口）">能否降到 T2</span></td></tr>
+<tr style="opacity:.5"><td class="mono dim">（云主机 · 有 /dev/kvm）</td><td><span class="chip dim">T4</span></td><td><span class="btn link" data-toast="本机无 KVM → T4 不出现在可选档（探测开放）；换到云主机部署后本页自动列出">为何看不到 T4</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">改策略 = 写域策略 + 审计；<b>降档比升档严重</b>：升档只是变慢，降档是承诺变小 → 必须走红色警告模态并三处显式 <span class="mono">isolation:none</span>。</p>
+<p style="margin-top:var(--s2)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-click data-goto="isolation__downgrade.html" data-close>我要降档执行 ▸ 看警告</button></p></div>
+
+<div class="modal" id="md-egress-del"><div style="padding:var(--s4)"><b>移除 egress 白名单项？</b>
+<p class="small dim" style="margin:8px 0">移除即<b>收紧</b>：该目标立即不可达，依赖它的在途执行会失败并被标 <span class="mono">egress_denied</span>（不是静默重试）。当前选中：<span class="mono">pypi.org:443</span>。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>受影响：quant-research 域内 2 个依赖安装类工具（下次执行起失败）</li>
+<li>不受影响：已完成的 run 与产物</li>
+<li>留痕：审计 <span class="mono">isolation_egress_changed</span>（含前后快照）</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b></p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [依赖已打进预构建镜像，可收回  ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已移除并立即生效 · 审计 isolation_egress_changed（演示）" data-close>确认移除</button></div></div></div>
+
+<div class="modal" id="md-kvm"><div style="padding:var(--s4)"><b>为什么 T4 在本机连「灰置可选」都不给？</b>
+<p class="small dim" style="margin:8px 0">探测开放铁律 ①：装不出来的档不显示可选。/dev/kvm 在本机不可读写（Apple 芯片无 KVM，macOS 上的 Docker VM 也不暴露），所以这一档在本页只作<b>说明</b>存在。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>不提供「强制选择」按钮——静默降档与虚假可选都是本设计明确禁止的</li>
+<li>要拿 T4：换 /dev/kvm 可用的 Linux 云主机 / 裸金属，本页会自动列出</li>
+<li>本机等效替代：T3（gVisor · 无需 KVM）</li>
+</ul>
+<div style="text-align:right"><button class="btn sm" data-close>知道了</button> <button class="btn sm primary" data-click data-goto="isolation__t3.html" data-close>看 T3（无 KVM 方案）</button></div></div></div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px 6px"><b>演示数据说明：</b>档位阶梯、失效面措辞、冷启动数值（T4 12ms VMM / ≤125ms boot）、探测结论（Docker 27.1 ✓ / runsc 未装 / /dev/kvm 不可用）与契约字段（tier / ttl+shutdownPolicy / operatingMode / egress / run-scoped 短票）均为 §6.26 与 §1.6 P1-14、<span class="mono">.specs/platform-evolution/D-execution-isolation-2/CONCLUSION.md</span> C8-1~C8-4 原文实值；具体命令行为通用 gVisor 官方安装形态的演示拼装（版本号与输出为演示值）；域清单中的 integrations-untrusted、最近执行请求、审计事件号均为演示数据。本页所有操作不产生真实执行或安装。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：档位行档名/「档位详情」：T0/T1/T4/T5 → 档位详情抽屉（只读 kv + 一张对比表）· T2/T3 → 独立详情页 <span class="mono">isolation__t2.html</span> / <span class="mono">isolation__t3.html</span>（失效面 + 探测输出 + 契约与对比表 · ≥3 子块）· T3「安装 runsc 指引」→ 独立详情页 <span class="mono">isolation__runsc.html</span> · 「降档执行」→ 独立详情页 <span class="mono">isolation__downgrade.html</span>（fail-closed 三处 isolation:none + 原因与域名确认）· T4「为何本机不可」→ 说明模态 · egress「+ 新增白名单项」→ 独立详情页 <span class="mono">isolation__egress.html</span>（提交即 toast 入审计）· 「移除」白名单 → 二次确认模态 · 重探/复探/勾选项 → toast · Esc 关闭所有浮层。</p>
+</body></html>

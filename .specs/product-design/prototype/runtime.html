@@ -1,0 +1,100 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>运行时监控 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="metrics.html">仪表盘</span></div>
+<p class="proto-note"><span class="chip warn">演示数据</span>会话列表 + 状态过滤 + 延迟分位值。会话详情（token 流 / 事件流 / 处置）与筛选面板均为独立详情页，不塞侧栏（原型每类只落一份样本页，同态各行同指一页）。SSE 实时推送会话事件与心跳；无数据时显示空态而非 0。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/monitor · 运行时</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html" class="active"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">监控 <span class="dim">· 运行时</span></span><span class="right"><span class="chip ok"><span class="dot idle" style="margin-right:4px"></span>SSE 已连接</span><button class="btn sm" data-toast="已拉取最新快照 · 游标 cursor 1841（演示）">刷新</button></span></div>
+          <div class="app-body">
+            <div class="tabs"><span class="tab active">运行时</span><span class="tab">指标仪表盘</span><span class="tab">调用链</span></div>
+            <div class="grid g4" style="margin-bottom:var(--s4)">
+              <div class="stat"><div class="stat-label">P50 延迟</div><div class="stat-value">3,725<span style="font-size:12px">ms</span></div><div class="stat-sub">样本 1,191</div></div>
+              <div class="stat"><div class="stat-label">P95 延迟</div><div class="stat-value" style="color:var(--orange)">18,912<span style="font-size:12px">ms</span></div><div class="stat-sub">样本 1,191</div></div>
+              <div class="stat"><div class="stat-label">P99 延迟</div><div class="stat-value" style="color:var(--red)">46,167<span style="font-size:12px">ms</span></div><div class="stat-sub">样本 1,191</div></div>
+              <div class="stat"><div class="stat-label">平均</div><div class="stat-value">5,915<span style="font-size:12px">ms</span></div><div class="stat-sub">全部会话</div></div>
+            </div>
+            <div style="display:flex;gap:var(--s2);align-items:center;margin-bottom:var(--s3)">
+              <span class="pill" style="border-color:var(--blue-border);color:var(--blue)" data-click data-goto="runtime__session-filters.html">全部 <b>1,191</b> ▾</span>
+              <span class="pill" data-click data-goto="runtime__session-filters.html">running <b>3</b></span><span class="pill" data-click data-goto="runtime__session-filters.html">success <b>1,188</b></span><span class="pill" data-click data-goto="runtime__session-filters.html">error <b>0</b></span>
+              <span style="flex:1"></span><span class="chip mono" data-click data-toast="自动刷新 30s；SSE 在线时推送增量为主的会话事件">自动刷新 · 30s</span>
+            </div>
+            <table class="tbl compact">
+              <thead><tr><th>Session ID</th><th>Agent</th><th>模型</th><th>状态</th><th>Token</th><th>耗时</th><th>开始时间</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td class="mono" data-click data-goto="runtime__rt-1-1783349487.html"><b style="color:var(--blue)">rt-1-1783349487</b></td><td>审查 Agent · 标准</td><td class="mono">gpt-4o</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">4,120</td><td class="mono">进行中</td><td class="mono">14:31:27</td><td><span class="btn link" data-toast="重启派发指令已下发 · 单进程内执行（演示）">重启</span><span class="btn link" data-click data-modal="md-drain">摘流</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">中断</span></td></tr>
+                <tr><td class="mono" data-click data-goto="runtime__rt-1-1783349487.html"><b style="color:var(--blue)">rt-2-1783349021</b></td><td>数据同步 Agent</td><td class="mono">deepseek-v3</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">1,880</td><td class="mono">进行中</td><td class="mono">14:23:41</td><td><span class="btn link" data-toast="重启派发指令已下发 · 单进程内执行（演示）">重启</span><span class="btn link" data-click data-modal="md-drain">摘流</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">中断</span></td></tr>
+                <tr><td class="mono" data-click data-goto="runtime__rt-1-1783349487.html"><b style="color:var(--blue)">rt-4-1783348712</b></td><td>前端 Agent</td><td class="mono">claude-sonnet</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">9,340</td><td class="mono">进行中</td><td class="mono">14:18:32</td><td><span class="btn link" data-toast="重启派发指令已下发 · 单进程内执行（演示）">重启</span><span class="btn link" data-click data-modal="md-drain">摘流</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">中断</span></td></tr>
+                <tr><td class="mono" data-click data-goto="runtime__rt-1-1783349487.html"><b style="color:var(--blue)">rt-1-1783348100</b></td><td>审查 Agent · 标准</td><td class="mono">gpt-4o</td><td><span class="chip ok">success</span></td><td class="mono">12,480</td><td class="mono">8.2s</td><td class="mono">14:08:20</td><td><span class="btn link" data-click data-goto="runtime__rt-1-1783349487.html">查看</span><span class="btn link" data-toast="已从失败点重跑 · 新会话 rt-1-1783349999（演示）">重试</span></td></tr>
+                <tr><td class="mono" data-click data-goto="runtime__rt-1-1783349487.html"><b style="color:var(--blue)">rt-5-1783347902</b></td><td>汇总 Agent</td><td class="mono">gpt-4o-mini</td><td><span class="chip ok">success</span></td><td class="mono">3,060</td><td class="mono">2.4s</td><td class="mono">14:05:02</td><td><span class="btn link" data-click data-goto="runtime__rt-1-1783349487.html">查看</span><span class="btn link" data-toast="重跑已入队 · priority 100（演示）">重试</span></td></tr>
+                <tr><td class="mono" data-click data-goto="runtime__rt-1-1783349487.html"><b style="color:var(--blue)">rt-3-1783347411</b></td><td>审查 Agent · 备援</td><td class="mono">claude-sonnet</td><td><span class="chip ok">success</span></td><td class="mono">15,720</td><td class="mono">11.7s</td><td class="mono">13:56:51</td><td><span class="btn link" data-click data-goto="runtime__rt-1-1783349487.html">查看</span><span class="btn link" data-toast="冷备副本已拉起 · 首调 +8s（演示）">重试</span></td></tr>
+                <tr><td class="mono" data-click data-goto="runtime__rt-1-1783346200.html"><b style="color:var(--blue)">rt-1-1783346200</b></td><td>审查 Agent · 标准</td><td class="mono">gpt-4o</td><td><span class="chip bad">error</span></td><td class="mono">21,004</td><td class="mono">31.7s</td><td class="mono">13:36:40</td><td><span class="btn link" data-click data-goto="runtime__rt-1-1783346200.html">查看</span><span class="btn link" data-toast="重跑已入队；关联告警 execution_failed 仍为未确认">重试</span></td></tr>
+                <tr><td class="mono" data-click data-goto="runtime__rt-1-1783349487.html"><b style="color:var(--blue)">rt-6-1783345800</b></td><td>数据同步 Agent</td><td class="mono">deepseek-v3</td><td><span class="chip ok">success</span></td><td class="mono">6,410</td><td class="mono">4.9s</td><td class="mono">13:30:00</td><td><span class="btn link" data-click data-goto="runtime__rt-1-1783349487.html">查看</span><span class="btn link" data-toast="重跑已入队 · priority 100（演示）">重试</span></td></tr>
+              </tbody>
+            </table>
+            <div class="panel tight" style="margin-top:var(--s3)" data-click data-goto="runtime__probes-ratelimit.html">
+              <p class="small" style="margin:0"><b style="color:var(--blue)">管控面探针 · /probes 限流</b> <span class="chip warn">进程内实现 · 单进程适用</span> <span class="tiny dim">窗口 60s · 上限 60 次 · 当前第 12 次 · 触发时返回 429 并显示错误提示条</span></p>
+            </div>
+            <div class="callout" style="margin-top:var(--s3)">
+              <p><b>SSE 事件流（实时）：</b><span class="mono">event: session_started</span> → <span class="mono">{session_id, agent, model, status, tokens}</span> · 心跳 <span class="mono">: heartbeat 1783349487</span>。</p>
+            </div>
+            <div class="panel" style="border-style:dashed;text-align:center;color:var(--text-muted);padding:var(--s4);margin-top:var(--s3)">
+              <p class="small" style="margin:0"><b>空态示例：</b>当 <span class="mono">?status=error</span> 无匹配结果时，此处显示「当前没有 error 状态的会话」——而不是显示 0 条数据的空表格。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim"><b>演示数据说明：</b>P50/P95/P99 与样本数 1,191 取自真实测试报告（<span class="mono">.specs/knowledge-plus/TEST.md</span>）。Session ID 采用真实的 <span class="mono">rt-{agent}-{ts}</span> 形态。</p>
+
+
+<div class="modal" id="md-stop"><div style="padding:var(--s4)"><b>中断会话 rt-1-1783349487？</b>
+<p class="small dim" style="margin:8px 0">需 <span class="mono">workflow:stop</span> 权限。影响清单：</p>
+<ul class="tiny" style="margin:0 0 8px;padding-left:18px">
+<li>进行中的 <span class="mono">step 3</span> 工具调用直接终止；已发出的外部副作用（已写入的文件）<b>不回滚</b>。</li>
+<li>下游 <span class="mono">fan-in</span> 等待数少 1，<span class="mono">merge</span> 节点可能永远等不齐 → 需同时中止整条 run r-128。</li>
+<li>已消耗 <span class="mono">4,120</span> token 已入账（metrics_raw），不可撤销。</li>
+<li>会话在平台进程内执行：中断只结束本次调用，<b>不重启 Agent 实例</b>。</li>
+<li>必填原因，动作入审计 <span class="mono">rt:interrupt</span>。</li>
+</ul>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [审查范围写错，改为整条 run 重跑 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="会话已中断 status=error · 审计 rt:interrupt（演示）" data-close>确认中断</button></div></div></div>
+
+<div class="modal" id="md-drain"><div style="padding:var(--s4)"><b>摘流该 Agent（停止派发新任务）？</b>
+<p class="small dim" style="margin:8px 0">摘流 = 从路由候选集中摘出，在途任务继续跑完；不杀进程、不清队列（调度队列同为进程内状态，重启即散）。影响：</p>
+<ul class="tiny" style="margin:0 0 8px;padding-left:18px">
+<li>在途 <b>1</b> 个会话（rt-1-1783349487）继续执行至结束。</li>
+<li>新任务改由同能力组其他 Agent 承接；<b>无可用副本则任务滞留队列</b>并出 agent_dead 类告警。</li>
+<li>调和循环不会替被摘流的实例扩容回期望值（需先解除摘流）。</li>
+<li>必填原因，动作入审计 <span class="mono">agent:drain</span>。</li>
+</ul>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [准备换模型配置，先摘流避免打到半路改 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已摘流 · 路由候选 3→2 · 审计 agent:drain（演示）" data-close>确认摘流</button></div></div></div>
+
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：Session ID / 查看→在途会话详情页 <span class="mono">runtime__rt-1-1783349487.html</span> · error 行→失败会话页 <span class="mono">runtime__rt-1-1783346200.html</span> · 探针限流卡→<span class="mono">runtime__probes-ratelimit.html</span> · 状态筛选 pill→<span class="mono">runtime__session-filters.html</span>（11 个选项超 pop 容量）· 「中断 / 摘流」→二次确认含影响清单与原因 · 「重启 / 重试 / 刷新」→toast · 状态筛选 pill→弹层　按 Esc 关闭所有浮层。</p>
+</body></html>

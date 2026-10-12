@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审查流水线详情 · 工作流 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<div class="detail-top"><span class="pill" data-back="workflows.html" data-click>← 返回 工作流</span><span class="crumb"><b>工作流</b> · review-pipeline</span><span class="chip ok">已发布</span><span class="chip mono">v3</span><span class="chip ok">成功率 98%</span></div>
+<div class="detail-body">
+<p class="proto-note"><span class="chip warn">演示数据</span>工作流详情：概览 / 步骤链 / 最近运行 / 版本。步骤可跳编排画布定位，回放依赖 trace 产生端（C10-0）。</p>
+
+<h4 class="blk">概览</h4>
+<dl class="kv"><dt>标识 / 版本</dt><dd class="mono">review-pipeline · v3（发布=不可变快照，v2 可回滚）</dd><dt>成功率 / 均值耗时</dt><dd><span class="chip ok">98%</span> · <span class="mono">7.4s</span>（近 20 次）</dd><dt>最后执行</dt><dd class="mono">14:31 · success · token 12,480</dd><dt>绑定域</dt><dd>默认域（策略容器：审批规则/决策开关随域）</dd><dt>运行总数</dt><dd class="mono">128 次 · 其中 error 1（r-127）</dd></dl>
+
+<h4 class="blk">步骤链（6 步 · 点击步骤 → 编排画布定位）</h4>
+<table class="tbl compact"><thead><tr><th>步骤</th><th>节点</th><th>边 / 语义</th><th>状态</th></tr></thead><tbody>
+<tr><td class="mono" data-click data-goto="canvas.html">1</td><td>审查 Agent · 标准</td><td class="mono tiny">fan-out →</td><td><span class="dot running"></span> healthy</td></tr>
+<tr><td class="mono" data-click data-goto="canvas.html">2a</td><td>前端 Agent</td><td class="mono tiny">fan-in →</td><td><span class="dot running"></span> healthy</td></tr>
+<tr><td class="mono" data-click data-goto="canvas.html">2b</td><td>数据同步 Agent</td><td class="mono tiny">fan-in →</td><td><span class="dot failed"></span> failed（retry-fallback 边接管）</td></tr>
+<tr><td class="mono" data-click data-goto="canvas.html">3</td><td>汇总 Agent</td><td class="mono tiny">human-approval</td><td><span class="dot idle"></span> 等待审批位</td></tr>
+<tr><td class="mono" data-click data-goto="canvas.html">4</td><td>人工审批</td><td class="mono tiny">→ end / dead-letter</td><td><span class="chip">规则: 状态转换层</span></td></tr>
+</tbody></table>
+<p class="tiny dim">表内为链上关键节点抽样（6 步 · 5 个可见节点），完整编排以画布为准。</p>
+
+<h4 class="blk">最近运行（运行历史 128 次）</h4>
+<table class="tbl compact"><thead><tr><th>run</th><th>时间</th><th>状态</th><th>token</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">r-128</td><td class="mono">14:31</td><td><span class="chip ok">success</span></td><td class="mono">12,480</td><td><span class="btn link" data-goto="replay__run.html" data-toast="跳转 p22 执行回放（回放依赖 trace 产生端补全 · C10-0）">回放</span></td></tr>
+<tr><td class="mono">r-127</td><td class="mono">14:02</td><td><span class="chip bad">error</span></td><td class="mono">21,004</td><td><span class="btn link" data-toast="从失败步重跑（演示）">重跑 r-127</span></td></tr>
+</tbody></table>
+
+<h4 class="blk">版本（3）</h4>
+<table class="tbl compact"><thead><tr><th>版本</th><th>形态</th><th>说明</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">v3</td><td><span class="chip ok">当前 · 不可变快照</span></td><td class="tiny">步骤 6 · 新增 retry-fallback 边接管 2b</td><td class="dim">—</td></tr>
+<tr><td class="mono">v2</td><td><span class="chip">历史快照</span></td><td class="tiny">步骤 5 · 无 fan-in 等待</td><td><span class="btn link" data-toast="回滚 v2 → 需重新发布生成快照（演示）">回滚到此版</span></td></tr>
+</tbody></table>
+<p class="tiny dim">发布 = 生成不可变快照；回滚不覆盖线上版本，需再走一次发布与审批。</p>
+
+<h4 class="blk">操作</h4>
+<p><button class="btn sm primary" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</button> <button class="btn sm" data-goto="canvas.html">编辑（跳编排画布）</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-stop">停止</button></p>
+<p class="tiny dim">编辑在画布内完成（YAML ↔ 画布双向同步，见文档 §6.5）；本页只承载只读详情与运行操作。</p>
+
+<div class="modal" id="md-stop"><div style="padding:var(--s4)"><b>停止「审查流水线」进行中的 2 个 run？</b><p class="small dim" style="margin:8px 0">在途任务收敛后停止；已发出的外部副作用不回滚。理由入审计。</p><div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="停止指令下发 · 审计 wf:stop（演示）" data-close>确认停止</button></div></div></div>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 工作流 · 步骤行→编排画布 · 回放→p22 · 执行/回滚→toast · 停止→二次确认（本页自带 modal 副本）　按 Esc 关闭所有浮层。</p>
+</body></html>

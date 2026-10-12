@@ -1,0 +1,26 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>变更 k8s-final 详情 · 工作台 · 变更总览 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p2" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="workbench.html" data-click>← 返回 工作台 · 变更总览</span><span class="crumb"><span class="dim">工作台 · 变更总览 /</span> <b>变更 k8s-final</b></span><span class="chip ok">7-integration</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="detail-body">
+<dl class="kv"><dt>Change ID / 标题</dt><dd class="mono">k8s-final · K8s 式管控收尾</dd><dt>当前阶段</dt><dd><span class="chip ok">7-integration</span> · 已归档</dd><dt>任务进度</dt><dd class="mono">12/12</dd><dt>产物</dt><dd class="mono">CHANGE / REQUIREMENT / DESIGN / TASK / TEST / REVIEW 齐</dd><dt>归档时间</dt><dd class="mono">5 天前 · 审计 chg:k8s-final:archived</dd></dl>
+<h4 class="blk">覆盖能力（对应 §1.3 管控块）</h4>
+<table class="tbl compact"><tbody>
+<tr><td>隔离域</td><td>域 CRUD · 删除不级联</td><td><span class="chip ok">已交付</span></td></tr>
+<tr><td>能力分组</td><td>按 capabilities 派生三层树 · 零新增表</td><td><span class="chip ok">已交付</span></td></tr>
+<tr><td>探针与健康</td><td>周期探活 · 五态灯 · Key 脱敏</td><td><span class="chip ok">已交付</span></td></tr>
+<tr><td>路由与网关</td><td>域内自动路由 + 跨域入口 · Least Connection</td><td><span class="chip ok">已交付</span></td></tr>
+<tr><td>渐进扩容</td><td>按目标副本渐进拉起</td><td><span class="chip ok">已交付</span></td></tr>
+<tr><td>Reconcile</td><td>三级修复 safe/caution/dangerous · dangerous 不自动执行</td><td><span class="chip ok">已交付</span></td></tr>
+<tr><td>队列 / 限流 / 退避</td><td>进程内内存三处状态</td><td><span class="chip warn">单副本限制遗留</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="归档变更不可直接改：请先「解除归档」（演示 · 需二次确认）">编辑产物</span> <button class="btn sm" data-toast="已导出变更包（含 6 份产物 + runtime.jsonl 摘要）（演示）">导出</button></p>
+</div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本详情页由工作台变更浮层升格：小节全宽展示 · 「进入下一阶段 / 按门禁意见建卡」→ toast（写明服务端判据）· 「回退阶段」「删除变更」→ 影响清单 + 必填原因二次确认（本页引用到的二次确认 modal 自带副本）· 产物「编辑」→ toast 跳 §6.18 形态　按 Esc 关闭浮层。</p>
+</body></html>

@@ -1,0 +1,66 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>可观测三档 env 生效值 详情 · 对外集成面 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p27" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="integration.html" data-click>← 返回 对外集成面</span><span class="crumb"><b>可观测三档 · env 生效值（只读呈现）</b> · P2-4</span><span class="chip">A/B 均未设</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="integration__watch.html">watch 契约</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="metrics.html">仪表盘</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>顺序不许跳：</b>先修产生端（C10-0）→ A 档 <span class="mono">/metrics</span> 直读 → B 档 OTLP 可选 → C 档版本化延后。<span class="mono">trace_spans / metrics_raw</span> 实测 <b>0 行</b>：「没标准」是二级病，「数据没产生」是一级病。</p></div>
+<h4 class="blk">档位口径</h4>
+<dl class="kv"><dt>前置 C10-0</dt><dd class="mono">编排执行点补 INSERT + 父子链列（expand-only ALTER）· 当前 0 行</dd><dt>A 档 · 开关</dt><dd class="mono">AF_ENABLE_METRICS = 未设（默认关）</dd><dt>A 档 · 内容</dt><dd class="mono">prometheus-fastapi-instrumentator /metrics + excluded_handlers · Counter/Histogram 直读现表（MySQL）· scrape 侧 TTL 缓存 · ≈0.5d · 零新组件</dd><dt>B 档 · 开关</dt><dd class="mono">AF_OTLP_ENDPOINT = 未设（默认关）</dd><dt>B 档 · 语义</dt><dd class="mono">OTel GenAI：invoke_agent / execute_tool / usage.input_tokens·output_tokens</dd><dt>B 档 · 不冻契约</dt><dd>semconv 全 Development 期 → 允许 <span class="mono">agentflow.*</span> 前缀兜底，<b>不对外冻结契约</b></dd><dt>trace_id 口径</dt><dd class="mono">合成 trace_id · 需书面声明「非 W3C 原生」</dd><dt>OpenInference</dt><dd>降为接 Phoenix 时的可选翻译层，不做主语义</dd><dt>token/成本口径</dt><dd class="mono">切 session_metrics（有 in/out 拆分）· trace_spans.tokens 单值列只用于链路结构</dd><dt>C 档</dt><dd>契约版本化延后至 semconv Development→Stable 或季度基线</dd><dt>本页职责</dt><dd>只读呈现 env 生效值 · 改值走二次确认（写建议，不写部署）</dd></dl>
+<h4 class="blk">A 档打开后会长这样（演示输出）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.7">$ curl -s http://127.0.0.1:8000/metrics | head
+# HELP agentflow_agent_runs_total Agent 运行次数（RED 的 Rate）
+# TYPE agentflow_agent_runs_total counter
+agentflow_agent_runs_total{domain="quant-research",status="success"} 418
+agentflow_agent_tokens_total{direction="input",domain="quant-research"} 1284510
+agentflow_request_duration_seconds_bucket{le="0.25"} 1191</pre>
+<p><span class="btn link" data-click data-toast="✓ 已复制 /metrics 抓取配置片段（演示）· 未开启任何开关">⧉ 复制 scrape 配置</span> <span class="btn link" data-click data-toast="✓ 已复制 gen_ai.* 语义映射表（演示）· 映射只读，不实现">⧉ 复制语义映射</span></p>
+<h4 class="blk">档位开关一览</h4>
+<table class="tbl compact"><thead><tr><th>档</th><th>开关</th><th>当前</th><th>操作</th></tr></thead><tbody>
+<tr><td>A · /metrics</td><td class="mono">AF_ENABLE_METRICS</td><td><span class="chip">未设</span></td><td><span class="btn link" data-click data-modal="md-metrics">开启</span></td></tr>
+<tr><td>B · OTLP</td><td class="mono">AF_OTLP_ENDPOINT</td><td><span class="chip">未设</span></td><td><span class="btn link" data-click data-modal="md-otlp">配置端点</span></td></tr>
+<tr><td>前置 · 产生端</td><td class="mono">—</td><td><span class="chip bad">trace_spans 0 行</span></td><td><span class="btn link" data-click data-toast="重查（演示）：count=0 → B 档即使打开也无东西可导">重查</span></td></tr>
+</tbody></table>
+<h4 class="blk">操作</h4>
+<p><button class="btn sm" data-back="integration.html" data-click>返回集成面</button> <button class="btn sm primary" data-click data-modal="md-disable">撤销已开的对外面</button></p>
+</div>
+<div class="modal" id="md-metrics"><div style="padding:var(--s4)"><b>开启 A 档 · <span class="mono">AF_ENABLE_METRICS=true</span>？</b>
+<p class="small dim" style="margin:8px 0"><b>env 开关 = 对外面变化</b>，按纪律二次确认。此页只读呈现生效值，确认结果是<b>生成写入建议</b>（供部署侧应用），本平台不热改自身进程环境。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>打开后 <span class="mono">GET /metrics</span> 对外可读：RED 指标 + 直读现表 Counter/Histogram（MySQL）</li>
+<li>暴露内容：域/能力名、运行计数、耗时直方图、token 汇总（<b>不含</b>会话原文与凭据）</li>
+<li>需配 <span class="mono">excluded_handlers</span>（健康检查与 /metrics 自身不打点）</li>
+<li>不改变 <span class="mono">trace_spans</span> 仍 0 行的事实——B 档此刻打开也无东西可导（前置 C10-0）</li>
+<li>撤销成本低：清 env 重启即下架（见「撤销已开的对外面」）</li>
+</ul>
+<div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已生成写入建议 AF_ENABLE_METRICS=true（演示）· 进程环境未改变 · 审计 integration_flag_changed" data-close>确认并生成写入建议</button></div></div></div>
+<div class="modal" id="md-otlp"><div style="padding:var(--s4)"><b style="color:var(--orange)">配置 B 档 · <span class="mono">AF_OTLP_ENDPOINT</span>？</b>
+<p class="small dim" style="margin:8px 0">这会把 span <b>推到外部采集器</b>——一次跨网出面的动作，且当前前置未满足。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>前置未达：<span class="chip bad">trace_spans 0 行</span> → 打开后导出为空，只会看到「管道通了没水」</li>
+<li>语义：OTel GenAI（<span class="mono">invoke_agent / execute_tool / usage.*_tokens</span>）· 全 Development 期<b>不冻结对外契约</b>，允许 <span class="mono">agentflow.*</span> 兜底</li>
+<li>trace_id 为合成值 · 需在接入文档书面声明「非 W3C 原生」</li>
+<li>egress：出口需加入白名单（§6.26 执行隔离页 · 新增即入审计）</li>
+<li>可选翻译层 OpenInference 只在接 Phoenix 时开</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b>（跨网出 + 契约未稳，无理由不开）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">端点: [http://otel-collector:4318 ]   原因: [先验通管道，只接测试采集器 · 不接厂商 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消 · 先修产生端</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已生成建议：AF_OTLP_ENDPOINT + egress 白名单待批（演示）· 未发起任何外连" data-close>确认并生成写入建议</button></div></div></div>
+<div class="modal" id="md-disable"><div style="padding:var(--s4)"><b>撤销已开启的对外面？</b>
+<p class="small dim" style="margin:8px 0">破坏性=对<b>外部消费者</b>破坏：一旦有 scrape 或采集器接上，下架会让对方的看板断流。当前状态：A/B 均未设、M0 未挂载 → 无外部消费方，撤销零影响。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>将下架：<span class="mono">/metrics</span>（若已开）· <span class="mono">/api/watch</span>（若已开）· <span class="mono">/.well-known/agent-card.json</span>（若已挂载）</li>
+<li>保留：历史指标与 change_log 记录（可计量数据走权威库，裁定⑦）</li>
+<li>重开需再次二次确认；对外承诺文档同步标注「已撤回」</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b></p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [承诺先行过大，先收回到只读卡片 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已生成下架建议 + 承诺撤回记录（演示）· 审计 integration_surface_revoked" data-close>确认撤销</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为可观测「三档 env 生效值」升格详情页（规划原型 · 6.27 界面尚不存在）。A/B/C 三档顺序、AF_ENABLE_METRICS / AF_OTLP_ENDPOINT 未设、trace_spans 0 行、合成 trace_id 声明、切 session_metrics 口径均为 §6.27 / P2-4 原文实值；/metrics 输出样本值（418 / 1284510 / 1191）为按 §6.12 口径拼装的演示值。本页不开关、不外连。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：scrape 配置 / 语义映射 ⧉ 复制 → toast · 「开启 / 配置端点 / 撤销」→ 二次确认模态（暴露面 + 前置未达清单 + 原因输入 · 只生成写入建议）· 「重查」→ toast · 顶部「← 返回」回 integration.html　按 Esc 关闭浮层。</p>
+</body></html>

@@ -1,0 +1,65 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>角色 · 数据对账专家 详情 · 角色市场</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p14" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="roles.html" data-click>← 返回 角色市场</span><span class="crumb"><b>角色详情 · 数据对账专家</b></span><span class="chip info">自定义</span><span class="chip mono">custom_roles/2</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<div class="detail-body">
+<div style="display:flex;gap:6px"><span class="pill" style="border-color:var(--blue-border);color:var(--blue)">8 段</span><span class="pill">参数槽 (3)</span><span class="pill">实例化记录 (2)</span><span class="pill">引用它的编排</span></div>
+<h4 class="blk">标识与参数</h4>
+<dl class="kv" style="margin-top:var(--s3)">
+<dt>标识 / 类型</dt><dd class="mono">custom_roles/2 · <span class="chip info">自定义</span>（可编辑 · 删除需 project:delete）</dd>
+<dt>派生自</dt><dd class="mono tiny dim">无（自建）· 非内置模板派生</dd>
+<dt>标签</dt><dd><span class="pill">数据</span> <span class="pill">对账</span></dd>
+<dt>实例化次数</dt><dd class="mono">2 次 · 最近 09-21 11:20</dd>
+<dt>创建 / 最后编辑</dt><dd class="mono">08-30 15:02 · 09-18 10:11（admin）</dd>
+<dt>参数槽</dt><dd class="mono">time_window · baseline_uri · tolerance</dd>
+</dl>
+<h4 class="blk">8 段定义（角色定义的全部内容）</h4>
+<table class="tbl compact"><thead><tr><th>段</th><th>内容</th></tr></thead><tbody>
+<tr><td><b>① 性情</b></td><td>谨慎、追根究底，对「大概率没问题」保持怀疑</td></tr>
+<tr><td><b>② 职责</b></td><td>定位数据差异的最小可解释单元</td></tr>
+<tr><td><b>③ 触发场景</b></td><td class="mono tiny">{gate: G3代码门, topic: 对账异常} · {gate: G4审查门, topic: 离线任务偏差} · {gate: 测试门, topic: 数据回流失败}</td></tr>
+<tr><td><b>④ ✅ 能做</b></td><td>读双端数据集并比对；给出带证据链的根因</td></tr>
+<tr><td><b>⑤ ❌ 不能做</b></td><td>不修改生产数据（写库一律转人工审批）；不代替人做业务判断</td></tr>
+<tr><td><b>⑥ 评估框架</b></td><td class="mono tiny">{step1: 差异定位, items: 逐条归因} · {step2: 根因可复现} · {step3: 证据链完整}</td></tr>
+<tr><td><b>⑦ 输入文件</b></td><td>双端数据集 + 时间窗（{time_window}）+ baseline 基线（{baseline_uri}）</td></tr>
+<tr><td><b>⑧ 输出格式</b></td><td>差异清单 + 每条的最小可解释根因（容差 {tolerance}）</td></tr>
+<tr><td><b>⑨ 安全闸门</b></td><td class="mono tiny">gate_pre: 输入须含 time_window 与 baseline_uri · gate_post: 输出差异清单非空 · io_filter: strict</td></tr>
+</tbody></table>
+<h4 class="blk">提示词预览（8 段拼装后的系统提示 · 实例化时可覆盖参数槽）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">你是数据对账专家。性情：谨慎、追根究底，对「大概率没问题」保持怀疑。
+职责：定位数据差异的最小可解释单元。
+边界：不得修改生产数据（写库操作一律转人工审批）；
+      不得代替人做业务判断——只给差异与根因，不给「要不要改」。
+触发场景：对账异常 / 离线任务偏差 / 数据回流失败。
+评估：根因可复现 + 结论附证据链，否则视为未完成。
+输入：双端数据集（{time_window} 内 · baseline={baseline_uri}）
+输出：差异清单（容差 {tolerance}）+ 每条的最小可解释根因</pre>
+<h4 class="blk">参数槽</h4>
+<table class="tbl compact"><thead><tr><th>槽位</th><th>默认值</th><th>必填</th></tr></thead><tbody>
+<tr><td class="mono">time_window</td><td class="mono tiny">近 24h</td><td><span class="chip ok">是</span></td></tr>
+<tr><td class="mono">baseline_uri</td><td class="mono tiny">无默认</td><td><span class="chip ok">是</span></td></tr>
+<tr><td class="mono">tolerance</td><td class="mono tiny">0.001</td><td><span class="chip">否</span></td></tr>
+</tbody></table>
+<h4 class="blk">实例化记录</h4>
+<table class="tbl compact"><thead><tr><th>Agent</th><th>域 / 能力组</th><th>时间</th><th>状态</th></tr></thead><tbody>
+<tr><td class="mono">数据同步 Agent</td><td class="tiny">默认域 · data-sync</td><td class="mono tiny">09-21 11:20</td><td><span class="dot running"></span> healthy</td></tr>
+<tr><td class="mono">对账 Agent（临时）</td><td class="tiny">默认域 · data-sync</td><td class="mono tiny">09-12 09:44</td><td><span class="dot dead"></span> 已终止</td></tr>
+</tbody></table>
+<div class="callout" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>不级联：</b>删除本角色不会删除已实例化的 Agent——它们携带实例化时的提示词快照，角色只是模板来源。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="实例化为 Agent → 跳转编排画布 · 参数槽需填 time_window / baseline_uri（演示）">实例化为 Agent</button> <button class="btn sm" data-toast="进入编辑：自定义角色可改 8 段（演示）">编辑</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-del">删除角色</button></p>
+</div>
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除自定义角色「审查 Agent 专用」？</b>
+<p class="small dim" style="margin:8px 0">需要 <span class="mono">project:delete</span>（危险权限点）。内置模板不可删除（只读参考）。<b>必填原因</b>。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>已实例化的 3 个 Agent</td><td><span class="chip ok">不级联删除</span> · 保留实例化时提示词快照</td></tr>
+<tr><td>编排中引用该角色的节点</td><td><span class="chip warn">标记失效引用</span> · 需人工换绑</td></tr>
+<tr><td>审计</td><td><span class="chip">记 role:deleted</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [与内置模板已无差异            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除角色（Agent 未被级联删除）· 审计 role:deleted（演示）" data-close>确认删除</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：实例化 / 编辑→toast · 「删除角色」→二次确认（声明不级联删除 Agent · 必填原因）· 8 段、提示词、参数槽、实例化记录全宽展示　按 Esc 关闭浮层。</p>
+</body></html>

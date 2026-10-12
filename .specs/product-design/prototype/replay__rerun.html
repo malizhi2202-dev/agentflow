@@ -1,0 +1,30 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>从失败步重跑 run-8842 · 执行回放 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p22" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="replay.html" data-click>← 返回 执行回放</span><span class="crumb"><b>从失败步重跑 · run-8842（AF-116）</b></span><span class="chip bad">失败步 seq 7</span><span class="chip">需二次确认</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="replay__run.html">整轮回放</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0">重跑是一次<b>新的运行请求</b>（新 run id），不是自动重试。下面把影响清单摊开，勾选要补投的上下文，再确认。</p></div>
+<h4 class="blk">影响清单</h4>
+<ul class="small dim" style="margin:0;padding-left:18px">
+<li>新建 <span class="mono">run-8849</span>，从 <span class="mono">seq 7</span> 起，前 6 步按<b>快照</b>复用（不重算、不再扣一次 token）</li>
+<li>预计消耗 <b>≤ 18k tok / $0.17</b>（AF-116 预算已用 $1.42 / 上限 $12）</li>
+<li>seq 5 的文件改动仍在工作区，重跑会<b>读到</b>它（非干净起点）；要干净起点得先手工回滚该文件</li>
+<li>上下文补投 <span class="mono">DESIGN.md §多选</span>（原「计划并入」里漏投的那份），并禁掉「改调用方」分支</li>
+<li>若再触发 <span class="mono">no-type-escape</span> 栅栏，将直接升级到人，不再自动重试</li>
+</ul>
+<h4 class="blk">重跑参数（起点 / 补投 / 上限 / 理由）</h4>
+<dl class="kv"><dt>起点</dt><dd class="mono">seq 7（失败步）· 前 6 步走快照 <span class="chip">▾ 可选 seq 5–7</span></dd><dt>补投 · DESIGN.md §多选</dt><dd><span class="chip ok">☑ 已选</span> 原计划并入但漏投，本次带上</dd><dt>补投 · REVIEW.md</dt><dd><span class="chip">☐ 未选</span> 与本次类型冲突无关</dd><dt>重试上限</dt><dd class="mono">retries = 1（再失败即升级到人，不再自动重试）</dd><dt>预算</dt><dd class="mono">≤ 18k tok / $0.17 · 本项剩余额度 $10.58</dd></dl>
+<div class="callout warn"><p class="tiny" style="margin:0"><b>理由必填（§6.0 纪律：破坏性 / 消耗资源动作带理由入审计）：</b>重跑会消耗预算并改动工作区，请写清为何现在跑。</p></div>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">理由: [已定方案 A：补类型，别再改调用方 ]</pre>
+<h4 class="blk">确认</h4>
+<p><button class="btn sm" data-back="replay.html" data-click>取消</button> <button class="btn sm" data-toast="已改为「回填原入参自己跑」——高级表单已打开（演示）">回填编辑</button> <button class="btn sm primary" data-toast="run-8849 已入队（从 seq 7 · 携补投上下文）· 审计 run:rerun_from_step · 记 AF-116 时间线（演示）" data-back="replay.html">确认重跑</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为「从失败步重跑」升格详情页（规划原型 · 6.22 界面尚不存在）。起点 / 补投上下文（计划 vs 收据）/ 预算 / 快照复用为设计意图演示，当前系统 <span class="mono">trace_spans</span> 实测 0 行、无动作级记录可支撑它——前置是 P2-4 的 <span class="mono">C10-0</span>（先补 INSERT + 父子链列）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：影响清单为只读摊开 · 重跑参数把原浮层的「补投 ☑☐ / 上限 / 理由」升格为全宽 kv · 「回填编辑」→ toast · 「确认重跑」→ toast 并返回 replay.html · 顶部「← 返回」回执行回放　按 Esc 关闭浮层。</p>
+</body></html>

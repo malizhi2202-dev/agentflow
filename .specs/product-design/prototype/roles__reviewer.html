@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>内置模板 · 代码审查员 详情 · 角色市场</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p14" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="roles.html" data-click>← 返回 角色市场</span><span class="crumb"><b>内置模板详情 · 代码审查员</b></span><span class="chip">只读参考</span><span class="chip mono">builtin/reviewer</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<div class="detail-body">
+<div class="callout warn"><p class="tiny" style="margin:0"><b>内置模板为只读参考，不能直接改</b>（§5.14 边界）；要定制请点「派生为自定义角色」。本页界面标注为「参考」性质。</p></div>
+<h4 class="blk">标识与派生</h4>
+<dl class="kv" style="margin-top:var(--s3)">
+<dt>标识 / 类型</dt><dd class="mono">builtin/reviewer · <span class="chip">只读参考</span></dd>
+<dt>标签</dt><dd><span class="pill">Review</span> <span class="pill">质量门禁</span></dd>
+<dt>派生出的自定义角色</dt><dd class="mono">审查 Agent 专用（1 个）</dd>
+<dt>实例化次数</dt><dd class="mono">3 次（2 次经派生角色 · 1 次直接用本模板）· 最近 09-21 14:22</dd>
+<dt>参数槽</dt><dd class="mono">severity_gate · evidence_required</dd>
+</dl>
+<h4 class="blk">8 段定义</h4>
+<table class="tbl compact"><tbody>
+<tr><td><b>① 性情</b></td><td>只信证据；不看作者；宁缺勿滥</td></tr>
+<tr><td><b>② 职责</b></td><td>每条发现给出位置 + 严重度 + 可复现依据</td></tr>
+<tr><td><b>③ 触发场景</b></td><td class="mono tiny">{gate: G3代码门, topic: 提交前门禁} · {gate: G4审查门, topic: REVIEW 阶段} · {gate: 测试门, topic: 质量抽查}</td></tr>
+<tr><td><b>④ ✅ 能做</b></td><td>读 diff 与规范；逐条定位；标注严重度与证据</td></tr>
+<tr><td><b>⑤ ❌ 不能做</b></td><td>不直接改代码；不评论风格偏好（非门禁项）</td></tr>
+<tr><td><b>⑥ 评估框架</b></td><td class="mono tiny">{step1: 定位到行} · {step2: 无误报} · {step3: 严重度准确}</td></tr>
+<tr><td><b>⑦ 输入文件</b></td><td>diff + 规范</td></tr>
+<tr><td><b>⑧ 输出格式</b></td><td class="mono tiny">findings[{file, line, severity, evidence}]</td></tr>
+<tr><td><b>⑨ 安全闸门</b></td><td class="dim tiny">内置只读 · 无自定义闸门（派生后可在自定义角色编辑）</td></tr>
+</tbody></table>
+<h4 class="blk">提示词预览</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">你是代码审查员。只看证据，每条发现必须给出位置与严重度。
+输出：findings[{file, line, severity, evidence}]
+门禁：severity ≥ {severity_required} 时置为阻塞（{severity_gate}）
+禁止：无证据的结论；风格偏好类意见。</pre>
+<h4 class="blk">实例化记录（均经派生角色）</h4>
+<table class="tbl compact"><thead><tr><th>Agent</th><th>来源角色</th><th>状态</th></tr></thead><tbody>
+<tr><td class="mono">审查 Agent · 标准</td><td class="mono tiny">审查 Agent 专用</td><td><span class="dot running"></span> healthy</td></tr>
+<tr><td class="mono">审查 Agent · 备援</td><td class="mono tiny">审查 Agent 专用</td><td><span class="dot idle"></span> 冷备</td></tr>
+<tr><td class="mono">旧版审查 Agent</td><td class="mono tiny">builtin/reviewer</td><td><span class="dot failed"></span> 探针 failed</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="实例化为 Agent → 跳转编排画布，模板提示词只读带入（演示）">实例化为 Agent</button> <button class="btn sm" data-toast="已基于「代码审查员」打开派生表单（演示）">派生为自定义角色</button> <button class="btn sm" style="opacity:.5">编辑（内置不可改）</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：实例化 / 派生为自定义角色→toast · 「编辑（内置不可改）」灰置 · 8 段与实例化记录全宽展示　按 Esc 关闭浮层。</p>
+</body></html>

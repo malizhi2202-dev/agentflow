@@ -1,0 +1,70 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审批单 AP-23 暂停 code-review 能力组 · 审批中心 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p17" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="audit.html">审计日志</span></div>
+<div class="detail-top"><span class="pill" data-back="approvals.html" data-click>← 返回 审批中心</span><span class="crumb"><b>审批中心 › 待决策 › AP-23 暂停 code-review 能力组</b></span><span class="chip warn">caution</span><span class="chip mono">可逆</span><span class="chip warn">挂起 3m</span></div>
+<div class="detail-body">
+<dl class="kv">
+<dt>单号 / 状态</dt><dd class="mono">human_approvals/23 · <span class="chip warn">pending</span></dd>
+<dt>发起方</dt><dd class="mono">admin · 李工（人 · 主动发起的暂停）</dd>
+<dt>目标</dt><dd class="mono">能力组 code-review（默认域 · 3 个 Agent）</dd>
+<dt>拟执行动作</dt><dd>暂停派发 → 在途任务收敛 → 组内 3 实例转 idle</dd>
+<dt>影响面</dt><dd>审查流水线 v3 的 fan-out 边无候选 → <b>入调度队列等待</b>（排队超 300s 自动提权 +10）</dd>
+<dt>风险级别</dt><dd><span class="chip warn">caution</span> · 可逆（恢复即回原态）</dd>
+</dl>
+<h4 class="blk">payload diff</h4>
+<div class="grid g2" style="gap:var(--s3)">
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">当前</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--red);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "capability_group": "code-review",
+  "enabled": true,
+  "members": [1, 5, 13],
+  "inflight": 2
+}</pre></div>
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">批准后</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--green);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "capability_group": "code-review",
+  "enabled": false,
+  "members": [1, 5, 13],   // 保留
+  "inflight": 0（收敛后）,
+  "route": "候选集排除本组"
+}</pre></div>
+</div>
+<table class="tbl compact"><thead><tr><th>字段</th><th>前</th><th>后</th><th>可逆</th></tr></thead><tbody>
+<tr><td class="mono">enabled</td><td class="mono tiny">true</td><td class="mono tiny">false</td><td><span class="chip ok">是</span></td></tr>
+<tr><td class="mono">在途 2 个任务</td><td class="mono tiny">running</td><td class="mono tiny">收敛后结束</td><td><span class="chip ok">不截断</span></td></tr>
+<tr><td class="mono">新请求</td><td class="mono tiny">分配到本组</td><td class="mono tiny">排队等其他候选</td><td><span class="chip warn">可能饿死</span></td></tr>
+<tr><td class="mono">域记忆 / 会话</td><td class="mono tiny">保留</td><td class="mono tiny">保留</td><td><span class="chip ok">是</span></td></tr>
+</tbody></table>
+<h4 class="blk">发起链</h4>
+<div class="timeline" style="margin:0">
+<div class="tl-item"><b>16:31:10</b> · admin 在 §6.3 管控面点「暂停能力组」（caution 级需人批 → 生成单）</div>
+<div class="tl-item"><b>16:31:11</b> · 通知发给域 owner 与 admin（只 ping 拍板人 · §6.0 ⑫）</div>
+<div class="tl-item"><b>16:34 现在</b> · pending · 3 分钟</div>
+</div>
+<h4 class="blk">留言区</h4>
+<div class="msgs" style="padding:0">
+<div class="msg-row"><div class="avatar">李</div><div class="bubble">线上误报严重，先停这个能力组，我把规范门禁调完再恢复。</div></div>
+<div class="msg-row me"><div class="avatar ai">AI</div><div class="bubble me">[汇总 Agent] 本组停用期间有 4 条流水线将排队（预计最长等待 6m）。</div></div>
+</div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已批准 · 审计 approval:approved · 能力组转入收敛（演示）">批准</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-reject">驳回（必填理由）</button></p>
+</div>
+<div class="modal" id="md-reject"><div style="padding:var(--s4)"><b>驳回 AP-22「终止并替换 agent-7」？</b>
+<p class="small dim" style="margin:8px 0"><b style="color:var(--red)">理由必填</b>（§6.0 纪律：破坏性决策二次确认 + 理由入 <span class="mono">human_approvals.remarks</span> 与审计）。驳回后调和引擎<b>不会自动重试该动作</b>，流程走异常分支并持续告警。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>本审批单</td><td><span class="chip bad">decision=rejected · 闭合不可改</span></td></tr>
+<tr><td>挂起的工作流边</td><td><span class="chip warn">走异常分支 → needs_human</span></td></tr>
+<tr><td>agent-7</td><td><span class="chip bad">仍 dead · 漂移保持存在</span></td></tr>
+<tr><td>告警</td><td><span class="chip warn">继续 30s 巡检上报（不静默）</span></td></tr>
+<tr><td>A2A 语义映射</td><td><span class="chip info">同 task 续跑 · <b>非</b> TaskState.rejected</span></td></tr>
+<tr><td>通知</td><td><span class="chip ok">旧「待决策」条目自愈归档（§6.0 ⑫）</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">理由（必填）: [先保留实例取日志，改走重启方案      ]</pre>
+<p class="tiny" style="margin:8px 0 0;color:var(--red)"><b>映射注：</b>「拒绝」写的是<b>决策字段</b>（<span class="mono">decision=rejected</span>），不等于把任务标成 A2A 的 <span class="mono">rejected</span>——后者表示<b>受理方拒绝承接</b>；这里是<b>已承接后由人否决</b>，task 延续同一上下文（P1-12）。</p>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已驳回 · 理由已记 · 审计 approval:rejected · 流程转异常分支（演示）" data-close>确认驳回</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 approvals.html 的 <span class="mono">dr-ap-caution</span> 抽屉升格而来（payload diff + 字段对照表 + 发起链 + 留言 + 决策操作链 → 整页）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：批准 → toast（能力组转入收敛）· 驳回 → 二次确认 modal（必填理由）。</p>
+</body></html>

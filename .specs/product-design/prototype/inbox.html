@@ -1,0 +1,111 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>收件箱 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p21" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="replay.html">执行回放</span></div>
+<p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：<b>只在需要人拍板时通知，而不是每一步都来烦你</b>。与现有「告警中心」（30 秒巡检、面向系统异常）分工不同：收件箱面向<b>需要人决策的工作流节点</b>。<b>2026-09-22 补（S7）：执行 §6.0 ⑫ 通知分层三规则（值得打扰才 ping / 读失败宁多发不漏发 / 旧失败随工作项推进自愈归档）；失败通知条目带 ④ 三件套入口；审批条目语义向 A2A HITL 扩展的「挂起→同任务延续」对齐（P1-12）。</b><b>此界面尚不存在</b>。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/inbox</span><span class="fake">规划原型</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="board.html"><svg class="icon"><use href="#i-branch"/></svg>工作项</a>
+          <a class="active"><svg class="icon"><use href="#i-inbox"/></svg>收件箱<span class="badge">3</span></a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批中心</a>
+          <a data-goto="alerts.html"><svg class="icon"><use href="#i-radio"/></svg>告警中心</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">收件箱 <span class="dim">· 待我决策 3 项</span></span><span class="right"><span class="pill mono" data-click data-pop="pp-filter">筛选：需我处理 ▾</span><span class="chip mono">订阅 27 · 未读 3 · 已自愈归档 11</span><button class="btn sm" data-click data-modal="md-readall">全部标为已读</button></span></div>
+          <div class="app-body">
+            <div class="card"><p class="tiny"><span class="chip bad">需决策</span> <b data-click data-goto="inbox__af-116.html" style="color:var(--blue)">AF-116 修复 32 个 TS 错误</b> 已受阻 2 小时<span class="btn link" data-toast="已标记已读（不归档：仍需你拍板，读状态与处理状态分离）（演示）">标已读</span></p><p class="tiny dim">Agent · code-fixer 报告：<span class="mono">ProjectManager.tsx</span> 的 <span class="mono">workflow_ids</span> 字段在类型定义中不存在，需要人确认是改类型还是改调用方。</p><p class="tiny"><span class="btn sm primary" data-click data-goto="inbox__af-116.html">选择方案并放行</span> <span class="btn sm" data-pop="pp-assignee" data-click>转派 ▾</span> <span class="btn sm" data-click data-modal="md-ignore">忽略</span> <span class="btn link" data-toast="已归档本条（工作项推进后同类失败通知将随其自愈归档）（演示）">归档</span></p></div>
+            <div class="card"><p class="tiny"><span class="chip warn">待验收</span> <b data-click data-drawer="dr-n2" style="color:var(--blue)">AF-104 收件箱聚合规则</b> 已完成，等待人工验收<span class="btn link" data-toast="已标记已读（演示）">标已读</span></p><p class="tiny dim">交付物：计划 / 文档 / 代码改动 / 测试结果 / <b>未解决问题清单</b>——验收的是工作本身，不是一句「已完成」。</p><p class="tiny"><span class="btn sm primary" data-click data-drawer="dr-n2">通过验收（看证据）</span> <span class="btn sm" data-toast="已打回：进行中 + 新的运行请求携评审意见入队（演示）">提高标准重做</span> <span class="btn sm" style="color:var(--red)" data-click data-modal="md-stop">叫停</span> <span class="btn link" data-toast="已归档本条（演示）">归档</span></p></div>
+            <div class="card"><p class="tiny"><span class="chip bad">危险动作</span> <b data-click data-drawer="dr-n3" style="color:var(--blue)">默认域/code-review</b> 异常数达 3，调和判定为 <span class="mono">dangerous</span><span class="btn link" data-toast="已标记已读 · 该条目到期前不会被自愈归档（等待人决策）（演示）">标已读</span></p><p class="tiny dim">建议动作：终止并替换 <span class="mono">agent-7</span>。<b>未自动执行</b>，等待人工批准。</p><p class="tiny"><span class="btn sm primary" data-click data-modal="md-approve">批准执行</span> <span class="btn sm" data-toast="已设为仅观察 · 7 天内不再重复推送同一告警（宁多发不漏发：到期未处理会再推）（演示）">仅观察</span> <span class="btn link" data-toast="已归档本条 · 审计 inbox:archive（演示）">归档</span></p></div>
+            <div class="card dim" data-click data-drawer="dr-read"><p class="tiny dim">已读 · 14 项（Agent 自动推进，无需你介入）—— 默认折叠</p><p class="tiny dim"><span class="btn link" data-toast="展开已读组（演示 · 见抽屉内列表）">展开</span><span class="btn link" data-toast="14 项已读全部归档（演示）">整组归档</span></p></div>
+            <div class="callout"><p><b>设计意图：</b>通知量与「需要人的次数」相等，而不是与「Agent 动作次数」相等。信息不足的选项不推送。</p></div>
+            <div class="callout warn"><p><b>收件箱三规则（§6.0 ⑫ 通知分层）：</b>① <b>值得打扰才 ping</b>——只推需要拍板的人，信息不足的选项不推送；② <b>读失败宁多发不漏发</b>——通知目录读取失败时按「可能漏发」重复推送，<b>漏发会把工作项困住</b>；③ <b>旧失败随工作项推进自愈归档</b>——工作项进 done / 关闭后，其历史「运行失败」通知批量自愈归档，无需手清。</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+<div class="drawer" id="dr-n2"><header><b>待验收 · AF-104 收件箱聚合规则</b><span class="chip warn">待验收</span><span class="chip ok">证据齐</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>来源</dt><dd><span class="dot running"></span> Agent · planner（进 6-review 后请求人验收）</dd><dt>类型</dt><dd><span class="chip warn">待验收</span> · done 前置（不是「已完成」——验收的是工作本身）</dd><dt>工作项</dt><dd class="mono">AF-104 · started 审核中 × accepted · 复核人 王工</dd><dt>creator</dt><dd class="mono tiny">user:1 李工</dd><dt>交付物 · 计划</dt><dd class="mono tiny">TASK.md（12 任务 / 12 完成）</dd><dt>交付物 · 文档</dt><dd class="mono tiny">REQUIREMENT.md@wf-8 · DESIGN.md@v2</dd><dt>交付物 · 代码</dt><dd class="mono tiny">3 文件 · +214 / −58 · 见 run-8811 收据</dd><dt>交付物 · 测试</dt><dd><span class="chip ok">TEST.md UAT 8/8</span> · 含 1 条负例（漏发演练）</dd><dt>交付物 · 未解决清单</dt><dd><span class="chip bad">空</span> 交付里为空 → 已打回一次，现补 2 条</dd><dt>推给你的原因</dt><dd class="tiny">规则①：需要人拍板（验收标准由人定，Agent 不自定通过）</dd><dt>A2A HITL 对齐</dt><dd class="tiny">语义为「挂起 → 同任务延续」：批准后<b>沿用同一 run</b>继续，不新起一次（P1-12）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">验收要点（点条目跳产物）</p>
+<table class="tbl compact"><thead><tr><th>要点</th><th>证据位置</th><th>结论</th><th>跳转</th></tr></thead><tbody>
+<tr><td class="tiny">聚合规则与 ⑫ 三条一致</td><td class="mono tiny">REQUIREMENT.md §FR3</td><td><span class="chip ok">一致</span></td><td><span class="btn link" data-toast="跳转 6.18 产物编辑 → REQUIREMENT.md §FR3（演示）">看</span></td></tr>
+<tr><td class="tiny">漏发宁多发不漏发有实现</td><td class="mono tiny">TEST.md §UAT-6 负例</td><td><span class="chip ok">有</span></td><td><span class="btn link" data-toast="跳转 TEST.md §UAT-6（演示）">看</span></td></tr>
+<tr><td class="tiny">自愈归档条件写清</td><td class="mono tiny">DESIGN.md §归档</td><td><span class="chip warn">写清但依赖并表 P1-16</span></td><td><span class="btn link" data-toast="跳转 DESIGN.md §归档（演示）">看</span></td></tr>
+<tr><td class="tiny">未解决问题清单必填</td><td class="mono tiny">REVIEW.md §遗留 2 条</td><td><span class="chip ok">已补</span></td><td><span class="btn link" data-toast="跳转 REVIEW.md（演示）">看</span></td></tr>
+<tr><td class="tiny">通知量 = 需要人的次数</td><td class="mono tiny">metrics（当前 0 行 · C10-0 待补）</td><td><span class="chip bad">无法自证</span></td><td><span class="btn link" data-toast="跳转 6.12 监控仪表盘（trace_spans 0 行，指标待产生端补全）（演示）">看指标</span></td></tr>
+</tbody></table>
+<div class="callout"><p class="tiny" style="margin:0"><b>通过后会发生什么：</b>AF-104 → done（附证据快照）· 本条与其历史失败通知一起自愈归档 · <span class="mono">run-8811</span> 沿用同任务收尾 · 审计 <span class="mono">inbox:accept</span>。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已通过验收 · done + 证据快照已固化 · 旧失败通知自愈归档（演示）">通过验收</button> <button class="btn sm" data-toast="已打回：审核中 → 进行中 · 评审意见作为运行请求入队（演示）">提高标准重做</button> <button class="btn sm" style="color:var(--red)" data-click data-modal="md-stop">叫停</button> <button class="btn sm" data-toast="已标记已读（演示）">标已读</button></p></div></div>
+
+<div class="drawer" id="dr-n3"><header><b>危险动作 · 默认域/code-review 判定 dangerous</b><span class="chip bad">未自动执行</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>系统没有动手：</b>调和器判定 <span class="mono">dangerous</span> 后<b>只推人，不执行</b>。「终止并替换 agent-7」在批之前不会发生——这条正是 §6.0 ⑥「未实装的授权位显式 INERT」与 P1-13 的边界所在。</p></div>
+<dl class="kv"><dt>来源</dt><dd><span class="dot running"></span> 调和器 reconcile（30s 巡检 · 面向系统异常，与告警中心同族）</dd><dt>对象</dt><dd class="mono">域 默认域 / 实例组 code-review / 目标 agent-7</dd><dt>触发事实</dt><dd class="mono tiny">异常数 3 ≥ 阈值 3 · 探针连续 fail（心跳正常，非离线）</dd><dt>建议动作</dt><dd>终止并替换 <span class="mono">agent-7</span>（重建实例，非改配置）</dd><dt>在跑任务</dt><dd class="mono tiny">3 个（1 进行中 · 2 排队）· 终止会中断进行中的那个</dd><dt>副作用范围</dt><dd class="mono tiny">不回滚 agent-7 已写出的 2 个产物（REVIEW.md 半写）</dd><dt>替代方案</dt><dd>仅观察 7 天 / 降并发到 1 / 换绑到 code-review-lite</dd><dt>推给你的原因</dt><dd class="tiny">危险动作必须人批（状态转换层规则，不写进提示词）</dd><dt>同类历史</dt><dd class="mono tiny">09-19 同一实例被批过 1 次替换 · 09-12 选择仅观察后自愈</dd><dt>有效期</dt><dd class="mono">14 天内未处理 → 降级为观察并归档本条（不漏发：仍留审计）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">批准前请核对</p>
+<table class="tbl compact"><thead><tr><th>检查项</th><th>现状</th><th>跳转</th></tr></thead><tbody>
+<tr><td class="tiny">agent-7 健康四态</td><td><span class="dot running"></span> online（心跳 12s · 阈值：45s 记 recently_lost / 75s 判 offline）</td><td><span class="btn link" data-toast="跳转 6.3 Agent 管控面 → agent-7（演示）">打开</span></td></tr>
+<tr><td class="tiny">异常是不是误判</td><td><span class="chip warn">3 次 fail 中 2 次为探针超时</span></td><td><span class="btn link" data-toast="跳转 6.4 Agent 详情 → 探针时间线（演示）">看探针</span></td></tr>
+<tr><td class="tiny">同组其他实例</td><td class="mono tiny">agent-5 healthy · agent-6 healthy</td><td><span class="btn link" data-toast="跳转 6.3 管控面 · 域树（演示）">看组</span></td></tr>
+<tr><td class="tiny">在跑任务归属</td><td class="mono tiny">AF-109 run-8839（你的收件箱另有其升级条）</td><td><span class="btn link" data-toast="跳转 6.20 → AF-109（演示）">看工作项</span></td></tr>
+<tr><td class="tiny">替换后归因</td><td class="mono tiny">新实例沿用同 run · tokens 记账不断链</td><td><span class="btn link" data-toast="跳转 6.22 执行回放（trace 产生端 0 行 · 依赖 C10-0）（演示）">看回放</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-click data-modal="md-approve">批准执行</button> <button class="btn sm" data-toast="已设仅观察 7 天（演示）">仅观察</button> <button class="btn sm" data-toast="已归档（判定保留在审计，动作不执行）（演示）">归档</button></p></div></div>
+
+<div class="drawer" id="dr-read"><header><b>已读 · 14 项（Agent 自动推进，无需你介入）</b><span class="chip">默认折叠</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout ok"><p class="tiny" style="margin:0"><b>这一组是「没打扰你」的证据：</b>14 项自动推进事件里，只有 2 项例外（下表标黄：1 条因读失败按规则②重推、1 条已转进「需决策」组），其余 12 项<b>没有一条</b>推给你——通知量与「需要人的次数」相等，而不是与 Agent 动作次数相等。</p></div>
+<dl class="kv"><dt>构成</dt><dd class="mono tiny">自动推进 11（未推你）· 自愈归档 3（随工作项进 done）</dd><dt>为什么折叠</dt><dd class="tiny">读失败宁多发不漏发（规则②）——但<b>已读 ≠ 需处理</b>，读状态与处理状态分离</dd><dt>保留</dt><dd class="mono tiny">30 天后随工作项归档一并下沉审计</dd></dl>
+<table class="tbl compact"><thead><tr><th>时间</th><th>事件</th><th>工作项</th><th>为何没推你</th></tr></thead><tbody>
+<tr><td class="mono tiny">14:31</td><td class="tiny">run-8846 成功 · 6-review 自动进归档</td><td class="mono tiny">AF-101</td><td class="tiny dim">门禁 G4 已过（人批早完成）</td></tr>
+<tr><td class="mono tiny">14:18</td><td class="tiny">探针 fail → 自动重试成功</td><td class="mono tiny">AF-115</td><td class="tiny dim">已自愈，无需拍板</td></tr>
+<tr><td class="mono tiny">14:05</td><td class="tiny">知识源 Confluence 同步完成（214 页）</td><td class="mono tiny">—</td><td class="tiny dim">系统事件，不属需人决策</td></tr>
+<tr><td class="mono tiny">13:58</td><td class="tiny">TASK.md 拆出 3 任务，自动派给 planner</td><td class="mono tiny">AF-109</td><td class="tiny dim">triage=accepted，派单池内合法</td></tr>
+<tr><td class="mono tiny">13:40</td><td class="tiny">REVIEW.md 写入 wf-8（旧版已备份）</td><td class="mono tiny">AF-104</td><td class="tiny dim">写产物不需人批</td></tr>
+<tr><td class="mono tiny">13:22</td><td class="tiny">旧「运行失败」通知 ×3 自愈归档</td><td class="mono tiny">AF-098</td><td class="tiny dim">工作项进 done 触发规则③</td></tr>
+<tr><td class="mono tiny">12:55</td><td class="tiny">域默认域扩容 2 → 3 实例（渐进扩容）</td><td class="mono tiny">—</td><td class="tiny dim">非危险动作，阈值内</td></tr>
+<tr><td class="mono tiny">12:31</td><td class="tiny">Notion 源令牌过期 · 索引冻结</td><td class="mono tiny">—</td><td><span class="chip warn">这条本该推你</span> 规则②：漏发风险已重复推送 2 次</td></tr>
+<tr><td class="mono tiny">11:47</td><td class="tiny">告警自愈工作流成功（alert-selfheal v2）</td><td class="mono tiny">—</td><td class="tiny dim">自动化任务，无人在环</td></tr>
+<tr><td class="mono tiny">11:20</td><td class="tiny">AF-124 受理门拒单 → 待你受理</td><td class="mono tiny">AF-124</td><td><span class="chip warn">已推 · 在「需决策」组</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="整组已归档（演示）">整组归档</button> <button class="btn sm" data-toast="已导出 14 项 JSONL（演示 · 供外部审计）">导出</button></p></div></div>
+<div class="modal" id="md-approve"><div style="padding:var(--s4)"><b style="color:var(--red)">批准「终止并替换 agent-7」？</b>
+<ul class="small dim" style="margin:8px 0;padding-left:18px">
+<li>中断进行中的 <b>run-8839（AF-109）</b>，2 个排队任务重新入队</li>
+<li>agent-7 已写出的 <b>REVIEW.md 半写产物不回滚</b>（将标记为可疑快照）</li>
+<li>新实例沿用同一 run 记账，tokens 不断链；替换后 30 分钟内探针重跑</li>
+<li>若属探针误判（3 次 fail 中 2 次超时），批准即为<b>无谓终止</b></li>
+</ul>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">必填理由: [连续异常且 2 次超时不可信，先替换观察 ]   有效期: 批准后立即执行一次，不复用</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="已改为仅观察 7 天 · 本条留档（演示）">仅观察</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已批准并执行替换 agent-7 · 审计 approval:granted:dangerous（演示）" data-close>确认批准执行</button></div></div></div>
+
+<div class="modal" id="md-stop"><div style="padding:var(--s4)"><b>叫停 AF-104 的交付？</b><p class="small dim" style="margin:8px 0">叫停≠打回重做：工作项进 <b>closed（需理由）</b>，已产出的 REVIEW.md / TEST.md 保留为快照，run-8811 收尾不再续跑，本条与其历史失败通知一起归档。<b>不可自动恢复</b>（重开需理由入审计）。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">理由: [聚合规则改由 P1-16 并表一起做，本项停 ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="已改为打回重做（进行中 · 保留交付物）（演示）">改打回</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已叫停 · AF-104 → closed · 审计 wi:stopped（演示）" data-close>确认叫停</button></div></div></div>
+
+<div class="modal" id="md-ignore"><div style="padding:var(--s4)"><b>忽略这条「需决策」通知？</b><p class="small dim" style="margin:8px 0"><b>忽略只影响通知，不影响工作项：</b>AF-116 会继续停在受阻、不会自动放行。规则②（宁多发不漏发）意味着<b>到期后还会再推</b>；要彻底不再打扰需改派负责人或关闭工作项。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">静音到: [24 小时 ▾]   理由（可空）: [在会议中，稍后处理 ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已静音 24 小时 · 工作项仍受阻（演示）">确认忽略</button> <button class="btn sm" data-pop="pp-assignee" data-click>改转派</button></div></div></div>
+
+<div class="modal" id="md-readall"><div style="padding:var(--s4)"><b>把 3 条待决策全部标为已读？</b><p class="small dim" style="margin:8px 0">标已读<b>不等于处理</b>：3 个工作项仍会因缺少人拍板而停住（AF-116 受阻 / AF-104 待验收 / code-review 待批）。为避免漏发，系统会在 <b>4 小时后重复推送未处理项</b>（规则②）。<b>影响清单：</b>3 条通知 · 关联 3 个工作项 · 2 个在跑运行。</p><div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="3 条已标已读（未处理项 4 小时后重推 · 演示）" data-close>确认全部标已读</button></div></div></div>
+<div class="pop" id="pp-filter"><p class="tiny muted" style="margin:2px 4px 6px">筛选（视图即链接 · §6.0 ②）</p>
+<table class="tbl compact"><tbody>
+<tr><td><b>需我处理</b></td><td class="tiny dim">未读 + 需人拍板（决策 / 验收 / 危险动作）</td><td><span class="chip ok">当前 3</span></td></tr>
+<tr><td>全部未读</td><td class="tiny dim">含系统事件</td><td><span class="btn link" data-toast="已筛选：全部未读 7 条（演示）">应用</span></td></tr>
+<tr><td>危险动作</td><td class="tiny dim mono">kind=approval:dangerous</td><td><span class="btn link" data-toast="已筛选：危险动作 1 条（演示）">应用</span></td></tr>
+<tr><td>已自愈归档</td><td class="tiny dim">规则③ 产物 · 只读</td><td><span class="btn link" data-toast="已筛选：自愈归档 11 条（演示）">应用</span></td></tr>
+<tr><td>因读失败重推的</td><td class="tiny dim" style="color:var(--red)">宁多发不漏发 · 2 条</td><td><span class="btn link" data-toast="已筛选：重推 2 条（含 Notion 令牌过期）（演示）">应用</span></td></tr>
+<tr><td>只看某工作项</td><td class="mono tiny">AF-116</td><td><span class="btn link" data-toast="已筛选：AF-116 全部 5 条通知（演示）">应用</span></td></tr>
+<tr><td>保存当前视图</td><td class="tiny dim mono">?view=in-2</td><td><span class="btn link" data-toast="视图已保存 · 链接可分享（演示）">保存</span></td></tr>
+</tbody></table></div>
+
+<div class="pop" id="pp-assignee"><p class="tiny muted" style="margin:2px 4px 6px">转派给（人 / Agent 双轨）</p>
+<table class="tbl compact"><tbody>
+<tr><td><b>王工</b> user:2</td><td class="tiny dim">前端 owner · 可批危险动作</td><td><span class="btn link" data-toast="已转派给王工 · 本条移出你的收件箱（演示）">转派</span></td></tr>
+<tr><td><b>李工</b> user:1</td><td class="tiny dim">当前用户（自派=留在原地）</td><td><span class="btn link" data-toast="已留在你名下并重置静音计时（演示）">留下</span></td></tr>
+<tr><td><span class="dot running"></span> <b>Agent · planner</b></td><td class="tiny dim">转派给 Agent = 人点名派发，<b>仍需人批门禁</b></td><td><span class="btn link" data-toast="已转派给 Agent · planner（点名派发不绕门禁 · 演示）">转派</span></td></tr>
+<tr><td><span class="dot dead"></span> <b>Agent · repo-hygiene</b></td><td class="tiny dim" style="color:var(--red)">offline（心跳 &gt; 75s）</td><td><span class="btn link" data-toast="拒：目标离线 400「runtime offline」· 拒因原样给出不粉饰（演示）">转派</span></td></tr>
+</tbody></table></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为<b>规划原型</b>（6.21 界面尚不存在）。三条待办（AF-116 需决策 / AF-104 待验收 / 默认域 code-review 异常数达 3 判定 <span class="mono">dangerous</span> 并建议终止替换 <span class="mono">agent-7</span>）、已读 14 项折叠组与「设计意图」句逐字取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.21；通知分层三规则（值得打扰才 ping / 读失败宁多发不漏发 / 旧失败随工作项推进自愈归档）与失败三件套（Retry with context / Edit as advanced form / 升级到人）取自 §6.0 ⑫ 与 ④；「挂起 → 同任务延续」为 A2A HITL 对齐语义（P1-12）。run id、推送与重推时刻、订阅计数、抽屉内时间线为编造；本页条目一律是「需人决策」，与告警中心（30 秒巡检、面向系统异常）不混用。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：「需决策」AF-116 标题 → 独立详情页 inbox__af-116.html · 「待验收」「危险动作」两标题 → 上下文抽屉（kv + 一张子表 · 只读）· 「需决策」详情页含三件套方案表（选 A/B、回填高级表单、升级到人 · §6.0 ④）· 「标已读」「归档」→ toast（写明已读≠处理、4 小时后重推）· 「全部标为已读」→ 二次确认（影响清单）· 「批准执行」→ 二次确认（下游影响 + 必填理由）· 「叫停」/「忽略」→ 二次确认 · 「筛选：需我处理」→ pop · 「转派」→ 人/Agent 双轨 pop（含离线拒因）　按 Esc 关闭所有浮层。</p>
+</body></html>

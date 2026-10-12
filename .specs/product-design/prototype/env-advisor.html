@@ -1,0 +1,84 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>环境参谋 · 部署方案 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}body{padding-top:34px}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p25" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="finetune.html">微调工厂</span></div>
+    <p class="proto-note"><span class="chip warn">规划原型</span>change <span class="mono">small-model-decisions</span> E 层：分层部署方案（可复制命令 / 可下载脚本 / 操作路径三种交付形态，平台零执行）。<b>此界面尚不存在</b>。演示数据。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/decision-models/advisor</span><span class="fake">规划原型</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="decision-models.html" class="active"><svg class="icon"><use href="#i-layers"/></svg>决策模型</a>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-shield"/></svg>审计日志</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">决策模型 <span class="dim">· 环境参谋</span></span><span class="right"><button class="btn sm" data-click data-toast="重新画像已发起（演示）：只读探测 · ≤5s · 结果存本机默认不上传">重新画像 · 3.1s</button><button class="btn sm primary" data-click data-pop="pop-adopt-layer">按推荐层部署 ▾</button></span></div>
+          <div class="app-body">
+            <div class="callout"><p><b>机器画像（本机 · 默认不上传）：</b>macOS 15 · Apple M1 Max · <b>32GB 统一内存</b> · 磁盘余 412GB · Metal ✓ / CUDA ✗ / Vulkan ✗ → <b>档位判定：本地推理 + 本地微调均可用</b>（统一内存 32GB ≥ 16GB，AC-B3 通过）。画像完整性：完整。</p></div>
+            <table class="tbl">
+              <thead><tr><th>方案层</th><th>引擎</th><th>推荐模型 · 量化</th><th>能 / 不能</th><th>磁盘 · 延迟估算</th><th>缺失步骤（逐项确认）</th></tr></thead>
+              <tbody>
+                <tr><td data-click data-goto="env-advisor__plan-l1.html" style="cursor:pointer"><b>L1 · 本机最优</b> <span class="chip ok">推荐</span></td><td>MLX（Apple 原生）</td><td>Jev-Style-Qwen3.5-2B · bf16<br><span class="tiny dim">复刻卡实测 77ms/决策</span></td><td>推理 ✓ 微调 ✓（MLX 后端）</td><td>7.8GB · ~80ms</td><td class="tiny">☐ <b class="mono">pip install mlx</b> <span class="dim">（指南 · 不代执行）</span>　☐ <button class="btn sm" style="padding:1px 7px" data-click data-toast="✓ 已复制下载命令（演示）· 平台未发起任何下载">⧉ 复制下载命令</button> <span class="tiny dim">源 + sha256 ✓ · Apache-2.0</span>　☐ <span class="btn link" data-click data-toast="✓ 已复制端点配置片段 + 校验命令（演示）">⧉ 端点配置片段 + 校验命令</span>　<span class="btn link" data-click data-goto="env-advisor__plan-l1.html">看方案详情</span></td></tr>
+                <tr><td data-click data-goto="env-advisor__plan-l2.html" style="cursor:pointer"><b>L2 · 跨平台稳妥</b></td><td>llama.cpp（Metal 后端）</td><td>同模型 · Q8_0（2.1GB）<br><span class="tiny dim">决策一致率 99.4% vs bf16</span></td><td>推理 ✓ 微调 ✗（走 LLaMA-Factory 另配）</td><td>2.1GB · ~110ms</td><td class="tiny">☐ <b class="mono">brew install llama.cpp</b> <span class="dim">⧉ 复制</span>　☐ <span class="btn link" data-click data-toast="✓ 已复制模型下载命令（演示）· 含 sha256 校验行">⧉ 模型下载命令</span>　<span class="btn link" data-click data-goto="env-advisor__plan-l2.html">看方案详情</span></td></tr>
+                <tr><td data-click data-goto="env-advisor__plan-l3.html" style="cursor:pointer"><b>L3 · 兜底</b></td><td>云 API</td><td>intent-cls-mini（0.6B 类）</td><td>推理 ✓ 微调 ✗ 数据出域需单独确认</td><td>0GB · 网络往返</td><td class="tiny">☐ 登记 API Key（平台给操作路径，用户自填）　<span class="btn link" data-click data-goto="env-advisor__plan-l3.html">看方案详情</span></td></tr>
+                <tr><td data-click data-goto="env-advisor__profile-l4.html" style="cursor:pointer"><span class="dim">另一台 · Windows 轻薄本（画像不完整）</span></td><td class="dim">— 无独显</td><td class="dim">Q4_K_M 1.3GB（纯 CPU 勉强）</td><td><span class="chip err">微调不可用</span> <span class="tiny dim">内存 8GB &lt; 16GB</span></td><td class="dim">~1.4s/决策（CPU）</td><td class="tiny dim">参谋原话：CPU 档延迟超预算 4.7 倍，不推荐承担路由决策 → <b>只推 L3 云档</b>，缺因见画像　<span class="btn link" data-click data-goto="env-advisor__profile-l4.html">看缺因</span></td></tr>
+              </tbody>
+            </table>
+            <p class="small dim">红线注记：本页<b>零执行</b>——「⧉ 复制」「脚本下载」「操作路径」都只是方案，装不装、什么时候装由用户决定（AC-E4，2026-09-22 原话「只给方案不执行」）；画像与再探测为只读动作。测不出配置的机器禁止凑方案（AC-E5 演示在末行）。</p>
+            <div class="grid g2" style="align-items:start">
+              <div class="callout warn" style="margin:0"><p><b>成本口径同页给（不藏）：</b>L1 一次性 7.8GB 磁盘 + 0 元；L2 2.1GB；L3 0GB 磁盘但按 token 计费且<b>数据出域</b>。三档都不改现有调度——采用只写「建议配置」，不写运行时。</p></div>
+              <div class="callout ok" style="margin:0"><p><b>探测 ≠ 执行：</b>连通状态由再次画像的只读探测刷新（<span class="btn link" data-click data-toast="只读探测完成（演示）：Metal 可用 · llama.cpp 未装 · MLX 未装 → L1 步骤 1 仍为未勾选">重探一次</span>）；勾选框是<b>人工进度记录</b>，不是执行回执。</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<div class="pop" id="pop-adopt-layer" style="max-width:440px"><p class="tiny dim" style="margin:0 0 6px"><b>按推荐层部署 · 选择要采用的方案层（采用 = 写配置建议，不是执行）</b></p>
+<table class="tbl compact"><thead><tr><th>层</th><th>适配本机</th><th>操作</th></tr></thead><tbody>
+<tr data-click data-toast="已选 L1（演示）→ 弹出二次确认：将写入建议配置草案，平台不执行安装"><td><b>L1 · MLX bf16</b> <span class="chip ok">推荐</span></td><td><span class="chip ok">是</span></td><td><span class="btn link">选</span></td></tr>
+<tr data-click data-toast="已选 L2（演示）→ 二次确认里会写明：此档不支持本机微调"><td>L2 · llama.cpp Q8_0</td><td><span class="chip ok">是</span></td><td><span class="btn link">选</span></td></tr>
+<tr data-click data-toast="已选 L3（演示）→ 需额外勾选「数据出域」确认才允许保存"><td>L3 · 云 API</td><td><span class="chip warn">仅当放弃本地算力</span></td><td><span class="btn link">选</span></td></tr>
+<tr style="opacity:.5"><td>Windows 轻薄本 · CPU 档</td><td><span class="chip bad">不推荐</span></td><td><span class="btn link" data-click data-toast="✗ 不提供「采用」：画像不完整 + 延迟超预算 4.7×（AC-E5）">为何不可选</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">「采用」写入的是 <span class="mono">.specs/…/advisor-plan.md</span> 草案（供人审），<b>不写 config、不启进程、不改绑定</b>。</p>
+<p style="margin-top:var(--s2)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-click data-modal="md-adopt" data-close>下一步 · 看将写入的内容</button></p></div>
+<div class="modal" id="md-adopt"><div style="padding:var(--s4)"><b>采用 L1 · 本机最优（MLX）？</b>
+<p class="small dim" style="margin:8px 0"><b>这一步只写建议，不执行</b>（AC-E4）：平台不会装引擎、不会下模型、不会改配置，也不会因此启用任何决策用途。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;line-height:1.75"># 将写入 .specs/small-model-decisions/advisor-plan.md（草案 · 待人审）
+layer: L1
+engine: mlx + mlx-lm
+model: Qwen3.5-2B bf16 (7.8GB, Apache-2.0)
+endpoint: http://127.0.0.1:8080/v1   # 建议值，未启动
+steps_unchecked: [装引擎, 下模型, 配端点, 连通校验]
+applied_by: admin · 演示
+</pre>
+<ul class="small dim" style="margin:8px 0 8px 18px">
+<li>影响：无运行时变化 · 仅产出一份草案文档 + 审计记录 <span class="mono">advisor_plan_adopted</span></li>
+<li>可撤销：删除草案即回到现状（不改任何既有配置）</li>
+<li>仍需人工：逐条复制命令去终端执行，回来勾 ☐ 记进度</li>
+</ul>
+<div style="text-align:right"><button class="btn sm" data-close>再想想</button> <button class="btn sm primary" data-toast="已写入建议草案 advisor-plan.md（演示）· 平台未执行任何安装/下载" data-close>确认采用（写建议）</button></div></div></div>
+<div class="modal" id="md-adopt-l3"><div style="padding:var(--s4)"><b style="color:var(--orange)">采用 L3 · 云 API —— 数据出域确认</b>
+<p class="small dim" style="margin:8px 0">与 L1/L2 不同，这一档会把<b>决策输入（state 摘要 + 选项集）送出本机</b>。确认前请看清范围：不含会话原文与凭据，但含项目术语。</p>
+<ul class="small dim" style="margin:0 0 8px 18px">
+<li>☐ 已读：出域范围 = state 摘要 + options（≤26 项）</li>
+<li>☐ 已知：Key 由用户自填、平台不落明文、可随时停用</li>
+<li>☐ 已知：失败即 <span class="mono">decision_fallback</span> 回退直通，不阻塞主调度</li>
+<li>☐ 仍需两步制绑定（本采用动作不启用任何用途）</li>
+</ul>
+<p class="tiny dim" style="margin:0 0 6px"><b>必填原因</b>（本机不达标或明确放弃本地算力时才走云）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [手头只有这台轻薄本，先跑通链路 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已记录出域确认 + 写入建议草案（演示）· 审计 advisor_egress_confirmed · 未发起任何网络调用" data-close>确认出域并采用</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px 6px"><b>演示数据说明：</b>机器画像数值（macOS 15 · M1 Max · 32GB · 磁盘余 412GB · Metal ✓/CUDA ✗/Vulkan ✗）、三档方案的引擎与体积（MLX bf16 7.8GB ~80ms · llama.cpp Q8_0 2.1GB ~110ms · 一致率 99.4%）、CPU 档 ~1.4s 与「超预算 4.7 倍」均为 §6.25 与 <span class="mono">.specs/small-model-decisions/REQUIREMENT.md</span> AC-E1/E2/E5 原文实值；命令块为文档语义下的演示拼装（源与 sha256 只标注「随行」，不写具体摘要值）；第二台机器的画像为演示值。所有「⧉ 复制 / ⭳ 下载 / 采用」均零执行（AC-E4）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：方案行方案名 /「看方案详情」「看缺因」→ 方案详情独立页（L1/L2/L3 探测依据 + 命令清单 + 成本 + 逐项确认全宽重排 · L4 为画像缺因页；采用二次确认随页自带）· 行内「⧉ 复制」→ toast · 「按推荐层部署 ▾」→ pop 层选择（4 项内合规）· 「重新画像 / 重探一次」→ toast（只读探测 · 零执行）· Esc 关闭所有浮层。</p>
+</body></html>

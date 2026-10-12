@@ -1,0 +1,28 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>保存前覆盖面预览 · 阶段模型配置 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<div class="detail-top"><span class="pill" data-back="stage-model.html" data-click>← 返回 阶段模型配置</span><span class="crumb"><b>管理 › 阶段模型 › 保存前 · 覆盖面预览</b></span><span class="chip bad">整包盲覆盖 · 无 If-Match</span></div>
+<div class="detail-body">
+<div class="callout bad"><p class="tiny" style="margin:0"><b>现状（P2-5 第一批要治的）：</b><span class="mono">workflow.json</span> 的 PUT 是<b>整包盲覆盖</b>——不发 ETag、不比对 <span class="mono">If-Match</span>，后写者全吃。本页「保存」就是这个 PUT，没有 412。</p></div>
+<dl class="kv"><dt>请求</dt><dd class="mono">PUT /api/admin/workflow（体 = workflow.json 全文 9 阶段）</dd><dt>乐观锁</dt><dd><span class="chip bad">无</span> 未带 If-Match</dd><dt>本地基线</dt><dd class="mono">打开时 workflow.json sha256 8f3c…（仅前端显示，不参与校验）</dd><dt>服务端当前</dt><dd class="mono">sha256 b21d…（14:04 被 Agent 整包覆盖过一次）</dd><dt>本次改动</dt><dd class="mono tiny">4 处（1-requirement 门禁 / 提示词路径 / 必需性 / 新增 2b）</dd><dt>将丢失</dt><dd class="mono" style="color:var(--red)">Agent 14:04 对 3-task 的改动（不在我表单里 → 被覆盖）</dd><dt>事务账本</dt><dd><span class="chip warn">待补</span> P2-5 第四件：change_log 同事务写 + <span class="mono">/api/watch</span></dd><dt>回滚路径</dt><dd class="mono">磁盘文件无版本表；只能靠 git 或人工备份</dd></dl>
+<h4 class="blk">保存前对照（diff 摘要）</h4>
+<table class="tbl compact"><thead><tr><th>阶段</th><th>字段</th><th>磁盘当前</th><th>你将写入</th></tr></thead><tbody>
+<tr><td class="mono">1-requirement</td><td class="tiny">门禁</td><td class="mono tiny">无</td><td class="mono tiny" style="color:var(--green)">需求门</td></tr>
+<tr><td class="mono">1-requirement</td><td class="tiny">提示词</td><td class="mono tiny">prompts/requirement.md</td><td class="mono tiny">prompts/1-requirement.md</td></tr>
+<tr><td class="mono">3-task</td><td class="tiny">必需性</td><td class="mono tiny">是（Agent 14:04 改）</td><td class="mono tiny" style="color:var(--red)">否 ← 回退他人改动</td></tr>
+<tr><td class="mono">2b-perf-baseline</td><td class="tiny">新增</td><td class="dim">—</td><td class="mono tiny">锚 unstarted · 产物 PERF.md</td></tr>
+<tr><td class="mono">7-integration</td><td class="tiny">显示名</td><td class="mono tiny">集成归档</td><td class="mono tiny">集成归档（未改）</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-close>取消（回去手工合并）</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-force">仍然整包覆盖保存</button> <button class="btn sm primary" data-toast="已提交：整包 PUT /api/admin/workflow（无 If-Match · 现状行为）（演示）">保存</button></p>
+</div>
+<div class="modal" id="md-force"><div style="padding:var(--s4)"><b style="color:var(--red)">仍然整包覆盖保存？</b>
+<p class="small dim" style="margin:8px 0">你正在吞掉 <b>Agent · planner 14:04 对 3-task 的改动</b>（必需性 是→否）。当前 API 无 If-Match，服务端不会拒绝，这一击<b>不可自动回滚</b>。<b>必填理由</b>入审计。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">理由: [确认 Agent 那次改动作废，我来维护基线 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已整包覆盖 workflow.json · 审计 wf:config_blind_overwrite（演示 · P2-5 后该路径将变 412）" data-close>确认覆盖保存</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 stage-model.html 的 <span class="mono">dr-save</span> 抽屉升格而来：请求语义 kv + 5 行保存前 diff 对照 + 三种落盘动作，是一屏读不完的写前预览。「将丢失」一栏明写吞掉 Agent 14:04 对 3-task 的改动。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：取消（回去手工合并）→ 返回阶段模型页 · 仍然整包覆盖保存 → 必填理由二次确认 modal · 保存 → toast（现状行为）。</p>
+</body></html>

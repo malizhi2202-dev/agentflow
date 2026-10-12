@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>审批单 AP-19 生产域扩容至 5 副本 · 审批中心 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p17" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="audit.html">审计日志</span></div>
+<div class="detail-top"><span class="pill" data-back="approvals.html" data-click>← 返回 审批中心</span><span class="crumb"><b>审批中心 › 已处理 › AP-19 生产域扩容至 5 副本</b></span><span class="chip ok">已批准 · 只读</span></div>
+<div class="detail-body">
+<div class="callout ok"><p class="tiny" style="margin:0"><b>已决策（只读）：</b>决策后单据不可再改；更正需另起一张单并引用本单号——留痕规则同审计追加写。</p></div>
+<dl class="kv" style="margin-top:var(--s3)">
+<dt>单号</dt><dd class="mono">human_approvals/19</dd>
+<dt>发起方</dt><dd class="mono">reconcile_loop · 渐进扩容策略（safe→caution 边界：跨阈值）</dd>
+<dt>决策人 / 时间</dt><dd class="mono">admin · 李工 · 09-21 11:02:44</dd>
+<dt>决策 / 理由</dt><dd><span class="chip ok">批准</span> · 「队列积压 12 条，先扩 2 副本观察」</dd>
+<dt>执行结果</dt><dd class="mono">生产域 3 → 5 healthy · 队列清零 · 未触发上限 8</dd>
+</dl>
+<h4 class="blk">payload diff</h4>
+<div class="grid g2" style="gap:var(--s3)">
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">批准前</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--red);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "domain": "生产域",
+  "replicas_desired": 3,
+  "healthy": 3,
+  "queue_backlog": 12
+}</pre></div>
+<div><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">执行后</p>
+<pre class="mono tiny" style="margin:0;font-size:11px;color:var(--green);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">{
+  "domain": "生产域",
+  "replicas_desired": 5,
+  "healthy": 5,
+  "queue_backlog": 0,
+  "scale_policy.max": 8（未触及）
+}</pre></div>
+</div>
+<table class="tbl compact"><thead><tr><th>字段</th><th>前</th><th>后</th></tr></thead><tbody>
+<tr><td class="mono">replicas_desired</td><td class="mono tiny">3</td><td class="mono tiny">5</td></tr>
+<tr><td class="mono">队列积压</td><td class="mono tiny">12</td><td class="mono tiny">0</td></tr>
+<tr><td class="mono">token / 成本口径</td><td class="mono tiny">session_metrics</td><td class="mono tiny">+2 实例并入统计</td></tr>
+<tr><td class="mono">审计</td><td class="dim tiny">—</td><td class="mono tiny">approval:approved</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="跳 §6.3 Agent 管控面 · 生产域（演示）">看执行落点</button> <button class="btn sm" data-goto="audit.html">看审计行</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 approvals.html 的 <span class="mono">dr-ap-approved</span> 抽屉升格而来：决策记录只读，但 payload diff + 字段对照 + 结论提示三块以上，侧栏装不下。决策后单据不可再改，更正需另起一张单并引用本单号。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：看执行落点 → toast（指向 §6.3 管控面）· 看审计行 → 跳 audit.html。</p>
+</body></html>

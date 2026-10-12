@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>新建微调任务 详情 · 微调工厂 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
+.proto-note{padding:0 18px;margin-top:14px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p24" style="color:inherit">回文档</a></span>
+<div class="detail-top"><span class="pill" data-back="finetune.html" data-click>← 返回 微调工厂</span><span class="crumb"><b>新建微调任务 · dept-router-v5-ft</b> · 域 quant-research</span><span class="chip warn">默认全不勾 · 不外传</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="finetune.html">微调工厂</span><span class="pill" data-goto="finetune__cmd.html">命令预览</span><span class="pill" data-goto="decision-models.html">决策模型</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>先选基座与数据集</b>（默认全不勾 · 训练数据不出本域）。提交后先跑<b>只读</b>硬件预检，达标才会弹二次确认；未达标则灰显并明写缺什么（本页不代装、不降门槛）。</p></div>
+<h4 class="blk">基座（本域可用）</h4>
+<table class="tbl compact"><thead><tr><th>基座</th><th>显存估算</th><th>操作</th></tr></thead><tbody>
+<tr data-click data-toast="已选基座 Qwen3.5-2B（演示）· 与 v3/v4 同谱系，便于对照"><td><b>Qwen3.5-2B</b> <span class="chip ok">推荐</span></td><td class="mono tiny">≈9GB（LoRA r16）</td><td><span class="btn link">选</span></td></tr>
+<tr data-click data-toast="已选基座 Qwen3.5-2B-Q4（演示）· 量化基座微调质量打折，仅做流程验证"><td>Qwen3.5-2B · Q4 量化</td><td class="mono tiny">≈5GB</td><td><span class="btn link">选</span></td></tr>
+<tr style="opacity:.5"><td><span class="dot blocked"></span> modernbert-310m <span class="chip bad">服务 offline</span></td><td class="tiny dim">—</td><td><span class="btn link" data-click data-toast="✗ 不可选：基座推理服务 :8081 未拉起（先恢复或换基座）">为何灰置</span></td></tr>
+</tbody></table>
+<h4 class="blk">数据集来源（仅本域 · 经 PII 脱敏管道 · 勾选入集）</h4>
+<table class="tbl compact"><thead><tr><th>来源</th><th>条数</th><th>勾选</th></tr></thead><tbody>
+<tr><td>本域会话（quant-research）</td><td class="mono">455</td><td><span class="btn link" data-click data-toast="已勾选会话样本（演示）：脱敏后入集 · 指纹重算">✓</span></td></tr>
+<tr><td>本域记忆条目</td><td class="mono">90</td><td><span class="btn link" data-click data-toast="已勾选记忆条目（演示）">✓</span></td></tr>
+<tr><td>回放样例（进评测集，不进训练集）</td><td class="mono">60</td><td><span class="chip">评测侧</span></td></tr>
+<tr><td class="dim">跨域数据</td><td class="dim">—</td><td><span class="btn link" style="color:var(--red)" data-click data-toast="✗ 禁止：训练数据不出本域（AC-B2）· 跨域取数无入口">禁止</span></td></tr>
+</tbody></table>
+<p class="tiny dim">提交后先跑<b>只读</b>硬件预检，达标才会弹二次确认；未达标则灰显并明写缺什么（本页不代装、不降门槛）。</p>
+<h4 class="blk">提交</h4>
+<p><button class="btn sm" data-back="finetune.html" data-click>取消</button> <button class="btn sm primary" data-click data-toast="预检中（演示）：显存 / 磁盘 / 引擎三项只读探测 · 完成后弹二次确认">预检并生成任务</button></p>
+</div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为「新建微调任务」升格详情页（规划原型 · 6.24 界面尚不存在）。基座谱系、显存估算、数据集来源与条数、跨域取数禁止（AC-B2）、只读预检先行均取自 §6.24 与 <span class="mono">.specs/small-model-decisions/REQUIREMENT.md</span>；条数与指纹为演示值。本页勾选 / 生成均不产生真实训练。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：基座行 / 「选」→ toast · 数据集 ✓ 勾选 → toast（脱敏入集 · 指纹重算）· 跨域行 → 拒因 toast · 「预检并生成任务」→ toast（只读探测，达标才弹二次确认）· 「命令预览」跳 finetune__cmd.html · 顶部「← 返回」回 finetune.html　按 Esc 关闭浮层。</p>
+</body></html>

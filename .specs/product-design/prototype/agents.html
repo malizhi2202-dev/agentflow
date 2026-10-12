@@ -1,0 +1,96 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}.nowrap{white-space:nowrap}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="agent-detail.html">Agent 详情</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<p class="proto-note"><span class="chip warn">演示数据</span>Agent 平铺表（Multica 式 Agent 模型：persona + 能力 + 运行时 + 安全闸门）· 「状态」列双灯（可用性 × 负载）· 破坏性动作归档/删除走二次确认。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/agents</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a class="active" data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="users.html"><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-file"/></svg>审计日志</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">Agent</span><span class="right"><button class="btn sm primary" data-goto="agents__new.html">+ 新建 Agent</button></span></div>
+          <div class="app-body">
+            <div style="display:flex;gap:var(--s2);margin-bottom:var(--s3);align-items:center">
+              <span class="pill mono" style="border-color:var(--blue-border);color:var(--blue)">🔍 搜索 Agent…</span>
+              <span class="pill" data-click data-pop="pp-access">Access：全部 ▾</span>
+              <span class="pill" data-click data-pop="pp-avail">可用性：全部 ▾</span>
+              <span style="flex:1"></span>
+              <span class="chip mono">共 6 个 Agent</span>
+            </div>
+            <table class="tbl compact">
+              <thead><tr><th>名称</th><th>归属</th><th>Access</th><th>运行时 + 模型</th><th>状态（可用性 · 负载）</th><th>技能数</th><th>最近运行</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td><b>审查 Agent · 标准</b><div class="tiny muted">前端 PR 代码审查主实例</div></td><td>默认域</td><td>全工作区</td><td class="mono">LangGraph · gpt-4o</td><td><span class="chip ok">online</span> <span class="chip info">working</span></td><td class="mono">3</td><td class="mono">r-128 · 2 分钟前</td><td class="nowrap"><span class="btn link" data-goto="agent-detail.html">详情</span>·<span class="btn link" data-click data-toast="已打开「审查 Agent · 标准」编辑分区（演示）">编辑</span>·<span class="btn link" data-click data-toast="已基于「审查 Agent · 标准」复制出新草稿（演示）">复制</span>·<span class="btn link" data-click data-modal="md-archive">归档</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>审查 Agent · 备援</b><div class="tiny muted">标准实例故障时接管同标签任务</div></td><td>默认域</td><td>仅我</td><td class="mono">LangChain · claude-sonnet</td><td><span class="chip ok">online</span> <span class="chip">idle</span></td><td class="mono">2</td><td class="mono">14:12</td><td class="nowrap"><span class="btn link" data-goto="agent-detail.html">详情</span>·<span class="btn link" data-click data-toast="已打开「审查 Agent · 备援」编辑分区（演示）">编辑</span>·<span class="btn link" data-click data-toast="已复制出新草稿（演示）">复制</span>·<span class="btn link" data-click data-modal="md-archive">归档</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>审查 Agent · 旧版</b><div class="tiny muted">历史跑批保留 · 已停用派发</div></td><td>默认域</td><td>全工作区</td><td class="mono">LangGraph · gpt-3.5</td><td><span class="chip bad">offline</span> <span class="chip">idle</span></td><td class="mono">2</td><td class="mono">3 天前</td><td class="nowrap"><span class="btn link" data-goto="agent-detail.html">详情</span>·<span class="btn link" data-click data-toast="已打开「审查 Agent · 旧版」编辑分区（演示）">编辑</span>·<span class="btn link" data-click data-toast="已复制出新草稿（演示）">复制</span>·<span class="btn link" data-click data-modal="md-archive">归档</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>数据同步 Agent</b><div class="tiny muted">Notion / 知识库增量同步</div></td><td>默认域</td><td>指定成员</td><td class="mono">CrewAI · deepseek-v3</td><td><span class="chip warn">unstable</span> <span class="chip info">working</span></td><td class="mono">1</td><td class="mono">Notion 401 · 2 分钟前</td><td class="nowrap"><span class="btn link" data-goto="agent-detail.html">详情</span>·<span class="btn link" data-click data-toast="已打开「数据同步 Agent」编辑分区（演示）">编辑</span>·<span class="btn link" data-click data-toast="已复制出新草稿（演示）">复制</span>·<span class="btn link" data-click data-modal="md-archive">归档</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>前端 Agent</b><div class="tiny muted">前端实现与自测</div></td><td>生产域</td><td>全工作区</td><td class="mono">AutoGen · claude-sonnet</td><td><span class="chip ok">online</span> <span class="chip warn">queued</span></td><td class="mono">3</td><td class="mono">wf-42 · 刚刚</td><td class="nowrap"><span class="btn link" data-goto="agent-detail.html">详情</span>·<span class="btn link" data-click data-toast="已打开「前端 Agent」编辑分区（演示）">编辑</span>·<span class="btn link" data-click data-toast="已复制出新草稿（演示）">复制</span>·<span class="btn link" data-click data-modal="md-archive">归档</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>汇总 Agent</b><div class="tiny muted">跨工作项进度汇总</div></td><td>生产域</td><td>指定成员</td><td class="mono">LangGraph · gpt-4o-mini</td><td><span class="chip ok">online</span> <span class="chip">idle</span></td><td class="mono">1</td><td class="mono">15:04</td><td class="nowrap"><span class="btn link" data-goto="agent-detail.html">详情</span>·<span class="btn link" data-click data-toast="已打开「汇总 Agent」编辑分区（演示）">编辑</span>·<span class="btn link" data-click data-toast="已复制出新草稿（演示）">复制</span>·<span class="btn link" data-click data-modal="md-archive">归档</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+              </tbody>
+            </table>
+            <!-- 空态：筛选或搜索无结果（0 条）时替换表格显示
+            <div class="panel" id="agents-empty" style="text-align:center;padding:var(--s6)">
+              <p class="muted" style="margin:0">暂无 Agent，点击 <span class="btn link" data-goto="agents__new.html">「新建 Agent」</span> 开始</p>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim"><b>演示数据说明：</b>6 个 Agent、Access/可用性筛选、双状态灯与技能数为演示值；真实系统「状态」灯映射 <span class="mono">--cp-status-*</span> 令牌。空态：无 Agent 时显示「暂无 Agent，点击「新建 Agent」开始」（见上方被注释的空态块）。</p>
+
+<div class="pop" id="pp-access"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">Access 筛选</p>
+<table class="tbl compact"><tbody>
+<tr><td><span class="chip">全部</span></td><td class="mono">6</td><td><span class="btn link" data-toast="已按 Access=全部 筛选（演示）">应用</span></td></tr>
+<tr><td><span class="chip info">仅我</span></td><td class="mono">1</td><td><span class="btn link" data-toast="已按 Access=仅我 筛选 · 命中 1（演示）">应用</span></td></tr>
+<tr><td><span class="chip info">全工作区</span></td><td class="mono">3</td><td><span class="btn link" data-toast="已按 Access=全工作区 筛选 · 命中 3（演示）">应用</span></td></tr>
+<tr><td><span class="chip info">指定成员</span></td><td class="mono">2</td><td><span class="btn link" data-toast="已按 Access=指定成员 筛选 · 命中 2（演示）">应用</span></td></tr>
+</tbody></table></div>
+
+<div class="pop" id="pp-avail"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">可用性筛选</p>
+<table class="tbl compact"><tbody>
+<tr><td><span class="chip">全部</span></td><td class="mono">6</td><td><span class="btn link" data-toast="已按可用性=全部 筛选（演示）">应用</span></td></tr>
+<tr><td><span class="chip ok">在线</span></td><td class="mono">4</td><td><span class="btn link" data-toast="已按可用性=在线 筛选 · 命中 4（演示）">应用</span></td></tr>
+<tr><td><span class="chip bad">离线</span></td><td class="mono">1</td><td><span class="btn link" data-toast="已按可用性=离线 筛选 · 命中 1（演示）">应用</span></td></tr>
+<tr><td><span class="chip warn">不稳定</span></td><td class="mono">1</td><td><span class="btn link" data-toast="已按可用性=不稳定 筛选 · 命中 1（演示）">应用</span></td></tr>
+</tbody></table></div>
+
+<div class="modal" id="md-archive"><div style="padding:var(--s4)"><b>归档 Agent「审查 Agent · 标准」？</b><p class="small dim" style="margin:8px 0 4px">归档后转为只读、退出调度与探活、不再接收新任务；可随时恢复。<b>必填原因</b>。</p><table class="tbl compact"><tbody>
+<tr><td>在途任务</td><td class="mono">0（无在途，可安全归档）</td><td><span class="chip ok">无副作用</span></td></tr>
+<tr><td>引用工作流</td><td class="mono">3（审查流水线 v3 / 发布前检查 v1 / 告警自愈 v2）</td><td><span class="chip warn">归档后引用转只读</span></td></tr>
+<tr><td>探活</td><td class="mono">60s 周期</td><td><span class="chip">停止</span></td></tr>
+<tr><td>恢复方式</td><td>从归档列表「恢复」</td><td><span class="chip info">保留</span></td></tr>
+</tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [已由备援接管 · 本实例退役保留      ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="已归档 · 退出调度与探活 · 审计 agent:archived（演示）" data-close>确认归档</button></div></div></div>
+
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除 Agent「审查 Agent · 标准」？</b><p class="small dim" style="margin:8px 0 4px">删除<b>不可恢复</b>（配置与凭据销毁，历史 run 转只读快照）。<b>必填原因</b>。</p><table class="tbl compact"><tbody>
+<tr><td>在途任务</td><td class="mono">1（task-1 · 需先处置）</td><td><span class="chip bad">删除前必查</span></td></tr>
+<tr><td>引用工作流</td><td class="mono">3</td><td><span class="chip warn">引用将悬空</span></td></tr>
+<tr><td>历史 run</td><td class="mono">1,284（保留只读）</td><td><span class="chip info">快照不变</span></td></tr>
+<tr><td>审计</td><td>删除人署名入账</td><td><span class="chip info">留下记录</span></td></tr>
+</tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [旧版已全量替代 · 长期无人使用      ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除 · 审计 agent:deleted（演示）" data-close>确认删除</button></div></div></div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：「详情」→ <span class="mono">agent-detail.html</span> · 「+ 新建 Agent」→ <span class="mono">agents__new.html</span> · Access / 可用性 pill → 筛选弹层（选择器）· 复制 / 编辑 → toast · 归档 / 删除 → 破坏性操作二次确认 + 必填原因　按 Esc 关闭浮层。</p>
+</body></html>

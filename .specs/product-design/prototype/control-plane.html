@@ -1,0 +1,265 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent 管控面 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p3" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="isolation.html">执行隔离</span></div>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>域 → 能力组 → Agent 实例三层树。注意 <span class="mono">Agent-A</span> 同时出现在 code-review 与 python 两个能力组中——这是「多层归属」的预期表现，不是重复渲染。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/control-plane</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html" class="active"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="users.html"><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-file"/></svg>审计日志</a>
+          <div class="spacer"></div>
+          <a data-goto="alerts.html" style="color:var(--red)"><svg class="icon"><use href="#i-bell"/></svg>告警 <span class="chip bad" style="height:16px;padding:0 5px">3</span></a>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">Agent 管控 <span class="dim">· 控制面</span></span><span class="right"><span class="chip ok" data-click data-drawer="dr-probe-sum">探针正常</span><button class="btn sm" data-toast="调和循环已暂停（本轮不再收敛漂移）→ 需二次确认才生效（演示 · 见「暂停调和」）" data-click data-modal="md-pause">暂停调和</button><button class="btn sm" data-click data-pop="pop-newdomain">+ 新建域 ▾</button><button class="btn sm primary" data-goto="agents__new.html">+ 新建 Agent</button></span></div>
+          <div class="app-body">
+            <div class="grid g4" style="margin-bottom:var(--s4)">
+              <div class="stat"><div class="stat-label">探针通过率</div><div class="stat-value" style="color:var(--green)">94<span style="font-size:14px">%</span></div><div class="stat-sub">17/18 最近一轮</div></div>
+              <div class="stat"><div class="stat-label">队列深度</div><div class="stat-value" style="color:var(--orange)">4</div><div class="stat-sub">最高优先级 200</div></div>
+              <div class="stat"><div class="stat-label">调和漂移</div><div class="stat-value" style="color:var(--orange)">1</div><div class="stat-sub">caution · 等待收敛</div></div>
+              <div class="stat"><div class="stat-label">Agent 总数</div><div class="stat-value">11</div><div class="stat-sub">9 healthy / 2 异常</div></div>
+            </div>
+
+            <div class="tabs"><span class="tab active" id="tab-tree" data-click onclick="showPv('tree')">域树视图</span><span class="tab" id="tab-agents" data-click onclick="showPv('agents')">Agent 列表</span><span class="tab" data-toast="已滚到调度队列区（本页四块内容同屏呈现 · 演示）">调度队列</span><span class="tab" data-toast="已滚到调和记录区（演示）">调和记录</span></div>
+
+            <div class="panel tight" id="pv-tree" style="padding:0;overflow:hidden">
+              <div class="tree">
+                <div class="tree-row l1" data-click data-goto="control-plane__domain-default.html"><span class="caret">▼</span><svg class="icon" style="color:var(--blue)"><use href="#i-folder"/></svg><span class="name">默认域</span><span class="chip mono">5 个 Agent</span><span class="chip ok">4 healthy / 5</span></div>
+                <div class="tree-row l2" data-click data-goto="control-plane__group-code-review.html"><span class="caret">▼</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">code-review</span><span class="chip mono">3 个</span><span class="chip ok">2 healthy / 3</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 标准（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 标准</span><span class="chip mono">gpt-4o</span><span class="chip mono">gpt</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot idle"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 备援（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 备援</span><span class="chip mono">claude-sonnet</span><span class="chip mono">standby</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot dead"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 旧版（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 旧版</span><span class="chip mono">gpt-3.5</span><span class="chip bad">dead</span></div>
+                <div class="tree-row l2" data-toast="能力组 python：2 个成员 · 1 healthy · 组不建表，由 capabilities 派生（演示）"><span class="caret">▼</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">python</span><span class="chip mono">2 个</span><span class="chip ok">1 healthy / 2</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 标准（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 标准</span><span class="chip mono">gpt-4o</span><span class="chip info">同时属于 code-review</span></div>
+                <div class="tree-row l3" data-click data-drawer="dr-ag-sync"><span class="caret">·</span><span class="dot failed"></span><span class="name">数据同步 Agent</span><span class="chip mono">deepseek-v3</span><span class="chip bad">failed</span></div>
+                <div class="tree-row l2" data-toast="未分类：无 capability 的 Agent 落在此组（1 个 · 1 healthy）（演示）"><span class="caret">▶</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">未分类</span><span class="chip mono">1 个</span><span class="chip ok">1 healthy / 1</span></div>
+                <div class="tree-row l1" data-click data-goto="control-plane__domain-prod.html"><span class="caret">▼</span><svg class="icon" style="color:var(--purple)"><use href="#i-folder"/></svg><span class="name">生产域</span><span class="chip mono">3 个 Agent</span><span class="chip ok">3 healthy / 3</span></div>
+                <div class="tree-row l2" data-toast="生产域 / code-review：2 个 · 2 healthy · 与默认域同名组但互不可见（域隔离）（演示）"><span class="caret">▶</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">code-review</span><span class="chip mono">2 个</span><span class="chip ok">2 healthy / 2</span></div>
+                <div class="tree-row l2" data-toast="生产域 / frontend：1 个 · 1 healthy（演示）"><span class="caret">▶</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">frontend</span><span class="chip mono">1 个</span><span class="chip ok">1 healthy / 1</span></div>
+                <div class="tree-row l1" data-click data-goto="control-plane__domain-test.html"><span class="caret">▶</span><svg class="icon" style="color:var(--orange)"><use href="#i-folder"/></svg><span class="name">测试域</span><span class="chip mono">3 个 Agent</span><span class="chip warn">2 healthy / 3</span></div>
+              </div>
+            </div>
+
+            <div class="panel" id="pv-agents" style="display:none">
+              <p class="tiny muted" style="margin:0 0 var(--s3)">Agent 平铺表（与域树同一份 Agent · 演示）</p>
+              <table class="tbl compact">
+                <thead><tr><th>名称</th><th>域</th><th>能力组</th><th>运行时 + 模型</th><th>可用性</th><th>负载</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td><b>审查 Agent · 标准</b></td><td>默认域</td><td><span class="pill mono">code-review</span> <span class="pill mono">python</span></td><td class="mono">LangGraph · gpt-4o</td><td><span class="chip ok">online</span></td><td><span class="chip info">working</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>审查 Agent · 备援</b></td><td>默认域</td><td><span class="pill mono">code-review</span></td><td class="mono">LangChain · claude-sonnet</td><td><span class="chip ok">online</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>审查 Agent · 旧版</b></td><td>默认域</td><td><span class="pill mono">code-review</span></td><td class="mono">LangGraph · gpt-3.5</td><td><span class="chip bad">offline</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>数据同步 Agent</b></td><td>默认域</td><td><span class="pill mono">python</span></td><td class="mono">CrewAI · deepseek-v3</td><td><span class="chip warn">unstable</span></td><td><span class="chip info">working</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>前端 Agent</b></td><td>生产域</td><td><span class="pill mono">frontend</span></td><td class="mono">AutoGen · claude-sonnet</td><td><span class="chip ok">online</span></td><td><span class="chip warn">queued</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>汇总 Agent</b></td><td>生产域</td><td><span class="pill mono">—</span></td><td class="mono">LangGraph · gpt-4o-mini</td><td><span class="chip ok">online</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="h2p" style="margin-top:var(--s5)">调度队列（前 5 条） <span class="chip info">行可点 → 任务详情（task-7 待方案 → 详情页 · 其余抽屉）</span> <span class="pill" data-click data-pop="pop-queue">筛选：全部状态 ▾</span></p>
+            <table class="tbl compact">
+              <thead><tr><th>Task ID</th><th>标签</th><th>优先级</th><th>状态</th><th>入队时间</th><th>目标</th></tr></thead>
+              <tbody>
+                <tr data-click data-drawer="dr-task-3"><td class="mono">task-3</td><td class="mono">code-review</td><td class="mono">200</td><td><span class="chip warn">pending</span></td><td class="mono">14:31:02</td><td>—</td></tr>
+                <tr data-click data-drawer="dr-task-1"><td class="mono">task-1</td><td class="mono">code-review</td><td class="mono">100</td><td><span class="chip info">assigned</span></td><td class="mono">14:28:44</td><td class="mono">agent-1</td></tr>
+                <tr data-click data-drawer="dr-task-2"><td class="mono">task-2</td><td class="mono">python</td><td class="mono">50</td><td><span class="chip warn">pending</span></td><td class="mono">14:25:10</td><td>—</td></tr>
+                <tr data-click data-goto="control-plane__task-frontend.html"><td class="mono">task-7</td><td class="mono">frontend</td><td class="mono">50</td><td><span class="chip warn">pending</span></td><td class="mono">14:19:38</td><td>—</td></tr>
+                <tr data-click data-drawer="dr-task-9"><td class="mono">task-9</td><td class="mono">code-review</td><td class="mono">10</td><td><span class="chip">dequeued</span></td><td class="mono">14:02:15</td><td class="mono">agent-4</td></tr>
+              </tbody>
+            </table>
+
+            <p class="h2p">域策略 · 决策用途绑定 <span class="chip warn">规划 · 未实现</span> <span class="chip info">开关可点 → toast 入审计</span></p>
+            <table class="tbl compact">
+              <thead><tr><th>用途</th><th>绑定</th><th>模型 / 阈值</th><th>今日决策记录</th></tr></thead>
+              <tbody>
+                <tr><td>路由决策</td><td><span class="chip ok" data-click data-toast="路由决策：开 → 关？两步制第二步解绑即刻生效 · 该用途回直通路由 · 已入审计 decision:usage_unbound（演示）">开 ▾</span></td><td><span class="mono">Jev-Style-Qwen3.5-2B</span> · 阈值 0.60</td><td class="tiny mono">41 次 · escalated 14 · fallback 0 · P95 112ms</td></tr>
+                <tr><td>对话分诊</td><td><span class="chip" data-click data-toast="两步制：需先在 §6.23 目录登记（第一步）再绑用途（第二步）· 当前第一步已完成 · 默认关 · 开启将入审计 decision:usage_bound（演示）">关 ▾</span></td><td class="dim">— 消息全部走现状直通</td><td class="dim tiny">0 次（未绑定=零调用，§2.7 两步制）</td></tr>
+                <tr><td>简单任务派发</td><td><span class="chip" data-click data-toast="白名单未开启 · 保持关闭；开启=按类型白名单派发，未命中仍走现状（演示）">关 ▾</span></td><td class="dim">— 白名单未开启</td><td class="dim tiny">0 次</td></tr>
+              </tbody>
+            </table>
+            <p class="small dim">三个开关彼此独立、默认全关；域 owner 变更后旧绑定失效需重绑（不可变 principal 纪律，§1.6.5 ⑤）。微调工厂入口见 §6.24（本域开关已由 @liang 显式开启，审计 AF-9K2）。</p>
+
+            <p class="h2p">最近调和动作 <span class="chip info">dangerous 行可点 → 审批详情</span></p>
+            <div class="timeline">
+              <div class="tl-item"><b>14:30</b> · <span class="chip warn">caution</span> 自动修复：<span class="mono">agent-2</span> 探针连续 3 次失败 → 退避后自动重启 → 复探通过 <span class="btn link" data-toast="退避序列 1s → 2s → 4s → 8s（连续 3 败后暂停本轮）· 复探 14:30:41 通过（演示）">退避细节</span></div>
+              <div class="tl-item fail"><b>14:22</b> · <span class="chip warn">caution</span> 检测到漂移：<span class="mono">默认域/code-review</span> 期望 3 healthy、实际 2 → 等待在途任务收敛 <span class="btn link" data-toast="不抢占在途：2 个 run 收敛后再补副本（渐进扩容避免冲击配额）（演示）">为何不动作</span></div>
+              <div class="tl-item"><b>13:58</b> · <span class="chip ok">safe</span> 拓扑安全检查通过：修复 <span class="mono">agent-2</span> 不会阻断下游 <span class="mono">agent-5</span> <span class="btn link" data-toast="拓扑下游：agent-2 → agent-5（汇总）· 暂停将令 agent-5 无上游，故先补备援再修（演示）">下游链</span></div>
+              <div class="tl-item fail" data-click data-drawer="dr-rec-danger"><b>13:41</b> · <span class="chip bad">dangerous</span> 异常数达 3 → 终止并替换 <span class="mono">agent-7</span> 转人工审批，未执行</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>三层树的展开状态、健康概要数值与队列内容为演示值；状态灯颜色对应真实 <span class="mono">--cp-status-*</span> 令牌。偏离处：真实系统在 <span class="mono">/probes</span> 限流被触发时会显示错误提示条，此处未画出。</p>
+
+
+
+
+
+<div class="drawer" id="dr-ag-sync"><header><b>Agent 速览 · 数据同步 Agent</b><span class="chip bad">failed</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>Agent ID / 名称</dt><dd class="mono">4 · 数据同步 Agent</dd><dt>归属</dt><dd>默认域 · python（多标签 Agent 会同时出现在多个组）</dd><dt>模型 / Provider</dt><dd class="mono">deepseek-v3 · deepseek</dd><dt>负载</dt><dd class="mono">1/2</dd><dt>探针</dt><dd><span class="chip bad">连续 2 败</span> · <span class="mono">connection refused</span></dd><dt>调和态</dt><dd><span class="chip warn">caution</span> · 退避中（1s→2s→4s→8s）· 连续 3 败暂停本轮</dd><dt>完整详情</dt><dd><a href="agent-detail.html">§6.4 Agent 详情（本页可点）</a></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">它承载的队列任务</p>
+<table class="tbl compact"><thead><tr><th>Task</th><th>标签</th><th>态</th></tr></thead><tbody>
+<tr><td class="mono">task-9</td><td class="mono">code-review</td><td><span class="chip">dequeued · 由 agent-4 执行中</span></td></tr>
+<tr><td class="mono">task-2</td><td class="mono">python</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td class="mono">task-2b</td><td class="mono">python</td><td><span class="chip warn">pending</span></td></tr>
+<tr><td class="mono">task-7</td><td class="mono">frontend</td><td><span class="chip warn">pending（标签不含 python，不派给它）</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="重启指令已下发 · 等下一轮复探通过才转 healthy（演示 · 状态灯不提前改）">重启</button> <span class="btn link" style="color:var(--red)" data-click data-modal="md-pause">停止自动修复</span></p></div></div>
+
+<div class="drawer" id="dr-task-3"><header><b>任务详情 · task-3</b><span class="chip warn">pending</span><span class="chip mono">优先级 200</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>Task ID</dt><dd class="mono">task-3（workflow instance <span class="mono">wi-2417</span>）</dd><dt>标签</dt><dd><span class="pill mono">code-review</span></dd><dt>优先级</dt><dd class="mono">200 · 队列最高（数值越大越先出队 · 同值 FIFO）</dd><dt>入队</dt><dd class="mono">14:31:02 · 已排 4m12s</dd><dt>状态</dt><dd><span class="chip warn">pending</span> · 未出队</dd><dt>匹配候选</dt><dd class="mono">3 · 可接 2（负载率 &lt; 1.0）</dd><dt>防饥饿</dt><dd class="mono">max_wait 300s · 已超 → 优先级已提升过一次</dd><dt>来源</dt><dd>人点名派发（对话中心 · 李工）→ 不过受理门（§6.0 ⑩）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">调度轨迹</p>
+<div class="timeline">
+  <div class="tl-item"><b>14:31:02</b> · 入队 · priority 200</div>
+  <div class="tl-item fail"><b>14:31:03</b> · 匹配 3 候选 · 备援负载 0.00 但 task-1 已占 · 标准 0.50 满载中 → 本轮不出队</div>
+  <div class="tl-item"><b>14:36:02</b> · <span class="chip info">防饥饿提升</span> 排队超 300s → 优先级 +10（重建堆项）</div>
+  <div class="tl-item"><b>14:36:05</b> · 第二次尝试：仍无可接候选 · 继续等待</div>
+</div>
+<p class="h2p" style="margin-top:var(--s4)">操作</p>
+<p><button class="btn sm primary" data-toast="已强制出队并指派 agent-2（备援 · 负载 0/2）（演示 · 审计 cp:task_assigned）">指派给备援</button> <button class="btn sm" data-toast="优先级已下调为 100（演示）">降优先级</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-cancel-task">取消任务</button></p>
+<div class="callout"><p class="tiny" style="margin:0"><b>取消 = 破坏性：</b>在途上下文与已发外部副作用不回滚，故二次确认 + 必填原因（§6.0 纪律）。</p></div></div></div>
+
+<div class="drawer" id="dr-task-1"><header><b>任务详情 · task-1</b><span class="chip info">assigned</span><span class="chip mono">优先级 100</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>Task ID</dt><dd class="mono">task-1 · <span class="mono">wi-2415</span></dd><dt>标签 / 目标</dt><dd><span class="pill mono">code-review</span> → <span class="mono">agent-1（审查 Agent · 标准）</span></dd><dt>状态</dt><dd><span class="chip info">assigned</span> · 已占该 Agent 1 个并发槽（2/4）</dd><dt>入队 / 出队</dt><dd class="mono">14:28:44 → 14:28:45（45ms 内中选）</dd><dt>路由依据</dt><dd>负载率 0.25 最低 · <span class="mono">Least Connection</span></dd><dt>决策记录</dt><dd class="mono">路由决策 0.71 ≥ 阈值 0.60 → 未升级 · 不 escalated</dd><dt>运行</dt><dd class="mono">run <span class="mono">r-128</span> · seq 到 14 · 无截断标记</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">执行片段（截取自转录）</p>
+<table class="tbl compact"><thead><tr><th>seq</th><th>类型</th><th>内容</th></tr></thead><tbody>
+<tr><td class="mono">11</td><td>tool</td><td class="mono tiny">read_file · .specs/agent-domains/REQUIREMENT.md → 2,822 B</td></tr>
+<tr><td class="mono">12</td><td>tool</td><td class="mono tiny">grep "domain_id" → 7 hits</td></tr>
+<tr><td class="mono">13</td><td>assistant</td><td class="tiny">发现外键删除行为未写 → 起草 F1 Minor</td></tr>
+<tr><td class="mono">14</td><td>wait</td><td><span class="chip warn">wait_reason: human_approval</span> · 写文件需 project:write</td></tr>
+<tr><td class="mono">—</td><td>计划 vs 实际</td><td class="tiny">计划并入 3 上下文 · 实际投喂 2（缺 CHANGE.md）</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="跳转 §6.22 执行回放 run r-128（演示）">回放</span> <button class="btn sm" data-toast="已代为批准该写文件动作（演示 · 审计 appr:approved）">批准写入</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-cancel-task">取消任务</button></p></div></div>
+
+<div class="drawer" id="dr-task-2"><header><b>任务详情 · task-2</b><span class="chip warn">pending</span><span class="chip mono">优先级 50</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>Task ID</dt><dd class="mono">task-2 · <span class="mono">wi-2409</span></dd><dt>标签</dt><dd><span class="pill mono">python</span></dd><dt>优先级</dt><dd class="mono">50 · 默认档（入队未显式指定）</dd><dt>入队 / 已排</dt><dd class="mono">14:25:10 · 6m04s</dd><dt>候选</dt><dd class="mono">2（python 组）· 可接 1 · 该候选 failed</dd><dt>阻塞因</dt><dd><span class="chip bad">标签内无健康 Agent</span> · 数据同步 Agent failed · 文档助手 idle 但缺 python 标签</dd><dt>提升</dt><dd class="mono">超 300s → 已 +10（60）</dd></dl>
+<div class="callout warn" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>与漂移同源：</b>把本任务从队列里挪走不解决问题——根因是 <span class="mono">python</span> 组少一个健康副本，正确动作是给该组扩容或修 <span class="mono">agent-4</span>。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已放宽标签匹配为 python∪未分类（演示 · 不推荐 · 会留审计标注）">放宽标签</button> <button class="btn sm primary" data-toast="已扩容 python 组 +1 副本（渐进 · 首个已起）（演示）">扩容解堵</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-cancel-task">取消任务</button></p></div></div>
+
+
+<div class="drawer" id="dr-task-9"><header><b>任务详情 · task-9</b><span class="chip">dequeued</span><span class="chip mono">优先级 10</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>Task ID</dt><dd class="mono">task-9 · <span class="mono">wi-2388</span></dd><dt>出队</dt><dd class="mono">14:02:15 入队 → 14:04:51 出队</dd><dt>目标</dt><dd class="mono">agent-4（数据同步 Agent）</dd><dt>执行</dt><dd><span class="chip warn">在途</span> · 已跑 31m · 探针 failed 但任务未中断</dd><dt>为何不抢占</dt><dd>调和等待在途收敛（caution 级不抢占），故 14:22 漂移只记录未动作</dd><dt>取消策略</dt><dd><span class="chip">运行中取消需二次确认</span> · 外部副作用不回滚</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">归因与用量</p>
+<table class="tbl compact"><tbody>
+<tr><td>tokens / USD</td><td class="mono">18,420 / ¥0.21</td></tr>
+<tr><td>工具调用</td><td class="mono">9 · 无截断标记</td></tr>
+<tr><td>上下文挂靠</td><td>工作项 wi-2388 + 对话 42（双挂靠 · §6.0 ⑪）</td></tr>
+<tr><td>取消人</td><td class="dim">—（未取消）</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已中断并回队（演示 · 审计 cp:task_requeued）">中断回队</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-cancel-task">取消任务</button></p></div></div>
+
+<div class="drawer" id="dr-rec-danger"><header><b>调和动作 · dangerous（13:41）</b><span class="chip bad">未执行 · 转人工</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>触发条件</dt><dd class="mono">异常数 ≥ 3（agent-4 failed · agent-7 dead · agent-2 连续 3 败）</dd><dt>判定</dt><dd><span class="chip bad">dangerous</span> · 不自动执行，人工闸门在服务端（落 <span class="mono">human_approvals</span> 阻塞等待）</dd><dt>拟执行动作</dt><dd>终止并替换 <span class="mono">agent-7</span></dd><dt>拓扑检查</dt><dd><span class="chip bad">不通过</span> · agent-7 是 <span class="mono">agent-5</span>（汇总）上游 → 直接替换会断链</dd><dt>快照</dt><dd class="mono">变更前快照已存（§1.6.5 ④）· snap-1207</dd><dt>退避</dt><dd class="mono">该实例本轮已暂停调和（连续 3 败）</dd><dt>通知</dt><dd>只 ping 域 owner 李工（§6.0 ⑫）· 未广播</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">审批单</p>
+<table class="tbl compact"><tbody>
+<tr><td>审批号</td><td class="mono">AP-118</td><td><span class="chip warn">等待中</span></td></tr>
+<tr><td>申请动作</td><td>终止 agent-7 → 替换为新副本</td><td><span class="chip bad">危险</span></td></tr>
+<tr><td>替代方案</td><td>先给 agent-5 补上游备援，再替换 agent-7</td><td><span class="chip ok">拓扑安全</span></td></tr>
+<tr><td>有效期</td><td class="mono">至 15:41（超时自动作废并重新评估）</td><td><span class="chip">deferred 调度行</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已批准替代方案：先补备援再替换（演示 · 审计 appr:approved）">批准替代方案</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-deny">驳回</button> <span class="btn link" data-toast="跳 §6.17 审批中心查看该审批（演示）">去审批中心</span></p></div></div>
+
+<div class="drawer" id="dr-probe-sum"><header><b>探针概要 · 最近一轮 17/18</b><span class="chip ok">探针正常</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>周期 / 窗口</dt><dd class="mono">每 60s 一轮 · 当前轮 14:35:10</dd><dt>端点解析</dt><dd>优先 <span class="mono">base_url + /health</span> → 回退显式 <span class="mono">health_url</span> → 皆无则不可探活</dd><dt>通过率</dt><dd><span class="chip ok">94%</span> 17/18（不可探活 1 个不计入分母）</dd><dt>限流</dt><dd class="mono">/probes 滑动窗口 · 进程内计数（多副本各自计数 · 已知限制）</dd><dt>凭据</dt><dd>API Key 输出一律 <span class="mono">sk-***</span></dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">本轮明细（11 个 Agent）</p>
+<table class="tbl compact"><thead><tr><th>Agent</th><th>结果</th><th>耗时</th><th>备注</th></tr></thead><tbody>
+<tr><td class="mono">agent-1 审查 · 标准</td><td><span class="chip ok">200</span></td><td class="mono">42ms</td><td class="tiny">基线</td></tr>
+<tr><td class="mono">agent-2 审查 · 备援</td><td><span class="chip ok">200</span></td><td class="mono">38ms</td><td class="tiny">14:30 重启后复探通过</td></tr>
+<tr><td class="mono">agent-3 审查 · 旧版</td><td><span class="chip bad">timeout</span></td><td class="mono">&gt;5000ms</td><td class="tiny">dead</td></tr>
+<tr><td class="mono">agent-4 数据同步</td><td><span class="chip bad">refused</span></td><td class="mono">—</td><td class="tiny">退避 8s 档</td></tr>
+<tr><td class="mono">agent-5 汇总</td><td><span class="chip ok">200</span></td><td class="mono">51ms</td><td class="tiny">依赖 agent-7 上游</td></tr>
+<tr><td class="mono">agent-6 生产主</td><td><span class="chip ok">200</span></td><td class="mono">44ms</td><td class="tiny">生产域</td></tr>
+<tr><td class="mono">agent-7 生产备</td><td><span class="chip bad">refused</span></td><td class="mono">—</td><td class="tiny">dangerous 审批中</td></tr>
+<tr><td class="mono">agent-8 前端</td><td><span class="chip ok">200</span></td><td class="mono">47ms</td><td class="tiny">—</td></tr>
+<tr><td class="mono">agent-9 测试 · 快</td><td><span class="chip ok">200</span></td><td class="mono">36ms</td><td class="tiny">—</td></tr>
+<tr><td class="mono">agent-10 测试 · 全量</td><td><span class="chip ok">200</span></td><td class="mono">55ms</td><td class="tiny">—</td></tr>
+<tr><td class="mono">agent-11 沙箱探针</td><td><span class="chip">不可探活</span></td><td class="mono">—</td><td class="tiny">无 base_url / health_url</td></tr>
+</tbody></table>
+<div class="callout bad" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>限流真实行为（本页未画出）：</b>高频轮询 <span class="mono">/probes</span> 触发滑动窗口限流时，界面顶部显示错误提示条并退避重试。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="✗ 429 · /probes 限流：请求过密，已退避 30s（演示 · 真实系统此处显示错误提示条）">模拟触发限流</button></p></div></div>
+
+<div class="modal" id="md-pause"><div style="padding:var(--s4)">
+<b>暂停调和循环（全部域 · 含 1 个未收敛漂移）？</b>
+<p class="small dim" style="margin:8px 0">暂停后系统<b>不再自动收敛任何漂移</b>，故障要靠人发现。<b>必填原因</b>（§6.0 纪律：破坏性操作二次确认 + 理由入审计）。</p>
+<p class="tiny" style="margin:0 0 4px"><b>影响清单</b></p>
+<table class="tbl compact"><tbody>
+<tr><td>未收敛漂移</td><td class="mono">1 · 默认域/code-review 期望 3 实际 2</td><td><span class="chip bad">保持不修</span></td></tr>
+<tr><td>dangerous 审批</td><td class="mono">AP-118 等待中</td><td><span class="chip warn">暂停不撤审批</span></td></tr>
+<tr><td>退避计时</td><td class="mono">agent-4 处于 8s 档</td><td><span class="chip">冻结</span></td></tr>
+<tr><td>在途任务</td><td class="mono">2</td><td><span class="chip info">继续跑 · 不被打断</span></td></tr>
+<tr><td>探针</td><td class="mono">60s 周期</td><td><span class="chip ok">继续（独立于调和）</span></td></tr>
+<tr><td>告警</td><td class="mono">3 未确认</td><td><span class="chip warn">仍产生 · 但无自愈兜底</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [正在做探针—调和联调，避免自愈干扰 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="调和循环已暂停 · 顶栏转红态 · 审计 reconcile:paused（演示）" data-close>确认暂停</button></div></div></div>
+
+<div class="modal" id="md-cancel-task"><div style="padding:var(--s4)">
+<b>取消队列任务 <span class="mono">task-3</span>？</b>
+<p class="small dim" style="margin:8px 0">该任务由人点名派发（李工），取消即丢弃其上下文投喂计划。必填原因。</p>
+<table class="tbl compact"><tbody>
+<tr><td>状态</td><td class="mono">pending · 未出队</td><td><span class="chip ok">无在途副作用</span></td></tr>
+<tr><td>计划并入上下文</td><td class="mono">3（工作项 + 对话 + 评论线程）</td><td><span class="chip warn">实际投喂 0</span></td></tr>
+<tr><td>关联运行</td><td class="mono">无</td><td><span class="chip ok">无 run 需终止</span></td></tr>
+<tr><td>提交人</td><td>@li.gong</td><td><span class="chip info">取消人署名入审计（§6.0 ⑪）</span></td></tr>
+<tr><td>通知</td><td>不广播</td><td><span class="chip">仅 ping 提交人</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [已改为在生产域手工执行          ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已从队列移除 task-3 · 审计 cp:task_cancelled · 取消人已署名（演示）" data-close>确认取消</button></div></div></div>
+
+<div class="modal" id="md-deny"><div style="padding:var(--s4)"><b>驳回审批 AP-118？</b><p class="small dim" style="margin:8px 0 4px">驳回后 agent-7 维持 dead 且不再自动处置，需另行决策。必填原因。</p><table class="tbl compact"><tbody>
+<tr><td>agent-7</td><td class="mono">生产备 · dead</td><td><span class="chip bad">保留现状</span></td></tr>
+<tr><td>agent-5 汇总</td><td class="mono">上游含 agent-7</td><td><span class="chip warn">断链风险仍在</span></td></tr>
+<tr><td>重评</td><td>下轮调和</td><td><span class="chip">作 deferred 调度行，不再发提醒</span></td></tr>
+</tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [先按替代方案补备援，再议替换    ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已驳回 AP-118 · 审计 appr:denied · 重评排入下轮（演示）" data-close>确认驳回</button></div></div></div>
+
+<div class="pop" id="pop-newdomain"><p class="tiny dim" style="margin:0 0 6px"><b>新建域 · 选起步形态</b>（建域 = 逻辑分组，不建能力组表；能力组由成员标签自动派生）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">空域</td><td>只建域，Agent 后续迁入</td><td><span class="btn link" data-toast="已建「空域 · 域 4」（未分类组暂空）（演示）">建</span></td></tr>
+<tr><td class="mono">从默认域复制策略</td><td>含决策绑定与阈值</td><td><span class="btn link" data-toast="已建并复制策略：路由决策=开 · 阈值 0.60 · 其余两开关保持关（两步制默认态）（演示）">建</span></td></tr>
+<tr><td class="mono">迁入指定 Agent</td><td>选成员，能力组自动重派生</td><td><span class="btn link" data-toast="已建并迁入 agent-9 / agent-10 · 派生 2 个能力组（演示）">建</span></td></tr>
+<tr><td class="mono">批量导入 YAML</td><td>域 + 归属一次声明</td><td><span class="btn link" data-toast="导入前会做归属冲突检查（多归属为预期，冲突仅指 owner 不一致）（演示）">导入</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0"><b>owner 纪律：</b>建号即定 owner；域 owner 变更后旧决策绑定失效需重绑（不可变 principal · §1.6.5 ⑤）。</p></div>
+
+<div class="pop" id="pop-queue"><p class="tiny dim" style="margin:0 0 6px"><b>队列筛选</b>（保存筛选 = 快照 + <span class="mono">?view=</span>，§6.0 ②）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">状态</td><td><span class="chip warn">pending 3</span> <span class="chip info">assigned 1</span> <span class="chip">dequeued 1</span></td><td><span class="btn link" data-toast="已筛 status=pending · 命中 3（演示）">筛</span></td></tr>
+<tr><td class="mono">标签</td><td class="mono">code-review 3 · python 1 · frontend 1</td><td><span class="btn link" data-toast="已筛 label=code-review · 命中 3（演示）">筛</span></td></tr>
+<tr><td class="mono">优先级 ≥</td><td class="mono">200 / 100 / 50 / 10</td><td><span class="btn link" data-toast="已筛 priority≥100 · 命中 2（演示）">筛</span></td></tr>
+<tr><td class="mono">目标 Agent</td><td class="mono">agent-1 · agent-4 · 未指派</td><td><span class="btn link" data-toast="已筛 未指派 · 命中 3（因无健康候选）（演示）">筛</span></td></tr>
+</tbody></table>
+<p style="margin:6px 0 0"><button class="btn sm" data-toast="视图已存为 v-31（队列 · pending + 无健康候选）（演示）">存为视图</button> <button class="btn sm" data-toast="队列视图已重置（演示）" data-close>重置</button></p></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：「域树视图 / Agent 列表」两个 tab → 内联 onclick 切换两个容器 display（真表格，不跳页）· Agent 列表表「详情」→ <span class="mono">agent-detail.html</span> · 顶栏「+ 新建 Agent」→ <span class="mono">agents__new.html</span> · 域树 l1 三行 → <b>域详情页</b>（control-plane__domain-*.html · Agent 列表 + 记忆时间线 + 编辑类操作，抽屉装不下）· l2 code-review 行 → <b>能力组详情页</b>（候选打分 + 排队根因）· 调度队列 task-7 → <b>任务详情页</b>（可选路径带操作链）· l3 failed 行 → Agent 速览抽屉（kv + 1 张子表 · 保留）· 队列其余 4 行 → 任务详情抽屉（kv + 1 张子表 · 保留）· 决策用途「开 / 关」三行 → toast（写明入审计 + 两步制默认关）· 顶栏「暂停调和」与危险动作 → 影响清单 + 必填原因二次确认 · dangerous 调和行 → 审批抽屉 · 「+ 新建域」与队列筛选 → pop · 探针正常 chip → 探针概要　按 Esc 关闭所有浮层。</p>
+<script>
+function showPv(k){
+  var t=document.getElementById('pv-tree'), a=document.getElementById('pv-agents');
+  if(t) t.style.display=(k==='tree')?'':'none';
+  if(a) a.style.display=(k==='agents')?'':'none';
+  var bt=document.getElementById('tab-tree'), ba=document.getElementById('tab-agents');
+  if(bt) bt.classList.toggle('active', k==='tree');
+  if(ba) ba.classList.toggle('active', k==='agents');
+}
+</script>
+</body></html>

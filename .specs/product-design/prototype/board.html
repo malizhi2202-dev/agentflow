@@ -1,0 +1,175 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工作项看板 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p20" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="workbench.html">工作台</span></div>
+<p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：补齐协作层最小集。<b>负责人可以是人或 Agent</b>，这是与 Multica 对齐的关键一列；状态采用四类生命周期（未开始 / 进行中 / 完成 / 关闭），并遵守「<b>状态标签不授予行为</b>」——进入「进行中」不等于自动启动 Agent。<b>2026-09-22 补（S7）：状态与「待受理」为两根正交轴——前者答「到哪一步」、后者答「这算不算活」，受理门只拦自动推导执行者的运行、不拦人点名派发（multica 483 迁移的显式反悔教训）；完成态建议按 §1.6.5 ③ 加「需证据 + 同伴复核」。</b><b>此界面尚不存在</b>。</p><p class="tiny dim" style="padding:0 4px">〔09-23 裁定⑦注〕告警属可计量追踪数据——P1-16 落表的表建在 <b>MySQL</b>（告警表+去重键+保留策略列），与 work_item 族同库；进程内环形 500 条形态退役。</p>
+<p class="tiny dim" style="padding:0 4px">〔第 4 轮 schema 注〕目标两组表+一次并表（P1-16 前置）：work_item 单表含 status×triage 双轴、assignee 人/Agent 双轨（owner_id 保持归属语义不动）、done 附证据；运行经 work_item_runs 连接表挂多上下文。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/work-items</span><span class="fake">规划原型</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="board.html" class="active"><svg class="icon"><use href="#i-branch"/></svg>工作项</a>
+          <a><svg class="icon"><use href="#i-inbox"/></svg>收件箱<span class="badge">3</span></a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">工作项 <span class="dim">· 项目：agentflow · 迭代 2026-W39</span></span><span class="right"><span class="pill mono" data-click data-pop="pp-view">视图：需我处理 · 负责人含 Agent ▾</span><button class="btn sm" data-click data-pop="pp-layout">看板 / 列表</button><button class="btn sm primary" data-click data-goto="board__work-item-new.html">+ 新建工作项</button></span></div>
+          <div class="app-body">
+            <div class="grid g4" style="align-items:start">
+              <div>
+                <p class="tiny dim" style="margin:0 0 6px"><b data-click data-drawer="dr-col-un">未开始</b> · 3<span class="chip info" style="height:16px" title="语义锚 unstarted">锚 unstarted</span> · <span class="btn link" data-toast="已按「到哪一步 = 未开始」筛列（演示）">筛此列</span></p>
+                <div class="card sm" data-click data-drawer="dr-wi-un"><p class="tiny"><span class="chip">AF-118</span> 知识库支持 .xlsx 白名单</p><p class="tiny dim"><span class="dot idle"></span> 未指派</p><p class="tiny dim"><span class="btn link" data-toast="AF-118 已标记为待受理（triage=untriaged→accepted）· 受理门只拦自动推导执行者的运行（演示）">受理</span><span class="btn link" data-click data-drawer="dr-wi-un">详情</span></p></div>
+                <div class="card sm" data-click data-drawer="dr-wi-un"><p class="tiny"><span class="chip">AF-121</span> 审计日志导出 CSV</p><p class="tiny dim"><span class="dot idle"></span> 未指派</p><p class="tiny dim"><span class="btn link" data-toast="AF-121 已指派给 Agent · doc-keeper（人点名派发不经过受理门）（演示）">点名派单</span></p></div>
+                <div class="card sm" data-click data-drawer="dr-wi-un"><p class="tiny"><span class="chip">AF-122</span> 编排画布支持框选</p><p class="tiny dim"><span class="dot idle"></span> 未指派</p><p class="tiny dim"><span class="btn link" data-click data-drawer="dr-wi-un">详情</span></p></div>
+              </div>
+              <div>
+                <p class="tiny dim" style="margin:0 0 6px"><b data-click data-drawer="dr-col-st">进行中</b> · 4<span class="chip info" style="height:16px">锚 started</span> · <span class="btn link" data-toast="本列只表达生命周期位置；进入本列不会启动任何 Agent（启动需显式运行请求）（演示）">为何没自动跑？</span></p>
+                <div class="card sm" data-click data-goto="board__af-109.html"><p class="tiny"><span class="chip">AF-109</span> 阶段模型可配置化</p><p class="tiny dim"><span class="dot running"></span> 负责人：<b>Agent · code-reviewer</b></p><p class="tiny dim"><span class="btn link" data-toast="AF-109：进行中 → 审核中（仅移动生命周期位置，不改运行）（演示）">流转 →</span><span class="btn link" data-toast="已停止本项在跑的 run-8839（不影响状态列 · 演示）">停止运行</span></p></div>
+                <div class="card sm" data-click data-drawer="dr-wi-human"><p class="tiny"><span class="chip">AF-112</span> 口令改 argon2</p><p class="tiny dim"><span class="dot running"></span> 负责人：<b>李工</b>（人）</p><p class="tiny dim"><span class="btn link" data-toast="AF-112：进行中 → 审核中（演示）">流转 →</span><span class="btn link" data-click data-goto="board__mark-done.html">完成</span></p></div>
+                <div class="card sm" data-click data-goto="board__af-109.html"><p class="tiny"><span class="chip">AF-115</span> 清理 node_modules 跟踪</p><p class="tiny dim"><span class="dot running"></span> 负责人：<b>Agent · repo-hygiene</b></p><p class="tiny dim"><span class="btn link" data-toast="AF-115：进行中 → 审核中（演示）">流转 →</span><span class="btn link" data-click data-goto="board__af-109.html">详情</span></p></div>
+                <div class="card sm" data-click data-goto="board__af-116.html"><p class="tiny"><span class="chip">AF-116</span> 修复 32 个 TS 错误</p><p class="tiny dim"><span class="dot blocked"></span> <span class="chip bad">受阻</span> 等待 AF-109 合入</p><p class="tiny dim"><span class="btn link" data-toast="AF-116：进行中 → 审核中（受阻不因流转自动清除；wait_reason 仍在）（演示）">流转 →</span><span class="btn link" data-toast="已解除阻塞并回到进行中 · 审计 wi:unblock（演示）">解除受阻</span></p></div>
+              </div>
+              <div>
+                <p class="tiny dim" style="margin:0 0 6px"><b data-click data-drawer="dr-col-st">审核中</b> · 2<span class="chip warn" style="height:16px">started 子态</span> · <span class="btn link" data-toast="审核中 = started + 等待人评审，不单设第五根锚（演示）">说明</span></p>
+                <div class="card sm" data-click data-drawer="dr-wi-review"><p class="tiny"><span class="chip">AF-104</span> 收件箱聚合规则</p><p class="tiny dim"><span class="dot running"></span> 负责人：<b>Agent · planner</b></p><p class="tiny dim">产物：<span class="mono">REVIEW.md</span> · <span class="chip warn">待验收</span></p><p class="tiny dim"><span class="btn link" data-click data-goto="board__mark-done.html">完成（需证据）</span><span class="btn link" data-toast="打回重做：审核中 → 进行中 · 已把评审意见作为运行请求入队（演示）">打回</span></p></div>
+                <div class="card sm" data-click data-drawer="dr-wi-human"><p class="tiny"><span class="chip">AF-107</span> 探针退避策略调整</p><p class="tiny dim"><span class="dot running"></span> 负责人：<b>王工</b>（人）</p><p class="tiny dim"><span class="btn link" data-toast="AF-107：进行中 → 审核中（演示）">流转 →</span><span class="btn link" data-click data-goto="board__mark-done.html">完成</span></p></div>
+              </div>
+              <div>
+                <p class="tiny dim" style="margin:0 0 6px"><b data-click data-drawer="dr-col-done">完成 / 关闭</b> · 5<span class="chip ok" style="height:16px">锚 done / closed</span> · <span class="btn link" data-toast="done 需证据 + 同伴复核（§1.6.5 ③）；closed 为「不再推进」，不计进度（演示）">终态规则</span></p>
+                <div class="card sm" data-click data-drawer="dr-wi-done"><p class="tiny"><span class="chip ok">AF-098</span> 能力分组三层树</p><p class="tiny dim"><span class="dot idle"></span> Agent · ui-builder · 已验收</p><p class="tiny dim"><span class="btn link" data-toast="证据面板：TEST.md §UAT-3 通过 + 2 张截图 · 复核人 王工（演示）">查看证据</span></p></div>
+                <div class="card sm" data-click data-drawer="dr-wi-done"><p class="tiny"><span class="chip ok">AF-101</span> 防饿死提权</p><p class="tiny dim"><span class="dot idle"></span> Agent · scheduler-eng · 已验收</p><p class="tiny dim"><span class="btn link" data-toast="证据面板：压测脚本 + 队列公平性曲线（演示）">查看证据</span></p></div>
+                <div class="card sm" data-click data-drawer="dr-wi-closed"><p class="tiny"><span class="chip">AF-095</span> 域删除回归默认域</p><p class="tiny dim"><span class="dot idle"></span> 已关闭（重复）</p><p class="tiny dim"><span class="btn link" data-toast="AF-095 的终态锚是 closed（不再推进），不计入进度分子（演示）">为何不算完成？</span></p></div>
+                <div class="card sm" data-click data-drawer="dr-arch"><p class="tiny dim">已归档 2 项…</p><p class="tiny dim"><span class="btn link" data-toast="归档≠删除：仍在 work_item 单表，仅不参与看板与派单池（演示）">归档说明</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-purge">清除归档</span></p></div>
+              </div>
+            </div>
+            <p class="tiny dim" style="margin-top:12px"><b>状态与行为解耦（沿用 Multica 的两条硬规矩）：</b>① 状态标签只表达语义，不授予行为；② 进入「进行中」<b>不是</b>启动 Agent 的指令——启动必须由显式的运行请求或触发规则产生。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+<div class="drawer" id="dr-wi-human"><header><b>工作项 · AF-112 口令改 argon2</b><span class="chip">进行中</span><span class="chip ok">负责人 = 人</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>标识 / 标题</dt><dd class="mono">AF-112 · 口令哈希改自适应（argon2）</dd><dt>status / triage</dt><dd><span class="chip">进行中</span> · <span class="chip ok">accepted</span></dd><dt>assignee</dt><dd><b>李工</b>（人 · user:1）· 人轨不消耗 token 预算</dd><dt>creator</dt><dd><span class="dot running"></span> Agent · security-review（自动推导执行者的那次派单<b>被受理门拦下</b>）</dd><dt>受理记录</dt><dd class="mono tiny">triage=untriaged 时自动派单被拒 → 李工 09-22 手工改为 accepted 并认领</dd><dt>优先级 / 标签</dt><dd><span class="chip bad">高</span> <span class="pill">P0-3</span> <span class="pill">认证</span></dd><dt>关联文档</dt><dd class="mono tiny">.specs/credential-scan/SCAN-REPORT.md · 改进方案 v10 P0-3（已过审）</dd><dt>门禁</dt><dd><span class="chip info">G3 人批</span> · 规则在<b>状态转换层</b>（动作者类型 × 目标状态），不只写在提示词</dd><dt>产物</dt><dd class="mono tiny">DESIGN.md ✓ · TASK.md ✓ · REVIEW.md ✗</dd><dt>done 证据</dt><dd><span class="chip warn">待补</span>：迁移后旧口令可登录性验证矩阵（含 3 项强度遗留）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">协作时间线</p>
+<div class="timeline"><p class="tl-item">09-23 10:05 李工 上传验证矩阵草稿（评论线程 · 非运行）</p><p class="tl-item">09-22 17:40 受理门拒单：creator 为 Agent、triage=untriaged → 不自动派单</p><p class="tl-item">09-22 16:02 王工 把工作项从「未开始」拖到「进行中」（<b>没有启动任何 Agent</b>）</p><p class="tl-item">09-20 11:11 security-review 自动创建工作项</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="AF-112：进行中 → 审核中（演示）">流转 → 审核中</button> <button class="btn sm primary" data-click data-goto="board__mark-done.html">完成（需证据）</button> <button class="btn sm" data-click data-goto="board__af-116.html">看一个 Agent 轨的项</button></p></div></div>
+
+<div class="drawer" id="dr-wi-review"><header><b>工作项 · AF-104 收件箱聚合规则</b><span class="chip">审核中</span><span class="chip warn">待验收</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>验收的是工作本身，不是一句「已完成」：</b>交付物 = 计划 / 文档 / 代码改动 / 测试结果 / <b>未解决问题清单</b>。缺一项则「完成」按钮给红注。</p></div>
+<dl class="kv"><dt>status / triage</dt><dd><span class="chip">审核中（started 子态）</span> · <span class="chip ok">accepted</span></dd><dt>assignee</dt><dd><span class="dot running"></span> Agent · planner</dd><dt>creator / 复核人</dt><dd class="mono tiny">李工 / 王工（同伴复核已指派）</dd><dt>产物 REVIEW.md</dt><dd class="mono">218 行 · 09-23 13:40 写入 · backup/ 4 版</dd><dt>测试</dt><dd><span class="chip ok">UAT 8/8 通过</span> · 见 TEST.md §聚合规则</dd><dt>未解决问题清单</dt><dd><span class="chip bad">缺</span> Agent 交付里为空，已打回一次</dd><dt>运行</dt><dd class="mono tiny">run-8811 · 成功 · 27.6k tok / $0.24</dd><dt>证据链</dt><dd class="mono tiny">run-8811 → REVIEW.md@wf-8 → TEST.md §UAT-8</dd></dl>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-click data-goto="board__mark-done.html">验收通过 → done</button> <button class="btn sm" data-toast="已打回：审核中 → 进行中，评审意见作为新的运行请求入队（演示）">打回重做</button> <button class="btn sm" data-toast="提高标准重做：验收准则追加「未解决问题清单必填」（演示）">提高标准</button></p></div></div>
+
+<div class="drawer" id="dr-wi-done"><header><b>工作项 · AF-098 能力分组三层树</b><span class="chip ok">完成 done</span><span class="chip">已附证据</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>status / triage</dt><dd><span class="chip ok">完成 done</span> · <span class="chip ok">accepted</span>（终态后 triage 锁为 not-needed）</dd><dt>assignee / creator</dt><dd><span class="dot idle"></span> Agent · ui-builder / user:2 王工</dd><dt>完成时间</dt><dd class="mono">09-20 16:20 · 李工（同伴复核人）</dd><dt>证据 · 测试</dt><dd class="mono tiny">TEST.md §UAT-3（12 断言全绿）· 压测 CSV 1 份</dd><dt>证据 · 产物</dt><dd class="mono tiny">DESIGN.md@v3 · REVIEW.md@wf-11 · 截图 2 张（附件池）</dd><dt>证据 · 运行</dt><dd class="mono tiny">run-8760（成功 · 33.1k tok）· run-8744（失败，保留以显式失败恢复过程）</dd><dt>门禁</dt><dd><span class="chip ok">G4 已过</span> 人工批准记录 auth:approval_granted</dd><dt>收件箱联动</dt><dd>进 done 后，本项旧的「运行失败」通知已<b>批量自愈归档</b>（§6.0 ⑫ 规则三）</dd><dt>回退路径</dt><dd>重开 = done → started，需理由入审计；旧证据保留为快照</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">验收清单</p>
+<table class="tbl compact"><thead><tr><th>项</th><th>状态</th><th>证据位置</th></tr></thead><tbody>
+<tr><td class="tiny">三层树渲染正确（域 / 分组 / 能力）</td><td><span class="chip ok">已验</span></td><td class="mono tiny">TEST.md §UAT-3.1</td></tr>
+<tr><td class="tiny">空域不误报</td><td><span class="chip ok">已验</span></td><td class="mono tiny">TEST.md §UAT-3.2</td></tr>
+<tr><td class="tiny">Domain 不是安全边界的文案已上界面</td><td><span class="chip ok">已验</span></td><td class="mono tiny">REVIEW.md@wf-11 第 4 条</td></tr>
+<tr><td class="tiny">多副本下的树一致性</td><td><span class="chip bad">已知不做</span></td><td class="tiny">记入未解决问题清单（P0-9 之后）</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已复制完成证据链接（演示 · 可分享视图 ?view=ev-98）">复制证据链接</button> <button class="btn sm" data-toast="重开为进行中需理由（演示）">重开</button></p></div></div>
+
+<div class="drawer" id="dr-wi-closed"><header><b>工作项 · AF-095 域删除回归默认域</b><span class="chip">已关闭（重复）</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>status / triage</dt><dd><span class="chip">关闭 closed</span> · <span class="chip">not-needed</span>（triage 与 status 正交：关闭≠完成）</dd><dt>关闭原因</dt><dd>与 AF-093 重复 · 理由入审计 <span class="mono tiny">wi:closed:duplicate</span></dd><dt>assignee / creator</dt><dd class="mono tiny">无 / user:1 李工</dd><dt>重复于</dt><dd class="mono tiny">AF-093（完成 done · 已附证据）</dd><dt>进度影响</dt><dd><span class="chip bad">不计入分子</span> · 分母也不计（closed 语义＝不再推进）</dd><dt>产物</dt><dd class="tiny dim">无（未进入任何阶段的产物要求）</dd><dt>重开</dt><dd>closed → unstarted 需理由；<b>closed 不会被任何自动规则写入</b></dd></dl>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="重开需要理由并入审计（演示）">重开</button> <button class="btn sm" data-toast="已合并到 AF-093（评论线程双向挂链 · 演示）">查看重复项</button></p></div></div>
+
+<div class="drawer" id="dr-wi-un"><header><b>工作项 · AF-118 知识库支持 .xlsx 白名单</b><span class="chip">未开始</span><span class="chip warn">待受理</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>status / triage</dt><dd><span class="chip">未开始 unstarted</span> · <span class="chip warn">untriaged 待受理</span>（<b>两轴独立</b>：未开始也可能已受理，已受理也可能未开始）</dd><dt>assignee</dt><dd><span class="dot idle"></span> 未指派（人 / Agent 双轨均为空）</dd><dt>creator</dt><dd class="mono tiny">user:2 王工</dd><dt>受理门效果</dt><dd>自动推导执行者的运行<b>被拦</b>；人点名派发的对话<b>放行</b>（multica 483 迁移的显式反悔教训）</dd><dt>优先级 / 标签</dt><dd><span class="chip">低</span> <span class="pill">知识库</span> <span class="pill">白名单</span></dd><dt>产物要求</dt><dd class="mono tiny">CHANGE.md（缺）→ REQUIREMENT.md（缺）</dd><dt>阶段位置</dt><dd class="mono tiny">锚 unstarted · 尚未进入 0-change</dd><dt>相似项</dt><dd class="mono tiny">AF-121（同属知识库白名单族，可合并）</dd></dl>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已受理（triage → accepted）· 仍不自动启动 Agent（演示）">受理</button> <button class="btn sm" data-pop="pp-assignee" data-click>点名派给… ▾</button> <button class="btn sm" data-toast="AF-118：未开始 → 进行中（只是位置变化，没有运行请求）（演示）">移到进行中</button> <button class="btn sm" style="color:var(--red)" data-click data-modal="md-close">关闭</button></p></div></div>
+
+
+
+<div class="drawer" id="dr-col-un"><header><b>列详情 · 未开始（锚 unstarted）</b><span class="chip">看板可见 3 · 含隐藏 6</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>语义</dt><dd>只表达「还没动」，<b>不授予任何行为</b></dd><dt>triage 分布</dt><dd class="mono tiny">untriaged 3 · accepted 0（本列三项均未受理）</dd><dt>负责人分布</dt><dd class="mono tiny">人 0 · Agent 0 · 未指派 3</dd><dt>在跑的运行</dt><dd class="mono tiny">0（有 1 项被点名派过单，但运行请求已撤回）</dd><dt>可批量操作</dt><dd>受理 / 改派 / 关闭（均不触发运行）</dd><dt>进度权重</dt><dd class="mono tiny">计入分母，不计分子</dd></dl>
+<table class="tbl compact"><thead><tr><th>项</th><th>triage</th><th>负责人</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-un">AF-118</td><td><span class="chip warn">待受理</span></td><td class="tiny dim">未指派</td><td><span class="btn link" data-toast="AF-118 已受理（演示）">受理</span><span class="btn link" data-pop="pp-assignee" data-click>派给…</span></td></tr>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-un">AF-121</td><td><span class="chip warn">待受理</span></td><td class="tiny dim">未指派</td><td><span class="btn link" data-toast="AF-121 已受理（演示）">受理</span><span class="btn link" data-pop="pp-assignee" data-click>派给…</span></td></tr>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-un">AF-122</td><td><span class="chip warn">待受理</span></td><td class="tiny dim">未指派</td><td><span class="btn link" data-toast="AF-122 已受理（演示）">受理</span><span class="btn link" data-pop="pp-assignee" data-click>派给…</span></td></tr>
+<tr><td class="mono tiny dim">AF-124</td><td><span class="chip ok">accepted</span></td><td><span class="dot running"></span> Agent · planner</td><td><span class="btn link" data-toast="AF-124：已受理但仍在「未开始」列——两轴正交的直观例证（演示）">为何没动？</span></td></tr>
+<tr><td class="mono tiny dim">AF-125</td><td><span class="chip warn">待受理</span></td><td class="tiny dim">未指派</td><td><span class="btn link" data-toast="AF-125 已受理（演示）">受理</span></td></tr>
+<tr><td class="mono tiny dim">AF-127</td><td><span class="chip">not-needed</span></td><td class="tiny dim">—</td><td><span class="btn link" data-toast="标记为不需处理（不动 status · 演示）">标为不算活</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">口径说明：看板列按<b>可见 3 项</b>计数；AF-124 / AF-125 / AF-127 是折叠在列尾溢出区的隐藏行，列表视图（顶栏「看板 / 列表」）可见全集 21 项。<b>隐藏不等于无</b>——受理态在两轴上照实显示。</p></div></div>
+
+<div class="drawer" id="dr-col-st"><header><b>列详情 · 进行中 / 审核中（锚 started）</b><span class="chip">4 + 2 项</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout warn"><p class="tiny" style="margin:0"><b>「进入进行中 ≠ 自动启动 Agent」：</b>启动只能由显式运行请求或触发规则产生。本列 4 项里只有 2 项真的在跑，另外 2 项是<b>人把卡片拖进来</b>的。</p></div>
+<dl class="kv"><dt>status</dt><dd class="mono tiny">started 4 · 审核中（started 子态）2</dd><dt>在跑运行</dt><dd class="mono tiny">2（run-8839、run-8844）· 排队 1 · 空闲 3</dd><dt>受阻</dt><dd class="mono tiny">1（AF-116 · wait_reason blocked_on:AF-109）</dd><dt>负责人分布</dt><dd class="mono tiny">Agent 3 · 人 2 · 未指派 1（审核中列允许无负责人）</dd><dt>triage 分布</dt><dd class="mono tiny">accepted 6 · not-needed 0</dd><dt>批量操作</dt><dd>仅「流转」「改派」「停止运行」，<b>无「一键全跑」</b>（避免把状态标签当指令）</dd></dl>
+<table class="tbl compact"><thead><tr><th>项</th><th>运行</th><th>负责人</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono tiny" data-click data-goto="board__af-109.html">AF-109</td><td><span class="dot running"></span> run-8839</td><td class="tiny">Agent · code-reviewer</td><td><span class="btn link" data-toast="跳转执行回放（演示）">回放</span></td></tr>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-human">AF-112</td><td><span class="dot idle"></span> 无运行</td><td class="tiny">李工（人）</td><td><span class="btn link" data-toast="已发起一次运行请求（人点名，不自动）（演示）">派单</span></td></tr>
+<tr><td class="mono tiny" data-click data-goto="board__af-109.html">AF-115</td><td><span class="dot running"></span> run-8844</td><td class="tiny">Agent · repo-hygiene</td><td><span class="btn link" data-toast="跳转执行回放（演示）">回放</span></td></tr>
+<tr><td class="mono tiny" data-click data-goto="board__af-116.html">AF-116</td><td><span class="dot dead"></span> run-8842 失败</td><td class="tiny">Agent · code-fixer</td><td><span class="btn link" data-toast="AF-116 受阻：等待 AF-109 合入 · 不自动重试（演示）">看受阻原因</span></td></tr>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-review">AF-104</td><td><span class="dot idle"></span> 无运行</td><td class="tiny">Agent · planner</td><td><span class="btn link" data-click data-goto="board__mark-done.html">验收</span></td></tr>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-human">AF-107</td><td><span class="dot idle"></span> 无运行</td><td class="tiny">王工（人）</td><td><span class="btn link" data-toast="AF-107：进行中 → 审核中（演示）">流转 →</span></td></tr>
+</tbody></table></div></div>
+
+<div class="drawer" id="dr-col-done"><header><b>列详情 · 完成 / 关闭（锚 done · closed）</b><span class="chip ok">5 项</span><span class="chip warn">+1 待验收</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>done 挂载阶段</dt><dd class="mono tiny">7-integration（见 6.19 阶段模型）</dd><dt>done 判定</dt><dd>进度 100% 且<b>证据齐</b>（缺证据时系统标「可疑完成」并推收件箱）</dd><dt>closed 判定</dt><dd>不再推进（重复 / 作废），需理由，不计进度</dd><dt>本列分布</dt><dd class="mono tiny">done 3（AF-098 · AF-101 附证据；AF-084 <span class="chip bad" style="height:16px">可疑完成</span>）· closed 2（AF-095 重复 · AF-090 作废）</dd><dt>同伴复核</dt><dd class="mono tiny">3/3 有复核人（§1.6.5 ③）</dd><dt>收件箱联动</dt><dd>进终态后旧「运行失败」通知自愈归档 7 条</dd></dl>
+<table class="tbl compact"><thead><tr><th>项</th><th>终态</th><th>证据</th><th>复核人</th></tr></thead><tbody>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-done">AF-098</td><td><span class="chip ok">done</span></td><td><span class="chip ok">齐</span></td><td class="tiny">李工</td></tr>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-done">AF-101</td><td><span class="chip ok">done</span></td><td><span class="chip ok">齐</span></td><td class="tiny">王工</td></tr>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-review">AF-104 <span class="tiny dim">（仍在「审核中」列，此处为待入列预览）</span></td><td><span class="chip warn">待验收</span></td><td><span class="chip warn">缺未解决清单</span></td><td class="tiny">王工</td></tr>
+<tr><td class="mono tiny" data-click data-drawer="dr-wi-closed">AF-095</td><td><span class="chip">closed 重复</span></td><td class="tiny dim">不适用</td><td class="tiny dim">—</td></tr>
+<tr><td class="mono tiny dim">AF-090</td><td><span class="chip">closed 作废</span></td><td class="tiny dim">不适用</td><td class="tiny dim">—</td></tr>
+<tr><td class="mono tiny dim">AF-084</td><td><span class="chip bad">可疑完成</span></td><td><span class="chip bad">无证据</span></td><td><span class="chip bad">无复核</span></td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已按「可疑完成」筛出 1 项（演示）">查可疑完成</button> <button class="btn sm" data-toast="导出本列 CSV（演示）">导出</button></p></div></div>
+
+<div class="drawer" id="dr-arch"><header><b>归档 · 2 项（不参与看板与派单池）</b><span class="chip">归档</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>归档语义</dt><dd>行仍在 work_item 单表，<b>不删数据</b>；不进看板、不进自动派单池</dd><dt>与 closed 的差别</dt><dd>closed 是终态锚（可出现在「完成/关闭」列）；归档是列表可见性开关</dd><dt>本组</dt><dd class="mono tiny">AF-076（旧版日志采集相关）· AF-071（已并入 AF-109）</dd><dt>保留策略</dt><dd class="mono tiny">归档 &gt; 180 天才允许物理清除（需二次确认）</dd><dt>审计</dt><dd class="mono tiny">wi:archived ×2 · 操作人 李工</dd></dl>
+<table class="tbl compact"><thead><tr><th>项</th><th>归档时间</th><th>原因</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono tiny">AF-076</td><td class="mono tiny">08-11</td><td class="tiny dim">功能下线</td><td><span class="btn link" data-toast="AF-076 已取消归档，回到「未开始」列（演示）">取消归档</span></td></tr>
+<tr><td class="mono tiny">AF-071</td><td class="mono tiny">07-30</td><td class="tiny dim">并入 AF-109</td><td><span class="btn link" data-toast="已跳转到合并目标 AF-109（演示）">看去向</span></td></tr>
+</tbody></table>
+<div class="callout warn" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>物理清除不可回滚</b>：无版本表，清掉就是清掉。建议永远停在归档。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已保留（演示）">保持归档</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-purge">清除归档</button></p></div></div>
+
+
+<div class="modal" id="md-close"><div style="padding:var(--s4)"><b>关闭 AF-116（closed，不是完成）？</b>
+<p class="small dim" style="margin:8px 0">closed＝不再推进：不计进度分子也不计分母，历史产物保留为快照，与 done 正交。<b>必填理由</b>；closed <b>不会被任何自动规则写入</b>。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">理由: [并入 AF-109 一起做，本项作废                ]   关联: duplicate-of AF-109</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已关闭（closed）· 在跑的 run-8842 未受影响，需另行停止 · 审计 wi:closed（演示）" data-close>确认关闭</button></div></div></div>
+
+
+
+<div class="modal" id="md-purge"><div style="padding:var(--s4)"><b style="color:var(--red)">物理清除 2 个归档工作项？</b><p class="small dim" style="margin:8px 0">不可回滚：work_item 行、评论线程、<span class="mono">work_item_runs</span> 关联一并删除；回放与审计里的引用变死链。归档已不足 180 天，<b>违反保留策略</b>，需管理员理由。</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">理由: [含误上传的凭据样本，需即刻清除（工单 SEC-31） ]   确认词: PURGE</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已清除 2 项 · 审计 wi:purged（含 SEC-31 引用）（演示）" data-close>确认清除</button></div></div></div>
+<div class="pop" id="pp-view"><p class="tiny muted" style="margin:2px 4px 6px">视图 = 筛选快照，URL 双向同步（§6.0 ②）</p>
+<table class="tbl compact"><tbody>
+<tr><td>需我处理</td><td class="tiny dim">creator/复核人=我 · triage=accepted</td><td><span class="chip ok">当前</span></td></tr>
+<tr><td>我创建的</td><td class="tiny dim mono">creator=user:1</td><td><span class="btn link" data-toast="视图已切换：我创建的 · 9 项（演示）">应用</span></td></tr>
+<tr><td>Agent 在跑的</td><td class="tiny dim mono">assignee.kind=agent · running</td><td><span class="btn link" data-toast="视图已切换：Agent 在跑 2 项（演示）">应用</span></td></tr>
+<tr><td>可疑完成（缺证据）</td><td class="tiny dim mono">status=done · evidence=null</td><td><span class="btn link" data-toast="视图已切换：1 项可疑完成（演示）">应用</span></td></tr>
+<tr><td>保存当前视图</td><td class="tiny dim mono">?view=v-3</td><td><span class="btn link" data-toast="视图已保存，链接可分享（演示）">保存</span></td></tr>
+</tbody></table></div>
+
+<div class="pop" id="pp-assignee"><p class="tiny muted" style="margin:2px 4px 6px">负责人：人 / Agent 双轨（同一列，两种轨）</p>
+<table class="tbl compact"><tbody>
+<tr><td><b>李工</b> user:1</td><td class="tiny dim">人轨 · 不消耗 token 预算</td><td><span class="btn link" data-toast="已派给 李工（人轨）· 仍需显式运行请求（演示）">指派</span></td></tr>
+<tr><td><b>王工</b> user:2</td><td class="tiny dim">人轨 · 可作 done 复核人</td><td><span class="btn link" data-toast="已派给 王工（演示）">指派</span></td></tr>
+<tr><td><span class="dot running"></span> <b>Agent · code-fixer</b></td><td class="tiny dim mono">可调用目标 ✓ · 域 默认域</td><td><span class="btn link" data-toast="已派给 Agent · code-fixer（人点名 → 过四道门，仍不自动跑）（演示）">指派</span></td></tr>
+<tr><td><span class="dot dead"></span> <b>Agent · repo-hygiene</b></td><td class="tiny dim" style="color:var(--red)">offline（心跳 &gt; 75s）</td><td><span class="btn link" data-toast="拒：目标离线 · 400「runtime offline」（§6.0 ④ 四道门之二，拒因原样给出不粉饰）">指派</span></td></tr>
+<tr><td class="tiny dim">无（取消指派）</td><td class="tiny dim">在跑的运行不受影响</td><td><span class="btn link" data-toast="已取消指派；run-8839 继续（演示）">取消</span></td></tr>
+</tbody></table></div>
+
+<div class="pop" id="pp-layout"><p class="tiny muted" style="margin:2px 4px 6px">布局与分组维</p>
+<table class="tbl compact"><tbody>
+<tr><td>看板（四列 = 语义锚）</td><td><span class="chip ok">当前</span></td><td><span class="btn link" data-toast="已是看板（演示）">—</span></td></tr>
+<tr><td>列表（含归档与隐藏行）</td><td class="tiny dim">全集 21 项</td><td><span class="btn link" data-toast="已切列表视图（演示）">切换</span></td></tr>
+<tr><td>按阶段分组</td><td class="tiny dim">读 6.19 目录表</td><td><span class="btn link" data-toast="已按阶段分组：9 组（演示）">切换</span></td></tr>
+<tr><td>自定义属性作分组维</td><td class="tiny dim">§6.0 ②</td><td><span class="btn link" data-toast="已按「域」分组（自定义属性 · 演示）">切换</span></td></tr>
+</tbody></table></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为<b>规划原型</b>（6.20 界面尚不存在）。四列生命周期、AF 编号与标题（AF-095 / 098 / 101 / 104 / 107 / 109 / 112 / 115 / 116 / 118 / 121 / 122）、负责人人-Agent 双轨、受阻理由「等待 AF-109 合入」、两条「状态与行为解耦」硬规矩逐条取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.20 与 §1.5.2 差距⑤；status×triage 正交、受理门只拦自动推导执行者的运行、done 附证据、creator 字段、<span class="mono">work_item_runs</span> 连接表取自 09-23 schema 钉死结论（P1-16 前置）。run id、token / USD、时间戳、验收清单与「已归档 2 项」的明细（AF-076 / AF-071）为编造。本页不存在任何自动启动逻辑：所有派单与运行请求都要显式点击，与「进入进行中 ≠ 自动启动 Agent」一致。</p>
+可点区演示（本轮交互重分级后）：AF-116 / AF-109 卡片与列内行 → <b>独立详情页</b> board__af-116（status×triage 两轴 · 运行表 · 时间线 · 流转与完成操作链）、board__af-109（Agent 轨 · 在跑运行 + 停止确认 + 指派 pop）·「+ 新建工作项」→ 整页表单 board__work-item-new ·「完成（需证据）」→ 整页表单 board__mark-done（5 个输入字段超出 modal 边界）· 其余工作项详情（AF-112 / AF-104 / AF-098 / AF-095 / AF-118）与列详情、归档仍是中等只读抽屉（kv + 至多一张子表）· 「关闭」/「停止运行」/「清除归档」→ 一屏读得完的二次确认 modal · 「视图」「看板 / 列表」「指派给…」→ 选择器 pop（≤8 项）·「流转」→ toast（写明不改运行）　按 Esc 关闭所有浮层。
+</body></html>

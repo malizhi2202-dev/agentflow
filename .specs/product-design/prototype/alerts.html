@@ -1,0 +1,105 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>告警中心 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="metrics.html">仪表盘</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<p class="proto-note"><span class="chip warn">演示数据</span>三类告警（Token 超限 / Agent 死亡 / 执行失败）+ 级别色标 + 确认操作。巡检周期 30 秒。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/alerts</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="spacer"></div>
+          <a data-goto="alerts.html" class="active" style="color:var(--red)"><svg class="icon"><use href="#i-bell"/></svg>告警 <span class="chip bad" style="height:16px;padding:0 5px">3</span></a>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">告警中心</span><span class="right"><span class="chip bad">3 条未确认</span><button class="btn sm" data-click data-modal="md-confirmall">全部确认</button></span></div>
+          <div class="app-body">
+            <div style="display:flex;gap:var(--s2);margin-bottom:var(--s3)">
+              <span class="pill" style="border-color:var(--blue-border);color:var(--blue)" data-click data-drawer="dr-alert-filter">全部 <b>3</b> ▾</span>
+              <span class="pill" data-click data-drawer="dr-alert-filter">token_exceeded <b>1</b></span><span class="pill" data-click data-drawer="dr-alert-filter">agent_dead <b>1</b></span><span class="pill" data-click data-drawer="dr-alert-filter">execution_failed <b>1</b></span>
+              <span style="flex:1"></span><span class="chip mono" data-click data-toast="巡检每 30 秒一次，故告警最多有 30 秒延迟——设计取舍，不是故障">巡检 · 30s</span>
+            </div>
+            <table class="tbl compact">
+              <thead><tr><th>级别</th><th>类型</th><th>目标</th><th>详情</th><th>触发时间</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr style="background:rgba(224,85,85,.05)"><td><span class="chip bad">critical</span></td><td class="mono">agent_dead</td><td class="mono">agent-7</td><td>探针连续 5 次失败，心跳丢失；已判定 dead</td><td class="mono">14:30:10</td><td><span class="chip bad">未确认</span></td><td><span class="btn link" data-click data-goto="alerts__agent-dead.html">详情</span><span class="btn link" data-toast="已确认 · 只标已读并清角标（3→2）· 根因需去管控面处理">确认</span><span class="btn link" data-click data-modal="md-silence">静默 24h</span><span class="btn link" data-toast="跳 §6.3 管控面三层树（演示）">去管控面</span></td></tr>
+                <tr style="background:rgba(224,85,85,.05)"><td><span class="chip bad">critical</span></td><td class="mono">execution_failed</td><td class="mono">rt-1-1783346200</td><td>会话以 error 结束，耗时 31.7s，Token 21,004</td><td class="mono">13:36:58</td><td><span class="chip bad">未确认</span></td><td><span class="btn link" data-click data-goto="alerts__exec-fail.html">详情</span><span class="btn link" data-toast="已确认 · 角标 2→1 · 失败根因（工具被禁用）仍在工具库">确认</span><span class="btn link" data-click data-modal="md-silence">静默 24h</span><span class="btn link" data-toast="跳 §6.10 失败会话详情（演示）">查看会话</span></td></tr>
+                <tr style="background:rgba(232,164,80,.05)"><td><span class="chip warn">warning</span></td><td class="mono">token_exceeded</td><td class="mono">agent-1</td><td>单会话 Token 21,004 超过软限 20,000</td><td class="mono">13:36:55</td><td><span class="chip bad">未确认</span></td><td><span class="btn link" data-click data-goto="alerts__token.html">详情</span><span class="btn link" data-toast="已确认 · 角标 1→0（导航红点消失）">确认</span><span class="btn link" data-click data-modal="md-silence">静默 24h</span><span class="btn link" data-toast="阈值在边配置 max_tokens 与域软限两处，改哪处需先定（演示）">调阈值</span></td></tr>
+                <tr><td><span class="chip">info</span></td><td class="mono">agent_dead</td><td class="mono">agent-2</td><td>探针 3 次失败 → 调和自动重启 → 已恢复</td><td class="mono">14:30:22</td><td><span class="chip ok">已确认</span></td><td><span class="btn link" data-click data-goto="alerts__selfheal.html">查看</span></td></tr>
+                <tr><td><span class="chip">info</span></td><td class="mono">token_exceeded</td><td class="mono">agent-3</td><td>单会话 Token 22,180 超过软限（备援 Agent）</td><td class="mono">昨天 18:22</td><td><span class="chip ok">已确认</span></td><td><span class="btn link" data-click data-goto="alerts__token.html">查看</span></td></tr>
+              </tbody>
+            </table>
+            <div class="grid g2" style="align-items:start">
+              <div class="callout warn" style="margin:0">
+                <p><b>延迟说明：</b>告警巡检每 <b>30 秒</b>运行一次，因此从事件发生到告警出现最多有 30 秒延迟。这是设计取舍，不是故障。</p>
+              </div>
+              <div class="callout" style="margin:0">
+                <p><b>确认 ≠ 修复：</b>「确认」只把告警标记为已读并清掉导航角标；根因仍需在管控面（探针 / 调和）或运行时监控中处理。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim"><b>演示数据说明：</b>三类告警名称与判定函数一一对应（<span class="mono">_check_token_exceeded</span> / <span class="mono">_check_agent_dead</span> / <span class="mono">_check_execution_failed</span>）。第 4 行演示「已被调和自愈」的告警，级别降为 info。</p>
+<div class="modal" id="md-silence"><div style="padding:var(--s4)"><b>静默该告警 24 小时？</b>
+<p class="small dim" style="margin:8px 0 6px">静默只压<b>通知与角标</b>：规则仍在跑，事件仍进环形缓冲，只是不再打扰。<b>这不是修复</b>，24h 后若仍触发会重新出现在列表。</p>
+<table class="tbl compact"><thead><tr><th>影响项</th><th>静默后</th></tr></thead><tbody>
+<tr><td>导航角标 / 未确认数</td><td>不计入（3→2）</td></tr>
+<tr><td>通知分层（§6.0 ⑫）</td><td>24h 内不再 ping 负责人</td></tr>
+<tr><td>同签名重复告警</td><td>仍记录「最近发生」，不新增行</td></tr>
+<tr><td>根因（工具禁用 / 探针失败）</td><td><span class="chip bad">不变 · 仍存在</span></td></tr>
+<tr><td>到期后</td><td>自动恢复可见，未确认状态回置</td></tr>
+</tbody></table>
+<p class="small" style="margin:8px 0 4px"><b>必填原因</b>（静默等同暂时压告警，须留痕）</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [已知问题 · 等 15:00 维护窗口处理 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已静默 24h 至明天 14:32 · 审计 alert:silence（演示）" data-close>确认静默 24h</button></div></div></div>
+<div class="modal" id="md-confirmall"><div style="padding:var(--s4)"><b>一次确认全部 3 条未确认告警？</b>
+<p class="small dim" style="margin:8px 0">批量确认会让「根因未处理」的三条一起从视野消失（角标 3→0）。列表含：</p>
+<table class="tbl compact"><thead><tr><th>类型</th><th>目标</th><th>级别</th><th>根因是否已处理</th></tr></thead><tbody>
+<tr><td class="mono">agent_dead</td><td class="mono">agent-7</td><td><span class="chip bad">critical</span></td><td><span class="chip bad">否 · 审批挂起</span></td></tr>
+<tr><td class="mono">execution_failed</td><td class="mono">rt-1-1783346200</td><td><span class="chip bad">critical</span></td><td><span class="chip bad">否 · 工具仍禁用</span></td></tr>
+<tr><td class="mono">token_exceeded</td><td class="mono">agent-1</td><td><span class="chip warn">warning</span></td><td><span class="chip warn">阈值待定</span></td></tr>
+</tbody></table>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消 · 逐条处理</button> <button class="btn sm primary" data-toast="已批量确认 3 条 · 角标清零 · 审计 alert:confirm_batch（演示）" data-close>确认全部</button></div></div></div>
+<div class="drawer" id="dr-alert-filter"><header><b>筛选 · 告警列表</b><span class="chip mono">类型 / 级别 / 状态 / 已存视图</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">按类型 / 级别 / 状态筛选</p>
+<table class="tbl compact"><thead><tr><th>alert_type</th><th>判定函数</th><th>级别色</th><th>数量</th></tr></thead><tbody>
+<tr><td class="mono">token_exceeded</td><td class="mono tiny">_check_token_exceeded</td><td><span class="chip warn">橙</span></td><td class="mono">2</td></tr>
+<tr><td class="mono">agent_dead</td><td class="mono tiny">_check_agent_dead</td><td><span class="chip bad">红</span></td><td class="mono">2</td></tr>
+<tr><td class="mono">execution_failed</td><td class="mono tiny">_check_execution_failed</td><td><span class="chip bad">红</span></td><td class="mono">1</td></tr>
+<tr><td class="mono">reconcile_stuck</td><td class="mono tiny">规划中 · 未实装</td><td><span class="chip">—</span></td><td class="mono">0</td></tr>
+</tbody></table>
+<p class="tiny muted" style="margin:8px 0 4px;text-transform:uppercase;letter-spacing:.05em">级别 / 确认状态</p>
+<table class="tbl compact"><tbody>
+<tr><td><span class="chip bad">critical</span></td><td class="mono">2</td><td><span class="btn link" data-toast="已按 critical 筛选（演示）">应用</span></td></tr>
+<tr><td><span class="chip warn">warning</span></td><td class="mono">1</td><td><span class="btn link" data-toast="已按 warning 筛选（演示）">应用</span></td></tr>
+<tr><td><span class="chip">info（含已自愈）</span></td><td class="mono">2</td><td><span class="btn link" data-toast="已按 info 筛选 · 自愈记录默认不占角标（演示）">应用</span></td></tr>
+<tr><td>未确认</td><td class="mono">3</td><td><span class="btn link" data-toast="已按「未确认」筛选（演示）">应用</span></td></tr>
+<tr><td>静默中</td><td class="mono">0</td><td><span class="btn link" data-toast="当前无静默条目（演示）">应用</span></td></tr>
+</tbody></table>
+<p class="tiny muted" style="margin:8px 0 4px;text-transform:uppercase;letter-spacing:.05em">已存视图（筛选快照可分享 · §6.0 ②）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">?view=p0-unacked</td><td class="tiny">critical + 未确认 + 近 1h</td><td><span class="btn link" data-toast="视图已应用（演示）">打开</span></td></tr>
+<tr><td class="mono">?view=agent7</td><td class="tiny">目标=agent-7 全类型</td><td><span class="btn link" data-toast="视图已应用（演示）">打开</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">重复告警由去重层压制；筛选只改变列表可见集，不改变确认与静默状态。</p></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：告警行「详情 / 查看」→告警详情独立页（4 类：规则 + 触发链 + 关联对象全宽重排 · 进程内环形 500 条重启即丢 · P1-16 落表红条 · 页内自带「静默 24h」二次确认）· 「确认」→toast（确认 ≠ 修复）· 「全部确认」与行内「静默 24h」→二次确认模态（影响清单 + 必填原因）· 类型/级别 pill→筛选抽屉（单击即应用）· 「巡检 · 30s」→延迟说明 toast　按 Esc 关闭所有浮层。</p>
+</body></html>

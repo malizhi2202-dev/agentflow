@@ -1,0 +1,62 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>产物 REQUIREMENT.md 编辑详情 · 产物文档编辑 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p18" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="projects.html">项目管理</span></div>
+<div class="detail-top"><span class="pill" data-back="artifacts.html" data-click>← 返回 产物文档编辑</span><span class="crumb"><b>agent-domains › REQUIREMENT.md（编辑态）</b></span><span class="chip warn">未保存 · 3 处改动</span><span class="chip bad">412 Precondition Failed</span></div>
+<div class="detail-body">
+<div class="callout"><p class="tiny" style="margin:0"><b>详情骨架（§6.0 ①）：</b>左 inspector 自动保存三态（保存中 / 已存 / <b>失败</b>）+ 右 <span class="mono">?view=</span> 分段；无权限走页内 Lock read-only，<b>不改 URL 不跳走</b>。本页（整页编辑态）自动保存当前为失败态，原因见下。</p></div>
+<div style="display:flex;gap:6px"><span class="pill" style="border-color:var(--blue-border);color:var(--blue)">编辑 · 预览</span><span class="pill" data-toast="切换分段：?view=versions（演示）">版本 (5)</span><span class="pill" data-toast="切换分段：?view=refs 引用方（演示）">引用 (3)</span><span class="pill" data-toast="切换分段：?view=audit 写入审计（演示）">写入审计</span></div>
+<dl class="kv" style="margin-top:var(--s3)"><dt>路径</dt><dd class="mono">.specs/agent-domains/REQUIREMENT.md（经 config.get_specs_dir() 解析）</dd><dt>类型 / 编码</dt><dd class="mono">text/markdown · UTF-8 · LF</dd><dt>行数 / 字节</dt><dd class="mono">65 行 · 2,822 B（磁盘态，真实值）</dd><dt>编辑器</dt><dd>CodeMirror 6 · Markdown 模式（本页以纯文本呈现）</dd><dt>脏状态</dt><dd><span class="chip warn">内存有 3 处未保存修改</span>（FR2 段落 + 验收条件 2 项）</dd><dt>客户端 If-Match</dt><dd class="mono">"wf-42"</dd><dt>服务端当前 ETag</dt><dd class="mono" style="color:var(--red)">"wf-45"（14:04 由 Agent run-8842 写入）</dd><dt>写入结果</dt><dd><span class="chip bad">412 Precondition Failed</span> 本次保存被拒，未产生任何写入</dd><dt>自动备份</dt><dd>关闭（仅保存成功才备份）· <span class="mono">backup/</span> 现有 5 版，满 5 挤掉最旧</dd><dt>阶段影响</dt><dd>产物变更后阶段与进度重算 · 扫描缓存 <b>5 秒</b>，立即刷新可能仍见旧阶段</dd><dt>挂载工作项</dt><dd class="mono">AF-116 修复 32 个 TS 错误（负责人 Agent · code-fixer · 运行 run-8842）</dd><dt>权限</dt><dd><span class="chip ok">{allowed: true}</span> · 角色 admin · 李工</dd></dl>
+<h4 class="blk">Markdown 预览（编辑态渲染，含未保存改动）</h4>
+<div class="panel tight"><p class="tiny" style="margin:0 0 4px"><b>agent-domains — 需求文档</b></p><p class="tiny dim" style="margin:0 0 6px">版本 1.1 · 状态 draft · 创建 2026-07-06</p><p class="tiny" style="margin:0 0 3px"><b>功能需求</b></p><p class="tiny" style="margin:0 0 3px">FR1 域 CRUD：创建域 name 必填、owner_id 默认当前用户；删除域将域内 Agent 的 <span class="mono">domain_id</span> 置 NULL（回归默认域）。</p><p class="tiny" style="margin:0 0 3px"><span style="background:var(--blue-bg)">FR2 Agent 归属域（本次改动）：</span>Agent 表新增 <span class="mono">domain_id</span>（可 NULL）+ <span class="mono">GET /api/agents?domain_id=X</span>；<b>新增</b>域成员分页上限 200。</p><p class="tiny" style="margin:0">验收条件：<span class="mono">[ ]</span> 域 CRUD 正常 · <span class="mono">[ ]</span> 删除后回归默认域 · <span class="mono">[ ]</span> TS 无新增编译错误 · <span class="mono">[x]</span> <span style="background:var(--blue-bg)">新增：域不是安全边界的文案已写进设置页</span></p></div>
+<h4 class="blk">版本列表（backup/ · 最近 5 版 + 当前内存态）</h4>
+<table class="tbl compact"><thead><tr><th>版本</th><th>时间</th><th>字节</th><th>作者</th><th>差异</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">当前（未保存）</td><td class="mono">14:26</td><td class="mono">2,918 B*</td><td>李工</td><td class="mono tiny">+3 段</td><td><span class="btn link" data-toast="差异视图已在右侧打开（演示）：与 wf-45 比较">对比</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-discard">丢弃修改</span></td></tr>
+<tr><td class="mono">wf-45</td><td class="mono">14:04</td><td class="mono">2,822 B</td><td><span class="dot running"></span> Agent · code-fixer</td><td class="mono tiny">+11 / -4</td><td><span class="btn link" data-toast="差异视图（演示）：Agent · code-fixer 追加了「域不是安全边界」一句">对比</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-rollback">回滚</span></td></tr>
+<tr><td class="mono">wf-44</td><td class="mono">09-22 18:10</td><td class="mono">2,610 B</td><td>李工</td><td class="mono tiny">+5 / -0</td><td><span class="btn link" data-toast="差异视图（演示）">对比</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-rollback">回滚</span></td></tr>
+<tr><td class="mono">wf-43</td><td class="mono">09-21 09:32</td><td class="mono">2,488 B</td><td>王工</td><td class="mono tiny">+18 / -22</td><td><span class="btn link" data-toast="差异视图（演示）">对比</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-rollback">回滚</span></td></tr>
+<tr><td class="mono">wf-42</td><td class="mono">09-18 16:05</td><td class="mono">2,301 B</td><td><span class="dot running"></span> Agent · planner</td><td class="mono tiny">+9 / -3</td><td><span class="chip warn" style="height:16px">我基于此版编辑</span><span class="btn link" data-toast="差异视图（演示）">对比</span></td></tr>
+<tr><td class="mono">wf-41</td><td class="mono">09-15 11:20</td><td class="mono">2,190 B</td><td>李工</td><td class="dim">—</td><td><span class="btn link" data-toast="差异视图（演示）">对比</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-rollback">回滚</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">* 当前字节为内存估计值，未落盘。<b>回滚=覆盖当前文件</b>，属破坏性操作，需二次确认并填理由入审计。</p>
+<h4 class="blk">写入时间线</h4>
+<div class="timeline"><p class="tl-item"><b>14:26 保存失败</b> · 412 · If-Match "wf-42" ≠ 服务端 "wf-45"（李工，客户端未刷新）</p><p class="tl-item">14:22 编辑开始 · 打开 REQUIREMENT.md · 取到 ETag "wf-42"（未再刷新）</p><p class="tl-item fail">14:04 服务端变更 · Agent · code-fixer（run-8842）写入 "wf-45"（+11 / -4）</p><p class="tl-item">13:58 读取产物清单 · 扫描器缓存刷新（5 秒 TTL）</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已写入 · 旧版已复制到 backup/（保留最近 5 版）· 阶段重算延迟 5s（演示）">保存</button> <button class="btn sm" data-click data-modal="md-412">查看 412 冲突</button> <button class="btn sm" data-toast="已重载服务端最新版 wf-45，我的改动留在草稿槽（§6.0 ⑦ 草稿是一等状态，互不覆盖）">重载最新版</button> <button class="btn sm" style="color:var(--red)" data-click data-modal="md-discard">丢弃修改</button></p>
+</div>
+<div class="modal" id="md-412"><div style="padding:var(--s4)"><b>412 Precondition Failed · 保存被拒</b>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin:8px 0">PUT /api/specs/file?path=agent-domains/REQUIREMENT.md
+If-Match: "wf-42"
+412 Precondition Failed
+  current_etag: "wf-45"
+  changed_by:   "agent:code-fixer"   changed_at: "14:04"
+  run:          "run-8842"（工作项 AF-116）</pre>
+<p class="small dim" style="margin:0 0 6px">你与 Agent 在 22 分钟内改了同一个产物。<b>现在什么都没写</b>——这是 §1.6 P2-5 第一批（ETag/If-Match→412）要换来的行为：治 <span class="mono">workflow.json</span> 式「PUT 盲覆盖」。三选一：</p>
+<table class="tbl compact"><tbody>
+<tr><td><b>合并后保存</b></td><td class="tiny dim">拉取 wf-45 三方合并，人工确认差异（推荐）</td></tr>
+<tr><td><b>重载最新版</b></td><td class="tiny dim">我的改动留在草稿槽，不丢（§6.0 ⑦）</td></tr>
+<tr><td><b style="color:var(--red)">强制覆盖</b></td><td class="tiny dim">丢弃 Agent 的 +11 / −4，需理由并入审计</td></tr>
+</tbody></table>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="已重载 wf-45 · 改动保留在草稿槽（演示）">重载最新版</button> <button class="btn sm primary" data-toast="三方合并已生成 · 请在编辑区逐处确认后保存（演示）">合并后保存</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-force">强制覆盖…</button></div></div></div>
+<div class="modal" id="md-force"><div style="padding:var(--s4)"><b style="color:var(--red)">强制覆盖 wf-45？</b>
+<p class="small dim" style="margin:8px 0">将丢弃 Agent run-8842 于 14:04 写入的 <span class="mono">+11 / −4</span>（「域不是安全边界」一句将被删除）。<b>必填理由</b>，随 <span class="mono">specs:force_overwrite</span> 入审计。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">理由: [Agent 误改，措辞与 §1.5.3 冲突 ]   影响产物: REQUIREMENT.md · wf-45 → wf-46</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已强制覆盖（演示）· 旧版已先备份到 backup/ · 审计 specs:force_overwrite 已记录" data-close>确认强制覆盖</button></div></div></div>
+<div class="modal" id="md-rollback"><div style="padding:var(--s4)"><b>回滚到备份快照 <span class="mono">wf-43</span>？</b>
+<ul class="small dim" style="margin:8px 0;padding-left:18px">
+<li>当前文件 <span class="mono">wf-45</span> 被 <span class="mono">wf-43</span> 内容覆盖（回滚前先自动备份，可再回滚）</li>
+<li>内存中 3 处<b>未保存</b>修改将<b>一并丢弃</b>，且无法恢复</li>
+<li>阶段判定与进度重算（扫描缓存 5 秒后生效），下游 <span class="mono">AF-116</span> 的产物清单刷新</li>
+<li>Agent run-8842 若正在引用该文件，其上下文不受影响（快照已固化），但<b>重跑会读到旧版</b></li>
+</ul>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">理由: [Agent 写入的段落与需求边界冲突，先回到人工版本 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已回滚 · 旧态入 backup/ · 审计 specs:rollback（演示）" data-close>确认回滚</button></div></div></div>
+<div class="modal" id="md-discard"><div style="padding:var(--s4)"><b style="color:var(--red)">丢弃 3 处未保存修改？</b>
+<p class="small dim" style="margin:8px 0">未落盘的改动不在 <span class="mono">backup/</span> 里，<b>丢弃后无法恢复</b>（草稿槽也一并清除）。建议改为「另存为草稿」。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">+11 行 / -4 行 · FR2 段落 · 验收条件 1 项 · 草稿槽 draft:agent-domains/REQUIREMENT.md</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="已存入草稿槽（§6.0 ⑦ 草稿是一等状态，互不覆盖）" data-close>另存为草稿</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已丢弃未保存修改 · 回到 wf-45（演示）" data-close>确认丢弃</button></div></div></div>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">本页由 artifacts.html 的 <span class="mono">dr-edit</span> 抽屉升格而来：脏状态 + 预览 + 6 条版本表（逐条回滚）+ 写入时间线 + 保存/重载/丢弃操作链，按纪律 C（可编辑 + ≥3 子块 + 版本回滚链）整页展示。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：保存 → toast · 查看 412 冲突 → modal（三选一，其中「强制覆盖」再走一次带理由确认）· 重载最新版 → toast（草稿槽互不覆盖）· 丢弃修改 / 版本表「回滚」→ 二次确认 modal · 顶部「← 返回 产物文档编辑」回编辑区。</p>
+</body></html>
