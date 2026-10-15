@@ -17,6 +17,7 @@
           <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
           <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
           <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
           <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
           <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
           <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
@@ -31,7 +32,7 @@
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">审计日志</span><span class="right"><span class="chip mono">audit.jsonl</span><button class="btn sm" data-toast="已导出 CSV（演示）：8 行 · 凭据字段已脱敏为 sk-*** · password_hash 整列剔除">导出 CSV</button><button class="btn sm" style="color:var(--red)" data-click data-modal="md-rotate">手动轮转归档</button></span></div>
+          <div class="app-top"><span class="crumb">审计日志</span><span class="right"><span class="chip mono">audit.jsonl</span><button class="btn sm" data-toast="已导出 CSV（演示）：8 行 · 敏感字段（env / MCP / PAT）恒掩码 · password_hash 整列剔除">导出 CSV</button><button class="btn sm" style="color:var(--red)" data-click data-modal="md-rotate">手动轮转归档</button></span></div>
           <div class="app-body">
             <div class="panel tight" style="display:flex;gap:var(--s2);align-items:center;margin-bottom:var(--s3);flex-wrap:wrap">
               <span class="pill mono" data-click data-pop="pp-range">近 7 天 ▾</span><span class="pill mono" data-click data-pop="pp-actor">全部用户 ▾</span><span class="pill mono" data-click data-pop="pp-action">全部操作类型 ▾</span>

@@ -5,7 +5,7 @@
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p3" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="isolation.html">执行隔离</span></div>
-<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>域 → 能力组 → Agent 实例三层树。注意 <span class="mono">Agent-A</span> 同时出现在 code-review 与 python 两个能力组中——这是「多层归属」的预期表现，不是重复渲染。</p>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>域 → 能力组 → Agent 实例三层树。注意 <span class="mono">Agent-A</span> 同时出现在 code-review 与 python 两个能力组中——这是「多层归属」的预期表现，不是重复渲染。根级另有「未分类」虚拟组（<span class="mono">domain_id=NULL</span>）：创建时不选域的 Agent 落此处。</p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/control-plane</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -17,6 +17,7 @@
           <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
           <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
           <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
           <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
           <a data-goto="control-plane.html" class="active"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
           <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
@@ -38,7 +39,7 @@
               <div class="stat"><div class="stat-label">探针通过率</div><div class="stat-value" style="color:var(--green)">94<span style="font-size:14px">%</span></div><div class="stat-sub">17/18 最近一轮</div></div>
               <div class="stat"><div class="stat-label">队列深度</div><div class="stat-value" style="color:var(--orange)">4</div><div class="stat-sub">最高优先级 200</div></div>
               <div class="stat"><div class="stat-label">调和漂移</div><div class="stat-value" style="color:var(--orange)">1</div><div class="stat-sub">caution · 等待收敛</div></div>
-              <div class="stat"><div class="stat-label">Agent 总数</div><div class="stat-value">11</div><div class="stat-sub">9 healthy / 2 异常</div></div>
+              <div class="stat"><div class="stat-label">Agent 总数</div><div class="stat-value">13</div><div class="stat-sub">9 healthy / 2 异常 · 2 未归类待归位</div></div>
             </div>
 
             <div class="tabs"><span class="tab active" id="tab-tree" data-click onclick="showPv('tree')">域树视图</span><span class="tab" id="tab-agents" data-click onclick="showPv('agents')">Agent 列表</span><span class="tab" data-toast="已滚到调度队列区（本页四块内容同屏呈现 · 演示）">调度队列</span><span class="tab" data-toast="已滚到调和记录区（演示）">调和记录</span></div>
@@ -47,18 +48,22 @@
               <div class="tree">
                 <div class="tree-row l1" data-click data-goto="control-plane__domain-default.html"><span class="caret">▼</span><svg class="icon" style="color:var(--blue)"><use href="#i-folder"/></svg><span class="name">默认域</span><span class="chip mono">5 个 Agent</span><span class="chip ok">4 healthy / 5</span></div>
                 <div class="tree-row l2" data-click data-goto="control-plane__group-code-review.html"><span class="caret">▼</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">code-review</span><span class="chip mono">3 个</span><span class="chip ok">2 healthy / 3</span></div>
-                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 标准（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 标准</span><span class="chip mono">gpt-4o</span><span class="chip mono">gpt</span></div>
-                <div class="tree-row l3"><span class="caret">·</span><span class="dot idle"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 备援（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 备援</span><span class="chip mono">claude-sonnet</span><span class="chip mono">standby</span></div>
-                <div class="tree-row l3"><span class="caret">·</span><span class="dot dead"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 旧版（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 旧版</span><span class="chip mono">gpt-3.5</span><span class="chip bad">dead</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 标准（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 标准</span><span class="chip mono">dsh · deepseek-official/deepseek-chat</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot idle"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 备援（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 备援</span><span class="chip mono">codex · gpt-5-codex</span><span class="chip mono">standby</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot dead"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 旧版（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 旧版</span><span class="chip mono">claude · claude-sonnet-4.5</span><span class="chip bad">dead</span></div>
                 <div class="tree-row l2" data-toast="能力组 python：2 个成员 · 1 healthy · 组不建表，由 capabilities 派生（演示）"><span class="caret">▼</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">python</span><span class="chip mono">2 个</span><span class="chip ok">1 healthy / 2</span></div>
-                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 标准（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 标准</span><span class="chip mono">gpt-4o</span><span class="chip info">同时属于 code-review</span></div>
-                <div class="tree-row l3" data-click data-drawer="dr-ag-sync"><span class="caret">·</span><span class="dot failed"></span><span class="name">数据同步 Agent</span><span class="chip mono">deepseek-v3</span><span class="chip bad">failed</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 标准（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 标准</span><span class="chip mono">dsh · deepseek-official/deepseek-chat</span><span class="chip info">同时属于 code-review</span></div>
+                <div class="tree-row l3" data-click data-drawer="dr-ag-sync"><span class="caret">·</span><span class="dot failed"></span><span class="name">数据同步 Agent</span><span class="chip mono">mcode · <span class="dim">由运行时托管</span></span><span class="chip bad">failed</span></div>
                 <div class="tree-row l2" data-toast="未分类：无 capability 的 Agent 落在此组（1 个 · 1 healthy）（演示）"><span class="caret">▶</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">未分类</span><span class="chip mono">1 个</span><span class="chip ok">1 healthy / 1</span></div>
                 <div class="tree-row l1" data-click data-goto="control-plane__domain-prod.html"><span class="caret">▼</span><svg class="icon" style="color:var(--purple)"><use href="#i-folder"/></svg><span class="name">生产域</span><span class="chip mono">3 个 Agent</span><span class="chip ok">3 healthy / 3</span></div>
                 <div class="tree-row l2" data-toast="生产域 / code-review：2 个 · 2 healthy · 与默认域同名组但互不可见（域隔离）（演示）"><span class="caret">▶</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">code-review</span><span class="chip mono">2 个</span><span class="chip ok">2 healthy / 2</span></div>
                 <div class="tree-row l2" data-toast="生产域 / frontend：1 个 · 1 healthy（演示）"><span class="caret">▶</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">frontend</span><span class="chip mono">1 个</span><span class="chip ok">1 healthy / 1</span></div>
                 <div class="tree-row l1" data-click data-goto="control-plane__domain-test.html"><span class="caret">▶</span><svg class="icon" style="color:var(--orange)"><use href="#i-folder"/></svg><span class="name">测试域</span><span class="chip mono">3 个 Agent</span><span class="chip warn">2 healthy / 3</span></div>
+                <div class="tree-row l1" data-toast="未分类：domain_id=NULL 的 Agent 虚拟组（不建表 · 2 个待归位）· 创建时不选域即落此处，可事后「归入域」（演示）"><span class="caret">▼</span><svg class="icon" style="color:var(--text-muted)"><use href="#i-folder"/></svg><span class="name">未分类</span><span class="chip info mono">domain_id=NULL</span><span class="chip mono">2 个 Agent</span></div>
+                <div class="tree-row l2"><span class="caret">·</span><span class="dot running"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 汇总 Agent · 试验（见 agent-detail.html）（演示）">汇总 Agent · 试验</span><span class="chip info">新建 · 未归属</span><span class="chip mono">dsh · deepseek-official/deepseek-chat</span><button class="btn sm" data-click data-pop="pop-assigndom">归入域 ▾</button></div>
+                <div class="tree-row l2"><span class="caret">·</span><span class="dot idle"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 数据同步 Agent · 备援（见 agent-detail.html）（演示）">数据同步 Agent · 备援</span><span class="chip warn">待归位</span><span class="chip mono">codex · gpt-5-mini-codex</span><button class="btn sm" data-click data-pop="pop-assigndom">归入域 ▾</button></div>
               </div>
+              <p class="tiny dim" style="padding:8px 12px;margin:0;border-top:1px solid var(--border)">「未分类」为 <span class="mono">domain_id=NULL</span> 虚拟组：创建时不选域即落此处，可「归入域」事后指定；自动路由按能力标签，域仅为分组 / 共享记忆边界（<b>非安全边界</b>）；删除域其 Agent 回落未分类。</p>
             </div>
 
             <div class="panel" id="pv-agents" style="display:none">
@@ -66,12 +71,14 @@
               <table class="tbl compact">
                 <thead><tr><th>名称</th><th>域</th><th>能力组</th><th>运行时 + 模型</th><th>可用性</th><th>负载</th><th>操作</th></tr></thead>
                 <tbody>
-                  <tr><td><b>审查 Agent · 标准</b></td><td>默认域</td><td><span class="pill mono">code-review</span> <span class="pill mono">python</span></td><td class="mono">LangGraph · gpt-4o</td><td><span class="chip ok">online</span></td><td><span class="chip info">working</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
-                  <tr><td><b>审查 Agent · 备援</b></td><td>默认域</td><td><span class="pill mono">code-review</span></td><td class="mono">LangChain · claude-sonnet</td><td><span class="chip ok">online</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
-                  <tr><td><b>审查 Agent · 旧版</b></td><td>默认域</td><td><span class="pill mono">code-review</span></td><td class="mono">LangGraph · gpt-3.5</td><td><span class="chip bad">offline</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
-                  <tr><td><b>数据同步 Agent</b></td><td>默认域</td><td><span class="pill mono">python</span></td><td class="mono">CrewAI · deepseek-v3</td><td><span class="chip warn">unstable</span></td><td><span class="chip info">working</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
-                  <tr><td><b>前端 Agent</b></td><td>生产域</td><td><span class="pill mono">frontend</span></td><td class="mono">AutoGen · claude-sonnet</td><td><span class="chip ok">online</span></td><td><span class="chip warn">queued</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
-                  <tr><td><b>汇总 Agent</b></td><td>生产域</td><td><span class="pill mono">—</span></td><td class="mono">LangGraph · gpt-4o-mini</td><td><span class="chip ok">online</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>审查 Agent · 标准</b></td><td>默认域</td><td><span class="pill mono">code-review</span> <span class="pill mono">python</span></td><td class="mono">dsh · deepseek-official/deepseek-chat</td><td><span class="chip ok">online</span></td><td><span class="chip info">working</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>审查 Agent · 备援</b></td><td>默认域</td><td><span class="pill mono">code-review</span></td><td class="mono">codex · gpt-5-codex</td><td><span class="chip ok">online</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>审查 Agent · 旧版</b></td><td>默认域</td><td><span class="pill mono">code-review</span></td><td class="mono">claude · claude-sonnet-4.5</td><td><span class="chip bad">offline</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>数据同步 Agent</b></td><td>默认域</td><td><span class="pill mono">python</span></td><td class="mono">mcode · <span class="dim">由运行时托管</span></td><td><span class="chip warn">unstable</span></td><td><span class="chip info">working</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>前端 Agent</b></td><td>生产域</td><td><span class="pill mono">frontend</span></td><td class="mono">claude · claude-opus-4.5</td><td><span class="chip ok">online</span></td><td><span class="chip warn">queued</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>汇总 Agent</b></td><td>生产域</td><td><span class="pill mono">—</span></td><td class="mono">qwen · qwen3-coder-plus</td><td><span class="chip ok">online</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span></td></tr>
+                  <tr><td><b>汇总 Agent · 试验</b></td><td><span class="chip info">未分类</span></td><td><span class="pill mono">—</span></td><td class="mono">dsh · deepseek-official/deepseek-chat</td><td><span class="chip ok">online</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span> <span class="btn link" data-click data-pop="pop-assigndom">归入域 ▾</span></td></tr>
+                  <tr><td><b>数据同步 Agent · 备援</b></td><td><span class="chip warn">未分类 · 待归位</span></td><td><span class="pill mono">python</span></td><td class="mono">codex · gpt-5-mini-codex</td><td><span class="chip ok">online</span></td><td><span class="chip">idle</span></td><td><span class="btn link" data-goto="agent-detail.html">详情</span> <span class="btn link" data-click data-pop="pop-assigndom">归入域 ▾</span></td></tr>
                 </tbody>
               </table>
             </div>
@@ -117,7 +124,7 @@
 
 
 <div class="drawer" id="dr-ag-sync"><header><b>Agent 速览 · 数据同步 Agent</b><span class="chip bad">failed</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
-<dl class="kv"><dt>Agent ID / 名称</dt><dd class="mono">4 · 数据同步 Agent</dd><dt>归属</dt><dd>默认域 · python（多标签 Agent 会同时出现在多个组）</dd><dt>模型 / Provider</dt><dd class="mono">deepseek-v3 · deepseek</dd><dt>负载</dt><dd class="mono">1/2</dd><dt>探针</dt><dd><span class="chip bad">连续 2 败</span> · <span class="mono">connection refused</span></dd><dt>调和态</dt><dd><span class="chip warn">caution</span> · 退避中（1s→2s→4s→8s）· 连续 3 败暂停本轮</dd><dt>完整详情</dt><dd><a href="agent-detail.html">§6.4 Agent 详情（本页可点）</a></dd></dl>
+<dl class="kv"><dt>Agent ID / 名称</dt><dd class="mono">4 · 数据同步 Agent</dd><dt>归属</dt><dd>默认域 · python（多标签 Agent 会同时出现在多个组）</dd><dt>运行时 + 模型</dt><dd><span class="mono">mcode · </span><span class="mono dim">由运行时托管</span> <span class="tiny dim">该运行时不提供模型目录 · 选择器失效 · 无会话续跑</span></dd><dt>负载</dt><dd class="mono">1/2</dd><dt>探针</dt><dd><span class="chip bad">连续 2 败</span> · <span class="mono">connection refused</span></dd><dt>调和态</dt><dd><span class="chip warn">caution</span> · 退避中（1s→2s→4s→8s）· 连续 3 败暂停本轮</dd><dt>完整详情</dt><dd><a href="agent-detail.html">§6.4 Agent 详情（本页可点）</a></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">它承载的队列任务</p>
 <table class="tbl compact"><thead><tr><th>Task</th><th>标签</th><th>态</th></tr></thead><tbody>
 <tr><td class="mono">task-9</td><td class="mono">code-review</td><td><span class="chip">dequeued · 由 agent-4 执行中</span></td></tr>
@@ -181,7 +188,7 @@
 <p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已批准替代方案：先补备援再替换（演示 · 审计 appr:approved）">批准替代方案</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-deny">驳回</button> <span class="btn link" data-toast="跳 §6.17 审批中心查看该审批（演示）">去审批中心</span></p></div></div>
 
 <div class="drawer" id="dr-probe-sum"><header><b>探针概要 · 最近一轮 17/18</b><span class="chip ok">探针正常</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
-<dl class="kv"><dt>周期 / 窗口</dt><dd class="mono">每 60s 一轮 · 当前轮 14:35:10</dd><dt>端点解析</dt><dd>优先 <span class="mono">base_url + /health</span> → 回退显式 <span class="mono">health_url</span> → 皆无则不可探活</dd><dt>通过率</dt><dd><span class="chip ok">94%</span> 17/18（不可探活 1 个不计入分母）</dd><dt>限流</dt><dd class="mono">/probes 滑动窗口 · 进程内计数（多副本各自计数 · 已知限制）</dd><dt>凭据</dt><dd>API Key 输出一律 <span class="mono">sk-***</span></dd></dl>
+<dl class="kv"><dt>周期 / 窗口</dt><dd class="mono">每 60s 一轮 · 当前轮 14:35:10</dd><dt>端点解析</dt><dd>优先 <span class="mono">base_url + /health</span> → 回退显式 <span class="mono">health_url</span> → 皆无则不可探活</dd><dt>通过率</dt><dd><span class="chip ok">94%</span> 17/18（不可探活 1 个不计入分母）</dd><dt>限流</dt><dd class="mono">/probes 滑动窗口 · 进程内计数（多副本各自计数 · 已知限制）</dd><dt>凭据</dt><dd>敏感值（env / MCP 令牌）输出一律掩码 <span class="mono">***</span></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">本轮明细（11 个 Agent）</p>
 <table class="tbl compact"><thead><tr><th>Agent</th><th>结果</th><th>耗时</th><th>备注</th></tr></thead><tbody>
 <tr><td class="mono">agent-1 审查 · 标准</td><td><span class="chip ok">200</span></td><td class="mono">42ms</td><td class="tiny">基线</td></tr>
@@ -250,8 +257,15 @@
 <tr><td class="mono">目标 Agent</td><td class="mono">agent-1 · agent-4 · 未指派</td><td><span class="btn link" data-toast="已筛 未指派 · 命中 3（因无健康候选）（演示）">筛</span></td></tr>
 </tbody></table>
 <p style="margin:6px 0 0"><button class="btn sm" data-toast="视图已存为 v-31（队列 · pending + 无健康候选）（演示）">存为视图</button> <button class="btn sm" data-toast="队列视图已重置（演示）" data-close>重置</button></p></div>
+<div class="pop" id="pop-assigndom"><p class="tiny dim" style="margin:0 0 6px"><b>归入域 · 为未分类 Agent 指定归属</b>（只改 <span class="mono">domain_id</span> · 不动能力标签 · 共享记忆边界随域变化）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">默认域</td><td>5 个 · 4 healthy</td><td><span class="btn link" data-toast="已将该 Agent 归入默认域 · domain_id=NULL → 1 · 审计 agent:domain_assigned（演示）">归入</span></td></tr>
+<tr><td class="mono">生产域</td><td>3 个 · 3 healthy</td><td><span class="btn link" data-toast="已将该 Agent 归入生产域 · domain_id=NULL → 2（演示 · 自动路由仍按能力标签）">归入</span></td></tr>
+<tr><td class="mono">测试域</td><td>3 个 · 2 healthy</td><td><span class="btn link" data-toast="已将该 Agent 归入测试域 · domain_id=NULL → 3（演示）">归入</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">域只是逻辑分组与共享记忆边界，<b>非安全边界</b>；删除域时其 Agent 自动回落未分类（外键 <span class="mono">SET NULL</span>），不级联删除。</p></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：「域树视图 / Agent 列表」两个 tab → 内联 onclick 切换两个容器 display（真表格，不跳页）· Agent 列表表「详情」→ <span class="mono">agent-detail.html</span> · 顶栏「+ 新建 Agent」→ <span class="mono">agents__new.html</span> · 域树 l1 三行 → <b>域详情页</b>（control-plane__domain-*.html · Agent 列表 + 记忆时间线 + 编辑类操作，抽屉装不下）· l2 code-review 行 → <b>能力组详情页</b>（候选打分 + 排队根因）· 调度队列 task-7 → <b>任务详情页</b>（可选路径带操作链）· l3 failed 行 → Agent 速览抽屉（kv + 1 张子表 · 保留）· 队列其余 4 行 → 任务详情抽屉（kv + 1 张子表 · 保留）· 决策用途「开 / 关」三行 → toast（写明入审计 + 两步制默认关）· 顶栏「暂停调和」与危险动作 → 影响清单 + 必填原因二次确认 · dangerous 调和行 → 审批抽屉 · 「+ 新建域」与队列筛选 → pop · 探针正常 chip → 探针概要　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：「域树视图 / Agent 列表」两个 tab → 内联 onclick 切换两个容器 display（真表格，不跳页）· Agent 列表表「详情」→ <span class="mono">agent-detail.html</span> · 顶栏「+ 新建 Agent」→ <span class="mono">agents__new.html</span> · 域树 l1 三行 → <b>域详情页</b>（control-plane__domain-*.html · Agent 列表 + 记忆时间线 + 编辑类操作，抽屉装不下）· l2 code-review 行 → <b>能力组详情页</b>（候选打分 + 排队根因）· 根级「未分类」l1 行 → toast（domain_id=NULL 虚拟组说明）· 其下 2 条 l2 Agent 行与平铺表「归入域 ▾」→ <b>归入域 pop</b>（选目标域 toast · 只改 domain_id 不动能力标签）· 调度队列 task-7 → <b>任务详情页</b>（可选路径带操作链）· l3 failed 行 → Agent 速览抽屉（kv + 1 张子表 · 保留）· 队列其余 4 行 → 任务详情抽屉（kv + 1 张子表 · 保留）· 决策用途「开 / 关」三行 → toast（写明入审计 + 两步制默认关）· 顶栏「暂停调和」与危险动作 → 影响清单 + 必填原因二次确认 · dangerous 调和行 → 审批抽屉 · 「+ 新建域」与队列筛选 → pop · 探针正常 chip → 探针概要　按 Esc 关闭所有浮层。</p>
 <script>
 function showPv(k){
   var t=document.getElementById('pv-tree'), a=document.getElementById('pv-agents');

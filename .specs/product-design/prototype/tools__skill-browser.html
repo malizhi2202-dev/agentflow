@@ -2,29 +2,88 @@
 <title>浏览器自动化详情 · 工具库 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
-.kbd{font-size:11px}</style></head><body>
+.kbd{font-size:11px}
+/* 表单风格（与 tools__new.html ② Skill 注册表单同源） */
+.fld{margin-bottom:var(--s3)}
+.fld label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.fld label b{color:var(--text)}
+.need{color:var(--red)}
+.fld input,.fld select,.fld textarea{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:7px 9px;font:12.5px var(--font);width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:1px solid var(--blue);border-color:var(--blue)}
+.fld [disabled],.fld [readonly]{opacity:.55}
+.fld .hint{font-size:11px;color:var(--text-muted);margin-top:3px}
+.fld textarea{min-height:96px;resize:vertical;font-family:var(--font-mono);font-size:11.5px}
+.fld input.mono,.fld textarea.mono{font-family:var(--font-mono);font-size:11.5px}
+.frm{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.savebar{position:sticky;bottom:0;z-index:45;display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap;padding:10px 14px;margin:var(--s4) 0 var(--s2);background:var(--bg-card);border:1px solid var(--border-strong);border-top:2px solid var(--blue);border-radius:var(--r-md);box-shadow:0 -8px 22px rgba(0,0,0,.4)}
+.lockline{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text-muted)}
+</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
-<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
-<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>工具</b> · <span class="mono">skill.browser</span></span><span class="chip purple">Skill</span><span class="chip bad">已禁用</span><span class="chip mono">7 参数</span></div>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="tools__new.html">注册工具（② Skill 表单）</span><span class="pill" data-goto="canvas__node-legacy.html">旧版节点现场</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>工具</b> · <span class="mono">skill.browser</span></span><span class="chip purple">Skill</span><span class="chip bad">已禁用</span><span class="chip mono">7 参数</span><button class="btn sm primary" data-click data-toast="已进入编辑模式 · 字段与注册表单同源（演示）">✎ 编辑</button></div>
 <div class="detail-body">
-<p class="proto-note"><span class="chip warn">演示数据</span>已禁用工具的完整现场：禁用人 / 原因 / 受影响引用 / 恢复条件 / 历史，以及「恢复启用」「删除工具」两步操作链。</p>
+<p class="proto-note"><span class="chip warn">演示数据</span>已禁用工具的完整现场：<b>禁用态不禁编辑</b>——配置区与注册 ② Skill 表单同源可改（修复镜像后要改的就是权限 / 指令 / 版本），下方保留禁用人 / 原因 / 受影响引用 / 恢复条件 / 历史与「恢复启用」「删除工具」两步操作链。</p>
 
-<div class="callout bad"><p class="tiny" style="margin:0"><b>禁用后卡片仍保留在列表中。</b>真实行为：禁用是全局生效，已引用该工具的编排在<b>下次执行</b>时才失败——所以必须可见，不能隐藏。</p></div>
+<div class="callout bad"><p class="tiny" style="margin:0"><b>禁用后卡片仍保留在列表中。</b>真实行为：禁用是全局生效，已引用该工具的编排在<b>下次执行</b>时才失败——所以必须可见，不能隐藏。<b>禁用态照样可改配置</b>，改完保存不等于恢复启用。</p></div>
+<p class="lockline" style="margin:0 0 var(--s3)">无 <span class="mono">tool:edit</span> 权限者此区为 <span class="chip">🔒 Lock read-only</span> <span class="dim">—— 就地只读、保留滚动位置与筛选，不改 URL、不跳走（§6.0 ①）。</span></p>
 
-<h4 class="blk">基础信息</h4>
-<dl class="kv"><dt>标识 / 类型</dt><dd class="mono">skill.browser · Skill</dd>
-<dt>禁用人 / 时间</dt><dd class="mono">admin 王工 · 09-22 17:40</dd>
-<dt>禁用原因（入审计）</dt><dd>无头浏览器依赖镜像与平台冲突，产生僵尸进程</dd>
-<dt>受影响引用</dt><dd class="mono">旧版审查 Agent · 编排 review→legacy 边（校验已警告）</dd>
-<dt>参数</dt><dd class="mono">7 参数（schema 保留可查）</dd>
-<dt>近 7 天调用</dt><dd class="mono">0 次 · 禁用前 12 次 / 失败 9</dd>
-<dt>恢复条件</dt><dd>修复镜像 + 一次成功试调用 · 需 admin</dd></dl>
+<h4 class="blk">配置（与注册表单同源）<span class="chip purple">Skill</span><span class="chip info">字段与 tools__new.html ② 一一对应</span></h4>
+<div class="panel">
+  <div class="grid g2">
+    <div class="fld"><label><b>名称</b> <span class="need">*</span> <span class="dim">· 注册时同源字段</span></label><input value="浏览器自动化"><p class="hint">列表卡片与绑定行显示名；库内标识 <span class="mono">skill.browser</span> 不随改名变化。</p></div>
+    <div class="fld"><label><b>描述</b> <span class="dim">· 注册时同源字段</span></label><input value="驱动无头浏览器完成端到端操作"><p class="hint">仅展示，不进执行 prompt；进 prompt 的只有下方「指令内容」。</p></div>
+    <div class="fld"><label><b>类型</b> <span class="dim">· 注册时同源字段</span></label><input value="Skill · 描述性登记（由 Agent 按提示词执行，无代码注入）" readonly><p class="hint">类型<b>创建后不可改</b>。本条实际调用外部无头浏览器，但登记形态仍是 Skill（红线：不因“看起来像代码”而改类型）。</p></div>
+    <div class="fld"><label><b>分类</b> <span class="dim">· 注册时同源字段</span></label><select><option selected>端到端与浏览器</option><option>代码质量 / 审查</option><option>测试与验证</option><option>文档与知识</option></select><p class="hint">用于工具库筛选与角色模板推荐，不影响执行。</p></div>
+    <div class="fld"><label><b>触发场景（何时适用）</b> <span class="need">*</span> <span class="dim">· 注册时同源字段</span></label><textarea class="mono" style="min-height:58px">需要跑真实页面交互时：端到端回归、复现用户报告的 UI 缺陷、截图取证</textarea><p class="hint">即 SKILL.md <span class="mono">## 何时适用</span>；Agent 自判是否调用，<b>不是</b>调度器硬绑定。</p></div>
+    <div class="fld"><label><b>输入 / 输出（契约）</b> <span class="need">*</span> <span class="dim">· 注册时同源字段</span></label><input class="mono" value="url, steps, selector, timeout_ms, headless, keep_open, out_dir → 截图 + console.log + 结论"><p class="hint">与「参数 schema（7）」同源；09-19 增列的 <span class="mono">headless</span> 就在这里改。</p></div>
+    <div class="fld"><label><b>所需权限</b> <span class="dim">· 注册时同源字段</span></label>
+      <div class="frm"><span class="chip info" data-click data-toast="已移除权限标签 browser:launch（演示）">browser:launch ×</span><span class="chip info" data-click data-toast="已移除权限标签 net:egress（演示）">net:egress ×</span><span class="chip info" data-click data-toast="已移除权限标签 specs:write（演示）">specs:write ×</span><span class="chip" style="border-style:dashed" data-click data-toast="已添加权限标签 host:shell（演示 · 需 admin 复核）">+ 添加权限</span></div>
+      <p class="hint" style="color:var(--orange)">本次禁用的根因即 <span class="mono">browser:launch</span> 依赖的镜像与平台冲突；改权限<b>不等于</b>恢复启用，需另行「恢复启用」。</p></div>
+    <div class="fld"><label><b>版本</b> <span class="need">*</span> <span class="dim">· 注册时同源字段</span></label><select><option selected>v1（当前 · 唯一版本）</option><option>v2（草稿 · 修复镜像后待发布）</option></select><p class="hint">发布走工具库，<b>绑定钉在 major 版本不自动跳</b>；旧版审查 Agent 仍钉 <span class="mono">v1</span>。</p></div>
+    <div class="fld"><label><b>标签</b> <span class="dim">· 注册时同源字段</span></label><div class="frm"><span class="pill mono">e2e</span><span class="pill mono">browser</span><span class="pill mono">needs-image-fix</span><span class="pill" data-click data-toast="加标签会同步改变能力组归属（多归属属预期）（演示）">＋ 加标签</span></div><p class="hint">标签驱动能力组派生与角色模板推荐；<span class="mono">needs-image-fix</span> 用于隔离域排障检索。</p></div>
+    <div class="fld"><label><b>产物落盘约定</b> <span class="dim">· 注册时同源字段</span></label><input class="mono" value=".specs/&lt;change-id&gt;/evidence/（截图 + console 日志 · 经 get_specs_dir()）"><p class="hint">读写 <span class="mono">.specs/</span> 一律经 <span class="mono">config.get_specs_dir()</span>，不硬编码目录。</p></div>
+  </div>
 
-<h4 class="blk">被引用的编排 / Agent（禁用不级联）</h4>
-<table class="tbl compact"><thead><tr><th>引用方</th><th>位置</th><th>执行时行为</th><th>操作</th></tr></thead><tbody>
-<tr><td class="mono">旧版审查 Agent</td><td>节点 legacy</td><td><span class="chip bad">调用即报错</span></td><td><span class="btn link" data-toast="跳 §6.5 画布移除该引用（演示）">去画布</span></td></tr>
-<tr><td class="mono">review → legacy 边</td><td>retry-fallback</td><td>耗尽后走 dead-letter</td><td><span class="btn link" data-toast="该边已配 dead-letter，失败任务有处可去">查看边</span></td></tr>
-<tr><td class="mono">端到端回归 v1</td><td>工作流（草稿）</td><td><span class="chip warn">未 apply · 暂不影响</span></td><td><span class="btn link" data-toast="草稿中的引用已标注为待处理">查看</span></td></tr>
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">指令内容（SKILL.md · Markdown · 多行） <span class="dim">· 注册时同源字段</span></p>
+  <textarea class="mono" style="min-height:150px"># 浏览器自动化
+## 何时适用
+- 需要真实页面交互与截图取证时
+## 开始前检查
+- 确认无头浏览器镜像版本与平台一致（当前不一致 → 拒启动）
+## 步骤
+1. 启动 browser 2. 逐条执行 steps 3. 采集 console 与截图
+## 结果形式
+- evidence/ 截图 + console.log + 结论段
+## 何时停下问人
+- 页面要求登录 / 出现验证码 / 疑似破坏性提交时</textarea>
+  <p class="hint" style="margin:6px 0 0">这一段就是进执行 prompt 的全部内容；「开始前检查」一行正是本次故障的修复落点。</p>
+
+  <p class="tiny muted" style="margin:14px 0 4px;text-transform:uppercase;letter-spacing:.05em">支持文件（随 SKILL.md 一并投喂） <span class="dim">· 注册时同源字段</span></p>
+  <table class="tbl compact" style="margin:0"><thead><tr><th>目录</th><th>文件</th><th>说明</th><th>操作</th></tr></thead><tbody>
+  <tr><td class="mono">references/</td><td class="mono">selector-cheatsheet.md</td><td class="tiny">选择器与等待策略速查</td><td><span class="btn link" data-click data-toast="已替换该支持文件（演示）">替换</span><span class="btn link" style="color:var(--red)" data-click data-toast="已移除支持文件 selector-cheatsheet.md（演示）">删</span></td></tr>
+  <tr><td class="mono">templates/</td><td class="mono">evidence.md.tpl</td><td class="tiny">取证结论模板</td><td><span class="btn link" data-click data-toast="已替换该支持文件（演示）">替换</span><span class="btn link" style="color:var(--red)" data-click data-toast="已移除支持文件 evidence.md.tpl（演示）">删</span></td></tr>
+  </tbody></table>
+  <p class="hint" style="margin:6px 0 0"><span class="btn link" data-click data-toast="已添加一行支持文件（演示）">+ 添加支持文件</span> · 清单随 SKILL.md 一并登记并投喂。</p>
+</div>
+
+<div class="savebar">
+  <span class="chip ok">自动保存 · 已存 14:12:07</span>
+  <span class="tiny dim">三态：<span class="chip">保存中</span> → <span class="chip ok">已存</span> / <span class="chip bad">失败（字段旁页内显错，不落库）</span> · 禁用态保存只改配置，<b>不改启停状态</b></span>
+  <span style="flex:1"></span>
+  <button class="btn sm primary" data-toast="配置已更新 · 引用它的工作流下轮生效（演示）">保存全部</button>
+  <button class="btn sm" data-toast="已放弃未保存改动 · 回到上一次已存配置（演示）">放弃</button>
+</div>
+
+
+<h4 class="blk">参数 schema（7）<span class="chip info">与配置区「输入 / 输出」同源</span></h4>
+<table class="tbl compact"><thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead><tbody>
+<tr><td class="mono">url</td><td class="mono">string</td><td><span class="chip bad">是</span></td><td class="tiny">起始地址 · 出站走域 egress 策略</td></tr>
+<tr><td class="mono">steps</td><td class="mono">array</td><td><span class="chip bad">是</span></td><td class="tiny">操作序列（goto / click / fill / wait）</td></tr>
+<tr><td class="mono">selector</td><td class="mono">string</td><td><span class="chip">否</span></td><td class="tiny">CSS 选择器</td></tr>
+<tr><td class="mono">timeout_ms</td><td class="mono">int</td><td><span class="chip">否</span></td><td class="tiny">默认 15,000</td></tr>
+<tr><td class="mono">headless</td><td class="mono">bool</td><td><span class="chip">否</span></td><td class="tiny">09-19 增列 · 默认 true</td></tr>
+<tr><td class="mono">keep_open</td><td class="mono">bool</td><td><span class="chip">否</span></td><td class="tiny">排障用 · 生产域强制 false</td></tr>
+<tr><td class="mono">out_dir</td><td class="mono">string</td><td><span class="chip">否</span></td><td class="tiny">证据落盘目录，默认 evidence/</td></tr>
 </tbody></table>
 
 <h4 class="blk">启用 / 禁用历史</h4>
@@ -34,14 +93,34 @@
 <div class="tl-item"><b>09-12 15:30</b> · 注册并启用</div>
 </div>
 
-<h4 class="blk">操作</h4>
-<p><button class="btn sm primary" data-toast="已恢复启用 · 编排下次执行可调用 · 审计 tool:enable（演示）">恢复启用</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-delete">删除工具</button></p>
+<h4 class="blk">基础信息 <span class="chip">只读速记 · 编辑去上方配置区（同源）</span></h4>
+<dl class="kv"><dt>标识 / 类型</dt><dd class="mono">skill.browser · Skill</dd>
+<dt>禁用人 / 时间</dt><dd class="mono">admin 王工 · 09-22 17:40</dd>
+<dt>禁用原因（入审计）</dt><dd>无头浏览器依赖镜像与平台冲突，产生僵尸进程</dd>
+<dt>受影响引用</dt><dd class="mono">旧版审查 Agent · 编排 review→legacy 边（校验已警告）</dd>
+<dt>参数</dt><dd class="mono">7 参数（schema 保留可查）</dd>
+<dt>配置最后修改</dt><dd class="mono">09-19 11:02 · 参数增列 <span class="mono">headless</span>（详情页编辑 · 与注册表单同源）</dd>
+<dt>近 7 天调用</dt><dd class="mono">0 次 · 禁用前 12 次 / 失败 9</dd>
+<dt>恢复条件</dt><dd>修复镜像 + 一次成功试调用 · 需 admin</dd></dl>
 
+<h4 class="blk">被引用的编排 / Agent（禁用不级联）</h4>
+<table class="tbl compact"><thead><tr><th>引用方</th><th>位置</th><th>执行时行为</th><th>操作</th></tr></thead><tbody>
+<tr><td class="mono">旧版审查 Agent</td><td>节点 legacy</td><td><span class="chip bad">调用即报错</span></td><td><span class="btn link" data-toast="跳 §6.5 画布移除该引用（演示）">去画布</span></td></tr>
+<tr><td class="mono">review → legacy 边</td><td>retry-fallback</td><td>耗尽后走 dead-letter</td><td><span class="btn link" data-toast="该边已配 dead-letter，失败任务有处可去">查看边</span></td></tr>
+<tr><td class="mono">端到端回归 v1</td><td>工作流（草稿）</td><td><span class="chip warn">未 apply · 暂不影响</span></td><td><span class="btn link" data-toast="草稿中的引用已标注为待处理">查看</span></td></tr>
+</tbody></table>
+<p class="tiny dim">与 <span class="mono">tools.html</span> 卡片「零引用」同口径：<b>卡片只计启用中 · 已发布的引用</b>，本条三处均为「已禁用 Agent 绑定 / 草稿 / 兜底边」，故列表显示零引用而详情如实列出。改配置对这些引用<b>不级联生效</b>——恢复启用后下次执行才读新配置。</p>
+
+<h4 class="blk">配置与操作 <span class="chip bad">破坏性 · 二次确认 · 必填原因</span></h4>
+<p class="tiny dim">配置字段全部在页内「配置（与注册表单同源）」区编辑（禁用态也可改）；本区只管启停与断链。</p>
+<p><button class="btn sm primary" data-toast="已恢复启用 · 编排下次执行可调用 · 审计 tool:enable（演示）">恢复启用</button> <button class="btn sm" data-toast="已进入编辑模式 · 字段与注册表单同源（演示）">✎ 编辑配置</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-delete">删除工具</button></p>
+<p class="tiny dim"><b>「删除工具」= 卸载：</b>本条被 3 处引用在册（旧版审查 Agent · review→legacy 边 · 端到端回归 v1 草稿），删除会断链且不可逆——建议只禁用。<b>置灰口径同列表页卡片</b>：<span class="mono">tools.html</span> 显示「零引用 · 删除置灰」＝只计启用中且已发布的引用；本页三处均为禁用绑定 / 草稿 / 兜底边，故详情内按钮可点但<b>必须走二次确认 + 必填原因</b>，且确认文案如实写明「3 处引用标红为工具不存在」。</p>
 <div class="modal" id="md-delete"><div style="padding:var(--s4)"><b>删除工具「浏览器自动化」？</b>
 <p class="small dim" style="margin:8px 0">删除需 <span class="mono">project:delete</span>。与禁用不同：删除后 schema 与启用历史一并移除，引用方在执行期报「工具不存在」而非「已禁用」，排障更难。<b>建议只禁用</b>。必填原因。</p>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [该 Skill 已由 MCP 版替代，库内需清账 ]</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消（保留禁用态）</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除 + 3 处引用标红为「工具不存在」· 审计 tool:deleted（演示）" data-close>确认删除</button></div></div></div>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 工具库 · 恢复启用→toast（含审计提示）· 删除工具→二次确认（本页自带 modal 副本，含必填原因）· 引用行操作→toast　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px"><b>可点区演示：</b>头部「✎ 编辑」→ toast（进入编辑模式 · 字段与注册同源）· 配置区逐字段可编辑（名称 / 描述 / 类型只读 / 分类 / 触发场景 / 输入输出 / 所需权限 chips / 版本下拉 / 标签 chips / 产物落盘 / 指令内容 textarea / 支持文件行内替换删除）· 底部 sticky 保存条（自动保存三态 + 保存全部 + 放弃 · 禁用态保存不改启停）· 恢复启用→toast（含审计提示）· 删除工具→二次确认（本页自带 modal 副本，含必填原因）· 引用行操作→toast　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:0 18px 14px"><b>同源约定：</b>本页配置区字段与 <span class="mono">tools__new.html</span>「② Skill 表单」逐项对应——注册即生成详情页，之后所有字段只在详情页编辑（同一份配置，两种入口）；无权限者整区为 <span class="chip">🔒 Lock read-only</span>。</p>
 </body></html>

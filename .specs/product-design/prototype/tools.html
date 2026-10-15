@@ -17,6 +17,7 @@
           <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
           <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
           <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
           <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
           <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
           <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
@@ -83,5 +84,5 @@
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="已禁用工具「文件读写」· 可逆 · 卡片仍可见（演示）" data-close>仅禁用</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除工具「文件读写」· 断掉 2 个引用 Agent（演示）" data-close>彻底删除</button></div></div></div>
 
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：卡片→详情页（Plugin 样本 <span class="mono">tools__fs-read-write.html</span> · Skill 样本 <span class="mono">tools__code-review-skill.html</span> · 禁用态 <span class="mono">tools__skill-browser.html</span> · MCP <span class="mono">tools__mcp-filesystem.html</span> / <span class="mono">tools__mcp-fetch.html</span>）· 卡片「删除」→ 二次确认模态（禁用=可逆 / 彻底删除=断链 · 列受影响 Agent · 必填原因）· 「+ 注册工具」→ 新建页 <span class="mono">tools__new.html</span>（Plugin / Skill / MCP 三类分型表单）· 类型与状态筛选 pill→弹层　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：<b>行 / 卡片点击 → 详情（查看 + 编辑 · 与注册字段同源）</b>——详情页头部「✎ 编辑」进编辑态，「配置（与注册表单同源）」区逐字段可改，底部 sticky 保存条「保存全部 / 放弃」（Plugin 样本 <span class="mono">tools__fs-read-write.html</span> · Skill 样本 <span class="mono">tools__code-review-skill.html</span> · 禁用态 <span class="mono">tools__skill-browser.html</span> · MCP <span class="mono">tools__mcp-filesystem.html</span> / <span class="mono">tools__mcp-fetch.html</span>）· 卡片「删除」→ 二次确认模态（禁用=可逆 / 彻底删除=断链 · 列受影响 Agent · 必填原因）· 卡片引用计数与详情页「被引用的工作流 / 编排」区<b>同一口径</b>（卡片只计已发布 · 启用中的引用，草稿在详情页如实列出并标注）· 「+ 注册工具」→ 新建页 <span class="mono">tools__new.html</span>（Plugin / Skill / MCP 三类分型表单 · 注册即生成详情页，之后只在详情页改）· 类型与状态筛选 pill→弹层　按 Esc 关闭浮层。</p>
 </body></html>

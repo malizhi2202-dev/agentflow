@@ -48,14 +48,14 @@
 - 将 Agent 列表改为域手风琴视图
 - 顶部：域列表 + 创建/删除域按钮
 - 点击域展开 Agent 列表
-- 无域 Agent 显示在"默认域"下
+- 无域 Agent 显示在「未分类」虚拟分组下
 - 确保 key props 唯一: `domain-{id}`, `agent-{id}`
 - 状态: [ ]
 
 ### T8: 后端测试
 - 验证域 CRUD 工作正常
 - 验证 Agent 域过滤
-- 验证域删除后 Agent 回归默认域
+- 验证域删除后 Agent 落「未分类」虚拟组（domain_id NULL）
 - 状态: [ ]
 
 ### T9: 前端测试

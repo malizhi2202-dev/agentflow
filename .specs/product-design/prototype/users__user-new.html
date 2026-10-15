@@ -3,7 +3,7 @@
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p16" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="audit.html">审计日志</span><span class="pill" data-goto="login.html">登录</span><span class="pill" data-goto="approvals.html">审批中心</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="audit.html">审计日志</span><span class="pill" data-goto="login.html">登录</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="agents.html">Agent 列表</span></div>
 <div class="detail-top"><span class="pill" data-back="users.html" data-click>← 返回 用户与权限</span><span class="crumb"><b>用户管理 › 新建用户</b></span><span class="chip warn">需 user:manage</span><span class="chip bad">默认零权限</span></div>
 <div class="detail-body">
 <h4 class="blk">新建用户</h4><p class="tiny dim" style="margin:0 0 6px">　需 <span class="mono">user:manage</span> · 落 <span class="mono">users.json</span>（目标态 MySQL users 表 · 裁定⑦）</p>
@@ -15,9 +15,20 @@
 初始口令   <span style="text-decoration:line-through;color:var(--text-muted)">[ 123456 ]</span>  <span class="chip bad">字段已废除 · P0-2</span>
            <span class="tiny dim">→ 改为：随机一次性口令（仅启动日志）+ must_change_password=true</span></pre>
 <p class="tiny" style="margin:8px 0 0;color:var(--red)"><b>「默认口令」输入框已消失</b>：123456 出厂口令在 P0-2 清零，界面与文档均不再出现可直接登录的口令。</p>
-<p class="tiny" style="margin:8px 0 0"><button class="btn sm primary" data-toast="已建账号（零权限）· 一次性口令写入启动日志 · 首登强制改密 · 审计 user:created（演示）" data-goto="users.html">创建并返回用户列表</button> <button class="btn sm" data-goto="users.html">取消</button></p>
+<h4 class="blk">同步生成预览 <span class="chip info">只读 · 不可取消勾选</span></h4>
+<div class="panel" style="border-color:var(--blue-border)">
+<p class="small" style="margin:0 0 6px">创建时将同步生成：<b>钱七 · 个人 Agent</b> <span class="chip ok">与用户 1:1</span></p>
+<dl class="kv" style="margin:0">
+<dt>owner</dt><dd class="mono tiny">钱七（随新建账号）· Agent 归属即用户归属</dd>
+<dt>可见性</dt><dd class="mono tiny">private（默认仅本人可见可运行 · 不随用户权限授予而扩大）</dd>
+<dt>绑定运行时</dt><dd class="mono tiny">默认 · 其选用（用户后续可自换；未选前不可运行）</dd>
+<dt>域 / 命名</dt><dd class="mono tiny">域=未分类 · 命名规则「&lt;显示名&gt; · 个人」（如既有用户 → 「李四 · 个人」；已有专名如「运维哨兵」则保留直链）</dd>
+</dl>
+<p class="tiny dim" style="margin:8px 0 0">每创建一个用户就创建一个关联 Agent，一一对应，代替这个人做事。<b>归档用户 → 其个人 Agent 同步置为不可运行；删除用户不自动删 Agent（需二次确认处置）。</b>以上为原型演示口径。</p>
+</div>
+<p class="tiny" style="margin:8px 0 0"><button class="btn sm primary" data-toast="已创建用户 + 1:1 个人 Agent「钱七 · 个人」（演示）· 账号零权限 · 一次性口令写入启动日志 · 首登强制改密 · 审计 user:created / agent:created（演示）" data-goto="users.html">创建并返回用户列表</button> <button class="btn sm" data-goto="users.html">取消</button></p>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">本页由 users.html 顶栏「+ 新建用户」的弹层升格而来：5 个字段 + 两组勾选 + 保存钮，已超出 pop 只放选择器的边界（纪律 D）。「初始口令」字段按 P0-2 以划除态呈现，不再产生 123456。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：创建 → toast 后回用户列表 · 取消 → 回用户列表。</p>
+<p class="tiny dim" style="padding:14px 18px">本页由 users.html 顶栏「+ 新建用户」的弹层升格而来：5 个字段 + 两组勾选 + 同步生成预览卡（只读）+ 保存钮，已超出 pop 只放选择器的边界（纪律 D）。「初始口令」字段按 P0-2 以划除态呈现，不再产生 123456。个人 Agent 为系统代建项：不出现在权限点勾选里，创建后在 users.html「个人 Agent」列与 agents.html 列表（chip「user-level · 个人 Agent」）可见。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：创建 → toast（已创建用户 + 1:1 个人 Agent · 演示）后回用户列表 · 取消 → 回用户列表 · 「Agent 列表」相关页 pill → agents.html。</p>
 </body></html>

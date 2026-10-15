@@ -10,7 +10,7 @@
 <div class="callout"><p class="tiny" style="margin:0"><b>节点 = Agent 引用，边 = 连线策略。</b>这里改的每一项都会写回底部 YAML；改 YAML 画布跟着重绘（双向同步）。</p></div>
 <dl class="kv"><dt>节点 ID / 类型</dt><dd class="mono">review · agent 节点（入口）</dd>
 <dt>绑定 Agent</dt><dd>审查 Agent · 标准 <span class="mono dim">agent-1</span> <span class="chip ok"><span class="dot idle" style="margin-right:4px"></span>探针通过 14:30:58</span></dd>
-<dt>模型 / Provider</dt><dd class="mono">gpt-4o · OpenAI 兼容口（API Key 恒为 sk-***）</dd>
+<dt>运行时 + 模型（默认随 Agent · 节点级可覆盖）</dt><dd class="mono">dsh · deepseek-official/deepseek-chat（模型目录由运行时暴露 · 覆盖只在其目录内重选）</dd>
 <dt>运行时</dt><dd>平台进程内执行 <span class="chip warn">无沙箱</span> · 域不是安全边界</dd>
 <dt>归属域 / 能力组</dt><dd class="mono">默认域 / code-review</dd>
 <dt>能力标签（路由用）</dt><dd><span class="pill mono">capability: code-review</span> <span class="pill mono">tier: standard</span></dd>

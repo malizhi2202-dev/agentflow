@@ -1,45 +1,118 @@
 <!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>内置模板 · 代码审查员 详情 · 角色市场</title><link rel="stylesheet" href="assets/base.css">
+<title>角色 · 审查角色（自定义 · 全字段）详情 · 角色市场</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p14" style="color:inherit">回文档</a></span>
-<div class="detail-top"><span class="pill" data-back="roles.html" data-click>← 返回 角色市场</span><span class="crumb"><b>内置模板详情 · 代码审查员</b></span><span class="chip">只读参考</span><span class="chip mono">builtin/reviewer</span></div>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<div class="detail-top"><span class="pill" data-back="roles.html" data-click>← 返回 角色市场</span><span class="crumb"><b>角色详情 · 审查角色</b></span><span class="chip info">自定义</span><span class="chip mono">custom_roles/4</span><span class="chip">visibility private</span><span class="chip">owner 李工</span><span style="flex:1"></span><button class="btn sm primary" data-click data-drawer="dr-edit">✎ 编辑（解锁全字段）</button></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="roles__derived.html">同源的「审查 Agent 专用」</span></div>
 <div class="detail-body">
-<div class="callout warn"><p class="tiny" style="margin:0"><b>内置模板为只读参考，不能直接改</b>（§5.14 边界）；要定制请点「派生为自定义角色」。本页界面标注为「参考」性质。</p></div>
-<h4 class="blk">标识与派生</h4>
+<div class="callout warn"><p class="tiny" style="margin:0"><b>本页是自定义角色</b>（代码 <span class="mono">CustomRole</span> 全 14 字段的原型投影，逐项可编辑）；其<b>基于的内置模板仍为只读参考</b>（§5.14 边界）——改内置只能再派生。点右上「✎ 编辑」进入页内解锁形态，保存进草稿槽。</p></div>
+<h4 class="blk">标识与派生 <span class="mono tiny dim">name · based_on · owner_id · visibility</span></h4>
 <dl class="kv" style="margin-top:var(--s3)">
-<dt>标识 / 类型</dt><dd class="mono">builtin/reviewer · <span class="chip">只读参考</span></dd>
+<dt>标识 / 类型</dt><dd class="mono">custom_roles/4 · <span class="chip info">自定义</span>（可编辑 · 删除需二次确认）</dd>
+<dt>name · 角色名称</dt><dd>审查角色</dd>
+<dt>based_on · 基于内置</dt><dd><span class="chip">基于内置：审查角色 · v2</span> <span class="mono tiny dim">builtin/reviewer（代码审查员）· v2</span> <span class="tiny dim">派生时复制 8 段全文 · 模板升版不自动回写本角色</span></dd>
+<dt>owner_id · 归属</dt><dd class="mono">admin · 李工 <span class="tiny dim">（编辑不可改 owner · 转移属规划）</span></dd>
+<dt>visibility · 可见性</dt><dd><span class="chip info">private</span> <span class="tiny dim">CustomRole 默认值 · 仅 owner 与显式共享成员可见</span></dd>
 <dt>标签</dt><dd><span class="pill">Review</span> <span class="pill">质量门禁</span></dd>
-<dt>派生出的自定义角色</dt><dd class="mono">审查 Agent 专用（1 个）</dd>
-<dt>实例化次数</dt><dd class="mono">3 次（2 次经派生角色 · 1 次直接用本模板）· 最近 09-21 14:22</dd>
+<dt>实例化次数</dt><dd class="mono">本角色 0 次（刚派生 · 待发布）· 父模板 builtin/reviewer 历史 3 次</dd>
 <dt>参数槽</dt><dd class="mono">severity_gate · evidence_required</dd>
 </dl>
-<h4 class="blk">8 段定义</h4>
-<table class="tbl compact"><tbody>
-<tr><td><b>① 性情</b></td><td>只信证据；不看作者；宁缺勿滥</td></tr>
-<tr><td><b>② 职责</b></td><td>每条发现给出位置 + 严重度 + 可复现依据</td></tr>
-<tr><td><b>③ 触发场景</b></td><td class="mono tiny">{gate: G3代码门, topic: 提交前门禁} · {gate: G4审查门, topic: REVIEW 阶段} · {gate: 测试门, topic: 质量抽查}</td></tr>
-<tr><td><b>④ ✅ 能做</b></td><td>读 diff 与规范；逐条定位；标注严重度与证据</td></tr>
-<tr><td><b>⑤ ❌ 不能做</b></td><td>不直接改代码；不评论风格偏好（非门禁项）</td></tr>
-<tr><td><b>⑥ 评估框架</b></td><td class="mono tiny">{step1: 定位到行} · {step2: 无误报} · {step3: 严重度准确}</td></tr>
-<tr><td><b>⑦ 输入文件</b></td><td>diff + 规范</td></tr>
-<tr><td><b>⑧ 输出格式</b></td><td class="mono tiny">findings[{file, line, severity, evidence}]</td></tr>
-<tr><td><b>⑨ 安全闸门</b></td><td class="dim tiny">内置只读 · 无自定义闸门（派生后可在自定义角色编辑）</td></tr>
+<h4 class="blk">① 性情 · 核心原则 <span class="mono tiny dim">temperament</span></h4>
+<div class="panel"><p class="small" style="margin:0">只信证据；不看作者；宁缺勿滥。核心原则：无位置的发现不是发现，无证据的结论必须撤回。</p></div>
+<h4 class="blk">② 职责 <span class="mono tiny dim">responsibilities[] · 数组 · 逐项可增删</span></h4>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip">逐条审查 diff：每条发现给出位置</span><span class="chip">标注严重度（blocker / major / minor）</span><span class="chip">附可复现依据与规范出处</span><span class="chip">过阈值时置门禁阻塞（severity_gate）</span></div>
+<h4 class="blk">③ 触发场景 <span class="mono tiny dim">triggers[{gate, topic}] · gate 用 9 阶段模型的阶段闸门名（需求① / 设计② / 开发④ / 审查⑥…）</span></h4>
+<table class="tbl compact"><thead><tr><th style="width:190px">gate · 阶段闸门</th><th>topic · 触发议题</th></tr></thead><tbody>
+<tr><td><span class="pill mono">需求①</span> <span class="mono tiny dim">1-requirement</span></td><td class="tiny">PRD / 验收准则的可测性预检（仅出建议票）</td></tr>
+<tr><td><span class="pill mono">设计②</span> <span class="mono tiny dim">2-design</span></td><td class="tiny">设计稿可实现性、与既有架构意图的冲突质询</td></tr>
+<tr><td><span class="pill mono">开发④</span> <span class="mono tiny dim">4-dev</span></td><td class="tiny">提交前 diff 自检门禁（原 G3 代码门口径 · 同一闸门改名映射）</td></tr>
+<tr><td><span class="pill mono">审查⑥</span> <span class="mono tiny dim">6-review · 主场</span></td><td class="tiny">REVIEW 阶段逐条证据充分性裁决（原 G4 审查门口径）</td></tr>
 </tbody></table>
-<h4 class="blk">提示词预览</h4>
-<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">你是代码审查员。只看证据，每条发现必须给出位置与严重度。
+<h4 class="blk">④⑤ 边界 <span class="mono tiny dim">boundaries_can[] / boundaries_cannot[] · 逐项可增删</span></h4>
+<div class="grid g2">
+<div class="panel tight"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">✅ 能做 boundaries_can</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip">读 diff 与规范</span><span class="chip">逐条定位到 file:line</span><span class="chip">标注严重度与证据</span></div></div>
+<div class="panel tight"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">❌ 不能做 boundaries_cannot</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip bad">不直接改代码</span><span class="chip bad">不评论风格偏好（非门禁项）</span><span class="chip bad">不代替人做合并决策</span></div></div>
+</div>
+<h4 class="blk">⑥ 评估框架 <span class="mono tiny dim">evaluation[{step, title, items[]}] · 步骤卡 · 可增删</span></h4>
+<div class="grid g3">
+<div class="panel tight"><p class="small" style="margin:0 0 4px"><b>step1 · 定位性</b></p><p class="tiny dim" style="margin:0">· 每条发现定位到 file:line<br>· 引用 diff 片段可回查</p></div>
+<div class="panel tight"><p class="small" style="margin:0 0 4px"><b>step2 · 无误报</b></p><p class="tiny dim" style="margin:0">· 结论全部附可复现证据<br>· 猜测式判断 = 0</p></div>
+<div class="panel tight"><p class="small" style="margin:0 0 4px"><b>step3 · 严重度准确</b></p><p class="tiny dim" style="margin:0">· blocker/major/minor 分类正确<br>· 阻塞仅由 severity_gate 阈值触发</p></div>
+</div>
+<h4 class="blk">⑦⑧ 输入文件 / 输出格式 <span class="mono tiny dim">inputs[] · outputs[]</span></h4>
+<div class="grid g2">
+<div class="panel tight"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">⑦ 输入文件 inputs</p><p class="mono tiny" style="margin:0">git diff · 审查规范（CLAUDE.md 约定 / {spec_ref}） · 被审 SUMMARY.md</p></div>
+<div class="panel tight"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">⑧ 输出格式 outputs</p><p class="mono tiny" style="margin:0">findings[{file, line, severity, evidence}] · 门禁票 ✅/❌</p></div>
+</div>
+<h4 class="blk">⑨ 安全闸门 <span class="mono tiny dim">gate_pre_check · gate_post_check · io_filter · 自定义角色可编辑</span></h4>
+<table class="tbl compact"><tbody>
+<tr><td style="width:150px"><b>gate_pre_check</b></td><td class="tiny mono">输入须含 diff 与被审规范版本标识，否则不开审</td></tr>
+<tr><td><b>gate_post_check</b></td><td class="tiny mono">门禁类意见必须带证据与位置，否则降级为建议（非阻塞）</td></tr>
+<tr><td><b>io_filter</b></td><td><span class="chip warn">sanitize · 基础过滤</span> <span class="tiny dim">可选 none / sanitize / strict</span></td></tr>
+</tbody></table>
+<h4 class="blk">提示词预览（8 段拼装 · 实例化时快照带入）</h4>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">你是审查角色（基于内置审查角色 v2 派生）。只看证据，每条发现必须给出位置与严重度。
 输出：findings[{file, line, severity, evidence}]
 门禁：severity ≥ {severity_required} 时置为阻塞（{severity_gate}）
 禁止：无证据的结论；风格偏好类意见。</pre>
-<h4 class="blk">实例化记录（均经派生角色）</h4>
+<h4 class="blk">实例化记录（父模板 builtin/reviewer 的历史记录 · 本角色尚未实例化）</h4>
 <table class="tbl compact"><thead><tr><th>Agent</th><th>来源角色</th><th>状态</th></tr></thead><tbody>
-<tr><td class="mono">审查 Agent · 标准</td><td class="mono tiny">审查 Agent 专用</td><td><span class="dot running"></span> healthy</td></tr>
-<tr><td class="mono">审查 Agent · 备援</td><td class="mono tiny">审查 Agent 专用</td><td><span class="dot idle"></span> 冷备</td></tr>
+<tr><td class="mono">审查 Agent · 标准</td><td class="mono tiny">审查 Agent 专用（同源姊妹角色）</td><td><span class="dot running"></span> healthy</td></tr>
+<tr><td class="mono">审查 Agent · 备援</td><td class="mono tiny">审查 Agent 专用（同源姊妹角色）</td><td><span class="dot idle"></span> 冷备</td></tr>
 <tr><td class="mono">旧版审查 Agent</td><td class="mono tiny">builtin/reviewer</td><td><span class="dot failed"></span> 探针 failed</td></tr>
 </tbody></table>
-<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="实例化为 Agent → 跳转编排画布，模板提示词只读带入（演示）">实例化为 Agent</button> <button class="btn sm" data-toast="已基于「代码审查员」打开派生表单（演示）">派生为自定义角色</button> <button class="btn sm" style="opacity:.5">编辑（内置不可改）</button></p>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="实例化为 Agent → 跳转编排画布，带入本角色 8 段快照（演示）">实例化为 Agent</button> <button class="btn sm" data-click data-drawer="dr-edit">✎ 编辑</button> <button class="btn sm" data-toast="已基于「审查角色」再派生 custom_roles/5 草稿（演示）">派生新角色</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-del">删除角色</button></p>
 </div>
+<div class="drawer" id="dr-edit"><header><b>编辑 · 审查角色（页内解锁形态 · CustomRole 全字段）</b><span class="chip info">草稿槽</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>解锁规则：</b>owner / 1:1 身份不可改；数组字段逐项 <b>＋ 加行 / ✕ 删行</b>；保存后进草稿槽，<b>引用它的 Agent 下轮生效</b>——在跑实例不热换（与运行闸门「显式重启才作用」同口径）。</p></div>
+<p class="h2p" style="margin-top:0">name · based_on · visibility</p>
+<table class="tbl compact"><tbody>
+<tr><td style="width:120px"><b>name</b></td><td class="mono tiny">[ 审查角色　　　　　　　　 ]</td></tr>
+<tr><td><b>based_on</b></td><td class="mono tiny">[ builtin/reviewer · 审查角色 v2 ▾ ] <span class="tiny dim">可换「自定义（无父模板）」</span></td></tr>
+<tr><td><b>visibility</b></td><td class="mono tiny">(•) private（默认）　( ) 团队可见 <span class="tiny dim">规划</span></td></tr>
+</tbody></table>
+<p class="h2p">temperament · 性情 <span class="btn link" data-click data-toast="进入多行编辑（演示）">改</span></p>
+<p class="tiny mono" style="margin:0 0 var(--s3)">只信证据；不看作者；宁缺勿滥。…</p>
+<p class="h2p">responsibilities[] · 职责</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="pill">逐条审查 diff：每条发现给出位置 <span class="btn link" style="color:var(--red)" data-toast="删除该职责行（保存后生效 · 演示）">✕</span></span><span class="pill">标注严重度（blocker/major/minor） <span class="btn link" style="color:var(--red)" data-toast="删除该职责行（保存后生效 · 演示）">✕</span></span><span class="pill">附可复现依据与规范出处 <span class="btn link" style="color:var(--red)" data-toast="删除该职责行（保存后生效 · 演示）">✕</span></span><span class="btn sm" data-toast="新增一行职责（演示输入：核对规范条目编号是否过时）">＋ 加行</span></div>
+<p class="h2p">triggers[{gate, topic}] · 触发场景 <span class="tiny dim mono">gate ∈ {需求① 设计② 开发④ 审查⑥ …}</span></p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono tiny">[需求① ▾]</td><td class="tiny">PRD / 验收准则可测性预检</td><td><span class="btn link" style="color:var(--red)" data-toast="删除该触发场景行（保存后生效 · 演示）">✕</span></td></tr>
+<tr><td class="mono tiny">[设计② ▾]</td><td class="tiny">设计稿可实现性质询</td><td><span class="btn link" style="color:var(--red)" data-toast="删除该触发场景行（保存后生效 · 演示）">✕</span></td></tr>
+<tr><td class="mono tiny">[开发④ ▾]</td><td class="tiny">提交前 diff 自检门禁</td><td><span class="btn link" style="color:var(--red)" data-toast="删除该触发场景行（保存后生效 · 演示）">✕</span></td></tr>
+<tr><td class="mono tiny">[审查⑥ ▾]</td><td class="tiny">REVIEW 阶段证据充分性裁决</td><td><span class="btn link" style="color:var(--red)" data-toast="删除该触发场景行（保存后生效 · 演示）">✕</span></td></tr>
+<tr><td colspan="3"><span class="btn sm" data-toast="新增一行触发场景（gate 下拉选阶段闸门 · 演示）">＋ 加行</span></td></tr>
+</tbody></table>
+<p class="h2p">boundaries_can[] · ✅ 能做</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="pill">读 diff 与规范 <span class="btn link" style="color:var(--red)" data-toast="删除该行（保存后生效 · 演示）">✕</span></span><span class="pill">逐条定位到 file:line <span class="btn link" style="color:var(--red)" data-toast="删除该行（保存后生效 · 演示）">✕</span></span><span class="pill">标注严重度与证据 <span class="btn link" style="color:var(--red)" data-toast="删除该行（保存后生效 · 演示）">✕</span></span><span class="btn sm" data-toast="新增一行「能做」（演示）">＋ 加行</span></div>
+<p class="h2p">boundaries_cannot[] · ❌ 不能做</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="pill">不直接改代码 <span class="btn link" style="color:var(--red)" data-toast="删除该行（保存后生效 · 演示）">✕</span></span><span class="pill">不评论风格偏好 <span class="btn link" style="color:var(--red)" data-toast="删除该行（保存后生效 · 演示）">✕</span></span><span class="btn sm" data-toast="新增一行「不能做」（演示）">＋ 加行</span></div>
+<p class="h2p">evaluation[{step, title, items[]}] · 评估框架</p>
+<div class="panel tight" style="margin-bottom:6px"><p class="small" style="margin:0"><b>step [1▾] · 标题 [定位性▎　　　　]</b> <span class="btn link" style="color:var(--red)" data-toast="删除该评估步骤（保存后生效 · 演示）">✕</span><br><span class="tiny dim">items：定位到 file:line ；引用 diff 片段可回查</span> <span class="btn link" data-toast="编辑 items（逗号分隔 · 演示）">改</span></p></div>
+<div class="panel tight" style="margin-bottom:6px"><p class="small" style="margin:0"><b>step [2▾] · 标题 [无误报▎　　　]</b> <span class="btn link" style="color:var(--red)" data-toast="删除该评估步骤（保存后生效 · 演示）">✕</span><br><span class="tiny dim">items：结论全部附可复现证据 ；猜测式判断 = 0</span> <span class="btn link" data-toast="编辑 items（演示）">改</span></p></div>
+<p style="margin:0 0 var(--s3)"><span class="btn sm" data-toast="添加评估步骤（step 自动取 4 · 演示）">＋ 添加评估步骤</span></p>
+<p class="h2p">inputs[] / outputs[]</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px"><span class="pill mono">git diff <span class="btn link" style="color:var(--red)" data-toast="删除该输入项（保存后生效 · 演示）">✕</span></span><span class="pill mono">{spec_ref} <span class="btn link" style="color:var(--red)" data-toast="删除该输入项（保存后生效 · 演示）">✕</span></span><span class="btn sm" data-toast="新增输入项（演示输入：TEST.md）">＋ 输入</span> <span class="btn sm" data-toast="新增输出项（演示）">＋ 输出</span></div>
+<p class="h2p">🛡 安全闸门 gate_pre_check / gate_post_check / io_filter</p>
+<table class="tbl compact"><tbody>
+<tr><td style="width:130px"><b>gate_pre_check</b></td><td class="mono tiny">[ 输入须含 diff 与被审规范版本标识… ]</td></tr>
+<tr><td><b>gate_post_check</b></td><td class="mono tiny">[ 门禁类意见必须带证据与位置…　　 ]</td></tr>
+<tr><td><b>io_filter</b></td><td class="mono tiny">[ sanitize ▾ ] <span class="tiny dim">none / sanitize / strict</span></td></tr>
+</tbody></table>
+<div style="display:flex;gap:var(--s2);margin-top:var(--s4)"><button class="btn sm primary" data-toast="角色已存草稿槽 · 引用它的 Agent 下轮生效（演示）" data-close>保存全部</button><button class="btn sm" data-close>取消</button></div></div></div>
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除自定义角色「审查角色」？</b>
+<p class="small dim" style="margin:8px 0">需要 <span class="mono">project:delete</span>（危险权限点）。基于的内置模板不受影响（只读参考）。<b>必填原因</b>。</p>
+<table class="tbl compact"><thead><tr><th>影响面</th><th>结果</th></tr></thead><tbody>
+<tr><td>已实例化的 Agent</td><td><span class="chip ok">本角色 0 个 · 不级联删除任何 Agent</span> · 保留实例化时提示词快照</td></tr>
+<tr><td>编排中引用该角色的节点</td><td><span class="chip warn">1 个草稿节点将标记失效引用</span> · 需人工换绑</td></tr>
+<tr><td>草稿槽</td><td><span class="chip bad">未发布的编辑稿一并清除</span></td></tr>
+<tr><td>审计</td><td><span class="chip">记 role:deleted</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [与内置模板已无差异            ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除角色（Agent 未被级联删除）· 审计 role:deleted（演示）" data-close>确认删除</button></div></div></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页）：实例化 / 派生为自定义角色→toast · 「编辑（内置不可改）」灰置 · 8 段与实例化记录全宽展示　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立详情页 · 自定义角色）：右上 / 底部「✎ 编辑」→ 页内解锁抽屉（数组项 ＋/− 演示 · 保存全部 → toast「角色已存草稿槽 · 引用它的 Agent 下轮生效」）·「删除角色」→ 二次确认 modal（不级联 · 必填原因）· 实例化 / 派生新角色 → toast · 14 字段全呈现：标识卡（name / based_on / owner / visibility）+ ①性情 ②职责 ③触发场景表（阶段闸门名）④⑤边界 ⑥评估框架卡 ⑦⑧输入/输出 ⑨安全闸门三件　按 Esc 关闭浮层。</p>
 </body></html>

@@ -54,7 +54,7 @@
     <span class="pill" data-click data-toast="已勾选 MCP：filesystem（演示）">filesystem</span>
     <span class="pill" data-click data-toast="已勾选 MCP：fetch（演示）">fetch</span>
   </div>
-  <p class="hint" style="margin:6px 0 0">技能决定能力组派生（code-review / python / frontend）；禁用态技能仍可绑定但标注「禁用绑定」。</p>
+  <p class="hint" style="margin:6px 0 0">技能决定能力组派生（code-review / python / frontend）；禁用态技能仍可绑定但标注「禁用绑定」。注入路径随运行时而异（dsh → <span class="mono">.dsh/skills/</span>，codex → <span class="mono">$CODEX_HOME/skills/</span>，hermes → per-run HERMES_HOME）。</p>
 </div>
 
 <h4 class="blk">4 · 对话启动语 <span class="chip info">≤ 3 条 · 每条 label + prompt</span></h4>
@@ -64,14 +64,44 @@
   <p class="hint" style="margin:0">已填 1 / 3 条 · 最多 3 条。</p>
 </div>
 
-<h4 class="blk">5 · 模型与运行时</h4>
+<h4 class="blk">5 · 模型与运行时 <span class="chip warn">平台不本地运行模型</span></h4>
 <div class="panel">
-  <div class="grid g2">
-    <div class="fld"><label>运行时</label><select><option>LangGraph</option><option>LangChain</option><option>AutoGen</option><option>CrewAI</option><option>OpenAI Codex CLI</option><option>自定义</option></select></div>
-    <div class="fld"><label>模型 Provider</label><select><option>openai</option><option>anthropic</option><option>deepseek</option><option>自定义</option></select></div>
-    <div class="fld"><label>模型名</label><select><option>gpt-4o</option><option>claude-sonnet</option><option>gpt-3.5</option><option>deepseek-v3</option><option>gpt-4o-mini</option></select></div>
-    <div class="fld"><label>thinking 档</label><select><option>无</option><option>低</option><option>中</option><option>高</option></select></div>
+  <div class="callout" style="margin:0 0 var(--s3)">
+    <p class="tiny" style="margin:0"><b>运行时 = 外部 AI 编码 CLI 框架</b>（DeepSeek Harness <span class="mono">dsh</span> / Codex CLI <span class="mono">codex</span> / Claude Code <span class="mono">claude</span> / Hermes <span class="mono">hermes</span> / Qwen Code <span class="mono">qwen</span>…），由机器上的 daemon 经「运行时发现」探测注册，run 一律调用这些 CLI。<b>模型目录由所选运行时暴露</b>（如 <span class="mono">dsh --list-models</span> 广告 · id 形如 <span class="mono">provider/model</span>），非平台内置。</p>
   </div>
+  <div class="grid g2">
+    <div class="fld"><label>运行时 <b class="need">*</b> <span class="pill mono" data-click data-goto="runtimes.html" style="margin-left:6px">去运行时发现添加 →</span></label>
+      <select>
+        <option selected>DeepSeek Harness (dsh) · ✓在线</option>
+        <option>Codex CLI (codex) · ✓在线</option>
+        <option>Claude Code (claude) · ✓在线</option>
+        <option>Hermes (hermes) · ✓在线</option>
+        <option>Cursor Agent (cursor-agent) · ✓在线</option>
+        <option>MiniMax Code (mcode) · ✓在线 · 模型由运行时托管</option>
+        <option disabled>GitHub Copilot CLI (copilot) · 离线 · 不可选</option>
+      </select>
+      <p class="hint">仅可选机器 daemon 已探测为在线的运行时；离线项置灰——先在运行时发现页确认在线与已登录。</p>
+    </div>
+    <div class="fld"><label>模型 <span class="chip info">随运行时获取</span> <span class="pill" data-click data-toast="已从 dsh --list-models 拉取 2 个模型（演示）" style="margin-left:6px">⟳ 刷新模型列表</span></label>
+      <select>
+        <option selected>deepseek-official/deepseek-chat</option>
+        <option>deepseek-official/deepseek-reasoner</option>
+        <option>（留空 · 用运行时/CLI 自身默认）</option>
+      </select>
+      <p class="hint">切换运行时后旧模型失效需重选；运行时离线时刷新得空列表，先确认在线与已登录。</p>
+    </div>
+    <div class="fld"><label>thinking 档</label><select><option>无</option><option>低</option><option>中</option><option>高</option></select></div>
+    <div class="fld"><label>服务档 <span class="dim">（Codex 类运行时支持 high / normal）</span></label><select><option>默认（随运行时）</option><option>high</option><option>normal</option></select><p class="hint">仅 codex 类 CLI 有服务档；其余运行时忽略此项。</p></div>
+  </div>
+  <p class="tiny muted" style="margin:var(--s2) 0 6px;text-transform:uppercase;letter-spacing:.05em">所选运行时能力 · DeepSeek Harness (dsh)</p>
+  <div class="panel tight">
+    <dl class="kv">
+      <dt>会话续跑</dt><dd><span class="chip ok">✓</span> 平台存会话 id · 下次 run 续跑</dd>
+      <dt>平台托管 MCP</dt><dd><span class="chip ok">✓</span> 可绑定托管型 MCP 服务</dd>
+      <dt>Skill 注入路径</dt><dd class="mono">.dsh/skills/</dd>
+    </dl>
+  </div>
+  <p class="hint" style="margin:8px 0 0">能力随运行时而异，下方「执行设置」区联动显隐：选 <span class="mono">copilot</span> 时 MCP 绑定区隐藏（不支持平台托管 MCP）；选 <span class="mono">mcode</span> 时无会话续跑（每次新会话）、模型显示「由运行时托管」（选择器失效）。</p>
 </div>
 
 <h4 class="blk">6 · Access</h4>
@@ -84,24 +114,55 @@
   <p class="hint" style="margin:6px 0 0">默认「仅我」：仅创建者可运行。</p>
 </div>
 
-<h4 class="blk">7 · 执行设置</h4>
+<h4 class="blk">7 · 域归属 <span class="chip info">可空 · 不选=未分类</span></h4>
 <div class="panel">
-  <div class="fld"><label>并发上限</label><input value="6" style="width:120px"><span class="hint" style="display:inline;margin-left:8px">默认 6</span></div>
-  <div class="fld"><label>环境变量 <span class="dim">（键值 · 值仅显示 ***，不可读回）</span></label>
-    <div class="kvrow"><input placeholder="KEY（如 OPENAI_API_KEY）"><input value="***" disabled><span class="btn sm" data-click data-toast="已删除该环境变量（演示）">删除</span></div>
-    <p class="hint" style="margin:0">已填 1 项 · 凭据不进指令，仅运行时使用。</p>
+  <div class="fld" style="max-width:420px"><label>所属域 <span class="dim">（可选 · 事后可在管控面指定）</span></label>
+    <select>
+      <option>默认域</option>
+      <option>生产域</option>
+      <option>测试域</option>
+      <option selected>未分类（默认 · 暂不归属）</option>
+    </select>
   </div>
-  <div class="fld"><label>CLI 自定义参数</label><input placeholder="例如：--review --format md"></div>
-  <div class="fld"><label>MCP 服务绑定 <span class="dim">（来自工具库 MCP 条目）</span></label>
+  <div class="callout" style="margin:var(--s2) 0 0">
+    <p class="tiny" style="margin:0">① 创建时域是<b>可选</b>字段：不选即 <span class="mono">domain_id=NULL</span>（外键 SET NULL），Agent 不隶属任何域。<br>② 管控面把无域 Agent 收进「未分类」虚拟分组，随时可「归入域」事后指定。<br>③ 域只是分组与共享记忆边界，<b>非安全边界</b>；自动路由按能力标签；删除域时其 Agent 回落未分类。</p>
+  </div>
+</div>
+
+<h4 class="blk">8 · 执行设置</h4>
+<div class="panel">
+  <div class="fld"><label>并发上限</label><input value="6" style="width:120px"><span class="hint" style="display:inline;margin-left:8px">默认 6 · 实际与机器 daemon 的全机上限（20）取小</span></div>
+  <div class="fld"><label>环境变量 <span class="dim">（键值 · 保存后仅回不透明计数）</span></label>
+    <div class="kvrow"><input placeholder="KEY（如 DEEPSEEK_API_KEY）"><input placeholder="值（仅写入 · 保存后不可读回）"><span class="btn sm" data-click data-toast="已删除该环境变量（演示）">删除</span></div>
+    <p class="hint" style="margin:0">已填 1 项 · 值仅 owner/admin 可解锁修改，读写均留审计；<span class="mono">PATH</span> / <span class="mono">HOME</span> 与平台保留变量不可覆盖；凭据一律放环境变量而非 CLI 参数。</p>
+  </div>
+  <div class="fld"><label>CLI 自定义参数 <span class="dim">（逐项追加到运行时 CLI 调用）</span></label>
+    <input value="--sandbox read-only" style="font-family:var(--font-mono)">
+    <p class="hint" style="margin:0">exec 数组逐项追加进 argv，<b>无 shell 展开</b>（<span class="mono">$VAR</span> / 引号 / 管道不解析）；<b>禁放凭据</b>——argv 可被同机进程 <span class="mono">ps</span> 看到，凭据走环境变量。</p>
+  </div>
+  <div class="fld"><label>MCP 服务绑定 <span class="dim">（来自工具库 MCP 条目 · 仅支持平台托管 MCP 的运行时显示）</span></label>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <span class="pill chip-toggle" data-click data-toast="已绑定 MCP：filesystem（演示）">filesystem ✓</span>
       <span class="pill" data-click data-toast="已绑定 MCP：fetch（演示）">fetch</span>
       <span class="pill" data-click data-toast="已绑定 MCP：postgres（演示）">postgres</span>
     </div>
+    <p class="hint" style="margin:6px 0 0">所选 dsh 支持托管 MCP；换成 copilot 时本区隐藏并注记「该运行时不支持平台托管 MCP」。MCP 配置含 token，存储/显示规则同环境变量。</p>
+  </div>
+  <div class="fld"><label>集成 <span class="chip info">Integrations · 外部服务的授权连接</span></label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="pill chip-toggle" data-click data-toast="已连接集成：GitHub（issue 跟踪 · 凭据由平台代管）（演示）">GitHub · issue 跟踪 ✓</span>
+      <span class="pill chip-toggle" data-click data-toast="已连接集成：CI（演示）">CI ✓</span>
+      <span class="pill" data-click data-toast="已勾选集成：Notion（授权后运行时可读写）（演示）">Notion</span>
+      <span class="pill" data-click data-toast="已勾选集成：Slack（演示）">Slack</span>
+    </div>
+    <p class="hint" style="margin:6px 0 0">集成 = 外部服务（issue 跟踪 / GitHub、CI、Notion、Slack）的授权连接，凭据由平台代管、run 中供工具调用；与 MCP 的区别：MCP 是协议服务，集成是服务账号。</p>
+  </div>
+  <div class="fld"><label>会话续跑</label>
+    <p style="margin:0"><span class="chip ok">✓ 由运行时决定</span> <span class="tiny dim">所选 dsh 支持：平台存会话 id，下次 run 续跑；运行时够不到该会话时新建会话继续。（mcode 不支持，每次新会话）</span></p>
   </div>
 </div>
 
-<h4 class="blk">8 · 安全闸门</h4>
+<h4 class="blk">9 · 安全闸门</h4>
 <div class="panel">
   <div class="grid g2">
     <div class="fld"><label>前置校验 gate_pre</label><select><option>开</option><option>关</option></select></div>
@@ -113,9 +174,10 @@
 
 <div style="display:flex;gap:var(--s2);margin-top:var(--s5)">
   <button class="btn" data-back="agents.html">取消</button>
-  <button class="btn primary" data-toast="已创建 Agent「审查 Agent · 标准」· 默认仅创建者可运行（演示）">创建 Agent</button>
+  <button class="btn primary" data-toast="已创建 Agent「审查 Agent · 标准」· 未归属域（未分类）· 绑定运行时 DeepSeek Harness · 模型 deepseek-official/deepseek-chat（演示）">创建 Agent</button>
 </div>
+<p class="hint" style="margin:8px 0 0">复制语义：拷贝到新运行时时「模型 / thinking 档 / 服务档」清空需重选；环境变量值与 MCP 配置从不复制。</p>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：起始点二选一（默认「空白创建」）· 技能 / Access / MCP 为多选 chips（可点 → toast）· 「取消」返回 <span class="mono">agents.html</span> · 「创建 Agent」→ toast　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：起始点二选一（默认「空白创建」）· 技能 / MCP / 集成 / Access 多选 chips（可点 → toast）· 运行时下拉仅列在线项（copilot 离线置灰）·「去运行时发现添加 →」→ <span class="mono">runtimes.html</span>（并行在建）·「⟳ 刷新模型列表」→ toast ·「所选运行时能力」小面板注记联动（copilot → 隐藏 MCP 区 · mcode → 无会话续跑、模型由运行时托管）· 域归属下拉默认「未分类」（domain_id=NULL）· 「取消」返回 <span class="mono">agents.html</span> · 「创建 Agent」→ toast（未分类 · dsh · deepseek-official/deepseek-chat）· 底部一行复制语义　按 Esc 关闭浮层。</p>
 </body></html>

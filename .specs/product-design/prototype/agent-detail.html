@@ -2,12 +2,29 @@
 <title>Agent 详情 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
-.kbd{font-size:11px}</style></head><body>
+.kbd{font-size:11px}
+.tabs .tab{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;text-decoration:none}
+.tabs .tab:hover{text-decoration:none}
+.tabs.sub{margin-bottom:var(--s3)}
+.tabs.sub .tab{padding:5px 11px;font-size:12px}
+.fld{margin-bottom:var(--s3)}
+.fld label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.fld label b{color:var(--text)}
+.fld input,.fld select,.fld textarea{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:7px 9px;font:12.5px var(--font);width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:1px solid var(--blue);border-color:var(--blue)}
+.fld .hint{font-size:11px;color:var(--text-muted);margin-top:3px}
+.fld textarea{min-height:88px;resize:vertical;font-family:var(--font-mono);font-size:11.5px}
+.kvrow{display:grid;grid-template-columns:1fr 1fr auto;gap:var(--s2);align-items:center;margin-bottom:var(--s2)}
+.clamp1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;max-width:640px}
+.savebar{position:sticky;bottom:0;display:flex;align-items:center;gap:var(--s2);background:var(--bg-card);border:1px solid var(--border);border-top:2px solid var(--blue);border-radius:var(--r-md);padding:8px 12px;margin-top:var(--s3);z-index:5}
+#work-scope .chip.active{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.hdr-act{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:130px}
+.cardmini{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s3)}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="runtime.html">运行时</span></div>
-<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>基础信息 + 探针时间线。API Key 恒为脱敏形态。</p>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>对齐 Multica Agent 详情页的<b>四标签信息架构</b>：概览（只读工作台）· 工作 · 能力（二级子栏）· 设置（二级子栏）。API 密钥类值恒为脱敏形态；<b>URL 带 <span class="mono">#view=set-probe</span> 等可直达子区（原型示意）</b>。</p>
 <div class="proto">
-      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/agents/1</span><span class="fake">演示数据</span></div>
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/agents/7</span><span class="fake">演示数据</span></div>
       <div class="app">
         <aside class="app-side">
           <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
@@ -31,86 +48,344 @@
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb"><span class="dim">Agent /</span> 审查 Agent · 标准</span><span class="right"><span class="chip ok" data-click data-drawer="dr-health"><span class="dot running" style="margin-right:4px"></span>running</span><button class="btn sm" data-toast="重启指令已下发 · 状态灯不即时改，等下一轮复探通过才转 healthy（演示）">重启</button><button class="btn sm" data-click data-pop="pop-edit">编辑 ▾</button><button class="btn sm" data-toast="已基于「审查 Agent · 标准」复制出新草稿（演示）">复制</button><button class="btn sm" style="color:var(--red)" data-click data-goto="agent-detail__delete-agent.html">删除</button></span></div>
+          <div class="app-top"><span class="crumb"><span class="dim">Agent /</span> 审查 Agent · 标准</span><span class="right"><span class="pill mono" data-goto="agent-detail__config.html">完整配置 ▸</span></span></div>
           <div class="app-body">
-            <div class="grid g2" style="align-items:start">
-              <div>
-                <p class="h2p">基础信息 <span class="pill mono" data-goto="agent-detail__config.html" data-click>完整配置 ▸</span></p>
+
+            <!-- ======== 头部区（Multica 式：头像 + 名称 + presence + 描述 + 元 chips + 右侧操作） ======== -->
+            <div class="panel" style="display:flex;gap:var(--s4);align-items:flex-start">
+              <span style="width:48px;height:48px;border-radius:14px;border:1px solid var(--border);background:var(--bg-main);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;flex:none" data-toast="字母头像取名称首字（Multica 无头像上传，原型示意）">审</span>
+              <div style="min-width:0;flex:1">
+                <p style="margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:16px">审查 Agent · 标准</b><span class="mono tiny dim">agent-7 · v3</span><span class="chip ok" data-click data-drawer="dr-health"><span class="dot running" style="margin-right:4px"></span>running</span></p>
+                <p class="small muted clamp1" id="desc-line" style="margin:5px 0 0">前端 PR 代码审查主实例，按规范检查变更并产出审查发现（演示）——只读 diff 与相关测试，按严重度排序输出发现，不改代码、不合并、不回复外部评论，交付 REVIEW.md。</p>
+                <p class="tiny" style="margin:2px 0 0"><span class="btn link" data-click onclick="toggleDesc(this)">展开 ▾</span></p>
+                <p class="tiny dim" style="margin:6px 0 0"><span data-toast="只显示更新时间（Updated），刻意不显示创建时间——Multica 详情页口径，创建时间归审计事件查（演示）">Updated 3 天前</span> · <span class="chip">工作区可见 · 仅我编辑</span> · <span class="chip mono">dsh · deepseek-official/deepseek-chat</span> <span class="tiny dim">运行时 · 模型（模型目录由运行时暴露）</span></p>
+              </div>
+              <div class="hdr-act">
+                <button class="btn sm" data-goto="chat.html">💬 DM</button>
+                <button class="btn sm primary" data-click data-modal="md-assign">＋ 指派工作</button>
+                <button class="btn sm" data-click data-pop="pop-edit">✎ 编辑 · 跳转子区 ▾</button>
+                <button class="btn sm" data-toast="重启指令已下发 · 状态灯不即时改，等下一轮复探通过才转 healthy（演示）">重启</button>
+                <button class="btn sm" data-click data-pop="pop-more">⋯</button>
+              </div>
+            </div>
+
+            <!-- ======== 三横幅位：实渲 1 条 + callout 说明另 2 条 ======== -->
+            <div class="callout warn" style="margin:var(--s3) 0 0">
+              <p style="margin:0"><b>探活近 1h 不健康：</b>通过率 <span class="mono">83%（50/60）</span> · 3 次失败集中在 14:30–14:32（timeout×2 · refused×1），已触发 caution 自动重启并恢复。口径：<b>探活 = AgentFlow 侧服务健康</b>（daemon 上报的 <span class="mono">/health</span>），<b>与模型 API Key 无关</b>；<b>CLI 登录凭据留在运行时机器上，平台从不接收</b>。<span class="btn link" data-click data-drawer="dr-health">探活详情 ▸</span><span class="btn link" data-click onclick="gotoView('v-set','sv-probe')">设置 → 探活 ▸</span></p>
+            </div>
+            <div class="callout" style="margin:var(--s2) 0 0"><p class="tiny" style="margin:0"><b>Multica 三横幅位（本页只实渲上面对应的一条健康告警）：</b>① <b>未绑定运行时</b>——琥珀 banner + <span class="mono">Bind runtime</span> 钮，点击=一次性意图通道，跳「设置 → 通用」聚焦运行时下拉；本 Agent 已绑定 dsh，故不渲；② <b>无编辑权 CapabilityBanner</b>——非 owner 打开时提示「owner 是李工 · 你只有运行权」，页内 Lock read-only，<b>不改 URL 不跳走</b>（§6.0 ①）；③ <b>归档 banner</b>——「已归档 · archived_at 2026-09-12 10:24 · 李工」+ Restore 钮，仅归档态渲染。</p></div>
+
+            <!-- ======== 四标签 Tab ======== -->
+            <div class="tabs" id="af-tabs" style="margin-top:var(--s4)">
+              <a class="tab active" data-pane="v-overview" data-click onclick="switchTo('v-overview')"><svg class="icon"><use href="#i-grid"/></svg>概览 Overview</a>
+              <a class="tab" data-pane="v-work" data-click onclick="switchTo('v-work')"><svg class="icon"><use href="#i-inbox"/></svg>工作 Work</a>
+              <a class="tab" data-pane="v-cap" data-click onclick="switchTo('v-cap')"><svg class="icon"><use href="#i-wrench"/></svg>能力 Capabilities</a>
+              <a class="tab" data-pane="v-set" data-click onclick="switchTo('v-set')"><svg class="icon"><use href="#i-gear"/></svg>设置 Settings</a>
+            </div>
+
+            <!-- ==================== Tab 1 · 概览（只读工作台） ==================== -->
+            <div class="view" id="v-overview" style="display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:var(--s3);align-items:start">
+              <div style="min-width:0">
+                <p class="h2p" style="margin-top:0">Now（活跃 run · 运行 / 排队）<span class="chip ok"><span class="dot running" style="margin-right:4px"></span>live</span></p>
+                <table class="tbl compact">
+                  <thead><tr><th>Run</th><th>工作项</th><th>态</th><th>来源</th><th>已跑 / 预估</th><th></th></tr></thead>
+                  <tbody>
+                    <tr><td class="mono">r-128</td><td class="mono">AF-104</td><td><span class="chip ok">running · 1m05s</span> <span class="chip warn" title="seq 14 停在 human_approval 等待段 · 对应审批中心 AP-31">等审批 AP-31</span></td><td><span class="chip info">人点名 · 李工</span></td><td class="mono">1m05s</td><td class="nowrap"><span class="btn link" data-goto="replay.html">看 transcript</span><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-cancel-run">取消 run</button></td></tr>
+                    <tr><td class="mono">r-129</td><td class="mono">AF-116</td><td><span class="chip">queued</span></td><td><span class="chip info">工作项</span></td><td class="tiny dim">等待位 <span class="mono">#1</span> · 预估 ~40s 起跑</td><td><span class="btn link" data-toast="已置顶 r-129（排队不改并发上限 · 演示）">置顶</span></td></tr>
+                    <tr><td class="mono">r-130</td><td class="tiny dim">—（无工作项）</td><td><span class="chip">queued</span></td><td><span class="chip purple">定时</span></td><td class="tiny dim">等待位 <span class="mono">#2</span> · 预估 ~1m10s 起跑</td><td><span class="btn link" data-toast="定时触发预建的 run · 可移出队列（演示）">移出队列</span></td></tr>
+                  </tbody>
+                </table>
+                <p class="tiny muted" style="margin:6px 0 0">在途任务（删除前必查 · 2）<span class="chip warn">删除前必查</span></p>
+                <table class="tbl compact">
+                  <thead><tr><th>Task</th><th>标签</th><th>来源</th><th>已跑</th><th>态</th></tr></thead>
+                  <tbody>
+                    <tr data-click data-toast="跳 §6.22 执行回放 · task-1 → run r-128（演示）"><td class="mono">task-1</td><td class="mono">code-review</td><td>人点名 · 李工</td><td class="mono">4m12s</td><td><span class="chip info">assigned</span></td></tr>
+                    <tr data-click data-toast="跳 §6.22 执行回放 · task-9 → run rt-1-13:40（演示）"><td class="mono">task-9</td><td class="mono">code-review</td><td>工作项 AF-104</td><td class="mono">31m</td><td><span class="chip warn">在途 · 探针失败未中断</span></td></tr>
+                  </tbody>
+                </table>
+
+                <p class="h2p" style="margin-top:var(--s4)">近 30 天</p>
+                <div class="grid g4" style="gap:var(--s2)">
+                  <div class="stat"><div class="stat-label">Runs</div><div class="stat-value">214</div><div class="stat-sub">终态 + 活跃</div></div>
+                  <div class="stat"><div class="stat-label">成功率</div><div class="stat-value">93%</div><div class="stat-sub" title="完成 ÷ (完成 + 失败)，取消不计">完成÷(完成+失败) · 取消不计</div></div>
+                  <div class="stat"><div class="stat-label">均时</div><div class="stat-value">2m41s</div><div class="stat-sub">P95 · 6m02s</div></div>
+                  <div class="stat"><div class="stat-label">失败 / 取消</div><div class="stat-value">12 <span style="font-size:13px">/ 3</span></div><div class="stat-sub">failed · cancelled</div></div>
+                </div>
+                <div class="panel" style="margin-top:var(--s2)">
+                  <p class="tiny muted" style="margin:0 0 4px">日 run 分布（近 30 天 · 手写折线 · 09-12 三连失败窗与探活抖动同窗）</p>
+                  <svg viewBox="0 0 302 64" style="width:100%;height:72px" role="img" aria-label="近 30 天日 run 数折线（演示数据）">
+                    <line x1="2" y1="56" x2="298" y2="56" stroke="rgba(255,255,255,.10)"/>
+                    <polyline fill="none" stroke="var(--blue)" stroke-width="1.5" points="2,34 12,28 22,38 32,30 42,24 52,33 62,40 72,29 82,26 92,36 102,42 112,31 122,25 132,20 142,30 152,37 162,28 172,22 182,17 192,27 202,35 212,30 222,23 232,18 242,26 252,33 262,27 272,21 282,16 292,12"/>
+                    <circle cx="292" cy="12" r="2.5" fill="var(--blue)"/>
+                  </svg>
+                </div>
+
+                <p class="h2p" style="margin-top:var(--s4)">最近工作（终态 run）<span class="chip info">行 → transcript 回放</span></p>
+                <p class="tiny dim" style="margin:0 0 4px">模型同为 <span class="mono">deepseek-official/deepseek-chat</span>（dsh 运行时），故不单列；来源徽标 6 类：工作项 / 对话 / 定时 / 人点名 / 工作流派生 / API。</p>
+                <table class="tbl compact">
+                  <thead><tr><th>Run</th><th>状态</th><th>来源</th><th>原因（失败 / 取消）</th><th>耗时</th><th></th></tr></thead>
+                  <tbody>
+                    <tr><td class="mono">rt-1-14:31</td><td><span class="chip ok">success</span></td><td><span class="chip info">工作项 · AF-104</span></td><td class="tiny dim">— · 12,480 tok</td><td class="mono">8.2s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">rt-1-14:12</td><td><span class="chip ok">success</span></td><td><span class="chip purple">对话 · c-338</span></td><td class="tiny dim">— · 9,120 tok</td><td class="mono">6.4s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">rt-1-13:58</td><td><span class="chip bad">failed</span></td><td><span class="chip info">工作项 · AF-104</span></td><td class="tiny">运行时 exit 1 · 断在 seq 9（<span class="mono">12,480→21,004 tok</span>）</td><td class="mono">31.7s</td><td><span class="btn link" data-goto="agent-detail__run-failed.html">失败详情</span></td></tr>
+                    <tr><td class="mono">rt-1-13:40</td><td><span class="chip ok">success</span></td><td><span class="chip">人点名 · 李工</span></td><td class="tiny dim">— · 7,860 tok</td><td class="mono">5.1s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">r-124</td><td><span class="chip ok">success</span></td><td><span class="chip info">工作项 · AF-109</span></td><td class="tiny dim">—</td><td class="mono">2m18s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">r-122</td><td><span class="chip">cancelled</span></td><td><span class="chip">人点名 · 王五</span></td><td class="tiny">取消 · 重复提交 · 操作者王五</td><td class="mono">41s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">r-119</td><td><span class="chip ok">success</span></td><td><span class="chip purple">定时 · 日会前审查</span></td><td class="tiny dim">—</td><td class="mono">1m52s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">r-117</td><td><span class="chip bad">failed</span></td><td><span class="chip mono">API · CI webhook</span></td><td class="tiny">上游模型限流（429）· retry×3 仍败</td><td class="mono">3m04s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">r-113</td><td><span class="chip ok">success</span></td><td><span class="chip info">工作流派生 · 审查流水线 v3</span></td><td class="tiny dim">—</td><td class="mono">47s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">r-109</td><td><span class="chip">cancelled</span></td><td><span class="chip purple">对话 · c-311</span></td><td class="tiny">用户中断 · 李工</td><td class="mono">12s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                  </tbody>
+                </table>
+                <p style="margin:6px 0 0"><button class="btn sm" data-toast="已加载更早 20 条（演示 · 真实系统按游标分页）">Show more +20</button></p>
+              </div>
+              <div style="min-width:0">
+                <p class="h2p" style="margin-top:0">摘要卡（只读 · 编辑去设置 Tab）</p>
+                <div class="cardmini" style="margin-bottom:var(--s2)"><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">Owner 与 Access</p><p class="small" style="margin:0">李工 <span class="mono tiny dim">@li.gong</span></p><p class="tiny dim" style="margin:4px 0 0">可见=工作区成员 · 编辑=仅 owner<br/>可运行=指定成员 <span class="mono">李工 · 王五</span> <span class="btn link" data-click onclick="gotoView('v-set','sv-acc')">改 Access ▸</span></p></div>
+                <div class="cardmini" style="margin-bottom:var(--s2)"><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">运行时与模型</p><p class="small" style="margin:0"><span class="chip ok mono">dsh · stdio 族 · 本机在线</span></p><p class="tiny" style="margin:4px 0 0">DeepSeek Harness · 每 run 由 daemon 调用该 CLI · 平台不本地运行模型 · <a data-goto="runtimes.html">运行时发现</a></p><p class="tiny mono" style="margin:4px 0 0">deepseek-official/deepseek-chat · thinking 高</p><p class="tiny" style="margin:4px 0 0"><span class="chip ok">✓ 会话续跑</span> 能力由运行时决定</p></div>
+                <div class="cardmini" style="margin-bottom:var(--s2)"><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">状态（双灯）与并发</p><p class="small" style="margin:0"><span class="chip ok">online</span> <span class="chip info">working</span> <span class="bar" style="display:inline-block;width:80px;vertical-align:middle"><i class="o" style="width:67%"></i></span> <span class="mono tiny">4/6</span></p><p class="tiny dim" style="margin:4px 0 0">并发上限 6（与 daemon 全机 20 取小）· 取消 run 不计成功率</p></div>
+                <div class="cardmini" style="margin-bottom:var(--s2)"><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">技能（绑定后注入运行时）</p><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="pill mono">代码审查</span><span class="pill mono">需求拆解</span><span class="pill mono" style="opacity:.6">浏览器自动化 <span class="chip bad" style="height:16px;padding:0 5px">禁用绑定</span></span></div><p class="tiny" style="margin:6px 0 0"><span class="btn link" data-click onclick="gotoView('v-cap','cv-skill')">能力 → 技能：管理绑定 ▸</span></p></div>
+                <div class="cardmini" style="margin-bottom:var(--s2)"><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">域归属</p><p class="small" style="margin:0"><span class="chip warn">未分类</span> <span class="tiny dim">创建时未选域（domain_id=NULL）</span></p><p class="tiny" style="margin:4px 0 0"><a data-goto="control-plane.html">去归位（管控面）▸</a> · <span class="btn link" data-click onclick="gotoView('v-set','sv-gen')">设置 → 通用 ▸</span></p></div>
+                <div class="cardmini" style="margin-bottom:var(--s2)"><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">域内共享记忆 <span class="chip info">同域可加载</span></p><p class="small" style="margin:0">本 Agent 已载入 <b>3</b> 条（同域共 5 条）</p><p class="tiny" style="margin:4px 0 0"><span class="btn link" data-click data-drawer="dr-mem">条目详情 ▸</span><span class="btn link" data-toast="已加入本 Agent 的检索挂载：审查 Agent · 备援 也能读到这 3 条（演示）">全量挂载</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-mem">断开记忆共享</span></p></div>
+                <div class="cardmini" style="margin-bottom:var(--s2)"><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">探活（AgentFlow 侧服务）</p><p class="small" style="margin:0"><span class="chip ok"><span class="dot running" style="margin-right:4px"></span>healthy</span> <span class="chip warn">近 1h 83%</span> <span class="mono tiny">42ms</span></p><p class="tiny" style="margin:4px 0 0"><span class="btn link" data-click data-drawer="dr-health">抽屉详情 ▸</span><span class="btn link" data-click onclick="gotoView('v-set','sv-probe')">设置 → 探活 ▸</span></p></div>
+                <div class="cardmini"><p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">Token / Cost（AgentFlow 特性保留）</p><p class="small mono" style="margin:0">2.71M tok · $24.6 <span class="tiny dim">近 30 天</span></p><p class="tiny dim" style="margin:4px 0 0">Multica 详情页刻意无用量；本平台保留监控口径并接 <a data-goto="metrics.html">监控</a>（SessionMetric 聚合 · 按 owner 归属）。</p></div>
+              </div>
+            </div>
+
+            <!-- ==================== Tab 2 · 工作 ==================== -->
+            <div class="view" id="v-work" style="display:none">
+              <p class="h2p" style="margin-top:0">工作范围 <span class="tiny dim">scope（Multica：Work tab 先切范围再看列表）</span></p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap" id="work-scope">
+                <span class="chip ok active" data-click onclick="scopePick(this,'分配给我（assigned）：本 Agent 被指派的工作项')">分配给我 · 4</span>
+                <span class="chip" data-click onclick="scopePick(this,'我创建的（created）：李工创建且指派给本 Agent 的')">我创建的 · 2</span>
+                <span class="chip" data-click data-toast="范围切换只影响列表过滤，URL 不变（原型示意）">＋ 自定义筛选</span>
+              </div>
+              <table class="tbl compact" style="margin-top:var(--s3)">
+                <thead><tr><th>工作项</th><th>状态</th><th>负责人</th><th>最近 run</th><th>更新</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">AF-104 · 收件箱聚合规则</td><td><span class="chip ok">进行中</span></td><td>李工</td><td class="mono tiny">r-128 <span class="btn link" data-goto="replay.html">回放</span></td><td class="mono tiny">刚刚</td></tr>
+                  <tr><td class="mono">AF-116 · deferred 隐藏开关</td><td><span class="chip">排队</span></td><td>王五</td><td class="mono tiny">r-129 · queued（等待位 #1）</td><td class="mono tiny">12 分钟前</td></tr>
+                  <tr><td class="mono">AF-109 · 能力分组派生口径</td><td><span class="chip ok">已完成</span></td><td>李工</td><td class="mono tiny">r-124 <span class="btn link" data-goto="replay.html">回放</span></td><td class="mono tiny">3 天前</td></tr>
+                  <tr><td class="mono">AF-121 · 权限矩阵回归</td><td><span class="chip warn">阻塞</span></td><td>李工</td><td class="tiny dim">— · 缺 project:write 授权</td><td class="mono tiny">5 小时前</td></tr>
+                </tbody>
+              </table>
+              <p class="tiny dim" style="margin-top:var(--s2)">指派新工作走头部「＋ 指派工作」（会入本 Agent 队列，等并发槽位释放）；工作项全量在 <a data-goto="board.html">看板</a>。取消不计入成功率（见概览口径）。</p>
+            </div>
+
+            <!-- ==================== Tab 3 · 能力（二级子栏） ==================== -->
+            <div class="view" id="v-cap" style="display:none">
+              <div class="tabs sub" id="cap-tabs">
+                <a class="tab active" data-pane="cv-instr" data-click onclick="switchTo('cv-instr')">指令</a>
+                <a class="tab" data-pane="cv-skill" data-click onclick="switchTo('cv-skill')">技能</a>
+                <a class="tab" data-pane="cv-mcp" data-click onclick="switchTo('cv-mcp')">MCP</a>
+                <a class="tab" data-pane="cv-int" data-click onclick="switchTo('cv-int')">集成</a>
+                <a class="tab" data-pane="cv-know" data-click onclick="switchTo('cv-know')">知识源与编排</a>
+              </div>
+
+              <div class="pane" id="cv-instr" style="display:block">
                 <div class="panel">
-                  <p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">标识与描述</p>
-                  <dl class="kv">
-                    <dt>名称</dt><dd><b>审查 Agent · 标准</b></dd>
-                    <dt>Agent ID</dt><dd class="mono">1</dd>
-                    <dt>描述</dt><dd>前端 PR 代码审查主实例，按规范检查变更并产出审查发现（演示）</dd>
-                    <dt>Owner</dt><dd>李工 <span class="mono">@li.gong</span></dd>
-                    <dt>创建时间</dt><dd class="mono">2026-06-12 10:24（演示）</dd>
-                  </dl>
-                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">指令 Instructions</p>
-                  <details>
-                    <summary class="tiny" style="cursor:pointer;color:var(--blue)">展开 / 收起（职责 · 边界 · 交付要求）</summary>
-                    <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:8px">你审查前端 PR。只读 diff 与相关测试，不得直接改代码。
+                  <p class="h2p" style="margin-top:0">系统指令 Instructions</p>
+                  <div class="fld"><textarea>你审查前端 PR。只读 diff 与相关测试，不得直接改代码。
 职责：按严重度排序输出发现，先列阻断项再列建议。
 边界：不改代码、不合并、不回复外部评论。
-交付：产出 REVIEW.md（含逐条位置 / severity / 建议）。</pre>
-                  </details>
-                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">技能</p>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap">
-                    <span class="pill mono">代码审查</span>
-                    <span class="pill mono">需求拆解</span>
-                    <span class="pill mono" style="opacity:.6">浏览器自动化 <span class="chip bad" style="height:16px;padding:0 5px">禁用绑定</span></span>
+交付：产出 REVIEW.md（含逐条位置 / severity / 建议）。</textarea>
+                    <p class="hint">指令拼在 run 的 system 段最前；改完不自动重启实例（§5.4 边界）。渲染由运行时的 CLI 侧完成。</p>
                   </div>
-                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">对话启动语（≤3）</p>
-                  <dl class="kv">
-                    <dt>帮我审查这个 PR</dt><dd class="tiny muted">对当前 diff 执行标准审查</dd>
-                    <dt>列出高优先级发现</dt><dd class="tiny muted">按 severity 降序列出阻断项</dd>
-                    <dt>总结本次审查</dt><dd class="tiny muted">输出一句话结论与建议</dd>
-                  </dl>
-                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">执行配置</p>
-                  <dl class="kv">
-                    <dt>运行时</dt><dd class="mono">LangGraph</dd>
-                    <dt>模型 Provider</dt><dd class="mono">openai</dd>
-                    <dt>模型</dt><dd class="mono">gpt-4o</dd>
-                    <dt>thinking</dt><dd class="mono">高</dd>
-                    <dt>并发上限</dt><dd class="mono">4</dd>
-                    <dt>环境变量</dt><dd class="mono">3 项（仅显示 count · 值恒脱敏）</dd>
-                    <dt>CLI 参数</dt><dd class="mono">--review --format md</dd>
-                    <dt>MCP</dt><dd class="mono">filesystem · fetch（2 个）</dd>
-                  </dl>
-                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">Access</p>
-                  <dl class="kv"><dt>可见性</dt><dd><span class="chip">指定成员</span> 李工 · 王五（可运行）</dd></dl>
-                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">状态（双灯）</p>
-                  <dl class="kv">
-                    <dt>可用性</dt><dd><span class="chip ok">online</span></dd>
-                    <dt>负载</dt><dd><span class="chip info">working</span> <span class="bar" style="display:inline-block;width:80px;vertical-align:middle"><i class="g" style="width:50%"></i></span> <span class="mono tiny">2/4</span></dd>
-                  </dl>
-                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">安全闸门</p>
-                  <dl class="kv">
-                    <dt>gate_pre</dt><dd class="mono">开 · diff 可读 + 测试通过</dd>
-                    <dt>gate_post</dt><dd class="mono">开 · 发现数 ≥ 1 才可交付</dd>
-                    <dt>io_filter</dt><dd class="mono">sanitize</dd>
-                  </dl>
-                  <p class="tiny muted" style="margin:var(--s4) 0 6px;text-transform:uppercase;letter-spacing:.05em">凭据与探活</p>
-                  <dl class="kv">
-                    <dt>Base URL</dt><dd class="mono">https://api.openai.com/v1</dd>
-                    <dt>健康端点</dt><dd class="mono">https://api.openai.com/v1/health</dd>
-                    <dt>API Key</dt><dd class="mono">sk-***</dd>
-                  </dl>
-                  <p class="tiny dim" style="margin:6px 0 0">凭据不进指令，仅运行时使用；界面与日志恒脱敏。</p>
-                </div>
-                <p class="h2p" style="margin-top:var(--s4)">域内共享记忆 <span class="chip info">同域可加载</span></p>
-                <div class="panel">
-                  <p class="small muted" style="margin:0 0 6px">同域 Agent 可加载以下前序上下文：</p>
-                  <div class="timeline" style="margin:0">
-                    <div class="tl-item" data-click data-drawer="dr-mem"><b>2026-07-06</b> · capability-groups 设计结论：虚拟分组不建表</div>
-                    <div class="tl-item"><b>2026-07-05</b> · 管控面探针限流器为进程内实现（单进程适用）</div>
-                    <div class="tl-item"><b>2026-07-05</b> · Reconcile 修复前须过拓扑安全检查</div>
-                  </div>
-                  <p class="tiny" style="margin:8px 0 0"><span class="btn link" data-toast="已加入本 Agent 的检索挂载：审查 Agent · 备援 也能读到这 3 条（演示）">全量挂载</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-mem">断开记忆共享</span></p>
+                  <p class="h2p">对话启动语（≤3 · DM 首屏按钮）</p>
+                  <table class="tbl compact"><tbody>
+                    <tr><td>帮我审查这个 PR</td><td class="tiny muted">对当前 diff 执行标准审查</td><td><span class="btn link" data-toast="已置为第 1 条（演示）">置顶</span><span class="btn link" style="color:var(--red)" data-click data-toast="已删除该启动语（剩 2 条 · 演示）">删</span></td></tr>
+                    <tr><td>列出高优先级发现</td><td class="tiny muted">按 severity 降序列出阻断项</td><td><span class="btn link" data-toast="已置为第 1 条（演示）">置顶</span><span class="btn link" style="color:var(--red)" data-click data-toast="已删除该启动语（剩 2 条 · 演示）">删</span></td></tr>
+                    <tr><td>总结本次审查</td><td class="tiny muted">输出一句话结论与建议</td><td><span class="btn link" data-toast="已置为第 1 条（演示）">置顶</span><span class="btn link" style="color:var(--red)" data-click data-toast="已删除该启动语（剩 2 条 · 演示）">删</span></td></tr>
+                  </tbody></table>
+                  <p style="margin-top:var(--s2)"><button class="btn sm" data-toast="已达 3 条上限——Multica 口径刻意限 3，避免首屏变菜单（演示）">＋ 加一条</button></p>
                 </div>
               </div>
-              <div>
-                <p class="h2p">探针时间线（最近 8 次） <span class="chip bad">fail 行可点 → 探针失败详情页</span> <span class="pill" data-click data-pop="pop-probe-range">范围：最近 8 次 ▾</span></p>
+
+              <div class="pane" id="cv-skill" style="display:none">
                 <div class="panel">
+                  <p class="h2p" style="margin-top:0">技能绑定表 <span class="tiny dim">绑定后由 daemon 注入运行时技能目录</span><span style="flex:1"></span><button class="btn sm primary" data-click data-pop="pop-skill-add">＋ 加绑</button></p>
+                  <table class="tbl compact">
+                    <thead><tr><th>技能</th><th>启用（绑定级）</th><th>版本</th><th>注入路径</th><th>状态</th></tr></thead>
+                    <tbody>
+                      <tr><td class="mono"><a data-goto="tools__code-review-skill.html">代码审查</a></td><td><span class="chip ok" data-click onclick="swBind(this)">开</span></td><td class="mono">v2</td><td class="mono tiny">.dsh/skills/code-review/</td><td><span class="chip ok" data-st="正常">正常</span></td></tr>
+                      <tr><td class="mono">需求拆解</td><td><span class="chip ok" data-click onclick="swBind(this)">开</span></td><td class="mono">v2</td><td class="mono tiny">.dsh/skills/requirement-split/</td><td><span class="chip ok" data-st="正常">正常</span></td></tr>
+                      <tr><td class="mono"><a data-goto="tools__skill-browser.html">浏览器自动化</a></td><td><span class="chip warn" data-click onclick="swBind(this)">关</span></td><td class="mono">v1</td><td class="mono tiny">.dsh/skills/browser/</td><td><span class="chip warn" data-st="禁用绑定">禁用绑定</span></td></tr>
+                    </tbody>
+                  </table>
+                  <p class="tiny dim" style="margin-top:var(--s2)"><b>三层开关，逐层短路：</b>① 库条目（工具库全局启停，关掉则所有 Agent 不可用——浏览器自动化在 <a data-goto="tools.html">工具库</a> 已「已禁用」）② 绑定（Agent ↔ 技能关系本身，删行即解绑）③ 绑定级（本行「开 / 关」，只影响本 Agent）。注入路径随运行时：<span class="mono">dsh → .dsh/skills/</span>、codex → <span class="mono">$CODEX_HOME/skills/ · per-run 隔离</span>。版本升级走工具库发布，绑定钉在 major 版本（v2）不自动跳。</p>
+                </div>
+              </div>
+
+              <div class="pane" id="cv-mcp" style="display:none">
+                <div class="callout warn"><p class="tiny" style="margin:0"><b>三态规则（与 Multica 同口径）：</b>请求体里 MCP 字段<b>省略 = 保持不变</b>；<b>清空（显式 null）= 删除全部</b>；<b>传对象 = 整体替换</b>。<b>已保存值不回显到编辑器、编辑即整体替换</b>——本页「可视化」表只读展示服务端现值，防止半截编辑误删。</p></div>
+                <div class="panel" style="margin-top:var(--s3)">
+                  <p class="h2p" style="margin-top:0">MCP 服务（现 2 个）<span style="flex:1"></span><span class="pill mono active" id="mcp-tab-v" data-click onclick="mcpMode('v',this)">可视化</span><span class="pill mono" id="mcp-tab-j" data-click onclick="mcpMode('j',this)">JSON</span></p>
+                  <div id="mcp-vis">
+                    <table class="tbl compact"><thead><tr><th>名称</th><th>传输</th><th>端点 / 命令</th><th>态</th><th></th></tr></thead><tbody>
+                      <tr><td class="mono"><a data-goto="tools__mcp-filesystem.html">filesystem</a></td><td><span class="chip mono">STDIO</span></td><td class="mono tiny">npx -y @modelcontextprotocol/server-filesystem /specs</td><td><span class="chip ok">connected · 6 tools</span></td><td><span class="btn link" style="color:var(--red)" data-toast="整体替换提交：剩余 1 个（fetch）——不是只删这一个（三态规则演示）">移除</span></td></tr>
+                      <tr><td class="mono"><a data-goto="tools__mcp-fetch.html">fetch</a></td><td><span class="chip mono">Streamable HTTP</span></td><td class="mono tiny">https://mcp.internal/fetch/sse</td><td><span class="chip ok">connected · 2 tools</span></td><td><span class="btn link" style="color:var(--red)" data-toast="整体替换提交：剩余 1 个（filesystem）（三态规则演示）">移除</span></td></tr>
+                    </tbody></table>
+                    <p class="tiny dim" style="margin-top:var(--s2)">transport 二选一：<b>STDIO</b>（daemon 本机拉起子进程）/ <b>Streamable HTTP</b>（远端端点 · 凭据 AES-GCM 落库、界面不回显明文）。</p>
+                  </div>
+                  <div id="mcp-json" style="display:none">
+                    <pre class="mono tiny" style="background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0">{
+  "filesystem": { "transport": "stdio", "command": "npx", "args": ["-y","@modelcontextprotocol/server-filesystem","/specs"] },
+  "fetch": { "transport": "streamable_http", "url": "https://mcp.internal/fetch/sse" }
+}</pre>
+                    <p class="tiny dim" style="margin-top:6px">编辑此 JSON 并保存 = <b>整体替换</b>；保存为空对象 {} = 清空全部（等价 null）。复制 Agent 时 MCP 配置<b>从不复制</b>。</p>
+                  </div>
+                  <p class="tiny dim" style="margin-top:var(--s2)"><b>provider 白名单：</b>运行时不支持平台托管 MCP 时（如 copilot ✗），本 MCP 子栏整体隐藏——不是置灰。当前 dsh ✓ 支持，故可见。</p>
+                </div>
+              </div>
+
+              <div class="pane" id="cv-int" style="display:none">
+                <div class="panel">
+                  <p class="h2p" style="margin-top:0">集成（外部服务授权连接 · 凭据由平台代管）</p>
+                  <table class="tbl compact"><thead><tr><th>集成</th><th>用途</th><th>态</th><th></th></tr></thead><tbody>
+                    <tr><td class="mono">GitHub</td><td class="tiny">读 PR diff · 回写审查评论</td><td><span class="chip ok">已连接 · 令牌有效</span></td><td><span class="btn link" style="color:var(--red)" data-toast="已断开 GitHub 集成 · 依赖它的 gate_pre（diff 可读）将转拒绝（演示 · 审计 int:unbound）">断开</span></td></tr>
+                    <tr><td class="mono">CI</td><td class="tiny">webhook 触发 run · 读构建结果</td><td><span class="chip ok">已连接</span></td><td><span class="btn link" style="color:var(--red)" data-toast="已断开 CI 集成 · API 来源的 run 将无法入队（演示）">断开</span></td></tr>
+                    <tr><td class="mono">Notion</td><td class="tiny">读产品需求库（与知识源共用凭据）</td><td><span class="chip bad">令牌过期 · 冻结</span></td><td><span class="btn link" data-goto="knowledge.html">更新凭据</span> <span class="btn link" style="color:var(--red)" data-toast="已断开 Notion 集成（演示 · 知识源侧冻结不受影响）">断开</span></td></tr>
+                  </tbody></table>
+                  <p class="tiny dim" style="margin-top:var(--s2)">凭据代管（AES-GCM 落库）与「运行时 CLI 登录凭据留在运行时机器」是<b>两条通道</b>，互不上收。<b>IM 渠道安装（企微 / 钉钉 / Slack bot）属工作区级</b>，仅 owner / admin 可管，本 Agent 页只读展示、不提供安装入口。</p>
+                </div>
+              </div>
+
+              <div class="pane" id="cv-know" style="display:none">
+                <div class="panel">
+                  <p class="h2p" style="margin-top:0">该 Agent 的编排引用 <span class="chip info">被 5 条边引用 · 删除 / 归档前必看</span></p>
+                  <table class="tbl compact"><thead><tr><th>工作流</th><th>版本</th><th>步骤</th><th>边策略</th></tr></thead><tbody>
+                    <tr><td class="mono">审查流水线</td><td class="mono">v3</td><td class="mono">1</td><td class="mono tiny">fan-out</td></tr>
+                    <tr><td class="mono">需求澄清</td><td class="mono">v2</td><td class="mono">2</td><td class="mono tiny">retry×2</td></tr>
+                    <tr><td class="mono">发布前检查</td><td class="mono">v1 草稿</td><td class="mono">3</td><td class="mono tiny">timeout 90s</td></tr>
+                    <tr><td class="mono">告警自愈</td><td class="mono">v2</td><td class="mono">2</td><td class="mono tiny">human-approval</td></tr>
+                    <tr><td class="mono">旧版日志采集</td><td class="mono">v9 归档</td><td class="mono">1</td><td class="mono tiny">dead-letter</td></tr>
+                  </tbody></table>
+                  <p class="tiny dim" style="margin-top:6px">画布视角见 <a data-goto="canvas.html">编排</a>；替换本 Agent 需先改指目标节点，human-approval / dead-letter 两条边为强引用。</p>
+                </div>
+                <div class="panel" style="margin-top:var(--s3)">
+                  <p class="h2p" style="margin-top:0">挂载知识源（3）</p>
+                  <table class="tbl compact"><tbody>
+                    <tr><td class="mono">架构说明.md</td><td><span class="chip ok">已索引 · 1 chunk</span></td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-kb">断开</span></td></tr>
+                    <tr><td class="mono">规范.pdf</td><td><span class="chip ok">已索引 · 100 chunks</span></td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-kb">断开</span></td></tr>
+                    <tr><td class="mono">Notion · 产品需求库</td><td><span class="chip bad">令牌过期 · 冻结</span></td><td><span class="btn link" data-toast="跳 §6.9 知识库更新凭据（演示 · 索引保持冻结）">更新凭据</span></td></tr>
+                  </tbody></table>
+                  <p class="tiny dim" style="margin-top:6px">检索挂载与「域内共享记忆」两路输入分开记账（见概览右卡与 <span class="btn link" data-click data-drawer="dr-mem">记忆抽屉</span>）。</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ==================== Tab 4 · 设置（二级子栏） ==================== -->
+            <div class="view" id="v-set" style="display:none">
+              <div class="tabs sub" id="set-tabs">
+                <a class="tab active" data-pane="sv-gen" data-click onclick="switchTo('sv-gen')">通用</a>
+                <a class="tab" data-pane="sv-acc" data-click onclick="switchTo('sv-acc')">Access</a>
+                <a class="tab" data-pane="sv-env" data-click onclick="switchTo('sv-env')">环境</a>
+                <a class="tab" data-pane="sv-cli" data-click onclick="switchTo('sv-cli')">CLI 参数</a>
+                <a class="tab" data-pane="sv-gate" data-click onclick="switchTo('sv-gate')">闸门</a>
+                <a class="tab" data-pane="sv-probe" data-click onclick="switchTo('sv-probe')">探活</a>
+                <a class="tab" data-pane="sv-danger" data-click onclick="switchTo('sv-danger')">危险区</a>
+              </div>
+
+              <div class="pane" id="sv-gen" style="display:block">
+                <div class="panel">
+                  <p class="h2p" style="margin-top:0">标识</p>
+                  <div class="grid g2">
+                    <div class="fld"><label><b>名称</b></label><input value="审查 Agent · 标准"></div>
+                    <div class="fld"><label>别名（≤16 字 · 列表与 @提及用）</label><input value="review-std" maxlength="16"><p class="hint">超 16 字前端截断保存，服务端拒绝。</p></div>
+                  </div>
+                  <div class="fld"><label>描述</label><textarea>前端 PR 代码审查主实例，按规范检查变更并产出审查发现（演示）</textarea></div>
+                  <div class="grid g2">
+                    <div class="fld"><label>归属域</label><select><option selected>未分类（domain_id=NULL）</option><option>default 域</option><option>test 域</option><option>prod 域</option></select><p class="hint">未分类不享受域内共享记忆注入 · <a data-goto="control-plane.html">去归位（管控面）▸</a></p></div>
+                    <div class="fld"><label>能力标签 <span class="dim">（决定能力组派生归属 · 多标签多归属）</span></label><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="pill mono">code-review</span><span class="pill mono">python</span><span class="pill" data-click data-toast="加标签会同步改变能力组归属（多归属属预期）（演示）">＋ 加标签</span></div></div>
+                  </div>
+                  <p class="h2p">执行配置</p>
+                  <div class="grid g2">
+                    <div class="fld"><label><b>运行时</b></label><select id="sel-rt" onchange="rtChanged(this)"><option selected value="dsh">DeepSeek Harness（dsh · stdio 族 · 本机在线）</option><option value="codex">Codex CLI（codex · online · 固定名单）</option><option value="claude">Claude Code（claude · online · 账号动态）</option><option value="hermes">Hermes Agent（hermes · online）</option><option value="mcode" disabled>mcode（离线 · 不可选）</option><option value="copilot" disabled>copilot（离线 · 不支持托管 MCP）</option></select><p class="hint">改运行时 → <b>模型清空重选</b>（模型目录由新运行时暴露）· 每 run 由该机器 daemon 调 CLI 执行。</p></div>
+                    <div class="fld"><label>模型 <span class="chip info">随运行时获取</span> <span class="pill" data-click data-toast="已从 dsh --list-models 拉取 2 个模型（演示）" style="margin-left:6px">⟳ 刷新模型列表</span></label><select id="sel-model"><option selected>deepseek-official/deepseek-chat</option><option>deepseek-official/deepseek-reasoner</option><option>（留空 · 用运行时/CLI 自身默认）</option></select><p class="hint">平台不本地运行 / 加载模型；运行时离线时刷新得空列表，先确认在线与已登录。</p></div>
+                    <div class="fld"><label>thinking 档</label><select><option>无</option><option>低</option><option>中</option><option selected>高</option></select></div>
+                    <div class="fld"><label>服务档 <span class="dim">（仅 Codex 类运行时支持 high / normal）</span></label><select><option selected>默认（随运行时）</option><option>high</option><option>normal</option></select><p class="hint">仅 codex 类 CLI 有服务档；其余运行时忽略此项。</p></div>
+                    <div class="fld"><label>并发上限</label><input type="number" value="6"><p class="hint">与 daemon 全机 20 取小 · 当前占用 <span class="mono">4/6</span>。</p></div>
+                    <div class="fld"><label>会话轮次上限</label><input type="number" value="20"><p class="hint">续跑会话累计轮数超限后新建会话继续（能力由运行时决定 · dsh ✓ 支持）。</p></div>
+                  </div>
+                  <div class="grid g3">
+                    <div class="fld"><label>单步超时</label><input value="120s"></div>
+                    <div class="fld"><label>重试</label><input value="3 次 · 退避 1/2/4/8s"></div>
+                    <div class="fld"><label>Token 预算</label><input value="单 run 200k · 日预算 1.2M（已用 412k）"></div>
+                  </div>
+                  <p class="tiny" style="margin:0"><span class="chip ok">✓ 会话续跑</span> <span class="tiny dim">上次会话已续跑 · 够不到会话时新建会话继续（随运行时能力）</span></p>
+                </div>
+                <div class="savebar"><span class="chip ok">已存</span><span class="tiny dim">自动保存三态：<span class="chip">保存中</span> → <span class="chip ok">已存</span> / <span class="chip bad">失败（页内显示具体错误）</span> · 改完不自动重启实例（§5.4）</span><span style="flex:1"></span><button class="btn sm primary" data-toast="已保存 3 处改动 · 实例未重启（需显式重启）（演示）">保存全部</button><button class="btn sm" data-click onclick="dirtyOff()" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）">放弃</button></div>
+              </div>
+
+              <div class="pane" id="sv-acc" style="display:none">
+                <div class="panel">
+                  <p class="h2p" style="margin-top:0">Access · 两轴分离 <span class="chip info">能看见 ≠ 能运行</span></p>
+                  <p class="tiny dim" style="margin:0 0 var(--s3)">可见轴管「发现与详情读取」；可运行轴管「触发 run」。两轴独立评估，服务端双闸门——只放开可见不会获得运行权（§6.0 ⑥）。</p>
+                  <p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">轴一 · 可见</p>
+                  <div class="fld"><label>范围</label><select><option>私有（仅 owner + 显式成员）</option><option selected>工作区（全员可见详情 · 编辑仍仅 owner）</option></select><p class="hint">成员补充：<span class="pill mono">李工（owner）</span><span class="pill mono">王五</span> <span class="pill" data-click data-toast="加可见成员走成员选择器（演示）">＋ 加成员</span></p></div>
+                  <p class="tiny muted" style="margin:var(--s3) 0 4px;text-transform:uppercase;letter-spacing:.05em">轴二 · 可运行</p>
+                  <div class="fld"><label>范围</label><select><option>Everyone（工作区全员可触发）</option><option selected>指定成员</option></select><p class="hint">可运行成员：<span class="pill mono">李工</span><span class="pill mono">王五</span> <span class="pill" data-click data-toast="运行权变更落审计 agent:access_updated（演示）">＋ 加成员</span></p></div>
+                  <p class="tiny muted" style="margin:var(--s3) 0 4px;text-transform:uppercase;letter-spacing:.05em">机器触发许可（独立于两轴）</p>
+                  <div class="grid g2">
+                    <div class="fld"><label>Autopilot（管控面自动派发）</label><p style="margin:0"><span class="chip ok" data-click onclick="swBind(this)">开</span> <span class="tiny dim">选中即参与选主；dangerous 动作仍走人工闸门</span></p></div>
+                    <div class="fld"><label>定时触发许可</label><p style="margin:0"><span class="chip ok" data-click onclick="swBind(this)">开</span> <span class="tiny dim">r-130（日会前审查）即定时来源 · 关许可不删任务只拒触发</span></p></div>
+                  </div>
+                  <p class="tiny dim" style="margin:var(--s2) 0 0">头部「工作区可见 · 仅我编辑」chip 即两轴现状的速记。无编辑权用户打开本页走页内 Lock read-only，不改 URL 不跳走。</p>
+                </div>
+                <div class="savebar"><span class="chip ok">已存</span><span class="tiny dim">两轴任一变更都落审计</span><span style="flex:1"></span><button class="btn sm primary" data-toast="Access 两轴已保存 · 鉴权即时生效（演示）">保存全部</button><button class="btn sm" data-click onclick="dirtyOff()" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）">放弃</button></div>
+              </div>
+
+              <div class="pane" id="sv-env" style="display:none">
+                <div class="callout ok"><p class="tiny" style="margin:0"><b>仅 canEdit 渲染本区块入口。</b>无编辑权用户看不到「环境」子栏本身——而不是渲染一个点开必 403 的表单。当前用户李工=owner，故可见。</p></div>
+                <div class="panel" style="margin-top:var(--s3)">
+                  <p class="h2p" style="margin-top:0">环境变量（3 项 · 值恒 *** 回显）</p>
+                  <div class="kvrow"><input class="mono" value="REVIEW_MODE" disabled><input type="password" value="strict" disabled><span class="chip warn dot-eye" data-click data-toast="👁 env:read 已入审计（谁在何时看了哪个变量明文可查）· 30s 后重新遮回 ***（演示）">👁 解锁</span></div>
+                  <div class="kvrow"><input class="mono" value="AF_NOTION_TOKEN" disabled><input type="password" value="nv-***" disabled><span class="chip warn" data-click data-toast="👁 env:read 已入审计（与知识源 Notion 令牌同值不同读，两次读都记账）（演示）">👁 解锁</span></div>
+                  <div class="kvrow"><input class="mono" value="DSH_SANDBOX（运行时保留变量）" disabled><input type="password" value="read-only" disabled><span class="chip">只读 · 保留变量</span></div>
+                  <p style="margin-top:var(--s2)"><button class="btn sm" data-toast="新增键：AF_ 前缀 · 重名拒绝（演示）">＋ 加一项</button></p>
+                  <p class="tiny dim" style="margin-top:var(--s2)"><b>保留变量不可覆盖：</b><span class="mono">DSH_* / CODEX_* / HOME / PATH</span> 等由运行时 daemon 注入，用户层同名键被服务端拒写。<b>专用端点：</b>env 只走 <span class="mono">PUT /agents/7/env</span>（带 rev 乐观锁）；常规更新接口请求体里带 env 会被拒 <span class="mono">400</span>，防「顺手改 env」。复制 Agent 时 env 值<b>从不复制</b>。</p>
+                </div>
+                <div class="savebar"><span class="chip ok">已存</span><span class="tiny dim">写 env 全量落审计 env:written</span><span style="flex:1"></span><button class="btn sm primary" data-toast="已按专用端点整包保存 3 项 env（rev +1）（演示）">保存全部</button><button class="btn sm" data-click onclick="dirtyOff()" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）">放弃</button></div>
+              </div>
+
+              <div class="pane" id="sv-cli" style="display:none">
+                <div class="panel">
+                  <p class="h2p" style="margin-top:0">CLI 自定义参数（daemon 拉起 CLI 时逐项追加）</p>
+                  <table class="tbl compact"><tbody>
+                    <tr><td class="mono">--sandbox</td><td class="mono">read-only</td><td><span class="btn link" style="color:var(--red)" data-toast="已移除该参数 · 下轮 run 生效 · 审计 agent:cliargs_updated（演示）">删</span></td></tr>
+                    <tr><td class="mono">--max-turns</td><td class="mono">40</td><td><span class="btn link" style="color:var(--red)" data-toast="已移除该参数（演示）">删</span></td></tr>
+                  </tbody></table>
+                  <p style="margin-top:var(--s2)"><button class="btn sm" data-toast="新增一行：参数名 + 值两个输入位（演示）">＋ 加一项</button></p>
+                  <p class="tiny dim" style="margin-top:var(--s2)"><b>exec 数组逐项追加，无 shell 展开</b>——<span class="mono">~</span>、<span class="mono">$VAR</span>、管道 / 重定向都不会生效，写进来就是字面量；参数<b>不放开任何凭据读取</b>，改参数只影响下次 CLI 进程启动。</p>
+                </div>
+                <div class="savebar"><span class="chip ok">已存</span><span class="tiny dim">运行中的 run 不受影响，下轮生效</span><span style="flex:1"></span><button class="btn sm primary" data-toast="CLI 参数已保存（演示 · 审计 agent:cliargs_updated）">保存全部</button><button class="btn sm" data-click onclick="dirtyOff()" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）">放弃</button></div>
+              </div>
+
+              <div class="pane" id="sv-gate" style="display:none">
+                <div class="panel">
+                  <p class="h2p" style="margin-top:0">安全闸门（规则加在状态转换层：动作者类型 × 目标状态）</p>
+                  <div class="grid g3">
+                    <div class="fld"><label>前置校验 gate_pre</label><select><option selected>开</option><option>关</option></select><p class="hint">开 · diff 可读 + 测试通过才准入队</p></div>
+                    <div class="fld"><label>后置校验 gate_post</label><select><option selected>开</option><option>关</option></select><p class="hint">开 · 发现数 ≥ 1 才可交付</p></div>
+                    <div class="fld"><label>IO 过滤 io_filter</label><select><option>none</option><option selected>sanitize</option><option>strict</option></select><p class="hint">出参含密钥 / PAT 模式匹配即脱敏替换</p></div>
+                  </div>
+                  <p class="tiny dim" style="margin-top:var(--s2)">闸门不是提示词契约：提示词里写「别改代码」不等于门禁，服务端在状态转换处拒绝 write 类动作（r-128 停在 human_approval 即此机制，见 <a data-goto="approvals.html">审批中心 AP-31</a>）。</p>
+                </div>
+                <div class="savebar"><span class="chip ok">已存</span><span class="tiny dim">闸门收紧即时生效，放宽需 admin 复核</span><span style="flex:1"></span><button class="btn sm primary" data-toast="闸门已保存 · gate_post 收紧对 queued run 即刻生效（演示）">保存全部</button><button class="btn sm" data-click onclick="dirtyOff()" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）">放弃</button></div>
+              </div>
+
+              <div class="pane" id="sv-probe" style="display:none">
+                <div class="callout"><p class="tiny" style="margin:0"><b>口径（新宇宙）：</b>探活对象是 <b>AgentFlow 侧服务健康</b>——运行时 daemon 上该 Agent 服务进程的 <span class="mono">/health</span>，验「还接不接受派活」；<b>不是模型 API Key 有效性</b>。<b>CLI 登录凭据留在运行时机器，平台从不接收、不代管、不参与探活</b>。</p></div>
+                <div class="panel" style="margin-top:var(--s3)">
+                  <p class="h2p" style="margin-top:0">探活配置 <span style="flex:1"></span><span class="pill" data-click data-pop="pop-probe-range">范围：最近 8 次 ▾</span><span class="btn link" data-click data-drawer="dr-health">抽屉全量详情 ▸</span></p>
+                  <div class="grid g3">
+                    <div class="fld"><label>健康端点</label><input class="mono" value="http://127.0.0.1:8391/health"><p class="hint">daemon 上报的本机服务端口 · 未配端点的 Agent 不可探活（见下方错误态）</p></div>
+                    <div class="fld"><label>周期 / 超时</label><input value="60s / 5000ms"></div>
+                    <div class="fld"><label>连续失败阈值</label><input value="3 → caution 自动重启"></div>
+                  </div>
+                  <div class="fld"><label>退避</label><input class="mono" value="[1,2,4,8]s · 超阈值暂停本轮调和"><p class="hint">下游依赖 agent-5（汇总）· 拓扑安全检查已计入（<a data-goto="control-plane.html">管控面</a>）。</p></div>
+                  <p><button class="btn sm primary" data-toast="已手动复探：200 OK · 43ms（演示）">立即复探</button> <button class="btn sm" data-toast="已改探测窗口为 30s（演示 · 审计 agent:probed_updated · 下轮生效）">调探测周期</button></p>
+                  <p class="h2p">探针时间线（最近 8 次）<span class="chip bad">fail 行可点 → 探针失败详情页</span></p>
                   <div class="timeline" style="margin:0">
                     <div class="tl-item"><b>14:35:10</b> · 通过 · <span class="mono">200 OK · 42ms</span></div>
                     <div class="tl-item"><b>14:34:10</b> · 通过 · <span class="mono">200 OK · 38ms</span></div>
@@ -121,40 +396,109 @@
                     <div class="tl-item"><b>14:30:22</b> · <span class="chip ok">safe</span> 调和动作：自动重启 → 恢复上报 <span class="btn link" data-toast="退避序列 1s→2s→4s→8s · 复探 14:33:10 通过后才回到 healthy（演示）">退避与复探</span></div>
                     <div class="tl-item"><b>14:29:10</b> · 通过 · <span class="mono">200 OK · 40ms</span></div>
                   </div>
+                  <div class="callout bad" style="margin-top:var(--s3)"><p><b>错误态示例：</b>未配置 <span class="mono">/health</span> 端点的 Agent 不可探活，此区域显示「该 Agent 未配置健康端点，无法探活」而非空列表（筛选「不可探活」时同样成立）。</p></div>
                 </div>
-                <p class="h2p" style="margin-top:var(--s4)">近期会话 <span class="chip info">行可点 → 执行回放（p22）</span></p>
-                <table class="tbl compact">
-                  <thead><tr><th>会话</th><th>模型</th><th>Token</th><th>状态</th><th>耗时</th></tr></thead>
-                  <tbody>
-                    <tr data-click data-toast="跳 §6.22 执行回放 · run rt-1-14:31（按工作项聚合视图 · 依赖 trace 产生端 C10-0）（演示）"><td class="mono">rt-1-14:31</td><td class="mono">gpt-4o</td><td class="mono">12,480</td><td><span class="chip ok">success</span></td><td class="mono">8.2s</td></tr>
-                    <tr data-click data-toast="跳 §6.22 执行回放 · run rt-1-14:12（演示）"><td class="mono">rt-1-14:12</td><td class="mono">gpt-4o</td><td class="mono">9,120</td><td><span class="chip ok">success</span></td><td class="mono">6.4s</td></tr>
-                    <tr data-click data-goto="agent-detail__run-failed.html"><td class="mono">rt-1-13:58</td><td class="mono">gpt-4o</td><td class="mono">21,004</td><td><span class="chip bad">error</span></td><td class="mono">31.7s</td></tr>
-                    <tr data-click data-toast="跳 §6.22 执行回放 · run rt-1-13:40（演示）"><td class="mono">rt-1-13:40</td><td class="mono">gpt-4o</td><td class="mono">7,860</td><td><span class="chip ok">success</span></td><td class="mono">5.1s</td></tr>
-                  </tbody>
-                </table>
-                <div class="callout bad" style="margin-top:0">
-                  <p><b>错误态示例：</b>无 <span class="mono">base_url</span> 也无 <span class="mono">health_url</span> 的 Agent 不可探活，此区域显示「该 Agent 未配置健康端点，无法探活」而非空列表。</p>
+                <div class="savebar"><span class="chip ok">已存</span><span class="tiny dim">探活改的是平台侧行为，与 CLI 登录无关</span><span style="flex:1"></span><button class="btn sm primary" data-toast="探测配置已保存 · 下轮生效（演示）">保存全部</button><button class="btn sm" data-click onclick="dirtyOff()" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）">放弃</button></div>
+              </div>
+
+              <div class="pane" id="sv-danger" style="display:none">
+                <div class="panel" style="border-color:var(--red)">
+                  <p class="h2p" style="margin-top:0;color:var(--red)">危险区</p>
+                  <table class="tbl compact"><tbody>
+                    <tr><td><b>归档（软）</b><div class="tiny muted">run 队列暂停 · 绑定与记忆保留 · 可恢复</div></td><td><button class="btn sm" data-click data-modal="md-archive">归档 Agent</button></td></tr>
+                    <tr><td><b>彻底删除</b><div class="tiny muted">先过删除前置检查：在途任务 2 · 编排引用 5 边 · 知识源 3 挂载</div></td><td><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-goto="agent-detail__delete-agent.html">删除前置检查 ▸</button></td></tr>
+                  </tbody></table>
+                  <div class="callout" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>复制语义：</b>「复制」得到新草稿；<b>拷贝到新运行时</b>时「模型 / thinking 档 / 服务档」清空需重选；<b>环境变量值与 MCP 配置从不复制</b>（凭据与整体替换态不可随身拷贝）。</p></div>
+                  <div class="callout warn" style="margin-top:var(--s2)"><p class="tiny" style="margin:0"><b>删除运行时绑定的影响：</b>解绑 dsh 后本 Agent 立即进入「未绑定运行时」态——顶部渲染琥珀 banner，queued/running run 暂停派发，编排引用它的边按 gate 拒绝入场；恢复走「设置 → 通用」重选运行时并<b>重选模型</b>。</p></div>
                 </div>
-                <p class="h2p" style="margin-top:var(--s4)">在途任务（2）<span class="chip warn">删除前必查</span></p>
-                <table class="tbl compact">
-                  <thead><tr><th>Task</th><th>标签</th><th>来源</th><th>已跑</th><th>态</th></tr></thead>
-                  <tbody>
-                    <tr data-click data-toast="跳 §6.22 执行回放 · task-1 → run rt-1-14:31（演示）"><td class="mono">task-1</td><td class="mono">code-review</td><td>人点名 · 李工</td><td class="mono">4m12s</td><td><span class="chip info">assigned</span></td></tr>
-                    <tr data-click data-toast="跳 §6.22 执行回放 · task-9 → run rt-1-13:40（演示）"><td class="mono">task-9</td><td class="mono">code-review</td><td>工作项 AF-104</td><td class="mono">31m</td><td><span class="chip warn">在途 · 探针失败未中断</span></td></tr>
-                  </tbody>
-                </table>
+                <div class="savebar"><span class="chip">危险区无自动保存</span><span class="tiny dim">每个动作独立二次确认</span></div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
     </div>
-<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>基础信息面板按 Multica 式 Agent 模型分区（标识 / 指令 / 技能 / 对话启动语 / 执行配置 / Access / 双状态 / 安全闸门 / 凭据与探活）；时间线的失败—重启—恢复序列演示了 §4.3 的自愈链路。真实系统中「重启」按钮点击后需等待复探确认才更新状态灯。</p>
 
+<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明（一）· 结构：</b>本页对齐一手侦察的 Multica Agent 详情页：<b>头部 + 三横幅位 + 四标签（概览 / 工作 / 能力 / 设置）</b>，能力与设置内再开二级子 Tab 横条（第二组仅在父 Tab 可见时显示）。头部只显示 <span class="mono">Updated 3 天前</span>——<b>刻意不显示创建时间</b>（Multica 口径：创建时间归审计事件查，详情页不让用户读一个没人用的时间戳）。概览 = 只读工作台（Now / 近 30 天 / 最近工作 + 右侧只读卡），编辑动作全部收进「设置」；「编辑 ▾」pop 只做跳转子区（页内切 Tab，不跳走）。旧「基础信息」大面板拆分去向：指令→能力·指令，技能→能力·技能，MCP / 集成→能力对应子栏，Access / 执行配置 / 闸门 / 探活→设置对应子栏，编排引用与知识源→能力·知识源与编排，探针时间线→设置·探活，近期会话与在途任务→概览 Now / 最近工作。凭据口径已按新宇宙更正：<b>旧「模型与凭据」分区（供应商 / 基础地址 / 掩码密钥三行）已整体删除</b>——模型目录由运行时（dsh --list-models）暴露，CLI 登录凭据留在运行时机器、平台不接收，探活只验 AgentFlow 侧服务健康。执行配置沿用上一轮新宇宙：dsh · stdio · CLI 自定义参数 · 集成 · 会话续跑 ✓。</p>
 
+<!-- ======== 浮层：模态 ======== -->
+<div class="modal" id="md-assign"><div style="padding:var(--s4)"><b>指派工作给「审查 Agent · 标准」</b><p class="small dim" style="margin:8px 0 4px">等价于建一条工作项并直接 assign 到本 Agent（会占并发槽；当前 4/6，槽满先排队）。</p>
+<div class="fld"><label>工作项标题</label><input placeholder="例：审查 AF-121 权限矩阵回归的 diff"></div>
+<div class="fld"><label>所属项目</label><select><option selected>AgentFlow 主项目</option><option>前端重构</option><option>知识库运营</option></select></div>
+<div class="fld"><label>描述</label><textarea placeholder="验收口径 / 涉及仓库 / 期望产出（REVIEW.md）…"></textarea></div>
+<div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="工作项已创建并指派 · 已入队（等待位 #3）· 来源徽标=人点名 · 李工（演示）" data-close>指派并入队</button></div></div></div>
 
+<div class="modal" id="md-cancel-run"><div style="padding:var(--s4)"><b>取消 run r-128？</b><p class="small dim" style="margin:8px 0 4px">r-128 当前 running 1m05s（seq 14 停在 human_approval 等待段）。取消<b>必填原因</b>、写回工作项 AF-104，且<b>不计入成功率</b>（成功率=完成÷(完成+失败)）。副作用不回滚：已发生的 tool 动作留在原地。</p>
+<div class="fld"><label>原因（必填）</label><textarea placeholder="例：方向已废，AF-104 需求重写…"></textarea></div>
+<div style="text-align:right"><button class="btn sm" data-close>保留继续跑</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="r-128 已取消 · 审计 run:canceled（原因必填已落库）· 队列顶上来 r-129（演示）" data-close>确认取消</button></div></div></div>
 
+<div class="modal" id="md-archive"><div style="padding:var(--s4)"><b>归档「审查 Agent · 标准」？</b><p class="small dim" style="margin:8px 0 4px">软归档：<b>archived_at + 操作者</b>记账，随时可在「已归档」筛选恢复（Restore）；不是删除。</p>
+<table class="tbl compact"><tbody>
+<tr><td>记账</td><td class="mono">archived_at=2026-09-15 14:36 · by @li.gong</td><td><span class="chip info">可恢复</span></td></tr>
+<tr><td>run 队列</td><td class="mono">r-129 / r-130</td><td><span class="chip warn">暂停派发</span></td></tr>
+<tr><td>编排引用 / 技能绑定 / 记忆</td><td class="mono">5 边 · 3 绑定 · 3 条</td><td><span class="chip ok">保留</span></td></tr>
+<tr><td>定时任务（日会前审查）</td><td class="mono">1</td><td><span class="chip warn">触发即拒并告警</span></td></tr>
+</tbody></table>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已归档（软）· 顶部将渲染归档 banner + Restore（演示 · 本页为活动态故未实渲）" data-close>确认归档</button></div></div></div>
 
+<div class="modal" id="md-discard"><div style="padding:var(--s4)"><b>有未保存的修改</b><p class="small dim" style="margin:8px 0 4px">你改了表单还没保存就要切 Tab。自动保存是草稿态，<b>离开分区前建议显式落库</b>；「放弃改动」只清本页草稿槽。</p>
+<div style="text-align:right"><button class="btn sm primary" data-close>Keep editing（留下）</button> <button class="btn sm" data-click onclick="discardAndGo()" data-close>Discard changes（丢弃并切换）</button></div></div></div>
+
+<div class="modal" id="md-unlink-mem"><div style="padding:var(--s4)"><b>断开本 Agent 的域内共享记忆？</b><p class="small dim" style="margin:8px 0 4px">断开后本 Agent 不再加载同域前序上下文（5 条），等价于关掉「记忆」这一路输入。必填原因。</p><table class="tbl compact"><tbody>
+<tr><td>受影响计划并入</td><td class="mono">3 → 2 上下文</td><td><span class="chip warn">推理质量可能变化</span></td></tr>
+<tr><td>其它同域 Agent</td><td class="mono">4</td><td><span class="chip ok">保留</span></td></tr>
+<tr><td>记忆条目本身</td><td class="mono">5</td><td><span class="chip info">不删（属域）</span></td></tr>
+</tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [A/B 对照：验证记忆对审查结论的影响 ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开记忆共享 · 下轮运行生效 · 审计 mem:detached（演示）" data-close>确认断开</button></div></div></div>
+
+<div class="modal" id="md-unlink-kb"><div style="padding:var(--s4)"><b>断开本 Agent 与知识源「架构说明.md」的挂载？</b><p class="small dim" style="margin:8px 0 4px">知识源本身不删（它还被另 2 个 Agent 挂载）。断开即从本 Agent 检索范围移除，历史会话引用保持快照。</p><table class="tbl compact"><tbody>
+<tr><td>本 Agent 检索</td><td class="mono">3 源 → 2 源</td><td><span class="chip warn">上下文变薄</span></td></tr>
+<tr><td>历史会话</td><td class="mono">1,284 run 引用该源</td><td><span class="chip ok">快照不变</span></td></tr>
+<tr><td>其它挂载方</td><td class="mono">备援 Agent · 旧版 Agent</td><td><span class="chip info">不受影响</span></td></tr>
+</tbody></table><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开挂载 · 审计 kb:unmounted（演示）" data-close>确认断开</button></div></div></div>
+
+<!-- ======== 浮层：气泡 ======== -->
+<div class="pop" id="pop-more"><p class="tiny dim" style="margin:0 0 6px"><b>更多操作 · agent-7</b></p>
+<table class="tbl compact"><tbody>
+<tr><td>复制</td><td class="tiny dim">拷出新草稿；拷到新运行时时模型 / thinking / 服务档清空，env 值与 MCP 配置从不复制</td><td><span class="btn link" data-toast="已基于「审查 Agent · 标准」复制出新草稿（模型沿用 · 换运行时则需重选）（演示）">复制</span></td></tr>
+<tr><td>导出 YAML</td><td class="tiny dim">编排可移植形态（不含 env 值与 MCP 配置）</td><td><span class="btn link" data-toast="已导出 agent-7.yaml（含画布快照 · 演示）">导出</span></td></tr>
+<tr><td>归档（软）</td><td class="tiny dim">记 archived_at + 操作者 · 可 Restore</td><td><span class="btn link" data-click data-modal="md-archive" onclick="closeAll()">归档</span></td></tr>
+<tr><td style="color:var(--red)">彻底删除</td><td class="tiny dim">先过删除前置检查（在途任务 · 编排引用 · 知识源）</td><td><span class="btn link" style="color:var(--red)" data-click data-goto="agent-detail__delete-agent.html">删除 ▸</span></td></tr>
+</tbody></table></div>
+
+<div class="pop" id="pop-edit"><p class="tiny dim" style="margin:0 0 6px"><b>编辑 · 跳转子区</b>（页内切 Tab · 不跳走；改完不自动重启实例 · §5.4 边界）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">标识与执行配置</td><td>名称 / 归属域 / 能力标签 / 运行时·模型联动</td><td><span class="btn link" data-click onclick="closeAll();gotoView('v-set','sv-gen')">设置 → 通用 ▸</span></td></tr>
+<tr><td class="mono">Access</td><td>可见 / 可运行两轴 · 机器触发许可</td><td><span class="btn link" data-click onclick="closeAll();gotoView('v-set','sv-acc')">设置 → Access ▸</span></td></tr>
+<tr><td class="mono">环境变量</td><td>3 项 · 专用端点 · 保留变量</td><td><span class="btn link" data-click onclick="closeAll();gotoView('v-set','sv-env')">设置 → 环境 ▸</span></td></tr>
+<tr><td class="mono">CLI 参数 / 闸门</td><td>exec 追加参数 · 状态转换层规则</td><td><span class="btn link" data-click onclick="closeAll();gotoView('v-set','sv-cli')">设置 → CLI ▸</span> <span class="btn link" data-click onclick="closeAll();gotoView('v-set','sv-gate')">闸门 ▸</span></td></tr>
+<tr><td class="mono">指令 / 技能 / MCP</td><td>系统指令 · 绑定表 · 整体替换规则</td><td><span class="btn link" data-click onclick="closeAll();gotoView('v-cap','cv-instr')">能力 → 指令 ▸</span> <span class="btn link" data-click onclick="closeAll();gotoView('v-cap','cv-skill')">技能 ▸</span> <span class="btn link" data-click onclick="closeAll();gotoView('v-cap','cv-mcp')">MCP ▸</span></td></tr>
+<tr><td class="mono">探活</td><td>AgentFlow 侧服务健康（非模型 Key）</td><td><span class="btn link" data-click onclick="closeAll();gotoView('v-set','sv-probe')">设置 → 探活 ▸</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">自动保存三态：<span class="chip">保存中</span> → <span class="chip ok">已存</span> / <span class="chip bad">失败（页内显示具体错误）</span>；无权限走页内 Lock read-only，不改 URL 不跳走（§6.0 ①）。</p></div>
+
+<div class="pop" id="pop-skill-add"><p class="tiny dim" style="margin:0 0 6px"><b>加绑 · 工具库技能（可绑未绑定项）</b></p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">代码审查</td><td class="mono tiny">v2</td><td><span class="chip info">已绑定</span></td></tr>
+<tr><td class="mono">需求拆解</td><td class="mono tiny">v2</td><td><span class="chip info">已绑定</span></td></tr>
+<tr><td class="mono">浏览器自动化</td><td class="mono tiny">v1</td><td><span class="chip warn">绑定存在 · 已禁用</span></td></tr>
+<tr><td class="mono">mcp · filesystem</td><td class="mono tiny">—</td><td><span class="chip bad">不可绑 · MCP 走能力 → MCP 子栏</span></td></tr>
+<tr><td class="mono">PDF 导出</td><td class="mono tiny">v1</td><td><span class="btn link" data-toast="已加绑 PDF 导出 v1 · 待绑定级开关打开才注入（三层开关 · 演示）">加绑</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">列表来自 <a data-goto="tools.html">工具库</a> 启用项；库条目被停用的技能此处标灰。</p></div>
+
+<div class="pop" id="pop-probe-range"><p class="tiny dim" style="margin:0 0 6px"><b>探针时间线范围</b></p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">最近 8 次</td><td><span class="chip">当前</span></td><td><span class="btn link" data-toast="已切到最近 8 次（演示）">选</span></td></tr>
+<tr><td class="mono">最近 1 小时</td><td class="mono">60 次 · 通过率 83%</td><td><span class="btn link" data-toast="已切到最近 1 小时 · 3 败集中在 14:30–14:32（演示）">选</span></td></tr>
+<tr><td class="mono">最近 24 小时</td><td class="mono">1,440 次 · 12 败</td><td><span class="btn link" data-toast="已切到 24 小时 · 12 败中 9 次与同源上游抖动同窗（演示）">选</span></td></tr>
+<tr><td class="mono">仅失败</td><td class="mono">过滤后 3 条</td><td><span class="btn link" data-toast="已筛 status=failed · 3 条（演示）">选</span></td></tr>
+<tr><td class="mono">不可探活</td><td class="mono">仅显示未配置健康端点的实例</td><td><span class="btn link" data-toast="本 Agent 有 health 端点，此筛选下为空（非错误态）（演示）">选</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">保存筛选 = 视图快照 + <span class="mono">?view=</span>（§6.0 ②）。</p>
+<p style="margin:6px 0 0"><button class="btn sm" data-toast="视图已存为 v-41（agent-1 · 仅失败 · 24h）（演示）">存为视图</button></p></div>
+
+<!-- ======== 浮层：抽屉 ======== -->
 <div class="drawer" id="dr-mem"><header><b>共享记忆条目 · 2026-07-06</b><span class="chip info">域内可读</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <dl class="kv"><dt>条目</dt><dd>capability-groups 设计结论：虚拟分组<b>不建表</b></dd><dt>来源</dt><dd class="mono">.specs/capability-groups/DESIGN.md · 结论段</dd><dt>写入者</dt><dd class="mono">@li.gong（人批后落）· 07-06 14:02</dd><dt>作用域</dt><dd>默认域 · 5 个 Agent 可读（同域即共享，不跨域）</dd><dt>消费方式</dt><dd>运行时作为前序上下文并入（计划并入 vs 实际投喂分开记账）</dd><dt>失效条件</dt><dd><span class="chip warn">来源产物被删或改写 → 条目转待复核</span></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">本域记忆条目（5）</p>
@@ -168,7 +512,7 @@
 <p style="margin-top:var(--s4)"><span class="btn link" data-toast="跳 §6.18 产物编辑器打开来源段落（演示 · 保存前自动备份）">看来源</span> <span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-mem">从本 Agent 断开</span></p></div></div>
 
 <div class="drawer" id="dr-health"><header><b>健康与探活配置</b><span class="chip ok"><span class="dot running" style="margin-right:4px"></span>healthy</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
-<dl class="kv"><dt>状态灯</dt><dd><span class="chip ok">running</span> · 5 态之一（idle / running / blocked / dead / failed）</dd><dt>周期 / 超时</dt><dd class="mono">60s · 5000ms</dd><dt>连续失败阈值</dt><dd class="mono">3 → 触发 caution 自动重启</dd><dt>退避</dt><dd class="mono">[1,2,4,8]s · 超阈值暂停本轮</dd><dt>本轮结果</dt><dd class="mono">14:35:10 · 200 OK · 42ms</dd><dt>近 1h 通过率</dt><dd><span class="chip warn">83%</span> 50/60（含 3 次已知抖动）</dd><dt>P50 / P95</dt><dd class="mono">41ms / 55ms</dd><dt>健康端点来源</dt><dd class="mono">base_url + /health（未用显式 health_url）</dd><dt>下游依赖</dt><dd class="mono">agent-5（汇总）· 拓扑安全检查已计入</dd></dl>
+<dl class="kv"><dt>状态灯</dt><dd><span class="chip ok">running</span> · 5 态之一（idle / running / blocked / dead / failed）</dd><dt>探活对象</dt><dd>AgentFlow 侧服务健康（非模型 Key · CLI 登录凭据留在运行时机器，平台不接收）</dd><dt>周期 / 超时</dt><dd class="mono">60s · 5000ms</dd><dt>连续失败阈值</dt><dd class="mono">3 → 触发 caution 自动重启</dd><dt>退避</dt><dd class="mono">[1,2,4,8]s · 超阈值暂停本轮</dd><dt>本轮结果</dt><dd class="mono">14:35:10 · 200 OK · 42ms</dd><dt>近 1h 通过率</dt><dd><span class="chip warn">83%</span> 50/60（含 3 次已知抖动）</dd><dt>P50 / P95</dt><dd class="mono">41ms / 55ms</dd><dt>健康端点来源</dt><dd class="mono">daemon 上报 · 本 Agent 服务 /health（不存在模型侧鉴权地址概念）</dd><dt>下游依赖</dt><dd class="mono">agent-5（汇总）· 拓扑安全检查已计入</dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">近 12 轮（3 败窗）</p>
 <div class="timeline">
   <div class="tl-item"><b>14:35:10</b> · 通过 · <span class="mono">42ms</span></div>
@@ -186,33 +530,35 @@
 </div>
 <p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已手动复探：200 OK · 43ms（演示）">立即复探</button> <button class="btn sm" data-toast="已改探测窗口为 30s（演示 · 审计 agent:probed_updated · 下轮生效）">调探测周期</button></p></div></div>
 
-
-<div class="modal" id="md-unlink-mem"><div style="padding:var(--s4)"><b>断开本 Agent 的域内共享记忆？</b><p class="small dim" style="margin:8px 0 4px">断开后本 Agent 不再加载同域前序上下文（5 条），等价于关掉「记忆」这一路输入。必填原因。</p><table class="tbl compact"><tbody>
-<tr><td>受影响计划并入</td><td class="mono">3 → 2 上下文</td><td><span class="chip warn">推理质量可能变化</span></td></tr>
-<tr><td>其它同域 Agent</td><td class="mono">4</td><td><span class="chip ok">保留</span></td></tr>
-<tr><td>记忆条目本身</td><td class="mono">5</td><td><span class="chip info">不删（属域）</span></td></tr>
-</tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [A/B 对照：验证记忆对审查结论的影响 ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开记忆共享 · 下轮运行生效 · 审计 mem:detached（演示）" data-close>确认断开</button></div></div></div>
-
-<div class="pop" id="pop-edit"><p class="tiny dim" style="margin:0 0 6px"><b>编辑 · 选分区</b>（改完不自动重启实例 · §5.4 边界）</p>
-<table class="tbl compact"><tbody>
-<tr><td class="mono">基础信息</td><td>名称 / 归属域 / 能力标签</td><td><span class="btn link" data-toast="已打开基础信息分区（多标签会同步改变能力组归属 · 演示）">改</span></td></tr>
-<tr><td class="mono">模型与凭据</td><td>Provider / 模型 / Base URL / Key</td><td><span class="btn link" data-toast="Key 输入后仅回显 sk-*** ，不可读回（演示）">改</span></td></tr>
-<tr><td class="mono">并发与容量</td><td>并发上限 / 超时 / 重试 / Token 预算</td><td><span class="btn link" data-toast="并发 4 → 6 已保存 · 等下轮生效（演示）">改</span></td></tr>
-<tr><td class="mono">探针与修复</td><td>健康端点 / 周期 / 失败阈值 / 退避</td><td><span class="btn link" data-toast="探测周期 60s → 30s · 已保存并提示限流风险（演示）">改</span></td></tr>
-</tbody></table>
-<p class="tiny dim" style="margin:6px 0 0">自动保存三态：<span class="chip">保存中</span> → <span class="chip ok">已存</span> / <span class="chip bad">失败（页内显示具体错误）</span>；无权限走页内 Lock read-only，不改 URL 不跳走（§6.0 ①）。</p>
-<p style="margin:6px 0 0"><button class="btn sm primary" data-toast="已保存 3 处改动 · 实例未重启（需显式重启）（演示）">保存全部</button> <button class="btn sm" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）" data-close>放弃</button></p></div>
-
-<div class="pop" id="pop-probe-range"><p class="tiny dim" style="margin:0 0 6px"><b>探针时间线范围</b></p>
-<table class="tbl compact"><tbody>
-<tr><td class="mono">最近 8 次</td><td><span class="chip">当前</span></td><td><span class="btn link" data-toast="已切到最近 8 次（演示）">选</span></td></tr>
-<tr><td class="mono">最近 1 小时</td><td class="mono">60 次 · 通过率 83%</td><td><span class="btn link" data-toast="已切到最近 1 小时 · 3 败集中在 14:30–14:32（演示）">选</span></td></tr>
-<tr><td class="mono">最近 24 小时</td><td class="mono">1,440 次 · 12 败</td><td><span class="btn link" data-toast="已切到 24 小时 · 12 败中 9 次与同源上游抖动同窗（演示）">选</span></td></tr>
-<tr><td class="mono">仅失败</td><td class="mono">过滤后 3 条</td><td><span class="btn link" data-toast="已筛 status=failed · 3 条（演示）">选</span></td></tr>
-<tr><td class="mono">不可探活</td><td class="mono">仅显示未配置健康端点的实例</td><td><span class="btn link" data-toast="本 Agent 有 health 端点，此筛选下为空（非错误态）（演示）">选</span></td></tr>
-</tbody></table>
-<p class="tiny dim" style="margin:6px 0 0">保存筛选 = 视图快照 + <span class="mono">?view=</span>（§6.0 ②）。</p>
-<p style="margin:6px 0 0"><button class="btn sm" data-toast="视图已存为 v-41（agent-1 · 仅失败 · 24h）（演示）">存为视图</button></p></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：探针 3 条 fail 行 → <b>探针失败详情页</b>（agent-detail__probe-timeout / __probe-refused · 原始输出 + 同窗 run + 处置钮）· error 会话行 <span class="mono">rt-1-13:58</span> → <b>失败运行详情页</b>（三件套：Retry / Edit as advanced form / 升级到人）· 基础信息面板 → <b>完整配置详情页</b> · 「删除」→ <b>删除前置检查详情页</b>（9 项清单 + 处置在途分支，modal 一屏读不完）· 其余会话与在途行 → toast 跳 §6.22 执行回放 · 顶栏「重启」→ toast（状态灯等复探才更新）· 「删除」→ 在途任务检查清单 + 必填原因二次确认（仍有在途则确认钮给出真实拒因）· 「编辑」→ 分区 pop（4 项选择器 · 合规）· 状态灯 chip → 健康抽屉 · 记忆条目 → 记忆详情抽屉（kv + 1 张子表 · 保留）· 断开知识挂载与记忆共享、暂停本实例自动修复 → 二次确认　按 Esc 关闭所有浮层。</p>
+
+<script>
+/* ---- 页内两级 Tab：switchTo(pane) · dirty 拦截 ---- */
+var PARENT={'cv-instr':'v-cap','cv-skill':'v-cap','cv-mcp':'v-cap','cv-int':'v-cap','cv-know':'v-cap',
+'sv-gen':'v-set','sv-acc':'v-set','sv-env':'v-set','sv-cli':'v-set','sv-gate':'v-set','sv-probe':'v-set','sv-danger':'v-set'};
+var FIRST={'v-cap':'cv-instr','v-set':'sv-gen'};
+var LBL={'v-overview':'概览 Overview','v-work':'工作 Work','v-cap':'能力 Capabilities','v-set':'设置 Settings',
+'cv-instr':'能力 · 指令','cv-skill':'能力 · 技能','cv-mcp':'能力 · MCP','cv-int':'能力 · 集成','cv-know':'能力 · 知识源与编排',
+'sv-gen':'设置 · 通用','sv-acc':'设置 · Access','sv-env':'设置 · 环境','sv-cli':'设置 · CLI 参数','sv-gate':'设置 · 闸门','sv-probe':'设置 · 探活','sv-danger':'设置 · 危险区'};
+window.__dirty=false;var _pending=null;var _cur='v-overview';
+document.addEventListener('input',function(){window.__dirty=true;});
+function dirtyOff(){window.__dirty=false;}
+function normPane(pane){if(PARENT[pane])return pane;return FIRST[pane]||pane;}
+function switchTo(pane){var target=normPane(pane);if(target!==_cur&&window.__dirty){_pending=pane;document.getElementById('modal-mask').classList.add('on');document.getElementById('md-discard').classList.add('on');return;}applySwitch(pane);}
+function applySwitch(pane){var parent=PARENT[pane]||pane;var show=normPane(pane);_cur=show;
+  var vs=document.querySelectorAll('.view');for(var i=0;i<vs.length;i++){vs[i].style.display=(vs[i].id===parent)?(parent==='v-overview'?'grid':''):'none';}
+  var panes=document.querySelectorAll('#v-cap>.pane,#v-set>.pane');for(var j=0;j<panes.length;j++){panes[j].style.display=(panes[j].id===show)?'':'none';}
+  var tabs=document.querySelectorAll('#af-tabs .tab,#cap-tabs .tab,#set-tabs .tab');for(var k=0;k<tabs.length;k++){var dp=tabs[k].getAttribute('data-pane');tabs[k].classList.toggle('active',dp===parent||dp===show);}
+  toast('已切换到「'+LBL[show]+'」（演示 · 深链可用 #view='+show+' 直达）');}
+function gotoView(parent,pane){switchTo(pane||parent);}
+function discardAndGo(){window.__dirty=false;var p=_pending;_pending=null;toast('已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）');if(p)applySwitch(p);}
+function scopePick(el,label){var cs=document.querySelectorAll('#work-scope .chip');for(var i=0;i<cs.length;i++){cs[i].classList.remove('active');}el.classList.add('active');toast('工作范围已切到「'+label+'」（演示 · 列表按 mock 过滤）');}
+function swBind(el){var tr=el.closest('tr');var st=tr?tr.querySelector('[data-st]'):null;if(el.classList.contains('ok')){el.classList.remove('ok');el.classList.add('warn');el.textContent='关';if(st){st.classList.remove('ok');st.classList.add('warn');st.textContent='禁用绑定';}toast('绑定级开关：关 · 只影响本 Agent，工具库条目与其它绑定不动（三层开关 · 演示）');}else{el.classList.remove('warn');el.classList.add('ok');el.textContent='开';if(st){st.classList.remove('warn');st.classList.add('ok');st.textContent='正常';}toast('绑定级开关：开 · 下轮 run 起注入 .dsh/skills/（演示）');}}
+function toggleDesc(el){var d=document.getElementById('desc-line');var open=d.classList.toggle('clamp1')===false;if(open){d.classList.remove('clamp1');el.textContent='收起 ▴';}else{el.textContent='展开 ▾';}toast('描述一行截断 ↔ 全文（演示）');}
+function rtChanged(sel){var m=document.getElementById('sel-model');m.selectedIndex=2;m.innerHTML='<option selected>（留空 · 由新运行时暴露目录后重选）</option>';toast('运行时已改为 '+(sel.options[sel.selectedIndex].value)+' → 模型清空需重选（模型目录随运行时 · thinking / 服务档按新运行时确认 · 演示）');window.__dirty=true;}
+function mcpMode(m,el){document.getElementById('mcp-vis').style.display=(m==='v')?'':'none';document.getElementById('mcp-json').style.display=(m==='j')?'':'none';var p1=document.getElementById('mcp-tab-v'),p2=document.getElementById('mcp-tab-j');p1.classList.remove('active');p2.classList.remove('active');el.classList.add('active');toast(m==='v'?'可视化只读展示服务端现值；JSON 编辑保存=整体替换（演示）':'JSON 页签：保存为空对象=清空全部 MCP（演示）');}
+/* 深链：#view=<paneId> 直达（原型示意；#dr-x/#md-x/#pop-x 由 proto.js 负责） */
+document.addEventListener('DOMContentLoaded',function(){var h=location.hash;if(h.indexOf('#view=')===0){var id=h.slice(6);if(LBL[id]){applySwitch(id);}}});
+</script>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（四 Tab 操作指引）：<b>头部</b>——presence chip → 探活抽屉 ·「展开」→ 描述全文 ·「💬 DM」→ 对话中心 ·「＋ 指派工作」→ 入队模态 ·「重启」→ toast（状态灯等复探才更新）·「⋯」→ 复制 / 导出 YAML / 归档模态 / 彻底删除前置检查页。<b>概览</b>——r-128「看 transcript」→ 回放 ·「取消 run」→ 必填原因模态（取消不计成功率）· 在途两行 → toast 回放 · 终态行 → transcript / 失败详情（rt-1-13:58 · 三件套 Retry / Edit as advanced form / 升级到人）· Show more → toast · 右卡均可跳对应子区。<b>工作</b>——scope chips 切换 toast · AF 行 → 回放。<b>能力</b>——指令 textarea · 启动语加删 toast（≤3 上限）· 技能「＋加绑」pop + 行内开关（三层开关）· MCP 可视化/JSON 双页签 + 三态规则 · 集成断开 · 知识源断开二次确认。<b>设置</b>——七子栏各带 sticky 保存底条（自动保存三态 + 保存全部 / 放弃）· 运行时下拉改选触发模型清空联动 toast · 探活抽屉 / 范围 pop / 时间线 fail 行 → 探针失败详情页。<b>未保存拦截</b>——任一输入敲一个字再切 Tab 即弹 md-discard（Keep editing / Discard changes）。<b>深链</b>——URL 带 <span class="mono">#view=sv-probe</span> 等可直达子区（原型示意）。　按 Esc 关闭所有浮层。</p>
 </body></html>

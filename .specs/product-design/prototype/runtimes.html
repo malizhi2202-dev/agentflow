@@ -1,0 +1,114 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>运行时发现 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.nowrap{white-space:nowrap}.row-off{opacity:.45}
+.fld{margin-bottom:var(--s3)}
+.fld label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.fld label b{color:var(--text)}
+.fld input,.fld select{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:7px 9px;font:12.5px var(--font);width:100%}
+.fld input:focus,.fld select:focus{outline:1px solid var(--blue);border-color:var(--blue)}
+.fld .hint{font-size:11px;color:var(--text-muted);margin-top:3px;display:block}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p3" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agents.html">Agent 列表</span><span class="pill" data-goto="agents__new.html">新建 Agent</span><span class="pill" data-goto="control-plane.html">Agent 管控</span><span class="pill" data-goto="tools.html">工具库</span></div>
+<p class="proto-note"><span class="chip warn">演示数据</span>运行时发现 · 参考 Multica daemon/runtimes 模型：机器上的 daemon 探测外部 AI 编码 CLI（<span class="mono">dsh / claude / codex / hermes…</span>）注册为运行时 · <b>平台不本地跑模型</b> · 模型目录由运行时暴露（<span class="mono">dsh --list-models</span> · 固定名单 · 账号动态 · 由运行时托管）。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/runtimes · 运行时发现</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a class="active" data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">运行时 <span class="dim">· 运行时发现（一台机器 × 一个 CLI × 一个协议族 = 一个运行时）</span></span><span class="right"><button class="btn sm" data-toast="已重扫本机 PATH · 新增探测到 1 个 CLI（演示）">⟳ 重新检测</button> <button class="btn sm primary" data-click data-modal="md-custom">+ 添加自定义运行时</button></span></div>
+          <div class="app-body">
+            <div class="callout" style="margin:0 0 var(--s3)">
+              <p><b>daemon ≠ 运行时。</b>① <b>daemon</b> 是「一台计算机上」的一个后台进程：随机器常驻、每 15s 向平台心跳一次，负责扫描本机 PATH 上的外部 AI 编码 CLI。② <b>运行时</b> = 该机器上「一个被探测到的 CLI 实例」——一台机器 × 一个 CLI × 一个协议族 = 一个运行时；<b>重启 daemon 是更新既有运行时记录，不是重复新建</b>。③ Agent 的每一次 run 一律由对应机器上的 daemon 调用外部框架 CLI（<span class="mono">dsh / hermes / codex / claude…</span>）执行，<b>AgentFlow 不本地运行 / 加载模型</b>。</p>
+              <p style="margin-top:6px"><b>执行位置与数据边界：</b>CLI 本体与其登录凭据（账号 / OAuth / API key）始终留在成员本机，登录归 CLI 自己，平台不接收；平台服务器保存的是 issue、Agent 配置与 run 上下文 —— 其中 <b>Agent 自定义环境变量与 MCP 配置存放在服务端</b>、由 daemon 执行时注入，页面显示受敏感值规则限制（掩码 <span class="mono">***</span>）。</p>
+            </div>
+            <div class="panel tight" style="margin:0 0 var(--s3)">
+              <p class="tiny muted" style="margin:0 0 8px">本机适配器探测 · <span class="chip ok">现状已实现</span>（<span class="mono">backend/runtime/adapters/</span> · <span class="mono">get_adapters()</span>）— 目前仅供「运行时监控」消费（RuntimeEvent 观测）；<b>本模块的目标是把探测结果接进运行时注册表与模型目录</b>。探测方式 = <b>CLI 日志目录指纹</b>（非 PATH 探测），解析其 JSONL 会话得 模型 / tokens / 工具调用 / @引用，缓存 60s。数值为演示。</p>
+              <table class="tbl compact">
+                <thead><tr><th>适配器</th><th>探测路径（日志指纹）</th><th class="c">本机</th><th>解析产物 → RuntimeEvent</th><th>模型样例（解析所得）</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">claude-code</td><td class="mono tiny">~/.claude/projects/*.jsonl</td><td class="c"><span class="chip ok">✓ 已探测</span></td><td class="tiny">会话数 · 入/出 tokens · tool_use · @引用 · skill 名</td><td class="mono tiny">claude-sonnet-4.5</td></tr>
+                  <tr><td class="mono">codex</td><td class="mono tiny">~/.codex · ~/.openai-codex · ~/.config/codex</td><td class="c"><span class="chip ok">✓ 已探测</span></td><td class="tiny">同上（rollout JSONL 解析）</td><td class="mono tiny">gpt-5-codex</td></tr>
+                  <tr><td class="mono">hermes</td><td class="mono tiny">~/.hermes · ~/.config/hermes · ~/.local/share/hermes</td><td class="c"><span class="chip ok">✓ 已探测</span></td><td class="tiny">同上（assistant.message.model / usage）</td><td class="mono tiny">hermes-large</td></tr>
+                  <tr><td class="mono">xiaolongxia · 通用兜底</td><td class="mono tiny">~/.xiaolongxia · ~/.crayfish · ~/.agent-logs 等</td><td class="c"><span class="chip">— 未探测</span></td><td class="tiny">未知 CLI 的 JSONL 亦可尝试解析 = 新 CLI 低成本接入位</td><td class="mono tiny dim">—</td></tr>
+                </tbody>
+              </table>
+              <p class="tiny dim" style="margin:8px 0 0">待补增量（对齐上方 daemon 模型）：① 探测结果注册为可选<b>运行时</b>（机器 × CLI）；② <b>模型目录探测</b>（如 <span class="mono">dsh --list-models</span>，而非仅回看历史模型）；③ daemon <b>心跳与在线/离线</b>；④ 创建 Agent 时<b>绑定运行时 → 模型随其获取</b>。</p>
+            </div>
+            <div class="grid g4" style="margin-bottom:var(--s3)">
+              <div class="stat"><div class="stat-label">计算机</div><div class="stat-value">2</div><div class="stat-sub">在线 1 · 离线 1（daemon 心跳 15s）</div></div>
+              <div class="stat"><div class="stat-label">运行时实例</div><div class="stat-value">10</div><div class="stat-sub">本机 8 · 构建机-B 2（PATH 探测）</div></div>
+              <div class="stat"><div class="stat-label">绑定 Agent</div><div class="stat-value">6</div><div class="stat-sub">绑定中实例的「删除」已置灰</div></div>
+              <div class="stat"><div class="stat-label">本机并发</div><div class="stat-value">14<span style="font-size:13px">/20</span></div><div class="stat-sub">daemon 全机 ≤20 · 单 Agent 默认 ≤6 · 生效取较小</div></div>
+            </div>
+            <table class="tbl compact">
+              <thead><tr><th>CLI · 检测命令</th><th>协议族</th><th>状态 · 版本</th><th>模型来源</th><th class="c">会话续跑</th><th class="c">托管 MCP</th><th>Skill 注入路径</th><th>可见性</th><th class="c">绑定 Agent</th><th>最近使用</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr class="grp-row"><td colspan="11"><b>本机 · Mac Studio（mac-mini-01）</b> <span class="chip ok">daemon 在线</span> 心跳 15s · 最近检测 刚刚 · 全机并发 <span class="mono">14/20</span> · 探测到 <b>8</b> 个运行时</td></tr>
+                <tr><td><b>DeepSeek Harness</b><div class="tiny muted mono">dsh</div></td><td class="tiny mono">stdio 族</td><td><span class="chip ok mono">online · 0.100.0</span></td><td class="tiny"><span class="mono">dsh --list-models</span> 广告目录 · <span class="mono">provider/model</span></td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">.dsh/skills/</span></td><td><span class="chip info" title="本地运行时默认 private：仅 owner 可在其上建 Agent（工作区管理员也不例外）">private · 仅 owner</span></td><td class="c mono">2</td><td class="mono tiny">r-128 · 刚刚</td><td class="nowrap"><span class="btn link" data-toast="dsh --list-models → deepseek-official/deepseek-chat · deepseek-official/deepseek-reasoner（演示）">查看模型目录</span>·<span class="btn link" data-toast="绑定：审查 Agent · 标准 · 编排 Agent（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 public · 全工作区成员可选用 · 仅共享路由权，不共享该 CLI 的登录凭据（演示）">置为公开</span>·<button class="btn link" disabled title="2 个 Agent 绑定中 · 先处置再删除">删除</button></td></tr>
+                <tr><td><b>Claude Code</b><div class="tiny muted mono">claude</div></td><td class="tiny mono">stdio 族</td><td><span class="chip ok mono">online · 1.0.18</span></td><td class="tiny">账号动态（由登录账号 / 订阅决定）</td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">.claude/skills/</span></td><td><span class="chip info">private · 仅 owner</span></td><td class="c mono">1</td><td class="mono tiny">r-126 · 14:22</td><td class="nowrap"><span class="btn link" data-click data-pop="pp-models">查看模型目录</span>·<span class="btn link" data-toast="绑定：前端 Agent（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 public · 全工作区成员可选用 · 仅共享路由权，不共享该 CLI 的登录凭据（演示）">置为公开</span>·<button class="btn link" disabled title="1 个 Agent 绑定中 · 先处置再删除">删除</button></td></tr>
+                <tr><td><b>Codex CLI</b><div class="tiny muted mono">codex</div></td><td class="tiny mono">stdio 族</td><td><span class="chip ok mono">online · 0.46.0</span></td><td class="tiny">固定名单</td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">$CODEX_HOME/skills/ · per-run 隔离</span></td><td><span class="chip ok" title="public 只共享路由权，不共享该 CLI 的登录凭据">public</span></td><td class="c mono">0</td><td class="mono tiny">r-124 · 15:02</td><td class="nowrap"><span class="btn link" data-toast="固定名单 → gpt-5-codex · gpt-4.1 · o4-mini（演示）">查看模型目录</span>·<span class="btn link" data-toast="该运行时当前无 Agent 绑定（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 private · 仅 owner 可在其上建 Agent（工作区管理员也不例外）（演示）">置为私有</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>Hermes Agent</b><div class="tiny muted mono">hermes</div></td><td class="tiny mono">stdio 族</td><td><span class="chip ok mono">online · 2.3.1</span></td><td class="tiny">账号动态（按登录账号 / 订阅返回）</td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">per-run HERMES_HOME/skills/</span></td><td><span class="chip info">private · 仅 owner</span></td><td class="c mono">0</td><td class="mono tiny">—</td><td class="nowrap"><span class="btn link" data-toast="账号动态目录（由 CLI 登录态决定）→ hermes-large · hermes-small（演示）">查看模型目录</span>·<span class="btn link" data-toast="该运行时当前无 Agent 绑定（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 public · 全工作区成员可选用 · 仅共享路由权，不共享该 CLI 的登录凭据（演示）">置为公开</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>Cursor Agent</b><div class="tiny muted mono">cursor-agent</div></td><td class="tiny mono">ACP 族</td><td><span class="chip ok mono">online · 2025.09</span></td><td class="tiny">固定名单</td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">.cursor/skills/</span></td><td><span class="chip ok">public</span></td><td class="c mono">1</td><td class="mono tiny">r-111 · 11:47</td><td class="nowrap"><span class="btn link" data-toast="固定名单 → cursor-large · cursor-small（演示）">查看模型目录</span>·<span class="btn link" data-toast="绑定：数据同步 Agent（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 private · 仅 owner 可在其上建 Agent（工作区管理员也不例外）（演示）">置为私有</span>·<button class="btn link" disabled title="1 个 Agent 绑定中 · 先处置再删除">删除</button></td></tr>
+                <tr><td><b>Qwen Code</b><div class="tiny muted mono">qwen</div></td><td class="tiny mono">ACP 族</td><td><span class="chip ok mono">online · 0.6.1</span></td><td class="tiny">固定名单</td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">.qwen/skills/</span></td><td><span class="chip info">private · 仅 owner</span></td><td class="c mono">0</td><td class="mono tiny">—</td><td class="nowrap"><span class="btn link" data-toast="固定名单 → qwen3-coder-plus · qwen3-coder-flash（演示）">查看模型目录</span>·<span class="btn link" data-toast="该运行时当前无 Agent 绑定（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 public · 全工作区成员可选用 · 仅共享路由权，不共享该 CLI 的登录凭据（演示）">置为公开</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>GitHub Copilot CLI</b><div class="tiny muted mono">copilot</div></td><td class="tiny mono">ACP 族</td><td><span class="chip ok mono">online · 1.230.0</span></td><td class="tiny">账号动态（GitHub 订阅决定）</td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-no" title="不支持托管 MCP · 创建 Agent 时不显示 MCP 区">✗</span></td><td><span class="mono tiny">.github/skills/</span></td><td><span class="chip info">private · 仅 owner</span></td><td class="c mono">0</td><td class="mono tiny">—</td><td class="nowrap"><span class="btn link" data-toast="账号动态目录（GitHub 订阅决定）→ gpt-5 · claude-sonnet-4.5（演示）">查看模型目录</span>·<span class="btn link" data-toast="该运行时当前无 Agent 绑定（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 public · 全工作区成员可选用 · 仅共享路由权，不共享该 CLI 的登录凭据（演示）">置为公开</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>MiniMax Code</b><div class="tiny muted mono">mcode</div></td><td class="tiny mono">ACP 族</td><td><span class="chip ok mono">online · 0.8.2</span></td><td class="tiny"><span class="chip warn">由运行时托管</span>（选择器禁用）</td><td class="c"><span class="dot-no" title="ACP 无会话加载 · 每次新会话">✗</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">.minimax/skills/</span></td><td><span class="chip ok">public</span></td><td class="c mono">1</td><td class="mono tiny">r-120 · 昨天 19:03</td><td class="nowrap"><span class="btn link" data-toast="无模型目录：选择器显示「由运行时托管」· MiniMax 侧自行选型（演示）">查看模型目录</span>·<span class="btn link" data-toast="绑定：汇总 Agent（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 private · 仅 owner 可在其上建 Agent（工作区管理员也不例外）（演示）">置为私有</span>·<button class="btn link" disabled title="1 个 Agent 绑定中 · 先处置再删除">删除</button></td></tr>
+                <tr class="grp-row"><td colspan="11"><b>构建机-B · Linux（build-02）</b> <span class="chip bad">daemon 离线 · ~40min</span> 心跳丢失 → 排队 run 等待（双条件才失败）· 在途 run 已失败 · 可自动重试 · 探测到 <b>2</b> 个运行时</td></tr>
+                <tr class="row-off"><td><b>Codex CLI</b><div class="tiny muted mono">codex</div></td><td class="tiny mono">stdio 族</td><td><span class="chip bad mono">offline · 0.44.0</span></td><td class="tiny">固定名单</td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">$CODEX_HOME/skills/ · per-run 隔离</span></td><td><span class="chip info">private · 仅 owner</span></td><td class="c mono">1</td><td class="mono tiny">r-118 · 3 小时前（离线前）</td><td class="nowrap"><span class="btn link" data-toast="daemon 离线 · 模型目录暂不可读（演示）">查看模型目录</span>·<span class="btn link" data-toast="绑定：审查 Agent · 备援（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 public · 全工作区成员可选用 · 仅共享路由权，不共享该 CLI 的登录凭据（演示）">置为公开</span>·<button class="btn link" disabled title="1 个 Agent 绑定中 · 先处置再删除">删除</button></td></tr>
+                <tr class="row-off"><td><b>Qwen Code</b><div class="tiny muted mono">qwen</div></td><td class="tiny mono">ACP 族</td><td><span class="chip bad mono">offline · 0.5.0</span></td><td class="tiny">固定名单</td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">.qwen/skills/</span></td><td><span class="chip info">private · 仅 owner</span></td><td class="c mono">0</td><td class="mono tiny">—</td><td class="nowrap"><span class="btn link" data-toast="daemon 离线 · 模型目录暂不可读（演示）">查看模型目录</span>·<span class="btn link" data-toast="该运行时当前无 Agent 绑定（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 public · 全工作区成员可选用 · 仅共享路由权，不共享该 CLI 的登录凭据（演示）">置为公开</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+              </tbody>
+            </table>
+            <div class="callout warn" style="margin-top:var(--s4)">
+              <p><b>离线语义（daemon 失联时）：</b>① 心跳 15s，异常退出最迟约 <b>3 分钟</b>转离线；② <b>排队的 run</b> 不立即失败 —— 「重连宽限期 + 入队时长」<b>双条件</b>都满足才置失败；③ <b>在途 run</b> 随失联失败，可按策略<b>自动重试</b>（原机重连或改派其他在线运行时）；④ 离线 <b>&gt;7 天</b>且无 Agent 绑定的运行时<b>自动清理</b>；⑤ daemon 重启会重新注册本机全部运行时（更新既有记录）并<b>回收未正常结束的 run</b>。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<p class="tiny dim"><b>演示数据说明：</b>2 台计算机 / 10 个运行时实例 / CLI 版本 / 并发 14/20 / 绑定数均为演示值；运行时模型对齐 Multica daemon-runtimes：daemon 心跳 15s · 离线判定 ≤3 分钟 · 全机并发 ≤20 · 单 Agent 默认 ≤6（生效取较小）· 本地运行时默认 private（仅 owner 可建 Agent，管理员也不例外）· public 只共享路由权不共享 CLI 登录凭据 · 模型目录由运行时暴露（<span class="mono">dsh --list-models</span> 的 id 形如 <span class="mono">provider/model</span>）· 支持矩阵取 providers.mdx 摘录 8 行。</p>
+
+<div class="pop" id="pp-models"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">claude · 账号动态目录（登录工作区账号 llm-team · 演示）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">claude-sonnet-4.5</td><td><span class="chip ok">可用</span></td></tr>
+<tr><td class="mono">claude-opus-4.1</td><td><span class="chip ok">可用</span></td></tr>
+<tr><td class="mono">claude-haiku-4.5</td><td><span class="chip ok">可用</span></td></tr>
+<tr><td class="mono">claude-2.1</td><td><span class="chip bad">已下架</span></td></tr>
+</tbody></table><p class="tiny dim" style="margin:6px 0 0">该 CLI 按登录账号 / 订阅动态返回目录 —— 新建 Agent 的「模型」下拉即以此为准（演示）。</p></div>
+
+<div class="modal" id="md-custom"><div><b>添加自定义运行时（profile）</b><p class="small dim" style="margin:6px 0 10px">档案 = 协议族 + 名称 + 命令 + 固定参数；保存后由各机器 daemon 探测解析。仅 owner / workspace 管理员可创建。</p>
+<div class="fld"><label>协议族 <b>*</b></label><select><option>stdio 族（平台协议参数：-p / --output-format / --permission-mode…）</option><option>ACP 兼容族</option></select></div>
+<div class="fld"><label>名称 <b>*</b> <span class="dim">（工作区内展示用）</span></label><input placeholder="例如：内部 CodeCli · ccms"></div>
+<div class="fld"><label>命令 <b>*</b> <span class="dim">（按 exec 数组解析 · 非 shell 脚本）</span></label><input class="mono" placeholder="ccms start q36"><span class="hint">空格分词，<b>不接受管道 / 重定向 / &amp;&amp;</b>；profile 全工作区共享，命令由每台机器自行在 PATH 解析。</span></div>
+<div class="fld"><label>固定参数</label><input class="mono" placeholder="--mode review --max-turns 20"><span class="hint">编辑档案只影响<b>其后领取的 run</b>，在途 run 不受影响。</span></div>
+<div class="callout" style="margin:0 0 var(--s3);padding:8px 10px"><p class="tiny"><b>参数顺序：</b><span class="mono">&lt;你的命令&gt; &lt;你的固定参数&gt; &lt;平台协议参数&gt; &lt;Agent 自定义参数&gt;</span>。平台协议关键参数（<span class="mono">-p / --output-format / --permission-mode</span> 等）会被<b>丢弃</b> —— 请勿写进固定参数。</p></div>
+<div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-close data-toast="自定义运行时档案已保存 · 等待各机器 daemon 探测解析命令（演示）">保存</button></div></div></div>
+
+<div class="modal" id="md-del"><div><b>删除运行时实例「Codex CLI · codex @ 本机」？（演示目标）</b><p class="small dim" style="margin:8px 0 4px">删除的是<b>这台机器上这个 CLI 的实例记录</b> —— 不删自定义运行时 profile（档案仍在，可继续选用）；daemon 若仍在跑，下一轮心跳会重新注册。<b>先处置在绑 Agent</b>：绑定中的行「删除」已置灰不可点。</p><table class="tbl compact"><tbody>
+<tr><td>自定义 profile</td><td class="mono">不随之删除 · 各机器仍解析</td><td><span class="chip info">保留</span></td></tr>
+<tr><td>daemon 重注册</td><td class="mono">在跑则下轮心跳复活</td><td><span class="chip warn">会重建</span></td></tr>
+<tr><td>绑定 Agent</td><td class="mono">0（可安全删除）</td><td><span class="chip ok">无绑定</span></td></tr>
+<tr><td>排队 / 在途 run</td><td class="mono">0 / 0</td><td><span class="chip ok">无副作用</span></td></tr>
+</tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [该 CLI 已从此机卸载 · 清理陈旧实例   ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-close data-toast="运行时实例已删除 · profile 保留 · daemon 若仍在跑会重新注册（演示）">确认删除</button></div></div></div>
+
+<p class="tiny dim" style="padding:14px 18px">可点区演示：「⟳ 重新检测」→ toast · 「+ 添加自定义运行时」→ <span class="mono">md-custom</span> 模态（exec 数组约束 / 参数顺序 / 保留 flag 丢弃说明）· 每行「查看模型目录」→ toast（dsh 用 <span class="mono">dsh --list-models</span> 文案）或弹层（claude 行 → <span class="mono">pp-models</span> 账号动态目录）· 「绑定 Agent」→ toast 列出绑定 · 「置为公开 / 私有」→ toast · 「删除」→ <span class="mono">md-del</span> 二次确认（绑定 &gt;0 的行已置灰）· 概念与离线语义 callout 内 chip → 悬停 title　按 Esc 关闭浮层。</p>
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+</body></html>

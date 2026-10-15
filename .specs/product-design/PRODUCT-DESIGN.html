@@ -414,12 +414,12 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <a href="#s5-1">5.1 登录与全局导航</a>
     <a href="#s5-2">5.2 工作台与变更总览</a>
     <a href="#s5-3">5.3 Agent 管控面</a>
-    <a href="#s5-4">5.4 Agent 详情与探针</a>
+    <a href="#s5-4">5.4 Agent 详情（四标签）</a>
     <a href="#s5-5">5.5 编排画布</a>
     <a href="#s5-6">5.6 工作流</a>
     <a href="#s5-7">5.7 工具库</a>
     <a href="#s5-8">5.8 对话中心与渠道</a>
-    <a href="#s5-9">5.9 知识库</a>
+    <a href="#s5-9">5.9 知识库（公共+空间）</a>
     <a href="#s5-10">5.10 运行时监控</a>
     <a href="#s5-11">5.11 告警中心</a>
     <a href="#s5-12">5.12 监控仪表盘</a>
@@ -434,7 +434,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <a href="#p1">6.1 登录</a>
     <a href="#p2">6.2 工作台</a>
     <a href="#p3">6.3 Agent 管控面 · 三层域树</a>
-    <a href="#p4">6.4 Agent 详情 · 探针时间线</a>
+    <a href="#p4">6.4 Agent 详情 · 四标签</a>
     <a href="#p5">6.5 编排画布</a>
     <a href="#p6">6.6 工作流列表</a>
     <a href="#p7">6.7 工具市场</a>
@@ -458,6 +458,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <a href="#p25" class="planned">6.25 环境参谋 ✱</a>
       <a href="#p26" class="planned">6.26 执行隔离策略 ✱</a>
       <a href="#p27" class="planned">6.27 对外集成面 ✱</a>
+    <a href="#p28">6.28 运行时发现</a>
     <p class="grp">附录</p>
     <a href="#s7">7 · 角色权限矩阵</a>
     <a href="#s8">8 · 术语表</a>
@@ -529,7 +530,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr>
           <td><b>Agent 开发者</b><br><span class="tiny dim">user + project:write</span></td>
           <td>要上线一个新的审查 Agent</td>
-          <td>工具库登记 Skill → 建 Agent 并绑定模型/运行时 → 编排拓扑连边 → apply 部署</td>
+          <td>工具库登记 Skill → 建 Agent 并绑定运行时（模型随其获取）→ 编排拓扑连边 → apply 部署</td>
           <td>拓扑落进调度队列，Agent 按声明式期望状态持续运行</td>
         </tr>
         <tr>
@@ -541,7 +542,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr>
           <td><b>值班 / 运维</b></td>
           <td>凌晨收到「Agent 心跳丢失」告警</td>
-          <td>看告警中心 → 进管控面看探针时间线 → 触发重启或让 Reconcile 自愈</td>
+          <td>看告警中心 → 进 Agent 详情「设置 → 探活」看时间线 → 触发重启或让 Reconcile 自愈</td>
           <td>漂移被检测并收敛，全过程写入审计</td>
         </tr>
         <tr>
@@ -569,15 +570,16 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>决策</td><td>微调工厂与三指标自测</td><td>域内对话+记忆数据（显式开关+脱敏+台账）编排本机 LLaMA-Factory 微调专属决策模型；准确率 / ECE / 基线一致率过门槛才可切生产（服务端门禁）</td><td>§6.24</td></tr>
         <tr><td>决策</td><td>环境参谋（机器自适应部署方案）</td><td>≤5s 硬件画像 → 方案库匹配出「引擎×模型×量化×步骤」分层可执行方案（命令可复制 / 脚本可下载）；<b>只给方案不代执行——装不装由用户决定（2026-09-22 原话）</b>；机器画像只读、默认不上传；测不出就只推云档（诚实降级）</td><td>§6.25</td></tr>
         <tr class="grp-row"><td colspan="4">管控与自愈</td></tr>
-        <tr><td>管控</td><td>隔离域</td><td>域 CRUD；删除域时 Agent 回归默认域（不级联删除）</td><td>§6.3</td></tr>
+        <tr><td>管控</td><td>隔离域</td><td>域 CRUD；删除域时 Agent 以 SET NULL 落「未分类」虚拟组、事后可归位（不级联删除）</td><td>§6.3</td></tr>
         <tr><td>管控</td><td>能力分组</td><td>按 <span class="mono">capabilities</span> 自动派生三层树；零新增表</td><td>§6.3</td></tr>
-        <tr><td>管控</td><td>探针与健康</td><td>周期探活；状态灯（idle/running/blocked/dead/failed）；API Key 脱敏</td><td>§6.3 §6.4</td></tr>
+        <tr><td>管控</td><td>探针与健康</td><td>执行存活由运行时 daemon 15s 心跳判定；可选探活=平台侧服务健康；状态灯（idle/running/blocked/dead/failed）</td><td>§6.3 §6.4</td></tr>
+        <tr><td>管控</td><td>运行时发现</td><td>daemon 扫 PATH 探测外部 AI 编码 CLI 注册为运行时（机器×CLI×协议族=一个）；模型目录由运行时暴露；平台不本地跑模型</td><td>§6.28</td></tr>
         <tr><td>管控</td><td>路由与网关</td><td>域内自动路由 + 跨域统一入口；Least Connection</td><td>§6.3</td></tr>
         <tr><td>管控</td><td>渐进扩容</td><td>按目标副本数渐进拉起，避免一次性冲击模型配额</td><td>§6.3</td></tr>
         <tr class="grp-row"><td colspan="4">交互与知识</td></tr>
-        <tr><td>交互</td><td>对话中心</td><td>Agent 会话列表 + 类 ChatGPT 消息流；工具调用块；流式光标</td><td>§6.8</td></tr>
+        <tr><td>交互</td><td>对话中心</td><td>我与某 Agent 的 1:1 私密会话（管理员亦不可见）；一条消息 = 一个 run；工具调用块；流式光标</td><td>§6.8</td></tr>
         <tr><td>交互</td><td>渠道中继</td><td>飞书 / 钉钉 / Slack / Telegram / SMTP 邮件；OAuth 扫码 + Mock 模式</td><td>§6.8</td></tr>
-        <tr><td>知识</td><td>知识库</td><td>文件上传（类型白名单 + 10MB 上限 + 文件名净化）→ 分块 → 嵌入 → indexed；语义检索</td><td>§6.9</td></tr>
+        <tr><td>知识</td><td>知识库</td><td>公共知识（平台维护、全体只读）+ 知识空间（与项目 1:1，成员可读写）；文件上传（类型白名单 + 10MB 上限 + 文件名净化）→ 分块 → 嵌入 → indexed；语义检索；L0-L3 总结写入</td><td>§6.9</td></tr>
         <tr><td>知识</td><td>记忆系统</td><td>域级共享记忆；同域 Agent 可加载前序上下文</td><td>§6.9</td></tr>
         <tr><td>知识</td><td>工作流产物</td><td>按 change-id 组织 CHANGE/REQUIREMENT/DESIGN/TASK/TEST/REVIEW；门禁投票；产物在线编辑 + 自动备份</td><td>§6.2 §6.18</td></tr>
         <tr class="grp-row"><td colspan="4">可观测与治理</td></tr>
@@ -595,7 +597,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <table class="tbl">
       <thead><tr><th>不做</th><th>原因</th><th>替代路径</th></tr></thead>
       <tbody>
-        <tr><td><b>不做 Agent 本身</b></td><td>平台是管控面，不是模型/提示词工厂</td><td>Agent 由用户自带（7 种 Provider × 4 个运行时适配器）</td></tr>
+        <tr><td><b>不做 Agent 本身</b></td><td>平台是管控面，不是模型/提示词工厂</td><td>Agent 由用户自带：在成员机器上的外部 AI 编码 CLI 运行时（dsh / Claude Code / Codex CLI…）中执行，由运行时发现探测注册（§6.28）；平台不本地运行/加载模型</td></tr>
         <tr><td><b>不绑定任何开发流程</b></td><td>通用平台，流程是用户的数据而非产品的代码</td><td>阶段与门禁以项目内配置 + <span class="mono">.specs/</span> 产物表达</td></tr>
         <tr><td><b>不做多集群联邦</b></td><td>当前为单控制面；联邦属远景</td><td>见 §9 Q5 的演进路径</td></tr>
         <tr><td><b>不做「隐式」语义路由</b></td><td>默认仍是标签匹配 + 最小连接数的确定性直通；决策小模型层<b>必须域内两步显式启用</b>（登记≠绑定），不配置就零介入——这是用户原话定的铁律</td><td>change <span class="mono">small-model-decisions</span> 已立项、需求门已过（2026-09-22），<b>代码未落地</b>；见 §6.23 §6.24 与 §9 Q20</td></tr>
@@ -809,7 +811,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <div class="grid g2">
       <div class="panel">
         <p class="h2p">一句话定义</p>
-        <p class="small muted" style="margin:0">Agent 的命名空间：一组 Agent 的可见性与归属边界，对应 K8s 的 Namespace。</p>
+        <p class="small muted" style="margin:0">Agent 的管控面分组：域是归属分组与共享记忆边界，<strong>不是安全边界</strong>——Agent 在成员机器的运行时中执行，可见性与归属靠 RBAC 与路由权控制，对应 K8s 的 Namespace 只是形似。</p>
       </div>
       <div class="panel">
         <p class="h2p">为什么重要</p>
@@ -818,12 +820,12 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     </div>
     <p><b>关键规则</b></p>
     <ul class="small">
-      <li>域的归属字段是 <span class="mono">agents.domain_id</span>，可为 <span class="mono">NULL</span>；<span class="mono">NULL</span> 一律视为属于<strong>默认域</strong>。</li>
-      <li>系统启动时自动创建默认域（<span class="mono">name='默认域', owner_id='admin'</span>）。</li>
-      <li><strong>删除域不删 Agent</strong>：外键为 <span class="mono">ON DELETE SET NULL</span>，域内 Agent 回归默认域。</li>
+      <li>域的归属字段是 <span class="mono">agents.domain_id</span>，<strong>归属可选</strong>：不选即为 <span class="mono">NULL</span>，归入「未分类」虚拟分组，事后可随时归位到某个域。</li>
+      <li>系统启动时自动创建默认域（<span class="mono">name='默认域', owner_id='admin'</span>）——它是既有代码形态的普通域，不是 NULL 的替身。</li>
+      <li><strong>删除域不删 Agent</strong>：外键为 <span class="mono">ON DELETE SET NULL</span>，域内 Agent 回落到「未分类」虚拟组（<span class="mono">domain_id NULL</span>），可再归位。</li>
       <li>域归属于创建者；admin 可管理所有域。</li>
     </ul>
-    <p class="small muted"><b>与其他概念：</b>域是能力分组的容器；路由与扩容都以域为作用范围；项目可见性（<span class="mono">project_ids</span>）与域是两套独立的可见性维度。</p>
+    <p class="small muted"><b>与其他概念：</b>域是能力分组的容器；<strong>自动路由按能力标签选候选</strong>，域只是作用范围与共享记忆边界，不授予行为；项目可见性（<span class="mono">project_ids</span>）与域是两套独立的可见性维度。</p>
 
     <h3 id="s2-2">2.2 能力分组 Capability Group</h3>
     <div class="grid g2">
@@ -849,7 +851,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <div class="grid g2">
       <div class="panel">
         <p class="h2p">一句话定义</p>
-        <p class="small muted" style="margin:0">被管控的执行实体：一个有模型配置、有工具、有状态灯、有归属域的「Agent 实例」。</p>
+        <p class="small muted" style="margin:0">被管控的执行实体：一个绑定了运行时、由运行时暴露模型、有工具、有状态灯、有归属域（可选）的「Agent 实例」。Agent 本体在成员机器上的 AI 编码 CLI 里跑，平台只声明与观测。</p>
       </div>
       <div class="panel">
         <p class="h2p">为什么重要</p>
@@ -860,10 +862,12 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <thead><tr><th>维度</th><th>取值</th><th>说明</th></tr></thead>
       <tbody>
         <tr><td>状态 <span class="mono">status</span></td><td><span class="chip ok">running</span> <span class="chip">standby</span> <span class="chip warn">blocked</span> <span class="chip bad">dead</span> <span class="chip bad">failed</span></td><td>健康判定与告警的输入</td></tr>
-        <tr><td>LLM Provider</td><td><span class="mono">openai / ollama / anthropic / hermes / deepseek / gemini / codex</span>（7 种）</td><td>来自 <span class="mono">provider_registry</span>，新增只需实现 <span class="mono">BaseProvider</span> 并注册</td></tr>
-        <tr><td>运行时适配器</td><td><span class="mono">claude_code / codex / hermes / xiaolongxia</span>（4 个）</td><td><span class="mono">backend/runtime/adapters/</span>；Agent 上另可声明 LangChain / LangGraph / AutoGen / CrewAI 等 runtime 标识（其执行实现待确认）</td></tr>
+        <tr><td>运行时</td><td><span class="mono">dsh / Hermes / Codex CLI / Claude Code / Cursor Agent / Qwen Code / MiniMax mcode / Copilot…</span></td><td>外部 AI 编码 CLI 框架，由机器上的 daemon 扫描本机 PATH 探测注册（§6.28）；创建 Agent 时运行时必填，run 一律调用这些 CLI——平台不本地运行/加载模型，CLI 登录凭据留本机、平台不接收</td></tr>
+        <tr><td>模型（随运行时）</td><td><span class="mono">provider/model</span>（如 <span class="mono">deepseek-official/deepseek-chat</span>）+ thinking 档 / 服务档</td><td>模型目录由所选运行时暴露（dsh <span class="mono">--list-models</span> 广告；离线刷新得空列表；mcode 等「由运行时托管」时选择器失效）；换运行时后模型/thinking/服务档清空重选。旧代码的 7 种 LLM Provider 配置面已从 Agent 上废除</td></tr>
         <tr><td>能力标签</td><td><span class="mono">model_config_json.capabilities[]</span></td><td>能力分组的派生源，也是路由标签的来源</td></tr>
-        <tr><td>并发上限</td><td><span class="mono">max_concurrency</span></td><td>负载率 = 当前并发 / 上限；为 0 时按 1 处理</td></tr>
+        <tr><td>并发上限</td><td><span class="mono">max_concurrency</span></td><td>负载率 = 当前并发 / 上限；为 0 时按 1 处理；生效并发取「daemon 全机 ≤20 与单 Agent ≤6」的较小值（§6.28）</td></tr>
+        <tr><td>可见性</td><td><span class="mono">private</span> / <span class="mono">public</span></td><td>运行时默认 private、仅 owner 可置 public——public 只共享路由权，不共享该 CLI 的登录凭据（§6.28）</td></tr>
+        <tr><td>能力集</td><td>CLI 自定义参数 / 环境变量 / 集成 / 会话续跑</td><td>CLI 参数=<span class="mono">exec</span> 数组、无 shell 展开、禁放凭据；环境变量=服务端存、值不回读、owner/admin 解锁入审计、保留变量不可覆盖、专用端点整包保存；集成=外部服务授权连接；会话续跑=存会话 id（mcode 等不支持）。「复制到新运行时」：模型类字段清空重选，env 值与 MCP 配置从不复制（§6.4）</td></tr>
       </tbody>
     </table>
 
@@ -924,7 +928,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <div class="grid g2">
       <div class="panel">
         <p class="h2p">一句话定义</p>
-        <p class="small muted" style="margin:0">周期性探活：对每个 Agent 解析出健康端点、发探测、记录结果与时间线。</p>
+        <p class="small muted" style="margin:0">执行存活由运行时 daemon 15s 心跳判定；可选的周期探活只对平台侧服务健康做——发探测、记录结果与时间线。</p>
       </div>
       <div class="panel">
         <p class="h2p">为什么重要</p>
@@ -932,9 +936,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       </div>
     </div>
     <ul class="small">
-      <li><b>健康端点解析</b>：优先 <span class="mono">base_url</span> + <span class="mono">/health</span>，回退到显式 <span class="mono">health_url</span>；两者都没有则判定为不可探活（返回 <span class="mono">None</span>）。</li>
-      <li><b>凭据脱敏</b>：探针输出与日志中的 API Key 一律脱敏为 <span class="mono">sk-***</span>（覆盖 <span class="mono">sk-</span> 与 <span class="mono">sk-ant-</span> 两种前缀）。</li>
-      <li><b>时间线</b>：每次探测的通过/失败进入 Agent 详情的探针时间线（§6.4）。</li>
+      <li><b>存活与探活分离</b>：执行存活由机器上的 daemon <span class="mono">15s 心跳</span>判定（失联即不可运行）；<strong>可选探活</strong>=平台侧服务健康检查，Agent 上不再配置 <span class="mono">base_url</span> / API Key——CLI 登录凭据始终留本机。</li>
+      <li><b>凭据脱敏</b>：平台侧界面与日志中的凭据（渠道令牌、决策模型云 API Key 等）一律脱敏为 <span class="mono">sk-***</span>（覆盖 <span class="mono">sk-</span> 与 <span class="mono">sk-ant-</span> 两种前缀）；运行时的 CLI 凭据平台根本不接收，不存在回读问题。</li>
+      <li><b>时间线</b>：每次探测的通过/失败进入 Agent 详情「设置 → 探活」子栏（§6.4）。</li>
       <li><b>限流</b>：管控面 <span class="mono">/probes</span> 端点带滑动窗口限流；当前限流器为<strong>进程内内存</strong>实现，多进程部署时各自计数（已知限制）。</li>
     </ul>
 
@@ -967,7 +971,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <div class="grid g2">
       <div class="panel">
         <p class="h2p">一句话定义</p>
-        <p class="small muted" style="margin:0">知识库是<strong>外部资料的摄入管道</strong>（文件 → 分块 → 嵌入 → 可检索）；记忆是<strong>Agent 可读写的上下文存储</strong>，可跨 Agent 共享。</p>
+        <p class="small muted" style="margin:0">知识库分两层：<strong>公共知识</strong>（平台维护，所有项目与 Agent 只读）与<strong>知识空间</strong>（与项目一一对应，项目成员——用户、Agent——与项目自身可读写）；摄入管道是文件 → 分块 → 嵌入 → 可检索。<strong>记忆</strong>是 Agent 可读写的上下文存储，按域共享。</p>
       </div>
       <div class="panel">
         <p class="h2p">为什么重要</p>
@@ -990,6 +994,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <li><b>路径穿越防御</b>：上传 <span class="mono">../../../etc/passwd.txt</span> 会被清洗为 <span class="mono">passwd.txt</span>，不逃逸目录。</li>
       <li><b>状态流转</b>：<span class="mono">uploading → processing → indexed</span>，无需人工干预。</li>
       <li><b>chunk 形态</b>：<span class="mono">key = {filename}_chunk_{N}</span>，<span class="mono">memory_type = "document"</span>，支持语义检索。</li>
+      <li><b>跨空间引用</b>：空间之间经「关联」获得只读快照（源更新走增量同步），不直接互写；越权访问与「资源不存在」统一返回 <span class="mono">404</span>。</li>
+      <li><b>总结写入分层（演示口径 · 参考记忆分层实践）</b>：<span class="mono">L0</span> 原始记录自动落盘 → <span class="mono">L1</span> 会话级摘要 → <span class="mono">L2</span> 主题级跨会话聚合（去重、置信度、冲突交人裁决）→ <span class="mono">L3</span> 画像与高价值沉淀（人工审核门；晋升公共知识需平台管理员评审）。</li>
     </ul>
 
     <h3 id="s2-9">2.9 审批与人工闸门</h3>
@@ -1132,7 +1138,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <thead><tr><th>域</th><th>表</th><th>关键字段 / 关系</th></tr></thead>
       <tbody>
         <tr class="grp-row"><td colspan="3">Agent 与管控</td></tr>
-        <tr><td>Agent</td><td class="mono">agents</td><td><span class="mono">domain_id</span> → domains（SET NULL）；<span class="mono">model_config_json</span>（含 capabilities / base_url / max_concurrency）；<span class="mono">status</span></td></tr>
+        <tr><td>Agent</td><td class="mono">agents</td><td><span class="mono">domain_id</span> → domains（SET NULL 回落「未分类」虚拟组）；<span class="mono">model_config_json</span>（含 capabilities / model / max_concurrency；旧 <span class="mono">base_url</span> 配置面已废除）；<span class="mono">runtime_id</span> → 运行时绑定（设计态，§6.28）；<span class="mono">status</span></td></tr>
         <tr><td>隔离域</td><td class="mono">domains</td><td><span class="mono">name</span> / <span class="mono">owner_id</span>；默认域启动时自动创建</td></tr>
         <tr><td>探针</td><td class="mono">agent_probes · <span class="mono">agent_probe_latest</span></td><td>历史探测记录 + 最新状态快照（详情页时间线）</td></tr>
         <tr><td>调度</td><td class="mono">scheduler_queue · <span class="mono">scheduling_queue</span> · <span class="mono">scheduled_tasks</span></td><td>入队任务 / 优先级队列 / cron 定时任务</td></tr>
@@ -1166,7 +1172,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>后端框架</td><td>FastAPI（Python 3.10+）</td><td>自动 OpenAPI、原生异步、SSE 直接可用</td></tr>
         <tr><td>ORM / 存储</td><td>SQLAlchemy 2.0 + SQLite（默认）/ MySQL（可选）</td><td><strong>零外部依赖</strong>是产品主张（本地档：clone 即跑不破门票）。<b>09-23 裁定⑦：可计量追踪数据（用户/会话/PAT/口令/错误告警/审计/变更账本/指标 trace）权威落 MySQL</b>——真实部署档用 MySQL，两档并存</td></tr>
         <tr><td>缓存</td><td>Redis 5.0（可选）</td><td>有则加速，无则自动跳过——不构成启动阻塞</td></tr>
-        <tr><td>模型接入</td><td>自研 <span class="mono">BaseProvider</span> 抽象（7 个 Provider）</td><td>避免被单一 SDK 绑定；新增 Provider 只需实现并注册</td></tr>
+        <tr><td>模型接入</td><td>自研 <span class="mono">BaseProvider</span> 抽象（7 个 Provider，现状代码）</td><td>遗留形态：设计口径已改为模型目录由运行时暴露（§2.3 / §6.28），平台不再本地跑模型；该抽象仅余渠道与决策模型云 API 等平台侧服务使用</td></tr>
         <tr><td>凭据保护</td><td><span class="mono">cryptography</span>（AES-GCM）+ API Key 脱敏</td><td>渠道与模型凭据落库需加密；日志与探针输出需脱敏</td></tr>
         <tr><td>文档解析</td><td>PyPDF2（PDF）/ python-docx（DOCX）</td><td>知识库白名单中的两类二进制格式</td></tr>
       </tbody>
@@ -1248,14 +1254,14 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <div class="seq-wrap"><table class="seq">
         <thead><tr><th class="actor-sys">探针循环</th><th class="actor-sys">Reconcile Loop</th><th>拓扑雷达</th><th>目标 Agent</th><th>审计</th></tr></thead>
         <tbody>
-          <tr><td class="msg" colspan="2"><span class="label"><span class="n">①</span>周期探测 <span class="mono">/health</span> → 连续失败</span><span class="arrow"></span></td><td></td><td></td><td></td></tr>
+          <tr><td class="msg" colspan="2"><span class="label"><span class="n">①</span>周期探测（可选服务健康探活；执行存活另由 daemon 15s 心跳）→ 连续失败</span><span class="arrow"></span></td><td></td><td></td><td></td></tr>
           <tr><td class="note">写入 agent_probes + agent_probe_latest</td><td class="note">_detect_drift()：期望健康数 vs 实际健康数</td><td></td><td></td><td></td></tr>
           <tr><td></td><td class="note">_classify_action() 定级</td><td></td><td></td><td></td></tr>
           <tr><td></td><td class="note"><span class="chip ok">safe</span> 无异常（unhealthy=0 且 drift=0）→ 本轮不动作</td><td class="note">_topology_safe_pause()：判断修复是否会卡住上下游</td><td class="note">重启 → 恢复上报</td><td class="note">记录动作与目标</td></tr>
           <tr><td></td><td class="note"><span class="chip warn">caution</span> 少量异常（1–2 且占比不大）→ 自动修复；退避 [1,2,4,8]s</td><td class="note">拓扑不允许暂停 → 降级为观察，不强行修</td><td></td><td></td></tr>
           <tr><td></td><td class="note"><span class="chip bad">dangerous</span> 异常 ≥3 或 &gt;半数 → 需人工把关</td><td></td><td></td><td class="note">人工审批记录一并落盘</td></tr>
           <tr><td></td><td class="msg" colspan="3"><span class="label"><span class="n">②</span>复探确认 → 漂移清零，本轮收敛</span><span class="arrow"></span></td><td></td></tr>
-          <tr><td class="note"><b>异常分支</b></td><td class="note">反复失败 → _should_backoff 拉长间隔，不产生告警风暴</td><td class="note">拓扑危险 → 只告警不修复（保守优先）</td><td class="note">不可探活（无 base_url / health_url）→ 跳过并标记</td><td class="note">每次修复都留痕</td></tr>
+          <tr><td class="note"><b>异常分支</b></td><td class="note">反复失败 → _should_backoff 拉长间隔，不产生告警风暴</td><td class="note">拓扑危险 → 只告警不修复（保守优先）</td><td class="note">未配置可选探活 → 只按 daemon 心跳判活，健康检查跳过并标记（不算失败）</td><td class="note">每次修复都留痕</td></tr>
         </tbody>
       </table></div>
     </figure>
@@ -1329,6 +1335,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>对话中心</td><td>💬 对话中心</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td>登录即可</td></tr>
         <tr><td>知识库</td><td>知识库</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="mono">project:read (上传需 write)</td></tr>
         <tr><td>运行时监控</td><td>监控 → 运行时</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td><td class="mono">project:read</td></tr>
+        <tr><td>运行时发现</td><td>运行时</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td><td class="mono">project:read（置公开仅 owner；public 只共享路由权，凭据留本机）</td></tr>
         <tr><td>告警中心</td><td>底部告警入口</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-yes">●</td><td class="mono">project:read</td></tr>
         <tr><td>监控仪表盘</td><td>监控</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="mono">project:read</td></tr>
         <tr><td>项目</td><td>项目</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="mono">project:read</td></tr>
@@ -1362,23 +1369,23 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「Agent 管控」→ <span class="mono">/control-plane</span></td></tr>
       <tr><td><b>步骤</b></td><td>1. 建域（或使用默认域）→ 2. 展开域，看到自动派生的能力组 → 3. 展开能力组，看到 Agent 实例与状态灯 → 4. 查看健康概要 <span class="mono">N healthy / M total</span> → 5. 需要时重启单实例或调整调度配置</td></tr>
       <tr><td><b>反馈</b></td><td>三层树逐级展开；能力组行右侧显示健康概要；状态灯颜色区分 idle / running / blocked / dead / failed；控制台顶部显示探针、队列、调和三块实时数据</td></tr>
-      <tr><td><b>边界</b></td><td><strong>删除域不会删除 Agent</strong>，域内 Agent 回归默认域；一个 Agent 有多个 capability 时会同时出现在多个能力组中（预期行为）；无 capability 的 Agent 落在「未分类」；<span class="mono">/probes</span> 端点有限流，高频轮询会被拒</td></tr>
+      <tr><td><b>边界</b></td><td><strong>删除域不会删除 Agent</strong>，域内 Agent 以 SET NULL 回落到「未分类」虚拟组（事后可归位）；一个 Agent 有多个 capability 时会同时出现在多个能力组中（预期行为）；无 capability 的 Agent 落在「未分类」；<span class="mono">/probes</span> 端点有限流，高频轮询会被拒</td></tr>
     </tbody></table>
 
-    <h3 id="s5-4">5.4 Agent 详情与探针</h3>
+    <h3 id="s5-4">5.4 Agent 详情（四标签）</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>Agent 列表 → 点击某行；或管控面三层树中的实例行</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 查看基础信息（模型、Provider、运行时、能力标签、归属域）→ 2. 切换「探针」Tab 查看时间线 → 3. 切换「记忆」Tab 查看域内共享记忆 → 4. 编辑并保存，或删除</td></tr>
-      <tr><td><b>反馈</b></td><td>探针时间线逐条显示通过 / 失败与时间；保存失败会在页内显示具体错误而非静默；删除需二次确认</td></tr>
-      <tr><td><b>边界</b></td><td>API Key 在界面与日志中恒为 <span class="mono">sk-***</span>；无 <span class="mono">base_url</span> 也无 <span class="mono">health_url</span> 的 Agent 不可探活，时间线为空（非错误）；编辑不会自动重启实例</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 概览（只读工作台：Now / 近 30 天 / 最近工作 + 右列只读卡）→ 2. 「工作」看运行 → 3. 「能力」子栏（指令 / 技能 / MCP / 集成 / 知识源与编排）逐项编辑 → 4. 「设置」子栏（通用 / Access / 环境 / CLI 参数 / 闸门 / 探活 / 危险区）→ 5. 归档 / 彻底删除 / 复制均在危险区，二次确认</td></tr>
+      <tr><td><b>反馈</b></td><td>四标签 + 二级子栏均走 <span class="mono">#view=</span> 深链；有未保存改动时切页会被 dirty 拦截；探活时间线逐条显示通过 / 失败；保存失败页内显示具体错误而非静默；头部只显 Updated 不显 Created</td></tr>
+      <tr><td><b>边界</b></td><td>三条横幅位：未绑定 runtime → 顶栏「Bind runtime」；无编辑权 → 页内 Lock read-only（不改 URL 不跳走）；归档态 → 只读 + Restore；env 值不回读、MCP 配置不回显；「环境」子栏仅 canEdit 时渲染入口；编辑不会自动重启实例</td></tr>
     </tbody></table>
 
     <h3 id="s5-5">5.5 编排画布</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「编排」</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 从 Agent 面板拖入节点 → 2. 连线并选择 13 种策略之一 → 3. 在右侧面板逐项配置该边（重试 / 超时 / Token 上限 / 安全栅栏 / 脱敏 / IO Schema）→ 4. 对照 YAML 视图 → 5. 校验 → 6. apply 部署</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 「＋ 新建画布」（空白 / 复制 / 粘 YAML 三来源，draft 起步）或经「⧉ 切换器」切到别的画布 → 2. 从 Agent 面板拖入节点 → 3. 连线并选择 13 种策略之一 → 4. 在右侧面板逐项配置该边（重试 / 超时 / Token 上限 / 安全栅栏 / 脱敏 / IO Schema）→ 5. 对照 YAML 视图 → 6. 校验 → 7. Apply 部署：应用内 diff 摘要模态 → 必填原因 → 部署完成跳转工作流详情（完整 diff 升格页仍可达）</td></tr>
       <tr><td><b>反馈</b></td><td>画布与 YAML <strong>双向同步</strong>：改画布 YAML 跟着变，改 YAML 画布跟着重绘；校验返回逐条错误并高亮出错边；apply 后拓扑入库并生成快照</td></tr>
-      <tr><td><b>边界</b></td><td>校验不通过不落库；<span class="mono">human-approval</span> 边会让流程挂起等人（不是超时失败）；<span class="mono">dead-letter</span> 边必须显式配置，否则失败任务无处可去；节点引用的工具若被 admin 禁用，执行时才报错（校验不拦截）</td></tr>
+      <tr><td><b>边界</b></td><td>校验不通过不落库；<span class="mono">human-approval</span> 边会让流程挂起等人（不是超时失败）；<span class="mono">dead-letter</span> 边必须显式配置，否则失败任务无处可去；节点引用的工具若被 admin 禁用，执行时才报错（校验不拦截）；切换器里 published 为只读浏览——改动前先生成新草稿，archived 仅查看禁 Apply</td></tr>
     </tbody></table>
 
     <h3 id="s5-6">5.6 工作流</h3>
@@ -1393,24 +1400,24 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「工具库」</td></tr>
       <tr><td><b>步骤</b></td><td>1. 按类型筛选（Plugin / Skill / MCP）→ 2. 查看工具详情（参数、IO、示例）→ 3. 下载 demo → 4. admin 可禁用某工具</td></tr>
-      <tr><td><b>反馈</b></td><td>类型徽章区分三类；禁用后工具卡片置灰并标注「已禁用」；详情页展示参数表与调用示例</td></tr>
+      <tr><td><b>反馈</b></td><td>类型徽章区分三类；禁用后工具卡片置灰并标注「已禁用」；详情页展示参数表与调用示例——注册表单（升格页，三类分型不共用一张表单）与详情页<strong>字段同源</strong>，详情页可编辑（启用历史 / 基础信息；被引用工作流·编排保留）</td></tr>
       <tr><td><b>边界</b></td><td>禁用是全局生效，已引用该工具的编排在<strong>下次执行</strong>时才失败；删除工具需 <span class="mono">project:delete</span>；demo 下载只给样例不给真实凭据</td></tr>
     </tbody></table>
 
     <h3 id="s5-8">5.8 对话中心与渠道</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「💬 对话中心」</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 选择或新建会话 → 2. 输入任务 → 3. 观察流式输出与工具调用块 → 4. 在「渠道」中配置飞书 / 钉钉 / Slack / Telegram / 邮件</td></tr>
-      <tr><td><b>反馈</b></td><td>助手消息流式追加，末尾显示光标；工具调用以独立块呈现（含工具名与参数摘要）；渠道配置支持 OAuth 扫码与 Mock 模式切换</td></tr>
-      <tr><td><b>边界</b></td><td>登录即可用（唯一无需额外权限的模块）；渠道凭据加密落库（AES-GCM）；Mock 模式下不实际外发消息；会话历史分页加载</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 与某 Agent 建立 1:1 私密会话（＋ 新建会话先选 Agent；启动语建议 ≤3 条，点击=复制进输入框不直发）→ 2. 输入任务（可「＋」挂项目背景），一条消息 = 一个 run → 3. 观察流式输出：运行中显阶段 + 工具活动，View details 进回放，停止保留已产出并回填未处理输入 → 4. 多轮即会话续跑（运行时不支持续跑则新会话继续）→ 5. 会话可重命名 / 置顶 / 归档（转只读，外部渠道绑定断开）/ 删除（不可恢复）→ 6. 在「渠道」中配置飞书 / 钉钉 / Slack / Telegram / 邮件（OAuth 扫码 + Mock 模式切换）</td></tr>
+      <tr><td><b>反馈</b></td><td>助手消息流式追加，末尾显示光标；工具调用以独立块呈现（含工具名与参数摘要）；运行时离线时消息排队等待上线；AgentFlow 强化：决策微模型分诊（直答/调工具/起工作流/转@，阈值 0.60 与管控面同源）+ 平台级能力（查工作项 / 调工具 / 触发工作流 / 审批 / 读写知识）</td></tr>
+      <tr><td><b>边界</b></td><td>登录即可用（唯一无需额外权限的模块）；<strong>1:1 私密——其他成员包括管理员都不可见</strong>；起点无 issue 上下文、绝不自动建工作项；归档或失去可运行权限的 Agent 不能发新消息；渠道凭据加密落库（AES-GCM）；Mock 模式下不实际外发消息；会话历史分页加载</td></tr>
     </tbody></table>
 
-    <h3 id="s5-9">5.9 知识库</h3>
+    <h3 id="s5-9">5.9 知识库（公共知识 + 知识空间）</h3>
     <table class="tbl compact"><tbody>
-      <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「知识库」→ 选择 Agent</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 拖拽或点选上传文件 → 2. 等待状态从 uploading 走到 indexed → 3. 用「测试连接」验证检索 → 4. 打标签 / 删除</td></tr>
-      <tr><td><b>反馈</b></td><td>状态列显示「已索引 / 处理失败」；来源类型标记为「本地文件」并显示路径；每源显示 chunk 数</td></tr>
-      <tr><td><b>边界</b></td><td>类型白名单 <span class="mono">.docx .js .json .md .pdf .py .txt</span>；单文件上限 10MB（正好 10MB 通过）；超限返回 400 而非 413；文件名会被净化（路径穿越被拦截）；嵌入失败只影响该源</td></tr>
+      <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「知识库」→ 选「公共知识」或某个<strong>知识空间</strong>（与项目 1:1，随新建项目自动创建）</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 在空间内拖拽或点选上传文件 → 2. 等待状态从 uploading 走到 indexed → 3. 用检索面板验证命中（公共知识 + 我可写空间 + 已关联只读源）→ 4. 打标签 / 删除；跨空间经「关联」只读引用，总结写入按 L0-L3 分层推进（L3 需人工审核门，晋升公共知识走平台管理员评审）</td></tr>
+      <tr><td><b>反馈</b></td><td>状态列显示「已索引 / 处理失败」；来源类型标记为「本地文件」并显示路径；每源显示 chunk 数；公共知识行只有「查看 / 关联到空间」</td></tr>
+      <tr><td><b>边界</b></td><td>类型白名单 <span class="mono">.docx .js .json .md .pdf .py .txt</span>；单文件上限 10MB（正好 10MB 通过）；超限返回 400 而非 413；文件名会被净化（路径穿越被拦截）；嵌入失败只影响该源；空间成员（用户与 Agent）与项目自身可读写，其余越权访问与「不存在」统一返回 <span class="mono">404</span></td></tr>
     </tbody></table>
 
     <h3 id="s5-10">5.10 运行时监控</h3>
@@ -1418,7 +1425,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「监控」→ 运行时 Tab</td></tr>
       <tr><td><b>步骤</b></td><td>1. 查看会话列表 → 2. 按状态过滤（running / success / error）→ 3. 查看延迟分位值与 Token 统计 → 4. 对失败会话触发重试</td></tr>
       <tr><td><b>反馈</b></td><td>SSE 实时推送会话开始事件与心跳；延迟卡显示 P50 / P95 / P99 与样本数；Token 用量按会话与模型分组</td></tr>
-      <tr><td><b>边界</b></td><td>无数据的指标显示<strong>空态而非 0</strong>；过滤条件不匹配时返回空列表而非报错；SSE 断开自动重连；延迟分位数在样本过少时不具统计意义（界面标注样本数）</td></tr>
+      <tr><td><b>边界</b></td><td>无数据的指标显示<strong>空态而非 0</strong>；过滤条件不匹配时返回空列表而非报错；SSE 断开自动重连；延迟分位数在样本过少时不具统计意义（界面标注样本数）。职责界定：本页观测<strong>机器与运行会话</strong>；执行环境（CLI 运行时）的注册与探测在「运行时发现」（§6.28），两者不混</td></tr>
     </tbody></table>
 
     <h3 id="s5-11">5.11 告警中心</h3>
@@ -1440,7 +1447,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <h3 id="s5-13">5.13 项目管理</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「项目」</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 查看已发现的项目 → 2. 新建或切换项目 → 3. 进入项目详情查看变更与需求输入 → 4. 发起执行</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 查看已发现的项目 → 2. 新建项目（名称/描述独立输入框、图标可选；代码源：本地目录=目录选择器、GitHub=输入框 +「克隆并关联」；状态/优先级=单选按钮组，<strong>无起止时间字段——节奏由里程碑/工作项承载</strong>；Leader 与成员可持续添加，候选=用户级 Agent / 其他 Agent / 用户）或切换项目 → 3. 进入项目详情查看变更与需求输入 → 4. 发起执行。创建项目 = 自动创建其专属知识空间（§5.9）</td></tr>
       <tr><td><b>反馈</b></td><td>项目列表标注是否具备提示词目录；切换项目后全局 <span class="mono">.specs/</span> 与提示词解析路径同步切换</td></tr>
       <tr><td><b>边界</b></td><td>项目可见性受 <span class="mono">project_ids</span> 限制：未分配任何项目的普通用户看到<strong>空列表</strong>（非全部）；删除项目需 <span class="mono">project:delete</span>，是高危操作</td></tr>
     </tbody></table>
@@ -1448,8 +1455,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <h3 id="s5-14">5.14 角色市场</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「角色」</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 浏览内置角色模板 → 2. 查看角色详情（性情 / 职责 / 边界 / 触发场景 / 评估 / 输入输出）→ 3. 基于模板派生自定义角色 → 4. 保存并复用到 Agent</td></tr>
-      <tr><td><b>反馈</b></td><td>卡片网格展示角色摘要；详情页按六个维度分区；保存后出现在「自定义角色」区</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 浏览内置角色模板 → 2. 查看角色详情（融合既有代码 CustomRole 全 14 字段：owner / based_on / temperament / responsibilities / triggers[gate, topic] / boundaries can·cannot / evaluation[step, title, items] / inputs / outputs / gate_pre / gate_post / io_filter / visibility，默认 private）→ 3. 基于模板派生自定义角色 → 4. 保存并复用到 Agent</td></tr>
+      <tr><td><b>反馈</b></td><td>卡片网格展示角色摘要；详情页按字段分区，列表字段用<strong>增删行编辑器</strong>（triggers / boundaries / evaluation items / io 逐条可增删）；保存后出现在「自定义角色」区</td></tr>
       <tr><td><b>边界</b></td><td>内置模板为只读参考，不能直接改；自定义角色可删除（需 <span class="mono">project:delete</span>）；删除被 Agent 引用的角色不会级联删除 Agent</td></tr>
     </tbody></table>
 
@@ -1464,9 +1471,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <h3 id="s5-16">5.16 用户与权限</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「用户管理」（管理区，仅 <span class="mono">user:manage</span> 可见）</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 查看用户列表 → 2. 新建用户（分配角色）→ 3. 为普通用户勾选 6 个权限点中的哪些 → 4. 分配可见项目 → 5. 重置密码或删除用户</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 查看用户列表 → 2. 新建用户（分配角色；创建即自动生成其 1:1 个人 Agent：owner 本人、默认 private、域未分类、代本人做事）→ 3. 为普通用户勾选 6 个权限点中的哪些 → 4. 分配可见项目 → 5. 重置密码或删除用户</td></tr>
       <tr><td><b>反馈</b></td><td>权限勾选实时显示「有效权限」汇总；危险权限点带警示标识；保存后立即生效</td></tr>
-      <tr><td><b>边界</b></td><td>普通用户<strong>默认零权限</strong>——不勾选任何权限点则看不到任何数据；admin 权限不可被削减（豁免逻辑）；账号数据存于 <span class="mono">users.json</span>（跨项目共享，原子写+文件锁）。<b>〔09-23 裁定⑦〕账号表化：迁 MySQL users 表，跨项目共享语义不变；权限目录表（阶段收敛同库）</b></td></tr>
+      <tr><td><b>边界</b></td><td>普通用户<strong>默认零权限</strong>——不勾选任何权限点则看不到任何数据；admin 权限不可被削减（豁免逻辑）；账号数据存于 <span class="mono">users.json</span>（跨项目共享，原子写+文件锁）。<b>〔09-23 裁定⑦〕账号表化：迁 MySQL users 表，跨项目共享语义不变；权限目录表（阶段收敛同库）</b>；归档用户 → 其个人 Agent 同步置为不可运行；删除用户不自动删其个人 Agent（需二次确认处置）</td></tr>
     </tbody></table>
 
     <h3 id="s5-17">5.17 审批中心</h3>
@@ -1500,7 +1507,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <tbody>
         <tr><td>①</td><td><b>统一详情骨架</b>：左 inspector（自动保存三态：保存中/已存/失败）+ 右 <span class="mono">?view=</span> 分段；无权限走页内 CapabilityBanner / Lock read-only，<b>不改 URL 不跳走</b></td><td>p4 · p7 · p14 · p18 及所有详情页</td></tr>
         <tr><td>②</td><td><b>视图即链接</b>：保存视图 = 筛选快照（status/priority/assignee/creator/project/label/property 等字段全集）+ <span class="mono">?view=&lt;id&gt;</span> URL 双向同步，天然可分享；自定义属性可作分组维</td><td>p6 · p12 · p15 · p20</td></tr>
-        <tr><td>③</td><td><b>Runtime 健康四态</b> online / recently_lost / offline / long_offline；<b>判定阈值写进产品文案</b>（如心跳 45s/离线 75s 式明说）；工作量折进健康列；Cost·7d 带环比；缺价模型显式告警</td><td>p10 · p22</td></tr>
+        <tr><td>③</td><td><b>Runtime 健康四态</b> online / recently_lost / offline / long_offline；<b>判定阈值写进产品文案</b>（如 daemon 心跳 15s / 离线判定 ≤3min 式明说）；工作量折进健康列；Cost·7d 带环比；缺价模型显式告警</td><td>p10 · p22 · p28</td></tr>
         <tr><td>④</td><td><b>失败卡片固定三件套</b>：Retry with context / Edit as advanced form（回填原输入）/ 升级到人；一键运行先过<b>权限·运行时·配额·归因四道门</b>，拒因原样 toast 不粉饰</td><td>p8 · p11 · p17</td></tr>
         <tr><td>⑤</td><td><b>Quick Actions</b>：管理员把命名 prompt 绑定为 Agent 动作，点击即跑、无输入框，public/private + 用量计数 + 可归档；「并入已有运行」用中性措辞，不谎报新启动</td><td>p7 · p14 · p19</td></tr>
         <tr><td>⑥</td><td><b>权限渲染纯函数化</b>：<span class="mono">{allowed, reason}</span> 稳定枚举决定 UI 变体（不解析字符串）；<b>private 连管理员也不旁路</b>；未实装的授权位显式 INERT；鉴权源唯一为「可调用目标」，visibility 降为展示字段</td><td>p16 · 全站</td></tr>
@@ -1624,7 +1631,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
 
     <!-- ─────────── 6.3 Agent 管控面 ─────────── -->
     <h3 id="p3">6.3 Agent 管控面 · 三层域树</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>域 → 能力组 → Agent 实例三层树。注意 <span class="mono">Agent-A</span> 同时出现在 code-review 与 python 两个能力组中——这是「多层归属」的预期表现，不是重复渲染。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>域 → 能力组 → Agent 实例三层树。注意 <span class="mono">Agent-A</span> 同时出现在 code-review 与 python 两个能力组中——这是「多层归属」的预期表现，不是重复渲染。「Agent 列表」签另有独立原型页 <span class="mono">agents.html</span>：平铺表（persona + 能力 + 运行时 + 安全闸门）、「状态」列双灯（可用性 × 负载）；不选域的 Agent 落「未分类」虚拟组（<span class="mono">domain_id NULL</span>，事后可归位）；归档 / 删除走二次确认。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/control-plane</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -1717,11 +1724,11 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <p class="tiny dim"><b>演示数据说明：</b>三层树的展开状态、健康概要数值与队列内容为演示值；状态灯颜色对应真实 <span class="mono">--cp-status-*</span> 令牌。偏离处：真实系统在 <span class="mono">/probes</span> 限流被触发时会显示错误提示条，此处未画出。</p>
 
     <!-- ─────────── 6.4 Agent 详情 ─────────── -->
-    <h3 id="p4">6.4 Agent 详情 · 探针时间线</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>基础信息 + 探针时间线。API Key 恒为脱敏形态。</p>
-    <p class="tiny dim">〔第 4 轮规划注〕P1-15 落地后，本页新增<b>「A2A 卡片」页签</b>（与探针时间线并列）：同一 Agent 对象的对外只读视图 + ⧉复制 + 未启用 capabilities 灰态——卡片是视图不是新实体。</p>
+    <h3 id="p4">6.4 Agent 详情 · 四标签</h3>
+    <p class="proto-note"><span class="chip warn">演示数据</span><strong>概览 / 工作 / 能力 / 设置</strong>四个一级标签，下设二级子栏，两级均走 <span class="mono">#view=</span> 深链、有未保存改动时切页被 dirty 拦截。概览是<strong>只读工作台</strong>（Now / 近 30 天 / 最近工作 + 右列只读卡），编辑动作全部收进「能力」与「设置」。头部只显示 Updated、刻意不显示 Created（创建时间归审计事件查）。三条横幅位：未绑定 runtime → 顶栏「Bind runtime」；无编辑权 → 页内 Lock read-only（不改 URL 不跳走）；归档态 → 只读 + Restore。全字段编辑另有升格落地页 <span class="mono">agent-detail__config.html</span>（16 分区，与详情页同源草稿槽、字段同源）。</p>
+    <p class="tiny dim">〔第 4 轮规划注〕P1-15 落地后，本页新增<b>「A2A 卡片」页签</b>（与四标签并列）：同一 Agent 对象的对外只读视图 + ⧉复制 + 未启用 capabilities 灰态——卡片是视图不是新实体。</p>
     <div class="proto">
-      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/agents/1</span><span class="fake">演示数据</span></div>
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/agents/1#view=v-overview</span><span class="fake">演示数据</span></div>
       <div class="app">
         <aside class="app-side">
           <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
@@ -1745,62 +1752,46 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb"><span class="dim">Agent /</span> 审查 Agent · 标准</span><span class="right"><span class="chip ok"><span class="dot running" style="margin-right:4px"></span>running</span><button class="btn sm">重启</button><button class="btn sm">编辑</button><button class="btn sm">删除</button></span></div>
+          <div class="app-top"><span class="crumb"><span class="dim">Agent /</span> 审查 Agent · 标准</span><span class="right"><span class="chip ok"><span class="dot running" style="margin-right:4px"></span>running</span><span class="chip mono">Updated 3 天前</span><button class="btn sm">编辑 ▾</button></span></div>
           <div class="app-body">
-            <div class="grid g2" style="align-items:start">
+            <div class="tabs"><span class="tab active">概览</span><span class="tab">工作</span><span class="tab">能力</span><span class="tab">设置</span></div>
+            <div class="grid" style="align-items:start;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:var(--s4)">
               <div>
-                <p class="h2p">基础信息</p>
+                <p class="h2p">Now（活跃 run · 运行 / 排队）</p>
                 <div class="panel">
                   <dl class="kv">
-                    <dt>Agent ID</dt><dd class="mono">1</dd>
-                    <dt>归属域</dt><dd>默认域</dd>
-                    <dt>能力标签</dt><dd><span class="pill mono">code-review</span> <span class="pill mono">python</span></dd>
-                    <dt>LLM Provider</dt><dd class="mono">openai</dd>
-                    <dt>模型</dt><dd class="mono">gpt-4o</dd>
-                    <dt>运行时</dt><dd class="mono">claude_code</dd>
-                    <dt>Base URL</dt><dd class="mono">https://api.openai.com/v1</dd>
-                    <dt>健康端点</dt><dd class="mono">https://api.openai.com/v1/health</dd>
-                    <dt>API Key</dt><dd class="mono">sk-***</dd>
-                    <dt>并发上限</dt><dd class="mono">4</dd>
-                    <dt>当前负载</dt><dd><span class="bar" style="display:inline-block;width:80px;vertical-align:middle"><i class="g" style="width:50%"></i></span> <span class="mono tiny">2/4</span></dd>
+                    <dt>运行中</dt><dd class="mono">1 · rt-1-1783349487（deepseek-official/deepseek-chat · 阶段：读文件 → 写补丁 · 工具活动 4）</dd>
+                    <dt>排队</dt><dd class="mono">0</dd>
                   </dl>
                 </div>
-                <p class="h2p" style="margin-top:var(--s4)">域内共享记忆</p>
-                <div class="panel">
-                  <p class="small muted" style="margin:0 0 6px">同域 Agent 可加载以下前序上下文：</p>
-                  <div class="timeline" style="margin:0">
-                    <div class="tl-item"><b>2026-07-06</b> · capability-groups 设计结论：虚拟分组不建表</div>
-                    <div class="tl-item"><b>2026-07-05</b> · 管控面探针限流器为进程内实现（单进程适用）</div>
-                    <div class="tl-item"><b>2026-07-05</b> · Reconcile 修复前须过拓扑安全检查</div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <p class="h2p">探针时间线（最近 8 次）</p>
-                <div class="panel">
-                  <div class="timeline" style="margin:0">
-                    <div class="tl-item"><b>14:35:10</b> · 通过 · <span class="mono">200 OK · 42ms</span></div>
-                    <div class="tl-item"><b>14:34:10</b> · 通过 · <span class="mono">200 OK · 38ms</span></div>
-                    <div class="tl-item"><b>14:33:10</b> · 通过 · <span class="mono">200 OK · 51ms</span></div>
-                    <div class="tl-item fail"><b>14:32:10</b> · 失败 · <span class="mono">timeout after 5000ms</span></div>
-                    <div class="tl-item fail"><b>14:31:10</b> · 失败 · <span class="mono">timeout after 5000ms</span></div>
-                    <div class="tl-item fail"><b>14:30:10</b> · 失败 · <span class="mono">connection refused</span></div>
-                    <div class="tl-item"><b>14:30:22</b> · <span class="chip ok">safe</span> 调和动作：自动重启 → 恢复上报</div>
-                    <div class="tl-item"><b>14:29:10</b> · 通过 · <span class="mono">200 OK · 40ms</span></div>
-                  </div>
-                </div>
-                <p class="h2p" style="margin-top:var(--s4)">近期会话</p>
+                <p class="h2p" style="margin-top:var(--s4)">近 30 天</p>
+                <div class="panel tight"><p class="small" style="margin:0"><b>128 runs · 成功率 92%</b> <span class="tiny dim">手写折线（演示）；09-12 三连失败窗与探活抖动同窗</span></p></div>
+                <p class="h2p" style="margin-top:var(--s4)">最近工作（终态 run） <span class="tiny dim">来源徽标 6 类：工作项 / 对话 / 定时 / 人点名 / 工作流派生 / API</span></p>
                 <table class="tbl compact">
-                  <thead><tr><th>会话</th><th>模型</th><th>Token</th><th>状态</th><th>耗时</th></tr></thead>
+                  <thead><tr><th>Run</th><th>来源</th><th>模型（运行时暴露）</th><th>Token</th><th>状态</th><th>耗时</th></tr></thead>
                   <tbody>
-                    <tr><td class="mono">rt-1-14:31</td><td class="mono">gpt-4o</td><td class="mono">12,480</td><td><span class="chip ok">success</span></td><td class="mono">8.2s</td></tr>
-                    <tr><td class="mono">rt-1-14:12</td><td class="mono">gpt-4o</td><td class="mono">9,120</td><td><span class="chip ok">success</span></td><td class="mono">6.4s</td></tr>
-                    <tr><td class="mono">rt-1-13:58</td><td class="mono">gpt-4o</td><td class="mono">21,004</td><td><span class="chip bad">error</span></td><td class="mono">31.7s</td></tr>
-                    <tr><td class="mono">rt-1-13:40</td><td class="mono">gpt-4o</td><td class="mono">7,860</td><td><span class="chip ok">success</span></td><td class="mono">5.1s</td></tr>
+                    <tr><td class="mono">rt-1-14:08</td><td><span class="chip info">工作项</span></td><td class="mono">deepseek-official/deepseek-chat</td><td class="mono">12,480</td><td><span class="chip ok">success</span></td><td class="mono">8.2s</td></tr>
+                    <tr><td class="mono">rt-1-13:58</td><td><span class="chip">对话</span></td><td class="mono">deepseek-official/deepseek-chat</td><td class="mono">21,004</td><td><span class="chip bad">error</span></td><td class="mono">31.7s</td></tr>
+                    <tr><td class="mono">rt-1-13:40</td><td><span class="chip purple">定时</span></td><td class="mono">deepseek-official/deepseek-reasoner</td><td class="mono">7,860</td><td><span class="chip ok">success</span></td><td class="mono">5.1s</td></tr>
                   </tbody>
                 </table>
-                <div class="callout bad" style="margin-top:0">
-                  <p><b>错误态示例：</b>无 <span class="mono">base_url</span> 也无 <span class="mono">health_url</span> 的 Agent 不可探活，此区域显示「该 Agent 未配置健康端点，无法探活」而非空列表。</p>
+              </div>
+              <div>
+                <p class="h2p">右列只读卡</p>
+                <div class="panel">
+                  <dl class="kv">
+                    <dt>运行时</dt><dd><span class="mono">DeepSeek Harness (dsh · stdio)</span> <span class="chip ok">在线</span> <span class="tiny dim">未绑定→顶栏 Bind runtime</span></dd>
+                    <dt>模型 / thinking</dt><dd class="mono">deepseek-official/deepseek-chat · medium <span class="tiny dim">换运行时清空重选</span></dd>
+                    <dt>归属域</dt><dd>默认域 <span class="tiny dim">不选域 =「未分类」虚拟组，事后可归位</span></dd>
+                    <dt>能力标签</dt><dd><span class="pill mono">code-review</span> <span class="pill mono">python</span></dd>
+                    <dt>可见性 / 运行</dt><dd><span class="chip">private</span> <span class="tiny dim">Access 两轴：可见 ≠ 可运行，另配 Autopilot 许可</span></dd>
+                  </dl>
+                </div>
+                <div class="callout" style="margin-top:var(--s3)">
+                  <p class="tiny" style="margin:0"><b>二级子栏一览：</b>能力＝指令 / 技能（三层开关 + 版本 + 注入路径随运行时：<span class="mono">.dsh/skills/ · $CODEX_HOME/skills/ · per-run HERMES_HOME</span>）/ MCP（三态：字段省略=不变 · <span class="mono">null</span>=清空 · 对象=整体替换；含 token 不回显）/ 集成（外部服务授权连接）/ 知识源与编排；设置＝通用 / Access / 环境（canEdit 才渲染入口；值不回读、owner/admin 解锁入审计、保留变量不可覆盖、专用端点整包保存）/ CLI 参数（自定义参数 exec 数组 · 无 shell 展开 · 禁放凭据）/ 闸门 / 探活（可选平台侧服务健康 + daemon 15s 心跳）/ 危险区（归档软删 + Restore · 彻底删除 · 复制）。</p>
+                </div>
+                <div class="callout bad" style="margin-top:var(--s3)">
+                  <p class="tiny" style="margin:0"><b>边界态示例：</b>未配置可选探活时时间线区显示「未配置服务健康探活，仅按 daemon 心跳判活」而非空列表报错；「复制到新运行时」= 模型类字段清空重选，env 值与 MCP 配置<strong>从不复制</strong>；归档后本页转只读、退出调度与探活、随时 Restore。</p>
                 </div>
               </div>
             </div>
@@ -1808,11 +1799,11 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         </div>
       </div>
     </div>
-    <p class="tiny dim"><b>演示数据说明：</b>时间线的失败—重启—恢复序列演示了 §4.3 的自愈链路。真实系统中「重启」按钮点击后需等待复探确认才更新状态灯。</p>
+    <p class="tiny dim"><b>演示数据说明：</b>旧版「基础信息 + 探针时间线」单页结构已升级为四标签：探活时间线（失败—重启—恢复序列，对应 §4.3 自愈链路）移入「设置 → 探活」子栏；域内共享记忆并入「能力 → 知识源」与 §6.9 知识空间语境。模型 id 一律为所选运行时暴露的 <span class="mono">provider/model</span> 形态；真实系统中「编辑 ▾」pop 只做跳转子区（页内切），全字段编辑走 <span class="mono">agent-detail__config.html</span> 升格页。</p>
 
     <!-- ─────────── 6.5 编排画布 ─────────── -->
     <h3 id="p5">6.5 编排画布 · YAML 双向同步</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>左侧节点面板 + 中央画布 + 右侧边配置 + 底部 YAML。改画布 YAML 跟着变，改 YAML 画布跟着重绘。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>左侧节点面板 + 中央画布 + 右侧边配置 + 底部 YAML。改画布 YAML 跟着变，改 YAML 画布跟着重绘。画布管理：右上「＋ 新建画布」（空白 / 复制 / 粘 YAML 三来源 · draft 起步）与「⧉ 画布切换器」（published 只读浏览、改动前先生成新草稿；archived 仅查看禁 Apply）；「Apply 部署」= 应用内 diff 摘要模态 → 必填原因 → 部署完成跳转工作流详情（完整 diff 升格页 <span class="mono">canvas__apply-diff.html</span> 仍可达）。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/orchestration</span><span class="fake">演示数据</span></div>
       <div class="app" style="grid-template-columns:180px minmax(0,1fr)">
@@ -1967,7 +1958,7 @@ edges:
 
     <!-- ─────────── 6.7 工具市场 ─────────── -->
     <h3 id="p7">6.7 工具市场</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>三类工具（Plugin / Skill / MCP）卡片网格 + 类型筛选。admin 可禁用。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>三类工具（Plugin / Skill / MCP）卡片网格 + 类型筛选。admin 可禁用。<b>〔本轮原型对齐〕</b>注册走「＋ 新建工具」升格页 <span class="mono">tools__new.html</span>（三类分型表单，语义不同、字段不同、不共用一张表单）；<strong>详情页与注册表单字段同源、可编辑</strong>（启用历史 / 基础信息；被引用工作流·编排保留）；工具详情（参数 schema / 被引用 / 历史）为独立详情页，卡片点击即整页打开，删除走二次确认（禁用=可逆 / 彻底删除=断链）。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/tools</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2019,7 +2010,7 @@ edges:
 
     <!-- ─────────── 6.8 对话中心 ─────────── -->
     <h3 id="p8">6.8 对话中心</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>会话列表 + 消息流（含工具调用块）+ 输入区。登录即可用，是唯一无需额外权限的模块。<b>〔09-23 补充〕</b>新增 <b>Agent 切换器</b>：新建会话先选 Agent；会话中可切换，下一条消息起生效、历史归属不变；异常/离线 Agent 灰置并给原因——「选 Agent → 发消息 → 看工具块与归属」即对话调用测试路径。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>会话列表 + 消息流（含工具调用块）+ 输入区。登录即可用，是唯一无需额外权限的模块。<b>〔09-23 补充〕</b>新增 <b>Agent 切换器</b>：新建会话先选 Agent；会话中可切换，下一条消息起生效、历史归属不变；异常/离线 Agent 灰置并给原因——「选 Agent → 发消息 → 看工具块与归属」即对话调用测试路径。<b>〔本轮对齐 chat.html〕</b>对话为<strong>我与某 Agent 的 1:1 私密会话（其他成员包括管理员都不可见）</strong>；起点无 issue 上下文、绝不自动把工作项化；一条消息 = 一个 run，运行时离线时消息排队等待上线；启动语建议 ≤3 条、点击=复制进输入框不直发；「＋」挂项目背景；运行中显阶段 + 工具活动，View details 进回放，停止保留已产出并回填未处理输入；会话重命名 / 置顶（≤5）/ 归档（转只读，外部渠道绑定断开）/ 删除（不可恢复）；多轮 = 会话续跑（运行时不支持续跑则新会话继续）；AgentFlow 强化 = 决策微模型分诊（直答 / 调工具 / 起工作流 / 转@，阈值 0.60 与管控面同源）+ 平台级能力（查工作项 / 调工具 / 触发工作流 / 审批 / 读写知识）。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/chat</span><span class="fake">演示数据</span></div>
       <div class="app" style="grid-template-columns:196px 190px minmax(0,1fr)">
@@ -2074,8 +2065,8 @@ edges:
             <p class="tiny dim" style="margin:6px 0 0">＋ 新建会话先过同一选择器（<span class="mono">agent_id</span> 随每条消息落库，p22 回放按条归属）</p>
           </div>
           <div class="msgs" style="flex:1">
-            <div class="msg-row"><div class="avatar">李</div><div class="bubble">审查一下 <span class="mono">.specs/agent-domains</span> 里的产物，重点看验收条件有没有覆盖「删除域后 Agent 回归默认域」。</div></div>
-            <div class="msg-row"><div class="avatar ai">AI</div><div class="bubble">已读取 4 个产物文件（REQUIREMENT / TASK / test_backend.py / _test_import.py）。<br><br>结论：<b>验收条件已覆盖</b>该场景——<span class="mono">REQUIREMENT.md</span> 的验收清单第 3 条为「删除域后 Agent 回归默认域」，且 <span class="mono">test_backend.py</span> 中有对应用例。<br><br>但发现 1 处不一致：<span class="mono">TASK.md</span> 的 T2 提到迁移语句，而 <span class="mono">REQUIREMENT.md</span> 的数据模型小节未写 <span class="mono">ON DELETE SET NULL</span>。<div class="toolcall">⚙ read_file · .specs/agent-domains/REQUIREMENT.md → 2,822 bytes<br>⚙ read_file · .specs/agent-domains/TASK.md → 2,171 bytes<br>⚙ grep · "domain_id" → 7 hits</div></div></div>
+            <div class="msg-row"><div class="avatar">李</div><div class="bubble">审查一下 <span class="mono">.specs/agent-domains</span> 里的产物，重点看验收条件有没有覆盖「删除域后 Agent 落『未分类』虚拟组」。</div></div>
+            <div class="msg-row"><div class="avatar ai">AI</div><div class="bubble">已读取 4 个产物文件（REQUIREMENT / TASK / test_backend.py / _test_import.py）。<br><br>结论：<b>验收条件已覆盖</b>该场景——<span class="mono">REQUIREMENT.md</span> 的验收清单第 3 条为「删除域后 Agent 落『未分类』虚拟组」，且 <span class="mono">test_backend.py</span> 中有对应用例。<br><br>但发现 1 处不一致：<span class="mono">TASK.md</span> 的 T2 提到迁移语句，而 <span class="mono">REQUIREMENT.md</span> 的数据模型小节未写 <span class="mono">ON DELETE SET NULL</span>。<div class="toolcall">⚙ read_file · .specs/agent-domains/REQUIREMENT.md → 2,822 bytes<br>⚙ read_file · .specs/agent-domains/TASK.md → 2,171 bytes<br>⚙ grep · "domain_id" → 7 hits</div></div></div>
             <div class="msg-row me"><div class="avatar">李</div><div class="bubble me">把这条不一致写成 REVIEW 的发现项。</div></div>
             <div class="msg-row"><div class="avatar ai">AI</div><div class="bubble">已生成发现项草稿（待你确认后落盘）：<br><br><b>F1 · Minor</b> · 数据模型描述缺外键删除行为<br>位置：<span class="mono">REQUIREMENT.md</span> §数据模型<br>建议：补一行 <span class="mono">domain_id INTEGER REFERENCES domains(id) ON DELETE SET NULL</span>。<div class="toolcall">⚙ write_file · 待确认（需 project:write 权限）</div><span style="color:var(--blue)">▌</span></div></div>
           </div>
@@ -2096,7 +2087,7 @@ edges:
 
     <!-- ─────────── 6.9 知识库 ─────────── -->
     <h3 id="p9">6.9 知识库</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>拖拽上传区 + 知识源表格（含状态与 chunk 数）。类型白名单 + 10MB 上限 + 文件名净化三重校验。<b>〔09-23 修正 · 本地/远端职责分离〕</b>本地上传<b>没有「测试连接」</b>——无远端可测，操作列=查看/重建索引/删除；仅<b>远端知识源</b>（Confluence/Notion/URL 爬取）有测试连接·立即同步·更新凭据，且连接失败→索引冻结+红态（Notion 行即此态）。右上角旧「测试连接」按钮改为「+ 添加源」。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>两层分区：<strong>公共知识</strong>（平台维护，所有项目与 Agent 只读；行操作只有「查看 / 关联到空间」，改动走 L3 晋升评审）+ <strong>知识空间</strong>（与项目 1:1、随新建项目自动创建，不单独建空间；项目成员——用户与 Agent——和项目自身可读写，跨空间经「关联」得只读快照，越权与「资源不存在」统一 404）。空间内为拖拽上传区 + 知识源表格（含状态与 chunk 数），类型白名单 + 10MB 上限 + 文件名净化三重校验；总结写入分 <b>L0 原始记录 → L1 会话级摘要 → L2 主题级聚合（去重/置信/冲突人裁）→ L3 画像与高价值沉淀（人工审核门）</b>。<b>〔09-23 修正 · 本地/远端职责分离〕</b>本地上传<b>没有「测试连接」</b>——无远端可测，操作列=查看/重建索引/删除；仅<b>远端知识源</b>（Confluence/Notion/URL 爬取）有测试连接·立即同步·更新凭据，且连接失败→索引冻结+红态（Notion 行即此态）。右上角旧「测试连接」按钮改为「+ 添加源」。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/knowledge</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2119,7 +2110,7 @@ edges:
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">知识库 <span class="dim">· 审查 Agent · 标准</span></span><span class="right"><span class="chip mono">9 源 · 7 本地 / 2 远端</span><span class="chip ok">7 已索引</span><button class="btn sm primary">+ 添加源 ▾ 本地上传｜远端知识源</button></span></div>
+          <div class="app-top"><span class="crumb">知识库 <span class="dim">· 公共知识 + 知识空间：agentflow（与项目 1:1）</span></span><span class="right"><span class="chip mono">9 源 · 7 本地 / 2 远端</span><span class="chip ok">7 已索引</span><button class="btn sm primary">+ 添加源 ▾ 本地上传｜远端知识源</button></span></div>
           <div class="app-body">
             <div class="panel" style="border-style:dashed;text-align:center;padding:var(--s6);margin-bottom:var(--s4)">
               <p class="small" style="margin:0 0 4px;color:var(--text)"><b>拖拽文件到此处上传</b></p>
@@ -2155,7 +2146,7 @@ edges:
 
     <!-- ─────────── 6.10 运行时监控 ─────────── -->
     <h3 id="p10">6.10 运行时监控</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>会话列表 + 状态过滤 + 延迟分位值。SSE 实时推送会话事件与心跳；无数据时显示空态而非 0。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>会话列表 + 状态过滤 + 延迟分位值。SSE 实时推送会话事件与心跳；无数据时显示空态而非 0。<b>〔职责界定〕</b>本页=机器与运行会话的<strong>观测</strong>；执行环境（外部 AI 编码 CLI）的<strong>注册与探测</strong>在「运行时发现」（§6.28），两者不混。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/monitor · 运行时</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2361,7 +2352,7 @@ edges:
 
     <!-- ─────────── 6.13 项目管理 ─────────── -->
     <h3 id="p13">6.13 项目管理</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>项目列表 + 提示词目录标注 + 项目级可见性。未分配项目的普通用户看到的是空列表（非全部）。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>项目列表 + 提示词目录标注 + 项目级可见性。未分配项目的普通用户看到的是空列表（非全部）。新建项目（<span class="mono">projects__new.html</span>）：名称/描述独立输入框、图标可选；代码源本地目录=目录选择器、GitHub=输入框 +「克隆并关联」；状态/优先级=单选按钮组，<strong>无起止时间字段——节奏由里程碑/工作项承载</strong>；Leader 与成员候选=用户级 Agent / 其他 Agent / 用户，可持续添加；创建项目 = 自动创建专属知识空间（§6.9）。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/projects</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2419,7 +2410,7 @@ edges:
 
     <!-- ─────────── 6.14 角色市场 ─────────── -->
     <h3 id="p14">6.14 角色市场</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>内置角色模板（只读参考）+ 自定义角色。角色定义六个维度：性情 / 职责 / 边界 / 触发场景 / 评估 / 输入输出。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>内置角色模板（只读参考）+ 自定义角色。自定义角色卡片带 owner · visibility · based_on 三枚 chip；字段融合既有代码 CustomRole <strong>全 14 字段</strong>（owner / based_on / temperament / responsibilities / triggers[gate, topic] / boundaries can·cannot / evaluation[step, title, items] / inputs / outputs / gate_pre / gate_post / io_filter / visibility 默认 private），列表类字段用增删行编辑器；「六个内容维度」（性情 / 职责 / 边界 / 触发场景 / 评估 / 输入输出）是其展示子集。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/roles-page</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2456,7 +2447,7 @@ edges:
               <div class="panel"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">数据对账专家</span><span class="chip info">自定义</span></div><p class="tiny muted" style="margin:5px 0">关注差异定位与根因，不接受「重跑一次」作为结论</p><div style="margin-top:6px"><span class="pill">数据</span> <span class="pill">对账</span></div></div>
               <div class="panel"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">前端实现者</span><span class="chip info">自定义</span></div><p class="tiny muted" style="margin:5px 0">严格复用设计令牌，不引入新组件库</p><div style="margin-top:6px"><span class="pill">React</span> <span class="pill">tokens</span></div></div>
             </div>
-            <p class="h2p" style="margin-top:var(--s5)">角色详情 · 数据对账专家（六个维度）</p>
+            <p class="h2p" style="margin-top:var(--s5)">角色详情 · 数据对账专家（六个内容维度 · CustomRole 14 字段的展示子集，列表字段带增删行编辑器）</p>
             <div class="grid g3">
               <div class="panel tight"><p class="small" style="margin:0"><b>性情</b><br><span class="muted">谨慎、追根究底，对「大概率没问题」保持怀疑</span></p></div>
               <div class="panel tight"><p class="small" style="margin:0"><b>职责</b><br><span class="muted">定位数据差异的最小可解释单元</span></p></div>
@@ -2552,7 +2543,7 @@ edges:
 
     <!-- ─────────── 6.16 用户与权限 ─────────── -->
     <h3 id="p16">6.16 用户与权限</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>用户列表 + 6 个权限点勾选 + 项目分配。普通用户默认零权限——不勾选任何权限点则看不到任何数据。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>用户列表 + 6 个权限点勾选 + 项目分配。普通用户默认零权限——不勾选任何权限点则看不到任何数据。<b>〔本轮对齐 users.html〕</b>新增「个人 Agent」列：创建用户即 1:1 自动生成其个人 Agent（owner 本人、默认 private、域未分类、代本人做事；命名「&lt;显示名&gt; · 个人」，已有如「运维哨兵」则保留原名直链）；归档用户 → 个人 Agent 同步置为不可运行；删除用户不自动删其个人 Agent。</p>
     <p class="tiny dim">〔第 4 轮规划注〕P0-2/P0-3 落地后，本页新增<b>部署安全卡</b>：DEPLOY_MODE / TRUSTED_PROXY_IPS / debug header 开关（开=全局红条+逐请求审计）/ cookie 退化态 / 出厂口令残留计数，只读呈现生效值，改动需当前口令再认证。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/users</span><span class="fake">演示数据</span></div>
@@ -2780,7 +2771,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
 
 ### FR1: 域 CRUD
 - 创建域：name（必填）、owner_id（默认当前用户）
-- 删除域：将域内所有 Agent 的 domain_id 置为 NULL（回归默认域）
+- 删除域：将域内所有 Agent 的 domain_id 置为 NULL（落「未分类」虚拟组，可再归位）
 
 ### FR2: Agent 归属域
 - Agent 表新增 `domain_id` 字段（可为 NULL）
@@ -2789,7 +2780,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
 ## 验收条件
 
 - [ ] 域 CRUD API 正常工作
-- [ ] 删除域后 Agent 回归默认域
+- [ ] 删除域后 Agent 落「未分类」虚拟组（domain_id NULL）
 - [ ] TypeScript 无新增编译错误
 <span style="background:var(--blue-bg)">▌</span></pre>
               </div>
@@ -2896,7 +2887,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
                 <p class="tiny dim" style="margin:0 0 6px"><b>完成 / 关闭</b> · 5</p>
                 <div class="card sm"><p class="tiny"><span class="chip ok">AF-098</span> 能力分组三层树</p><p class="tiny dim"><span class="dot idle"></span> Agent · ui-builder · 已验收</p></div>
                 <div class="card sm"><p class="tiny"><span class="chip ok">AF-101</span> 防饿死提权</p><p class="tiny dim"><span class="dot idle"></span> Agent · scheduler-eng · 已验收</p></div>
-                <div class="card sm"><p class="tiny"><span class="chip">AF-095</span> 域删除回归默认域</p><p class="tiny dim"><span class="dot idle"></span> 已关闭（重复）</p></div>
+                <div class="card sm"><p class="tiny"><span class="chip">AF-095</span> 域删除落「未分类」虚拟组</p><p class="tiny dim"><span class="dot idle"></span> 已关闭（重复）</p></div>
                 <div class="card sm"><p class="tiny dim">已归档 2 项…</p></div>
               </div>
             </div>
@@ -3176,6 +3167,56 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
       </div>
     </div>
 
+    <h3 id="p28">6.28 运行时发现</h3>
+    <p class="proto-note"><span class="chip warn">演示数据</span>执行环境的注册与探测（参考 Multica daemon/runtimes 模型）：机器上的 daemon 每 <b>15s 心跳</b>一次，扫描本机 PATH 探测外部 AI 编码 CLI（<span class="mono">dsh / Hermes / Codex CLI / Claude Code / Cursor Agent / Qwen Code / MiniMax mcode / Copilot…</span>）并注册为运行时——<strong>一台机器 × 一个 CLI × 一个协议族 = 一个运行时</strong>，daemon 重启更新既有记录而非重复新建。<b>平台不本地运行/加载模型</b>；CLI 登录凭据（账号 / OAuth / API Key）始终留成员本机，平台不接收。职责区分：本页=执行环境注册与探测；「运行时监控」（§6.10）=机器与会话观测。</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/runtimes</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a class="active"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
+          <a><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <div class="nav-grp">管理</div>
+          <a><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
+          <a><svg class="icon"><use href="#i-file"/></svg>审计日志</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">运行时 <span class="dim">· 发现与注册表</span></span><span class="right"><span class="chip mono">daemon 心跳 15s</span><span class="chip ok">3 台机器在线</span><button class="btn sm">⟳ 重新检测</button></span></div>
+          <div class="app-body">
+            <div class="callout"><p><b>daemon ≠ 运行时：</b>daemon 是每台机器上的扫描与上报进程；运行时是「机器 × CLI × 协议族」的注册记录。执行一律由运行时调用外部框架 CLI 完成，平台服务器只保存工作项、Agent 定义与 run 记录。并发口径：<b>daemon 全机 ≤20 · 单 Agent 默认 ≤6 · 生效取较小</b>；离线判定 ≤3 分钟，心跳丢失时排队 run 等待、不直接判失败。</p></div>
+            <p class="h2p" style="margin-top:var(--s4)">注册表与模型目录（模型由运行时暴露）</p>
+            <table class="tbl compact">
+              <thead><tr><th>机器 · CLI</th><th>协议族</th><th>状态</th><th>模型目录（<span class="mono">--list-models</span> 解析）</th><th class="c">会话续跑</th><th class="c">托管 MCP</th><th>Skill 注入路径</th><th>可见性</th><th class="c">绑定 Agent</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">workstation-mal · dsh</td><td class="mono">stdio</td><td><span class="chip ok">在线 · 心跳 15s</span></td><td class="mono">deepseek-official/deepseek-chat · deepseek-official/deepseek-reasoner</td><td class="c dot-yes">✓</td><td class="c dot-yes">✓</td><td class="mono tiny">.dsh/skills/</td><td><span class="chip">private · 仅 owner</span></td><td class="c mono">3</td><td><span class="btn link">查看模型目录</span><span class="btn link">置为公开</span></td></tr>
+                <tr><td class="mono">workstation-mal · codex</td><td class="mono">exec</td><td><span class="chip ok">在线</span></td><td class="mono">账号动态（固定名单 + 动态项）</td><td class="c dot-yes">✓</td><td class="c dot-yes">✓</td><td class="mono tiny">$CODEX_HOME/skills/ · per-run 隔离</td><td><span class="chip">private</span></td><td class="c mono">1</td><td><span class="btn link">查看模型目录</span><span class="btn link">置为公开</span></td></tr>
+                <tr><td class="mono">mac-late · mcode</td><td class="mono">exec</td><td><span class="chip ok">在线</span></td><td><span class="chip info">由运行时托管 · 选择器失效</span></td><td class="c dot-no">✗ <span class="tiny dim">每次新会话</span></td><td class="c dot-yes">✓</td><td class="mono tiny">per-run HERMES_HOME 同族</td><td><span class="chip">private</span></td><td class="c mono">0</td><td><span class="btn link">查看模型目录</span></td></tr>
+                <tr style="background:rgba(224,85,85,.05)"><td class="mono">srv-a2 · copilot</td><td class="mono">jsonrpc</td><td><span class="chip bad">daemon 离线 · ~40min</span></td><td class="tiny dim">离线刷新 = 空列表（模型目录暂不可读）</td><td class="c dot-yes">✓</td><td class="c dot-no">✗ <span class="tiny dim">MCP 区隐藏</span></td><td class="tiny dim">—</td><td><span class="chip">private</span></td><td class="c mono">0</td><td><span class="btn link" style="opacity:.5">查看模型目录</span></td></tr>
+              </tbody>
+            </table>
+            <p class="h2p" style="margin-top:var(--s4)">能力矩阵与自定义 profile</p>
+            <div class="grid g2" style="align-items:start">
+              <div class="panel tight">
+                <p class="small" style="margin:0"><b>能力矩阵（进 Agent 创建表单即联动显隐）：</b>会话续跑（mcode ✗ → 「新会话继续」提示）；平台托管 MCP（copilot ✗ → MCP 区整块隐藏）；Skill 注入路径随运行时（<span class="mono">.dsh/skills/ · $CODEX_HOME/skills/ · per-run HERMES_HOME</span>）。换运行时后模型 / thinking / 服务档<strong>清空重选</strong>。</p>
+              </div>
+              <div class="panel tight">
+                <p class="small" style="margin:0"><b>自定义 profile：</b>协议族 + 名称 + 命令 + 固定参数——命令为 <span class="mono">exec 数组</span>（非 shell 脚本、无 shell 展开），保存后由各机器 daemon 在 PATH 自行解析；参数顺序 = <span class="mono">自身 → 平台协议 → Agent 自定义</span>，保留 flag 冲突时丢弃己方并说明。profile 全工作区共享，仅 owner / workspace 管理员可建；删除档案后已用 Agent 保留档案引用，daemon 在跑则下轮心跳重新注册。</p>
+              </div>
+            </div>
+            <div class="callout warn" style="margin-top:var(--s4)">
+              <p><b>共享语义红线：</b>运行时默认 <span class="mono">private</span>（仅 owner 可在其上建 Agent，工作区管理员也不例外）；仅 owner 可置 <span class="mono">public</span>——public 只共享<strong>路由权</strong>，不共享该 CLI 的登录凭据。平台侧 env / MCP 配置值受敏感值规则限制（掩码、不回读），运行时凭据则根本不进平台。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="tiny dim"><b>演示数据说明：</b>机器名、CLI 版本与模型清单为演示值；模型目录真实来源为运行时 <span class="mono">--list-models</span> 广告解析（离线刷新得空列表）。旧文档中「Agent 配 Provider / Base URL / API Key（<span class="mono">sk-***</span>）」的配置面已整体废除，探活改为可选的平台侧服务健康检查；LangGraph / LangChain / AutoGen / CrewAI 不再作为运行时表述——运行时只有成员机器上探测到的 AI 编码 CLI（本页）。会话续跑、托管 MCP、Skill 注入三项能力差异在 <span class="mono">agents__new.html</span> 表单中实时联动。</p>
+
     <h2 class="sec"><span class="num">7</span>角色权限矩阵</h2>
     <p class="q">本章回答：进去之后能做什么。矩阵必须与 §5.0 的模块可见性一致。</p>
 
@@ -3214,6 +3255,8 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
         <tr><td>知识库（查看 / 检索）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td></tr>
         <tr><td>知识库上传 / 删除</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td></tr>
         <tr><td>运行时监控</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td></tr>
+        <tr><td>运行时发现（查看 / 探测）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td></tr>
+        <tr><td>运行时置 public / 删改 <span class="chip bad">危险</span></td><td class="c dot-yes">●<span class="tiny dim">（仅 owner 可置 public）</span></td><td class="c dot-yes">●<span class="tiny dim">（仅本 runtime owner）</span></td><td class="c dot-no">—</td><td class="c dot-no">—</td></tr>
         <tr><td>监控仪表盘 / 调用链</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td></tr>
         <tr><td>告警中心（查看 / 确认）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-yes">●</td></tr>
         <tr class="grp-row"><td colspan="5">治理（admin 与审查角色）</td></tr>
@@ -3243,8 +3286,8 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
       <thead><tr><th>术语</th><th>定义</th><th>首次出现</th></tr></thead>
       <tbody>
         <tr class="grp-row"><td colspan="3">管控与编排</td></tr>
-        <tr><td><b>隔离域</b><br><span class="tiny dim">Domain</span></td><td>Agent 的命名空间：一组 Agent 的可见性与归属边界，对应 K8s 的 Namespace。<span class="mono">agents.domain_id</span> 为 NULL 时归默认域。</td><td>§1.3 · §2.1</td></tr>
-        <tr><td><b>默认域</b></td><td>系统启动时自动创建的域（<span class="mono">name='默认域', owner_id='admin'</span>）。删除其他域时，域内 Agent 回归此处。</td><td>§2.1</td></tr>
+        <tr><td><b>隔离域</b><br><span class="tiny dim">Domain</span></td><td>Agent 的管控面分组与共享记忆边界，<strong>非安全边界</strong>；对应 K8s 的 Namespace 只是形似。<span class="mono">agents.domain_id</span> 为 NULL 时归「未分类」虚拟组（归属可选、事后可归位）。</td><td>§1.3 · §2.1</td></tr>
+        <tr><td><b>默认域</b></td><td>系统启动时自动创建的域（<span class="mono">name='默认域', owner_id='admin'</span>）——既有代码形态的普通域。删除其他域时域内 Agent <strong>不回归此处</strong>，而是 SET NULL 落「未分类」虚拟组。</td><td>§2.1</td></tr>
         <tr><td><b>能力分组</b><br><span class="tiny dim">Capability Group</span></td><td>域内按 <span class="mono">model_config_json.capabilities</span> 自动派生的中间层，零新增表。一个 Agent 有多个 capability 时同时出现在多组。</td><td>§1.3 · §2.2</td></tr>
         <tr><td><b>未分类</b></td><td>没有 capabilities 的 Agent 所归入的能力组。</td><td>§2.2</td></tr>
         <tr><td><b>连线策略</b><br><span class="tiny dim">Edge Strategy</span></td><td>编排图中边的语义类型，共 13 种：sequential / pipeline / parallel / fan-out / fan-in / map-reduce / fork / condition / master-slave / event-trigger / human-approval / retry-fallback / dead-letter。</td><td>§2.4</td></tr>
@@ -3258,14 +3301,15 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
         <tr><td><b>调度队列</b></td><td>候选 Agent 全部满载或标签无匹配时的缓冲队列，按 priority 出队。</td><td>§1.3 · §6.3</td></tr>
         <tr class="grp-row"><td colspan="3">Agent 与健康</td></tr>
         <tr><td><b>Agent</b></td><td>被管控的执行实体：有模型配置、工具、状态灯与归属域的一等对象。</td><td>§2.3</td></tr>
-        <tr><td><b>探针</b><br><span class="tiny dim">Probe</span></td><td>周期性探活：解析健康端点、发探测、记录结果与时间线。</td><td>§2.6</td></tr>
-        <tr><td><b>健康端点</b></td><td>由 <span class="mono">base_url</span> + <span class="mono">/health</span> 优先解析，回退到显式 <span class="mono">health_url</span>；两者都无则不可探活。</td><td>§2.6</td></tr>
+        <tr><td><b>探针</b><br><span class="tiny dim">Probe</span></td><td>可选的平台侧服务健康探测：发探测、记录结果与时间线；执行存活另由 daemon 15s 心跳判定。</td><td>§2.6</td></tr>
+        <tr><td><b>探活边界</b></td><td>Agent 上不再配置 <span class="mono">base_url</span> / API Key；未配置可选探活端点时只按心跳判活，不算错误。</td><td>§2.6 · §6.28</td></tr>
         <tr><td><b>状态灯</b></td><td>Agent 状态的视觉标识，5 态：idle / running / blocked / dead / failed（令牌 <span class="mono">--cp-status-*</span>）。</td><td>§2.3</td></tr>
-        <tr><td><b>凭据脱敏</b></td><td>界面与日志中的 API Key 一律显示为 <span class="mono">sk-***</span>（覆盖 sk- 与 sk-ant- 前缀）。</td><td>§2.6</td></tr>
-        <tr><td><b>Provider</b></td><td>LLM 接入实现，共 7 种：openai / ollama / anthropic / hermes / deepseek / gemini / codex。新增只需实现 <span class="mono">BaseProvider</span> 并注册。</td><td>§2.3 · §3.4</td></tr>
-        <tr><td><b>运行时适配器</b></td><td>Agent 的执行后端适配层，4 个：claude_code / codex / hermes / xiaolongxia。</td><td>§2.3 · §3.2</td></tr>
+        <tr><td><b>凭据脱敏</b></td><td>平台侧界面与日志中的 API Key / 令牌一律显示为 <span class="mono">sk-***</span>（覆盖 sk- 与 sk-ant- 前缀）；运行时 CLI 凭据留本机、平台不接收。</td><td>§2.6</td></tr>
+        <tr><td><b>Provider</b></td><td>旧代码 LLM 接入抽象（7 种：<span class="mono">openai / ollama / anthropic / hermes / deepseek / gemini / codex</span>），已退出 Agent 配置面——模型目录由运行时暴露（<span class="mono">provider/model</span> id），仅余平台侧服务沿用。</td><td>§2.3 · §3.4</td></tr>
+        <tr><td><b>运行时</b></td><td>成员机器上的外部 AI 编码 CLI（dsh / Hermes / Codex CLI / Claude Code / Cursor Agent / Qwen Code / MiniMax mcode / Copilot…），由 daemon 扫 PATH 探测注册；一台机器 × 一个 CLI × 一个协议族 = 一个运行时。旧「运行时适配器」（claude_code / codex / hermes / xiaolongxia）是现状代码形态。</td><td>§2.3 · §6.28</td></tr>
         <tr class="grp-row"><td colspan="3">知识与人机协作</td></tr>
-        <tr><td><b>知识库</b></td><td>外部资料的摄入管道：文件 → 三重校验 → 分块 → 嵌入 → 可检索。</td><td>§2.8</td></tr>
+        <tr><td><b>知识库</b></td><td>两层：公共知识（平台维护、所有项目与 Agent 只读）+ 知识空间（与项目 1:1，成员与项目自身可读写；跨空间经关联只读，越权统一 404）。摄入管道：文件 → 三重校验 → 分块 → 嵌入 → 可检索。</td><td>§2.8 · §6.9</td></tr>
+        <tr><td><b>总结写入分层</b><br><span class="tiny dim">L0-L3</span></td><td>L0 原始记录 → L1 会话级摘要 → L2 主题级跨会话聚合（去重/置信/冲突人裁）→ L3 画像与高价值沉淀（人工审核门；晋升公共知识需平台管理员评审）。演示口径。</td><td>§2.8 · §6.9</td></tr>
         <tr><td><b>分块</b><br><span class="tiny dim">Chunk</span></td><td>知识源的切片单位，形态 <span class="mono">{filename}_chunk_{N}</span>，<span class="mono">memory_type="document"</span>。</td><td>§2.8</td></tr>
         <tr><td><b>记忆</b><br><span class="tiny dim">Memory</span></td><td>Agent 可读写的上下文存储，域级共享——新 Agent 可继承前序结论。</td><td>§2.8</td></tr>
         <tr><td><b>人工闸门</b><br><span class="tiny dim">Human Gate</span></td><td>把不可逆或高不确定的决策点暴露给人：流程挂起等人放行，不超时自动通过。</td><td>§2.9</td></tr>
@@ -3301,13 +3345,13 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
     <p class="q">本章从「这个产品不做什么」（§1.4）与用户反问高频点派生。</p>
 
     <h3>Q1 · 它和 Dify / LangGraph / CrewAI 这类框架有什么本质区别？</h3>
-    <p><b>A：</b>那些是<strong>构建 Agent 的框架</strong>，AgentFlow 是<strong>管控一群 Agent 的控制面</strong>。类比：LangGraph ≈ 写应用的库；AgentFlow ≈ 跑应用的 K8s。框架关心「怎么把一个 Agent 编出来」，AgentFlow 关心「Agent 上线后如何隔离、路由、扩容、自愈、可观测、可审计」。因此 AgentFlow 不生产 Agent——Agent 由用户自带（7 种 Provider × 4 个运行时适配器）。</p>
+    <p><b>A：</b>那些是<strong>构建 Agent 的框架</strong>，AgentFlow 是<strong>管控一群 Agent 的控制面</strong>。类比：LangGraph ≈ 写应用的库；AgentFlow ≈ 跑应用的 K8s。框架关心「怎么把一个 Agent 编出来」，AgentFlow 关心「Agent 上线后如何隔离、路由、扩容、自愈、可观测、可审计」。因此 AgentFlow 不生产 Agent——Agent 由用户自带：在成员机器上的外部 AI 编码 CLI 运行时（§6.28）中执行，模型目录由运行时暴露，LangGraph / LangChain / AutoGen / CrewAI 这类库<strong>不作为运行时</strong>存在。</p>
 
     <h3>Q2 · 为什么不直接依赖 Redis / etcd / 消息队列？</h3>
     <p><b>A：</b>因为「零外部依赖」是核心主张（§1.4）。用户 clone 下来 <code>uvicorn main:app</code> 就能跑，不需要先搭基础设施。状态一致性由 SQLite 承担，Redis 存在则用于加速、不存在则自动跳过，<strong>不构成启动阻塞</strong>。代价是：多进程部署时进程内的限流器与调度状态各自独立（已知限制，见 §2.6）。</p>
 
     <h3>Q3 · 删除一个隔离域，里面的 Agent 会一起被删吗？</h3>
-    <p><b>A：</b><strong>不会</strong>。域与 Agent 的外键是 <code>ON DELETE SET NULL</code>：删除域只是把域内 Agent 的 <code>domain_id</code> 置空，它们会回归<strong>默认域</strong>。这是刻意设计——域是「组织方式」，不是「生命周期容器」。需要真正删除 Agent 必须显式调用 Agent 删除接口。</p>
+    <p><b>A：</b><strong>不会</strong>。域与 Agent 的外键是 <code>ON DELETE SET NULL</code>：删除域只是把域内 Agent 的 <code>domain_id</code> 置空，它们落入<strong>「未分类」虚拟分组</strong>，事后可再归位到任何域。这是刻意设计——域是「组织方式」，不是「生命周期容器」，也不是安全边界。需要真正删除 Agent 必须显式调用 Agent 删除接口。</p>
 
     <h3>Q4 · 同一个 Agent 为什么会出现在两个能力组里？是 bug 吗？</h3>
     <p><b>A：</b>不是 bug，是<strong>多层归属</strong>（§2.2）。一个 Agent 的 <code>capabilities</code> 可以是 <code>["code-review","python"]</code>，它就应该同时出现在 code-review 组和 python 组——因为「按能力找 Agent」时，两个入口都该找到它。能力分组是展示层派生，不新建表、不改变归属。</p>
@@ -3367,7 +3411,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
 </section>
 
   <footer class="doc-foot">
-    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）</p>
+    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）· <b>v11 · 2026-10-15：运行时口径同步</b>（本轮对齐 10 月原型：运行时=成员机器上的外部 AI 编码 CLI，daemon 15s 心跳探测注册、新增 §6.28 运行时发现；Agent 配置面废除 Provider/Base URL/API Key；Agent 详情=四标签；对话中心=1:1 私密会话；知识库=公共知识+知识空间（L0-L3）；用户级 Agent 1:1；角色=CustomRole 14 字段；画布 Apply=应用内 diff 模态；新建项目无起止时间；全文清除 LangGraph/LangChain/AutoGen/CrewAI 作为运行时的表述）</p>
     <p>第 4 轮证据链：<span class="mono">.specs/platform-evolution/D-{execution-isolation-2, declarative-api, otel-observability, a2a-protocol-surface, collaboration-layer-2, identity-and-security-2}</span> + <span class="mono">R4-CODEAUDIT.md</span>（2026-09-23，六路 agent 交叉验证）</p>
     <p>单文件自包含 HTML，零外部依赖（无 CDN / 无外链字体 / 无外部图片）；设计令牌与产品源码 <span class="mono">frontend/src/styles/tokens.css</span> 同源；§6 全部数据为演示假数据，其中 6.19–6.22 为<b>明确标注的规划原型</b>。</p>
     <p>数量口径来自对当前代码库与 <span class="mono">.specs/</span> 产物的实测扫描（2026-09-21）：后端 117 个 <span class="mono">.py</span> 模块（含 8 个测试文件）/ 28 个路由模块 / 169 个端点 / 132 条路径 / 19 个 ORM 模型模块 → 26 张表 / 24 个服务 + 5 个渠道适配器 / 4 个引擎模块 / 4 个运行时适配器；前端 100 个 <span class="mono">ts/tsx</span> / 34 个页面 / 28 个组件 + 13 个 Edge 组件 / 12 个 Zustand store。凡属推测或未实现的内容已在正文标注「待确认」。</p>

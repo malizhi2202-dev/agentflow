@@ -33,7 +33,7 @@
 <h4 class="blk">字段级差异</h4>
 <table class="tbl compact"><thead><tr><th>字段</th><th>前</th><th>后</th><th>敏感</th></tr></thead><tbody>
 <tr><td class="mono">domain_id</td><td class="mono tiny">null</td><td class="mono tiny">3</td><td><span class="chip">否</span></td></tr>
-<tr><td class="mono">api_key</td><td class="mono tiny">sk-***（旧）</td><td class="mono tiny">sk-***（新）</td><td><span class="chip warn">是 · 仅存脱敏尾 4 位</span></td></tr>
+<tr><td class="mono">env:DEEPSEEK_API_KEY</td><td class="mono tiny">***（旧）</td><td class="mono tiny">***（新）</td><td><span class="chip warn">是 · 值不回读 · 解锁入审计</span></td></tr>
 <tr><td class="mono">probe_interval</td><td class="mono tiny">30s</td><td class="mono tiny">15s</td><td><span class="chip">否</span></td></tr>
 <tr><td class="mono">updated_by / at</td><td class="mono tiny">admin 09-18</td><td class="mono tiny">admin 09-21 14:22</td><td><span class="chip">否</span></td></tr>
 <tr><td class="mono">model</td><td class="mono tiny">gpt-4o</td><td class="mono tiny">gpt-4o（未变）</td><td><span class="chip">无差异</span></td></tr>

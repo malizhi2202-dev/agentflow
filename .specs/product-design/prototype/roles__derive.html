@@ -1,21 +1,46 @@
 <!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>派生角色 · 角色市场</title><link rel="stylesheet" href="assets/base.css">
+<title>创建自定义角色（派生表单 · 全字段）· 角色市场</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p14" style="color:inherit">回文档</a></span>
-<div class="detail-top"><span class="pill" data-back="roles.html" data-click>← 返回 角色市场</span><span class="crumb"><b>派生角色 · 内置模板只读，改动落在派生副本</b></span><span class="chip">派生 = 复制父模板后再编辑</span></div>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="chat.html">对话中心</span></div>
+<div class="detail-top"><span class="pill" data-back="roles.html" data-click>← 返回 角色市场</span><span class="crumb"><b>创建自定义角色 · 内置模板只读，改动落在派生副本</b></span><span class="chip">派生 = 复制父模板全字段后再逐项编辑</span><span class="chip mono">表单 = CustomRole 全 14 字段</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="roles__reviewer.html">审查角色（14 字段示范）</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="chat.html">对话中心</span></div>
 <div class="detail-body">
-<h4 class="blk">派生表单</h4>
-<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0">父模板   [ builtin/reviewer ▾ ]
-新角色名 [ 我的审查角色          ]
-覆盖段   [☑ 职责 ☑ 评估框架 ☑ 触发场景 ☐ 性情 ☐ 能做 ☐ 不能做 ☐ 输入文件 ☐ 输出格式]
-参数槽   + spec_ref (必填)
-安全闸门 [ gate_pre: —   gate_post: —   io_filter: none ]  <span class="tiny dim">自定义角色才可编辑</span>
-标签     [Review] [自定义]</pre>
-<p class="tiny" style="margin:8px 0 0"><button class="btn sm primary" data-toast="已派生 custom_roles/4 · 8 段已复制，可在详情页编辑（演示）">派生并进入编辑</button> <button class="btn sm" data-back="roles.html">取消 · 返回角色市场</button></p>
-<p class="tiny dim" style="margin:6px 0 0">派生关系会显示在卡片「派生自」pill 与详情页「与父模板差异表」（8 段口径）中。</p>
+<div class="callout"><p class="tiny" style="margin:0"><b>与代码 <span class="mono">CustomRole</span> 对齐</b>：based_on 选择内置模板 → 复制其 8 段；owner=创建人、visibility 默认 <b>private</b> 由系统写入，不在表单勾选；数组字段（职责 / 触发 / 边界 / 评估 / 输入 / 输出）逐项 <b>＋ 加行 / ✕ 删行</b>。</p></div>
+<h4 class="blk">创建表单 · 全字段（解锁态演示）</h4>
+<p class="h2p" style="margin-top:0">标识与派生 <span class="mono tiny dim">name · based_on · owner_id（只读）· visibility</span></p>
+<table class="tbl compact"><tbody>
+<tr><td style="width:150px"><b>name · 角色名称</b></td><td class="mono tiny">[ 我的审查角色　　　　　　　 ]</td></tr>
+<tr><td><b>based_on · 基于内置</b></td><td class="mono tiny">[ builtin/reviewer · 审查角色 v2 ▾ ] <span class="tiny dim">选项：内置 12 模板 / 自定义（无父模板）</span></td></tr>
+<tr><td><b>owner_id · 归属</b></td><td class="mono">admin · 李工 <span class="chip">系统写入 · 不可改</span></td></tr>
+<tr><td><b>visibility · 可见性</b></td><td class="mono tiny">(•) private（默认）　( ) 团队可见 <span class="tiny dim">规划</span></td></tr>
+</tbody></table>
+<p class="h2p">temperament · 性情 / 核心原则 <span class="tiny dim">多行</span></p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0 0 var(--s3)">[ 只信证据；不看作者；宁缺勿滥。……　　　　]  <span class="chip">复制自父模板 · 可改</span></pre>
+<p class="h2p">responsibilities[] · 职责 <span class="tiny dim mono">数组 · 加/删行</span></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:var(--s3)"><span class="pill">逐条审查 diff：每条发现给出位置 <span class="btn link" style="color:var(--red)" data-toast="删除该职责行（演示）">✕</span></span><span class="pill">标注严重度 <span class="btn link" style="color:var(--red)" data-toast="删除该职责行（演示）">✕</span></span><span class="btn sm" data-toast="新增一行职责（演示输入：核对规范条目编号）">＋ 加行</span></div>
+<p class="h2p">triggers[{gate, topic}] · 触发场景 <span class="tiny dim mono">gate 用阶段闸门名（需求① / 设计② / 开发④ / 审查⑥…）</span></p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono tiny" style="width:150px">[gate ▾ 审查⑥]</td><td class="tiny mono">[topic · REVIEW 阶段证据充分性裁决　　　] <span class="btn link" style="color:var(--red)" data-toast="删除该触发场景行（演示）">✕</span></td></tr>
+<tr><td colspan="2"><span class="btn sm" data-toast="新增一行触发场景（gate 下拉 + topic 输入 · 演示）">＋ 加行</span></td></tr>
+</tbody></table>
+<p class="h2p">boundaries_can[] / boundaries_cannot[] · 边界 <span class="tiny dim">两列 · 逐项加/删</span></p>
+<div class="grid g2" style="margin-bottom:var(--s3)">
+<div class="panel tight"><p class="tiny muted" style="margin:0 0 6px">✅ 能做</p><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="pill">读 diff 与规范 <span class="btn link" style="color:var(--red)" data-toast="删除该行（演示）">✕</span></span><span class="btn sm" data-toast="新增一行「能做」（演示）">＋</span></div></div>
+<div class="panel tight"><p class="tiny muted" style="margin:0 0 6px">❌ 不能做</p><div style="display:flex;gap:6px;flex-wrap:wrap"><span class="pill">不直接改代码 <span class="btn link" style="color:var(--red)" data-toast="删除该行（演示）">✕</span></span><span class="btn sm" data-toast="新增一行「不能做」（演示）">＋</span></div></div>
+</div>
+<p class="h2p">evaluation[{step, title, items[]}] · 评估框架 <span class="tiny dim">步骤卡 · 可增删</span></p>
+<div class="panel tight" style="margin-bottom:6px"><p class="small" style="margin:0"><b>step [1] · title [定位性▎　　　]</b> <span class="btn link" style="color:var(--red)" data-toast="删除该评估步骤（演示）">✕</span><br><span class="tiny dim mono">items[定位到 file:line, 引用 diff 可回查]</span></p></div>
+<p style="margin:0 0 var(--s3)"><span class="btn sm" data-toast="添加评估步骤（step 自动递增 · 演示）">＋ 添加评估步骤</span></p>
+<p class="h2p">inputs[] / outputs[] · 输入文件 / 输出格式 <span class="tiny dim">双列 · 逐项加/删</span></p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:var(--s3)"><span class="pill mono">git diff <span class="btn link" style="color:var(--red)" data-toast="删除该输入项（演示）">✕</span></span><span class="pill mono">findings[{file,line,severity,evidence}] <span class="btn link" style="color:var(--red)" data-toast="删除该输出项（演示）">✕</span></span><span class="btn sm" data-toast="新增输入项（演示输入：TEST.md）">＋ 输入</span> <span class="btn sm" data-toast="新增输出项（演示）">＋ 输出</span></div>
+<p class="h2p">🛡 安全闸门三件 <span class="mono tiny dim">gate_pre_check · gate_post_check · io_filter · 仅自定义角色可编辑</span></p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin:0 0 var(--s4)">gate_pre_check  [ 输入须含 diff 与被审规范版本标识… ]
+gate_post_check [ 门禁类意见必须带证据与位置，否则降级为建议 ]
+io_filter       [ sanitize ▾ ]  <span class="tiny dim">none / sanitize / strict</span></pre>
+<p class="tiny" style="margin:8px 0 0"><button class="btn sm primary" data-toast="已创建 custom_roles/5「我的审查角色」· owner=admin·李工 · visibility=private · 14 字段复制自父模板 · 引用它的 Agent 下轮生效（演示）">创建 · 存草稿槽</button> <button class="btn sm" data-back="roles.html">取消 · 返回角色市场</button></p>
+<p class="tiny dim" style="margin:6px 0 0">派生关系会显示在卡片「基于内置」chip 与详情页差异表中；示范页：<span class="pill" data-goto="roles__reviewer.html">审查角色 · 14 字段全呈现</span></p>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示（独立表单页）：「派生并进入编辑」→toast（派生关系写入卡片与详情页差异表）· 取消 / 顶部「← 返回」→回角色市场　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立表单页 · 与 CustomRole 字段一一对齐）：based_on 下拉 · 数组字段 ＋/✕ 逐行演示 · 「创建 · 存草稿槽」→ toast（owner/visibility 系统写入）· 取消 / 顶部「← 返回」→ 回角色市场　按 Esc 关闭浮层。</p>
 </body></html>

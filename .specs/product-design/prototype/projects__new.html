@@ -1,45 +1,223 @@
 <!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>新建项目 · 项目管理</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
-<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
+<style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+/* 表单原语 */
+.fld{margin-bottom:var(--s3)}
+.fld>label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.fld>label b{color:var(--text)}
+.fld input,.fld select,.fld textarea{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:7px 9px;font:12.5px var(--font);width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:1px solid var(--blue);border-color:var(--blue)}
+.fld .hint{font-size:11px;color:var(--text-muted);margin-top:3px}
+.fld textarea{min-height:74px;resize:vertical;font-size:12.5px}
+.need{color:var(--red)}
+.rowline{display:grid;grid-template-columns:150px minmax(0,1fr) 130px auto;gap:var(--s2);align-items:center;margin-bottom:var(--s2)}
+.rowline select{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:5px 7px;font:12px var(--font);width:100%}
+/* 单选按钮组 chips（纯 CSS，无 JS）：input 紧邻 label，:checked+label 高亮 */
+.rdg{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.rdg input[type=radio]{width:0;height:0;margin:0;padding:0;border:0;opacity:0}
+.rdg label{border:1px solid var(--border);border-radius:999px;background:var(--bg-main);padding:3px 12px;font-size:12px;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
+.rdg label:hover{border-color:var(--blue-border);color:var(--text)}
+.rdg input[type=radio]:checked+label{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue);font-weight:600}
+.rdg input[type=radio]:focus-visible+label{outline:2px solid var(--blue);outline-offset:2px}
+.rdg input[type=radio]:disabled+label{opacity:.45;cursor:not-allowed}
+/* 图标单选（圆形 chip） */
+.icg input[type=radio]{width:0;height:0;opacity:0;margin:0;padding:0;border:0}
+.icg label{display:inline-grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg-main);font-size:15px;cursor:pointer;color:var(--text);line-height:1}
+.icg label.txt{font-family:var(--font-mono);font-size:12px}
+.icg label:hover{border-color:var(--blue-border)}
+.icg input[type=radio]:checked+label{border-color:var(--blue-border);background:var(--blue-bg);box-shadow:inset 0 0 0 1px var(--blue-border)}
+.icg input[type=radio]:focus-visible+label{outline:2px solid var(--blue);outline-offset:2px}
+.icg .skip{width:auto;height:auto;padding:0 12px;border-radius:999px;font-size:12px}
+/* 已选资源 chip（可移除） */
+.reschip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--green);background:var(--green-bg);color:var(--text);border-radius:999px;padding:2px 6px 2px 10px;font-family:var(--font-mono);font-size:11.5px}
+.reschip .x{cursor:pointer;color:var(--text-muted);border:0;background:none;padding:0 4px;font-size:13px}
+.reschip .x:hover{color:var(--red)}
+.memchip{border:1px solid var(--blue-border);background:var(--blue-bg);color:var(--blue);border-radius:999px;padding:1px 8px;font-size:11px}
+a.pill{cursor:pointer;text-decoration:none}
+a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:none}
+h4.blk{font-size:13px;font-weight:700;margin:var(--s5) 0 var(--s2);display:flex;align-items:center;gap:8px;scroll-margin-top:92px}
+h4.blk .sub{font-size:11.5px;font-weight:400;color:var(--text-muted)}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p13" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="users.html">用户与权限</span></div>
-<div class="detail-top"><span class="pill" data-back="projects.html" data-click>← 返回 项目管理</span><span class="crumb"><b>新建项目 · 登记 + 关联</b></span><span class="chip">与「删除」对称：只动平台内登记，不动盘上文件</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="projects.html">项目列表</span><span class="pill" data-goto="knowledge.html">知识库（公共 + 空间）</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="agents.html">Agent</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="stage-model.html">阶段模型</span></div>
+<div class="detail-top"><span class="pill" data-back="projects.html" data-click>← 返回 项目管理</span><span class="crumb"><b>新建项目 · 登记 + 关联 + 专属知识空间</b></span><span class="chip">与「删除」对称：只动平台内登记，不动盘上文件</span><span class="chip warn">演示 · 未保存</span></div>
 <div class="detail-body">
-<div class="callout"><p class="tiny" style="margin:0">登记语义与「删除」对称：新建只写平台内记录（路径映射 · 成员分配 · 关联对象台账），<b>不在盘上创建目录</b>；下方「本地目录」需已存在或稍后补齐。</p></div>
+<div class="callout"><p class="tiny" style="margin:0">登记语义与「删除」对称：新建只写平台内记录（路径映射 · 成员分配 · 关联对象台账 · <b>专属知识空间</b>），<b>不在盘上创建目录</b>；下方「本地目录」需已存在或稍后补齐。</p></div>
+<p class="tiny dim" style="margin:var(--s3) 0 6px">7 分区直达（页内锚点）：</p>
+<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:var(--s3)">
+  <a class="pill" href="#sec-id">1 标识</a><a class="pill" href="#sec-res">2 关联资源</a><a class="pill" href="#sec-plan">3 状态与优先级</a><a class="pill" href="#sec-lead">4 Leader</a><a class="pill" href="#sec-mem">5 成员</a><a class="pill" href="#sec-ks">6 专属知识空间</a><a class="pill" href="#sec-rel">7 关联对象</a>
+</div>
 
-<h4 class="blk">① 标识</h4>
-<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">名称（必填）  [ 我的新项目                        ]
-图标         [ i-folder ▾ ]  <span class="tiny dim">图标 id：i-folder / i-users / i-bot / i-branch / i-chart / i-book / i-layers</span>
-描述         [ 登记 + 关联 Agent 与工作流        ]
-             <span class="tiny dim">描述会进入项目内 Agent 的执行上下文</span></pre>
+<h4 class="blk" id="sec-id">1 · 标识 <span class="sub">名称与描述各自独立输入框 · 图标可选</span></h4>
+<div class="panel">
+  <div class="grid g2">
+    <div class="fld"><label>名称 <b class="need">*</b> <span class="dim">（列表内唯一）</span></label><input value="agentflow"><p class="hint">用于项目名、其专属知识空间名与产物目录标注。</p></div>
+    <div class="fld"><label>图标 <span class="dim">（可选 · 单选 · 默认跳过）</span></label>
+      <div class="icg rdg" style="gap:5px">
+        <input type="radio" name="icon" id="ic-skip" checked><label for="ic-skip" class="skip">跳过</label>
+        <input type="radio" name="icon" id="ic1"><label for="ic1">🚀</label>
+        <input type="radio" name="icon" id="ic2"><label for="ic2">📁</label>
+        <input type="radio" name="icon" id="ic3"><label for="ic3">🤖</label>
+        <input type="radio" name="icon" id="ic4"><label for="ic4">🛠</label>
+        <input type="radio" name="icon" id="ic5"><label for="ic5">📊</label>
+        <input type="radio" name="icon" id="ic6"><label for="ic6">🔒</label>
+        <input type="radio" name="icon" id="ic7"><label for="ic7">📝</label>
+        <input type="radio" name="icon" id="ic8"><label for="ic8" class="txt">AF</label>
+      </div>
+      <p class="hint">8 个 emoji / 字母可选其一；不选即「跳过」，列表与详情页回落默认 <span class="mono">i-folder</span>。</p>
+    </div>
+  </div>
+  <div class="fld" style="margin:0"><label>描述 <span class="dim">（独立 textarea · 会进入项目内 Agent 的执行上下文）</span></label><textarea>通用 Agent 编排与管控平台：YAML ↔ 画布编排、K8s 式管控（隔离域 / 自动路由 / 渐进扩容 / Reconcile 自愈）、知识产物监控、RBAC + 审计。</textarea><p class="hint">描述与名称<b>分别成字段</b>，不共用一行；清空描述不影响登记。</p></div>
+</div>
 
-<h4 class="blk">② 计划</h4>
-<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">状态     [ planned ▾ in_progress paused completed cancelled ]  (•) in_progress
-优先级   [ urgent ▾ high medium low none ]  (•) high
-Lead     (•) 成员：[李工 ▾]   ( ) Agent：[审查 Agent·标准 ▾]   <span class="tiny dim">成员或 Agent 二选一（演示下拉：李工 / 王工 / 审查 Agent·标准）</span>
-开始日期 [ 2026-09-23 ]   目标日期 [ 2026-10-10 ]</pre>
+<h4 class="blk" id="sec-res">2 · 关联资源 <span class="sub">本地目录 = 目录选择器 · GitHub = 克隆并挂载为仓库资源</span></h4>
+<div class="panel">
+  <div class="fld"><label>本地目录 <span class="dim">（产物目录 <span class="mono">.specs/</span> 与提示词 <span class="mono">prompts/</span> 的发现根）</span></label>
+    <p style="margin:0 0 6px"><button class="btn sm" data-click data-toast="已选 ~/project/agentflow（目录选择器 · 演示）">📁 选择目录…</button> <span class="tiny dim">平台不写盘、不建目录；选中即登记路径映射。</span></p>
+    <p style="margin:0"><span class="reschip">/home/malizhi/project/agentflow <span class="x" data-click data-toast="已移除本地目录（项目仍可建，产物目录显示「未关联」）（演示）">✕</span></span> <span class="chip ok">已发现 .specs/（11 个 change 目录）</span> <span class="chip ok">已发现 prompts/</span></p>
+    <p class="hint">移除后路径变空态；重新选择覆盖上一路径，登记历史进审计。</p>
+  </div>
+  <div class="fld" style="margin-bottom:0"><label>GitHub <span class="dim">（可选 · 克隆到工作区后作为仓库资源挂载）</span></label>
+    <div style="display:flex;gap:var(--s2);align-items:flex-start">
+      <input placeholder="https://github.com/org/repo" value="https://github.com/malizhi2202-dev/agentflow" style="flex:1">
+      <button class="btn sm primary" style="white-space:nowrap" data-click data-toast="正在克隆到工作区…完成后作为仓库资源挂载（演示）">⟱ 克隆并关联</button>
+    </div>
+    <p style="margin:6px 0 0"><span class="reschip">github.com/malizhi2202-dev/agentflow @ main <span class="x" data-click data-toast="已解除该仓库关联（盘上工作区副本保留）（演示）">✕</span></span> <span class="chip warn">克隆中 · 3.2 MB / 8.1 MB → 完成后转「已挂载」</span> <span class="tiny dim">凭据走集成（GitHub），不落仓库 URL；见 <span class="mono">integration.html</span></span></p>
+    <p class="hint">本地目录与 GitHub 二选一或并存：并存时以本地目录为产物根，仓库为只读代码源（提交/PR 由 Agent 侧动作 + 审批）。</p>
+  </div>
+</div>
 
-<h4 class="blk">③ 资源</h4>
-<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">GitHub 仓库 [ owner/repo                 ]  ref（可选）[ main ]  →  <span class="tiny dim">owner/repo@main</span>
-本地目录    [ /home/malizhi/project/agentflow ]  <span class="tiny dim">绝对路径</span></pre>
+<h4 class="blk" id="sec-plan">3 · 状态与优先级 <span class="sub">单选按钮组 chips · 无日期字段</span></h4>
+<div class="panel">
+  <div class="fld"><label>状态 <span class="dim">（单选）</span></label>
+    <div class="rdg">
+      <input type="radio" name="status" id="st-1"><label for="st-1">未开始</label>
+      <input type="radio" name="status" id="st-2" checked><label for="st-2">进行中</label>
+      <input type="radio" name="status" id="st-3"><label for="st-3">已暂停</label>
+      <input type="radio" name="status" id="st-4"><label for="st-4">已完成</label>
+    </div>
+    <p class="hint">列表页 chip 同源：<span class="mono">未开始=planned · 进行中=in_progress · 已暂停=paused · 已完成=completed</span>（另存 <span class="mono">cancelled</span> 归档态，不在新建表单提供）。</p>
+  </div>
+  <div class="fld" style="margin-bottom:0"><label>优先级 <span class="dim">（单选）</span></label>
+    <div class="rdg">
+      <input type="radio" name="prio" id="pr-1"><label for="pr-1">低</label>
+      <input type="radio" name="prio" id="pr-2" checked><label for="pr-2">中</label>
+      <input type="radio" name="prio" id="pr-3"><label for="pr-3">高</label>
+      <input type="radio" name="prio" id="pr-4"><label for="pr-4">紧急</label>
+    </div>
+    <p class="hint" style="margin-top:6px">两组均为<b>原生单选按钮组</b>（点 label 即切选中态 · 纯 CSS 高亮，不依赖 JS；浮层引擎对可点区统一 preventDefault，故 chip 上不挂 toast，免得吞掉原生选中）——读当前值：<button class="btn sm" data-click data-toast="当前：状态 = 进行中（in_progress）· 优先级 = 中（medium）（演示）">读当前选择 ▸</button></p>
+  </div>
+  <div class="callout warn" style="margin:var(--s3) 0 0"><p class="tiny" style="margin:0"><b>本页无「开始 / 结束时间」字段（已裁撤）。</b>理由见页脚一句：项目无期限概念，节奏由里程碑 / 工作项承载。</p></div>
+</div>
 
-<h4 class="blk">④ 成员与可见性</h4>
-<p class="tiny dim" style="margin:0 0 6px">成员分配（成员名 + 角色 owner/admin/member + 本项目权限）：</p>
-<table class="tbl compact"><thead><tr><th>成员名</th><th>角色</th><th>本项目权限</th></tr></thead><tbody>
-<tr><td class="mono">admin · 李工</td><td><span class="chip bad">owner</span></td><td class="mono tiny">全部 6 项（豁免 · 不可削减）</td></tr>
-<tr><td class="mono">lisi · 李四</td><td><span class="chip info">member</span></td><td class="mono tiny">project:read + project:write</td></tr>
-<tr><td class="mono dim">wangwu · 王五</td><td><span class="chip">—（未分配）</span></td><td class="mono tiny dim">不可见</td></tr>
-</tbody></table>
-<p class="tiny" style="margin:6px 0 0">可见性：(•) private　( ) public　<span class="tiny dim">未分配成员不可见（不回退为全部可见）</span></p>
+<h4 class="blk" id="sec-lead">4 · Leader <span class="sub">单选 · 候选 = 用户级 Agent 或其他 Agent（不含人）</span></h4>
+<div class="panel">
+  <div class="fld"><label>Leader <b class="need">*</b> <span class="dim">（项目的推进责任人 · 单选其一）</span></label>
+    <div class="rdg" style="flex-direction:column;align-items:flex-start;gap:5px">
+      <div class="rdg"><span class="tiny dim" style="width:96px">用户级 Agent</span>
+        <input type="radio" name="lead" id="ld-1" checked><label for="ld-1">李工 · 个人 Agent</label>
+        <input type="radio" name="lead" id="ld-2"><label for="ld-2">王工 · 个人 Agent</label>
+        <input type="radio" name="lead" id="ld-3"><label for="ld-3">张三 · 个人 Agent</label>
+      </div>
+      <div class="rdg"><span class="tiny dim" style="width:96px">其他 Agent</span>
+        <input type="radio" name="lead" id="ld-4"><label for="ld-4">审查 Agent · 标准</label>
+        <input type="radio" name="lead" id="ld-5"><label for="ld-5">汇总 Agent</label>
+        <input type="radio" name="lead" id="ld-6"><label for="ld-6">数据同步 Agent</label>
+        <input type="radio" name="lead" id="ld-7" disabled><label for="ld-7">审查 Agent · 旧版（归档 · 不可选）</label>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:6px">Leader 同样是<b>原生单选</b>（chip 上挂 toast 会被 preventDefault 吞掉选中态，故反馈单列）：选人后 → <button class="btn sm" data-click data-toast="Leader 已设为：李工的个人 Agent（用户级 Agent · 与用户 1:1 · 见用户管理）（演示）">选人 toast 演示 ▸</button></p>
+    <p class="hint">每个用户有一个 <b>1:1 个人 Agent</b>（用户级 Agent，随用户创建自动生成，见<a style="color:var(--blue);cursor:pointer" data-goto="users.html">用户管理</a>）；被选为 Leader 的用户级 Agent 自动进成员表并获写权限。Leader <b>不能是人</b>——人是审批与责任人，推进由 Agent 承担；改 Leader 留审计。</p>
+  </div>
+  <div class="fld" style="margin-bottom:0"><label>可见性 <span class="dim">（单选 · 决定谁能在项目列表看到本项）</span></label>
+    <div class="rdg">
+      <input type="radio" name="vis" id="vs-1" checked><label for="vs-1">private（仅成员）</label>
+      <input type="radio" name="vis" id="vs-2"><label for="vs-2">public（全平台可读）</label>
+    </div>
+  </div>
+</div>
 
-<h4 class="blk">⑤ 关联对象（多选）</h4>
-<p style="margin:0 0 6px"><span class="pill" data-click style="border-color:var(--blue-border);color:var(--blue)">☑ Agent（多选）</span> <span class="pill" data-click style="border-color:var(--blue-border);color:var(--blue)">☑ 工作流</span> <span class="pill" data-click style="border-color:var(--blue-border);color:var(--blue)">☑ 知识库</span> <span class="pill" data-click>☐ 对话会话</span> <span class="pill" data-click>☐ 工作项</span></p>
-<div class="callout"><p class="tiny" style="margin:0">关联语义：<b>一 Agent 可属多项目，一项目可绑多 Agent</b>（N:N 连接表）；工作流 1:N 快照；知识库 / 对话会话 / 工作项 以 project_id 关联列挂靠。</p></div>
+<h4 class="blk" id="sec-mem">5 · 成员 <span class="sub">可继续添加 · 每行先选类型再选对象 · 初始含创建者本人</span></h4>
+<div class="panel">
+  <div class="rowline" style="margin-bottom:4px"><span class="tiny dim">类型</span><span class="tiny dim">成员</span><span class="tiny dim">本项目角色</span><span></span></div>
+  <div class="rowline">
+    <select><option>用户级 Agent</option><option>Agent</option><option selected>用户</option></select>
+    <select><option selected>李工 · admin（创建者本人）</option></select>
+    <select><option selected>owner</option><option disabled>admin（owner 不可削减）</option><option disabled>member</option></select>
+    <button class="btn sm" style="opacity:.45" data-click data-toast="✗ 创建者本人（owner）不可移除：先移交 owner（演示）">移除</button>
+  </div>
+  <div class="rowline">
+    <select><option selected>用户级 Agent</option><option>Agent</option><option>用户</option></select>
+    <select><option selected>李工的个人 Agent（Leader · 随 Leader 自动加入）</option></select>
+    <select><option selected>member（读写）</option><option>只读</option></select>
+    <button class="btn sm" data-click data-toast="✗ Leader 行不可移除：先改选其他 Leader（演示）">移除</button>
+  </div>
+  <div class="rowline">
+    <select><option>用户级 Agent</option><option selected>Agent</option><option>用户</option></select>
+    <select><option selected>审查 Agent · 标准</option><option>汇总 Agent</option><option>数据同步 Agent</option><option>前端 Agent</option></select>
+    <select><option selected>member（读写）</option><option>只读</option></select>
+    <button class="btn sm" data-click data-toast="已移除该成员行（未提交，不影响已登记成员）（演示）">移除</button>
+  </div>
+  <div class="rowline">
+    <select><option>用户级 Agent</option><option>Agent</option><option selected>用户</option></select>
+    <select><option selected>张三 · testuser</option><option>李四 · lisi</option><option>王五 · wangwu</option><option>赵六 · newbie</option></select>
+    <select><option selected>member（读写）</option><option>只读</option></select>
+    <button class="btn sm" data-click data-toast="已移除该成员行（演示）">移除</button>
+  </div>
+  <div class="rowline">
+    <select><option selected>用户级 Agent</option><option>Agent</option><option>用户</option></select>
+    <select><option selected>王工的个人 Agent</option><option>张三的个人 Agent</option><option>李四的个人 Agent</option></select>
+    <select><option selected>member（读写）</option><option>只读</option></select>
+    <button class="btn sm" data-click data-toast="已移除该成员行（演示）">移除</button>
+  </div>
+  <p style="margin:var(--s2) 0 0"><button class="btn sm primary" data-click data-toast="已加一行成员（类型 → 对象 → 角色），可继续添加（演示）">＋ 加一行</button> <span class="tiny dim">当前 5 行 = 创建者本人（用户 · owner）+ Leader 个人 Agent + 1 Agent + 1 用户 + 1 用户级 Agent</span></p>
+  <div class="callout" style="margin:var(--s3) 0 0"><p class="tiny" style="margin:0">成员即<b>知识空间成员</b>：同一份台账三处共用（项目成员 = 空间成员 = 可读写名单）。用户与其 1:1 个人 Agent 需分别成行——只加用户不会自动带上其个人 Agent，反之亦然，写权限各自留审计。</p></div>
+  <p class="tiny dim" style="margin:var(--s2) 0 0">未分配成员（如 <span class="mono">wangwu · 王五</span> 在本项目）在项目与其知识空间的任何列表中都不可见；越权与不存在统一 <span class="mono">404</span>。</p>
+</div>
 
-<p style="margin-top:var(--s4)"><button class="btn primary" data-toast="已创建项目「我的新项目」并登记关联与成员（演示）">创建项目</button> <button class="btn" data-back="projects.html">取消 · 返回列表</button></p>
-<p class="tiny dim" style="margin:6px 0 0">创建仅写平台内登记（路径映射 · 成员分配 · 关联台账），<b>不在盘上创建目录</b>；审计 <span class="mono">project:register</span>（演示）。</p>
+<h4 class="blk" id="sec-ks">6 · 专属知识空间 <span class="sub">创建项目 = 同时自动创建其知识空间（1:1 · 读写 + 总结写入）</span></h4>
+<div class="callout ok"><p class="tiny" style="margin:0"><b>创建流程（一条链，无需二次操作）：</b>提交创建 → 建项目登记（路径 · 成员 · 关联）→ <b>自动创建同名专属知识空间</b>（成员 = 项目成员，含 Agent）→ 项目自身与成员获得<b>读写</b>权 → run / 会话产物按 <b>L0→L3</b> 自动总结写入<b>本空间</b>。空间不可单独创建、不可跨项目共享写。</p></div>
+<div class="panel">
+  <div class="grid g2" style="align-items:start">
+    <div>
+      <p class="h2p">新空间 · <b>agentflow 空间</b> <span class="chip ok">读写（成员）</span> <span class="chip info">1:1 项目</span></p>
+      <dl class="kv">
+        <dt>成员（自动）</dt><dd class="tiny"><span class="memchip">李工的个人 Agent</span> <span class="memchip">审查 Agent · 标准</span> <span class="memchip">张三</span> <span class="dim">+ 项目 owner</span></dd>
+        <dt>初始文档</dt><dd class="mono">0 <span class="tiny dim">首次 run 结束自动产 L1 摘要；也可直接上传</span></dd>
+        <dt>非成员</dt><dd><span class="chip bad">不可见 · 越权 404</span></dd>
+        <dt>入口</dt><dd class="tiny"><span class="pill" data-click data-goto="knowledge.html#space-agentflow">知识库 › 空间列表 › 进入（深链锚点）</span></dd>
+      </dl>
+    </div>
+    <div>
+      <p style="font-size:12px;color:var(--text-secondary);margin:0 0 6px">关联已有知识库 <b>（可多选 · 只读引用）</b></p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="pill" data-click data-toast="已勾选：☑ 公共知识（4 篇 · 全体只读）（演示）">☑ 公共知识（公司规范 / API 契约 / 安全基线 / 入门）</span>
+        <span class="pill" data-click data-toast="已勾选：☑ 外部源 · Confluence ADR（只读快照）（演示）">☑ Confluence · 架构决策记录（外部源）</span>
+        <span class="pill" data-click data-toast="已勾选：☐ Notion · 产品需求库（令牌过期 · 冻结，勾选后为旧快照只读）（演示）">☐ Notion · 产品需求库（外部源 · 冻结）</span>
+        <span class="pill" data-click data-toast="已勾选：☐ 收件箱聚合空间（跨空间只读引用 · 写不进去）（演示）">☐ 收件箱聚合空间（跨空间引用）</span>
+      </div>
+      <p class="tiny dim" style="margin:6px 0 0">关联 = <b>只读</b>：引用进本空间后不可写、不可改标签；被关联方更新走增量同步。公共知识默认对全体可读，此处勾选只是固定引用清单与版本。</p>
+    </div>
+  </div>
+  <div class="callout" style="margin:var(--s3) 0 0"><p class="tiny" style="margin:0 0 4px"><b>L0 → L3 总结写入分层</b> <span class="chip warn">演示口径 · 参考腾讯记忆分层</span></p>
+    <div class="flow" style="margin:0">
+      <div class="step"><b class="mono">L0</b> 原始记录<br><span class="tiny dim">会话 / run 产物 / 文档原样 · 短期 TTL（30d）</span></div><span class="to">→</span>
+      <div class="step"><b class="mono">L1</b> 会话级摘要<br><span class="tiny dim">run / 会话结束自动产出 · 挂来源指针</span></div><span class="to">→</span>
+      <div class="step"><b class="mono">L2</b> 主题级聚合<br><span class="tiny dim">跨会话按主题合并 · 去重 · 置信更新 · 冲突人裁</span></div><span class="to">→</span>
+      <div class="step hi"><b class="mono">L3</b> 画像与高价值沉淀<br><span class="tiny dim">长期稳定 · 进空间正式文档 · <b>过人工审核门</b></span></div>
+    </div>
+    <p class="tiny" style="margin:var(--s3) 0 0"><b>两条边界：</b>① <b>写入只进本空间</b>——L0-L3 任何一层都写不到公共知识，也写不到别的项目空间；② <b>公共知识只接收 L3</b>，且必须经<b>平台管理员评审</b>通过后按新版本发布（申请入口见 <span class="mono">knowledge.html</span> 的「申请晋升」）。</p></div>
+</div>
+
+<h4 class="blk" id="sec-rel">7 · 关联对象（多选）<span class="sub">Agent / 工作流 / 知识库 / 会话 / 工作项</span></h4>
+<p style="margin:0 0 6px"><span class="pill" data-click data-toast="关联对象：☑ Agent（成员表已含 3 个 Agent：Leader 个人 Agent + 审查 Agent + 王工个人 Agent）（演示）" style="border-color:var(--blue-border);color:var(--blue)">☑ Agent</span> <span class="pill" data-click data-toast="关联对象：☑ 工作流（收件箱聚合 wf-42 · 审查流水线 v3）（演示）" style="border-color:var(--blue-border);color:var(--blue)">☑ 工作流</span> <span class="pill" data-click data-toast="关联对象：☑ 知识库（专属空间自动创建 + 只读关联：公共知识 + 外部源）（演示）" style="border-color:var(--blue-border);color:var(--blue)">☑ 知识库</span> <span class="pill" data-click data-toast="关联对象：☐ 对话会话（从项目上下文发起的对话回填 project_id）（演示）">☐ 对话会话</span> <span class="pill" data-click data-toast="关联对象：☐ 工作项（看板 AF-1xx 挂靠本项目）（演示）">☐ 工作项</span></p>
+<div class="callout"><p class="tiny" style="margin:0">关联语义：<b>一 Agent 可属多项目，一项目可绑多 Agent</b>（N:N 连接表）；工作流 1:N 快照；知识库 = 专属空间 1:1 + 只读关联 N:N；对话会话 / 工作项 以 <span class="mono">project_id</span> 关联列挂靠。</p></div>
+
+<p style="margin-top:var(--s4)"><button class="btn primary" data-toast="已创建项目「agentflow」· 专属知识空间同步创建 · Leader：李工的个人 Agent（演示）">提交创建</button> <button class="btn" data-back="projects.html">取消 · 返回列表</button></p>
+<p class="tiny dim" style="margin:6px 0 0">创建仅写平台内登记（路径映射 · 成员分配 · 专属知识空间 · 关联台账），<b>不在盘上创建目录</b>；审计 <span class="mono">project:register</span> + <span class="mono">space:auto_created</span>（演示）。</p>
+<hr>
+<p class="tiny dim" style="margin:0"><b>字段裁撤说明（页脚）：</b>曾有「开始日期 / 目标日期」两项，现已删除——<b>项目无期限概念，节奏由里程碑 / 工作项承载</b>（工作项见 <span class="mono">board.html</span>）。状态与优先级保留为单选 chips；Leader 从「成员或 Agent 二选一」改为「仅 Agent（用户级 Agent 优先）」，人只出现在成员与审批里。</p>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示（独立表单页）：「创建项目」→ toast（已创建 + 登记关联与成员）· 取消 / 顶部「← 返回」→ 回项目列表　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立表单页 · 纯静态）：名称 / 描述为两个独立输入框（描述 textarea）· 图标 = 9 个单选圆形 chip（跳过 + 8 emoji/字母 · 默认跳过）·「📁 选择目录…」→ toast + 路径 chip（✕ 可移除）· GitHub 输入框 +「⟱ 克隆并关联」→ 克隆 toast · 状态（未开始 / 进行中 / 已暂停 / 已完成）/ 优先级（低 / 中 / 高 / 紧急）/ 可见性 = 原生单选按钮组 chips（点 label 即切选中态 · 纯 CSS，chip 上不挂 toast 以免 preventDefault 吞掉选中）· <b>无开始 / 结束时间字段</b>（理由在页脚）· Leader 单选（用户级 Agent 组 + 其他 Agent 组 · 归档项置灰）→ 选人 toast · 成员 5 行「类型（用户级 Agent / Agent / 用户）/ 对象 / 角色」下拉 + 逐行移除，「＋ 加一行」→ toast（可继续添加；创建者 owner 行与 Leader 行不可移除）· 第 6 区为创建流程 callout（项目 1:1 专属空间 + 关联已有知识库只读多选）与 <b>L0-L3 总结写入</b>卡（演示口径 · 参考腾讯记忆分层）· 空间「进入」深链 → <span class="mono">knowledge.html#space-agentflow</span> ·「提交创建」→ toast（已创建项目「agentflow」· 专属知识空间同步创建 · Leader：李工的个人 Agent）· 取消 / 顶部「← 返回」→ 项目列表　按 Esc 关闭浮层。</p>
 </body></html>

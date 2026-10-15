@@ -2,24 +2,78 @@
 <title>文件读写详情 · 工具库 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
-.kbd{font-size:11px}</style></head><body>
+.kbd{font-size:11px}
+/* 表单风格（与 tools__new.html ① Plugin 注册表单同源） */
+.fld{margin-bottom:var(--s3)}
+.fld:last-child{margin-bottom:0}
+.fld label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.fld label b{color:var(--text)}
+.need{color:var(--red)}
+.fld input,.fld select,.fld textarea{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:7px 9px;font:12.5px var(--font);width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:1px solid var(--blue);border-color:var(--blue)}
+.fld [disabled],.fld [readonly]{opacity:.55}
+.fld .hint{font-size:11px;color:var(--text-muted);margin-top:3px}
+.fld textarea{min-height:80px;resize:vertical;font-family:var(--font-mono);font-size:11.5px}
+.fld input.mono,.fld textarea.mono{font-family:var(--font-mono);font-size:11.5px}
+.frm{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tri{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tri input[type=radio]{position:absolute;width:0;height:0;opacity:0;margin:0;padding:0;border:0}
+.tri label{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg-main);padding:4px 10px;font-size:12px;color:var(--text-secondary);cursor:pointer;margin-bottom:0}
+.tri label:hover{border-color:var(--blue-border);color:var(--text)}
+.tri input[type=radio]:checked+label{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue);font-weight:600}
+.tri input[type=radio]:focus-visible+label{outline:2px solid var(--blue);outline-offset:2px}
+.savebar{position:sticky;bottom:0;z-index:45;display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap;padding:10px 14px;margin:var(--s4) 0 var(--s2);background:var(--bg-card);border:1px solid var(--border-strong);border-top:2px solid var(--blue);border-radius:var(--r-md);box-shadow:0 -8px 22px rgba(0,0,0,.4)}
+.lockline{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text-muted)}
+</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
-<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
-<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>工具</b> · <span class="mono">fs.read_write</span></span><span class="chip info">Plugin</span><span class="chip ok">启用</span><span class="chip mono">8 参数</span></div>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="tools__new.html">注册工具（① Plugin 表单）</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>工具</b> · <span class="mono">fs.read_write</span></span><span class="chip info">Plugin</span><span class="chip ok">启用</span><span class="chip mono">8 参数</span><button class="btn sm primary" data-click data-toast="已进入编辑模式 · 字段与注册表单同源（演示）">✎ 编辑</button></div>
 <div class="detail-body">
-<p class="proto-note"><span class="chip warn">演示数据</span>Plugin 工具详情：参数 schema / 被引用编排 / 启用历史。禁用为全局操作，卡片保持可见——故整页承载，不塞侧栏。本页为 Plugin 类样本（「Shell 执行」「Git 操作」同形态，原型共用一份数据未逐条区分）。</p>
+<p class="proto-note"><span class="chip warn">演示数据</span>Plugin 工具详情：<b>配置区与注册 ① Plugin 表单同源可编辑</b>（参数 schema / 权限标签 / Token 双限 / 安全闸门三件套 / IO 过滤），下方保留参数 schema、被引用编排、启用历史与全局启停。本页为 Plugin 类样本（「Shell 执行」「Git 操作」同形态，原型共用一份数据未逐条区分）。</p>
+<p class="lockline" style="margin:0 0 var(--s3)">无 <span class="mono">tool:edit</span> 权限者此区为 <span class="chip">🔒 Lock read-only</span> <span class="dim">—— 就地只读、保留滚动位置与筛选，不改 URL、不跳走（§6.0 ①）。</span></p>
 
-<h4 class="blk">基础信息</h4>
-<dl class="kv"><dt>标识 / 类型</dt><dd class="mono">fs.read_write · Plugin（内置注册）</dd>
-<dt>能力</dt><dd>本地文件系统读写，路径白名单 + 越界拦截</dd>
-<dt>参数 / 返回</dt><dd class="mono">8 参数 · {ok, content|bytes_written, path}</dd>
-<dt>安全栅栏</dt><dd class="mono">path_allowlist: .specs/**, backend/** · 拒绝 .. 穿越</dd>
-<dt>被引用</dt><dd>2 个工作流 · 3 个 Agent · 编排 <span class="mono">审查流水线 v3</span></dd>
-<dt>近 7 天调用</dt><dd class="mono">412 次 · 失败 3 · P95 62ms</dd>
-<dt>注册 / 最后修改</dt><dd class="mono">09-15 10:02 · 09-21 16:40（加白名单）</dd>
-<dt>权限要求</dt><dd><span class="chip">project:write 才可写</span> 无权限时调用返回 404 而非 403</dd></dl>
+<h4 class="blk">配置（与注册表单同源）<span class="chip info">Plugin</span><span class="chip info">字段与 tools__new.html ① 一一对应</span></h4>
+<div class="panel">
+  <div class="grid g2">
+    <div class="fld"><label><b>名称</b> <span class="need">*</span> <span class="dim">· 注册时同源字段</span></label><input value="文件读写 v2"><p class="hint">列表卡片与绑定行显示名；库内标识 <span class="mono">fs.read_write</span> 不随改名变化。</p></div>
+    <div class="fld"><label><b>描述</b> <span class="dim">· 注册时同源字段</span></label><input value="本地文件系统读写，支持路径白名单"><p class="hint">仅展示，不进执行 prompt。</p></div>
+    <div class="fld"><label><b>类型</b> <span class="dim">· 注册时同源字段</span></label><input value="Plugin · 平台内置代码实现（带参数 schema + 权限标签 + 安全闸门）" readonly><p class="hint">类型<b>创建后不可改</b>：Plugin 是代码级能力，注册即注入运行时，与 Skill / MCP 不共用表单。</p></div>
+    <div class="fld"><label><b>分类</b> <span class="dim">· 注册时同源字段</span></label><select><option selected>文件系统 / IO</option><option>命令执行</option><option>版本控制</option><option>网络与抓取</option><option>知识与检索</option></select><p class="hint">用于工具库筛选与角色模板推荐；「Shell 执行」= 命令执行、「Git 操作」= 版本控制（同形态样本）。</p></div>
+    <div class="fld"><label><b>实现版本</b> <span class="need">*</span> <span class="dim">· 注册时同源字段</span></label><select><option selected>v2（当前 · 已发布）</option><option>v3（草稿 · 未发布，绑定不可指向）</option><option>v1（已下线 · 仅历史 run 可读）</option></select><p class="hint">发布走工具库，<b>绑定钉在 major 版本不自动跳</b>；改选即要求所有引用方下轮读新实现。</p></div>
+    <div class="fld"><label><b>运行时要求</b> <span class="dim">· 注册时同源字段</span></label><select><option selected>全部运行时（stdio 族）</option><option>仅 dsh</option><option>需 daemon ≥ 0.100.0</option></select><p class="hint">不满足要求的机器上该工具显示「不可用」而非静默降级——与禁用同理必须可见。</p></div>
+  </div>
 
-<h4 class="blk">参数 schema（8）</h4>
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">参数 schema（JSON · 提交时校验） <span class="dim">· 注册时同源字段</span></p>
+  <textarea class="mono" style="min-height:104px">{"path":{"type":"string","required":true},"mode":{"type":"string","enum":["read","write","append"],"required":true},"content":{"type":"string","max_bytes":1048576},"offset":{"type":"int","default":1},"limit":{"type":"int","default":2000},"encoding":{"type":"string","default":"utf-8"},"backup":{"type":"bool","default":true},"create_parent":{"type":"bool","default":false}}</textarea>
+  <p class="hint" style="margin:6px 0 0">与下方「参数 schema（8）」表同源（此处改一处，表随之重解析）；校验未过会在<b>字段旁</b>页内显错、不落库。示例失败态：删掉 <span class="mono">"required":true</span> 保存 → 提示「path 必须 required」。</p>
+
+  <p class="tiny muted" style="margin:14px 0 4px;text-transform:uppercase;letter-spacing:.05em">权限标签（chips 增删） <span class="dim">· 注册时同源字段</span></p>
+  <div class="frm"><span class="chip info" data-click data-toast="已移除权限标签 read（演示）">read ×</span><span class="chip info" data-click data-toast="已移除权限标签 write（演示）">write ×</span><span class="chip info" data-click data-toast="已移除权限标签 project:write（演示）">project:write ×</span><span class="chip" style="border-style:dashed" data-click data-toast="已添加权限标签 execute（演示 · 收紧即时生效，放宽需 admin 复核）">+ 添加标签</span></div>
+  <p class="hint" style="margin:6px 0 0">缺权限时调用返回 <b>404 而非 403</b>（避免用状态码探测资源存在性）；权限收紧即时生效，放宽需 admin 复核。</p>
+
+  <div class="grid g2" style="margin-top:var(--s3)">
+    <div class="fld"><label><b>Token 软限制</b> <span class="dim">· 注册时同源字段</span></label><input class="mono" value="80000"><p class="hint">达软限即告警并在 run 内提示收敛。</p></div>
+    <div class="fld"><label><b>Token 硬限制</b> <span class="dim">· 注册时同源字段</span></label><input class="mono" value="100000"><p class="hint">达硬限直接截断该次调用并记 <span class="mono">exec_fail</span> 告警；硬限必须 ≥ 软限，否则字段旁显错。</p></div>
+  </div>
+
+  <p class="tiny muted" style="margin:14px 0 4px;text-transform:uppercase;letter-spacing:.05em">安全闸门（三件套） <span class="dim">· 注册时同源字段</span></p>
+  <div class="fld"><label><b>gate_pre</b> <span class="dim">· 注册时同源字段</span></label><input class="mono" value="路径越界即拒 · 白名单 .specs/**, backend/** · 拒绝 .. 穿越"><p class="hint">前置闸门：入参校验。<b>收紧即时生效（含 queued run）</b>，放宽需 admin 复核。</p></div>
+  <div class="fld"><label><b>gate_post</b> <span class="dim">· 注册时同源字段</span></label><input class="mono" value="写入后重读校验 · 不一致即回滚到 backup/ 版"><p class="hint">后置闸门：出参复核。关掉会让「写成功但内容不符」不可见，默认必开。</p></div>
+  <div class="fld"><label><b>IO 过滤</b> <span class="dim">· 注册时同源字段</span></label>
+    <div class="tri"><input type="radio" name="io" id="io-none"><label for="io-none">none</label><input type="radio" name="io" id="io-san" checked><label for="io-san">sanitize</label><input type="radio" name="io" id="io-strict"><label for="io-strict">strict</label></div>
+    <p class="hint">三档互斥单选：<span class="mono">none</span> 原样透传（仅隔离域内允许）· <span class="mono">sanitize</span> 当前值 · <span class="mono">strict</span> 只放行白名单类型并剥除二进制。</p></div>
+  <div class="fld"><label><b>写前自动备份保留版数</b> <span class="dim">· 注册时同源字段</span></label><input class="mono" value="5（满 5 挤掉最旧 · 落 backup/）"><p class="hint">与产物区备份策略同源；改小会立即淘汰超出的历史快照。</p></div>
+</div>
+
+<div class="savebar">
+  <span class="chip ok">自动保存 · 已存 16:40:12</span>
+  <span class="tiny dim">三态：<span class="chip">保存中</span> → <span class="chip ok">已存</span> / <span class="chip bad">失败（字段旁页内显错，不落库）</span> · 保存只改期望态，在途 run 用旧配置</span>
+  <span style="flex:1"></span>
+  <button class="btn sm primary" data-toast="配置已更新 · 引用它的工作流下轮生效（演示）">保存全部</button>
+  <button class="btn sm" data-toast="已放弃未保存改动 · 回到上一次已存配置（演示）">放弃</button>
+</div>
+
+<h4 class="blk">参数 schema（8）<span class="chip info">与配置区「参数 schema」同源</span></h4>
 <table class="tbl compact"><thead><tr><th>参数</th><th>类型</th><th>必填</th><th>说明</th></tr></thead><tbody>
 <tr><td class="mono">path</td><td class="mono">string</td><td><span class="chip bad">是</span></td><td class="tiny">相对项目根；越界即拒</td></tr>
 <tr><td class="mono">mode</td><td class="mono">enum</td><td><span class="chip bad">是</span></td><td class="tiny">read / write / append</td></tr>
@@ -31,13 +85,6 @@
 <tr><td class="mono">create_parent</td><td class="mono">bool</td><td><span class="chip">否</span></td><td class="tiny">父目录不存在时是否创建</td></tr>
 </tbody></table>
 
-<h4 class="blk">被引用的工作流 / 编排（3）</h4>
-<table class="tbl compact"><thead><tr><th>引用方</th><th>类型</th><th>状态</th><th>禁用后影响</th></tr></thead><tbody>
-<tr><td class="mono" data-click data-goto="workflows__review-pipeline.html">审查流水线 v3</td><td>编排</td><td><span class="chip ok">已发布</span></td><td class="tiny">下次执行才失败（校验不拦截）</td></tr>
-<tr><td class="mono">需求澄清 v2</td><td>工作流</td><td><span class="chip ok">已发布</span></td><td class="tiny">同上 · 卡片仍可见</td></tr>
-<tr><td class="mono">知识入库 v5</td><td>工作流</td><td><span class="chip warn">草稿</span></td><td class="tiny">未 apply，不影响线上</td></tr>
-</tbody></table>
-
 <h4 class="blk">启用历史</h4>
 <div class="timeline">
 <div class="tl-item"><b>09-21 16:40</b> · 修改：新增 <span class="mono">backup</span> 参数（默认 true）</div>
@@ -46,9 +93,28 @@
 <div class="tl-item"><b>09-15 10:02</b> · 注册进工具库 · 类型 Plugin · 6 参数</div>
 </div>
 
-<h4 class="blk">操作</h4>
-<div class="callout warn"><p class="tiny" style="margin:0"><b>纪律：</b>禁用<b>全局生效</b>且<b>卡片保持可见</b>——已引用它的编排在<b>下次执行</b>时才失败，隐藏会让用户以为工具不存在。</p></div>
-<p><button class="btn sm" data-toast="demo 包已下载（样例 + 假凭据 · 演示）">下载 demo</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-disable">禁用</button></p>
+<h4 class="blk">基础信息 <span class="chip">只读速记 · 编辑去上方配置区（同源）</span></h4>
+<dl class="kv"><dt>标识 / 类型</dt><dd class="mono">fs.read_write · Plugin（内置注册）</dd>
+<dt>能力</dt><dd>本地文件系统读写，路径白名单 + 越界拦截</dd>
+<dt>参数 / 返回</dt><dd class="mono">8 参数 · {ok, content|bytes_written, path}</dd>
+<dt>安全栅栏</dt><dd class="mono">path_allowlist: .specs/**, backend/** · 拒绝 .. 穿越</dd>
+<dt>被引用</dt><dd>2 个工作流 · 3 个 Agent · 编排 <span class="mono">审查流水线 v3 · wf-8</span>（明细见上方「被引用的工作流 / 编排」）</dd>
+<dt>近 7 天调用</dt><dd class="mono">412 次 · 失败 3 · P95 62ms</dd>
+<dt>注册 / 最后修改</dt><dd class="mono">09-15 10:02 · 09-21 16:40（加白名单）</dd>
+<dt>权限要求</dt><dd><span class="chip">project:write 才可写</span> 无权限时调用返回 404 而非 403</dd></dl>
+
+<h4 class="blk">被引用的工作流 / 编排（3）</h4>
+<table class="tbl compact"><thead><tr><th>引用方</th><th>类型</th><th>状态</th><th>禁用后影响</th></tr></thead><tbody>
+<tr><td class="mono" data-click data-goto="workflows__review-pipeline.html">审查流水线 v3</td><td>编排 · <span class="mono">wf-8</span></td><td><span class="chip ok">已发布</span></td><td class="tiny">下次执行才失败（校验不拦截）</td></tr>
+<tr><td class="mono">需求澄清 v2</td><td>工作流</td><td><span class="chip ok">已发布</span></td><td class="tiny">同上 · 卡片仍可见</td></tr>
+<tr><td class="mono">知识入库 v5</td><td>工作流</td><td><span class="chip warn">草稿</span></td><td class="tiny">未 apply，不影响线上</td></tr>
+</tbody></table>
+<p class="tiny dim">与 <span class="mono">tools.html</span> 卡片「被 3 个 Agent 引用」同口径。<b>改配置（闸门 / schema / Token 双限）不阻断在途 run</b>，引用方下一轮生效；禁用才在执行期失败。</p>
+
+<h4 class="blk">配置与操作 <span class="chip bad">破坏性 · 二次确认 · 必填原因</span></h4>
+<div class="callout warn"><p class="tiny" style="margin:0"><b>纪律：</b>禁用<b>全局生效</b>且<b>卡片保持可见</b>——已引用它的编排在<b>下次执行</b>时才失败，隐藏会让用户以为工具不存在。配置字段一律在上方同源配置区改，本区只管启停与断链。</p></div>
+<p><button class="btn sm" data-toast="demo 包已下载（样例 + 假凭据 · 演示）">下载 demo</button> <button class="btn sm" data-toast="已进入编辑模式 · 字段与注册表单同源（演示）">✎ 编辑配置</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-disable">禁用</button> <button class="btn sm" disabled title="被 3 个 Agent + 2 个工作流引用 · 先解除引用才可卸载（断链不可逆）">卸载</button></p>
+<p class="tiny dim"><b>被引用 &gt; 0 → 「卸载」置灰：</b>须先在画布 / Agent 绑定处移除引用，或走「禁用（可逆）」；置灰注记为「被 3 个 Agent + 2 个工作流引用 · 先解除引用才可卸载」。</p>
 
 <div class="modal" id="md-disable"><div style="padding:var(--s4)"><b>禁用工具「文件读写」？</b>
 <p class="small dim" style="margin:8px 0">禁用<b>全局生效</b>：卡片保持可见（不隐藏），已引用它的 <b>3 处编排在下次执行时才失败</b>。<b>必填原因</b>——理由与操作人入审计（§6.0 纪律）。</p>
@@ -61,5 +127,6 @@
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已禁用 · 卡片仍可见 · 审计 tool:disable（演示）" data-close>确认禁用</button></div></div></div>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 工具库 · 引用方「审查流水线 v3」→ 工作流详情页 · 下载 demo→toast · 禁用→二次确认（本页自带 modal 副本，含必填原因）　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px"><b>可点区演示：</b>头部「✎ 编辑」→ toast（进入编辑模式 · 字段与注册同源）· 配置区逐字段可编辑（名称 / 描述 / 类型只读 / 分类 / 实现版本 / 运行时要求 / 参数 schema JSON / 权限标签 chips / Token 软硬双限 / gate_pre / gate_post / IO 过滤三档单选 / 备份版数）· 底部 sticky 保存条（自动保存三态 + 保存全部 + 放弃）· 引用方「审查流水线 v3」→ 工作流详情 · 下载 demo→toast · 禁用→二次确认（本页自带 modal 副本，含必填原因）·「卸载」被引用 &gt; 0 置灰（title 注记）　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:0 18px 14px"><b>同源约定：</b>本页配置区字段与 <span class="mono">tools__new.html</span>「① Plugin 表单」逐项对应——注册即生成详情页，之后所有字段只在详情页编辑（同一份配置，两种入口）；无权限者整区为 <span class="chip">🔒 Lock read-only</span>。</p>
 </body></html>

@@ -12,7 +12,7 @@
 
 1. **作为管理员**，我希望创建隔离域（如"生产域"、"开发域"），将不同环境的 Agent 分组管理。
 2. **作为管理员**，我希望在控制面板中按域查看 Agent，而非单一的扁平列表。
-3. **作为管理员**，我希望删除域时，域内的 Agent 不会被删除，而是自动回归默认域。
+3. **作为管理员**，我希望删除域时，域内的 Agent 不会被删除，而是落入「未分类」虚拟分组（归属可选，事后可归位）。
 4. **作为普通用户**，我只能看到自己拥有的域和域内的 Agent（继承现有 owner 权限模型）。
 
 ## 功能需求
@@ -21,7 +21,7 @@
 - 创建域：name（必填）、owner_id（默认当前用户）
 - 列出所有域
 - 更新域名
-- 删除域：将域内所有 Agent 的 domain_id 置为 NULL（回归默认域）
+- 删除域：将域内所有 Agent 的 domain_id 置为 NULL（落「未分类」虚拟组，可再归位）
 
 ### FR2: Agent 归属域
 - Agent 表新增 `domain_id` 字段（可为 NULL）
@@ -30,18 +30,18 @@
 
 ### FR3: 默认域
 - 系统启动时自动创建"默认域"（name='默认域', owner='admin'）
-- 所有 domain_id=NULL 的 Agent 视为属于默认域
+- 所有 domain_id=NULL 的 Agent 归入「未分类」虚拟分组——归属可选，不视为属于任何真实域（默认域只是既有代码形态的一个普通域）
 
 ### FR4: 控制面板域视图
 - 顶部显示域卡片/手风琴列表
 - 点击域展开显示该域内的 Agent 列表
-- 无域 Agent 显示在"默认域"下
+- 无域 Agent 显示在「未分类」虚拟分组下
 - 支持创建/删除域的内联 UI
 
 ## 非功能需求
 
 ### NFR1: 向后兼容
-- 现有 Agent（domain_id=NULL）自动归属默认域
+- 现有 Agent（domain_id=NULL）落「未分类」虚拟组，功能不受影响
 - 现有 API 端点不受影响
 
 ### NFR2: 权限
@@ -73,14 +73,14 @@
 | GET | /api/domains | 列出所有域 |
 | POST | /api/domains | 创建域 |
 | PUT | /api/domains/{id} | 更新域 |
-| DELETE | /api/domains/{id} | 删除域（Agent 回归默认域） |
+| DELETE | /api/domains/{id} | 删除域（Agent 落「未分类」虚拟组） |
 | GET | /api/agents?domain_id=X | 按域过滤 Agent（已有端点增强） |
 
 ## 验收条件
 
 - [ ] 域 CRUD API 正常工作
 - [ ] Agent 可按域过滤
-- [ ] 删除域后 Agent 回归默认域
+- [ ] 删除域后 Agent 落「未分类」虚拟组（domain_id NULL）
 - [ ] 控制面板显示域手风琴视图
 - [ ] 现有 API 端点不受影响
 - [ ] TypeScript 无新增编译错误

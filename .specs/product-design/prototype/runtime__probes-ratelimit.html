@@ -16,7 +16,7 @@
 <dt>超限返回</dt><dd class="mono">429 Too Many Requests + 界面错误提示条</dd>
 <dt>状态存储</dt><dd class="mono">进程内存（重启清零，不落库）</dd>
 <dt>健康端点解析</dt><dd class="mono">base_url + /health → 回退 health_url → 皆无则不可探活（None）</dd>
-<dt>凭据脱敏</dt><dd class="mono">sk-*** / sk-ant-*** 两种前缀均覆盖</dd>
+<dt>凭据脱敏</dt><dd class="mono">sk-… / Bearer… / PAT… 等凭据形态均覆盖（只掩码不落明文）</dd>
 <dt>同类进程内状态</dt><dd>调度队列 <span class="mono">scheduler_service._queue</span> · 调和退避 <span class="mono">reconcile_loop._backoff_state</span></dd></dl>
 
 <h4 class="blk">最近探活记录（本进程窗口内 · 8 条）</h4>

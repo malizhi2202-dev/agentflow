@@ -5,7 +5,7 @@
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="tools.html">工具市场</span><span class="pill" data-goto="stage-model.html">阶段模型</span></div>
-<p class="proto-note"><span class="chip warn">演示数据</span>左侧节点面板 + 中央画布 + 右侧边配置 + 底部 YAML。改画布 YAML 跟着变，改 YAML 画布跟着重绘。</p>
+<p class="proto-note"><span class="chip warn">演示数据</span>左侧节点面板 + 中央画布 + 右侧边配置 + 底部 YAML。改画布 YAML 跟着变，改 YAML 画布跟着重绘。<b>新建/切换画布</b>：右上「＋ 新建画布」（空白/复制/粘 YAML 三来源 · draft 起步）与「⧉ 画布切换器」。</p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/orchestration</span><span class="fake">演示数据</span></div>
       <div class="app" style="grid-template-columns:180px minmax(0,1fr)">
@@ -17,6 +17,7 @@
           <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
           <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
           <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
           <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
           <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
           <a data-goto="canvas.html" class="active"><svg class="icon"><use href="#i-net"/></svg>编排</a>
@@ -28,7 +29,7 @@
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">编排 <span class="dim">· 审查流水线 v3</span></span><span class="right"><span class="pill" style="color:var(--orange);border-color:rgba(232,164,80,.45)" data-click data-toast="草稿（draft）：改动未发布，校验通过后 Apply 部署 → 发布即生成不可变快照并置为已发布（published）（演示）">草稿 draft</span><span class="pill" data-click data-goto="canvas__strategies-versions.html">历史版本</span><button class="btn sm" data-toast="⧉ 已复制当前草稿 YAML 到剪贴板（演示）">复制</button><span class="chip mono" data-click data-goto="canvas__strategies-versions.html">13 种策略 →</span><button class="btn sm" data-toast="✓ 校验通过 · 5 节点 / 5 边 · 0 错误 · 1 警告：旧版审查 Agent 引用的工具已被禁用，执行时将失败（工具被禁用不拦截校验，仅在执行时失败）">校验</button><button class="btn sm" data-toast="草稿已保存 · 未 apply 前不生成快照（演示）">保存</button><button class="btn sm primary" data-click data-goto="canvas__apply-diff.html">Apply 部署</button><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-del-wf">删除</button></span></div>
+          <div class="app-top"><span class="crumb">编排 <span class="dim">· 审查流水线 v3</span></span><span class="right"><span class="pill mono" data-click data-pop="pop-wfs" title="切换/浏览已有画布 · 画布与工作流一对一">⧉ 画布：审查流水线 v3 ▾</span> <button class="btn sm primary" data-click data-modal="md-new-canvas">＋ 新建画布</button><span class="pill" style="color:var(--orange);border-color:rgba(232,164,80,.45)" data-click data-toast="草稿（draft）：改动未发布，校验通过后 Apply 部署 → 发布即生成不可变快照并置为已发布（published）（演示）">草稿 draft</span><span class="pill" data-click data-goto="canvas__strategies-versions.html">历史版本</span><button class="btn sm" data-toast="⧉ 已复制当前草稿 YAML 到剪贴板（演示）">复制</button><span class="chip mono" data-click data-goto="canvas__strategies-versions.html">13 种策略 →</span><button class="btn sm" data-toast="✓ 校验通过 · 5 节点 / 5 边 · 0 错误 · 1 警告：旧版审查 Agent 引用的工具已被禁用，执行时将失败（工具被禁用不拦截校验，仅在执行时失败）">校验</button><button class="btn sm" data-toast="草稿已保存 · 未 apply 前不生成快照（演示）">保存</button><button class="btn sm primary" data-click data-modal="md-apply">Apply 部署</button><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-del-wf">删除</button></span></div>
           <div class="app-body" style="display:grid;grid-template-columns:150px minmax(0,1fr) 190px;gap:var(--s3);align-items:start">
             <div class="panel tight">
               <p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">Agent 节点</p>
@@ -106,6 +107,27 @@ edges:
 
 
 
+<div class="pop" id="pop-wfs" style="min-width:280px"><p class="tiny dim" style="margin:0 0 6px"><b>切换画布</b>（画布与工作流一对一 · draft 未保存切换会提示丢弃）</p>
+<table class="tbl compact"><tbody>
+<tr data-click data-toast="当前画布（演示不切）"><td><b>审查流水线 v3</b> <span class="chip warn">draft</span></td><td class="tiny dim">wf-8 · 5 节点 · 编辑中</td></tr>
+<tr data-click data-toast="已切换画布「收件箱聚合 · 已发布 v2」· 只读浏览：改前先生成新草稿（演示）"><td>收件箱聚合 <span class="chip ok">published v2</span></td><td class="tiny dim">wf-42 · 8 节点</td></tr>
+<tr data-click data-toast="已切换画布「旧版审查流程」· 已归档：仅查看，Apply 禁用（演示）"><td class="dim">旧版审查流程 <span class="chip">archived</span></td><td class="tiny dim">wf-3 · 3 节点</td></tr>
+</tbody></table>
+<p class="tiny" style="margin:8px 0 0"><span class="btn link" data-click data-modal="md-new-canvas">＋ 新建画布…</span> <span class="dim">或去 <a data-goto="workflows.html" data-click>工作流列表</a> 新建（新建工作流 → 建画布 同路）</span></p></div>
+<div class="modal" id="md-new-canvas"><div style="padding:var(--s4)"><b>新建画布</b>
+<p class="small dim" style="margin:6px 0 10px">画布 = 工作流的可视化编排体（YAML ↔ 画布双向同步）。创建后生成 <span class="chip warn">draft</span> 工作流并出现在工作流列表。</p>
+<div class="fld" style="margin-bottom:var(--s2)"><label>画布名称 <b class="need">*</b></label><input placeholder="例如：收件箱聚合流水线"></div>
+<label class="tiny muted">起始来源</label>
+<div class="cardpick sel" data-click style="margin:6px 0"><b>空白画布</b><p class="tiny muted" style="margin:4px 0 0">含 3 个初始节点提示（输入 · Agent · 输出），从左栏工具面板拖入节点开编；也可 粘贴 YAML / 校验后自动重绘。</p></div>
+<div class="cardpick" data-click data-toast="已选「复制已有画布」：复制节点与边结构，不携带版本历史（演示）" style="margin:6px 0"><b>复制已有画布</b><p class="tiny muted" style="margin:4px 0 0">▾ 审查流水线 v3（draft）· 收件箱聚合（published v2）—— 复制生成新 draft，与源画布独立演进。</p></div>
+<div class="cardpick" data-click data-toast="已选「粘贴 YAML」：校验通过后自动布局生成节点与边（演示）" style="margin:6px 0 10px"><b>粘贴 YAML</b><p class="tiny muted" style="margin:4px 0 0">贴 workflow YAML → 校验 → 画布重绘；报错定位到行。</p></div>
+<div class="fld" style="margin-bottom:var(--s2)"><label>所属项目</label><select><option>AgentFlow 平台研发</option><option>收件箱聚合（wf-42 所在）</option><option>不关联（个人草稿）</option></select></div>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已创建画布「收件箱聚合流水线」· 空白+3 初始节点 · draft · 已出现在工作流列表（演示）" data-close>创建并进入</button></div></div></div>
+<div class="modal" id="md-apply"><div style="padding:var(--s4)"><b>Apply 部署 · 审查流水线 v3 → v4</b>
+<p class="small dim" style="margin:6px 0 8px">漂移摘要（期望草稿 vs 已部署快照 v3）：节点 <b>+1</b>（前端 Agent）· 边 <b>+2</b> · 策略变更 <b>1</b>（<span class="mono tiny">retry 3→2</span>）。apply 后拓扑入库并生成<b>不可变快照 v4（published）</b>。　<span class="pill" data-goto="canvas__apply-diff.html">看完整漂移 diff 详情 →</span></p>
+<div class="fld" style="margin-bottom:var(--s2)"><label>部署原因 <b class="need">*</b> <span class="dim">（破坏性操作必填 · 入审计 orch:apply）</span></label><input placeholder="如：前端分支超时收短，避免 P95 拖高"></div>
+<div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-goto="workflows__review-pipeline.html" title="快照 v4 入库 · 拓扑入队后跳转对应工作流">部署完成 → 跳转工作流</button></div>
+<p class="tiny dim" style="text-align:right;margin-top:6px">部署成功后进入「工作流 · 审查流水线」详情：版本历史可见 v4（published），画布转已发布态。</p></div></div>
 <div class="modal" id="md-del-wf"><div style="padding:var(--s4)"><b>删除工作流「审查流水线」？</b>
 <p class="small dim" style="margin:8px 0">选择处置方式（两者都<b>必填原因</b>，动作入审计）：</p>
 <ul class="tiny dim" style="margin:4px 0 10px 18px;padding:0">
@@ -114,5 +136,5 @@ edges:
 </ul>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [ 必填 · 例如：业务下线，保留快照备查                        ]</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--orange);border-color:var(--orange)" data-toast="已归档工作流 · 版本快照保留 · 可恢复（演示）" data-close>归档</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已彻底删除工作流 · 全部版本快照已清除 · 不可恢复（演示）" data-close>彻底删除</button></div></div></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：画布节点 → <b>节点配置详情页</b>（canvas__node-review / __node-legacy · 出边表 + 节点事件 + 移除钮）· 右侧「审查 → 前端」/前端节点 → <b>边配置详情页</b>（canvas__edge-review-frontend）· 「13 种策略 ▾」与左侧策略 pill → <b>策略与版本详情页</b>（canvas__strategies-versions · 13 项 > pop 上限 · 含回滚）· 「Apply 部署」→ <b>漂移 diff 详情页</b>（canvas__apply-diff · diff 表 + 影响清单 + 原因）· 「校验」/「保存」→ toast · 「草稿 draft」状态 chip → 版本态说明 toast（发布生成不可变快照并置 published）· 「历史版本」→ 策略与版本详情页（canvas__strategies-versions）· 「复制」→ toast · 「删除」→ 归档 / 彻底删除双选二次确认（md-del-wf · 都需理由）· 移除节点 / 删除边 / 回滚 → 二次确认随节点与边配置进入各自详情页（页内自带副本）　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：画布节点 → <b>节点配置详情页</b>（canvas__node-review / __node-legacy · 出边表 + 节点事件 + 移除钮）· 右侧「审查 → 前端」/前端节点 → <b>边配置详情页</b>（canvas__edge-review-frontend）· 「13 种策略 ▾」与左侧策略 pill → <b>策略与版本详情页</b>（canvas__strategies-versions · 13 项 > pop 上限 · 含回滚）· 「Apply 部署」→ <b>应用内 diff 摘要模态</b>（md-apply · 必填原因 → 「部署完成」跳转工作流详情 <span class="mono">workflows__review-pipeline.html</span>；完整漂移 diff 升格页 canvas__apply-diff 仍可达）· 「校验」/「保存」→ toast · 「草稿 draft」状态 chip → 版本态说明 toast（发布生成不可变快照并置 published）· 「历史版本」→ 策略与版本详情页（canvas__strategies-versions）· 「复制」→ toast · 「删除」→ 归档 / 彻底删除双选二次确认（md-del-wf · 都需理由）· 移除节点 / 删除边 / 回滚 → 二次确认随节点与边配置进入各自详情页（页内自带副本）　「＋ 新建画布」→ 三来源模态（md-new-canvas · 创建即 draft 并入工作流列表）· 「⧉ 画布切换器」→ pop-wfs（published 只读浏览、改前先生成新草稿 · archived 仅查看禁 Apply）　按 Esc 关闭所有浮层。</p>
 </body></html>

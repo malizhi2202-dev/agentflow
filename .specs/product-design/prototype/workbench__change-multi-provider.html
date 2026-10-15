@@ -7,19 +7,19 @@
 <div class="detail-top"><span class="pill" data-back="workbench.html" data-click>← 返回 工作台 · 变更总览</span><span class="crumb"><span class="dim">工作台 · 变更总览 /</span> <b>变更 multi-provider</b></span><span class="chip warn">待确认</span><span class="chip info">4-dev</span></div>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">工作项看板</span></div>
 <div class="detail-body">
-<dl class="kv"><dt>Change ID / 标题</dt><dd class="mono">multi-provider · 多 LLM Provider 接入</dd><dt>当前阶段</dt><dd><span class="chip info">4-dev</span> · 下一站 <span class="mono">5-test</span></dd><dt>任务进度</dt><dd class="mono">6/9（in_progress 3）</dd><dt>风险</dt><dd><span class="chip warn">待确认</span>：Provider 凭据是否落 MySQL（裁定⑦）</dd><dt>需人裁定</dt><dd>2 项 · 均已挂审批中心</dd><dt>更新时间</dt><dd class="mono">4 天前 · Agent · dev-main</dd></dl>
+<dl class="kv"><dt>Change ID / 标题</dt><dd class="mono">multi-provider · 多运行时接入（外部 CLI 框架 · dsh/codex/claude…）</dd><dt>当前阶段</dt><dd><span class="chip info">4-dev</span> · 下一站 <span class="mono">5-test</span></dd><dt>任务进度</dt><dd class="mono">6/9（in_progress 3）</dd><dt>风险</dt><dd><span class="chip warn">待确认</span>：凭据留运行时机器平台不接收；平台侧 PAT/MCP 令牌是否落 MySQL（裁定⑦）</dd><dt>需人裁定</dt><dd>2 项 · 均已挂审批中心</dd><dt>更新时间</dt><dd class="mono">4 天前 · Agent · dev-main</dd></dl>
 <h4 class="blk">待确认清单</h4>
 <table class="tbl compact"><thead><tr><th>#</th><th>问题</th><th>影响</th><th>操作</th></tr></thead><tbody>
 <tr><td class="mono">Q1</td><td>API Key 存储档位：MySQL 权威 / 本地加密文件</td><td><span class="chip bad">涉裁定⑦</span></td><td><span class="btn link" data-toast="已选 MySQL 档并回执审批中心（演示）">裁定</span></td></tr>
 <tr><td class="mono">Q2</td><td>缺价模型的 Cost 计算口径</td><td><span class="chip warn">§6.0 ③ 要求显式告警</span></td><td><span class="btn link" data-toast="已按「显式告警 + 不计费」落票（演示）">裁定</span></td></tr>
-<tr><td class="mono">Q3</td><td>Provider 健康端点探测复用探针限流</td><td><span class="chip">进程内限流</span></td><td><span class="btn link" data-toast="已并入 T09（演示）">并入任务</span></td></tr>
-<tr><td class="mono">Q4</td><td>Base URL 变更是否需旋转会话</td><td><span class="chip info">不涉身份</span></td><td><span class="btn link" data-toast="已记为无需（演示）">关闭</span></td></tr>
+<tr><td class="mono">Q3</td><td>daemon 心跳与探活复用探针限流</td><td><span class="chip">进程内限流</span></td><td><span class="btn link" data-toast="已并入 T09（演示）">并入任务</span></td></tr>
+<tr><td class="mono">Q4</td><td>换运行时是否需作废会话续跑</td><td><span class="chip info">不涉身份</span></td><td><span class="btn link" data-toast="已记为无需（演示）">关闭</span></td></tr>
 <tr><td class="mono">Q5</td><td>旧 <span class="mono">openai</span> 配置兼容窗口</td><td><span class="chip">迁移期 2 版</span></td><td><span class="btn link" data-toast="迁移窗口已定（演示）">关闭</span></td></tr>
 </tbody></table>
 <h4 class="blk">任务波次</h4>
 <div class="timeline">
   <div class="tl-item"><b>T01–T06</b> · <span class="chip ok">done 6</span></div>
-  <div class="tl-item"><b>T07</b> · in_progress · Provider 注册表</div>
+  <div class="tl-item"><b>T07</b> · in_progress · 运行时注册表（机器 × CLI × 协议族 · 见运行时发现）</div>
   <div class="tl-item"><b>T08</b> · in_progress · 路由回退</div>
   <div class="tl-item fail"><b>T09</b> · blocked · 等 Q1 裁定</div>
   <div class="tl-item"><b>T10 · T11</b> · pending · 前端选择器 / 指标列</div>

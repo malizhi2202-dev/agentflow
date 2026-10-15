@@ -2,23 +2,86 @@
 <title>MCP fetch 详情 · 工具库 | AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
-.kbd{font-size:11px}</style></head><body>
+.kbd{font-size:11px}
+/* 表单风格（与 tools__new.html ③ MCP 注册表单同源） */
+.fld{margin-bottom:var(--s3)}
+.fld label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.fld label b{color:var(--text)}
+.need{color:var(--red)}
+.fld input,.fld select,.fld textarea{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:7px 9px;font:12.5px var(--font);width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:1px solid var(--blue);border-color:var(--blue)}
+.fld [disabled],.fld [readonly]{opacity:.55}
+.fld .hint{font-size:11px;color:var(--text-muted);margin-top:3px}
+.fld textarea{min-height:74px;resize:vertical;font-family:var(--font-mono);font-size:11.5px}
+.fld input.mono,.fld textarea.mono{font-family:var(--font-mono);font-size:11.5px}
+.kvrow{display:grid;grid-template-columns:1fr 1.5fr auto;gap:var(--s2);align-items:center;margin-bottom:var(--s2)}
+.kvrow input{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:6px 8px;font:11.5px var(--font-mono);width:100%}
+.tri{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tri input[type=radio]{position:absolute;width:0;height:0;opacity:0;margin:0;padding:0;border:0}
+.tri label{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg-main);padding:4px 10px;font-size:12px;color:var(--text-secondary);cursor:pointer;margin-bottom:0}
+.tri label:hover{border-color:var(--blue-border);color:var(--text)}
+.tri input[type=radio]:checked+label{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue);font-weight:600}
+.tri input[type=radio]:focus-visible+label{outline:2px solid var(--blue);outline-offset:2px}
+.savebar{position:sticky;bottom:0;z-index:45;display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap;padding:10px 14px;margin:var(--s4) 0 var(--s2);background:var(--bg-card);border:1px solid var(--border-strong);border-top:2px solid var(--blue);border-radius:var(--r-md);box-shadow:0 -8px 22px rgba(0,0,0,.4)}
+.lockline{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text-muted)}
+</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
-<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
-<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>MCP 服务</b> · <span class="mono">fetch</span></span><span class="chip warn">MCP</span><span class="chip bad">连接失败</span><span class="chip mono">2 工具</span></div>
+<div class="relbar" style="position:static"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="tools__new.html">注册工具（③ MCP 表单）</span><span class="pill" data-goto="tools__mcp-filesystem.html">已连接样本 filesystem</span><span class="pill" data-goto="canvas.html">编排画布</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="detail-top"><span class="pill" data-back="tools.html" data-click>← 返回 工具库</span><span class="crumb"><b>MCP 服务</b> · <span class="mono">fetch</span></span><span class="chip warn">MCP</span><span class="chip bad">连接失败</span><span class="chip mono">2 工具</span><button class="btn sm primary" data-click data-toast="已进入编辑模式 · 字段与注册表单同源（演示）">✎ 编辑</button></div>
 <div class="detail-body">
-<p class="proto-note"><span class="chip warn">演示数据</span>连接失败态的 MCP 服务：拒因原样呈现（含退避与复探节奏）、缓存 schema 仍可读、恢复动作成组给出。</p>
+<p class="proto-note"><span class="chip warn">演示数据</span>连接失败态的 MCP 服务：拒因原样呈现（含退避与复探节奏）、缓存 schema 仍可读、恢复动作成组给出——<b>失败态不禁编辑</b>：上方配置区与注册 ③ MCP 表单同源可改（端点迁移正是本页最常见的改因）。</p>
 
-<div class="callout bad"><p class="tiny" style="margin:0"><b>不隐藏、不删除：</b>连接失败时卡片保持可见并标注「连接失败」+「重试连接」——避免用户误以为工具不存在。</p></div>
+<div class="callout bad"><p class="tiny" style="margin:0"><b>不隐藏、不删除：</b>连接失败时卡片保持可见并标注「连接失败」+「重试连接」——避免用户误以为工具不存在。<b>失败态同样可编辑配置</b>，改端点不必删了重建。</p></div>
+<p class="lockline" style="margin:0 0 var(--s3)">无 <span class="mono">tool:edit</span> 权限者此区为 <span class="chip">🔒 Lock read-only</span> <span class="dim">—— 就地只读、保留滚动位置与筛选，不改 URL、不跳走（§6.0 ①）。</span></p>
 
-<h4 class="blk">基础信息</h4>
-<dl class="kv"><dt>端点</dt><dd class="mono">https://mcp.internal/fetch/sse（SSE 传输）</dd>
-<dt>最后成功</dt><dd class="mono">09-20 17:12 · tools/list 2 tools</dd>
-<dt>当前错误</dt><dd class="mono" style="color:var(--red)">握手超时（10s）· 连续 4 次失败 · 退避 8s</dd>
-<dt>暴露工具</dt><dd class="mono">2 个（fetch / extract）· schema 缓存可读</dd>
-<dt>受影响引用</dt><dd class="mono">前端 Agent（联网取规范）· 2 个工作流草稿</dd>
-<dt>凭据</dt><dd class="mono">Bearer ****（AES-GCM 密文 · 界面无明文）</dd>
-<dt>自动恢复</dt><dd>每 30s 复探 · 成功即回到「已连接」并写连接日志</dd></dl>
+<h4 class="blk">配置（与注册表单同源）<span class="chip warn">MCP</span><span class="chip info">字段与 tools__new.html ③ 一一对应</span></h4>
+<div class="panel">
+  <div class="grid g2">
+    <div class="fld"><label><b>名称</b> <span class="need">*</span> <span class="dim">· 注册时同源字段</span></label><input class="mono" value="fetch"><p class="hint">库内唯一标识；本样本为「连接失败态」的 MCP 服务。</p></div>
+    <div class="fld"><label><b>描述</b> <span class="dim">· 注册时同源字段</span></label><input value="HTTP 抓取与正文提取（远端 MCP 服务）"><p class="hint">仅列表与详情展示，不进运行时。</p></div>
+    <div class="fld"><label><b>类型</b> <span class="dim">· 注册时同源字段</span></label><input value="MCP · 外部服务（tools/list 运行时发现）" readonly><p class="hint">类型<b>创建后不可改</b>：MCP 工具条目不渲染成 Skill（纵向层红线）。</p></div>
+    <div class="fld"><label><b>transport</b> <span class="need">*</span> <span class="dim">· 注册时同源字段</span></label>
+      <div class="tri"><input type="radio" name="tp" id="tp-stdio"><label for="tp-stdio">STDIO</label><input type="radio" name="tp" id="tp-http" checked><label for="tp-http">Streamable HTTP</label></div>
+      <p class="hint">二选一：当前 = <span class="mono">Streamable HTTP</span>（URL + headers + 密钥必填）· 选 STDIO 则命令 / 参数 / env 必填。旧登记口径「SSE」已并入本项，端点路径仍带 <span class="mono">/sse</span> 不影响。</p></div>
+    <div class="fld"><label><b>URL（端点）</b> <span class="need">*</span> <span class="dim">· 注册时同源字段</span></label><input class="mono" value="https://mcp.internal/fetch/sse"><p class="hint" style="color:var(--red)">当前该端点解析失败（旧地址已下线 · 见连接日志 14:30:20）——<b>改这里即可</b>，保存后自动重试一轮。</p></div>
+    <div class="fld"><label><b>命令（command）</b> <span class="dim">· 注册时同源字段</span></label><input class="mono" placeholder="未启用 · 切到 STDIO 后填 npx / mcp-server-fetch" disabled><p class="hint">当前 transport = Streamable HTTP，本字段不适用（置灰保值）。</p></div>
+    <div class="fld"><label><b>参数（args · exec 数组）</b> <span class="dim">· 注册时同源字段</span></label><input class="mono" placeholder="未启用 · STDIO 族才填，如 [&quot;-y&quot;,&quot;@modelcontextprotocol/server-fetch&quot;]" disabled><p class="hint">STDIO 族必填；按 exec 数组原样存储、<b>不经 shell 解析</b>（免注入）。已连接样本见 <span class="mono" data-goto="tools__mcp-filesystem.html" data-click>filesystem</span>。</p></div>
+    <div class="fld"><label><b>超时（秒）</b> <span class="dim">· 注册时同源字段</span></label><input class="mono" value="10"><p class="hint">握手 + 单次 <span class="mono">tools/call</span> 共用；当前 4 次失败全部为该值超时（见连接日志）。</p></div>
+  </div>
+
+  <p class="tiny muted" style="margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">Headers（键值 · Streamable HTTP） <span class="dim">· 注册时同源字段</span></p>
+  <div class="kvrow"><input class="mono" value="Authorization"><input class="mono" value="Bearer ***" readonly><span style="display:flex;gap:6px"><span class="btn sm" data-click data-toast="解锁需二次确认 · tool:edit 入审计 · 60s 后回掩码（演示）">👁 解锁</span><span class="btn sm" data-click data-toast="已移除 header Authorization · 保存后计数 2 → 1（演示）">删除</span></span></div>
+  <div class="kvrow"><input class="mono" value="X-Tenant"><input class="mono" value="demo"><span style="display:flex;gap:6px"><span class="btn sm" data-click data-toast="已移除 header X-Tenant（演示）">删除</span></span></div>
+  <p class="hint" style="margin:6px 0 0"><span class="btn link" data-click data-toast="已添加一行 header（演示）">+ 添加 header</span> · 头里带 token 时按<b>敏感值</b>处理：存储加密、界面 <span class="mono">***</span>、日志脱敏。</p>
+
+  <p class="tiny muted" style="margin:14px 0 4px;text-transform:uppercase;letter-spacing:.05em">环境变量（键值 · STDIO 注入子进程） <span class="dim">· 注册时同源字段</span></p>
+  <div class="kvrow"><input class="mono" value="HTTP_PROXY" placeholder="键"><input class="mono" value="***" readonly><span style="display:flex;gap:6px"><span class="btn sm" data-click data-toast="解锁需二次确认 · env:read 入审计 · 60s 后回掩码（演示）">👁 解锁</span><span class="btn sm" data-click data-toast="已删除该环境变量（演示）">删除</span></span></div>
+  <p class="hint" style="margin:6px 0 0"><span class="btn link" data-click data-toast="已添加一行环境变量（演示 · 值按敏感值处理）">+ 添加变量</span> · 本服务 transport 为 HTTP，env 仍随配置保留（切回 STDIO 立即可用）；敏感值一律 <span class="mono">***</span> + 👁 解锁。</p>
+
+  <p class="tiny muted" style="margin:14px 0 4px;text-transform:uppercase;letter-spacing:.05em">密钥（Secret 引用） <span class="dim">· 注册时同源字段</span></p>
+  <dl class="kv" style="margin:0"><dt>引用表达式</dt><dd class="mono">${secret:MCP_FETCH_TOKEN} → *** <span class="dim">AES-GCM 加密存储 · 界面无明文 · 运行时注入不落明文</span></dd></dl>
+
+  <p style="margin:14px 0 0"><button class="btn sm" data-toast="已拉取 tools/list · 失败：握手超时 10s（结果写连接日志 · 演示）">⟳ 拉取 tools/list</button> <span class="tiny dim">拉取结果进下方<b>工具清单 · 参数 schema</b>区；本页当前显示的是<b>最后一次成功的缓存</b>，失败只写日志、不清缓存。</span></p>
+</div>
+
+<div class="savebar">
+  <span class="chip ok">自动保存 · 已存 14:30:02</span>
+  <span class="tiny dim">三态：<span class="chip">保存中</span> → <span class="chip ok">已存</span> / <span class="chip bad">失败（字段旁页内显错，不落库）</span></span>
+  <span style="flex:1"></span>
+  <button class="btn sm primary" data-toast="配置已更新 · 引用它的工作流下轮生效（演示）">保存全部</button>
+  <button class="btn sm" data-toast="已放弃未保存改动 · 回到上一次已存配置（演示）">放弃</button>
+</div>
+
+
+<h4 class="blk">工具清单 · 参数 schema（缓存 · 2 工具）<span class="chip info">由上方「⟳ 拉取 tools/list」写入</span></h4>
+<table class="tbl compact"><thead><tr><th>工具 / 参数</th><th>类型</th><th>必填</th><th>可用性</th></tr></thead><tbody>
+<tr><td class="mono">fetch.url</td><td class="mono">string</td><td><span class="chip bad">是</span></td><td><span class="chip bad">不可调用</span></td></tr>
+<tr><td class="mono">fetch.max_bytes</td><td class="mono">int</td><td><span class="chip">否</span></td><td class="tiny">默认 1,048,576</td></tr>
+<tr><td class="mono">fetch.timeout_s</td><td class="mono">int</td><td><span class="chip">否</span></td><td class="tiny">默认 10</td></tr>
+<tr><td class="mono">extract.format</td><td class="mono">enum</td><td><span class="chip">否</span></td><td class="tiny">text / markdown</td></tr>
+<tr><td class="mono">extract.selector</td><td class="mono">string</td><td><span class="chip">否</span></td><td class="tiny">CSS 选择器</td></tr>
+</tbody></table>
+<p class="tiny dim">本表按<b>参数</b>展开；<b>逐工具启停</b>（注册 ③ 表单「发现的工具 · 勾选启用」的同一份数据）：<span class="mono">fetch</span> <span class="chip ok" data-click data-toast="已禁用工具 fetch · 恢复启用前需先重试连接成功（演示）">✓ 启用</span> · <span class="mono">extract</span> <span class="chip ok" data-click data-toast="已禁用工具 extract（演示）">✓ 启用</span>。连接失败不改这两个勾选、也不清这份缓存。</p>
 
 <h4 class="blk">连接日志（失败收敛）</h4>
 <div class="timeline">
@@ -28,25 +91,48 @@
 <div class="tl-item fail"><b>14:30:20</b> · 端点变更后端点解析失败（旧地址已下线）</div>
 <div class="tl-item"><b>09-20 17:12</b> · 最后一次成功 · tools/list 返回 fetch / extract</div>
 </div>
+<p class="tiny dim">⟳ 拉取 <span class="mono">tools/list</span> 的<b>连接事件</b>（含失败）写在本区，<b>拉取结果</b>进下方「参数 schema（缓存）」区——失败不清缓存，只追加日志。</p>
 
-<h4 class="blk">参数 schema（缓存 · 2 工具）</h4>
-<table class="tbl compact"><thead><tr><th>工具 / 参数</th><th>类型</th><th>必填</th><th>可用性</th></tr></thead><tbody>
-<tr><td class="mono">fetch.url</td><td class="mono">string</td><td><span class="chip bad">是</span></td><td><span class="chip bad">不可调用</span></td></tr>
-<tr><td class="mono">fetch.max_bytes</td><td class="mono">int</td><td><span class="chip">否</span></td><td class="tiny">默认 1,048,576</td></tr>
-<tr><td class="mono">fetch.timeout_s</td><td class="mono">int</td><td><span class="chip">否</span></td><td class="tiny">默认 10</td></tr>
-<tr><td class="mono">extract.format</td><td class="mono">enum</td><td><span class="chip">否</span></td><td class="tiny">text / markdown</td></tr>
-<tr><td class="mono">extract.selector</td><td class="mono">string</td><td><span class="chip">否</span></td><td class="tiny">CSS 选择器</td></tr>
+<h4 class="blk">启用历史</h4>
+<div class="timeline">
+<div class="tl-item"><b>09-20 17:12</b> · <b>恢复启用</b> · admin 王工 · 原因：端点已回填，先启用观察复探结果</div>
+<div class="tl-item fail"><b>09-20 09:40</b> · <b>禁用</b> · admin 李工 · 原因：连续超时打空，暂停外呼 · 审计 <span class="mono">tool:disable</span></div>
+<div class="tl-item"><b>09-14 11:20</b> · 注册进工具库（注册 ③ MCP 表单）· transport=Streamable HTTP · tools/list 发现 2 个 · 默认全启用 · admin 王工</div>
+</div>
+
+<h4 class="blk">基础信息 <span class="chip">只读速记 · 编辑去上方配置区（同源）</span></h4>
+<dl class="kv"><dt>端点</dt><dd class="mono">https://mcp.internal/fetch/sse · transport = Streamable HTTP（端点路径仍带 /sse，旧称 SSE）</dd>
+<dt>最后成功</dt><dd class="mono">09-20 17:12 · tools/list 2 tools</dd>
+<dt>当前错误</dt><dd class="mono" style="color:var(--red)">握手超时（10s）· 连续 4 次失败 · 退避 8s</dd>
+<dt>暴露工具</dt><dd class="mono">2 个（fetch / extract）· schema 缓存可读</dd>
+<dt>受影响引用</dt><dd class="mono">前端 Agent（联网取规范）· 2 个工作流草稿（明细见下方「被引用的工作流 / 编排」）</dd>
+<dt>凭据</dt><dd class="mono">Bearer ****（AES-GCM 密文 · 界面无明文）</dd>
+<dt>配置最后修改</dt><dd class="mono">09-20 16:58 · admin 王工（端点迁移，改 URL 后未复探成功）</dd>
+<dt>自动恢复</dt><dd>每 30s 复探 · 成功即回到「已连接」并写连接日志</dd></dl>
+
+<h4 class="blk">被引用的工作流 / 编排（引用未断 · 失败不级联）</h4>
+<table class="tbl compact"><thead><tr><th>引用方</th><th>类型 / 编号</th><th>状态</th><th>改端点或禁用后影响</th></tr></thead><tbody>
+<tr><td class="mono">数据同步对账</td><td>工作流 · <span class="mono">sync-reconcile v1</span>（草稿）</td><td><span class="chip warn">未 apply</span></td><td class="tiny">草稿内引用已标「待处理」· 不影响线上</td></tr>
+<tr><td class="mono">数据同步 Agent</td><td>Agent · 绑定 <span class="mono">fetch</span></td><td><span class="chip warn">unstable</span></td><td class="tiny">调用即失败 · 失败已在告警面板可见</td></tr>
+<tr><td class="mono">前端 Agent · 联网取规范</td><td>编排节点（草稿）</td><td><span class="chip warn">未 apply</span></td><td class="tiny">改配置下轮生效 · 禁用才在执行期失败</td></tr>
 </tbody></table>
+<p class="tiny dim">与 <span class="mono">tools.html</span> 卡片「零引用」同口径：<b>卡片只计已发布引用</b>，本页三处均为草稿 / 未 apply（或已发布但仅绑定关系），故列表显示零引用、详情仍如实列出——不隐藏、不造新数据。「照抄已连接服务的配置」动作见下方操作区。</p>
 
-<h4 class="blk">操作</h4>
-<p><button class="btn sm primary" data-toast="重试连接中 · 结果将写入连接日志（演示）">重试连接</button> <button class="btn sm" data-goto="tools__mcp-filesystem.html">照抄已连接服务的配置</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-unlink">断开连接</button></p>
-<p class="tiny dim">「照抄已连接服务的配置」跳 <span class="mono">filesystem</span> 详情页对照 transport / endpoint / 凭据三字段，逐项手工回填（MCP 配置不做跨服务批量复制，避免脏端点）。</p>
-
+<h4 class="blk">配置与操作 <span class="chip bad">破坏性 · 二次确认 · 必填原因</span></h4>
+<p class="tiny dim">配置字段全部在页内「配置（与注册表单同源）」区编辑；本区只给恢复动作与断链动作。</p>
+<p><button class="btn sm primary" data-toast="重试连接中 · 结果将写入连接日志（演示）">重试连接</button> <button class="btn sm" data-goto="tools__mcp-filesystem.html">照抄已连接服务的配置</button> <button class="btn sm" data-toast="已进入编辑模式 · 字段与注册表单同源（演示）">✎ 编辑配置</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-unlink">断开连接</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-disable">禁用</button> <button class="btn sm" disabled title="草稿中仍有 3 处引用 · 先处置引用才可卸载（断链不可逆）">卸载</button></p>
+<p class="tiny dim">「照抄已连接服务的配置」跳 <span class="mono">filesystem</span> 详情页对照 transport / endpoint / 凭据三字段，逐项手工回填（MCP 配置不做跨服务批量复制，避免脏端点）。<b>被引用 &gt; 0 → 「卸载」置灰</b>（本服务有 3 处草稿 / 绑定引用），禁用与断开仍可逆、不隐藏卡片。</p>
 <div class="modal" id="md-unlink"><div style="padding:var(--s4)"><b>断开 MCP 服务「fetch」连接？</b>
 <p class="small dim" style="margin:8px 0">当前已是「连接失败」态：断开 = 停止自动复探并转为「未连接」，已缓存的工具 schema 保留可查，引用它的 Agent 下次执行直接报错。必填原因。</p>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [端点迁移中，先断开避免 30s 复探持续打空 ]</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开 · 停止复探 · 状态转「未连接」· 审计 mcp:unlink（演示）" data-close>确认断开</button></div></div></div>
+
+<div class="modal" id="md-disable"><div style="padding:var(--s4)"><b>禁用 MCP 服务「fetch」？</b>
+<p class="small dim" style="margin:8px 0">禁用<b>全局生效</b>且<b>可逆</b>：卡片保持可见（不隐藏），三处引用（数据同步对账草稿 · 数据同步 Agent · 前端 Agent 草稿节点）在<b>下次执行时</b>才失败。与「断开」的差别：禁用不再复探、也不受复探成功影响。<b>必填原因</b>入审计。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [上游服务下线迁移，先停用避免复探打空 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已禁用 · 卡片仍可见 · 审计 tool:disable（演示）" data-close>确认禁用</button></div></div></div>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：← 返回 工具库 · 重试连接→toast（结果写日志）· 照抄配置→filesystem 详情页 · 断开连接→二次确认（本页自带 modal 副本）　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px"><b>可点区演示：</b>头部「✎ 编辑」→ toast（进入编辑模式 · 字段与注册同源）· 配置区逐字段可编辑（名称 / 描述 / 类型只读 / transport 单选 / URL / 命令+参数置灰 / 超时 / headers KV 含 👁 / 环境变量 KV / 密钥引用）+「⟳ 拉取 tools/list」→ toast（失败写日志、结果进 schema）· 底部 sticky 保存条（自动保存三态 + 保存全部 + 放弃）· 重试连接→toast · 照抄配置→filesystem 详情页 · 禁用 · 断开连接→二次确认（本页自带 modal 副本 · 必填原因）·「卸载」有引用时置灰（title 注记）　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:0 18px 14px"><b>同源约定：</b>本页配置区字段与 <span class="mono">tools__new.html</span>「③ MCP 表单」逐项对应——注册即生成详情页，之后所有字段只在详情页编辑（同一份配置，两种入口）；无权限者整区为 <span class="chip">🔒 Lock read-only</span>。</p>
 </body></html>

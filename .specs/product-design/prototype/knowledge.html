@@ -2,9 +2,25 @@
 <title>知识库 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
-.kbd{font-size:11px}</style></head><body>
+.kbd{font-size:11px}
+/* 两层结构（公共知识 / 知识空间）分区标题与工具条 */
+.sec-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:var(--s5) 0 var(--s2);font-size:14px;font-weight:700;color:var(--text)}
+.sec-h:first-of-type{margin-top:0}
+.sec-h .n{font-family:var(--font-mono);color:var(--blue);font-size:12px}
+.sec-h .desc{font-size:11.5px;font-weight:400;color:var(--text-muted)}
+tr[id],div[id]{scroll-margin-top:46px}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:8px 10px;margin-bottom:var(--s3)}
+.toolbar input,.toolbar select{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:5px 8px;font:12px var(--font)}
+.toolbar input{min-width:210px}
+.toolbar .lb{font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.tag{cursor:pointer}
+.tag.on{border-color:var(--blue-border);color:var(--blue);background:var(--blue-bg)}
+.lay{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg-main);padding:5px 9px}
+.lay b{color:var(--text);font-family:var(--font-mono)}
+.dimrow td{opacity:.6}
+.readonly-ops{color:var(--text-muted)}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="projects.html">项目</span><span class="pill" data-goto="projects__agentflow.html">agentflow 项目详情</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="agent-detail.html">Agent</span></div>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/knowledge</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -16,6 +32,7 @@
           <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
           <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
           <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
           <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
           <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
           <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
@@ -27,48 +44,157 @@
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">知识库 <span class="dim">· 审查 Agent · 标准</span></span><span class="right"><span class="chip mono">9 源 · 7 本地 / 2 远端</span><span class="chip ok">7 已索引</span><button class="btn sm primary">+ 添加源 ▾ 本地上传｜远端知识源</button></span></div>
+          <div class="app-top"><span class="crumb">知识库 <span class="dim">· 公共知识 + 知识空间（与项目 1:1）</span></span><span class="right"><span class="chip mono">公共 4 · 全局只读</span><span class="chip info mono">空间 6 · 与项目 1:1</span><span class="chip mono">外部源 2 · 1 冻结</span><button class="btn sm" data-click data-toast="已按当前身份聚合：4 篇公共知识 + 6 个可见空间（5 个可自动总结 · 1 个暂停冻结）（演示）">我的知识 ▾</button><button class="btn sm primary" data-click data-toast="✗ 知识空间与项目 1:1，随项目自动创建——不单独建空间：先到「项目 · 新建项目」勾选资源与成员（演示）">+ 新建空间</button><button class="btn sm primary" data-click data-toast="+ 添加源：本地上传 → 落到「当前空间」（需空间成员）；远端知识源 → 先授权再接索引，之后按需「关联到空间」转只读快照（演示）">+ 添加源 ▾ 本地上传｜远端知识源</button></span></div>
           <div class="app-body">
-            <div class="panel" style="border-style:dashed;text-align:center;padding:var(--s6);margin-bottom:var(--s4)">
-              <p class="small" style="margin:0 0 4px;color:var(--text)"><b>拖拽文件到此处上传</b></p>
-              <p class="tiny dim" style="margin:0">支持 .docx .js .json .md .pdf .py .txt · 单文件 ≤ 10MB</p>
-            </div>
-            <table class="tbl compact">
-              <thead><tr><th>源名称</th><th>来源类型</th><th>大小</th><th>状态</th><th>Chunks</th><th>标签</th><th>上传时间</th><th>操作</th></tr></thead>
+
+            <h4 class="sec-h" id="matrix"><span class="n">§0</span> 权限矩阵 <span class="desc">—— 谁能读、谁能写，一眼定死；越权与不存在同码</span></h4>
+            <table class="tbl compact" style="margin:0 0 var(--s2)">
+              <thead><tr><th>层</th><th>全体用户 / 全体 Agent</th><th>空间成员（用户 · Agent）</th><th>平台管理员</th><th>写入路径</th></tr></thead>
               <tbody>
-                <tr><td class="mono">Confluence · 架构决策记录</td><td><span class="chip">远端源 · Confluence</span></td><td class="dim">—</td><td><span class="chip ok">已连接 · 30min 自动同步</span></td><td class="mono">214</td><td><span class="pill">ADR</span></td><td class="mono">09-06 10:12 同步</td><td><span class="btn link" data-toast="✓ 连接测试通过 · Confluence 可达 · 214 页 · 42ms">测试连接</span><span class="btn link" data-toast="立即同步已排队（演示）">立即同步</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink">断开</span></td></tr>
-                <tr><td class="mono">Notion · 产品需求库</td><td><span class="chip">远端源 · Notion</span></td><td class="dim">—</td><td><span class="chip bad">令牌过期 · 索引冻结</span></td><td class="mono">58 <span class="dim">(旧)</span></td><td><span class="pill">需求</span></td><td class="mono">09-01 08:40 最后成功</td><td><span class="btn link" style="color:var(--red)" data-toast="✗ 连接测试失败 · 401 Unauthorized（令牌过期）——索引保持冻结">测试连接</span><span class="btn link" data-click data-goto="knowledge__notion-source.html">更新凭据</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink">断开</span></td></tr>
-                <tr><td class="mono">test_knowledge.txt</td><td><span class="chip">本地文件</span></td><td class="mono">222 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">测试</span></td><td class="mono">07-06 14:02</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
-                <tr><td class="mono">架构说明.md</td><td><span class="chip">本地文件</span></td><td class="mono">168 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">设计</span></td><td class="mono">07-06 13:48</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
-                <tr><td class="mono">规范.pdf</td><td><span class="chip">本地文件</span></td><td class="mono">2.4 MB</td><td><span class="chip ok">已索引</span></td><td class="mono">100</td><td><span class="pill">规范</span> <span class="pill">必读</span></td><td class="mono">07-06 11:20</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
-                <tr><td class="mono">api-schema.json</td><td><span class="chip">本地文件</span></td><td class="mono">84 KB</td><td><span class="chip ok">已索引</span></td><td class="mono">37</td><td><span class="pill">接口</span></td><td class="mono">07-05 17:33</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
-                <tr><td class="mono">db-schema.sql</td><td><span class="chip">本地文件</span></td><td class="mono">31 KB</td><td><span class="chip bad">处理失败</span></td><td class="dim">—</td><td><span class="pill">数据库</span></td><td class="mono">07-05 17:30</td><td><span class="btn link">重试</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
-                <tr><td class="mono">onboarding.md</td><td><span class="chip">本地文件</span></td><td class="mono">6.1 KB</td><td><span class="chip ok">已索引</span></td><td class="mono">9</td><td><span class="pill">入门</span></td><td class="mono">07-04 09:12</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
-                <tr><td class="mono">passwd.txt</td><td><span class="chip">本地文件</span></td><td class="mono">102 B</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td class="dim">—</td><td class="mono">07-04 09:10</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b>公共知识</b> <span class="chip">全局可用 · 只读</span></td><td><span class="dot-yes">✓ 可读</span>（检索默认命中）</td><td><span class="dot-yes">✓ 可读</span> <span class="dot-no">✗ 不可写</span></td><td><span class="dot-yes">✓ 维护（写）</span></td><td class="tiny">仅由 <b>L3 晋升评审</b> 与管理员录入产生；任何项目/Agent 不能直接写</td></tr>
+                <tr><td><b>知识空间</b> <span class="chip info">与项目 1:1</span></td><td><span class="dot-no">✗ 非成员不可见</span>（列表隐藏 · 越权统一 <span class="mono">404</span>）</td><td><span class="dot-yes">✓ 读</span> <span class="dot-yes">✓ 写</span> <span class="tiny dim">（项目自身亦可读写）</span></td><td><span class="dot-yes">✓ 读</span>（审计可见，写入需先入空间）</td><td class="tiny">成员手工编辑 + 项目自身读写 + <b>L0→L3 总结写入</b>（自动产摘要进本空间）</td></tr>
+                <tr><td><b>跨空间引用</b> <span class="chip">关联知识库</span></td><td class="dot-no">✗</td><td><span class="dot-yes">✓ 只读引用</span></td><td><span class="dot-yes">✓ 只读引用</span></td><td class="tiny"><b>不可写</b>：被关联空间持只读快照，源空间更新走增量同步</td></tr>
+                <tr><td><b>外部源</b> <span class="chip">Confluence / Notion / GitHub…</span></td><td class="dot-no">✗</td><td><span class="dot-yes">✓ 关联进空间后只读</span></td><td><span class="dot-yes">✓ 授权与凭据维护</span></td><td class="tiny">写回由源自身系统负责；平台侧只同步索引（冻结源不再增量）</td></tr>
               </tbody>
             </table>
-            <div class="grid g2" style="align-items:start">
-              <div class="callout bad" style="margin:0">
-                <p><b>错误态：</b>上传 <span class="mono">.exe</span> / <span class="mono">.sh</span> / 无后缀文件 → 400「不支持的文件类型: .exe」；上传 11MB 文件 → 400「文件过大: 11534336 bytes，最大允许 10485760 bytes (10MB)」。</p>
+            <div class="callout warn" style="margin:0 0 var(--s4)"><p class="tiny" style="margin:0"><b>两条判定句：</b>① <b>空间与项目一一对应</b>——建项目即建空间，删项目即解除登记（内容留快照），不存在「一个项目多空间」或共享写空间。② <b>越权与「资源不存在」统一返回 <span class="mono">404</span></b>（CLAUDE.md 约定）：非成员既看不到行、也无法用状态码探测空间是否存在。</p></div>
+
+            <div class="toolbar">
+              <span class="lb">搜索</span><input placeholder="全文 / 语义检索：如「身份认证 fail-open」"><span class="btn sm" data-click data-toast="检索范围 = 公共知识 + 我可写的 6 个空间 + 已关联只读源 · 命中 14 条（演示）">检索</span>
+              <span class="lb" style="margin-left:var(--s3)">标签</span><span class="pill tag on" data-click data-toast="标签筛选：全部（演示）">全部</span><span class="pill tag" data-click data-toast="标签筛选：规范 · 公共 2 / 空间 5（演示）">规范</span><span class="pill tag" data-click data-toast="标签筛选：接口 · 公共 1 / 空间 3（演示）">接口</span><span class="pill tag" data-click data-toast="标签筛选：安全 · 公共 1 / 空间 2（演示）">安全</span><span class="pill tag" data-click data-toast="标签筛选：ADR · 外部源 Confluence 214 chunks（演示）">ADR</span><span class="pill tag" data-click data-toast="标签筛选：需求 · 外部源 Notion（冻结 · 58 旧 chunks）（演示）">需求</span>
+              <span class="lb" style="margin-left:var(--s3)">挂载 Agent</span><select><option selected>全部（含个人 Agent）</option><option>审查 Agent · 标准</option><option>汇总 Agent</option><option>李工的个人 Agent</option><option>王工的个人 Agent</option><option disabled>未挂载任何知识层 → 无检索结果</option></select>
+              <span class="lb" style="margin-left:var(--s3)">范围</span><span class="pill tag on" data-click data-toast="范围 = 公共 + 空间 + 外部源（演示）">公共</span><span class="pill tag on" data-click data-toast="范围 = 我的空间（可写）（演示）">空间</span><span class="pill tag on" data-click data-toast="范围 = 已关联外部源（只读快照）（演示）">外部源</span>
+            </div>
+            <p class="tiny dim" style="margin:0 0 var(--s3)">标签 / 搜索 / 挂载 Agent 三个筛选<b>跨两层生效</b>；但<b>写操作只在空间层出现</b>——公共知识行只有「查看 · 关联到空间」。</p>
+
+            <h4 class="sec-h" id="public"><span class="n">§1</span> 公共知识 <span class="chip">全局可用 · 只读</span><span class="desc">所有项目与所有 Agent 可读 · 平台管理员维护 · 分类：公司规范 / API 契约 / 安全基线 / 入职引导</span></h4>
+            <table class="tbl compact">
+              <thead><tr><th>分类</th><th>文档</th><th>版本</th><th>状态</th><th>Chunks</th><th>标签</th><th>维护者</th><th>挂载 Agent（检索范围）</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td><span class="chip">公司规范</span></td><td class="mono">规范.pdf</td><td class="mono">v3</td><td><span class="chip ok">已索引</span></td><td class="mono">100</td><td><span class="pill">规范</span> <span class="pill">必读</span></td><td class="mono tiny">平台管理员 · admin（李工）</td><td class="tiny">全体 Agent（默认）· 5 个项目空间已关联</td><td class="readonly-ops"><span class="btn link" data-click data-drawer="dr-pub">查看</span><span class="btn link" data-click data-pop="pp-link">关联到空间</span></td></tr>
+                <tr><td><span class="chip">API 契约</span></td><td class="mono">api-schema.json</td><td class="mono">v2.4</td><td><span class="chip ok">已索引</span></td><td class="mono">37</td><td><span class="pill">接口</span></td><td class="mono tiny">平台管理员 · admin（李工）</td><td class="tiny">审查 Agent · 标准 / 前端 Agent / 汇总 Agent</td><td class="readonly-ops"><span class="btn link" data-click data-drawer="dr-pub">查看</span><span class="btn link" data-click data-pop="pp-link">关联到空间</span></td></tr>
+                <tr><td><span class="chip">安全基线</span></td><td class="mono">安全基线.md</td><td class="mono">v1.7</td><td><span class="chip ok">已索引</span></td><td class="mono">12</td><td><span class="pill">安全</span> <span class="pill">必读</span></td><td class="mono tiny">平台管理员 · admin（李工）</td><td class="tiny">全体 Agent（含个人 Agent）</td><td class="readonly-ops"><span class="btn link" data-click data-drawer="dr-pub">查看</span><span class="btn link" data-click data-pop="pp-link">关联到空间</span></td></tr>
+                <tr><td><span class="chip">入职引导</span></td><td class="mono">onboarding.md</td><td class="mono">v1.2</td><td><span class="chip ok">已索引</span></td><td class="mono">9</td><td><span class="pill">入门</span></td><td class="mono tiny">平台管理员 · admin（李工）</td><td class="tiny">全体用户 · 新成员首登推荐</td><td class="readonly-ops"><span class="btn link" data-click data-drawer="dr-pub">查看</span><span class="btn link" data-click data-pop="pp-link">关联到空间</span></td></tr>
+              </tbody>
+            </table>
+            <div class="callout" style="margin:0 0 var(--s2)"><p class="tiny" style="margin:0"><b>写不进去，是设计而非缺能：</b>公共知识无「编辑 / 重建索引 / 删除」行操作——改它要走<b>晋升与评审</b>：空间侧 L3 沉淀 → 提交申请 → 平台管理员评审 → 通过后作为新版本发布（<span class="mono">auth:knowledge_promoted</span> 入审计）。<span class="btn link" data-click data-modal="md-promote">申请晋升一篇到公共知识 →</span></p></div>
+
+            <h4 class="sec-h" id="spaces"><span class="n">§2</span> 知识空间 <span class="chip info">与项目一一对应 · 成员读写</span><span class="desc">非成员不可见（越权统一 404）· 空间成员（用户与 Agent）可读 + 可写 · 项目自身亦可读写</span></h4>
+            <table class="tbl compact">
+              <thead><tr><th>知识空间</th><th>所属项目</th><th>成员数</th><th>文档数</th><th>最近写入</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr id="space-agentflow"><td><b>AgentFlow 平台研发空间</b> <span class="chip ok">读写</span></td><td class="mono tiny"><span class="pill" data-click data-goto="projects__agentflow.html">agentflow</span>（当前项目）</td><td class="mono">7 <span class="tiny dim">4 用户 · 3 Agent</span></td><td class="mono">128 <span class="tiny dim">L3 沉淀 9</span></td><td class="mono tiny">09-23 14:02 · 李工的个人 Agent（L1 摘要）</td><td><span class="btn link" data-click data-drawer="dr-space">进入</span><span class="btn link" data-toast="已复制空间深链 knowledge.html#space-agentflow（分享给项目成员 · 非成员打开仍 404）（演示）">复制链接</span></td></tr>
+                <tr id="space-inbox"><td><b>收件箱聚合空间</b> <span class="chip ok">读写</span></td><td class="mono tiny">收件箱聚合 <span class="chip info">wf-42 所在</span></td><td class="mono">4 <span class="tiny dim">2 用户 · 2 Agent</span></td><td class="mono">63 <span class="tiny dim">L3 沉淀 4</span></td><td class="mono tiny">09-23 11:20 · 汇总 Agent（L2 聚合）</td><td><span class="btn link" data-click data-toast="已进入「收件箱聚合空间」· 本页空间卡展示的是 agentflow 空间示例（演示）">进入</span><span class="btn link" data-toast="已复制空间深链 knowledge.html#space-inbox（演示）">复制链接</span></td></tr>
+                <tr id="space-goweb"><td><b>goweb_log_collection 空间</b> <span class="chip ok">读写</span></td><td class="mono tiny">goweb_log_collection</td><td class="mono">3 <span class="tiny dim">1 用户 · 2 Agent</span></td><td class="mono">21 <span class="tiny dim">L3 沉淀 1</span></td><td class="mono tiny">09-22 18:04 · 王工（手动）</td><td><span class="btn link" data-click data-toast="已进入「goweb_log_collection 空间」· 本页空间卡展示的是 agentflow 空间示例（演示）">进入</span><span class="btn link" data-toast="已复制空间深链 knowledge.html#space-goweb（演示）">复制链接</span></td></tr>
+                <tr id="space-infra"><td><b>infra-scripts 空间</b> <span class="chip ok">读写</span></td><td class="mono tiny">infra-scripts</td><td class="mono">2 <span class="tiny dim">1 用户 · 1 Agent</span></td><td class="mono">9</td><td class="mono tiny">09-20 09:41 · 数据同步 Agent（L0 落盘）</td><td><span class="btn link" data-click data-toast="已进入「infra-scripts 空间」· 本页空间卡展示的是 agentflow 空间示例（演示）">进入</span><span class="btn link" data-toast="已复制空间深链 knowledge.html#space-infra（演示）">复制链接</span></td></tr>
+                <tr id="space-sandbox"><td><b>demo-sandbox 空间</b> <span class="chip ok">读写</span> <span class="chip">空态</span></td><td class="mono tiny">demo-sandbox</td><td class="mono">1 <span class="tiny dim">仅创建者</span></td><td class="mono">0</td><td class="dim tiny">无写入</td><td><span class="btn link" data-click data-toast="已进入「demo-sandbox 空间」· 本页空间卡展示的是 agentflow 空间示例（演示）">进入</span><span class="btn link" data-toast="空空间：可直接上传，或由项目 run 的 L0 原始记录自动落盘（演示）">上传第一份</span></td></tr>
+                <tr id="space-legacy" class="dimrow"><td><b>legacy-monitor 空间</b> <span class="chip">暂停项目 · 仍可读</span></td><td class="mono tiny">legacy-monitor</td><td class="mono">2</td><td class="mono">5</td><td class="mono tiny">09-11 15:12 · 李工（手动）</td><td><span class="btn link" data-click data-toast="已进入「legacy-monitor 空间」· 本页空间卡展示的是 agentflow 空间示例（演示）">进入</span><span class="btn link" data-toast="项目已暂停：空间转「冻结可读写、不再自动总结」，恢复项目即恢复自动写入（演示）">冻结原因</span></td></tr>
+              </tbody>
+            </table>
+            <div class="grid g2" style="align-items:start;margin:var(--s2) 0 var(--s4)">
+              <div class="callout" style="margin:0"><p class="tiny" style="margin:0">空间成员<b>含用户与 Agent 两类</b>：Agent 作为成员即可读写（run 结束自动写 L1 摘要属同一权限）；个人 Agent 与用户 1:1，故其写权限等同该用户。加人 = 加空间成员 = 加项目成员，三处同一份台账（见<a style="color:var(--blue);cursor:pointer" data-goto="users.html">用户管理</a>）。</p></div>
+              <div class="panel tight" style="margin:0"><p class="tiny dim" style="margin:0 0 6px">可见性预览（非成员不是「置灰」，是整行消失）</p><p style="margin:0"><span class="btn link" data-click data-pop="pp-asuser">以其他身份预览空间列表 ▾</span> <a class="pill" href="#space-body" style="cursor:pointer">↓ 跳到本页空间卡（agentflow）</a></p></div>
+            </div>
+
+            <div class="panel" id="space-body" style="margin-bottom:var(--s4)">
+              <p class="h2p">当前空间 · <b>AgentFlow 平台研发空间</b> <span class="chip ok">你可读写</span> <span class="chip info">1:1 项目 agentflow</span> <span class="chip mono">成员 7 · 文档 128</span></p>
+              <div class="grid g2" style="align-items:start;margin:var(--s3) 0">
+                <div class="panel tight">
+                  <p class="tiny dim" style="margin:0 0 6px">空间成员（用户 + Agent · 均可读写）</p>
+                  <p style="margin:0"><span class="pill">李工 <span class="dim">owner</span></span> <span class="pill">张三</span> <span class="pill">李四 <span class="dim">只读</span></span> <span class="pill">王五 <span class="dim">只读</span></span> <span class="pill" style="border-color:var(--blue-border);color:var(--blue)">李工的个人 Agent</span> <span class="pill" style="border-color:var(--blue-border);color:var(--blue)">王工的个人 Agent</span> <span class="pill" style="border-color:var(--blue-border);color:var(--blue)">审查 Agent · 标准</span> <span class="btn link" data-click data-toast="添加成员：与项目成员同一入口（用户级 Agent / Agent / 用户），见 projects__new.html（演示）">＋ 添加成员</span></p>
+                </div>
+                <div class="panel tight">
+                  <p class="tiny dim" style="margin:0 0 6px">已关联知识库 / 外部源（只读引用）</p>
+                  <p style="margin:0"><span class="pill">公共 · 规范.pdf</span> <span class="pill">公共 · 安全基线.md</span> <span class="pill">外部 · Confluence ADR</span> <span class="pill" style="border-color:rgba(224,85,85,.35);color:var(--red)">外部 · Notion（冻结）</span> <span class="btn link" data-click data-pop="pp-link">＋ 关联</span></p>
+                </div>
               </div>
-              <div class="callout ok" style="margin:0">
-                <p><b>安全示例：</b>第 7 行 <span class="mono">passwd.txt</span> 原本是上传 <span class="mono">../../../etc/passwd.txt</span>——文件名已被净化，实际落在 <span class="mono">uploads/1/…_passwd.txt</span>，未逃逸目录。</p>
+              <div class="panel" style="border-style:dashed;text-align:center;padding:var(--s5);margin-bottom:var(--s3)">
+                <p class="small" style="margin:0 0 4px;color:var(--text)"><b>拖拽文件到此处上传（写入本空间）</b></p>
+                <p class="tiny dim" style="margin:0">支持 .docx .js .json .md .pdf .py .txt · 单文件 ≤ 10MB · 文件名净化后落 <span class="mono">spaces/agentflow/uploads/…</span> · <b>不能</b>借此写公共知识或其他空间</p>
+              </div>
+              <table class="tbl compact">
+                <thead><tr><th>文档</th><th>来源层</th><th>大小 / 类型</th><th>状态</th><th>Chunks</th><th>标签</th><th>最近写入</th><th>挂载 Agent</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">架构说明.md</td><td><span class="chip">空间手写 · 人</span></td><td class="mono">168 B · .md</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">设计</span></td><td class="mono tiny">07-06 13:48 · 李工</td><td class="tiny">审查 Agent · 标准（知识源 3 之一）</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" data-toast="编辑标签：设计 → 设计 + 架构（演示 · 仅本空间成员可见改动）">编辑标签</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                  <tr><td class="mono">run-2026-09-23-af116.summary.md</td><td><span class="chip purple">L1 会话级摘要</span></td><td class="mono">3.2 KB · .md</td><td><span class="chip ok">已索引</span></td><td class="mono">4</td><td><span class="pill">run</span> <span class="pill">AF-116</span></td><td class="mono tiny">09-23 14:02 · 李工的个人 Agent（自动）</td><td class="tiny">全体空间成员 Agent</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-click data-modal="md-promote">申请晋升 L3</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                  <tr><td class="mono">主题聚合 · 身份与认证.md</td><td><span class="chip info">L2 主题级聚合</span></td><td class="mono">7.8 KB · .md</td><td><span class="chip ok">已索引 · 冲突待裁 1</span></td><td class="mono">11</td><td><span class="pill">安全</span> <span class="pill">认证</span></td><td class="mono tiny">09-23 09:15 · 汇总 Agent（自动）</td><td class="tiny">审查 Agent · 标准 / 前端 Agent</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="冲突项「fail-open 是否保留 localhost 缓解」需人裁：两版本并列，Agent 不自裁（演示 · 纪律：必须人批的动作加在状态转换层）">裁冲突</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                  <tr><td class="mono">test_knowledge.txt</td><td><span class="chip">空间手写 · 人</span></td><td class="mono">222 B · .txt</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td><span class="pill">测试</span></td><td class="mono tiny">07-06 14:02 · 李工</td><td class="tiny">审查 Agent · 标准</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）：排队中 → 分块 → 嵌入 → 可检索">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                  <tr><td class="mono">db-schema.sql</td><td><span class="chip">空间手写 · 人</span></td><td class="mono">31 KB · .sql</td><td><span class="chip bad">处理失败</span></td><td class="dim">—</td><td><span class="pill">数据库</span></td><td class="mono tiny">07-05 17:30 · 李工</td><td class="dim tiny">索引未成，检索不到</td><td><span class="btn link" data-toast="重试解析已排队（演示）：SQL 方言不在白名单 → 需人工改 .md 或换解析器">重试</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                  <tr><td class="mono">passwd.txt</td><td><span class="chip">空间手写 · 人</span></td><td class="mono">102 B · .txt</td><td><span class="chip ok">已索引</span></td><td class="mono">1</td><td class="dim">—</td><td class="mono tiny">07-04 09:10 · 李工</td><td class="tiny">审查 Agent · 标准</td><td><span class="btn link" data-click data-drawer="dr-kb">查看</span><span class="btn link" data-toast="重建索引任务已提交（演示）">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                </tbody>
+              </table>
+              <div class="grid g2" style="align-items:start">
+                <div class="callout bad" style="margin:0">
+                  <p><b>错误态：</b>上传 <span class="mono">.exe</span> / <span class="mono">.sh</span> / 无后缀文件 → 400「不支持的文件类型: .exe」；上传 11MB 文件 → 400「文件过大: 11534336 bytes，最大允许 10485760 bytes (10MB)」。</p>
+                </div>
+                <div class="callout ok" style="margin:0">
+                  <p><b>安全示例：</b><span class="mono">passwd.txt</span> 原本是上传 <span class="mono">../../../etc/passwd.txt</span>——文件名已被净化，实际落在 <span class="mono">spaces/agentflow/uploads/…_passwd.txt</span>，未逃逸目录；跨空间路径同样被拒（<span class="mono">404</span>）。</p>
+                </div>
               </div>
             </div>
+
+            <h4 class="sec-h" id="external"><span class="n">§3</span> 外部源 <span class="chip">关联进空间后只读</span><span class="desc">源级授权 · 凭据只写不读 · 未关联任何空间时对普通成员不可见</span></h4>
+            <table class="tbl compact">
+              <thead><tr><th>源名称</th><th>来源类型</th><th>状态</th><th>Chunks</th><th>标签</th><th>同步时间</th><th>关联空间（只读）</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">Confluence · 架构决策记录</td><td><span class="chip">远端源 · Confluence</span></td><td><span class="chip ok">已连接 · 30min 自动同步</span></td><td class="mono">214</td><td><span class="pill">ADR</span></td><td class="mono tiny">09-06 10:12 同步</td><td class="mono tiny">agentflow · 收件箱聚合 · infra-scripts</td><td><span class="btn link" data-toast="✓ 连接测试通过 · Confluence 可达 · 214 页 · 42ms">测试连接</span><span class="btn link" data-toast="立即同步已排队（演示）">立即同步</span><span class="btn link" data-click data-pop="pp-link">关联到空间</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink">断开</span></td></tr>
+                <tr><td class="mono">Notion · 产品需求库</td><td><span class="chip">远端源 · Notion</span></td><td><span class="chip bad">令牌过期 · 索引冻结</span></td><td class="mono">58 <span class="dim">(旧)</span></td><td><span class="pill">需求</span></td><td class="mono tiny">09-01 08:40 最后成功</td><td class="mono tiny">agentflow（只读快照 · 冻结中）</td><td><span class="btn link" style="color:var(--red)" data-toast="✗ 连接测试失败 · 401 Unauthorized（令牌过期）——索引保持冻结">测试连接</span><span class="btn link" data-click data-goto="knowledge__notion-source.html">更新凭据</span><span class="btn link" data-click data-pop="pp-link">关联到空间</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink">断开</span></td></tr>
+              </tbody>
+            </table>
+            <div class="callout warn" style="margin:0 0 var(--s3)"><p class="tiny" style="margin:0"><b>关联 ≠ 授权扩散：</b>外部源被关联进哪个空间，就只有那个空间的成员能读到那份只读快照；凭据（Internal Integration Token 等）恒为密文、只写不读，界面无回显。冻结源（Notion 401）仍可用旧快照检索，但<b>不再增量</b>——修凭据走 <span class="mono">knowledge__notion-source.html</span>。</p></div>
+            <p class="tiny dim" style="margin:0">L0→L3 总结写入的落点只有<b>本空间</b>；公共知识仅接收通过 <b>L3 晋升评审</b>的沉淀（详见<a style="color:var(--blue);cursor:pointer" data-goto="projects__new.html">新建项目 · 新空间卡</a>）。按 Esc 关闭浮层。</p>
           </div>
         </div>
       </div>
-    </div><div class="drawer" id="dr-kb"><header><b>知识源详情 · 架构说明.md</b><span class="chip">本地文件</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
-<div class="callout"><p class="tiny" style="margin:0"><b>本地文件无「测试连接」</b>——没有远端可测；本地源的操作面=查看 chunks / 重建索引 / 编辑标签 / 删除。</p></div>
-<dl class="kv"><dt>大小 / 类型</dt><dd class="mono">168 B · .md（白名单内）</dd><dt>上传</dt><dd class="mono">07-06 13:48 · 李工</dd><dt>状态</dt><dd><span class="chip ok">已索引</span> · 1 chunk · 嵌入模型 <span class="mono">bge-m3</span></dd><dt>标签</dt><dd><span class="pill">设计</span></dd><dt>挂载于</dt><dd>审查 Agent · 标准（知识源 3 之一）· 对话检索时生效</dd></dl>
+    </div><div class="drawer" id="dr-pub"><header><b>公共知识详情 · 规范.pdf</b><span class="chip">全局可用 · 只读</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>只读层：</b>本页无「编辑 / 重建索引 / 删除」——公共知识由平台管理员维护；项目侧要改动，只能<b>在自己空间里开副本</b>，或提交晋升申请走评审。</p></div>
+<dl class="kv"><dt>分类</dt><dd><span class="chip">公司规范</span> · 全员必读</dd><dt>大小 / 类型</dt><dd class="mono">2.4 MB · .pdf（白名单内）</dd><dt>版本 / 发布</dt><dd class="mono">v3 · 09-12 16:00 · 平台管理员 admin（李工）</dd><dt>状态</dt><dd><span class="chip ok">已索引</span> · 100 chunks · 嵌入模型 <span class="mono">bge-m3</span></dd><dt>标签</dt><dd><span class="pill">规范</span> <span class="pill">必读</span></dd><dt>可读范围</dt><dd>全体项目与全体 Agent（含个人 Agent）· 检索默认命中</dd><dt>被引用</dt><dd class="mono tiny">5 个项目空间（只读关联）· 其中 2 个仍锁定 v2</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">Chunk 预览（3/100）</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">## 3. 破坏性操作
+必须先二次确认 + 必填原因，规则加在状态转换层……</pre>
+<p style="margin-top:var(--s4)"><span class="btn sm" data-click data-pop="pp-link">关联到我的空间</span> <span class="btn sm" data-toast="已复制引用深链 knowledge.html#public（演示）">复制引用链接</span></p></div></div>
+
+<div class="drawer" id="dr-space"><header><b>知识空间 · AgentFlow 平台研发</b><span class="chip info">1:1 项目 agentflow</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<dl class="kv"><dt>所属项目</dt><dd class="mono"><span class="pill" data-click data-goto="projects__agentflow.html">agentflow</span> · 一个项目一个空间（无共享写空间）</dd><dt>我的权限</dt><dd><span class="chip ok">读 + 写</span> · 以空间成员身份（非平台管理员）</dd><dt>成员</dt><dd class="mono tiny">4 用户 · 3 Agent <span class="dim">（个人 Agent 与用户 1:1）</span></dd><dt>文档 / chunks</dt><dd class="mono">128 · 1,043</dd><dt>非成员</dt><dd><span class="chip bad">不可见</span> · 越权访问统一 <span class="mono">404</span>（与「不存在」同码）</dd><dt>只读关联</dt><dd class="tiny">公共 2 篇 · 外部源 Confluence / Notion（冻结）</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">总结写入分层（L0→L3 · 演示口径）</p>
+<table class="tbl compact"><thead><tr><th>层</th><th>本空间条目</th><th>产出方式</th></tr></thead><tbody>
+<tr><td class="mono">L0 原始记录</td><td class="mono">892</td><td class="tiny">会话 / run 产物 / 文档原样 · 短期 TTL 30d</td></tr>
+<tr><td class="mono">L1 会话级摘要</td><td class="mono">214</td><td class="tiny">run 或会话结束自动产出</td></tr>
+<tr><td class="mono">L2 主题级聚合</td><td class="mono">13 <span class="chip warn">冲突待裁 1</span></td><td class="tiny">跨会话按主题合并 · 去重 · 置信更新</td></tr>
+<tr><td class="mono">L3 画像与沉淀</td><td class="mono">9</td><td class="tiny">进空间正式文档 · 过人工审核门后才可晋升公共</td></tr>
+</tbody></table>
+<p style="margin-top:var(--s4)"><button class="btn sm primary" data-toast="已进入空间工作台：读写 + L0-L3 摘要视图（演示 · 本页空间卡即为该视图）">进入空间工作台</button> <button class="btn sm" data-click data-modal="md-promote">晋升申请</button></p></div></div>
+
+<div class="drawer" id="dr-kb"><header><b>空间文档详情 · 架构说明.md</b><span class="chip ok">你可读写</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>本地文件无「测试连接」</b>——没有远端可测；空间文档的操作面=查看 chunks / 重建索引 / 编辑标签 / 删除。<b>写入只进本空间</b>，公共知识与其他空间均不可写。</p></div>
+<dl class="kv"><dt>所在空间</dt><dd class="mono">AgentFlow 平台研发空间（1:1 项目 agentflow）</dd><dt>大小 / 类型</dt><dd class="mono">168 B · .md（白名单内）</dd><dt>上传</dt><dd class="mono">07-06 13:48 · 李工</dd><dt>状态</dt><dd><span class="chip ok">已索引</span> · 1 chunk · 嵌入模型 <span class="mono">bge-m3</span></dd><dt>标签</dt><dd><span class="pill">设计</span></dd><dt>挂载于</dt><dd>审查 Agent · 标准（空间知识源 3 之一）· 对话检索时生效</dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">Chunk 预览（1/1）</p><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">## 架构说明
 系统分编排引擎 / 运行时适配器 / 存储抽象三层……</pre>
-<p style="margin-top:var(--s4)"><span class="btn link" data-toast="重建索引任务已提交（演示）">重建索引</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></p></div></div>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="重建索引任务已提交（演示）">重建索引</span><span class="btn link" data-toast="已提交编辑：进入草稿，保存后重建索引（演示）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></p></div></div>
 
-<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除知识源「架构说明.md」？</b>
-<p class="small dim" style="margin:8px 0">删除即从所有挂载 Agent 的检索范围移除，历史会话引用保持快照。<b>必填原因</b>（§6.0 纪律：破坏性操作二次确认+理由入审计）。</p>
+<div class="modal" id="md-del"><div style="padding:var(--s4)"><b>删除空间文档「架构说明.md」？</b>
+<p class="small dim" style="margin:8px 0">仅影响 <b>AgentFlow 平台研发空间</b>及其成员；从所有挂载 Agent 的检索范围移除，历史会话引用保持快照。<b>必填原因</b>（§6.0 纪律：破坏性操作二次确认+理由入审计）。公共知识与其他空间不受影响。</p>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [被规范.pdf 取代            ]</pre>
-<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除 + 审计 auth:knowledge_deleted（演示）" data-close>确认删除</button></div></div></div>
-<div class="modal" id="md-unlink"><div style="padding:var(--s4)"><b>断开远端源「Confluence」？</b><p class="small dim" style="margin:8px 0">断开将保留已索引 214 chunks 为只读快照；重连后增量同步。</p><div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已断开 · 快照转只读（演示）" data-close>确认断开</button></div></div></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：行操作「查看」→ 详情抽屉（只读 · 侧栏可容） · 远端「更新凭据」→ 整页详情（可编辑表单：<span class="mono">knowledge__notion-source.html</span>） · 「测试连接」→ 结果反馈 · 删除/断开 → 二次确认模态　按 Esc 关闭所有浮层。</p>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除（本空间）+ 审计 auth:knowledge_deleted（演示）" data-close>确认删除</button></div></div></div>
+<div class="modal" id="md-unlink"><div style="padding:var(--s4)"><b>断开远端源「Confluence」？</b><p class="small dim" style="margin:8px 0">断开将保留已索引 214 chunks 为只读快照；3 个关联空间同步转快照，重连后增量同步。</p><div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已断开 · 快照转只读（演示）" data-close>确认断开</button></div></div></div>
+<div class="modal" id="md-promote"><div style="padding:var(--s4)"><b>申请把空间沉淀晋升为公共知识？</b>
+<p class="small dim" style="margin:8px 0">只有 <b>L3 层</b>条目可申请，且必须过<b>平台管理员评审</b>——通过后作为新版本发布，全体项目与 Agent 只读可见；未通过则留在本空间。</p>
+<dl class="kv"><dt>候选条目</dt><dd class="mono tiny">run-2026-09-23-af116.summary.md <span class="chip purple">L1</span> <span class="dim">→ 先聚合到 L2/L3 再申请</span></dd><dt>建议分类</dt><dd><span class="chip">安全基线</span></dd><dt>理由</dt><dd class="mono tiny">[跨项目通用：破坏性操作二次确认口径        ]</dd></dl>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已提交晋升申请 · 待平台管理员评审（演示 · 审计 knowledge_promote_requested）" data-close>提交评审</button></div></div></div>
+<div class="pop" id="pp-link" style="max-width:420px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ 关联到空间（只读引用 · 多选）</b>　公共知识 = 全体本已可读，此操作是把引用固定进空间的知识源列表</p>
+<table class="tbl compact"><tbody>
+<tr><td><b>AgentFlow 平台研发空间</b></td><td><span class="chip ok">已关联</span></td><td><span class="btn link" style="opacity:.6" data-toast="已取消该空间的只读关联（不影响其他空间）（演示）" data-close>取消关联</span></td></tr>
+<tr><td>收件箱聚合空间</td><td><span class="chip ok">已关联</span></td><td><span class="btn link" style="opacity:.6" data-toast="已取消该空间的只读关联（演示）" data-close>取消关联</span></td></tr>
+<tr><td>goweb_log_collection 空间</td><td><span class="chip">未关联</span></td><td><span class="btn link" data-toast="已只读关联到 goweb_log_collection 空间（演示）" data-close>关联</span></td></tr>
+<tr><td>infra-scripts 空间</td><td><span class="chip">未关联</span></td><td><span class="btn link" data-toast="已只读关联到 infra-scripts 空间（演示）" data-close>关联</span></td></tr>
+<tr><td class="dim">legacy-monitor 空间</td><td><span class="chip bad">非成员</span></td><td class="dim tiny">不可关联（<span class="mono">404</span>）</td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0">跨空间写？——<b>不存在该操作</b>：跨空间只有「关联知识库」只读引用。外部源凭据不随关联扩散。</p></div>
+<div class="pop" id="pp-asuser" style="max-width:400px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ 以其他身份预览空间列表（可见性演示）</b>　仅影响本页视图，不切登录态</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">admin · 李工</td><td class="tiny">6 个空间（成员或管理员可见全部）</td><td><span class="btn link" data-toast="已按 admin 预览：6 行（演示）" data-close>预览</span></td></tr>
+<tr><td class="mono">testuser · 张三</td><td class="tiny">2 个空间（agentflow · 收件箱聚合）</td><td><span class="btn link" data-toast="已按张三预览：仅 2 行——其余 4 行整行消失，非置灰（演示）" data-close>预览</span></td></tr>
+<tr><td class="mono">lisi · 李四</td><td class="tiny">1 个空间（agentflow · 只读位）</td><td><span class="btn link" data-toast="已按李四预览：1 行 + 公共知识 4 篇（只读）（演示）" data-close>预览</span></td></tr>
+<tr><td class="mono">newbie · 赵六</td><td class="tiny">0 个空间 → 只剩公共知识</td><td><span class="btn link" data-toast="已按赵六预览：空间区显示「你还没被加入任何知识空间」，公共知识仍全量只读可见；直接访问 knowledge.html#space-legacy → 404（与不存在同码）（演示）" data-close>预览</span></td></tr>
+</tbody></table></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：§0 权限矩阵（公共只读 / 空间成员读写 / 跨空间只读关联 / 外部源关联后只读）· 顶部工具条（搜索 · 标签 · 挂载 Agent · 范围）跨两层生效 · §1 公共知识行操作仅「查看 → 只读抽屉 <span class="mono">dr-pub</span>」「关联到空间 → 弹层 <span class="mono">pp-link</span>」，改内容走「申请晋升 → <span class="mono">md-promote</span>」 · §2 空间行「进入 → <span class="mono">dr-space</span>」（含 L0-L3 条目统计）、「复制链接」= 跨页深链锚点 <span class="mono">knowledge.html#space-agentflow</span>（<span class="mono">projects.html</span> 知识空间列即跳此处）、「以其他身份预览 → <span class="mono">pp-asuser</span>」（非成员整行消失 · 越权 404）· 空间卡内文档行保留原操作面（查看 <span class="mono">dr-kb</span> / 重建索引 / 编辑标签 / 删除 → <span class="mono">md-del</span>）· §3 外部源行「测试连接 / 更新凭据（整页 <span class="mono">knowledge__notion-source.html</span> · Notion 401 冻结）/ 关联到空间 / 断开 → <span class="mono">md-unlink</span>」 · 顶栏「+ 新建空间」被拒：空间随项目 1:1 自动创建，建项目走 <span class="mono">projects__new.html</span>　按 Esc 关闭所有浮层。</p>
 </body></html>

@@ -13,7 +13,7 @@
 <div class="tabs">
   <span class="tab active" data-click data-toast="Plugin：平台内置代码实现，带参数 schema + 权限标签 + token 双限 + 安全闸门，注册即注入运行时（代码级能力）">Plugin</span>
   <span class="tab" data-click data-toast="Skill：描述性登记（SKILL.md + 支持文件），由 Agent 按提示词执行，无代码注入">Skill</span>
-  <span class="tab" data-click data-toast="MCP：外部服务（stdio / SSE），运行时 tools/list 发现工具后勾选启用">MCP</span>
+  <span class="tab" data-click data-toast="MCP：外部服务（stdio / Streamable HTTP），运行时 tools/list 发现工具后勾选启用">MCP</span>
 </div>
 <div class="tabs">
   <span class="tab active" data-click data-toast="手工：逐字段填写本页表单（默认，改动最细）">手工</span>
@@ -22,8 +22,12 @@
   <span class="tab" data-click data-toast="从运行时拷贝：从已在运行的 Agent / 服务拷一份配置再改（不改原实例）">从运行时拷贝</span>
 </div>
 <div class="callout"><p class="tiny" style="margin:0"><b>三类语义不混：</b>Plugin = 平台内置代码实现；Skill = 描述性登记由 Agent 按提示词执行；MCP = 外部服务 <span class="mono">tools/list</span> 运行时发现。四种导入方式对三类通用，但<b>表单字段分型</b>——导入只决定初始值来源。</p></div>
+<div class="callout ok"><p class="tiny" style="margin:0"><b>注册即生成详情页；之后所有字段在详情页同源可编辑</b>（同一份配置，两种入口）。本页只是<b>首次登记入口</b>——创建后逐字段编辑落到详情区的「配置（与注册表单同源）」：① Plugin → <span class="mono">tools__fs-read-write.html</span> · ② Skill → <span class="mono">tools__code-review-skill.html</span> / <span class="mono">tools__skill-browser.html</span> · ③ MCP → <span class="mono">tools__mcp-filesystem.html</span> / <span class="mono">tools__mcp-fetch.html</span>。每页头部「✎ 编辑」进入编辑态、底部 sticky 保存条落库；无 <span class="mono">tool:edit</span> 权限者整区为 <span class="chip">🔒 Lock read-only</span>（§6.0 ①）。</p></div>
 
 <h4 class="blk">① Plugin 表单 <span class="chip info">Plugin</span></h4>
+<!-- 字段同源说明（本文件只加注不改字段）：以下 ①②③ 每个字段都落到对应详情页的「配置（与注册表单同源）」区，
+     创建后唯一编辑入口在详情页：① → tools__fs-read-write.html · ② → tools__code-review-skill.html / tools__skill-browser.html
+     · ③ → tools__mcp-filesystem.html / tools__mcp-fetch.html。transport 枚举现按 STDIO / Streamable HTTP 口径渲染（SSE 已并入后者）。 -->
 <div class="form-panel">
   <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0">名称   [ 文件读写 v2                              ]
 描述   [ 本地文件系统读写，支持路径白名单           ]</pre>
@@ -86,7 +90,7 @@ transport [ SSE ▾ ]（stdio / SSE 二选一）</pre>
   <tr><td><span class="chip ok" data-click data-toast="已禁用工具 migrate（演示）">✓ 启用</span></td><td class="mono">migrate</td><td class="tiny">执行迁移</td></tr>
   <tr><td><span class="chip ok" data-click data-toast="已禁用工具 ping（演示）">✓ 启用</span></td><td class="mono">ping</td><td class="tiny">健康检查</td></tr>
   </tbody></table>
-  <p class="tiny dim" style="margin:8px 0 0">MCP 工具条目<b>不渲染成 Skill</b>（纵向层红线）；密钥仅存密文，运行时经 <span class="mono">${secret:NAME}</span> 注入，不落明文。</p>
+  <p class="tiny dim" style="margin:8px 0 0">MCP 工具条目<b>不渲染成 Skill</b>（纵向层红线）；密钥仅存密文，运行时经 <span class="mono">${secret:NAME}</span> 注入，不落明文。<b>注：</b>transport 枚举现按 <span class="mono">STDIO</span> / <span class="mono">Streamable HTTP</span> 渲染（上方表单里的「SSE」为旧称），详情页配置区同名同序；本表单的每个字段在创建后都在<b>该服务详情页</b>「配置（与注册表单同源）」区逐项可改。</p>
 </div>
 
 <h4 class="blk">提交</h4>
@@ -94,5 +98,5 @@ transport [ SSE ▾ ]（stdio / SSE 二选一）</pre>
 <p class="tiny dim" style="margin:8px 0 0">创建只登记到工具库，<b>需绑定到 Agent</b> 才会进入编排执行；绑定前不计入引用、不被调用。</p>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px"><b>页脚说明：</b>三类语义不混——Plugin = 平台内置代码实现；Skill = 描述性登记由 Agent 按提示词执行；MCP = 外部服务 <span class="mono">tools/list</span> 运行时发现。可点区演示：顶部 tabs → toast（语义说明）· 权限标签 / header / 发现工具 → toast（增删、启停）· 连接测试 → toast（tools/list 发现 6 个工具）· 「取消」/ 顶部「← 返回」→ 回 tools.html · 「创建」→ toast（需绑定到 Agent 才生效）　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px"><b>页脚说明：</b>三类语义不混——Plugin = 平台内置代码实现；Skill = 描述性登记由 Agent 按提示词执行；MCP = 外部服务 <span class="mono">tools/list</span> 运行时发现。可点区演示：顶部 tabs → toast（语义说明）· 权限标签 / header / 发现工具 → toast（增删、启停）· 连接测试 → toast（tools/list 发现 6 个工具）· 「取消」/ 顶部「← 返回」→ 回 tools.html · 「创建」→ toast（需绑定到 Agent 才生效）　<b>注：本页只负责首次登记——三类表单的每个字段在创建后都落到对应详情页的「配置（与注册表单同源）」区（① → <span class="mono">tools__fs-read-write.html</span> · ② → <span class="mono">tools__code-review-skill.html</span> / <span class="mono">tools__skill-browser.html</span> · ③ → <span class="mono">tools__mcp-filesystem.html</span> / <span class="mono">tools__mcp-fetch.html</span>），逐项可编辑、带 sticky 保存条；同一份配置，两种入口。</b>　按 Esc 关闭浮层。</p>
 </body></html>

@@ -5,7 +5,7 @@
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p13" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="users.html">用户与权限</span></div>
-<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>项目列表 + 提示词目录标注 + 项目级可见性。未分配项目的普通用户看到的是空列表（非全部）。</p>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>项目列表 + <b>专属知识空间（1:1）</b> + 提示词目录标注 + 项目级可见性。未分配项目的普通用户看到的是空列表（非全部）；同样地，他看不到该项目的知识空间（越权与不存在统一 <span class="mono">404</span>）。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/projects</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -17,6 +17,7 @@
           <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
           <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
           <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
           <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
           <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
           <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
@@ -28,28 +29,31 @@
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">项目 <span class="dim" data-click data-pop="pp-switch">· 当前：agentflow ▾</span></span><span class="right"><button class="btn sm" data-toast="扫描已触发（演示）：重扫 5 个登记路径 · 提示词目录缺失 2 个 · 新增 0 · 耗时 340ms">扫描</button><button class="btn sm primary" data-click data-goto="projects__new.html">+ 新建项目</button></span></div>
+          <div class="app-top"><span class="crumb">项目 <span class="dim" data-click data-pop="pp-switch">· 当前：agentflow ▾</span></span><span class="right"><span class="chip mono">5 项目 · 5 专属空间（1:1）</span><button class="btn sm" data-toast="扫描已触发（演示）：重扫 5 个登记路径 · 提示词目录缺失 2 个 · 新增 0 · 耗时 340ms">扫描</button><button class="btn sm primary" data-click data-goto="projects__new.html">+ 新建项目</button></span></div>
           <div class="app-body">
             <table class="tbl compact">
-              <thead><tr><th>项目</th><th>状态</th><th>优先级</th><th>Lead</th><th>成员数</th><th>进度</th><th>路径</th><th>提示词目录</th><th>变更数</th><th>Agent 数</th><th>当前</th><th>操作</th></tr></thead>
+              <thead><tr><th>项目</th><th>状态</th><th>优先级</th><th>Leader（个人 Agent）</th><th>成员数</th><th>知识空间 <span class="chip info" style="margin-left:4px">1:1</span></th><th>进度</th><th>路径</th><th>提示词目录</th><th>变更数</th><th>Agent 数</th><th>当前</th><th>操作</th></tr></thead>
               <tbody>
-                <tr style="background:var(--bg-selected)"><td><b data-click data-goto="projects__agentflow.html" style="color:var(--blue)">agentflow</b></td><td><span class="chip ok">in_progress</span></td><td><span class="chip warn">high</span></td><td class="mono">李工</td><td class="mono">4</td><td class="mono">62% <span class="tiny dim">13/21</span></td><td class="mono tiny">/home/malizhi/project/agentflow</td><td><span class="chip ok">prompts/</span></td><td class="mono">14</td><td class="mono">11</td><td><span class="chip info">当前</span></td><td><span class="btn link" data-click data-goto="projects__agentflow.html">详情</span><span class="btn link" style="opacity:.5">切换</span><span class="btn link" style="color:var(--red);opacity:.5" data-toast="✗ 不可删除当前项目：先切换到其他项目（演示）">删除</span></td></tr>
-                <tr><td><b data-click data-drawer="dr-proj-log" style="color:var(--blue)">goweb_log_collection</b></td><td><span class="chip ok">in_progress</span></td><td><span class="chip info">medium</span></td><td class="mono">王工</td><td class="mono">2</td><td class="mono">45% <span class="tiny dim">10/22</span></td><td class="mono tiny">/home/malizhi/go/src/goweb_log_collection/client</td><td><span class="chip ok">prompts/</span></td><td class="mono">22</td><td class="mono">6</td><td class="dim">—</td><td><span class="btn link" data-toast="已切换当前项目 → goweb_log_collection · 全局 .specs/ 与提示词解析路径同步切换（演示）">切换</span><span class="btn link" data-click data-drawer="dr-proj-log">详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
-                <tr><td><b data-click data-drawer="dr-proj-miss" style="color:var(--blue)">demo-sandbox</b></td><td><span class="chip">planned</span></td><td><span class="chip dim">none</span></td><td class="dim">—</td><td class="mono">1</td><td class="mono">0% <span class="tiny dim">0/0</span></td><td class="mono tiny">/tmp/demo-sandbox</td><td><span class="chip bad">缺失</span></td><td class="mono">0</td><td class="mono">0</td><td class="dim">—</td><td><span class="btn link" data-toast="已切换当前项目 → demo-sandbox · 提示词解析回退全局默认（该路径无 prompts/）（演示）">切换</span><span class="btn link" data-click data-drawer="dr-proj-miss">详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
-                <tr><td><b data-click data-drawer="dr-proj-miss" style="color:var(--blue)">legacy-monitor</b></td><td><span class="chip warn">paused</span></td><td><span class="chip">low</span></td><td class="mono">李工</td><td class="mono">2</td><td class="mono">33% <span class="tiny dim">1/3</span></td><td class="mono tiny">/opt/legacy/monitor</td><td><span class="chip bad">缺失</span></td><td class="mono">3</td><td class="mono">2</td><td class="dim">—</td><td><span class="btn link" data-toast="已切换当前项目 → legacy-monitor · 提示词解析回退全局默认（演示）">切换</span><span class="btn link" data-click data-drawer="dr-proj-miss">详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
-                <tr><td><b data-click data-drawer="dr-proj-infra" style="color:var(--blue)">infra-scripts</b></td><td><span class="chip ok">in_progress</span></td><td><span class="chip info">medium</span></td><td class="mono">审查 Agent · 标准</td><td class="mono">2</td><td class="mono">57% <span class="tiny dim">4/7</span></td><td class="mono tiny">/home/malizhi/work/infra-scripts</td><td><span class="chip ok">prompts/</span></td><td class="mono">7</td><td class="mono">4</td><td class="dim">—</td><td><span class="btn link" data-toast="已切换当前项目 → infra-scripts · 全局 .specs/ 与提示词解析路径同步切换（演示）">切换</span><span class="btn link" data-click data-drawer="dr-proj-infra">详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr style="background:var(--bg-selected)"><td><b data-click data-goto="projects__agentflow.html" style="color:var(--blue)">agentflow</b></td><td><span class="chip ok">in_progress</span></td><td><span class="chip warn">high</span></td><td class="mono">李工的个人 Agent <span class="tiny dim">owner 李工</span></td><td class="mono">7 <span class="tiny dim">4 用户 · 3 Agent</span></td><td><a data-click data-goto="knowledge.html#space-agentflow" style="color:var(--blue);cursor:pointer">AgentFlow 平台研发空间</a> <span class="chip ok">读写</span> <span class="mono tiny dim">128 篇</span></td><td class="mono">62% <span class="tiny dim">13/21</span></td><td class="mono tiny">/home/malizhi/project/agentflow</td><td><span class="chip ok">prompts/</span></td><td class="mono">14</td><td class="mono">11</td><td><span class="chip info">当前</span></td><td><span class="btn link" data-click data-goto="projects__agentflow.html">详情</span><span class="btn link" style="opacity:.5">切换</span><span class="btn link" style="color:var(--red);opacity:.5" data-toast="✗ 不可删除当前项目：先切换到其他项目（演示）">删除</span></td></tr>
+                <tr><td><b data-click data-drawer="dr-proj-log" style="color:var(--blue)">goweb_log_collection</b></td><td><span class="chip ok">in_progress</span></td><td><span class="chip info">medium</span></td><td class="mono">王工的个人 Agent <span class="tiny dim">owner 王工</span></td><td class="mono">2</td><td><a data-click data-goto="knowledge.html#space-goweb" style="color:var(--blue);cursor:pointer">goweb_log_collection 空间</a> <span class="chip ok">读写</span> <span class="mono tiny dim">21 篇</span></td><td class="mono">45% <span class="tiny dim">10/22</span></td><td class="mono tiny">/home/malizhi/go/src/goweb_log_collection/client</td><td><span class="chip ok">prompts/</span></td><td class="mono">22</td><td class="mono">6</td><td class="dim">—</td><td><span class="btn link" data-toast="已切换当前项目 → goweb_log_collection · 全局 .specs/ 与提示词解析路径同步切换（演示）">切换</span><span class="btn link" data-click data-drawer="dr-proj-log">详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b data-click data-drawer="dr-proj-miss" style="color:var(--blue)">demo-sandbox</b></td><td><span class="chip">planned</span></td><td><span class="chip dim">none</span></td><td class="dim">—（未设 Leader）</td><td class="mono">1</td><td><a data-click data-goto="knowledge.html#space-sandbox" style="color:var(--blue);cursor:pointer">demo-sandbox 空间</a> <span class="chip ok">读写</span> <span class="chip">空态</span></td><td class="mono">0% <span class="tiny dim">0/0</span></td><td class="mono tiny">/tmp/demo-sandbox</td><td><span class="chip bad">缺失</span></td><td class="mono">0</td><td class="mono">0</td><td class="dim">—</td><td><span class="btn link" data-toast="已切换当前项目 → demo-sandbox · 提示词解析回退全局默认（该路径无 prompts/）（演示）">切换</span><span class="btn link" data-click data-drawer="dr-proj-miss">详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b data-click data-drawer="dr-proj-miss" style="color:var(--blue)">legacy-monitor</b></td><td><span class="chip warn">paused</span></td><td><span class="chip">low</span></td><td class="mono">李工的个人 Agent <span class="tiny dim">owner 李工</span></td><td class="mono">2</td><td><a data-click data-goto="knowledge.html#space-legacy" style="color:var(--blue);cursor:pointer">legacy-monitor 空间</a> <span class="chip">暂停 · 冻结自动总结</span></td><td class="mono">33% <span class="tiny dim">1/3</span></td><td class="mono tiny">/opt/legacy/monitor</td><td><span class="chip bad">缺失</span></td><td class="mono">3</td><td class="mono">2</td><td class="dim">—</td><td><span class="btn link" data-toast="已切换当前项目 → legacy-monitor · 提示词解析回退全局默认（演示）">切换</span><span class="btn link" data-click data-drawer="dr-proj-miss">详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
+                <tr><td><b data-click data-drawer="dr-proj-infra" style="color:var(--blue)">infra-scripts</b></td><td><span class="chip ok">in_progress</span></td><td><span class="chip info">medium</span></td><td class="mono">审查 Agent · 标准 <span class="tiny dim">owner 李工</span></td><td class="mono">2</td><td><a data-click data-goto="knowledge.html#space-infra" style="color:var(--blue);cursor:pointer">infra-scripts 空间</a> <span class="chip ok">读写</span> <span class="mono tiny dim">9 篇</span></td><td class="mono">57% <span class="tiny dim">4/7</span></td><td class="mono tiny">/home/malizhi/work/infra-scripts</td><td><span class="chip ok">prompts/</span></td><td class="mono">7</td><td class="mono">4</td><td class="dim">—</td><td><span class="btn link" data-toast="已切换当前项目 → infra-scripts · 全局 .specs/ 与提示词解析路径同步切换（演示）">切换</span><span class="btn link" data-click data-drawer="dr-proj-infra">详情</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
               </tbody>
             </table>
+            <p class="tiny dim" style="margin:0 0 var(--s4)"><b>知识空间列</b>：与项目 <b>1:1</b>，随项目创建自动创建（见 <span class="mono">projects__new.html</span> 第 6 区）；行内链为深链锚点 → <span class="mono">knowledge.html#space-〈项目〉</span>，非成员看不到该行、直接访问锚点得 <span class="mono">404</span>。<b>Leader 列</b>显示个人 Agent 名（每个用户有一个 1:1 用户级 Agent，见 <span class="mono">users.html</span>），owner 为其代表人。<span class="dim">另：收件箱聚合项目（wf-42 所在，见 <span class="mono">canvas.html</span>）不在本机登记列表内，其空间见 <span class="mono">knowledge.html#space-inbox</span>。</span></p>
             <div class="grid g2" style="align-items:start">
               <div class="panel">
                 <p class="h2p" data-click data-goto="projects__agentflow.html" >当前项目 · agentflow</p>
                 <dl class="kv">
+                  <dt>专属知识空间</dt><dd><a data-click data-goto="knowledge.html#space-agentflow" style="color:var(--blue);cursor:pointer">AgentFlow 平台研发空间</a> <span class="chip ok">成员读写</span> <span class="chip info">1:1</span> <span class="mono tiny dim">128 篇 · L0→L3 自动总结写入本空间</span></dd>
+                  <dt>Leader</dt><dd class="mono tiny">李工的个人 Agent <span class="dim">（owner 李工 · 用户级 Agent 1:1）</span></dd>
                   <dt>产物目录</dt><dd class="mono tiny">/home/malizhi/project/agentflow/.specs</dd>
                   <dt>提示词目录</dt><dd class="mono tiny">/home/malizhi/project/agentflow/prompts</dd>
                   <dt>备份目录</dt><dd class="mono tiny">/home/malizhi/project/agentflow/backup</dd>
                   <dt>数据根目录</dt><dd class="mono tiny">/home/malizhi/project <span class="chip warn">users.json / audit.jsonl 在此</span></dd>
                 </dl>
-                <p class="tiny dim" style="margin:var(--s3) 0 0">点标题或行内项目名 → 项目详情独立页（路径 / 扫描结果 / 成员 / 扫描历史）。小型项目仍为详情抽屉。</p>
+                <p class="tiny dim" style="margin:var(--s3) 0 0">点标题或行内项目名 → 项目详情独立页（路径 / 扫描结果 / 成员 / 扫描历史 / <b>专属知识空间入口卡</b>）。小型项目仍为详情抽屉。</p>
               </div>
               <div class="panel" style="border-style:dashed">
                 <p class="h2p">空态示例 · 无可见项目</p>
@@ -64,11 +68,13 @@
 <div class="drawer" id="dr-proj-log"><header><b>项目详情 · goweb_log_collection</b><span class="chip ok">has_prompts</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <dl class="kv">
 <dt>项目路径</dt><dd class="mono tiny">/home/malizhi/go/src/goweb_log_collection/client</dd>
+<dt>Leader</dt><dd class="mono tiny">王工的个人 Agent <span class="dim">（用户级 Agent · owner 王工）</span></dd>
+<dt>知识空间</dt><dd><a data-click data-goto="knowledge.html#space-goweb" style="color:var(--blue);cursor:pointer">goweb_log_collection 空间</a> <span class="chip ok">读写</span> <span class="mono tiny">21 篇 · L3 沉淀 1</span></dd>
 <dt>提示词目录</dt><dd><span class="chip ok">prompts/</span> · 该路径下存在 <span class="mono">prompts/</span>（<span class="mono">has_prompts=true</span>）</dd>
 <dt>变更数 / Agent 数</dt><dd class="mono">22 · 6</dd>
 <dt>当前</dt><dd><span class="chip">非当前</span> · 切换后全局 <span class="mono">.specs/</span> 与提示词解析路径同步切换</dd>
 <dt>绑定 Agent</dt><dd>日志归档组（<span class="mono">数据同步 Agent</span> · <span class="mono">archive/oss</span> 工具）</dd>
-<dt>关联资源（现/建议）</dt><dd class="tiny">Agent ✅1(单值) · 工作流 ✅1 · 产物/会话/知识/工作项 ❌账面零关联 · Team ❌不存在 → 全表见<a style="color:var(--blue);cursor:pointer" data-goto="projects__agentflow.html">装配快照</a></dd></dl>
+<dt>关联资源（现/建议）</dt><dd class="tiny">Agent ✅1(单值) · 工作流 ✅1 · 知识 ✅<b>专属空间 1:1（成员读写）</b> · 产物/会话/工作项 ❌账面零关联 · Team ❌不存在 → 全表见<a style="color:var(--blue);cursor:pointer" data-goto="projects__agentflow.html">装配快照</a></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">扫描结果</p>
 <table class="tbl compact"><thead><tr><th>产物</th><th>说明</th><th>状态</th></tr></thead><tbody>
 <tr><td class="mono tiny">.specs/</td><td class="tiny">22 个变更目录（演示态未展开明细）</td><td><span class="chip ok">已索引</span></td></tr>
@@ -81,7 +87,8 @@
 <dt>影响</dt><dd>派发到该项目的工作流使用全局提示词 → 项目定制语气/边界不生效</dd>
 <dt>补法</dt><dd>在项目路径下建 <span class="mono">prompts/</span> 后点「重新扫描」，或直接编辑项目提示词（§6.18）</dd>
 <dt>上次校验</dt><dd class="mono">09-19 17:04（启动扫描）</dd>
-<dt>关联资源（现/建议）</dt><dd class="tiny">Agent ✅1(单值) · 工作流 ✅1 · 产物/会话/知识/工作项 ❌账面零关联 · Team ❌不存在 → 全表见<a style="color:var(--blue);cursor:pointer" data-goto="projects__agentflow.html">装配快照</a></dd></dl>
+<dt>知识空间</dt><dd><span class="pill" data-click data-goto="knowledge.html#space-sandbox">demo-sandbox 空间</span> <span class="chip ok">读写</span> <span class="chip">空态 0 篇</span> · <span class="pill" data-click data-goto="knowledge.html#space-legacy">legacy-monitor 空间</span> <span class="chip">冻结 5 篇</span> <span class="tiny dim">（两项目各 1 个空间 · 与项目 1:1，缺提示词不影响空间可用性）</span></dd>
+<dt>关联资源（现/建议）</dt><dd class="tiny">Agent ✅1(单值) · 工作流 ✅1 · 知识 ✅<b>专属空间 1:1（成员读写）</b> · 产物/会话/工作项 ❌账面零关联 · Team ❌不存在 → 全表见<a style="color:var(--blue);cursor:pointer" data-goto="projects__agentflow.html">装配快照</a></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">命中清单</p>
 <table class="tbl compact"><thead><tr><th>项目</th><th>路径</th><th>变更数</th><th>Agent 数</th><th>操作</th></tr></thead><tbody>
 <tr><td><b>demo-sandbox</b></td><td class="mono tiny">/tmp/demo-sandbox</td><td class="mono">0</td><td class="mono">0</td><td><span class="btn link" data-toast="初始化 prompts/ 需在盘上落目录——本环境未解冻（裁定⑧：只改文档与原型），演示态不执行">初始化 prompts/</span><span class="btn link" data-toast="重新扫描已排队（演示）">重新扫描</span></td></tr>
@@ -92,10 +99,12 @@
 <div class="drawer" id="dr-proj-infra"><header><b>项目详情 · infra-scripts</b><span class="chip ok">has_prompts</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <dl class="kv">
 <dt>项目路径</dt><dd class="mono tiny">/home/malizhi/work/infra-scripts</dd>
+<dt>Leader</dt><dd class="mono tiny">审查 Agent · 标准 <span class="dim">（其他 Agent 类 Leader · owner 李工）</span></dd>
+<dt>知识空间</dt><dd><a data-click data-goto="knowledge.html#space-infra" style="color:var(--blue);cursor:pointer">infra-scripts 空间</a> <span class="chip ok">读写</span> <span class="mono tiny">9 篇 · 最近 09-20 09:41（L0 落盘）</span></dd>
 <dt>提示词目录</dt><dd><span class="chip ok">prompts/</span> · <span class="mono">has_prompts=true</span></dd>
 <dt>变更数 / Agent 数</dt><dd class="mono">7 · 4</dd>
 <dt>当前</dt><dd><span class="chip">非当前</span></dd>
-<dt>关联资源（现/建议）</dt><dd class="tiny">Agent ✅1(单值) · 工作流 ✅1 · 产物/会话/知识/工作项 ❌账面零关联 · Team ❌不存在 → 全表见<a style="color:var(--blue);cursor:pointer" data-goto="projects__agentflow.html">装配快照</a></dd></dl>
+<dt>关联资源（现/建议）</dt><dd class="tiny">Agent ✅1(单值) · 工作流 ✅1 · 知识 ✅<b>专属空间 1:1（成员读写）</b> · 产物/会话/工作项 ❌账面零关联 · Team ❌不存在 → 全表见<a style="color:var(--blue);cursor:pointer" data-goto="projects__agentflow.html">装配快照</a></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">成员</p>
 <table class="tbl compact"><thead><tr><th>成员</th><th>角色</th><th>本项目权限</th></tr></thead><tbody>
 <tr><td class="mono">admin · 李工</td><td><span class="chip bad">admin</span></td><td class="mono tiny">全部 6 项（豁免）</td></tr>
@@ -109,10 +118,11 @@
 <tr><td>盘上项目目录 / 产物文件</td><td><span class="chip ok">不改动</span></td></tr>
 <tr><td>该项目下的变更索引</td><td><span class="chip warn">平台内解除登记</span></td></tr>
 <tr><td>已挂载 Agent 的 <span class="mono">project_ids</span></td><td><span class="chip warn">同步移除该分配</span></td></tr>
+<tr><td><b>专属知识空间</b>（1:1）</td><td><span class="chip warn">同步解除登记 · 内容转归档快照</span> <span class="tiny dim">不删文档，保留 <span class="mono">90d</span> 后回收；L0-L3 自动总结同时停写</span></td></tr>
 <tr><td>历史会话与审计</td><td><span class="chip ok">保留快照</span></td></tr>
 </tbody></table>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [沙盒已废弃，索引清理            ]</pre>
-<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已解除登记（盘上文件未删除）· 审计 project:unregistered（演示）" data-close>确认删除登记</button></div></div></div>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已解除登记（盘上文件未删除）· 专属空间转归档快照 · 审计 project:unregistered + space:archived（演示）" data-close>确认删除登记</button></div></div></div>
 <div class="pop" id="pp-switch" style="max-width:420px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ 当前项目切换器</b>　切换后全局 <span class="mono">.specs/</span> 与提示词解析路径同步切换</p>
 <table class="tbl compact"><tbody>
 <tr><td><b>agentflow</b> <span class="chip info">当前</span></td><td class="mono tiny">…/project/agentflow</td><td><span class="btn link" style="opacity:.5">切换</span></td></tr>
@@ -129,6 +139,6 @@
 <tr><td class="mono">lisi · 李四</td><td class="tiny">2 个项目（agentflow · demo-sandbox）</td><td><span class="btn link" data-toast="已按 lisi 预览：2 行（演示）" data-close>预览</span></td></tr>
 <tr><td class="mono">newbie · 赵六</td><td class="tiny">0 个项目 → 空列表</td><td><span class="btn link" data-toast="已按 newbie 预览：空列表「你还没有被分配任何项目，请联系管理员」——不回退为全部（演示）" data-close>预览</span></td></tr>
 </tbody></table></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明：</b>路径为真实机器路径。「提示词目录缺失」演示项目未初始化提示词资源时的标注（该字段对应 <span class="mono">has_prompts</span> 判定）。状态 / 优先级 / Lead / 成员数 / 进度为演示列：状态取 <span class="mono">planned·in_progress·paused·completed·cancelled</span>，优先级取 <span class="mono">urgent·high·medium·low·none</span>，Lead 为成员或 Agent，进度 = 已完成工作项 / 总工作项（演示百分比）。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：agentflow 项目名 / 行内「详情」/ 当前项目面板标题 → 项目详情独立页（路径 · 扫描结果 11 行 · 成员 · 扫描历史 · 页内自带删除二次确认）· 其余 4 行的「详情」→ 3 个精简详情抽屉（kv + 至多 1 子表）· 顶栏「当前：agentflow ▾」与空态卡「以零权限用户预览 ▾」→ 弹层 · 「+ 新建项目」→ 新建项目表单独立页（标识 / 计划 / 资源 / 成员 / 关联对象）· 「切换」→ toast · 「删除」→ 二次确认（声明不删盘上文件 · 必填原因）· 缺失态抽屉内「初始化 prompts/」→ 冻结说明 toast　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明：</b>路径为真实机器路径。「提示词目录缺失」演示项目未初始化提示词资源时的标注（该字段对应 <span class="mono">has_prompts</span> 判定）。状态 / 优先级 / Leader / 成员数 / 知识空间 / 进度为演示列：状态取 <span class="mono">planned·in_progress·paused·completed·cancelled</span>（表单侧中文单选 = 未开始 / 进行中 / 已暂停 / 已完成），优先级取 <span class="mono">urgent·high·medium·low·none</span>（表单侧 = 紧急 / 高 / 中 / 低），<b>Leader 显示个人 Agent 名</b>（每个用户有一个 1:1 用户级 Agent，见 <span class="mono">users.html</span>），<b>知识空间与项目 1:1</b>（成员读写 · 非成员 404），进度 = 已完成工作项 / 总工作项（演示百分比）。<b>列表与表单均无开始 / 结束时间列</b>——项目无期限概念，节奏由里程碑 / 工作项承载。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：agentflow 项目名 / 行内「详情」/ 当前项目面板标题 → 项目详情独立页（路径 · 扫描结果 11 行 · <b>关联资源与专属知识空间卡</b> · 成员 · 扫描历史 · 页内自带删除二次确认）· <b>行内「知识空间」列 → 深链锚点 <span class="mono">knowledge.html#space-〈项目〉</span></b>（空间页 §2 表内对应行）· 其余 4 行的「详情」→ 3 个精简详情抽屉（kv + 至多 1 子表 · 含 Leader / 知识空间行）· 顶栏「当前：agentflow ▾」与空态卡「以零权限用户预览 ▾」→ 弹层 · 「+ 新建项目」→ 新建项目表单独立页（标识 / 资源 / 状态与优先级 / Leader / 成员 / <b>专属知识空间 + L0-L3</b> / 关联对象 · 无日期字段）· 「切换」→ toast · 「删除」→ 二次确认（声明不删盘上文件 · 含空间转归档快照 · 必填原因）· 缺失态抽屉内「初始化 prompts/」→ 冻结说明 toast　按 Esc 关闭所有浮层。</p>
 </body></html>
