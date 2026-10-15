@@ -3,33 +3,33 @@
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="projects__files.html">文件查看（只读）</span></div>
 <div class="detail-top"><span class="pill" data-back="stage-model.html" data-click>← 返回 阶段模型配置</span><span class="crumb"><b>管理 › 阶段模型 › 终态锚 done / closed</b></span><span class="chip ok">done · 7-integration</span><span class="chip">closed · 未挂载</span></div>
 <div class="detail-body">
 <div class="callout bad"><p class="tiny" style="margin:0"><b>终态锚不同于普通阶段：</b>它决定「完成 / 关闭」两列的语义、done 的<b>证据要求</b>、以及 6.21 收件箱的自愈归档条件。删除或改归类会连带影响下游 5 处（见下表），本页对终态锚<b>只允许改显示名与提示词</b>，删除需二次确认。</p></div>
-<dl class="kv"><dt>done 挂载阶段</dt><dd class="mono">7-integration 集成归档</dd><dt>done 产物</dt><dd class="mono tiny">（无）<span class="chip" style="height:16px">当前无必需产物</span></dd><dt>证据要求</dt><dd><span class="chip warn">建议加</span> §1.6.5 ③：done 需证据 + 同伴复核（当前可空手进 done）</dd><dt>closed 挂载阶段</dt><dd class="mono dim">（无）</dd><dt>门禁</dt><dd><span class="chip">无</span></dd><dt>提示词</dt><dd class="mono">prompts/7-integration.md</dd><dt>看板映射</dt><dd class="mono">6.20 列「完成 / 关闭」</dd><dt>收件箱联动</dt><dd>工作项进 done → 旧的「运行失败」通知批量自愈归档（§6.0 ⑫ 规则三）</dd><dt>triage 影响</dt><dd>进终态后 triage 轴锁为 <span class="mono">not-needed</span>，不再计入自动派单池</dd></dl>
+<dl class="kv"><dt>done 挂载阶段</dt><dd class="mono">7-integration 集成归档</dd><dt>done 产物</dt><dd class="mono tiny">（无）<span class="chip" style="height:16px">当前无必需产物</span></dd><dt>证据要求</dt><dd><span class="chip warn">建议加</span> §1.6.5 ③：done 需证据 + 同伴复核（当前可空手进 done）</dd><dt>closed 挂载阶段</dt><dd class="mono dim">（无）</dd><dt>门禁</dt><dd><span class="chip">无</span></dd><dt>提示词</dt><dd class="mono">prompts/7-integration.md</dd><dt>看板映射</dt><dd class="mono">6.20 列「完成 / 关闭」</dd><dt>收件箱联动</dt><dd>任务进 done → 旧的「运行失败」通知批量自愈归档（§6.0 ⑫ 规则三）</dd><dt>triage 影响</dt><dd>进终态后 triage 轴锁为 <span class="mono">not-needed</span>，不再计入自动派单池</dd></dl>
 <h4 class="blk">删除终态锚 · 下游影响清单</h4>
 <table class="tbl compact"><thead><tr><th>受影响面</th><th>现在</th><th>删除后</th></tr></thead><tbody>
-<tr><td>6.20 看板第 4 列</td><td class="tiny">完成 / 关闭 · 5 项</td><td class="tiny" style="color:var(--red)">列消失，5 个工作项无处可放</td></tr>
+<tr><td>6.20 看板第 4 列</td><td class="tiny">完成 / 关闭 · 5 项</td><td class="tiny" style="color:var(--red)">列消失，5 个任务无处可放</td></tr>
 <tr><td>阶段判定与进度</td><td class="tiny">扫描到 7-integration 即 100%</td><td class="tiny" style="color:var(--red)">进度上限停在 8/9，所有 change 永远「差一步」</td></tr>
 <tr><td>收件箱自愈归档</td><td class="tiny">进 done 触发旧失败通知归档</td><td class="tiny" style="color:var(--red)">归档条件失效，旧通知滞留</td></tr>
 <tr><td>历史产物</td><td class="tiny">INTEGRATION.md ×3</td><td class="tiny" style="color:var(--red)">变孤儿，无阶段认领</td></tr>
-<tr><td>工作项批量迁移</td><td class="tiny">status=done ×14</td><td class="tiny" style="color:var(--red)">需回填到新终态（multica 迁移 332/337 的教训）</td></tr>
+<tr><td>任务批量迁移</td><td class="tiny">status=done ×14</td><td class="tiny" style="color:var(--red)">需回填到新终态（multica 迁移 332/337 的教训）</td></tr>
 </tbody></table>
 <p style="margin-top:var(--s4)"><button class="btn sm" data-click data-goto="stage-model__stage-edit.html">编辑 7-integration</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-del-anchor">删除终态锚（done）</button></p>
 </div>
 <div class="modal" id="md-del-anchor"><div style="padding:var(--s4)"><b style="color:var(--red)">删除终态锚 · done（7-integration）？</b>
 <p class="small dim" style="margin:8px 0">终态锚决定「完成 / 关闭」两列语义、done 的证据要求与收件箱自愈归档条件。<b>下游影响 5 处</b>：</p>
 <ul class="small dim" style="margin:0 0 8px;padding-left:18px">
-<li>6.20 看板「完成 / 关闭」列消失，<b>14 个 status=done 工作项</b>需批量迁移回填</li>
+<li>6.20 看板「完成 / 关闭」列消失，<b>14 个 status=done 任务</b>需批量迁移回填</li>
 <li>进度分母变 8，所有 change 永远停在「差一步」</li>
 <li>历史 <span class="mono">INTEGRATION.md</span> ×3 成孤儿产物</li>
 <li>收件箱「进 done 自愈归档旧失败通知」条件失效，旧通知滞留</li>
 <li><span class="mono">锚归类建后不可改</span> 的不变量由机械测试护航（multica 537）——删锚会打断该测试</li>
 </ul>
-<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">必填理由: [平台不再承诺归档阶段，改由 closed 承载 ]   受影响工作项: 14   受影响产物: 3</pre>
-<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除终态锚（演示）· 14 工作项转待迁移队列 · 审计 wf:anchor_deleted" data-close>确认删除（不可自动回滚）</button></div></div></div>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">必填理由: [平台不再承诺归档阶段，改由 closed 承载 ]   受影响任务: 14   受影响产物: 3</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除终态锚（演示）· 14 任务转待迁移队列 · 审计 wf:anchor_deleted" data-close>确认删除（不可自动回滚）</button></div></div></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
 <p class="tiny dim" style="padding:14px 18px">本页由 stage-model.html 的 <span class="mono">dr-anchor-done</span> 抽屉升格而来：终态锚语义 + 下游影响 5 处清单 + 删除（不可自动回滚）操作链。本页对终态锚只允许改显示名与提示词。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：编辑 7-integration → stage-model__stage-edit · 删除终态锚 → 必填理由二次确认 modal（含 14 个工作项待迁移）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：编辑 7-integration → stage-model__stage-edit · 删除终态锚 → 必填理由二次确认 modal（含 14 个任务待迁移）。</p>
 </body></html>

@@ -3,7 +3,7 @@
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="projects__files.html">文件查看（只读）</span></div>
 <div class="detail-top"><span class="pill" data-back="stage-model.html" data-click>← 返回 阶段模型配置</span><span class="crumb"><b>管理 › 阶段模型 › 保存前 · 覆盖面预览</b></span><span class="chip bad">整包盲覆盖 · 无 If-Match</span></div>
 <div class="detail-body">
 <div class="callout bad"><p class="tiny" style="margin:0"><b>现状（P2-5 第一批要治的）：</b><span class="mono">workflow.json</span> 的 PUT 是<b>整包盲覆盖</b>——不发 ETag、不比对 <span class="mono">If-Match</span>，后写者全吃。本页「保存」就是这个 PUT，没有 412。</p></div>

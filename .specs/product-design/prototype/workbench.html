@@ -4,7 +4,7 @@
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p2" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="projects__files.html">文件查看（只读）</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">任务看板</span></div>
 <p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>登录后默认首页。变更卡片按最近活动排序；每张卡片显示阶段条、任务进度与风险标签。</p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/（工作台）</span><span class="fake">演示数据</span></div>
@@ -106,7 +106,7 @@
 <p style="margin-top:var(--s3)"><button class="btn sm" data-toast="已保存为视图 v-12（status=进行中）· 链接 ?view=v-12 可分享（§6.0 ②）（演示）">存为视图</button></p></div></div>
 
 <div class="drawer" id="dr-stat-blocked"><header><b>指标 · 阻塞 2（需人工介入）</b><span class="chip bad">阻塞</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
-<dl class="kv"><dt>口径</dt><dd>风险标签 =「阻塞」或存在 <span class="mono">blocked</span> 卡且无人接</dd><dt>平均滞留</dt><dd class="mono">19h</dd><dt>通知态</dt><dd><span class="chip ok">已只 ping 拍板人</span>（§6.0 ⑫）</dd><dt>自愈</dt><dd>旧「运行失败」通知未自愈归档 · 因工作项未推进</dd></dl>
+<dl class="kv"><dt>口径</dt><dd>风险标签 =「阻塞」或存在 <span class="mono">blocked</span> 卡且无人接</dd><dt>平均滞留</dt><dd class="mono">19h</dd><dt>通知态</dt><dd><span class="chip ok">已只 ping 拍板人</span>（§6.0 ⑫）</dd><dt>自愈</dt><dd>旧「运行失败」通知未自愈归档 · 因任务未推进</dd></dl>
 <table class="tbl compact" style="margin-top:var(--s3)"><thead><tr><th>Change</th><th>因</th><th>责任</th></tr></thead><tbody>
 <tr><td class="mono">agent-control-plane</td><td>SPEC 前置产物缺 2 份</td><td class="mono">李工</td></tr>
 <tr><td class="mono">multi-provider</td><td>T09 等 Q1 裁定</td><td class="mono">王工</td></tr>

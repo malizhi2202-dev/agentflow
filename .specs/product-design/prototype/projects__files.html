@@ -1,0 +1,390 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>项目 · 文件查看（只读）· AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.file-layer{display:none}.file-layer.on{display:block}
+.fp{display:none}.fp.on{display:block}
+pre.code{background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px 10px 10px 6px;overflow:auto;max-height:420px;line-height:1.55;white-space:pre}
+pre.code .ln{display:inline-block;width:2.9em;text-align:right;margin-right:.9em;color:var(--text-muted);font-style:normal;user-select:none}
+tr[data-fp]{cursor:pointer}
+tr[data-fp]:hover{background:var(--bg-card-hover)}
+tr[data-fp]:hover td.path{color:var(--blue)}
+td.path{font-family:var(--font-mono);font-size:11.5px;white-space:nowrap}
+.dir{font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;color:var(--text);cursor:pointer}
+input.q{height:26px;background:var(--bg-input);border:1px solid var(--border-strong);border-radius:6px;color:var(--text);padding:0 9px;font-size:12px;min-width:250px}
+.pill.on{border-color:var(--blue-border);color:var(--blue);background:var(--bg-selected);font-weight:600}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p13" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="projects.html">项目管理</span><span class="pill" data-goto="projects__agentflow.html">agentflow 项目详情</span><span class="pill" data-goto="knowledge.html">知识库</span><span class="pill" data-goto="replay.html">执行回放</span></div>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span><b>只读页。</b>项目文件由「代码仓 + 本地目录」两个资源索引进平台：<b>平台可读 · 可追溯 · 不可写</b>。产物文档编辑功能已下线（改版历史由 git 提交与 <span class="mono">backup/</span> 快照承担），要看要改请去本地目录或代码仓。</p>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/projects/1/files · 只读索引</span><span class="fake">演示数据</span></div>
+      <div class="app" style="grid-template-columns:196px minmax(0,1fr)">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html" class="active"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="nav-grp">管理</div>
+          <a data-goto="audit.html"><svg class="icon"><use href="#i-file"/></svg>审计日志</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb"><a data-click data-goto="projects.html" style="color:inherit;text-decoration:none">项目</a> <span class="dim">/ <a data-click data-goto="projects__agentflow.html" style="color:inherit;text-decoration:none">AgentFlow 平台研发</a> / 文件</span></span>
+            <span class="right"><span class="chip ok">只读索引</span><span class="chip mono" data-click data-pop="pp-proj">项目：agentflow ▾</span><span class="btn link" data-click data-goto="projects__agentflow.html#res">项目资源 ▾</span></span></div>
+          <div class="app-body">
+            <div class="tabs" id="res-tabs" style="margin-bottom:var(--s3)">
+              <span class="tab active" onclick="setLayer('ly-gh',this)">GitHub 仓 · <span class="mono tiny">github.com/malizhi2202-dev/agentflow</span> @ main · <span class="mono tiny">a1b2c3</span></span>
+              <span class="tab" onclick="setLayer('ly-local',this)">本地目录 · <span class="mono tiny">~/project/agentflow</span></span>
+              <span style="flex:1"></span>
+              <span class="tiny dim" style="align-self:center;padding-bottom:6px">⟷ 同一批文件的两个视图 · 内容有差异（见各层头部差异条）</span>
+            </div>
+
+            <div class="panel tight" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:var(--s3)">
+              <input class="q" id="q" placeholder="搜索路径（如 agents_api / ROADMAP / .specs/）" oninput="filterRows()">
+              <button class="btn sm" data-toast="⟳ 已重建索引：1,284 个文件 · 342ms · 跳过 frontend/node_modules（35,517 个被跟踪文件）与 .venv · 审计 file_index:rebuilt（演示）">⟳ 刷新索引</button>
+              <span class="pill" id="f-recent" onclick="toggleRecent(this)" title="只保留「最近变更 ≤ 7d」的行">仅最近变更 7d</span>
+              <span class="pill" data-toast="已切换排序：按最近变更倒序（演示 · 排序写入 URL：?sort=mtime）">排序：最近变更 ▾</span>
+              <span class="pill" data-click data-pop="pp-view">视图与跳过项 ▾</span>
+              <span style="flex:1"></span>
+              <span class="tiny dim">当前层命中 <b id="hit" class="mono">17</b> / <b id="tot" class="mono">17</b> 行 · 索引 09-23 14:10 · TTL 5s</span>
+            </div>
+
+            <div class="file-layer on" id="ly-gh">
+              <div class="callout" style="margin-bottom:var(--s3)"><p class="tiny" style="margin:0"><b>与本地的差异（GitHub 视角）：</b>落后 <span class="mono">0</span> commits · 领先 <span class="mono">3</span> commits 未推送 · 工作区 <span class="mono">6</span> 处未提交改动<b>不在此视图</b>（远端只有已提交内容）。仓库资源保持<b>只读</b>：平台不 push、不建分支、不写文件。</p></div>
+              <table class="tbl compact"><thead><tr><th style="width:46%">路径</th><th>大小</th><th>最近变更</th><th>变更者</th></tr></thead><tbody>
+                <tr><td class="dir" onclick="toggleDir('gh-backend',this)"><span class="caret">▾</span> 📁 backend/</td><td class="mono tiny dim">4 项</td><td class="mono tiny">2d 前</td><td class="tiny dim">—</td></tr>
+                <tr data-in="gh-backend"><td class="path" data-click data-drawer="dr-file" data-fp="fp-main">　└ backend/main.py</td><td class="mono">11.3 KB</td><td class="mono tiny" data-age="2">09-21 16:04 · 2d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr data-in="gh-backend"><td class="path" data-click data-drawer="dr-file" data-fp="fp-config">　└ backend/config.py</td><td class="mono">2.8 KB</td><td class="mono tiny">09-21 16:04 · 2d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr data-in="gh-backend"><td class="path" data-click data-drawer="dr-file" data-fp="fp-agentsapi">　　└ backend/routes/agents_api.py</td><td class="mono">12.3 KB</td><td class="mono tiny">09-21 14:22 · 2d</td><td><span class="chip purple">Agent · 开发 Agent</span></td></tr>
+                <tr data-in="gh-backend"><td class="path" data-click data-drawer="dr-file" data-fp="fp-adapter">　　└ backend/runtime/adapters/claude_code.py</td><td class="mono">4.3 KB</td><td class="mono tiny">09-18 11:05 · 5d</td><td><span class="chip">用户 · 王工</span></td></tr>
+                <tr><td class="dir" onclick="toggleDir('gh-frontend',this)"><span class="caret">▾</span> 📁 frontend/</td><td class="mono tiny dim">2 项</td><td class="mono tiny">3d 前</td><td class="tiny dim">—</td></tr>
+                <tr data-in="gh-frontend"><td class="path" data-click data-drawer="dr-file" data-fp="fp-cp">　└ frontend/src/pages/AgentControlPlane.tsx</td><td class="mono">71.6 KB <span class="chip warn tiny">大文件</span></td><td class="mono tiny">09-20 20:41 · 3d</td><td><span class="chip">用户 · 王工</span></td></tr>
+                <tr data-in="gh-frontend"><td class="path" data-click data-drawer="dr-file" data-fp="fp-tokens">　　└ frontend/src/styles/tokens.css</td><td class="mono">7.7 KB</td><td class="mono tiny" data-age="15">09-08 10:12 · 15d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr><td class="dir" onclick="toggleDir('gh-specs',this)"><span class="caret">▾</span> 📁 .specs/ <span class="chip info tiny">知识产物根</span></td><td class="mono tiny dim">11 个 change 目录</td><td class="mono tiny">4h 前</td><td class="tiny dim">—</td></tr>
+                <tr data-in="gh-specs"><td class="path" data-click data-drawer="dr-file" data-fp="fp-state">　└ .specs/STATE.md <span class="chip warn tiny">跨会话状态</span></td><td class="mono">11.4 KB</td><td class="mono tiny">09-23 10:12 · 4h</td><td><span class="chip purple">Agent · 李工的个人 Agent</span></td></tr>
+                <tr data-in="gh-specs"><td class="path" data-click data-drawer="dr-file" data-fp="fp-roadmap">　└ .specs/platform-evolution/ROADMAP.md</td><td class="mono">19.5 KB</td><td class="mono tiny">09-20 09:30 · 3d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr data-in="gh-specs"><td class="path" data-click data-drawer="dr-file" data-fp="fp-pd">　└ .specs/product-design/PRODUCT-DESIGN.html</td><td class="mono">392 KB <span class="chip warn tiny">大文件</span></td><td class="mono tiny">09-22 22:14 · 1d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr data-in="gh-specs"><td class="path" data-click data-drawer="dr-file" data-fp="fp-requirement">　　└ .specs/agent-domains/REQUIREMENT.md</td><td class="mono">3.0 KB</td><td class="mono tiny">09-17 15:02 · 6d</td><td><span class="chip purple">Agent · 李工的个人 Agent</span></td></tr>
+                <tr><td class="path" data-click data-drawer="dr-file" data-fp="fp-readme">📄 README.md</td><td class="mono">16.2 KB</td><td class="mono tiny" data-age="8">09-15 13:40 · 8d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr><td class="path" data-click data-drawer="dr-file" data-fp="fp-claude">📄 CLAUDE.md <span class="chip tiny">Agent 指令</span></td><td class="mono">5.1 KB</td><td class="mono tiny">09-22 08:50 · 1d</td><td><span class="chip purple">Agent · 开发 Agent</span></td></tr>
+                <tr><td class="path" data-click data-drawer="dr-file" data-fp="fp-sprite">📦 .specs/product-design/prototype/assets/sprite.js</td><td class="mono">4.0 KB</td><td class="mono tiny" data-age="20">09-03 17:20 · 20d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr><td class="path" data-toast="目录与索引跳过项不展开预览：frontend/node_modules 35,517 个文件已被 .gitignore 规则排除，但历史已纳入跟踪（已知缺陷）· 平台不整仓拉取（演示）">🚫 frontend/node_modules/ <span class="chip bad tiny">索引已跳过</span></td><td class="mono dim">35,517 文件</td><td class="mono tiny dim" data-age="30">—</td><td class="tiny dim">不索引</td></tr>
+              </tbody></table>
+            </div>
+
+            <div class="file-layer" id="ly-local">
+              <div class="callout warn" style="margin-bottom:var(--s3)"><p class="tiny" style="margin:0"><b>与远端的差异（本地视角）：</b>本地 <span class="mono">6</span> 处未提交改动 + <span class="mono">3</span> 个未跟踪文件<b>只存在于这一层</b>；<span class="mono">backup/</span> 自动快照目录也只在本机。<b>写操作全在本地完成</b>——平台侧任何角色都没有写入路径（无 API、无按钮），所以本层无需「保存」类控件。</p></div>
+              <table class="tbl compact"><thead><tr><th style="width:46%">路径</th><th>大小</th><th>最近变更</th><th>变更者</th></tr></thead><tbody>
+                <tr><td class="path" data-click data-drawer="dr-file" data-fp="fp-agentsapi">📄 backend/routes/agents_api.py</td><td class="mono">12.3 KB</td><td class="mono tiny">09-21 14:22 · 2d</td><td><span class="chip purple">Agent · 开发 Agent</span></td></tr>
+                <tr><td class="path" data-click data-drawer="dr-file" data-fp="fp-main">📄 backend/main.py</td><td class="mono">11.3 KB</td><td class="mono tiny">09-21 16:04 · 2d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr><td class="path" data-toast="本地工作区改动 · 未提交：git diff 可见 · 平台不代为提交（演示）">📄 backend/config.py <span class="chip warn tiny">工作区改动</span></td><td class="mono">2.9 KB</td><td class="mono tiny">12min 前 · 本地未提交</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr><td class="dir" onclick="toggleDir('lo-specs',this)"><span class="caret">▾</span> 📁 .specs/ <span class="chip info tiny">知识产物根</span></td><td class="mono tiny dim">11 个 change 目录</td><td class="mono tiny">42min 前</td><td class="tiny dim">—</td></tr>
+                <tr data-in="lo-specs"><td class="path" data-click data-drawer="dr-file" data-fp="fp-state">　└ .specs/STATE.md <span class="chip warn tiny">工作区改动</span></td><td class="mono">11.6 KB</td><td class="mono tiny">42min 前 · 未提交</td><td><span class="chip purple">Agent · 李工的个人 Agent</span></td></tr>
+                <tr data-in="lo-specs"><td class="path" data-click data-drawer="dr-file" data-fp="fp-requirement">　└ .specs/agent-domains/REQUIREMENT.md</td><td class="mono">3.0 KB</td><td class="mono tiny">09-17 15:02 · 6d</td><td><span class="chip purple">Agent · 李工的个人 Agent</span></td></tr>
+                <tr data-in="lo-specs"><td class="path" data-click data-drawer="dr-file" data-fp="fp-pd">　└ .specs/product-design/PRODUCT-DESIGN.html</td><td class="mono">392 KB <span class="chip warn tiny">大文件</span></td><td class="mono tiny">09-23 09:58 · 5h</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr><td class="path" data-toast="本轮新增页 · 未跟踪（git status 显示 ?? projects__files.html）：提交后才出现在 GitHub 层（演示）">📄 .specs/product-design/prototype/projects__files.html <span class="chip bad tiny">未跟踪</span></td><td class="mono">28.6 KB</td><td class="mono tiny">刚刚 · 本地</td><td><span class="chip purple">Agent · 李工的个人 Agent</span></td></tr>
+                <tr><td class="dir" onclick="toggleDir('lo-backup',this)"><span class="caret">▾</span> 📁 backup/ <span class="chip tiny">仅本机 · 不入仓</span></td><td class="mono tiny dim">214 份快照</td><td class="mono tiny">4h 前</td><td class="tiny dim">系统自动</td></tr>
+                <tr data-in="lo-backup"><td class="path" data-click data-drawer="dr-file" data-fp="fp-backup">　└ backup/agent-domains/REQUIREMENT.md@09-23-1402</td><td class="mono">3.0 KB</td><td class="mono tiny">09-23 14:02</td><td><span class="chip info">系统 · 写入前自动备份</span></td></tr>
+                <tr><td class="path" data-toast=".gitignore 已含规则但对已跟踪文件不生效（已知缺陷）· 索引按跳过策略不拉取，仅登记计数（演示）">🚫 frontend/node_modules/ <span class="chip bad tiny">索引已跳过</span></td><td class="mono dim">35,517 文件</td><td class="mono tiny dim" data-age="30">—</td><td class="tiny dim">不索引</td></tr>
+                <tr><td class="path" data-toast=".venv/ 命中 .gitignore → 不进索引；如需在平台可见，改「视图与跳过项」里的忽略策略（演示）">🚫 .venv/ <span class="chip tiny">忽略</span></td><td class="mono dim">8,942 文件</td><td class="mono tiny dim" data-age="30">—</td><td class="tiny dim">不索引</td></tr>
+                <tr><td class="path" data-click data-drawer="dr-file" data-fp="fp-sprite">📦 .specs/product-design/prototype/assets/sprite.js</td><td class="mono">4.0 KB</td><td class="mono tiny" data-age="20">09-03 17:20 · 20d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr><td class="path" data-click data-drawer="dr-file" data-fp="fp-cp">📄 frontend/src/pages/AgentControlPlane.tsx</td><td class="mono">71.6 KB <span class="chip warn tiny">大文件</span></td><td class="mono tiny">09-20 20:41 · 3d</td><td><span class="chip">用户 · 王工</span></td></tr>
+                <tr><td class="path" data-click data-drawer="dr-file" data-fp="fp-roadmap">📄 .specs/platform-evolution/ROADMAP.md</td><td class="mono">19.5 KB</td><td class="mono tiny">09-20 09:30 · 3d</td><td><span class="chip">用户 · 李工</span></td></tr>
+                <tr><td class="path" data-click data-drawer="dr-file" data-fp="fp-readme">📄 README.md</td><td class="mono">16.2 KB</td><td class="mono tiny" data-age="8">09-15 13:40 · 8d</td><td><span class="chip">用户 · 李工</span></td></tr>
+              </tbody></table>
+            </div>
+
+            <div class="callout ok" style="margin-top:var(--s3)"><p class="tiny" style="margin:0 0 6px"><b>本页的产品口径（与旧「产物文档编辑」的区别）：</b></p>
+            <table class="tbl compact"><thead><tr><th>能力</th><th>本页（只读索引）</th><th>已下线的产物编辑（§6.18）</th></tr></thead><tbody>
+              <tr><td>查看文件 · 预览前 60 行</td><td><span class="chip ok">有</span></td><td><span class="chip ok">有</span></td></tr>
+              <tr><td>追溯：谁改的 · 何时 · 哪一版</td><td><span class="chip ok">有</span> <span class="tiny dim">索引进变更者列 + 时间 · 逐版对照交给 git / backup/</span></td><td><span class="chip ok">有</span> <span class="tiny dim">自建 5 版快照</span></td></tr>
+              <tr><td>编辑并写回磁盘</td><td><span class="chip bad">无</span> <span class="tiny dim">由本地目录 / 代码仓承担</span></td><td><span class="chip bad">已下线</span> <span class="tiny dim">平台不承载文档编辑器</span></td></tr>
+              <tr><td>写入面</td><td class="tiny">零写入：无 PUT/PATCH 路由，越权与「不存在」统一 <span class="mono">404</span></td><td class="tiny dim">曾计划 ETag/412 + 写路径解析</td></tr>
+            </tbody></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="drawer" id="dr-file"><header><b>文件预览 · 只读</b><span class="chip">不可写</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+
+  <div class="fp on" id="fp-agentsapi">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> backend <span class="dim">/</span> routes <span class="dim">/</span> <b>agents_api.py</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">12,577 B · text/x-python · UTF-8</dd><dt>最近变更</dt><dd class="mono tiny">09-21 14:22 · 2d 前 · commit <span class="mono">a1b2c3</span></dd><dt>变更者</dt><dd><span class="chip purple">Agent · 开发 Agent</span> <span class="tiny dim">提交人：李工（owner）</span></dd></dl>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–14 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i>"""Agent API 路由 — CRUD + 执行."""
+<i class="ln">2</i>from fastapi import APIRouter, Depends, HTTPException, Request
+<i class="ln">3</i>from sqlalchemy.orm import Session
+<i class="ln">4</i>from database import get_db
+<i class="ln">5</i>from models.agent import Agent
+<i class="ln">6</i>from services.encryption_service import encrypt
+<i class="ln">7</i>from services.audit_service import log_audit
+<i class="ln">8</i>from services.llm_providers import SUPPORTED_PROVIDERS
+<i class="ln">9</i>from models.agent import SUPPORTED_RUNTIMES
+<i class="ln">10</i>
+<i class="ln">11</i>router = APIRouter(prefix="/api/agents", tags=["agents"])
+<i class="ln">12</i>
+<i class="ln">13</i>
+<i class="ln">14</i>def _user(request: Request) -> dict:
+<i class="ln">…</i>    … 后续 46 行进索引窗口，按需滚动加载 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。本机：<span class="mono">~/project/agentflow/backend/routes/agents_api.py</span></p></div>
+  </div>
+
+  <div class="fp" id="fp-main">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> backend <span class="dim">/</span> <b>main.py</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">11,525 B · 300 行 · text/x-python</dd><dt>最近变更</dt><dd class="mono tiny">09-21 16:04 · 2d 前</dd><dt>变更者</dt><dd><span class="chip">用户 · 李工</span></dd></dl>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–11 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i>"""AgentFlow FastAPI 入口."""
+<i class="ln">2</i>import asyncio
+<i class="ln">3</i>from contextlib import asynccontextmanager
+<i class="ln">4</i>from fastapi import FastAPI, Request
+<i class="ln">5</i>from fastapi.middleware.cors import CORSMiddleware
+<i class="ln">6</i>from fastapi.responses import JSONResponse
+<i class="ln">7</i>from config import CORS_ORIGIN, HOST, PORT
+<i class="ln">8</i>from auth import get_user, load_users
+<i class="ln">9</i>from routes.changes import router as changes_router
+<i class="ln">10</i>from routes.change_detail import router as detail_router
+<i class="ln">…</i>    … 后续 49 行进索引窗口 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-config">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> backend <span class="dim">/</span> <b>config.py</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">2,859 B · 80 行 · text/x-python</dd><dt>最近变更</dt><dd class="mono tiny">12min 前 · <span class="chip warn">本地未提交</span></dd><dt>变更者</dt><dd><span class="chip">用户 · 李工</span></dd></dl>
+    <div class="callout warn"><p class="tiny" style="margin:0">未提交的本地改动：<b>平台只读侧看不到 diff 全文</b>（只登记 mtime 与「工作区改动」标记），对照 <span class="mono">git diff</span> 请在本机执行。含默认口令一类的字面值在索引层做脱敏，不明文落库。</p></div>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–10 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i>"""AgentFlow 后端配置."""
+<i class="ln">2</i>import os
+<i class="ln">3</i>import json
+<i class="ln">4</i>
+<i class="ln">5</i>HOST: str = os.environ.get("HOST", "127.0.0.1")
+<i class="ln">6</i>PORT: int = int(os.environ.get("PORT", "8000"))
+<i class="ln">7</i>SCAN_INTERVAL: int = int(os.environ.get("SCAN_INTERVAL", "5"))
+<i class="ln">8</i>CORS_ORIGIN: str = os.environ.get("CORS_ORIGIN", "http://localhost:5173")
+<i class="ln">9</i>PROJECT_ROOT: str = os.environ.get("PROJECT_ROOT", os.path.dirname(os.path.dirname(__file__)))
+<i class="ln">10</i>
+<i class="ln">…</i>    … 后续 50 行进索引窗口 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-adapter">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> backend <span class="dim">/</span> runtime <span class="dim">/</span> adapters <span class="dim">/</span> <b>claude_code.py</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">4,357 B · 90 行</dd><dt>同目录其他</dt><dd class="mono tiny">codex.py · hermes.py · xiaolongxia.py · __init__.py</dd><dt>变更者</dt><dd><span class="chip">用户 · 王工</span></dd></dl>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–12 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i>"""Claude Code 适配器 — 解析 ~/.claude/projects/&lt;project&gt;/*.jsonl."""
+<i class="ln">2</i>import os
+<i class="ln">3</i>import json
+<i class="ln">4</i>import re
+<i class="ln">5</i>import glob
+<i class="ln">6</i>from ..adapter import RuntimeEvent
+<i class="ln">7</i>
+<i class="ln">8</i>
+<i class="ln">9</i>class ClaudeCodeAdapter:
+<i class="ln">10</i>    name = "claude-code"
+<i class="ln">11</i>
+<i class="ln">12</i>    def detect(self) -> bool:
+<i class="ln">…</i>    … 后续 48 行进索引窗口 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-cp">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> frontend <span class="dim">/</span> src <span class="dim">/</span> pages <span class="dim">/</span> <b>AgentControlPlane.tsx</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">71.6 KB · text/tsx · UTF-8</dd><dt>最近变更</dt><dd class="mono tiny">09-20 20:41 · 3d 前</dd><dt>变更者</dt><dd><span class="chip">用户 · 王工</span></dd></dl>
+    <div class="callout warn"><p class="tiny" style="margin:0"><b>截断显示 · 完整内容 2,143 行 · <span class="btn link" data-click data-modal="md-dl">下载原文件</span></b>（预览只取前 60 行；整文件不经预览通道，避免 71.6 KB 进渲染树）。</p></div>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–10 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i>import { useEffect, useState, useCallback, useRef } from 'react';
+<i class="ln">2</i>import {
+<i class="ln">3</i>  Radio, Circle, Activity, RefreshCw, Clock, XCircle,
+<i class="ln">4</i>  Play, Pause, RotateCcw, X, Server, Cpu, BarChart3, Link2,
+<i class="ln">5</i>  Layers, Plus, Trash2, Edit3, Check, ChevronDown, ChevronRight,
+<i class="ln">6</i>  GitBranch, Zap, CopyPlus, AlertTriangle,
+<i class="ln">7</i>} from 'lucide-react';
+<i class="ln">8</i>import { useControlPlane, AgentStatus, QueueItem, ReconcileEntry } from '../stores/controlPlane';
+<i class="ln">9</i>import { useDomains, Domain, RouteResult, ScaleResult } from '../stores/domains';
+<i class="ln">10</i>import { useAgents, Agent } from '../stores/agents';
+<i class="ln">…</i>    … 2,133 行未渲染 · 下载或本地打开 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-tokens">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> frontend <span class="dim">/</span> src <span class="dim">/</span> styles <span class="dim">/</span> <b>tokens.css</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">7,842 B · 210 行 · text/css</dd><dt>变更者</dt><dd><span class="chip">用户 · 李工</span></dd><dt>被引用</dt><dd class="mono tiny">main.tsx · 12 个页面 <span class="dim">（改一处即全站生效，改前先看引用面）</span></dd></dl>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–10 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i>/* ═══════════════════════════════════════════
+<i class="ln">2</i>   AgentFlow console · 开发操作台风格
+<i class="ln">3</i>   借鉴 Linear + GitHub + VSCode
+<i class="ln">4</i>   ═══════════════════════════════════════════ */
+<i class="ln">5</i>
+<i class="ln">6</i>:root {
+<i class="ln">7</i>  /* 背景 */
+<i class="ln">8</i>  --bg-app:         #0d0e12;
+<i class="ln">9</i>  --bg-sidebar:     #0f1015;
+<i class="ln">10</i>  --bg-main:        #13141a;
+<i class="ln">…</i>    … 后续 50 行进索引窗口 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-state">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> .specs <span class="dim">/</span> <b>STATE.md</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">11,635 B · 81 行 · text/markdown</dd><dt>最近变更</dt><dd class="mono tiny">42min 前 · <span class="chip warn">本地未提交</span></dd><dt>变更者</dt><dd><span class="chip purple">Agent · 李工的个人 Agent</span></dd></dl>
+    <div class="callout"><p class="tiny" style="margin:0">跨会话状态文件由 <b>Agent 在会话结束前自行写入本地</b>；平台侧只登记索引与时间线，<b>不提供写入口</b>——避免「平台改一次、本地改一次」双头写。</p></div>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–10 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i># STATE — 跨会话状态
+<i class="ln">2</i>
+<i class="ln">3</i>&gt; 本文件记录当前进行中的工作与上次断点。**每次会话结束前更新**。
+<i class="ln">4</i>&gt; 最近更新：2026-09-23
+<i class="ln">5</i>
+<i class="ln">6</i>## 当前阶段
+<i class="ln">7</i>
+<i class="ln">8</i>**产品化调研与文档重写**（code-kit discovery 第 1 轮 + P-product 产物重写）
+<i class="ln">9</i>
+<i class="ln">10</i>## 最近完成
+<i class="ln">…</i>    … 后续 50 行进索引窗口 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-roadmap">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> .specs <span class="dim">/</span> platform-evolution <span class="dim">/</span> <b>ROADMAP.md</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">19,991 B · 225 行 · text/markdown</dd><dt>所属变更</dt><dd><span class="pill" data-click data-goto="workbench.html">platform-evolution（discovery）</span></dd><dt>变更者</dt><dd><span class="chip">用户 · 李工</span></dd></dl>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–11 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i># ROADMAP — platform-evolution（第 1 轮 · 已过审结论汇总）
+<i class="ln">2</i>
+<i class="ln">3</i>&gt; 来源：本 change 已过审 5 个子议题的结论汇总（状态见 TOPICS.md）。**去重后按依赖关系重排**，不按子议题顺序。
+<i class="ln">4</i>&gt; 详细依据见各子议题的 `D-&lt;slug&gt;/CONCLUSION.md`。
+<i class="ln">5</i>
+<i class="ln">6</i>---
+<i class="ln">7</i>
+<i class="ln">8</i>## 一、总览：5 个子议题的结论收敛为 3 个层次
+<i class="ln">9</i>
+<i class="ln">10</i>| 层 | 含义 | 子议题 | 特征 |
+<i class="ln">11</i>|---|---|---|---|
+<i class="ln">…</i>    … 后续 49 行进索引窗口 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。<span class="tiny dim">未过 ⑤ 人审门的结论禁止进 ROADMAP —— 门禁在服务端，不在编辑器里。</span></p></div>
+  </div>
+
+  <div class="fp" id="fp-requirement">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> .specs <span class="dim">/</span> agent-domains <span class="dim">/</span> <b>REQUIREMENT.md</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">3,104 B · 86 行 · text/markdown</dd><dt>阶段</dt><dd><span class="chip warn">TEST（5-test）</span> <span class="tiny dim">1-requirement 已过需求门</span></dd><dt>变更者</dt><dd><span class="chip purple">Agent · 李工的个人 Agent</span></dd><dt>改版历史</dt><dd class="tiny">v1.0 · 3 次提交 · 2 份自动备份（<span class="mono">backup/agent-domains/</span>）<span class="btn link" data-toast="逐版对照请在本机执行 git log -p 或 diff 两份备份快照 · 平台不承载文档版本 UI（演示）">怎么对照？</span></dd></dl>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–11 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i># agent-domains — 需求文档
+<i class="ln">2</i>
+<i class="ln">3</i>&gt; 版本: 1.0
+<i class="ln">4</i>&gt; 状态: draft
+<i class="ln">5</i>&gt; 创建: 2026-07-06
+<i class="ln">6</i>
+<i class="ln">7</i>## 概述
+<i class="ln">8</i>
+<i class="ln">9</i>为 Agent 控制面板增加 **隔离域（Domain）** 功能，允许用户将 Agent 按域（如：开发域、测试域、生产域）分组管理。每个域内 Agent 独立可见，域之间互相隔离。
+<i class="ln">10</i>
+<i class="ln">11</i>## 用户故事
+<i class="ln">…</i>    … 后续 49 行进索引窗口 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-pd">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> .specs <span class="dim">/</span> product-design <span class="dim">/</span> <b>PRODUCT-DESIGN.html</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">401,184 B · 3,354 行 · text/html</dd><dt>最近变更</dt><dd class="mono tiny">09-23 09:58 · 5h 前</dd><dt>变更者</dt><dd><span class="chip">用户 · 李工</span></dd></dl>
+    <div class="callout warn"><p class="tiny" style="margin:0"><b>截断显示 · 完整内容 3,354 行 · <span class="btn link" data-click data-modal="md-dl">下载原文件</span></b>（392 KB 文档不做整页预览；HTML 类文件按源码文本呈现，不内联渲染，避免样式与脚本进本页沙箱）。</p></div>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–6 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i>&lt;!doctype html&gt;&lt;html lang="zh"&gt;&lt;head&gt;&lt;meta charset="utf-8"&gt;
+<i class="ln">2</i>&lt;title&gt;AgentFlow · 产品设计与开发方案&lt;/title&gt;
+<i class="ln">3</i>&lt;link rel="stylesheet" href="prototype/assets/base.css"&gt;
+<i class="ln">4</i>&lt;/head&gt;&lt;body&gt;
+<i class="ln">5</i>&lt;div class="doc-shell"&gt;
+<i class="ln">…</i>    … 3,348 行未渲染 · 下载或本地打开 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-readme">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> <b>README.md</b></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">16,550 B · 357 行 · text/markdown</dd><dt>变更者</dt><dd><span class="chip">用户 · 李工</span></dd><dt>一致性</dt><dd class="tiny">配置表与 <span class="mono">backend/config.py</span> 需同步（约定）· <span class="chip ok">本次索引未发现漂移</span></dd></dl>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–9 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i># AgentFlow — 通用 Agent 编排与监控平台
+<i class="ln">2</i>
+<i class="ln">3</i>&gt; 通用 Agent 编排 + K8s 式管控 + 可视化监控 + 对话中心
+<i class="ln">4</i>
+<i class="ln">5</i>---
+<i class="ln">6</i>
+<i class="ln">7</i>## 启动
+<i class="ln">8</i>
+<i class="ln">9</i>```bash
+<i class="ln">…</i>    … 后续 51 行进索引窗口 …</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-claude">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> <b>CLAUDE.md</b> <span class="chip tiny">Agent 指令文件</span></p>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">5,236 B · 67 行 · text/markdown</dd><dt>变更者</dt><dd><span class="chip purple">Agent · 开发 Agent</span></dd><dt>生效方式</dt><dd class="tiny">Agent 会话开始时自动加载 · <b>不参与运行时门禁</b>（提示词契约≠门禁）</dd></dl>
+    <p class="h2p" style="margin-top:var(--s3)">前 60 行（当前窗口 1–8 行）</p>
+    <pre class="mono tiny code"><i class="ln">1</i># CLAUDE.md — 项目级 AI 指令
+<i class="ln">2</i>
+<i class="ln">3</i>&gt; 本文件每次会话自动加载。
+<i class="ln">4</i>
+<i class="ln">5</i>## 项目定位
+<i class="ln">6</i>
+<i class="ln">7</i>**AgentFlow** —— 通用 Agent 编排与管控平台，不绑定任何特定的开发流程或框架。
+<i class="ln">8</i>核心能力：Agent 编排（YAML ↔ 画布）、K8s 式管控（隔离域 / 自动路由 / 渐进扩容 / Reconcile 自愈）、
+<i class="ln">…</i>    … 后续 7 行（全文 67 行 · 已到底）…</pre>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。<span class="tiny dim">要改 Agent 行为提示词，同样只能在本地改；平台侧唯一的规则落点是阶段模型与门禁配置。</span></p></div>
+  </div>
+
+  <div class="fp" id="fp-sprite">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> .specs <span class="dim">/</span> product-design <span class="dim">/</span> prototype <span class="dim">/</span> assets <span class="dim">/</span> <b>sprite.js</b></p>
+    <div class="callout warn"><p class="tiny" style="margin:0"><b>不给预览。</b>命中「非文本 / 打包产物」判定：单行压缩（1 line · 4,113 B）、无换行统计意义、预览无阅读价值。索引只登记元信息，正文<b>不落明文副本</b>。</p></div>
+    <dl class="kv"><dt>大小</dt><dd class="mono">4,113 B（4.0 KB）</dd><dt>类型</dt><dd class="mono">application/javascript <span class="chip tiny">打包产物 · 单行</span></dd><dt>mtime</dt><dd class="mono">2026-09-03 17:20:41 +0800</dd><dt>行统计</dt><dd class="mono">1 行 · 最长行 4,112 字符</dd><dt>checksum</dt><dd class="mono tiny">sha256:7f3ac19e…（前 8 位 · 用于「同内容不同路径」去重）</dd><dt>变更者</dt><dd><span class="chip">用户 · 李工</span></dd><dt>二进制同类</dt><dd class="tiny dim">.png / .ico / .woff2 / .pyc / .sqlite 同样只给元信息，预览位显示「不可预览 · 下载原文件」</dd></dl>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+  <div class="fp" id="fp-backup">
+    <p class="tiny mono" style="margin:0 0 8px">项目 <span class="dim">/</span> agentflow <span class="dim">/</span> backup <span class="dim">/</span> agent-domains <span class="dim">/</span> <b>REQUIREMENT.md@09-23-1402</b></p>
+    <div class="callout"><p class="tiny" style="margin:0"><b>快照文件 · 只读且不可改。</b><span class="mono">backup/</span> 是本地工具在写文件前自动留的副本，<b>不入仓、不进平台账本</b>，只被索引到路径与时间。旧「产物编辑」页里的「保留最近 5 版」表随之下线——对照与回滚是本地动作（<span class="mono">git</span> / 直接比文件）。</p></div>
+    <dl class="kv"><dt>大小 / 类型</dt><dd class="mono">3,104 B · text/markdown（与源文件同内容）</dd><dt>生成</dt><dd class="mono">09-23 14:02 · 本地工具自动（非平台触发）</dd><dt>对应源</dt><dd class="mono tiny"><span class="btn link" data-click data-goto="projects__files.html#fp-requirement">.specs/agent-domains/REQUIREMENT.md</span></dd><dt>清理策略</dt><dd class="tiny">本机保留 30d · 平台不代为删除</dd></dl>
+    <div class="callout"><p class="tiny" style="margin:0"><b>编辑请去本地目录或代码仓</b> —— 平台只提供只读索引与追溯（产物编辑功能已下线，改版历史由 git / 备份承担）。</p></div>
+  </div>
+
+</div></div>
+
+<div class="pop" id="pp-view"><p class="tiny muted" style="margin:2px 4px 6px">视图与跳过策略</p>
+<table class="tbl compact"><tbody>
+<tr><td>仅知识产物（<span class="mono tiny">.specs/**</span>）</td><td class="tiny dim">5 行</td><td><span class="btn link" data-toast="已筛选：仅 .specs/ 产物 · 5/16 行（演示 · 筛选写入 URL ?scope=specs）">应用</span></td></tr>
+<tr><td>仅代码（<span class="mono tiny">backend/ frontend/</span>）</td><td class="tiny dim">6 行</td><td><span class="btn link" data-toast="已筛选：仅代码 6/16 行（演示）">应用</span></td></tr>
+<tr><td>显示跳过项（node_modules / .venv）</td><td class="chip bad">默认关</td><td><span class="btn link" data-toast="已展开计数行，仍不索引正文：44,459 文件 · 展开只读元信息（演示）">展开</span></td></tr>
+<tr><td>按阶段分组（change 目录）</td><td class="tiny dim">11 组</td><td><span class="btn link" data-toast="已切换分组维：change 目录（演示）">应用</span></td></tr>
+</tbody></table></div>
+
+<div class="pop" id="pp-proj"><p class="tiny muted" style="margin:2px 4px 6px">切换项目（文件索引按项目各一份）</p>
+<table class="tbl compact"><tbody>
+<tr><td class="mono">agentflow</td><td class="tiny">1,284 文件 · 2 资源</td><td><span class="chip ok">当前</span></td></tr>
+<tr><td class="mono">eve_uploader</td><td class="tiny">312 文件 · 1 资源</td><td><span class="btn link" data-toast="已切到 eve_uploader（索引随之重载 · 演示）">切换</span></td></tr>
+<tr><td class="mono">demo-sandbox</td><td class="tiny dim">未登记本地目录</td><td><span class="btn link" data-toast="✗ 无资源可索引：该项目只挂了 GitHub 仓且未拉取 → 先在项目详情挂本地目录（演示）">打开</span></td></tr>
+</tbody></table></div>
+
+<div class="modal" id="md-dl"><div style="padding:var(--s4)"><b>下载原文件？</b>
+<p class="small dim" style="margin:8px 0">下载走<b>只读通道</b>：以当前身份取整文件，需 <span class="mono">project:read</span> 且是该项目成员；<b>不回写、不建副本</b>。审计记 <span class="mono">file:downloaded</span>（路径 · 大小 · sha256 前 8 位 · 操作人）。<b>要改文件请在本地目录或代码仓改</b>——平台没有写入口。</p>
+<table class="tbl compact"><thead><tr><th>项</th><th>值</th></tr></thead><tbody>
+<tr><td>文件</td><td class="mono tiny">当前预览文件 · 例：AgentControlPlane.tsx · 71.6 KB · 2,143 行</td></tr>
+<tr><td>来源层</td><td>GitHub <span class="mono tiny">@ main · a1b2c3</span></td></tr>
+<tr><td>越权与不存在</td><td>统一 <span class="mono">404</span>（不区分，避免探测他人项目文件）</td></tr>
+</tbody></table>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="已生成只读下载链接（5min 有效）· 审计 file:downloaded（演示）" data-close>下载</button></div></div></div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<script>
+function setLayer(id,el){var ls=document.querySelectorAll('.file-layer');for(var i=0;i<ls.length;i++){ls[i].classList.toggle('on',ls[i].id===id);}var ts=document.querySelectorAll('#res-tabs .tab');for(var j=0;j<ts.length;j++){ts[j].classList.toggle('active',ts[j]===el);}filterRows();if(window.toast){toast('已切到「'+(id==='ly-gh'?'GitHub 仓 main @ a1b2c3':'本地目录 ~/project/agentflow')+'」视图 · 两层文件集合有差异（演示）');}}
+function toggleDir(g,el){var rows=document.querySelectorAll('tr[data-in="'+g+'"]');var open=el.querySelector('.caret').textContent==='▸';for(var i=0;i<rows.length;i++){rows[i].style.display=open?'':'none';}el.querySelector('.caret').textContent=open?'▾':'▸';}
+function toggleRecent(el){el.classList.toggle('on');filterRows();toast(el.classList.contains('on')?'已开筛选：仅最近变更 ≤ 7d · 命中数见右上角（演示 · 筛选写入 URL ?since=7d）':'已关闭「仅最近变更」筛选（演示）');}
+function filterRows(){var q=(document.getElementById('q').value||'').trim().toLowerCase();var recent=document.getElementById('f-recent').classList.contains('on');var hit=0;var layers=document.querySelectorAll('.file-layer');for(var k=0;k<layers.length;k++){if(!layers[k].classList.contains('on'))continue;var rows=layers[k].querySelectorAll('tbody tr');var tt=document.getElementById('tot');if(tt)tt.textContent=String(rows.length);for(var i=0;i<rows.length;i++){var r=rows[i];var m=(!q||r.textContent.toLowerCase().indexOf(q)>=0);if(m&&recent){var a=r.querySelector('[data-age]');if(a&&parseFloat(a.dataset.age)>7)m=false;}r.style.display=m?'':'none';if(m)hit++;}}var h=document.getElementById('hit');if(h)h.textContent=String(hit);}
+document.addEventListener('click',function(e){var t=e.target.closest('[data-fp]');if(!t)return;var id=t.getAttribute('data-fp');var ps=document.querySelectorAll('.fp');for(var i=0;i<ps.length;i++){ps[i].classList.toggle('on',ps[i].id===id);}var d=document.getElementById('dr-file');if(d){d.scrollTop=0;var b=d.querySelector('.body');if(b)b.scrollTop=0;}});
+document.addEventListener('DOMContentLoaded',function(){var h=decodeURIComponent(location.hash.slice(1));if(h==='ly-local'||h==='ly-gh'){var tb=document.querySelectorAll('#res-tabs .tab');setLayer(h,h==='ly-local'?tb[1]:tb[0]);return;}if(h&&h.indexOf('fp-')===0){var el=document.getElementById(h);if(el){el.classList.add('on');document.getElementById('drawer-mask').classList.add('on');document.getElementById('dr-file').classList.add('on');}}filterRows();});
+</script>
+<p class="tiny dim" style="padding:14px 18px"><b>演示数据说明：</b>路径与文件名取自项目真实 <span class="mono">/home/malizhi/project/agentflow</span> 与 <span class="mono">.specs/</span> 目录（<span class="mono">backend/config.py</span> · <span class="mono">routes/agents_api.py</span> · <span class="mono">runtime/adapters/</span> · <span class="mono">.specs/platform-evolution/ROADMAP.md</span> · <span class="mono">STATE.md</span> · <span class="mono">CLAUDE.md</span> 等），预览正文即各文件真实头部若干行；<b>行数 / 字节 / mtime / commit <span class="mono">a1b2c3</span> / 命中计数为演示值</b>（<span class="mono">AgentControlPlane.tsx</span> 的 2,143 行为演示口径，非实测），变更者（李工 / 王工 / 开发 Agent / 李工的个人 Agent）取自本原型 mock 宇宙同一批身份。两个资源层的差异（未提交改动 · 未跟踪文件 · <span class="mono">backup/</span> 仅本机 · <span class="mono">node_modules</span> 被跟踪但跳过索引）对应 <span class="mono">CLAUDE.md</span> 已核实事实。<b>本页零写入：没有任何「保存 / 提交 / 推送」入口</b>，「下载原文件」也只是只读通道。刷新索引 TTL 5s、越权与不存在统一 <span class="mono">404</span>、跨项目各一份索引为规划语义，真实系统尚无此路由。</p>
+<p class="tiny dim" style="padding:0 18px 14px">可点区演示：顶栏<b>面包屑「项目 / AgentFlow 平台研发 / 文件」</b>前两级分别跳 <span class="mono">projects.html</span> 与 <span class="mono">projects__agentflow.html#res</span>（资源表）· 资源 tab「⟷ GitHub 仓 ⟷ 本地目录」→ 页内脚本切层，两层文件树内容有差异 · 工具行「搜索框」实时过滤并计数 · 「⟳ 刷新索引」→ toast（写明 TTL 与跳过策略）· 「仅最近变更 7d」chip → 开/关筛选并写 URL 语义 · 「视图与跳过项 ▾」「项目 ▾」→ 选择器 pop · <b>文件行</b> → 右抽屉只读预览（路径面包屑 + 行号前 60 行 <span class="mono">&lt;pre&gt;</span> + 底部一行「编辑请去本地目录或代码仓」；大文件 <span class="mono">AgentControlPlane.tsx</span> / <span class="mono">PRODUCT-DESIGN.html</span> 显「截断显示 · 完整内容 N 行 · 下载原文件」并弹 <span class="mono">md-dl</span> 二次确认；打包/二进制行 <span class="mono">sprite.js</span> 与快照 <span class="mono">backup/…</span> 只给元信息不给正文）· <b>目录行</b> <span class="mono">▾/▸</span> 折叠展开 · 🚫 跳过项行 → toast 说明为何不索引 · 深链：<span class="mono">projects__files.html#fp-requirement</span> 直接打开指定文件预览（<span class="mono">workbench__change-*.html</span> 产物清单的「查看（只读）」即跳此处）· 页尾对照表说明本页与已下线「产物编辑」的能力差　按 Esc 关闭所有浮层。</p>
+</body></html>

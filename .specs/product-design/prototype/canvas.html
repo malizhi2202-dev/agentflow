@@ -51,11 +51,11 @@
               </div>
             </div>
             <div class="canvas">
-              <div class="cnode ok" style="left:18px;top:130px" data-click data-goto="canvas__node-review.html"><span class="st dot running"></span><b>审查 Agent</b><span>gpt-4o</span></div>
+              <div class="cnode ok" style="left:18px;top:130px" data-click data-goto="canvas__node-review.html"><span class="st dot running"></span><b>审查 Agent</b><span>gpt-5-codex</span></div>
               <div class="cnode ok" style="left:190px;top:52px" data-click data-goto="canvas__edge-review-frontend.html"><span class="st dot running"></span><b>前端 Agent</b><span>claude-sonnet</span></div>
-              <div class="cnode ok" style="left:190px;top:206px" data-click data-goto="canvas__node-review.html"><span class="st dot idle"></span><b>数据同步 Agent</b><span>deepseek-v3</span></div>
+              <div class="cnode ok" style="left:190px;top:206px" data-click data-goto="canvas__node-review.html"><span class="st dot idle"></span><b>数据同步 Agent</b><span>deepseek-chat</span></div>
               <div class="cnode" style="left:362px;top:130px" data-click data-goto="canvas__node-review.html"><b>汇总 Agent</b><span>gpt-4o-mini</span></div>
-              <div class="cnode bad" style="left:190px;top:288px" data-click data-goto="canvas__node-legacy.html"><span class="st dot failed"></span><b>旧版审查 Agent</b><span>gpt-3.5</span></div>
+              <div class="cnode bad" style="left:190px;top:288px" data-click data-goto="canvas__node-legacy.html"><span class="st dot failed"></span><b>旧版审查 Agent</b><span>deepseek-chat</span></div>
               <div class="edge" style="left:150px;top:146px;width:40px;transform:rotate(0deg)"></div>
               <div class="edge" style="left:150px;top:146px;width:110px;transform:rotate(-32deg)"></div>
               <div class="edge" style="left:150px;top:146px;width:110px;transform:rotate(32deg)"></div>
@@ -87,9 +87,9 @@
             <pre class="mono" style="margin:0;font-size:11px;color:var(--text-secondary);overflow-x:auto;line-height:1.6">name: 审查流水线
 version: 3
 nodes:
-  - id: review      { agent: 审查 Agent · 标准, model: gpt-4o }
+  - id: review      { agent: 审查 Agent · 标准, model: gpt-5-codex }
   - id: frontend    { agent: 前端 Agent,       model: claude-sonnet }
-  - id: sync        { agent: 数据同步 Agent,   model: deepseek-v3 }
+  - id: sync        { agent: 数据同步 Agent,   model: deepseek-chat }
   - id: merge       { agent: 汇总 Agent,       model: gpt-4o-mini }
 edges:
   - { from: review, to: frontend, type: fan-out, retry: 3, timeout: 120s, max_tokens: 32000 }

@@ -4,12 +4,12 @@
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
 <div class="detail-top"><span class="pill" data-back="alerts.html" data-click>← 返回 告警中心</span><span class="crumb"><b>告警详情 · execution_failed / rt-1-1783346200</b></span><span class="chip bad">critical</span><span class="chip bad">未确认</span></div>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="metrics.html">仪表盘</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="metrics.html">仪表盘</span><span class="pill" data-goto="board.html">任务看板</span></div>
 <div class="detail-body">
 <h4 class="blk">规则 · 根因 · 去重</h4>
 <dl class="kv"><dt>规则</dt><dd class="mono">execution_failed · 判定函数 _check_execution_failed</dd>
 <dt>触发条件</dt><dd class="mono">会话以 status=error 结束（巡检扫描 runtime.jsonl / 会话表增量）</dd>
-<dt>目标</dt><dd class="mono">rt-1-1783346200 · 审查 Agent · 标准 · gpt-4o</dd>
+<dt>目标</dt><dd class="mono">rt-1-1783346200 · 审查 Agent · 标准 · gpt-5-codex</dd>
 <dt>详情</dt><dd class="mono">error · 31.7s · 21,004 tokens</dd>
 <dt>根因</dt><dd class="mono" style="color:var(--red)">引用的工具「浏览器自动化」已禁用（09-22 17:40 全局禁用）→ 调用即报错</dd>
 <dt>同因批量</dt><dd class="mono">近 24h 共 3 次同签名失败 · 已按去重键合并为 1 条</dd>
@@ -30,7 +30,7 @@
 <table class="tbl compact"><thead><tr><th>动作</th><th>前置</th><th>效果</th></tr></thead><tbody>
 <tr><td>带上下文重跑</td><td class="tiny">需工具恢复可用</td><td><span class="chip warn">当前会同样失败</span></td></tr>
 <tr><td>改高级表单重填</td><td class="tiny">回填原输入</td><td class="tiny">可换备援 Agent 与可用工具</td></tr>
-<tr><td>升级到人</td><td class="tiny">转工作项 / 审批</td><td><span class="chip ok">推荐 · 禁用属人工决策</span></td></tr>
+<tr><td>升级到人</td><td class="tiny">转任务 / 审批</td><td><span class="chip ok">推荐 · 禁用属人工决策</span></td></tr>
 </tbody></table>
 <h4 class="blk">同类告警（近 24h · 去重前）</h4>
 <table class="tbl compact"><thead><tr><th>时间</th><th>会话</th><th>状态</th><th>去重结果</th></tr></thead><tbody>

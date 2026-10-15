@@ -10,7 +10,7 @@
 <div class="callout bad"><p class="tiny" style="margin:0"><b>校验警告原文：</b><span class="mono">旧版审查 Agent</span> 引用的工具已被禁用，执行时将失败。<b>校验不拦截</b>——这是 §5.5 的边界：禁用是全局生效，已引用它的编排在<b>下次执行</b>时才失败。</p></div>
 <dl class="kv"><dt>节点 ID / 类型</dt><dd class="mono">legacy · agent 节点（备援支路）</dd>
 <dt>绑定 Agent</dt><dd>旧版审查 Agent <span class="mono dim">agent-7</span> <span class="chip bad">探针连续 5 次失败 · dead</span></dd>
-<dt>模型</dt><dd class="mono">gpt-3.5（低价备援档）</dd>
+<dt>模型</dt><dd class="mono">deepseek-chat（低价备援档）</dd>
 <dt>归属域 / 能力组</dt><dd class="mono">默认域 / code-review（冷备）</dd>
 <dt>被引用的边</dt><dd class="mono">review → legacy（retry-fallback · on_exhausted: dead-letter）</dd>
 <dt>引用的工具</dt><dd><span class="chip bad">浏览器自动化 · Skill 已禁用</span> <span class="chip">grep</span> <span class="chip">read_file</span></dd>

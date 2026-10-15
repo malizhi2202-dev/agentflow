@@ -112,10 +112,10 @@
 <pre class="mono tiny" style="margin:0;font-size:11px;color:var(--green);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px">T2 迁移语句（补回滚与验收映射）
 + ALTER TABLE agents ADD domain_id
 + 回滚：expand-only，不回滚列
-+ 映射：AC-3（删除域回归默认域）</pre></div>
++ 映射：AC-3（删除域后落未分类）</pre></div>
 </div>
 <p class="tiny dim" style="margin-top:var(--s3)">知识产物读写全走 <span class="mono">config.get_specs_dir()</span>，审计目标记的是相对项目根的路径，不记绝对路径（跨机器可比对）。</p>
-<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="跳 §6.18 产物文档编辑 · 版本对照（演示）">看完整版本对照</button></p></div></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="平台不承载文档版本对照：逐版 diff 请在本机执行 git log -p / diff backup 快照 · 只读索引见 projects__files.html（演示）">看完整版本对照（本地 git）</button></p></div></div>
 <div class="modal" id="md-rotate"><div style="padding:var(--s4)"><b>手动轮转归档 audit.jsonl？</b>
 <p class="small dim" style="margin:8px 0">当前 9,241 行（未达 1 万阈值）· 现有归档 4 份。手动轮转会<b>立即丢弃最旧一份</b>，且<b>不可恢复</b>——审计本身为追加写，没有任何「撤销轮转」。</p>
 <table class="tbl compact"><thead><tr><th>文件</th><th>行数</th><th>轮转后</th></tr></thead><tbody>

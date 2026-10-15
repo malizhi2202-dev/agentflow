@@ -5,7 +5,7 @@
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p2" style="color:inherit">回文档</a></span>
 <div class="detail-top"><span class="pill" data-back="workbench.html" data-click>← 返回 工作台 · 变更总览</span><span class="crumb"><span class="dim">工作台 · 变更总览 /</span> <b>变更 agent-control-plane</b></span><span class="chip bad">阻塞</span><span class="chip">6-review</span></div>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="projects__files.html">文件查看（只读）</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">任务看板</span></div>
 <div class="detail-body">
 <div class="callout bad"><p class="tiny" style="margin:0"><b>风险：SPEC 缺失。</b>已有 TEST.md / REVIEW.md，缺 <span class="mono">CHANGE.md</span> 与 <span class="mono">REQUIREMENT.md</span>——扫描器按文件存在性判阶段，故「6-review」与「待补前置产物」并存（真实系统会拒绝从此处推进）。</p></div>
 <dl class="kv" style="margin-top:var(--s3)"><dt>Change ID / 标题</dt><dd class="mono">agent-control-plane · Agent 管控面</dd><dt>当前阶段</dt><dd><span class="chip">6-review 代码审查</span>（判据：REVIEW.md 存在）</dd><dt>任务进度</dt><dd class="mono">5/5 测试通过 · TASK.md 缺失</dd><dt>阻塞项</dt><dd><span class="chip bad">前置产物缺 2 份</span> <span class="chip warn">三处状态在进程内存</span></dd><dt>更新时间</dt><dd class="mono">昨天 16:38 · Agent · reviewer</dd><dt>下一步（scanner 推断）</dt><dd class="mono">补 CHANGE/REQUIREMENT → 重扫 → 再进 7-integration</dd></dl>
@@ -52,5 +52,5 @@
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [前置 SPEC 缺失，先补产物再走门禁   ]</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已回退到 4-dev · 门禁记录作废 · 审计 chg:phase_rollback（演示）" data-close>确认回退</button></div></div></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">本详情页由工作台变更浮层升格：小节全宽展示 · 「进入下一阶段 / 按门禁意见建卡」→ toast（写明服务端判据）· 「回退阶段」「删除变更」→ 影响清单 + 必填原因二次确认（本页引用到的二次确认 modal 自带副本）· 产物「编辑」→ toast 跳 §6.18 形态　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">本详情页由工作台变更浮层升格：小节全宽展示 · 「进入下一阶段 / 按门禁意见建卡」→ toast（写明服务端判据）· 「回退阶段」「删除变更」→ 影响清单 + 必填原因二次确认（本页引用到的二次确认 modal 自带副本）· 产物行「查看（只读）」→ <span class="mono">projects__files.html</span>（<b>§6.18 产物文档编辑已下线</b>：编辑由本地目录 / 代码仓承担，平台只读索引与追溯）　按 Esc 关闭浮层。</p>
 </body></html>

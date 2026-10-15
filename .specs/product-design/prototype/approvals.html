@@ -4,7 +4,7 @@
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p17" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="control-plane.html">Agent 管控</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="audit.html">审计日志</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="control-plane.html">Agent 管控</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="audit.html">审计日志</span></div>
 <p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>这里是 <b>HITL 人机协同审批</b>：Agent 执行到需要人工把关的动作时<b>暂停请求人批</b>，人做出决策后<b>回到同一 task 上下文续跑</b>，不重建运行。审批为阻塞式：不决策则 run 一直挂起，不会超时自动放行。</p>
 <p class="tiny dim" style="padding:0 18px">〔09-23 裁定⑦注〕决策落 <span class="mono">human_approvals</span>（<span class="mono">agent_id / task_id / form_data / response_data / pending|approved|rejected</span>），权威库 = <b>MySQL</b>；审批挂起 ⇄ A2A <span class="mono">TASK_STATE_INPUT_REQUIRED</span>，回复 = 同一 task 的续跑（P1-12）。</p>
     <div class="proto">
@@ -59,12 +59,12 @@
                 <dl class="kv">
                   <dt>稳定 ID</dt><dd class="mono">AP-31（审批单 id 全程稳定，决策复用同一单据，不换号）</dd>
                   <dt>归属</dt><dd class="mono">run r-128 · task-1 · agent 审查 Agent · 标准</dd>
-                  <dt>任务上下文</dt><dd class="mono">工作项 AF-104「收件箱聚合规则」· 执行到 seq 14</dd>
+                  <dt>任务上下文</dt><dd class="mono">任务 AF-104「收件箱聚合规则」· 执行到 seq 14</dd>
                   <dt>执行模式</dt><dd><span class="chip warn">Smart</span> 仅高风险动作请求（写产物 / rm / 网络发送）</dd>
                   <dt>发起时间</dt><dd class="mono">09-22 14:32:07 · 已挂起 8m 12s</dd>
                 </dl>
                 <p class="h2p" style="margin-top:var(--s4)">待批动作 <span class="tiny dim">（1 项 · 审批卡覆盖工具调用内容）</span></p>
-                <div class="toolcall">write_file(path=&quot;/work-items/AF-104/REVIEW.md&quot;, content=&quot;# 收件箱聚合规则 · 审查结论\n…（4.2KB · 截断展示）&quot;, append=false)<br><span class="dim">— 需 project:write · 把审查结论写回工作项产物快照</span></div>
+                <div class="toolcall">write_file(path=&quot;/work-items/AF-104/REVIEW.md&quot;, content=&quot;# 收件箱聚合规则 · 审查结论\n…（4.2KB · 截断展示）&quot;, append=false)<br><span class="dim">— 需 project:write · 把审查结论写回任务产物快照</span></div>
                 <div class="callout warn" style="margin-top:var(--s3)">
                   <p><b>触发审批的原因：</b>审查 Agent · 标准的角色仅有 <span class="mono">project:read</span>（只读），而写产物文件需要 <span class="mono">project:write</span>；Smart 模式下「写产物」属高写风险动作 → <b>暂停请求人工</b>，不自动放行。</p>
                 </div>

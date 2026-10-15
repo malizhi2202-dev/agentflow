@@ -4,12 +4,12 @@
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
 <div class="detail-top"><span class="pill" data-back="alerts.html" data-click>← 返回 告警中心</span><span class="crumb"><b>告警详情 · token_exceeded / agent-1</b></span><span class="chip warn">warning</span><span class="chip bad">未确认</span></div>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="metrics.html">仪表盘</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="metrics.html">仪表盘</span><span class="pill" data-goto="board.html">任务看板</span></div>
 <div class="detail-body">
 <h4 class="blk">规则 · 阈值 · 成本</h4>
 <dl class="kv"><dt>规则</dt><dd class="mono">token_exceeded · 判定函数 _check_token_exceeded</dd>
 <dt>触发条件</dt><dd class="mono">单会话 tokens &gt; 软限 20,000（硬限在边 max_tokens 32,000）</dd>
-<dt>目标</dt><dd class="mono">agent-1 · 审查 Agent · 标准 · gpt-4o</dd>
+<dt>目标</dt><dd class="mono">agent-1 · 审查 Agent · 标准 · gpt-5-codex</dd>
 <dt>实测值</dt><dd class="mono">21,004 / 20,000（超 5.0%）· 边上限 32,000 未触</dd>
 <dt>级别</dt><dd><span class="chip warn">warning</span> 橙 · 只标软限，未中断执行</dd>
 <dt>阈值来源</dt><dd class="mono">域软限（20,000）+ 边 max_tokens（32,000）两处独立</dd>

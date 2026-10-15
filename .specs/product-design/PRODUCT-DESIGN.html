@@ -428,7 +428,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <a href="#s5-15">5.15 审计日志</a>
     <a href="#s5-16">5.16 用户与权限</a>
     <a href="#s5-17">5.17 审批中心</a>
-    <a href="#s5-18">5.18 产物文档编辑</a>
+    <a href="#s5-18">5.18 产物文档编辑（已裁撤）</a>
     <p class="grp">原型</p>
     <a href="#p0">6.0 全局交互纪律</a>
     <a href="#p1">6.1 登录</a>
@@ -444,13 +444,14 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <a href="#p11">6.11 告警中心</a>
     <a href="#p12">6.12 监控仪表盘</a>
     <a href="#p13">6.13 项目管理</a>
+    <a href="#p13b">6.13b 项目文件查看</a>
     <a href="#p14">6.14 角色市场</a>
     <a href="#p15">6.15 审计日志</a>
     <a href="#p16">6.16 用户与权限</a>
     <a href="#p17">6.17 审批中心</a>
-    <a href="#p18">6.18 产物文档编辑</a>
+    <a href="#p18">6.18 产物文档编辑（已裁撤）</a>
     <a href="#p19" class="planned">6.19 阶段模型配置 ✱</a>
-    <a href="#p20" class="planned">6.20 工作项看板 ✱</a>
+    <a href="#p20" class="planned">6.20 任务看板 ✱</a>
     <a href="#p21" class="planned">6.21 收件箱 ✱</a>
     <a href="#p22" class="planned">6.22 执行回放 ✱</a>
     <a href="#p23" class="planned">6.23 决策模型目录 ✱</a>
@@ -581,7 +582,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>交互</td><td>渠道中继</td><td>飞书 / 钉钉 / Slack / Telegram / SMTP 邮件；OAuth 扫码 + Mock 模式</td><td>§6.8</td></tr>
         <tr><td>知识</td><td>知识库</td><td>公共知识（平台维护、全体只读）+ 知识空间（与项目 1:1，成员可读写）；文件上传（类型白名单 + 10MB 上限 + 文件名净化）→ 分块 → 嵌入 → indexed；语义检索；L0-L3 总结写入</td><td>§6.9</td></tr>
         <tr><td>知识</td><td>记忆系统</td><td>域级共享记忆；同域 Agent 可加载前序上下文</td><td>§6.9</td></tr>
-        <tr><td>知识</td><td>工作流产物</td><td>按 change-id 组织 CHANGE/REQUIREMENT/DESIGN/TASK/TEST/REVIEW；门禁投票；产物在线编辑 + 自动备份</td><td>§6.2 §6.18</td></tr>
+        <tr><td>知识</td><td>工作流产物</td><td>按 change-id 组织 CHANGE/REQUIREMENT/DESIGN/TASK/TEST/REVIEW；门禁投票；只读文件查看（编辑在本地目录/代码仓，平台编辑入口已下线·2026-10-15）</td><td>§6.2 §6.13b</td></tr>
         <tr class="grp-row"><td colspan="4">可观测与治理</td></tr>
         <tr><td>观测</td><td>运行时监控</td><td>会话列表 + 状态过滤；SSE 实时推送；P50/P95/P99 延迟；Token 统计</td><td>§6.10</td></tr>
         <tr><td>观测</td><td>告警中心</td><td>三类告警：Token 超限 / Agent 死亡 / 执行失败；30s 巡检；确认与静默</td><td>§6.11</td></tr>
@@ -608,7 +609,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     </table>
 
     <h3 id="s1-5">1.5 竞品坐标：同类产品在做什么，我们站在哪</h3>
-    <p class="lead">2026 年 9 月对 67 个开源仓库做了一手调研（证据见 <span class="mono">.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md</span>）。<b>结论先说：AgentFlow 原先「K8s 式 Agent 管控无人做过」的假设已被推翻</b>——2026 年出现了多个明确以「declarative + K8s 语义 + agent」为卖点的项目。因此本章的目的不是宣称首创，而是<b>说清我们在哪一格、凭什么被选择</b>。<b>2026-09-22 第 3 轮复核的定盘判断：「工作项+负责人 / 收件箱+审批门 / 可回放执行时间线 / 成本归因 / runtime 注册 / 协议对齐」六件套已成品类入场券</b>（当日实抓 20+ 项目，头部产品全部齐备，multica 51,081★ 且 9 月连发 6 个版本）——p19–p22 只是补票。<b>胜负手在三块零先例空白：画布↔YAML 双向对账、产物谱系+晋级门禁、域=配额+沙箱+RBAC 三合一强制边界。</b>另注：品类内已出现「流程=可挂载技能」的实装（multica 本机实例把整套阶段流程做成 20 个 skill 挂给 34 个 agent），佐证 §3 模板市场不是空想。</p>
+    <p class="lead">2026 年 9 月对 67 个开源仓库做了一手调研（证据见 <span class="mono">.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md</span>）。<b>结论先说：AgentFlow 原先「K8s 式 Agent 管控无人做过」的假设已被推翻</b>——2026 年出现了多个明确以「declarative + K8s 语义 + agent」为卖点的项目。因此本章的目的不是宣称首创，而是<b>说清我们在哪一格、凭什么被选择</b>。<b>2026-09-22 第 3 轮复核的定盘判断：「任务+负责人 / 收件箱+审批门 / 可回放执行时间线 / 成本归因 / runtime 注册 / 协议对齐」六件套已成品类入场券</b>（当日实抓 20+ 项目，头部产品全部齐备，multica 51,081★ 且 9 月连发 6 个版本）——p19–p22 只是补票。<b>胜负手在三块零先例空白：画布↔YAML 双向对账、产物谱系+晋级门禁、域=配额+沙箱+RBAC 三合一强制边界。</b>另注：品类内已出现「流程=可挂载技能」的实装（multica 本机实例把整套阶段流程做成 20 个 skill 挂给 34 个 agent），佐证 §3 模板市场不是空想。</p>
 
     <h4 class="h4">1.5.1 三条赛道与我们的位置</h4>
     <table class="tbl">
@@ -652,7 +653,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td><b>沙箱执行隔离</b></td><td class="c dot-no">— 进程内</td><td class="c dot-eye">○ 非沙箱产品</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-yes">● 用户机器</td></tr>
         <tr><td><b>可观测（OTel/Prometheus）</b></td><td class="c dot-no">— 自建</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-no">—</td><td class="c dot-yes">●</td></tr>
         <tr><td><b>A2A 委派协议</b></td><td class="c dot-no">—</td><td class="c dot-yes">● 一等公民</td><td class="c dot-eye">○</td><td class="c dot-no">—</td><td class="c dot-eye">○</td></tr>
-        <tr><td><b>工作项 / 负责人 / 收件箱</b></td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-yes">● 核心</td></tr>
+        <tr><td><b>任务 / 负责人 / 收件箱</b></td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-yes">● 核心</td></tr>
       </tbody>
     </table>
 
@@ -670,7 +671,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         ② <b>没有声明式 API 面</b>——有 YAML apply，但没有 CRD 那样的稳定契约与 watch 语义。<br>　<span class="tiny dim"><b>〔09-23〕</b>两脸事实：workflow.json PUT=整包盲覆盖；编排面已有 apply/validate 雏形——契约化是<b>在半成品上加规格</b>：ETag/If-Match→412 + apiVersion 形体 + conditions/observedGeneration + change_log 同事务账本 + /api/watch SSE（恢复走应用层 cursor——MCP 07-28 撤传输层续传是先例）。见 p27。</span><br>
         ③ <b>没有可观测标准</b>——自建 SQLite 指标，无 OTel/Prometheus，无法接入既有可观测栈。<br>　<span class="tiny dim"><b>〔09-23〕</b>更一级病实测：<span class="mono">trace_spans</span>/<span class="mono">metrics_raw</span> <b>零行零写入</b>（只有表结构和读 API）。顺序：先修产生端→A 档 /metrics 直读（~0.5d）→B 档 OTLP 可选（GenAI 语义全 Development，不冻契约）→C 档版本化延后；token 口径统一 <span class="mono">session_metrics</span>。</span><br>
         ④ <b>没有 A2A</b>——协议层已收敛（A2A v1.0.1 赢家通吃，ACP 已归档），缺席意味着无法被别人的 Agent 调用。<br>　<span class="tiny dim"><b>〔09-23〕</b>措辞校准为「<b>收敛 + registry 留白</b>」：v1.0.1（2026-05-28）为最新发布版、ACP 并入 A2A（archived:true+官方横幅一手）、partners ~150——但官方明文不规定 curated registry，「无法被发现」比「无法被调用」更准，目录治理留白是我们地盘。建议停 M0 静态卡（~1 人日），M1-lite 以 P0-1 为硬闸。见 p4 页签·p27·Q21。</span><br>
-        ⑤ <b>没有协作层</b>——无工作项、负责人、收件箱；Multica 的整个产品都建在这一层上。<br>　<span class="tiny dim"><b>〔09-23〕</b>schema 钉死：缺口=「<b>两组表 + 一次并表</b>」——26 表无 work_items/inbox，owner_id 无双轨语义，<b>alerts 实为进程内环形 500 条重启即丢</b>（自家反面教材），双 queue 表并存。施工序：告警落表→并 queue→work_item 单表（status×triage/assignee 双轨/done 证据）→收件箱三规则。见 p20-22 注记·P1-16。</span></p>
+        ⑤ <b>没有协作层</b>——无任务、负责人、收件箱；Multica 的整个产品都建在这一层上。<br>　<span class="tiny dim"><b>〔09-23〕</b>schema 钉死：缺口=「<b>两组表 + 一次并表</b>」——26 表无 work_items/inbox，owner_id 无双轨语义，<b>alerts 实为进程内环形 500 条重启即丢</b>（自家反面教材），双 queue 表并存。施工序：告警落表→并 queue→work_item 单表（status×triage/assignee 双轨/done 证据）→收件箱三规则。见 p20-22 注记·P1-16。</span></p>
       </div>
     </div>
 
@@ -712,8 +713,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>P1-1</td><td><b>把「动作级审计」做成对外可验证的卖点</b>：统一 <span class="mono">audit.jsonl</span> 与 <span class="mono">audit_service</span> 两条写入路径；补齐「授权了什么 / 以谁权限 / 谁批准 / 执行证据」四要素；解决 1 万行轮转只留 5 份导致<b>历史不可查</b>的问题（改为可配置 + 可外送）</td><td>1.5.2 护城河①；Endor Labs 三层架构清单</td><td>中</td></tr>
         <tr><td>P1-2</td><td><b>把队列/路由升级为「可声明」</b>：现在优先级、并发上限靠实例字段与运行时状态，应引入 Kueue/Volcano 式的<b>配额与准入</b>（层级队列、<span class="mono">guarantee</span>/<span class="mono">deserved</span>/<span class="mono">capability</span>、公平共享、抢占、gang 语义）</td><td>1.5.2 护城河②；Kueue 2,993★ / Volcano 5,972★ 的成熟原语</td><td>高</td></tr>
         <tr><td>P1-3</td><td><b>知识产物监控升级为「可配置流程模型」</b>：把阶段/产物/门禁从代码搬到配置（复用已有的 <span class="mono">/api/admin/workflow</span> 与 <span class="mono">workflow.json</span>，让 <span class="mono">scanner</span> 与前端都从它读），使「不绑定任何开发流程」从口号变成事实</td><td>1.6.1 P0-6；§1.4「不绑定任何开发流程」</td><td>中</td></tr>
-        <tr><td>P1-4</td><td><b>补齐协作层最小集</b>：工作项（含「负责人可以是人或 Agent」）+ 状态生命周期 + 收件箱（只在需人拍板时通知）。可借鉴 Multica 的四类状态（<span class="mono">unstarted/started/done/closed</span>）与「<b>状态标签不授予行为</b>」「进入状态≠启动 Agent」两条硬规矩。<b>09-23 schema 钉死（已过审 09-23）：缺口=两组表+一次并表；施工序=告警落表→并 queue→work_item 单表（status×triage 正交 · assignee 人/Agent 双轨 · done 附证据）→收件箱三规则；multica/amux 模式均轮 2/3 已审，不重查</b></td><td>1.5.2 差距⑤；Multica <span class="mono">docs/issue-status-lifecycle-rollout.md</span></td><td>高</td></tr>
-        <tr><td>P1-5</td><td><b>执行日志做到可回放</b>：每次工具调用 / 命令 / 报错带时间戳、可完整重放；当前有 <span class="mono">trace_spans</span> 但无按工作项的完整回放视图</td><td>Multica「执行日志 → 可以完整回放」</td><td>中</td></tr>
+        <tr><td>P1-4</td><td><b>补齐协作层最小集</b>：任务（含「负责人可以是人或 Agent」）+ 状态生命周期 + 收件箱（只在需人拍板时通知）。可借鉴 Multica 的四类状态（<span class="mono">unstarted/started/done/closed</span>）与「<b>状态标签不授予行为</b>」「进入状态≠启动 Agent」两条硬规矩。<b>09-23 schema 钉死（已过审 09-23）：缺口=两组表+一次并表；施工序=告警落表→并 queue→work_item 单表（status×triage 正交 · assignee 人/Agent 双轨 · done 附证据）→收件箱三规则；multica/amux 模式均轮 2/3 已审，不重查</b></td><td>1.5.2 差距⑤；Multica <span class="mono">docs/issue-status-lifecycle-rollout.md</span></td><td>高</td></tr>
+        <tr><td>P1-5</td><td><b>执行日志做到可回放</b>：每次工具调用 / 命令 / 报错带时间戳、可完整重放；当前有 <span class="mono">trace_spans</span> 但无按任务的完整回放视图</td><td>Multica「执行日志 → 可以完整回放」</td><td>中</td></tr>
         <tr><td>P1-6</td><td><b>成本归属</b>：把已采集的 token 用量做成组织/用户/会话三级预算与归因</td><td>OpenHands Enterprise 控制面四能力之一（Cost attribution）</td><td>中</td></tr>
         <tr><td>P1-7</td><td><b>调度状态外置 + 租约/心跳</b>（P0-9 的正解）：把队列、标签映射、退避、限流从进程内存搬到数据库，并引入任务租约与心跳，使多副本成为可能。这是所有「K8s 式」主张的<b>地基</b></td><td>Agno 的 <span class="mono">lock_grace_seconds</span> + 心跳；DBOS「无独立编排服务、每步一次写」</td><td>中</td></tr>
         <tr><td>P1-8</td><td><b>补 <span class="mono">spec / status / conditions</span> 与 <span class="mono">observedGeneration</span></b>：当前编排实例只有状态字段，<b>没有 K8s 条件语义</b>——用户无法知道「平台执行到哪一步、为什么还没收敛」。这是声明式体验的核心缺口</td><td>agent-sandbox 的 K8s 条件语义；language-operator「as your cluster changes」</td><td>中</td></tr>
@@ -724,7 +725,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>P1-13</td><td><b>成本与授权归因到人</b>：每次运行双列记账——originator（只用于鉴权）与 accountable（只用于审计/成本）分离 + 多级归属瀑布 + <b>域策略级 fail-closed 开关</b>（解析不到精确责任人直接拒跑，而非降级记在 owner 头上）</td><td>multica <span class="mono">attribution_fail_closed</span> + 8 级 <span class="mono">originator_source</span>（models.go:1607；「no enqueue path may exist without a declared attribution」）</td><td>中</td></tr>
         <tr><td>P1-14 <span class="chip ok">已过审</span></td><td><b>执行隔离契约先行</b>（第 4 轮 S8）：立 execution spec——tier(inproc|container|gvisor|microvm|remote) + ttl/<span class="mono">shutdownPolicy(Delete|Retain)</span>（Retain=留产物清现场，与知识产物一等公民同构）+ <span class="mono">operatingMode(Running|Suspended)</span> + egress 默认拒；fail-closed：选档探测失败=拒绝执行，界面/审计/API 三处显式 <span class="mono">isolation:none</span>；凭证（run-scoped 短票）与档位正交</td><td>agent-sandbox v1beta1 契约语义（09-23 直读）；multica 三边界+「说清不藏」先例；p26</td><td>中（契约文档级先行）</td></tr>
         <tr><td>P1-15 <span class="chip ok">已过审</span></td><td><b>A2A M0 静态 AgentCard</b>（第 4 轮 S11）：<span class="mono">/.well-known/agent-card.json</span>（必填 8 项、protocolVersion="1.0"、capabilities 全 false、只含 public 可见域、敏感卡 MUST 走鉴权扩展卡）；M1-lite（SendMessage+GetTask+INPUT_REQUIRED 续跑，映射层自证不引 SDK）硬前置=<b>P0-1 落地+单副本承诺书面化</b>；M2（streaming/push）明确冻结</td><td>A2A spec/SDK 一手（09-23）；纪律句见 §1.6.5 ⑬；Q21·p27</td><td>低（M0 ≈1 人日）</td></tr>
-        <tr><td>P1-16 <span class="chip ok">已过审</span></td><td><b>协作层止血两件</b>（第 4 轮 S12）：①<b>告警落表</b>——现状 alert_service 进程内环形 500 条<b>重启即丢</b>，告警中心界面消费的是易失数据（告警=可计量数据，裁定⑦同向：直接落 MySQL 告警表）；②<b>scheduling_queue 与 scheduler_queue 双表并表</b>——工作项层任何设计的前置清障</td><td>R4-CODEAUDIT 议题5（file:line 实测）；「有界面没表」与 multica「有表没界面」同罪（§1.6.5 ⑨ 自家反面）</td><td>低</td></tr>
+        <tr><td>P1-16 <span class="chip ok">已过审</span></td><td><b>协作层止血两件</b>（第 4 轮 S12）：①<b>告警落表</b>——现状 alert_service 进程内环形 500 条<b>重启即丢</b>，告警中心界面消费的是易失数据（告警=可计量数据，裁定⑦同向：直接落 MySQL 告警表）；②<b>scheduling_queue 与 scheduler_queue 双表并表</b>——任务层任何设计的前置清障</td><td>R4-CODEAUDIT 议题5（file:line 实测）；「有界面没表」与 multica「有表没界面」同罪（§1.6.5 ⑨ 自家反面）</td><td>低</td></tr>
       </tbody>
     </table>
 
@@ -761,7 +762,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <tbody>
         <tr>
           <td><b>① 提示词契约 ≠ 门禁</b><br><span class="tiny dim">门禁必须落在状态转换层</span></td>
-          <td><b>反面：</b>Multica 对外承诺「工作先进审核，<b>由你决定什么能上线</b>」，但「<span class="mono">done</span> 保留给人」只写在<b>注入给 Agent 的指令</b>里——其代码库中<b>没有任何 handler/service 层校验</b>阻止 Agent 直接把工作项状态改为 <span class="mono">done</span>。产品语义与实现之间存在缺口，全靠 Agent 守约</td>
+          <td><b>反面：</b>Multica 对外承诺「工作先进审核，<b>由你决定什么能上线</b>」，但「<span class="mono">done</span> 保留给人」只写在<b>注入给 Agent 的指令</b>里——其代码库中<b>没有任何 handler/service 层校验</b>阻止 Agent 直接把任务状态改为 <span class="mono">done</span>。产品语义与实现之间存在缺口，全靠 Agent 守约</td>
           <td><b>这是 AgentFlow 的既有优势，应当守住并写清：</b>本平台的 <span class="mono">dangerous</span> 级调和动作<b>不自动执行</b>，人工闸门是服务端行为（落 <span class="mono">human_approvals</span> 表、阻塞式等待），不是提示词约定。若要新增任何「必须人批」的动作，规则必须加在<b>状态转换层（动作者类型 × 目标状态）</b></td>
         </tr>
         <tr>
@@ -769,7 +770,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
           <td><b>正面：</b>Multica 对机器凭证强制「<b>URL 里的工作区 == 令牌里钉死的工作区</b>」，不等即 403。关键在于同一不变量做了<b>两次</b>——早期解析处一次，中间件里再留一个 catch-all，并注明「不假设前一处覆盖了所有入口」。另外其成员查询失败一律返回 <b>404 而非 403</b>，避免泄露私有资源是否存在</td>
           <td>AgentFlow 的多租户隔离应照搬这两点：域归属校验在入口与中间件各做一次；越权与「不存在」统一返回 404 而非 403，避免通过状态码探测他人资源</td>
         </tr>
-        <tr><td><b>③ done 需证据 + 逐卡预算</b><br><span class="tiny dim">质量与成本门禁下沉到工作项粒度</span></td><td><b>正面：</b>amux 的看板要求 <span class="mono">done</span> 必须附证据、<span class="mono">verified</span> 需同伴复核，且<b>每卡独立预算</b>（09-20 仍在调 nudge）；multica 按 run/agent/issue 归因 token</td><td>工作项完成态加证据字段与同伴复核位（与 ① 同族：证据校验放服务端，不放提示词）；用量面板做 issue 维预算列</td></tr>
+        <tr><td><b>③ done 需证据 + 逐卡预算</b><br><span class="tiny dim">质量与成本门禁下沉到任务粒度</span></td><td><b>正面：</b>amux 的看板要求 <span class="mono">done</span> 必须附证据、<span class="mono">verified</span> 需同伴复核，且<b>每卡独立预算</b>（09-20 仍在调 nudge）；multica 按 run/agent/issue 归因 token</td><td>任务完成态加证据字段与同伴复核位（与 ① 同族：证据校验放服务端，不放提示词）；用量面板做任务维预算列</td></tr>
         <tr><td><b>④ 人工干预记「变更前快照」</b><br><span class="tiny dim">干预必须可回放可归因</span></td><td><b>正面：</b>AgentTeams v1.2.3 的暂停/恢复/重规划<b>每次干预记录审计元数据与变更前快照</b>，并给出干预时间线 + checkpoint 图</td><td>审批中心与编排画布的人工干预统一记 before-snapshot；p17/p22 的「谁在什么时候改了什么」以此为准</td></tr>
         <tr><td><b>⑤ 不可变 principal：编辑触发器 ≠ 重新授权</b><br><span class="tiny dim">「以谁身份跑」建后冻结</span></td><td><b>正面：</b>multica 的 trigger <span class="mono">created_by_id</span> 回填一次即钉死，普通编辑永不改写；NULL 则派发 fail-closed（models.go:318-321）</td><td>编排发布加 append-only 版本表；定时任务「以谁身份跑」与发布版本绑定——且<b>留痕必须界面可见</b>（multica 有表无界面，是其欠账、我们的加分项）</td></tr>
         <tr><td><b>⑥ 队列合并必须重打身份与能力</b><br><span class="tiny dim">计划 vs 收据分开记账</span></td><td><b>反面转正面：</b>multica 曾把新评论并入他人已排队任务却<b>不换审计身份</b>（回答 B 的运行带着 A 的凭证跑），MUL-4195 审查后改为合并即重打 originator/overlay；并分记 <span class="mono">coalesced_ids</span>（计划并入）与 <span class="mono">delivered_ids</span>（实际投喂）</td><td>调度队列做合并语义时，身份、凭证、能力必须随合并重算；「计划 vs 收据」双数组进 p22 记账面</td></tr>
@@ -965,7 +966,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td><span class="mono">T01-SUMMARY.md</span> 等</td><td>开发执行</td><td>存在即判定为已进入开发阶段</td></tr>
       </tbody>
     </table>
-    <p class="small muted"><b>与其他概念：</b>产物是 §6.2 工作台与 §6.18 产物编辑器的数据源；产物目录由 <span class="mono">config.get_specs_dir()</span> 统一解析，<strong>不硬编码路径</strong>。保存前自动备份，保留最近 5 个版本。</p>
+    <p class="small muted"><b>与其他概念：</b>产物是 §6.2 工作台与 §6.13b 只读文件查看的数据源；产物目录由 <span class="mono">config.get_specs_dir()</span> 统一解析，<strong>不硬编码路径</strong>。<b>〔2026-10-15〕</b>知识产物仍是平台一等数据（数据不撤），但编辑发生在本地目录/代码仓——平台侧编辑入口已下线（§5.18/§6.18），历史与回滚走代码仓版本管理。</p>
 
     <h3 id="s2-8">2.8 记忆与知识库</h3>
     <div class="grid g2">
@@ -1343,7 +1344,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>审计日志</td><td>审计日志（管理区）</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-yes">●</td><td class="mono">audit:view</td></tr>
         <tr><td>用户与权限</td><td>用户管理（管理区）</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono">user:manage</td></tr>
         <tr><td>审批中心</td><td>审批</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td><td class="mono">project:read (决策需 write)</td></tr>
-        <tr><td>产物文档编辑</td><td>变更详情 → 文档</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="mono">project:read (写需 write)</td></tr>
+        <tr><td>只读文件查看（原产物文档编辑·已下线）</td><td>项目 → 文件 / 变更详情 → 文档</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="mono">project:read（编辑入口已下线，无写形态）</td></tr>
       </tbody>
     </table>
     <p class="tiny dim">图例：<span class="dot-yes">●</span> 可操作 · <span class="dot-eye">○</span> 只可见 · <span class="dot-no">—</span> 不可见。普通用户（user 角色）默认零权限，上表后三列对应的是「已按需分配权限后」的形态。</p>
@@ -1408,8 +1409,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「💬 对话中心」</td></tr>
       <tr><td><b>步骤</b></td><td>1. 与某 Agent 建立 1:1 私密会话（＋ 新建会话先选 Agent；启动语建议 ≤3 条，点击=复制进输入框不直发）→ 2. 输入任务（可「＋」挂项目背景），一条消息 = 一个 run → 3. 观察流式输出：运行中显阶段 + 工具活动，View details 进回放，停止保留已产出并回填未处理输入 → 4. 多轮即会话续跑（运行时不支持续跑则新会话继续）→ 5. 会话可重命名 / 置顶 / 归档（转只读，外部渠道绑定断开）/ 删除（不可恢复）→ 6. 在「渠道」中配置飞书 / 钉钉 / Slack / Telegram / 邮件（OAuth 扫码 + Mock 模式切换）</td></tr>
-      <tr><td><b>反馈</b></td><td>助手消息流式追加，末尾显示光标；工具调用以独立块呈现（含工具名与参数摘要）；运行时离线时消息排队等待上线；AgentFlow 强化：决策微模型分诊（直答/调工具/起工作流/转@，阈值 0.60 与管控面同源）+ 平台级能力（查工作项 / 调工具 / 触发工作流 / 审批 / 读写知识）</td></tr>
-      <tr><td><b>边界</b></td><td>登录即可用（唯一无需额外权限的模块）；<strong>1:1 私密——其他成员包括管理员都不可见</strong>；起点无 issue 上下文、绝不自动建工作项；归档或失去可运行权限的 Agent 不能发新消息；渠道凭据加密落库（AES-GCM）；Mock 模式下不实际外发消息；会话历史分页加载</td></tr>
+      <tr><td><b>反馈</b></td><td>助手消息流式追加，末尾显示光标；工具调用以独立块呈现（含工具名与参数摘要）；运行时离线时消息排队等待上线；AgentFlow 强化：决策微模型分诊（直答/调工具/起工作流/转@，阈值 0.60 与管控面同源）+ 平台级能力（查任务 / 调工具 / 触发工作流 / 审批 / 读写知识）</td></tr>
+      <tr><td><b>边界</b></td><td>登录即可用（唯一无需额外权限的模块）；<strong>1:1 私密——其他成员包括管理员都不可见</strong>；起点无任务上下文、绝不自动建任务；归档或失去可运行权限的 Agent 不能发新消息；渠道凭据加密落库（AES-GCM）；Mock 模式下不实际外发消息；会话历史分页加载</td></tr>
     </tbody></table>
 
     <h3 id="s5-9">5.9 知识库（公共知识 + 知识空间）</h3>
@@ -1447,8 +1448,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <h3 id="s5-13">5.13 项目管理</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「项目」</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 查看已发现的项目 → 2. 新建项目（名称/描述独立输入框、图标可选；代码源：本地目录=目录选择器、GitHub=输入框 +「克隆并关联」；状态/优先级=单选按钮组，<strong>无起止时间字段——节奏由里程碑/工作项承载</strong>；Leader 与成员可持续添加，候选=用户级 Agent / 其他 Agent / 用户）或切换项目 → 3. 进入项目详情查看变更与需求输入 → 4. 发起执行。创建项目 = 自动创建其专属知识空间（§5.9）</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 查看已发现的项目 → 2. 新建项目（名称/描述独立输入框、图标可选；代码源：本地目录=目录选择器、GitHub=输入框 +「克隆并关联」；状态/优先级=单选按钮组，<strong>无起止时间字段——节奏由里程碑/任务承载</strong>；Leader 与成员可持续添加，候选=用户级 Agent / 其他 Agent / 用户）或切换项目 → 3. 进入项目详情查看变更与需求输入 → 4. 发起执行。创建项目 = 自动创建其专属知识空间（§5.9）</td></tr>
       <tr><td><b>反馈</b></td><td>项目列表标注是否具备提示词目录；切换项目后全局 <span class="mono">.specs/</span> 与提示词解析路径同步切换</td></tr>
+      <tr><td><b>文件查看</b> <span class="tiny dim">〔2026-10-15 新增〕</span></td><td>项目详情 →「文件」tab：<b>资源双源 tab</b>（GitHub 仓 @commit 锁定 / 本地目录）；<b>只读</b>文件树 + 搜索 + 预览——大文件截断显示（标总行数/字节并提示本地打开），二进制文件仅列元信息。<b>「编辑去你那边」</b>：平台无编辑入口（§5.18 已裁撤），改文件回本地目录 / 代码仓</td></tr>
       <tr><td><b>边界</b></td><td>项目可见性受 <span class="mono">project_ids</span> 限制：未分配任何项目的普通用户看到<strong>空列表</strong>（非全部）；删除项目需 <span class="mono">project:delete</span>，是高危操作</td></tr>
     </tbody></table>
 
@@ -1484,12 +1486,11 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <tr><td><b>边界</b></td><td>审批是<strong>阻塞式</strong>的：不决策则流程一直挂起（不会超时自动放行）；刷新不丢；决策动作本身写入审计</td></tr>
     </tbody></table>
 
-    <h3 id="s5-18">5.18 产物文档编辑</h3>
+    <h3 id="s5-18">5.18 产物文档编辑 <span class="chip">已裁撤 · 2026-10-15 裁定</span></h3>
     <table class="tbl compact"><tbody>
-      <tr><td style="width:88px"><b>入口</b></td><td>变更详情 → 产物 Tab → 点击某文件；或直接编辑项目提示词 / 模板 / 规则文件</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 选择文件 → 2. 在 CodeMirror 中编辑 → 3. 保存 → 4. 需要时从备份恢复</td></tr>
-      <tr><td><b>反馈</b></td><td>保存前自动备份（保留最近 5 个版本）；保存成功有明确回执；文件树标出当前编辑项</td></tr>
-      <tr><td><b>边界</b></td><td>写入路径统一经 <span class="mono">config.get_specs_dir()</span> / 提示词目录解析，<strong>不做路径越界写入</strong>；编辑会改变阶段判定结果（扫描有 5 秒缓存）；无 <span class="mono">project:write</span> 时编辑器只读</td></tr>
+      <tr><td style="width:88px"><b>裁定</b></td><td>平台侧编辑入口整节下线：<b>编辑发生在本地目录 / 代码仓</b>，平台不再提供文件编辑器与「保存 + 自动备份」流；<span class="mono">.specs/</span> 知识产物仍是平台一等数据，扫描、阶段判定、门禁照常消费——<strong>数据不撤，撤的是 UI 编辑入口</strong></td></tr>
+      <tr><td><b>替代操作</b></td><td>看文件：项目详情 →「文件」tab（§5.13，只读树 + 搜索 + 预览）或变更详情 → 文档只读预览；改文件：在本地目录 / 代码仓中编辑，平台经产物扫描感知（扫描有 <strong>5 秒缓存</strong>）；历史与回滚走代码仓版本管理</td></tr>
+      <tr><td><b>界面基线</b></td><td>只读文件查看见 §6.13b；原 §6.18 编辑原型已同步裁撤</td></tr>
     </tbody></table>
   </section>
 
@@ -1505,18 +1506,18 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <table class="tbl compact">
       <thead><tr><th>#</th><th>纪律</th><th>落点页</th></tr></thead>
       <tbody>
-        <tr><td>①</td><td><b>统一详情骨架</b>：左 inspector（自动保存三态：保存中/已存/失败）+ 右 <span class="mono">?view=</span> 分段；无权限走页内 CapabilityBanner / Lock read-only，<b>不改 URL 不跳走</b></td><td>p4 · p7 · p14 · p18 及所有详情页</td></tr>
+        <tr><td>①</td><td><b>统一详情骨架</b>：左 inspector（自动保存三态：保存中/已存/失败）+ 右 <span class="mono">?view=</span> 分段；无权限走页内 CapabilityBanner / Lock read-only，<b>不改 URL 不跳走</b></td><td>p4 · p7 · p14 及所有详情页</td></tr>
         <tr><td>②</td><td><b>视图即链接</b>：保存视图 = 筛选快照（status/priority/assignee/creator/project/label/property 等字段全集）+ <span class="mono">?view=&lt;id&gt;</span> URL 双向同步，天然可分享；自定义属性可作分组维</td><td>p6 · p12 · p15 · p20</td></tr>
         <tr><td>③</td><td><b>Runtime 健康四态</b> online / recently_lost / offline / long_offline；<b>判定阈值写进产品文案</b>（如 daemon 心跳 15s / 离线判定 ≤3min 式明说）；工作量折进健康列；Cost·7d 带环比；缺价模型显式告警</td><td>p10 · p22 · p28</td></tr>
         <tr><td>④</td><td><b>失败卡片固定三件套</b>：Retry with context / Edit as advanced form（回填原输入）/ 升级到人；一键运行先过<b>权限·运行时·配额·归因四道门</b>，拒因原样 toast 不粉饰</td><td>p8 · p11 · p17</td></tr>
         <tr><td>⑤</td><td><b>Quick Actions</b>：管理员把命名 prompt 绑定为 Agent 动作，点击即跑、无输入框，public/private + 用量计数 + 可归档；「并入已有运行」用中性措辞，不谎报新启动</td><td>p7 · p14 · p19</td></tr>
         <tr><td>⑥</td><td><b>权限渲染纯函数化</b>：<span class="mono">{allowed, reason}</span> 稳定枚举决定 UI 变体（不解析字符串）；<b>private 连管理员也不旁路</b>；未实装的授权位显式 INERT；鉴权源唯一为「可调用目标」，visibility 降为展示字段</td><td>p16 · 全站</td></tr>
-        <tr><td>⑦</td><td><b>草稿与滚动位是一等状态</b>：不同创建形态用互不覆盖的草稿槽 + 共享附件池；未完成草稿在入口页聚合提示；详情页返回时恢复滚动 memento</td><td>p8 · p18 · p19</td></tr>
-        <tr><td>⑧</td><td><b>不可信内容渲染边界下沉到显示端</b>：产物/附件预览一律 <span class="mono">iframe sandbox="allow-scripts" + srcdoc</span>——<span class="mono">.specs/</span> 的 HTML 预览必须照做（与运行时暂无沙箱不矛盾，见 §1.6.5 ① 与 P1-11）</td><td>p9 · p18</td></tr>
+        <tr><td>⑦</td><td><b>草稿与滚动位是一等状态</b>：不同创建形态用互不覆盖的草稿槽 + 共享附件池；未完成草稿在入口页聚合提示；详情页返回时恢复滚动 memento</td><td>p8 · p19</td></tr>
+        <tr><td>⑧</td><td><b>不可信内容渲染边界下沉到显示端</b>：产物/附件预览一律 <span class="mono">iframe sandbox="allow-scripts" + srcdoc</span>——<span class="mono">.specs/</span> 的 HTML 预览必须照做（与运行时暂无沙箱不矛盾，见 §1.6.5 ① 与 P1-11）</td><td>p9 · p13b</td></tr>
         <tr><td>⑨</td><td><b>留痕要「表 + 界面」两步齐</b>：规则/编排版本、干预快照必须有可见消费界面（multica 有版本表却无展示页，为戒）；UI 可隐藏的调度行（如未启用升级）表必须保留供审计</td><td>p17 · p19</td></tr>
-        <tr><td>⑩</td><td><b>status 与 triage 两根正交轴</b>：「到哪一步」≠「这算不算活」；受理门只拦从工作项<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</td><td>p17 · p20</td></tr>
-        <tr><td>⑪</td><td><b>执行时间线记账面</b>：一次运行可挂多上下文（工作项/对话/自动化/评论线程）；「计划并入」与「实际投喂」双数组（计划 vs 收据）；转录带 seq + 调用 id + <b>截断标记</b>；取消人署名；wait_reason 作一等状态渲染；每 run 显示 tokens/USD</td><td>p10 · p22</td></tr>
-        <tr><td>⑫</td><td><b>通知分层</b>：只 ping 需要拍板的人；通知目录读取失败宁多发不漏发（漏发会把工作项困住）；工作项推进后旧「运行失败」通知批量自愈归档；升级重评作 deferred 调度行而非提醒</td><td>p11 · p21</td></tr>
+        <tr><td>⑩</td><td><b>status 与 triage 两根正交轴</b>：「到哪一步」≠「这算不算活」；受理门只拦从任务<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</td><td>p17 · p20</td></tr>
+        <tr><td>⑪</td><td><b>执行时间线记账面</b>：一次运行可挂多上下文（任务/对话/自动化/评论线程）；「计划并入」与「实际投喂」双数组（计划 vs 收据）；转录带 seq + 调用 id + <b>截断标记</b>；取消人署名；wait_reason 作一等状态渲染；每 run 显示 tokens/USD</td><td>p10 · p22</td></tr>
+        <tr><td>⑫</td><td><b>通知分层</b>：只 ping 需要拍板的人；通知目录读取失败宁多发不漏发（漏发会把任务困住）；任务推进后旧「运行失败」通知批量自愈归档；升级重评作 deferred 调度行而非提醒</td><td>p11 · p21</td></tr>
               <tr><td>⑬</td><td><b>身份修复前不暴露任何对外写端点</b>：fail-open 身份存在期间，A2A M1+、webhook 回传等对外写面一律冻结——协议面第一块砖只能是只读 AgentCard（P0-1 是 P1-15 的硬前置）</td><td>P1-15 · <span class="mono">D-identity-and-security-2</span></td></tr>
       </tbody>
     </table>
@@ -1673,12 +1674,12 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
               <div class="tree">
                 <div class="tree-row l1"><span class="caret">▼</span><svg class="icon" style="color:var(--blue)"><use href="#i-folder"/></svg><span class="name">默认域</span><span class="chip mono">5 个 Agent</span><span class="chip ok">4 healthy / 5</span></div>
                 <div class="tree-row l2"><span class="caret">▼</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">code-review</span><span class="chip mono">3 个</span><span class="chip ok">2 healthy / 3</span></div>
-                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name">审查 Agent · 标准</span><span class="chip mono">gpt-4o</span><span class="chip mono">gpt</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name">审查 Agent · 标准</span><span class="chip mono">gpt-5-codex</span><span class="chip mono">gpt</span></div>
                 <div class="tree-row l3"><span class="caret">·</span><span class="dot idle"></span><span class="name">审查 Agent · 备援</span><span class="chip mono">claude-sonnet</span><span class="chip mono">standby</span></div>
-                <div class="tree-row l3"><span class="caret">·</span><span class="dot dead"></span><span class="name">审查 Agent · 旧版</span><span class="chip mono">gpt-3.5</span><span class="chip bad">dead</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot dead"></span><span class="name">审查 Agent · 旧版</span><span class="chip mono">deepseek-chat</span><span class="chip bad">dead</span></div>
                 <div class="tree-row l2"><span class="caret">▼</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">python</span><span class="chip mono">2 个</span><span class="chip ok">1 healthy / 2</span></div>
-                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name">审查 Agent · 标准</span><span class="chip mono">gpt-4o</span><span class="chip info">同时属于 code-review</span></div>
-                <div class="tree-row l3"><span class="caret">·</span><span class="dot failed"></span><span class="name">数据同步 Agent</span><span class="chip mono">deepseek-v3</span><span class="chip bad">failed</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name">审查 Agent · 标准</span><span class="chip mono">gpt-5-codex</span><span class="chip info">同时属于 code-review</span></div>
+                <div class="tree-row l3"><span class="caret">·</span><span class="dot failed"></span><span class="name">数据同步 Agent</span><span class="chip mono">deepseek-chat</span><span class="chip bad">failed</span></div>
                 <div class="tree-row l2"><span class="caret">▶</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">未分类</span><span class="chip mono">1 个</span><span class="chip ok">1 healthy / 1</span></div>
                 <div class="tree-row l1"><span class="caret">▼</span><svg class="icon" style="color:var(--purple)"><use href="#i-folder"/></svg><span class="name">生产域</span><span class="chip mono">3 个 Agent</span><span class="chip ok">3 healthy / 3</span></div>
                 <div class="tree-row l2"><span class="caret">▶</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">code-review</span><span class="chip mono">2 个</span><span class="chip ok">2 healthy / 2</span></div>
@@ -1766,11 +1767,11 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
                 </div>
                 <p class="h2p" style="margin-top:var(--s4)">近 30 天</p>
                 <div class="panel tight"><p class="small" style="margin:0"><b>128 runs · 成功率 92%</b> <span class="tiny dim">手写折线（演示）；09-12 三连失败窗与探活抖动同窗</span></p></div>
-                <p class="h2p" style="margin-top:var(--s4)">最近工作（终态 run） <span class="tiny dim">来源徽标 6 类：工作项 / 对话 / 定时 / 人点名 / 工作流派生 / API</span></p>
+                <p class="h2p" style="margin-top:var(--s4)">最近工作（终态 run） <span class="tiny dim">来源徽标 6 类：任务 / 对话 / 定时 / 人点名 / 工作流派生 / API</span></p>
                 <table class="tbl compact">
                   <thead><tr><th>Run</th><th>来源</th><th>模型（运行时暴露）</th><th>Token</th><th>状态</th><th>耗时</th></tr></thead>
                   <tbody>
-                    <tr><td class="mono">rt-1-14:08</td><td><span class="chip info">工作项</span></td><td class="mono">deepseek-official/deepseek-chat</td><td class="mono">12,480</td><td><span class="chip ok">success</span></td><td class="mono">8.2s</td></tr>
+                    <tr><td class="mono">rt-1-14:08</td><td><span class="chip info">任务</span></td><td class="mono">deepseek-official/deepseek-chat</td><td class="mono">12,480</td><td><span class="chip ok">success</span></td><td class="mono">8.2s</td></tr>
                     <tr><td class="mono">rt-1-13:58</td><td><span class="chip">对话</span></td><td class="mono">deepseek-official/deepseek-chat</td><td class="mono">21,004</td><td><span class="chip bad">error</span></td><td class="mono">31.7s</td></tr>
                     <tr><td class="mono">rt-1-13:40</td><td><span class="chip purple">定时</span></td><td class="mono">deepseek-official/deepseek-reasoner</td><td class="mono">7,860</td><td><span class="chip ok">success</span></td><td class="mono">5.1s</td></tr>
                   </tbody>
@@ -1848,11 +1849,11 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
               </div>
             </div>
             <div class="canvas">
-              <div class="cnode ok" style="left:18px;top:130px"><span class="st dot running"></span><b>审查 Agent</b><span>gpt-4o</span></div>
+              <div class="cnode ok" style="left:18px;top:130px"><span class="st dot running"></span><b>审查 Agent</b><span>gpt-5-codex</span></div>
               <div class="cnode ok" style="left:190px;top:52px"><span class="st dot running"></span><b>前端 Agent</b><span>claude-sonnet</span></div>
-              <div class="cnode ok" style="left:190px;top:206px"><span class="st dot idle"></span><b>数据同步 Agent</b><span>deepseek-v3</span></div>
+              <div class="cnode ok" style="left:190px;top:206px"><span class="st dot idle"></span><b>数据同步 Agent</b><span>deepseek-chat</span></div>
               <div class="cnode" style="left:362px;top:130px"><b>汇总 Agent</b><span>gpt-4o-mini</span></div>
-              <div class="cnode bad" style="left:190px;top:288px"><span class="st dot failed"></span><b>旧版审查 Agent</b><span>gpt-3.5</span></div>
+              <div class="cnode bad" style="left:190px;top:288px"><span class="st dot failed"></span><b>旧版审查 Agent</b><span>deepseek-chat</span></div>
               <div class="edge" style="left:150px;top:146px;width:40px;transform:rotate(0deg)"></div>
               <div class="edge" style="left:150px;top:146px;width:110px;transform:rotate(-32deg)"></div>
               <div class="edge" style="left:150px;top:146px;width:110px;transform:rotate(32deg)"></div>
@@ -1884,9 +1885,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
             <pre class="mono" style="margin:0;font-size:11px;color:var(--text-secondary);overflow-x:auto;line-height:1.6">name: 审查流水线
 version: 3
 nodes:
-  - id: review      { agent: 审查 Agent · 标准, model: gpt-4o }
+  - id: review      { agent: 审查 Agent · 标准, model: gpt-5-codex }
   - id: frontend    { agent: 前端 Agent,       model: claude-sonnet }
-  - id: sync        { agent: 数据同步 Agent,   model: deepseek-v3 }
+  - id: sync        { agent: 数据同步 Agent,   model: deepseek-chat }
   - id: merge       { agent: 汇总 Agent,       model: gpt-4o-mini }
 edges:
   - { from: review, to: frontend, type: fan-out, retry: 3, timeout: 120s, max_tokens: 32000 }
@@ -2010,7 +2011,7 @@ edges:
 
     <!-- ─────────── 6.8 对话中心 ─────────── -->
     <h3 id="p8">6.8 对话中心</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>会话列表 + 消息流（含工具调用块）+ 输入区。登录即可用，是唯一无需额外权限的模块。<b>〔09-23 补充〕</b>新增 <b>Agent 切换器</b>：新建会话先选 Agent；会话中可切换，下一条消息起生效、历史归属不变；异常/离线 Agent 灰置并给原因——「选 Agent → 发消息 → 看工具块与归属」即对话调用测试路径。<b>〔本轮对齐 chat.html〕</b>对话为<strong>我与某 Agent 的 1:1 私密会话（其他成员包括管理员都不可见）</strong>；起点无 issue 上下文、绝不自动把工作项化；一条消息 = 一个 run，运行时离线时消息排队等待上线；启动语建议 ≤3 条、点击=复制进输入框不直发；「＋」挂项目背景；运行中显阶段 + 工具活动，View details 进回放，停止保留已产出并回填未处理输入；会话重命名 / 置顶（≤5）/ 归档（转只读，外部渠道绑定断开）/ 删除（不可恢复）；多轮 = 会话续跑（运行时不支持续跑则新会话继续）；AgentFlow 强化 = 决策微模型分诊（直答 / 调工具 / 起工作流 / 转@，阈值 0.60 与管控面同源）+ 平台级能力（查工作项 / 调工具 / 触发工作流 / 审批 / 读写知识）。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>会话列表 + 消息流（含工具调用块）+ 输入区。登录即可用，是唯一无需额外权限的模块。<b>〔09-23 补充〕</b>新增 <b>Agent 切换器</b>：新建会话先选 Agent；会话中可切换，下一条消息起生效、历史归属不变；异常/离线 Agent 灰置并给原因——「选 Agent → 发消息 → 看工具块与归属」即对话调用测试路径。<b>〔本轮对齐 chat.html〕</b>对话为<strong>我与某 Agent 的 1:1 私密会话（其他成员包括管理员都不可见）</strong>；起点无任务上下文、绝不自动建任务；一条消息 = 一个 run，运行时离线时消息排队等待上线；启动语建议 ≤3 条、点击=复制进输入框不直发；「＋」挂项目背景；运行中显阶段 + 工具活动，View details 进回放，停止保留已产出并回填未处理输入；会话重命名 / 置顶（≤5）/ 归档（转只读，外部渠道绑定断开）/ 删除（不可恢复）；多轮 = 会话续跑（运行时不支持续跑则新会话继续）；AgentFlow 强化 = 决策微模型分诊（直答 / 调工具 / 起工作流 / 转@，阈值 0.60 与管控面同源）+ 平台级能力（查任务 / 调工具 / 触发工作流 / 审批 / 读写知识）。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/chat</span><span class="fake">演示数据</span></div>
       <div class="app" style="grid-template-columns:196px 190px minmax(0,1fr)">
@@ -2054,12 +2055,12 @@ edges:
           </div>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">审查 agent-domains 的变更</span><span class="right"><button class="btn sm" style="border-style:dashed">审查 Agent · 标准 ▾</button><span class="chip ok">gpt-4o</span></span></div>
+          <div class="app-top"><span class="crumb">审查 agent-domains 的变更</span><span class="right"><button class="btn sm" style="border-style:dashed">审查 Agent · 标准 ▾</button><span class="chip ok">gpt-5-codex</span></span></div>
           <div class="panel tight" style="margin:8px 14px 0;border-color:var(--blue-border)"><p class="tiny dim" style="margin:0 0 6px"><b>▼ Agent 切换器 · 点击后的演示态（mock open）</b>　切换自下一条消息起生效，历史消息归属不变</p>
             <table class="tbl compact"><tbody>
-              <tr><td><span class="dot running"></span> <b>审查 Agent · 标准</b> <span class="chip">当前</span></td><td class="mono tiny">gpt-4o</td><td class="tiny dim">知识源：架构说明.md 等 3 · 工具：read/grep · healthy</td></tr>
-              <tr><td><span class="dot idle"></span> 数据同步 Agent</td><td class="mono tiny">deepseek-v3</td><td class="tiny dim">工具：archive/oss · 上次会话 13:58</td></tr>
-              <tr><td><span class="dot dead"></span> 旧版审查 Agent <span class="chip bad">运行异常</span></td><td class="mono tiny">gpt-3.5</td><td class="tiny dim">灰置：探针 failed，选择需先「重启」（跳 p4 详情）</td></tr>
+              <tr><td><span class="dot running"></span> <b>审查 Agent · 标准</b> <span class="chip">当前</span></td><td class="mono tiny">gpt-5-codex</td><td class="tiny dim">知识源：架构说明.md 等 3 · 工具：read/grep · healthy</td></tr>
+              <tr><td><span class="dot idle"></span> 数据同步 Agent</td><td class="mono tiny">deepseek-chat</td><td class="tiny dim">工具：archive/oss · 上次会话 13:58</td></tr>
+              <tr><td><span class="dot dead"></span> 旧版审查 Agent <span class="chip bad">运行异常</span></td><td class="mono tiny">deepseek-chat</td><td class="tiny dim">灰置：探针 failed，选择需先「重启」（跳 p4 详情）</td></tr>
               <tr><td><span class="dot running"></span> 审查 Agent · 备援 <span class="chip">冷备</span></td><td class="mono tiny">claude-sonnet</td><td class="tiny dim">切换=拉起冷备副本（首次调用 +8s，计费提示）</td></tr>
             </tbody></table>
             <p class="tiny dim" style="margin:6px 0 0">＋ 新建会话先过同一选择器（<span class="mono">agent_id</span> 随每条消息落库，p22 回放按条归属）</p>
@@ -2186,14 +2187,14 @@ edges:
             <table class="tbl compact">
               <thead><tr><th>Session ID</th><th>Agent</th><th>模型</th><th>状态</th><th>Token</th><th>耗时</th><th>开始时间</th><th>操作</th></tr></thead>
               <tbody>
-                <tr><td class="mono">rt-1-1783349487</td><td>审查 Agent · 标准</td><td class="mono">gpt-4o</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">4,120</td><td class="mono">进行中</td><td class="mono">14:31:27</td><td><span class="btn link" style="color:var(--red)">中断</span></td></tr>
-                <tr><td class="mono">rt-2-1783349021</td><td>数据同步 Agent</td><td class="mono">deepseek-v3</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">1,880</td><td class="mono">进行中</td><td class="mono">14:23:41</td><td><span class="btn link" style="color:var(--red)">中断</span></td></tr>
+                <tr><td class="mono">rt-1-1783349487</td><td>审查 Agent · 标准</td><td class="mono">gpt-5-codex</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">4,120</td><td class="mono">进行中</td><td class="mono">14:31:27</td><td><span class="btn link" style="color:var(--red)">中断</span></td></tr>
+                <tr><td class="mono">rt-2-1783349021</td><td>数据同步 Agent</td><td class="mono">deepseek-chat</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">1,880</td><td class="mono">进行中</td><td class="mono">14:23:41</td><td><span class="btn link" style="color:var(--red)">中断</span></td></tr>
                 <tr><td class="mono">rt-4-1783348712</td><td>前端 Agent</td><td class="mono">claude-sonnet</td><td><span class="chip warn"><span class="dot running" style="margin-right:4px"></span>running</span></td><td class="mono">9,340</td><td class="mono">进行中</td><td class="mono">14:18:32</td><td><span class="btn link" style="color:var(--red)">中断</span></td></tr>
-                <tr><td class="mono">rt-1-1783348100</td><td>审查 Agent · 标准</td><td class="mono">gpt-4o</td><td><span class="chip ok">success</span></td><td class="mono">12,480</td><td class="mono">8.2s</td><td class="mono">14:08:20</td><td><span class="btn link">查看</span><span class="btn link">重试</span></td></tr>
+                <tr><td class="mono">rt-1-1783348100</td><td>审查 Agent · 标准</td><td class="mono">gpt-5-codex</td><td><span class="chip ok">success</span></td><td class="mono">12,480</td><td class="mono">8.2s</td><td class="mono">14:08:20</td><td><span class="btn link">查看</span><span class="btn link">重试</span></td></tr>
                 <tr><td class="mono">rt-5-1783347902</td><td>汇总 Agent</td><td class="mono">gpt-4o-mini</td><td><span class="chip ok">success</span></td><td class="mono">3,060</td><td class="mono">2.4s</td><td class="mono">14:05:02</td><td><span class="btn link">查看</span><span class="btn link">重试</span></td></tr>
                 <tr><td class="mono">rt-3-1783347411</td><td>审查 Agent · 备援</td><td class="mono">claude-sonnet</td><td><span class="chip ok">success</span></td><td class="mono">15,720</td><td class="mono">11.7s</td><td class="mono">13:56:51</td><td><span class="btn link">查看</span><span class="btn link">重试</span></td></tr>
-                <tr><td class="mono">rt-1-1783346200</td><td>审查 Agent · 标准</td><td class="mono">gpt-4o</td><td><span class="chip bad">error</span></td><td class="mono">21,004</td><td class="mono">31.7s</td><td class="mono">13:36:40</td><td><span class="btn link">查看</span><span class="btn link">重试</span></td></tr>
-                <tr><td class="mono">rt-6-1783345800</td><td>数据同步 Agent</td><td class="mono">deepseek-v3</td><td><span class="chip ok">success</span></td><td class="mono">6,410</td><td class="mono">4.9s</td><td class="mono">13:30:00</td><td><span class="btn link">查看</span><span class="btn link">重试</span></td></tr>
+                <tr><td class="mono">rt-1-1783346200</td><td>审查 Agent · 标准</td><td class="mono">gpt-5-codex</td><td><span class="chip bad">error</span></td><td class="mono">21,004</td><td class="mono">31.7s</td><td class="mono">13:36:40</td><td><span class="btn link">查看</span><span class="btn link">重试</span></td></tr>
+                <tr><td class="mono">rt-6-1783345800</td><td>数据同步 Agent</td><td class="mono">deepseek-chat</td><td><span class="chip ok">success</span></td><td class="mono">6,410</td><td class="mono">4.9s</td><td class="mono">13:30:00</td><td><span class="btn link">查看</span><span class="btn link">重试</span></td></tr>
               </tbody>
             </table>
             <div class="callout" style="margin-top:var(--s3)">
@@ -2335,7 +2336,7 @@ edges:
                     <div style="display:flex;align-items:center;gap:6px"><span class="chip ok">12.4s</span><span class="mono small">审查流水线 v3</span></div>
                     <div style="padding-left:16px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip ok">8.2s</span><span class="mono small">审查 Agent · 标准</span></div>
                     <div style="padding-left:32px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip ok">2.1s</span><span class="mono small">↳ read_file</span></div>
-                    <div style="padding-left:32px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip warn">5.4s</span><span class="mono small">↳ llm.chat (gpt-4o)</span></div>
+                    <div style="padding-left:32px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip warn">5.4s</span><span class="mono small">↳ llm.chat (gpt-5-codex)</span></div>
                     <div style="padding-left:16px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip ok">3.8s</span><span class="mono small">前端 Agent</span></div>
                   </div>
                 </div>
@@ -2352,7 +2353,7 @@ edges:
 
     <!-- ─────────── 6.13 项目管理 ─────────── -->
     <h3 id="p13">6.13 项目管理</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>项目列表 + 提示词目录标注 + 项目级可见性。未分配项目的普通用户看到的是空列表（非全部）。新建项目（<span class="mono">projects__new.html</span>）：名称/描述独立输入框、图标可选；代码源本地目录=目录选择器、GitHub=输入框 +「克隆并关联」；状态/优先级=单选按钮组，<strong>无起止时间字段——节奏由里程碑/工作项承载</strong>；Leader 与成员候选=用户级 Agent / 其他 Agent / 用户，可持续添加；创建项目 = 自动创建专属知识空间（§6.9）。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>项目列表 + 提示词目录标注 + 项目级可见性。未分配项目的普通用户看到的是空列表（非全部）。新建项目（<span class="mono">projects__new.html</span>）：名称/描述独立输入框、图标可选；代码源本地目录=目录选择器、GitHub=输入框 +「克隆并关联」；状态/优先级=单选按钮组，<strong>无起止时间字段——节奏由里程碑/任务承载</strong>；Leader 与成员候选=用户级 Agent / 其他 Agent / 用户，可持续添加；创建项目 = 自动创建专属知识空间（§6.9）。<b>〔2026-10-15 补〕</b>项目详情新增<b>「文件」tab（只读）</b>原型：<span class="mono">projects__files.html</span>，资源双源 tab · 只读树 + 搜索 + 预览——形态基线见 §6.13b。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/projects</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -2407,6 +2408,10 @@ edges:
       </div>
     </div>
     <p class="tiny dim"><b>演示数据说明：</b>路径为真实机器路径。「提示词目录缺失」演示项目未初始化提示词资源时的标注（该字段对应 <span class="mono">has_prompts</span> 判定）。</p>
+
+    <!-- ─────────── 6.13b 项目文件查看（只读） ─────────── -->
+    <h3 id="p13b">6.13b 项目文件查看（只读） <span class="chip">2026-10-15 新增</span></h3>
+    <p class="proto-note"><span class="chip warn">演示数据</span>项目详情「文件」tab，原型页 <span class="mono">projects__files.html</span>——承接原 §6.18 编辑页的查看面（2026-10-15 裁定：编辑下线、查看保留）。资源<b>双源 tab</b>：GitHub 仓 @commit 锁定 / 本地目录；<b>只读</b>文件树 + 搜索 + 预览，大文件截断显示（标总行数/字节）、二进制仅元信息。<b>「编辑去你那边」</b>：页面无编辑入口、无保存按钮，追溯走代码仓历史与 §6.15 审计。操作口径见 §5.13，裁撤说明见 §6.18。</p>
 
     <!-- ─────────── 6.14 角色市场 ─────────── -->
     <h3 id="p14">6.14 角色市场</h3>
@@ -2709,101 +2714,12 @@ edges:
     </div>
     <p class="tiny dim"><b>演示数据说明：</b>「终止并替换 agent-7」对应 §6.3 调和时间线中 13:41 的 <span class="mono">dangerous</span> 事件——两侧是同一件事的两种视角。审批为阻塞式，无超时放行。</p>
 
-    <!-- ─────────── 6.18 产物文档编辑 ─────────── -->
-    <h3 id="p18">6.18 产物文档编辑</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>文件树 + CodeMirror 编辑区 + 保存前自动备份（保留最近 5 版）。写入路径统一经目录解析函数，不做路径越界写入。</p>
-    <div class="proto">
-      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/docs · .specs/agent-domains/</span><span class="fake">演示数据</span></div>
-      <div class="app" style="grid-template-columns:196px minmax(0,1fr)">
-        <aside class="app-side">
-          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
-          <div class="nav-grp">工作区</div>
-          <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
-          <a><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
-          <a><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
-          <a><svg class="icon"><use href="#i-users"/></svg>角色</a>
-          <a><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
-          <a><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
-          <a><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
-          <a><svg class="icon"><use href="#i-net"/></svg>编排</a>
-          <a><svg class="icon"><use href="#i-chart"/></svg>监控</a>
-          <a class="active"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
-          <a><svg class="icon"><use href="#i-book"/></svg>知识库</a>
-          <a><svg class="icon"><use href="#i-shield"/></svg>审批</a>
-          <div class="spacer"></div>
-          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
-        </aside>
-        <div class="app-main">
-          <div class="app-top"><span class="crumb"><span class="dim">agent-domains /</span> REQUIREMENT.md</span><span class="right"><span class="chip warn">未保存</span><button class="btn sm">备份历史</button><button class="btn sm primary">保存</button></span></div>
-          <div class="app-body" style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:var(--s3);align-items:start">
-            <div class="panel tight" style="padding:var(--s2) 0">
-              <p class="tiny muted" style="margin:0 0 4px;padding:0 var(--s3);text-transform:uppercase;letter-spacing:.05em">.specs/agent-domains</p>
-              <div class="tree">
-                <div class="tree-row" style="padding:5px 12px"><svg class="icon" style="color:var(--blue)"><use href="#i-file"/></svg><span class="name">REQUIREMENT.md</span><span class="chip info" style="height:15px">编辑中</span></div>
-                <div class="tree-row" style="padding:5px 12px"><svg class="icon"><use href="#i-file"/></svg><span class="name">TASK.md</span></div>
-                <div class="tree-row" style="padding:5px 12px"><svg class="icon"><use href="#i-file"/></svg><span class="name">test_backend.py</span></div>
-                <div class="tree-row" style="padding:5px 12px"><svg class="icon"><use href="#i-file"/></svg><span class="name">_test_import.py</span></div>
-              </div>
-              <p class="tiny muted" style="margin:var(--s3) 0 4px;padding:0 var(--s3);text-transform:uppercase;letter-spacing:.05em">项目资源</p>
-              <div class="tree">
-                <div class="tree-row" style="padding:5px 12px"><svg class="icon"><use href="#i-folder"/></svg><span class="name">prompts/</span></div>
-                <div class="tree-row" style="padding:5px 12px"><svg class="icon"><use href="#i-folder"/></svg><span class="name">templates/</span></div>
-                <div class="tree-row" style="padding:5px 12px"><svg class="icon"><use href="#i-folder"/></svg><span class="name">rules/</span></div>
-              </div>
-            </div>
-            <div>
-              <div class="panel tight" style="padding:0;overflow:hidden">
-                <div style="display:flex;align-items:center;gap:var(--s2);padding:5px var(--s3);background:var(--bg-toolbar,var(--bg-tooltip));border-bottom:1px solid var(--border);font-size:11px;color:var(--text-muted)">
-                  <span class="mono">REQUIREMENT.md</span><span class="chip mono" style="height:15px">Markdown</span><span style="flex:1"></span><span class="mono">65 行 · 2,822 bytes</span>
-                </div>
-                <pre class="mono" style="margin:0;font-size:11px;line-height:1.75;color:var(--text-secondary);padding:var(--s3);overflow-x:auto"># agent-domains — 需求文档
-
-&gt; 版本: 1.0
-&gt; 状态: draft
-&gt; 创建: 2026-07-06
-
-## 概述
-
-为 Agent 控制面板增加 **隔离域（Domain）** 功能，允许用户将
-Agent 按域（如：开发域、测试域、生产域）分组管理。
-
-## 功能需求
-
-### FR1: 域 CRUD
-- 创建域：name（必填）、owner_id（默认当前用户）
-- 删除域：将域内所有 Agent 的 domain_id 置为 NULL（落「未分类」虚拟组，可再归位）
-
-### FR2: Agent 归属域
-- Agent 表新增 `domain_id` 字段（可为 NULL）
-- GET /api/agents?domain_id=X 按域过滤
-
-## 验收条件
-
-- [ ] 域 CRUD API 正常工作
-- [ ] 删除域后 Agent 落「未分类」虚拟组（domain_id NULL）
-- [ ] TypeScript 无新增编译错误
-<span style="background:var(--blue-bg)">▌</span></pre>
-              </div>
-              <div class="grid g2" style="margin-top:var(--s3);align-items:start">
-                <div class="callout ok" style="margin:0">
-                  <p><b>保存前自动备份：</b>写入前先把当前版本复制到 <span class="mono">backup/</span>，保留最近 <b>5</b> 个版本；需要时可回滚。</p>
-                </div>
-                <div class="callout warn" style="margin:0">
-                  <p><b>保存会改变阶段判定：</b>产物变更后阶段与进度重算，但扫描有 <b>5 秒</b>缓存——立即刷新可能仍看到旧阶段。</p>
-                </div>
-              </div>
-              <div class="callout" style="margin-top:var(--s3)">
-                <p><b>路径安全：</b>所有读写都经 <span class="mono">config.get_specs_dir()</span> 与提示词目录解析函数，<strong>不接受</strong>前端传入的绝对路径，因此不存在路径越界写入。</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p class="tiny dim"><b>演示数据说明：</b>编辑内容取自真实产物 <span class="mono">.specs/agent-domains/REQUIREMENT.md</span>（65 行 / 2,822 bytes 为真实值）。「未保存」徽章演示脏状态；真实系统另有语法高亮（CodeMirror 6），此处以纯文本呈现。</p>
+    <!-- ─────────── 6.18 产物文档编辑（已裁撤） ─────────── -->
+    <h3 id="p18">6.18 产物文档编辑 <span class="chip">已裁撤 · 2026-10-15 裁定</span></h3>
+    <p class="proto-note">本节原「文件树 + CodeMirror 编辑 + 保存前自动备份」原型整页裁撤。<b>裁定理由：编辑发生在本地目录 / 代码仓</b>——文件本来就在成员机器上，版本历史与回滚由代码仓承担，平台再造一套编辑+备份是重复且更弱的那一份。平台侧保留<b>只读文件查看与追溯</b>（资源双源 tab · 只读树 + 搜索 + 预览），界面基线见 <a href="#p13b" style="color:inherit">§6.13b 项目文件查看</a>；操作手册见 §5.13 / §5.18。<b>术语不变：</b><span class="mono">.specs/</span> 知识产物仍是平台一等数据——<b>数据不撤、扫描与阶段判定不撤，撤的只是 UI 编辑入口</b>。</p>
 
     <h3 id="p19">6.19 阶段模型配置 <span class="chip warn">规划原型 · 未实现</span></h3>
-    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P0-6 / P1-3</b>：把当前硬编码在 13 个文件里的 9 阶段与产物文件名，收敛为可编辑的配置。<b>此界面尚不存在</b>，用于表达目标形态。真实系统已有 <span class="mono">GET/PUT /api/admin/workflow</span> 与 <span class="mono">workflow.json</span> 作为落点。<b>2026-09-22（S7 过审）：业界成型解已呈——阶段做成「目录表 + 4 个语义锚（unstarted/started/done/closed）」，自定义阶段只继承生命周期、禁止继承停车/评审/失败恢复行为，锚归类建后不可改（multica 迁移 332/337 实证 + 537 对迁移的机械不变量测试护航）。原「是否允许用户自定义阶段模型」的待裁定项，决策成本由开放设计降为方案采纳。<b>09-23 复核：</b>「13 个文件」系 <span class="mono">grep -l "0-change"</span> 口径，阶段字面量口径后端实测 6——采纳实施前重新盘点。</b></p>
+    <p class="proto-note"><span class="chip warn">规划原型</span><b>〔2026-10-15 裁定确认：阶段模型非孤立，裁撤的是产物编辑 UI 而非阶段模型〕</b>被消费面实证：任务看板状态机（done 需证据门）、角色触发 <span class="mono">gate × topic</span>、执行回放阶段标注、画布节点语义锚（started/done）、工作台变更卡进度——五面共同消费阶段模型，故阶段配置化（下条）仍需推进。对应 §1.6 <b>P0-6 / P1-3</b>：把当前硬编码在 13 个文件里的 9 阶段与产物文件名，收敛为可编辑的配置。<b>此界面尚不存在</b>，用于表达目标形态。真实系统已有 <span class="mono">GET/PUT /api/admin/workflow</span> 与 <span class="mono">workflow.json</span> 作为落点。<b>2026-09-22（S7 过审）：业界成型解已呈——阶段做成「目录表 + 4 个语义锚（unstarted/started/done/closed）」，自定义阶段只继承生命周期、禁止继承停车/评审/失败恢复行为，锚归类建后不可改（multica 迁移 332/337 实证 + 537 对迁移的机械不变量测试护航）。原「是否允许用户自定义阶段模型」的待裁定项，决策成本由开放设计降为方案采纳。<b>09-23 复核：</b>「13 个文件」系 <span class="mono">grep -l "0-change"</span> 口径，阶段字面量口径后端实测 6——采纳实施前重新盘点。</b></p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/workflow-model</span><span class="fake">规划原型</span></div>
       <div class="app">
@@ -2844,25 +2760,27 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
       </div>
     </div>
 
-    <h3 id="p20">6.20 工作项看板 <span class="chip warn">规划原型 · 未实现</span></h3>
+    <h3 id="p20">6.20 任务看板 <span class="chip warn">规划原型 · 未实现</span></h3>
     <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：补齐协作层最小集。<b>负责人可以是人或 Agent</b>，这是与 Multica 对齐的关键一列；状态采用四类生命周期（未开始 / 进行中 / 完成 / 关闭），并遵守「<b>状态标签不授予行为</b>」——进入「进行中」不等于自动启动 Agent。<b>2026-09-22 补（S7）：状态与「待受理」为两根正交轴——前者答「到哪一步」、后者答「这算不算活」，受理门只拦自动推导执行者的运行、不拦人点名派发（multica 483 迁移的显式反悔教训）；完成态建议按 §1.6.5 ③ 加「需证据 + 同伴复核」。</b><b>此界面尚不存在</b>。</p>
     <p class="tiny dim">〔09-23 裁定⑦注〕告警属可计量追踪数据——P1-16 落表的表建在 <b>MySQL</b>（告警表+去重键+保留策略列），与 work_item 族同库；进程内环形 500 条形态退役。</p>
     <p class="tiny dim">〔第 4 轮 schema 注〕目标两组表+一次并表（P1-16 前置）：work_item 单表含 status×triage 双轴、assignee 人/Agent 双轨（owner_id 保持归属语义不动）、done 附证据；运行经 work_item_runs 连接表挂多上下文。</p>
+    <p class="tiny dim">〔2026-10-15 裁定·详情机制统一〕卡片点击<b>一律</b>右侧统一抽屉（状态/指派/优先级等操作均可在抽屉完成）；完整详情整页仅作二级落点——同一机制贯穿，不再页面/弹窗混用。</p>
+    <p class="tiny dim">〔2026-10-15 裁定·三视角同一组件〕任务列表为同一组件复用三处：成员详情=「我所属的任务」、Agent 详情=「指派给本 Agent 的任务」、项目详情=「本项目关联的任务」；scope 只是查询条件，不另做页面、不另做交互。</p>
     <div class="proto">
-      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/work-items</span><span class="fake">规划原型</span></div>
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/tasks</span><span class="fake">规划原型</span></div>
       <div class="app">
         <aside class="app-side">
           <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
           <div class="nav-grp">工作区</div>
           <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
-          <a class="active"><svg class="icon"><use href="#i-branch"/></svg>工作项</a>
+          <a class="active"><svg class="icon"><use href="#i-branch"/></svg>任务</a>
           <a><svg class="icon"><use href="#i-inbox"/></svg>收件箱<span class="badge">3</span></a>
           <a><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
           <a><svg class="icon"><use href="#i-net"/></svg>编排</a>
           <a><svg class="icon"><use href="#i-folder"/></svg>项目</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">工作项 <span class="dim">· 项目：agentflow · 迭代 2026-W39</span></span><span class="right"><button class="btn sm">看板 / 列表</button><button class="btn sm primary">+ 新建工作项</button></span></div>
+          <div class="app-top"><span class="crumb">任务 <span class="dim">· 项目：agentflow · 迭代 2026-W39</span></span><span class="right"><button class="btn sm">看板 / 列表</button><button class="btn sm primary">+ 新建任务</button></span></div>
           <div class="app-body">
             <div class="grid g4" style="align-items:start">
               <div>
@@ -2898,7 +2816,8 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
     </div>
 
     <h3 id="p21">6.21 收件箱 <span class="chip warn">规划原型 · 未实现</span></h3>
-    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：<b>只在需要人拍板时通知，而不是每一步都来烦你</b>。与现有「告警中心」（30 秒巡检、面向系统异常）分工不同：收件箱面向<b>需要人决策的工作流节点</b>。<b>2026-09-22 补（S7）：执行 §6.0 ⑫ 通知分层三规则（值得打扰才 ping / 读失败宁多发不漏发 / 旧失败随工作项推进自愈归档）；失败通知条目带 ④ 三件套入口；审批条目语义向 A2A HITL 扩展的「挂起→同任务延续」对齐（P1-12）。</b><b>此界面尚不存在</b>。</p>
+    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：<b>只在需要人拍板时通知，而不是每一步都来烦你</b>。与现有「告警中心」（30 秒巡检、面向系统异常）分工不同：收件箱面向<b>需要人决策的工作流节点</b>。<b>2026-09-22 补（S7）：执行 §6.0 ⑫ 通知分层三规则（值得打扰才 ping / 读失败宁多发不漏发 / 旧失败随任务推进自愈归档）；失败通知条目带 ④ 三件套入口；审批条目语义向 A2A HITL 扩展的「挂起→同任务延续」对齐（P1-12）。</b><b>此界面尚不存在</b>。</p>
+    <p class="tiny dim">〔2026-10-15 裁定·收件箱升级〕①<b>点开通知 = 完整上下文线程</b>：引发该通知的讨论/活动链在右侧抽屉内直接读完，不再跳页找线索；②既有理念不变——<b>值得打扰才 ping</b>（通知量与「需要人的次数」相等）；③入箱仅三类条件命中之一：<b>@我 / 我订阅（对象或项目）/ 我负责（负责人含人、Agent 双轨）</b>。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/inbox</span><span class="fake">规划原型</span></div>
       <div class="app">
@@ -2906,7 +2825,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
           <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
           <div class="nav-grp">工作区</div>
           <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
-          <a><svg class="icon"><use href="#i-branch"/></svg>工作项</a>
+          <a><svg class="icon"><use href="#i-branch"/></svg>任务</a>
           <a class="active"><svg class="icon"><use href="#i-inbox"/></svg>收件箱<span class="badge">3</span></a>
           <a><svg class="icon"><use href="#i-shield"/></svg>审批中心</a>
           <a><svg class="icon"><use href="#i-radio"/></svg>告警中心</a>
@@ -2925,20 +2844,21 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
     </div>
 
     <h3 id="p22">6.22 执行回放 <span class="chip warn">规划原型 · 未实现</span></h3>
-    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-5</b>：把「这活哪个 Agent 动过、它到底跑了什么、花了多少」做成<b>按工作项可完整回放</b>的时间线。现有 <span class="mono">trace_spans</span> 表提供跨度数据，但缺这个视图。<b>2026-09-22 补（S7）：回放面执行 §6.0 ③⑪（健康四态/阈值入文案；多上下文挂靠、计划 vs 收据双数组、截断标记、取消人署名、wait_reason 徽标、每 run tokens/USD）；人工干预条目带变更前快照与干预时间线（§1.6.5 ④）；实时增量遵守 ⑧ 契约——推送只降延迟，形状与查询响应一致。</b><b>此界面尚不存在</b>。</p>
+    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-5</b>：把「这活哪个 Agent 动过、它到底跑了什么、花了多少」做成<b>按任务可完整回放</b>的时间线。现有 <span class="mono">trace_spans</span> 表提供跨度数据，但缺这个视图。<b>2026-09-22 补（S7）：回放面执行 §6.0 ③⑪（健康四态/阈值入文案；多上下文挂靠、计划 vs 收据双数组、截断标记、取消人署名、wait_reason 徽标、每 run tokens/USD）；人工干预条目带变更前快照与干预时间线（§1.6.5 ④）；实时增量遵守 ⑧ 契约——推送只降延迟，形状与查询响应一致。</b><b>此界面尚不存在</b>。</p>
     <p class="tiny dim">〔第 4 轮实测注〕本页消费的产生表 trace_spans <b>当前 0 行（无产生端写入）</b>——回放能力的前置是 P2-4 的 C10-0，先让数据真的产生。</p>
+    <p class="tiny dim">〔2026-10-15 裁定·任务回放与入口链〕执行回放=任务回放，<b>无独立列表页</b>：入口链=任务详情 run 历史 · 看板抽屉 run 区 · Agent 概览 Now · 对话「View details」；面包屑固定措辞「<b>任务 AF-104 › run r-128 › 执行回放</b>」式（任务 → run → 页名三级）。</p>
     <div class="proto">
-      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/work-items/AF-116/runs/run-8842</span><span class="fake">规划原型</span></div>
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/tasks/AF-116/runs/run-8842</span><span class="fake">规划原型</span></div>
       <div class="app">
         <aside class="app-side">
           <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
           <div class="nav-grp">工作区</div>
           <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
-          <a class="active"><svg class="icon"><use href="#i-branch"/></svg>工作项</a>
+          <a class="active"><svg class="icon"><use href="#i-branch"/></svg>任务</a>
           <a><svg class="icon"><use href="#i-chart"/></svg>监控</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">AF-116 <span class="dim">· run-8842 · Agent: code-fixer</span></span><span class="right"><span class="chip bad">失败</span><span class="chip" title="每 run tokens/USD，§6.0 ⑪ 记账面">41.2k tok · $0.38</span><button class="btn sm">重试</button><button class="btn sm">导出</button></span></div>
+          <div class="app-top"><span class="crumb">任务 AF-116 › run-8842 › 执行回放 <span class="dim">· Agent: code-fixer</span></span><span class="right"><span class="chip bad">失败</span><span class="chip" title="每 run tokens/USD，§6.0 ⑪ 记账面">41.2k tok · $0.38</span><button class="btn sm">重试</button><button class="btn sm">导出</button></span></div>
           <div class="app-body">
             <div class="grid g3" style="align-items:start;margin-bottom:12px">
               <div class="stat"><p class="stat-label">耗时</p><p class="stat-value">4m 12s</p></div>
@@ -2949,7 +2869,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
               <thead><tr><th style="width:88px">时间</th><th>类型</th><th>内容</th><th>结果</th><th>耗时</th></tr></thead>
               <tbody>
                 <tr><td class="mono tiny">14:02:08</td><td><span class="chip" style="border-color:var(--purple);color:var(--purple)">decision</span></td><td class="tiny">路由决策 · <span class="mono">Jev-Style-Qwen3.5-2B</span>：3 候选 → code-fixer <b>0.52</b> · doc-keeper 0.27 · test-runner 0.21　<span class="dim">top1 &lt; 阈值 0.60</span></td><td><span class="chip warn">escalated · 升级大模型复核派单</span></td><td class="mono tiny">0.1s</td></tr>
-                <tr><td class="mono tiny">14:02:11</td><td><span class="chip info">think</span></td><td class="tiny">读取工作项描述与 <span class="mono">TASK.md</span>，规划修复范围</td><td><span class="chip ok">ok</span></td><td class="mono tiny">1.2s</td></tr>
+                <tr><td class="mono tiny">14:02:11</td><td><span class="chip info">think</span></td><td class="tiny">读取任务描述与 <span class="mono">TASK.md</span>，规划修复范围</td><td><span class="chip ok">ok</span></td><td class="mono tiny">1.2s</td></tr>
                 <tr><td class="mono tiny">14:02:13</td><td><span class="chip">tool</span></td><td class="tiny"><span class="mono">grep -rn "workflow_ids" src/</span></td><td><span class="chip ok">3 处命中</span></td><td class="mono tiny">0.3s</td></tr>
                 <tr><td class="mono tiny">14:02:15</td><td><span class="chip">tool</span></td><td class="tiny"><span class="mono">read src/types/agent.ts</span></td><td><span class="chip ok">ok</span></td><td class="mono tiny">0.1s</td></tr>
                 <tr><td class="mono tiny">14:02:40</td><td><span class="chip">edit</span></td><td class="tiny">修改 <span class="mono">ProjectManager.tsx</span> 第 29 行，改用 <span class="mono">workflow_id</span></td><td><span class="chip ok">+1 / -1</span></td><td class="mono tiny">0.2s</td></tr>
@@ -2959,7 +2879,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
               </tbody>
             </table>
             <div class="callout warn" style="margin-top:10px"><p><b>这一行是本次回放最有价值的证据：</b>Agent 试图用 <span class="mono">as any</span> 绕过类型检查，被安全栅栏（<span class="mono">gate_registry</span>）拦下。没有动作级记录，这条只会表现为「莫名其妙失败了 3 次」。</p></div>
-            <p class="tiny dim">回放支持逐条展开原始入参 / 出参 / stderr；可导出为 JSONL 供外部审计。<b>按工作项聚合</b>，而非按会话——这是与现有「运行时监控」（按会话）的关键差别。</p>
+            <p class="tiny dim">回放支持逐条展开原始入参 / 出参 / stderr；可导出为 JSONL 供外部审计。<b>按任务聚合</b>，而非按会话——这是与现有「运行时监控」（按会话）的关键差别。</p>
           </div>
         </div>
       </div>
@@ -3188,7 +3108,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
         <div class="app-main">
           <div class="app-top"><span class="crumb">运行时 <span class="dim">· 发现与注册表</span></span><span class="right"><span class="chip mono">daemon 心跳 15s</span><span class="chip ok">3 台机器在线</span><button class="btn sm">⟳ 重新检测</button></span></div>
           <div class="app-body">
-            <div class="callout"><p><b>daemon ≠ 运行时：</b>daemon 是每台机器上的扫描与上报进程；运行时是「机器 × CLI × 协议族」的注册记录。执行一律由运行时调用外部框架 CLI 完成，平台服务器只保存工作项、Agent 定义与 run 记录。并发口径：<b>daemon 全机 ≤20 · 单 Agent 默认 ≤6 · 生效取较小</b>；离线判定 ≤3 分钟，心跳丢失时排队 run 等待、不直接判失败。</p></div>
+            <div class="callout"><p><b>daemon ≠ 运行时：</b>daemon 是每台机器上的扫描与上报进程；运行时是「机器 × CLI × 协议族」的注册记录。执行一律由运行时调用外部框架 CLI 完成，平台服务器只保存任务、Agent 定义与 run 记录。并发口径：<b>daemon 全机 ≤20 · 单 Agent 默认 ≤6 · 生效取较小</b>；离线判定 ≤3 分钟，心跳丢失时排队 run 等待、不直接判失败。</p></div>
             <p class="h2p" style="margin-top:var(--s4)">注册表与模型目录（模型由运行时暴露）</p>
             <table class="tbl compact">
               <thead><tr><th>机器 · CLI</th><th>协议族</th><th>状态</th><th>模型目录（<span class="mono">--list-models</span> 解析）</th><th class="c">会话续跑</th><th class="c">托管 MCP</th><th>Skill 注入路径</th><th>可见性</th><th class="c">绑定 Agent</th><th>操作</th></tr></thead>
@@ -3235,7 +3155,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
         <tr class="grp-row"><td colspan="5">项目与产物（project:read / project:write）</td></tr>
         <tr><td>工作台 · 变更总览</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td></tr>
         <tr><td>项目管理</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td></tr>
-        <tr><td>产物文档编辑</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td></tr>
+        <tr><td>只读文件查看（产物编辑已下线·2026-10-15）</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td></tr>
         <tr><td>删除变更 / 产物 / 角色 <span class="chip bad">危险</span></td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td></tr>
         <tr class="grp-row"><td colspan="5">编排与执行</td></tr>
         <tr><td>编排画布（校验 / apply）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-eye">○</td></tr>
@@ -3369,7 +3289,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
     <p><b>A：</b>大概率不是。<code>user</code> 角色<strong>默认零权限</strong>——不勾选任何权限点、不分配任何项目时，导航里只剩「对话中心」。这是刻意的白名单设计（§2.10）：管控平台的操作不可逆性高，所以默认关闭而非默认放开。管理员需在「用户管理」中显式分配权限点与可见项目。</p>
 
     <h3>Q9 · 为什么改了 <code>.specs</code> 里的文件，界面上阶段没变？</h3>
-    <p><b>A：</b>产物扫描有 <strong>5 秒 TTL 缓存</strong>（§5.18）。保存后稍等再刷新即可。另外，保存前会自动备份到 <code>backup/</code>（保留最近 5 版），需要时可回滚。</p>
+    <p><b>A：</b>产物扫描有 <strong>5 秒 TTL 缓存</strong>（§5.18）。本地改完稍等再刷新即可。<b>平台侧编辑入口已下线</b>（2026-10-15 裁定，§5.18/§6.18）——改文件在本地目录 / 代码仓进行，历史与回滚走代码仓版本管理，平台保留只读查看与追溯（§5.13 / §6.13b）。</p>
 
     <h3>Q10 · 编排里配置了 <code>human-approval</code> 边，会不会超时自动放行？</h3>
     <p><b>A：</b><strong>不会</strong>。人工闸门是阻塞式的：不决策则流程一直挂起（§2.9）。这是安全默认值——自动放行会让闸门失去意义。如果担心流程长期悬挂，应在审批中心配置提醒或在编排里为该边显式配置超时后的异常分支。</p>
@@ -3395,7 +3315,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
     <h3>Q17 · 为什么不干脆跟着 kagent 做 CRD？</h3>
     <p><b>A：</b>因为那会放弃 AgentFlow 唯一不可替代的优势：<b>不需要 K8s 就能跑</b>。kagent 的代价是双层状态（其架构文档明确写 <code>AgentInstance</code>「不是 Kubernetes 资源」，运行时状态在 PostgreSQL），并且要求集群、CRD 安装、PostgreSQL。AgentFlow 的选择是<b>用 YAML + SQLite 表达同一套声明式语义</b>，换取「clone 下来一条 uvicorn 就能验证」。要补的不是 CRD，而是 CRD 背后的<b>条件语义</b>（<code>spec/status/conditions</code> 与 <code>observedGeneration</code>，见 P1-8）。</p>
     <h3>Q18 · 「IM 原生工作场所」和「对话内嵌团队层」这两条路线怎么算？</h3>
-    <p><b>A：</b>都是真实路线，但都不是我们的对位。OCTO（1,060★）把 IM 当内核——工作场所即聊天；dsh-agent-teams（1,766★，2026-08 立）把团队层嵌进单个 harness 会话——一条 prompt 变 captain。AgentFlow 是<b>管控面</b>：对话中心是众多入口之一（multica 实测 132/139 运行由评论触发，证明对话入口是主通道之一，值得做深），但隔离域、Reconcile、产物谱系这些<b>不随对话消失的持久对象</b>才是平台本体。三条路线在「工作项+负责人」面上会合，在「期望态与边界」上分道。参照 §1.6.6 的 dsh-agent-teams 行与 §6.0 ④⑩⑫。</p>
+    <p><b>A：</b>都是真实路线，但都不是我们的对位。OCTO（1,060★）把 IM 当内核——工作场所即聊天；dsh-agent-teams（1,766★，2026-08 立）把团队层嵌进单个 harness 会话——一条 prompt 变 captain。AgentFlow 是<b>管控面</b>：对话中心是众多入口之一（multica 实测 132/139 运行由评论触发，证明对话入口是主通道之一，值得做深），但隔离域、Reconcile、产物谱系这些<b>不随对话消失的持久对象</b>才是平台本体。三条路线在「任务+负责人」面上会合，在「期望态与边界」上分道。参照 §1.6.6 的 dsh-agent-teams 行与 §6.0 ④⑩⑫。</p>
     <h3>Q19 · multica 已经是 51k★ 的六件套全家桶，还追赶什么？</h3>
     <p><b>A：</b>正因为六件套成了入场券（§1.6 定盘句），追赶的定义变了：<b>不是抄它的 board，而是守住它没有的三样</b>——画布↔YAML 双向对账（它只有 board，最强同类 AgentTeams 也只到只读 Mermaid）、产物谱系+晋级门禁（品类无对应物，multica 的 issue↔run↔diff 停在审计素材层）、域=配额+沙箱+RBAC 三合一强制边界（它明写无 OS 沙箱、真边界在执行宿主；K8s 阵营有沙箱没工作台）。三样各成一件，「multica + 画布 + 自愈」和「kagent + 工作台」这两个没人完成的组合就是我们的位置。</p>
     <h3>Q20 · 决策小模型这么香，为什么不默认开着？</h3>
@@ -3411,7 +3331,7 @@ Agent 按域（如：开发域、测试域、生产域）分组管理。
 </section>
 
   <footer class="doc-foot">
-    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）· <b>v11 · 2026-10-15：运行时口径同步</b>（本轮对齐 10 月原型：运行时=成员机器上的外部 AI 编码 CLI，daemon 15s 心跳探测注册、新增 §6.28 运行时发现；Agent 配置面废除 Provider/Base URL/API Key；Agent 详情=四标签；对话中心=1:1 私密会话；知识库=公共知识+知识空间（L0-L3）；用户级 Agent 1:1；角色=CustomRole 14 字段；画布 Apply=应用内 diff 模态；新建项目无起止时间；全文清除 LangGraph/LangChain/AutoGen/CrewAI 作为运行时的表述）</p>
+    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）· <b>v11 · 2026-10-15：运行时口径同步</b>（本轮对齐 10 月原型：运行时=成员机器上的外部 AI 编码 CLI，daemon 15s 心跳探测注册、新增 §6.28 运行时发现；Agent 配置面废除 Provider/Base URL/API Key；Agent 详情=四标签；对话中心=1:1 私密会话；知识库=公共知识+知识空间（L0-L3）；用户级 Agent 1:1；角色=CustomRole 14 字段；画布 Apply=应用内 diff 模态；新建项目无起止时间；全文清除 LangGraph/LangChain/AutoGen/CrewAI 作为运行时的表述）· <b>v12 · 2026-10-15 · 任务化收敛与产物编辑下线</b>（产物文档编辑 UI 整节裁撤（§5.18/§6.18）→ 只读文件查看 §5.13/§6.13b 新增，能力地图/§5.0 可见性/§7 权限矩阵同步撤编辑行；阶段模型非孤立实证句入 §6.19；看板详情一律右侧统一抽屉 + 三视角任务列表同一组件（§6.20）；收件箱升级=点开通知即完整上下文线程 + 三类入箱条件（§6.21）；执行回放=任务回放、无独立列表页、入口链与「任务 › run › 执行回放」面包屑（§6.22）；全站「工作项→任务」改名于本版落地并做语义连带统一）</p>
     <p>第 4 轮证据链：<span class="mono">.specs/platform-evolution/D-{execution-isolation-2, declarative-api, otel-observability, a2a-protocol-surface, collaboration-layer-2, identity-and-security-2}</span> + <span class="mono">R4-CODEAUDIT.md</span>（2026-09-23，六路 agent 交叉验证）</p>
     <p>单文件自包含 HTML，零外部依赖（无 CDN / 无外链字体 / 无外部图片）；设计令牌与产品源码 <span class="mono">frontend/src/styles/tokens.css</span> 同源；§6 全部数据为演示假数据，其中 6.19–6.22 为<b>明确标注的规划原型</b>。</p>
     <p>数量口径来自对当前代码库与 <span class="mono">.specs/</span> 产物的实测扫描（2026-09-21）：后端 117 个 <span class="mono">.py</span> 模块（含 8 个测试文件）/ 28 个路由模块 / 169 个端点 / 132 条路径 / 19 个 ORM 模型模块 → 26 张表 / 24 个服务 + 5 个渠道适配器 / 4 个引擎模块 / 4 个运行时适配器；前端 100 个 <span class="mono">ts/tsx</span> / 34 个页面 / 28 个组件 + 13 个 Edge 组件 / 12 个 Zustand store。凡属推测或未实现的内容已在正文标注「待确认」。</p>

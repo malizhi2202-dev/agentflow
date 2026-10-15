@@ -4,23 +4,24 @@
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p22" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="inbox.html">收件箱</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="inbox.html">收件箱</span></div>
 <p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>执行回放对齐 <b>run transcript</b>：每条 run = 状态时间线（queued → dispatched → running → human_approval → completed/failed）+ agent 摘要 + 逐条 tool calls。下方 run r-128（审查 Agent · 标准）当前停在 <span class="mono">human_approval</span> 等待段——与审批中心 AP-31 联动。</p>
 <p class="tiny dim" style="padding:0 18px">〔数据可得性注〕本页消费的产生表 <span class="mono">trace_spans</span> 当前 0 行（无产生端写入），回放前置 = P2-4 的 <span class="mono">C10-0</span>；本页步骤 / token / 耗时 / run 列表全为演示。</p>
 <div class="proto">
-      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/work-items/AF-104/runs/r-128</span><span class="fake">演示数据</span></div>
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/tasks/AF-104/runs/r-128</span><span class="fake">演示数据</span></div>
       <div class="app">
         <aside class="app-side">
           <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
           <div class="nav-grp">工作区</div>
           <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
-          <a data-goto="board.html" class="active"><svg class="icon"><use href="#i-branch"/></svg>工作项</a>
+          <a data-goto="board.html" class="active"><svg class="icon"><use href="#i-branch"/></svg>任务</a>
           <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">AF-104 <span class="dim">· r-128 · Agent: 审查 Agent · 标准</span></span><span class="right"><span class="pill mono" data-click data-pop="pp-filter">时间线：全部 14 步 ▾</span><span class="pill mono" data-click data-pop="pp-ctx">挂靠上下文 3 ▾</span><span class="chip warn">human_approval · 等待审批（AP-31）</span><span class="chip">31.4k tok · $0.29</span><button class="btn sm" data-click data-goto="replay__run.html">整轮回放</button><button class="btn sm" data-click data-goto="replay__rerun.html" title="非幂等重跑：不 rollback 已发生的副作用 · 运行时（外部 CLI）按其自身会话/checkpoint 续跑">从失败步重跑</button><button class="btn sm" data-toast="已导出 r-128.jsonl（14 步 + 审批段 · 演示）">导出</button></span></div>
+          <div class="app-top"><span class="pill" data-click data-goto="board__af-109.html">← 返回任务</span><span class="crumb">任务 AF-104 <span class="dim">› run r-128 › 执行回放 · Agent: 审查 Agent · 标准</span></span><span class="right"><span class="pill mono" data-click data-pop="pp-filter">时间线：全部 14 步 ▾</span><span class="pill mono" data-click data-pop="pp-ctx">挂靠上下文 3 ▾</span><span class="chip warn">human_approval · 等待审批（AP-31）</span><span class="chip">31.4k tok · $0.29</span><button class="btn sm" data-click data-goto="replay__run.html">整轮回放</button><button class="btn sm" data-click data-goto="replay__rerun.html" title="非幂等重跑：不 rollback 已发生的副作用 · 运行时（外部 CLI）按其自身会话/checkpoint 续跑">从失败步重跑</button><button class="btn sm" data-toast="已导出 r-128.jsonl（14 步 + 审批段 · 演示）">导出</button></span></div>
           <div class="app-body">
-            <div class="callout warn" style="margin-top:0"><p><b>回放数据可得性（本页写明）：</b>产生表 <span class="mono">trace_spans</span> 当前 0 行（只有表结构与读 API，无产生端写入）。「先修产生端」是 P2-4 的 <span class="mono">C10-0</span>，它是回放的前置；下方步骤、token、耗时、run 列表全为演示数据。下面的 run 状态时间线与审批等待段按 run transcript 目标形态演示。</p></div>
+            <div class="callout" style="margin-top:0;border-left-color:var(--green)"><p class="tiny" style="margin:0"><b>〔入口说明 · 演示口径〕</b>回放 = <b>任务回放的 run 转写</b>，永远从「任务」或「run」进入，<b>无独立列表页</b>。四个入口：① 任务详情『run 历史』每行「回放」（board__af-109 / board__af-116）；② 看板统一抽屉 dr-task 底部「查看执行回放 →」（board.html 点任意列内卡片）；③ Agent 详情 · 概览 Now『看 transcript』与「最近工作」行内 transcript；④ 对话『View details』。<span class="btn link" data-click data-goto="board.html">从看板抽屉进入（示例）</span><span class="btn link" data-click data-goto="board__af-109.html">回到任务详情</span></p></div>
+            <div class="callout warn"><p><b>回放数据可得性（本页写明）：</b>产生表 <span class="mono">trace_spans</span> 当前 0 行（只有表结构与读 API，无产生端写入）。「先修产生端」是 P2-4 的 <span class="mono">C10-0</span>，它是回放的前置；下方步骤、token、耗时、run 列表全为演示数据。下面的 run 状态时间线与审批等待段按 run transcript 目标形态演示。</p></div>
             <div class="grid g4" style="align-items:start;margin-bottom:12px">
               <div class="stat"><p class="stat-label">耗时</p><p class="stat-value">1m 05s</p><p class="stat-sub">挂起 8m 12s</p></div>
               <div class="stat"><p class="stat-label">Token（入 / 出）</p><p class="stat-value">32.1k / 2.9k</p><p class="stat-sub">$0.29</p></div>
@@ -39,7 +40,7 @@
               <p class="tiny dim" style="margin:8px 0 0">当前停在第 4 段 <b style="color:var(--orange)">human_approval（等待审批）</b>：这里对应审批中心 <span class="mono">AP-31</span>「写文件需要 project:write」，审批通过后从 <span class="mono">seq 14</span> 继续 —— <a data-goto="approvals.html" data-click>去审批中心</a>。</p>
             </div>
             <div class="panel tight" style="margin-bottom:var(--s3)">
-              <p class="tiny muted" style="margin:0 0 6px">同一工作项 AF-104 的 run（每行 = 触发源 / 执行 Agent / 状态时间线）</p>
+              <p class="tiny muted" style="margin:0 0 6px">同一任务 AF-104 的 run（每行 = 触发源 / 执行 Agent / 状态时间线）</p>
               <table class="tbl compact"><thead><tr><th>run</th><th>触发源</th><th>执行 Agent</th><th>状态时间线</th><th>tokens / USD</th><th>操作</th></tr></thead><tbody>
                 <tr><td class="mono">r-128</td><td class="tiny">人点名派发 · 李工</td><td class="tiny">审查 Agent · 标准</td><td class="tiny dim"><span class="chip mono" style="height:16px;padding:0 4px">queued</span>→<span class="chip mono" style="height:16px;padding:0 4px">dispatched</span>→<span class="chip ok" style="height:16px;padding:0 4px">running</span>→<span class="chip warn" style="height:16px;padding:0 4px">human_approval</span></td><td class="mono tiny">31.4k / $0.29</td><td><span class="btn link" data-click data-goto="replay__run.html">回放</span><span class="btn link" data-click data-goto="approvals.html">去处理审批</span></td></tr>
                 <tr><td class="mono">run-8842</td><td class="tiny">人点名派发 · 李工</td><td class="tiny">code-fixer</td><td class="tiny dim"><span class="chip mono" style="height:16px;padding:0 4px">queued</span>→<span class="chip mono" style="height:16px;padding:0 4px">dispatched</span>→<span class="chip ok" style="height:16px;padding:0 4px">running</span>→<span class="chip bad" style="height:16px;padding:0 4px">failed</span></td><td class="mono tiny">41.2k / $0.38</td><td><span class="btn link" data-click data-goto="replay__run.html">回放</span><span class="btn link" data-click data-goto="replay__rerun.html">从失败步重跑</span></td></tr>
@@ -52,7 +53,7 @@
               <thead><tr><th style="width:88px">时间</th><th style="width:120px">类型</th><th>内容</th><th style="width:150px">结果</th><th style="width:70px">耗时</th></tr></thead>
               <tbody>
                 <tr data-click data-drawer="dr-step-route"><td class="mono tiny">14:31:02</td><td><span class="chip" style="border-color:var(--purple);color:var(--purple)">decision</span></td><td class="tiny">路由决策 · 3 候选 → 审查 Agent·标准 <b>0.71</b> · 备援 0.19 · legacy 0.10　<span class="dim">top1 ≥ 阈值 0.60</span></td><td><span class="chip ok">dispatched</span></td><td class="mono tiny">0.1s</td></tr>
-                <tr data-click data-toast="展开 seq 2 · think 规划审查范围（演示）"><td class="mono tiny">14:31:05</td><td><span class="chip info">think</span></td><td class="tiny">读取工作项 AF-104「收件箱聚合规则」描述与 <span class="mono">REVIEW.md</span> 草稿，规划审查范围</td><td><span class="chip ok">ok</span></td><td class="mono tiny">1.4s</td></tr>
+                <tr data-click data-toast="展开 seq 2 · think 规划审查范围（演示）"><td class="mono tiny">14:31:05</td><td><span class="chip info">think</span></td><td class="tiny">读取任务 AF-104「收件箱聚合规则」描述与 <span class="mono">REVIEW.md</span> 草稿，规划审查范围</td><td><span class="chip ok">ok</span></td><td class="mono tiny">1.4s</td></tr>
                 <tr data-click data-toast="展开 seq 3 · tool read REVIEW.md（演示）"><td class="mono tiny">14:31:08</td><td><span class="chip">tool</span></td><td class="tiny"><span class="mono">read REVIEW.md</span>（wf-8 旧版已备份）</td><td><span class="chip ok">ok</span></td><td class="mono tiny">0.2s</td></tr>
                 <tr data-click data-toast="展开 seq 4 · tool read REQUIREMENT.md（演示）"><td class="mono tiny">14:31:11</td><td><span class="chip">tool</span></td><td class="tiny"><span class="mono">read REQUIREMENT.md@wf-8</span></td><td><span class="chip ok">ok</span></td><td class="mono tiny">0.2s</td></tr>
                 <tr data-click data-toast="展开 seq 5 · tool grep 聚合实现（演示）"><td class="mono tiny">14:31:15</td><td><span class="chip">tool</span></td><td class="tiny"><span class="mono">grep -rn 收件箱聚合 实现</span></td><td><span class="chip ok">12 处命中</span></td><td class="mono tiny">0.4s</td></tr>
@@ -68,7 +69,7 @@
               </tbody>
             </table>
             <div class="callout warn" style="margin-top:10px"><p><b>审批等待段（与审批中心联动）：</b>seq 14 的 <span class="mono">write_file</span> 需要 <span class="mono">project:write</span>，而审查 Agent · 标准角色仅只读 → run r-128 停在 <span class="mono">human_approval</span>，对应审批中心 <b>AP-31</b>「写文件需要 project:write」。审批通过后从 seq 14 继续，沿用同一 run r-128、<b>不重建上下文</b>。<a data-goto="approvals.html" data-click>去审批中心</a></p></div>
-            <p class="tiny dim">回放支持逐条展开原始入参 / 出参 / stderr；可导出 JSONL 供外部审计。本页<b>按工作项聚合</b>（AF-104），而非按会话。</p>
+            <p class="tiny dim">回放支持逐条展开原始入参 / 出参 / stderr；可导出 JSONL 供外部审计。本页<b>按任务聚合</b>（AF-104），而非按会话。</p>
           </div>
         </div>
       </div>
@@ -80,7 +81,7 @@
   <dt>路由依据</dt><dd class="mono tiny">能力位 code-review ✓ · 负载率 0.25 最低 · Least Connection</dd>
   <dt>候选打分</dt><dd class="mono tiny">审查 Agent·标准 0.71 · 备援 0.19 · legacy 0.10（top1 ≥ 0.60 → 未升级）</dd>
   <dt>结果</dt><dd><span class="chip ok">dispatched</span> → 审查 Agent·标准（占 1 并发槽 · 2/4）</dd>
-  <dt>任务上下文</dt><dd class="mono">task-1 · 工作项 AF-104 + 对话 c-338 双挂靠</dd>
+  <dt>任务上下文</dt><dd class="mono">task-1 · 任务 AF-104 + 对话 c-338 双挂靠</dd>
 </dl></div></div>
 
 <div class="drawer" id="dr-step-write"><header><b>步 seq 14 · tool · write_file（审批等待）</b><span class="chip warn">human_approval</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
@@ -89,7 +90,7 @@
   <dt>父子链</dt><dd class="mono">run r-128 → seq 2 → seq 14</dd>
   <dt>调用 / 入参</dt><dd class="mono tiny">write_file(path=&quot;/work-items/AF-104/REVIEW.md&quot;, content=&quot;…&quot;, append=false)</dd>
   <dt>触发的审批单</dt><dd class="mono">AP-31「写文件需要 project:write」· pending</dd>
-  <dt>为什么被拦</dt><dd class="tiny">审查 Agent 角色的工具权限只读，写产物需 project:write；写产物会改动工作项 AF-104 的产物快照</dd>
+  <dt>为什么被拦</dt><dd class="tiny">审查 Agent 角色的工具权限只读，写产物需 project:write；写产物会改动任务 AF-104 的产物快照</dd>
   <dt>若批准</dt><dd class="tiny">write_file 以原参数落盘，run 从 seq 14 继续 seq 15…</dd>
   <dt>若驳回</dt><dd class="tiny">write_file 不下发，agent 携拒绝理由改选方案（改人工合并 REVIEW.md）</dd>
   <dt>回到同一任务上下文</dt><dd class="tiny">决策只写 <span class="mono">human_approvals.response_data</span>，不重建 run r-128 / task-1</dd>
@@ -98,9 +99,15 @@
 <div class="toolcall">write_file(path=&quot;/work-items/AF-104/REVIEW.md&quot;, content=&quot;# 收件箱聚合规则 · 审查结论&#10;1) 规则②「只 ping 拍板人」缺实现 —— 建议补 CHECK&#10;2) 规则③ deferred 隐藏缺 UI 开关 —— 建议补枚举&#10;（4.2KB · 截断展示）&quot;, append=false)</div>
 <p style="margin-top:var(--s4)"><button class="btn sm primary" data-click data-goto="approvals.html">去审批中心处理 AP-31</button> <button class="btn sm" data-toast="已复制本步 JSON（入参 / 审批上下文 · 演示）">复制 JSON</button></p></div></div>
 
+<div class="drawer" id="dr-step-generic"><header><b>步详情 · 通用模板（每步同构）</b><span class="chip">演示 · 深链落点</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<p class="tiny dim" style="margin:0 0 10px">步骤树统一深链回本页（<span class="mono">#dr-step-*</span>）：seq 1（路由决策）与 seq 14（审批等待）有专属抽屉 <span class="mono">dr-step-route / dr-step-write</span>；其余步一律落到这份通用模板——展示每步必有的字段形状，不为 14 步各画一版。</p>
+<dl class="kv"><dt>父子链</dt><dd class="mono tiny">run → seq n（树见 replay__run 步骤表）</dd><dt>类型</dt><dd>think / tool / edit / error（kind 列）</dd><dt>入参原文</dt><dd class="mono tiny">…逐条展开（JSON · 截断项留 2KB / 原 4.2KB <span class="chip warn">truncated</span>）</dd><dt>出参 / stderr 原文</dt><dd class="mono tiny">…</dd><dt>耗时 / token</dt><dd class="mono tiny">见每步 token 瀑布（按最大步归一）</dd><dt>收据编号</dt><dd class="mono tiny">trace_spans.span_id · JSONL 可导出供外部审计</dd></dl>
+<p class="tiny dim" style="margin-top:var(--s3)">〔数据可得性〕<span class="mono">trace_spans</span> 产生端 0 行（C10-0 未修）——本抽屉为「应该有」的形状演示。</p>
+<p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已复制本步 JSON（入参 / 结果 · 演示）">复制 JSON</button> <button class="btn sm" data-goto="replay__run.html">回整轮步骤树</button></p></div></div>
+
 <div class="pop" id="pp-ctx"><p class="tiny muted" style="margin:2px 4px 6px">一次运行可挂多上下文（§6.0 ⑪ · 计划 vs 收据）</p>
 <table class="tbl compact"><tbody>
-<tr><td class="mono tiny">work_item:AF-104</td><td class="tiny dim">主挂靠 · 回放按工作项聚合</td><td><span class="btn link" data-toast="跳转工作项看板 → AF-104（演示）">打开</span></td></tr>
+<tr><td class="mono tiny">work_item:AF-104</td><td class="tiny dim">主挂靠 · 回放按任务聚合</td><td><span class="btn link" data-click data-goto="board.html#dr-task">打开任务</span></td></tr>
 <tr><td class="mono tiny">chat:c-338</td><td class="tiny dim">同一 run 的对话面</td><td><span class="btn link" data-toast="跳转对话中心 → c-338（演示）">打开</span></td></tr>
 <tr><td class="mono tiny">wf:审查流水线 v3</td><td class="tiny dim">触发 workflow · review-pipeline</td><td><span class="btn link" data-toast="跳转编排画布 → 审查流水线 v3（演示）">打开</span></td></tr>
 </tbody></table></div>
@@ -114,5 +121,5 @@
 <tr><td>数据可得性</td><td class="tiny dim" style="color:var(--red)">trace_spans 0 行 · C10-0 未修</td><td><span class="chip bad">演示</span></td></tr>
 </tbody></table></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
 <p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为<b>规划原型</b>。run r-128（审查 Agent · 标准）在 AF-104 执行到 seq 14 时，因 write_file 需 <span class="mono">project:write</span> 停在 <span class="mono">human_approval</span> 等待段——与审批中心 AP-31 联动；审批通过后从 seq 14 继续、沿用同一 run。run 状态时间线（queued → dispatched → running → human_approval → completed/failed）与「每行触发源 / 执行 Agent / 状态时间线」对齐 Multica run transcript 字段。14 步动作记录、token / USD / 耗时、run 列表（r-128 / run-8842 / run-8811 / r-121）为演示值；关键事实是产生表 <span class="mono">trace_spans</span> 实测 0 行，回放前置 = P2-4 的 <span class="mono">C10-0</span>。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：run 状态时间线里「去审批中心」与 seq 14 审批行 → 跳 <span class="mono">approvals.html</span>（同一 mock 宇宙 · 联动）· run 列表「回放 / 去处理审批 / 从失败步重跑」→ 整轮回放 <span class="mono">replay__run.html</span> 与重跑 <span class="mono">replay__rerun.html</span> · 步骤表逐行 → seq 1 / seq 14 抽屉（审批卡覆盖工具调用内容），其余步骤 → toast · 顶栏「时间线 ▾ / 挂靠上下文 ▾」→ pop · 「导出」→ toast（JSONL 收据）　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：<b>入口说明 callout</b>（本回放 = 任务回放，四入口清单）· 顶部「← 返回任务」与「回到任务详情」→ 整页层 board__af-109 · 「从看板抽屉进入」→ board.html#dr-task 深链直接展开统一抽屉 · run 状态时间线里「去审批中心」与 seq 14 审批行 → 跳 <span class="mono">approvals.html</span>（同一 mock 宇宙 · 联动）· run 列表「回放 / 去处理审批 / 从失败步重跑」→ 整轮回放 <span class="mono">replay__run.html</span> 与重跑 <span class="mono">replay__rerun.html</span> · 步骤表逐行 → seq 1 / seq 14 抽屉（审批卡覆盖工具调用内容），其余步骤 → toast；replay__run 步骤树的「看」深链 → 同名两枚专属抽屉或通用模板 <span class="mono">dr-step-generic</span> · 顶栏「时间线 ▾ / 挂靠上下文 ▾」→ pop · 「导出」→ toast（JSONL 收据）　按 Esc 关闭所有浮层。</p>
 </body></html>

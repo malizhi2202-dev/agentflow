@@ -114,9 +114,9 @@
                     <text x="50" y="61" text-anchor="middle" fill="#5d6068" font-size="8">演示</text>
                   </svg>
                   <div class="legend" style="flex:1;min-width:120px">
-                    <span><i class="sw" style="background:#548cf0"></i>gpt-4o 42%</span>
-                    <span><i class="sw" style="background:#5cb878"></i>claude-3.5-sonnet 26%</span>
-                    <span><i class="sw" style="background:#e8a450"></i>deepseek-v3 18%</span>
+                    <span><i class="sw" style="background:#548cf0"></i>gpt-5-codex 42%</span>
+                    <span><i class="sw" style="background:#5cb878"></i>claude-sonnet-4.5 26%</span>
+                    <span><i class="sw" style="background:#e8a450"></i>deepseek-chat 18%</span>
                     <span><i class="sw" style="background:#e05555"></i>gpt-4o-mini 9%</span>
                     <span><i class="sw" style="background:#b47cd8"></i>qwen-max 5%</span>
                   </div>
@@ -144,12 +144,12 @@
                 <table class="tbl compact">
                   <thead><tr><th>会话 session_id</th><th>模型</th><th class="c">Prompt</th><th class="c">Completion</th><th>总 Token</th><th class="c">耗时</th><th class="c">状态 / 错误</th></tr></thead>
                   <tbody>
-                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-9f2a41c8</td><td class="mono">gpt-4o</td><td class="c mono">2,140</td><td class="c mono">1,860</td><td class="mono">4,000<span class="bar" style="display:block"><i style="width:68%"></i></span></td><td class="c mono">3.2s</td><td class="c"><span class="chip ok">成功</span></td></tr>
-                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-a0e2c4d5</td><td class="mono">gpt-4o</td><td class="c mono">3,120</td><td class="c mono">2,740</td><td class="mono">5,860<span class="bar" style="display:block"><i style="width:100%"></i></span></td><td class="c mono">8.4s</td><td class="c"><span class="chip warn" title="error_msg: upstream timeout after 8000ms">超时</span></td></tr>
-                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-3c71b0e2</td><td class="mono">claude-3.5-sonnet</td><td class="c mono">1,880</td><td class="c mono">1,520</td><td class="mono">3,400<span class="bar" style="display:block"><i style="width:58%"></i></span></td><td class="c mono">2.8s</td><td class="c"><span class="chip ok">成功</span></td></tr>
-                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-77d0a9f1</td><td class="mono">deepseek-v3</td><td class="c mono">1,240</td><td class="c mono">980</td><td class="mono">2,220<span class="bar" style="display:block"><i style="width:38%"></i></span></td><td class="c mono">1.9s</td><td class="c"><span class="chip ok">成功</span></td></tr>
+                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-9f2a41c8</td><td class="mono">gpt-5-codex</td><td class="c mono">2,140</td><td class="c mono">1,860</td><td class="mono">4,000<span class="bar" style="display:block"><i style="width:68%"></i></span></td><td class="c mono">3.2s</td><td class="c"><span class="chip ok">成功</span></td></tr>
+                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-a0e2c4d5</td><td class="mono">gpt-5-codex</td><td class="c mono">3,120</td><td class="c mono">2,740</td><td class="mono">5,860<span class="bar" style="display:block"><i style="width:100%"></i></span></td><td class="c mono">8.4s</td><td class="c"><span class="chip warn" title="error_msg: upstream timeout after 8000ms">超时</span></td></tr>
+                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-3c71b0e2</td><td class="mono">claude-sonnet-4.5</td><td class="c mono">1,880</td><td class="c mono">1,520</td><td class="mono">3,400<span class="bar" style="display:block"><i style="width:58%"></i></span></td><td class="c mono">2.8s</td><td class="c"><span class="chip ok">成功</span></td></tr>
+                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-77d0a9f1</td><td class="mono">deepseek-chat</td><td class="c mono">1,240</td><td class="c mono">980</td><td class="mono">2,220<span class="bar" style="display:block"><i style="width:38%"></i></span></td><td class="c mono">1.9s</td><td class="c"><span class="chip ok">成功</span></td></tr>
                     <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-5b18e0c9</td><td class="mono">gpt-4o-mini</td><td class="c mono">640</td><td class="c mono">480</td><td class="mono">1,120<span class="bar" style="display:block"><i style="width:19%"></i></span></td><td class="c mono">1.1s</td><td class="c"><span class="chip ok">成功</span></td></tr>
-                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-e9c3f7a2</td><td class="mono">claude-3.5-sonnet</td><td class="c mono">1,020</td><td class="c mono">0</td><td class="mono">1,020<span class="bar" style="display:block"><i class="r" style="width:17%"></i></span></td><td class="c mono">0.9s</td><td class="c"><span class="chip bad" title="error_msg: context length exceeded">失败</span></td></tr>
+                    <tr data-click data-toast="下钻：会话详情（演示）"><td class="mono">sess-e9c3f7a2</td><td class="mono">claude-sonnet-4.5</td><td class="c mono">1,020</td><td class="c mono">0</td><td class="mono">1,020<span class="bar" style="display:block"><i class="r" style="width:17%"></i></span></td><td class="c mono">0.9s</td><td class="c"><span class="chip bad" title="error_msg: context length exceeded">失败</span></td></tr>
                   </tbody>
                 </table>
                 <p class="tiny dim" style="margin:0">状态 / 错误字段来自 SessionMetric.status / error_msg；prompt + completion = total（演示）。</p>
@@ -432,7 +432,7 @@
                 <div style="display:flex;align-items:center;gap:6px"><span class="chip ok">12.4s</span><span class="mono small">审查流水线 v3</span></div>
                 <div style="padding-left:16px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip ok">8.2s</span><span class="mono small">审查 Agent · 标准</span></div>
                 <div style="padding-left:32px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip ok">2.1s</span><span class="mono small">↳ read_file</span></div>
-                <div style="padding-left:32px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip warn">5.4s</span><span class="mono small">↳ llm.chat (gpt-4o)</span></div>
+                <div style="padding-left:32px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip warn">5.4s</span><span class="mono small">↳ llm.chat (gpt-5-codex)</span></div>
                 <div style="padding-left:16px;display:flex;align-items:center;gap:6px;border-left:1px solid var(--border-strong)"><span class="chip ok">3.8s</span><span class="mono small">前端 Agent</span></div>
               </div>
             </div>

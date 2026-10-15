@@ -3,17 +3,17 @@
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="projects__files.html">文件查看（只读）</span></div>
 <div class="detail-top"><span class="pill" data-back="stage-model.html" data-click>← 返回 阶段模型配置</span><span class="crumb"><b>管理 › 阶段模型 › 锚 started（3 个阶段）</b></span><span class="chip info">生命周期锚 · 3 / 9</span></div>
 <div class="detail-body">
-<dl class="kv"><dt>锚语义</dt><dd>「正在做」</dd><dt>本锚阶段数</dt><dd class="mono">3 / 9</dd><dt>与运行态的关系</dt><dd><b>进入 started ≠ 启动 Agent</b>：启动必须由显式运行请求或触发规则产生（6.20 硬规矩 ②）</dd><dt>停车 / 评审 / 失败恢复</dt><dd><span class="chip bad">不继承</span></dd><dt>看板映射</dt><dd class="mono">6.20 列「进行中」/「审核中」</dd><dt>triage 轴</dt><dd>与 status <b>正交</b>：本锚答「到哪一步」，「待受理」答「这算不算活」</dd><dt>受理门</dt><dd>只拦从工作项<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发</dd><dt>典型受阻</dt><dd class="mono">AF-116 · 等待 AF-109 合入（started + blocked）</dd></dl>
+<dl class="kv"><dt>锚语义</dt><dd>「正在做」</dd><dt>本锚阶段数</dt><dd class="mono">3 / 9</dd><dt>与运行态的关系</dt><dd><b>进入 started ≠ 启动 Agent</b>：启动必须由显式运行请求或触发规则产生（6.20 硬规矩 ②）</dd><dt>停车 / 评审 / 失败恢复</dt><dd><span class="chip bad">不继承</span></dd><dt>看板映射</dt><dd class="mono">6.20 列「进行中」/「审核中」</dd><dt>triage 轴</dt><dd>与 status <b>正交</b>：本锚答「到哪一步」，「待受理」答「这算不算活」</dd><dt>受理门</dt><dd>只拦从任务<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发</dd><dt>典型受阻</dt><dd class="mono">AF-116 · 等待 AF-109 合入（started + blocked）</dd></dl>
 <h4 class="blk">目录表（本锚 3 行）</h4>
 <table class="tbl compact"><thead><tr><th>阶段 ID</th><th>显示名</th><th>产物文件</th><th>门禁</th><th>操作</th></tr></thead><tbody>
 <tr><td class="mono">4-dev</td><td>开发执行</td><td class="mono tiny">T*-SUMMARY.md</td><td><span class="chip info">G3</span></td><td><span class="btn link" data-click data-goto="stage-model__stage-edit.html">编辑</span></td></tr>
 <tr><td class="mono">5-test</td><td>测试验证</td><td class="mono">TEST.md</td><td><span class="chip info">测试门</span></td><td><span class="btn link" data-click data-goto="stage-model__stage-edit.html">编辑</span></td></tr>
 <tr><td class="mono">6-review</td><td>代码审查</td><td class="mono">REVIEW.md</td><td><span class="chip info">G4</span></td><td><span class="btn link" data-click data-goto="stage-model__stage-edit.html">编辑</span></td></tr>
 </tbody></table>
-<div class="callout"><p class="tiny" style="margin:0"><b>为什么「审核中」不是一列锚：</b>审核中是 started 的<b>子状态</b>（等待人评审），不新增第五根锚，否则 6.20 看板的第四列会变成第五列，历史工作项需要重新映射。</p></div>
+<div class="callout"><p class="tiny" style="margin:0"><b>为什么「审核中」不是一列锚：</b>审核中是 started 的<b>子状态</b>（等待人评审），不新增第五根锚，否则 6.20 看板的第四列会变成第五列，历史任务需要重新映射。</p></div>
 <p style="margin-top:var(--s4)"><button class="btn sm" data-click data-goto="stage-model__stage-new.html">+ 往本锚新增阶段 ▾</button></p>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>

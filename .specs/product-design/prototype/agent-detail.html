@@ -88,11 +88,11 @@
               <div style="min-width:0">
                 <p class="h2p" style="margin-top:0">Now（活跃 run · 运行 / 排队）<span class="chip ok"><span class="dot running" style="margin-right:4px"></span>live</span></p>
                 <table class="tbl compact">
-                  <thead><tr><th>Run</th><th>工作项</th><th>态</th><th>来源</th><th>已跑 / 预估</th><th></th></tr></thead>
+                  <thead><tr><th>Run</th><th>任务</th><th>态</th><th>来源</th><th>已跑 / 预估</th><th></th></tr></thead>
                   <tbody>
                     <tr><td class="mono">r-128</td><td class="mono">AF-104</td><td><span class="chip ok">running · 1m05s</span> <span class="chip warn" title="seq 14 停在 human_approval 等待段 · 对应审批中心 AP-31">等审批 AP-31</span></td><td><span class="chip info">人点名 · 李工</span></td><td class="mono">1m05s</td><td class="nowrap"><span class="btn link" data-goto="replay.html">看 transcript</span><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-cancel-run">取消 run</button></td></tr>
-                    <tr><td class="mono">r-129</td><td class="mono">AF-116</td><td><span class="chip">queued</span></td><td><span class="chip info">工作项</span></td><td class="tiny dim">等待位 <span class="mono">#1</span> · 预估 ~40s 起跑</td><td><span class="btn link" data-toast="已置顶 r-129（排队不改并发上限 · 演示）">置顶</span></td></tr>
-                    <tr><td class="mono">r-130</td><td class="tiny dim">—（无工作项）</td><td><span class="chip">queued</span></td><td><span class="chip purple">定时</span></td><td class="tiny dim">等待位 <span class="mono">#2</span> · 预估 ~1m10s 起跑</td><td><span class="btn link" data-toast="定时触发预建的 run · 可移出队列（演示）">移出队列</span></td></tr>
+                    <tr><td class="mono">r-129</td><td class="mono">AF-116</td><td><span class="chip">queued</span></td><td><span class="chip info">任务</span></td><td class="tiny dim">等待位 <span class="mono">#1</span> · 预估 ~40s 起跑</td><td><span class="btn link" data-toast="已置顶 r-129（排队不改并发上限 · 演示）">置顶</span></td></tr>
+                    <tr><td class="mono">r-130</td><td class="tiny dim">—（无任务）</td><td><span class="chip">queued</span></td><td><span class="chip purple">定时</span></td><td class="tiny dim">等待位 <span class="mono">#2</span> · 预估 ~1m10s 起跑</td><td><span class="btn link" data-toast="定时触发预建的 run · 可移出队列（演示）">移出队列</span></td></tr>
                   </tbody>
                 </table>
                 <p class="tiny muted" style="margin:6px 0 0">在途任务（删除前必查 · 2）<span class="chip warn">删除前必查</span></p>
@@ -100,7 +100,7 @@
                   <thead><tr><th>Task</th><th>标签</th><th>来源</th><th>已跑</th><th>态</th></tr></thead>
                   <tbody>
                     <tr data-click data-toast="跳 §6.22 执行回放 · task-1 → run r-128（演示）"><td class="mono">task-1</td><td class="mono">code-review</td><td>人点名 · 李工</td><td class="mono">4m12s</td><td><span class="chip info">assigned</span></td></tr>
-                    <tr data-click data-toast="跳 §6.22 执行回放 · task-9 → run rt-1-13:40（演示）"><td class="mono">task-9</td><td class="mono">code-review</td><td>工作项 AF-104</td><td class="mono">31m</td><td><span class="chip warn">在途 · 探针失败未中断</span></td></tr>
+                    <tr data-click data-toast="跳 §6.22 执行回放 · task-9 → run rt-1-13:40（演示）"><td class="mono">task-9</td><td class="mono">code-review</td><td>任务 AF-104</td><td class="mono">31m</td><td><span class="chip warn">在途 · 探针失败未中断</span></td></tr>
                   </tbody>
                 </table>
 
@@ -121,15 +121,15 @@
                 </div>
 
                 <p class="h2p" style="margin-top:var(--s4)">最近工作（终态 run）<span class="chip info">行 → transcript 回放</span></p>
-                <p class="tiny dim" style="margin:0 0 4px">模型同为 <span class="mono">deepseek-official/deepseek-chat</span>（dsh 运行时），故不单列；来源徽标 6 类：工作项 / 对话 / 定时 / 人点名 / 工作流派生 / API。</p>
+                <p class="tiny dim" style="margin:0 0 4px">模型同为 <span class="mono">deepseek-official/deepseek-chat</span>（dsh 运行时），故不单列；来源徽标 6 类：任务 / 对话 / 定时 / 人点名 / 工作流派生 / API。</p>
                 <table class="tbl compact">
                   <thead><tr><th>Run</th><th>状态</th><th>来源</th><th>原因（失败 / 取消）</th><th>耗时</th><th></th></tr></thead>
                   <tbody>
-                    <tr><td class="mono">rt-1-14:31</td><td><span class="chip ok">success</span></td><td><span class="chip info">工作项 · AF-104</span></td><td class="tiny dim">— · 12,480 tok</td><td class="mono">8.2s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">rt-1-14:31</td><td><span class="chip ok">success</span></td><td><span class="chip info">任务 · AF-104</span></td><td class="tiny dim">— · 12,480 tok</td><td class="mono">8.2s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
                     <tr><td class="mono">rt-1-14:12</td><td><span class="chip ok">success</span></td><td><span class="chip purple">对话 · c-338</span></td><td class="tiny dim">— · 9,120 tok</td><td class="mono">6.4s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
-                    <tr><td class="mono">rt-1-13:58</td><td><span class="chip bad">failed</span></td><td><span class="chip info">工作项 · AF-104</span></td><td class="tiny">运行时 exit 1 · 断在 seq 9（<span class="mono">12,480→21,004 tok</span>）</td><td class="mono">31.7s</td><td><span class="btn link" data-goto="agent-detail__run-failed.html">失败详情</span></td></tr>
+                    <tr><td class="mono">rt-1-13:58</td><td><span class="chip bad">failed</span></td><td><span class="chip info">任务 · AF-104</span></td><td class="tiny">运行时 exit 1 · 断在 seq 9（<span class="mono">12,480→21,004 tok</span>）</td><td class="mono">31.7s</td><td><span class="btn link" data-goto="agent-detail__run-failed.html">失败详情</span></td></tr>
                     <tr><td class="mono">rt-1-13:40</td><td><span class="chip ok">success</span></td><td><span class="chip">人点名 · 李工</span></td><td class="tiny dim">— · 7,860 tok</td><td class="mono">5.1s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
-                    <tr><td class="mono">r-124</td><td><span class="chip ok">success</span></td><td><span class="chip info">工作项 · AF-109</span></td><td class="tiny dim">—</td><td class="mono">2m18s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
+                    <tr><td class="mono">r-124</td><td><span class="chip ok">success</span></td><td><span class="chip info">任务 · AF-109</span></td><td class="tiny dim">—</td><td class="mono">2m18s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
                     <tr><td class="mono">r-122</td><td><span class="chip">cancelled</span></td><td><span class="chip">人点名 · 王五</span></td><td class="tiny">取消 · 重复提交 · 操作者王五</td><td class="mono">41s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
                     <tr><td class="mono">r-119</td><td><span class="chip ok">success</span></td><td><span class="chip purple">定时 · 日会前审查</span></td><td class="tiny dim">—</td><td class="mono">1m52s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
                     <tr><td class="mono">r-117</td><td><span class="chip bad">failed</span></td><td><span class="chip mono">API · CI webhook</span></td><td class="tiny">上游模型限流（429）· retry×3 仍败</td><td class="mono">3m04s</td><td><span class="btn link" data-goto="replay.html">transcript</span></td></tr>
@@ -153,23 +153,33 @@
             </div>
 
             <!-- ==================== Tab 2 · 工作 ==================== -->
+            <!-- 同一列表组件（三视角）：本标签页 = 看板 scope 的「指派给：本 Agent」视图；项目详情任务表 =「本项目」视图；看板顶部 scope 条 =「我所属的/全部/指派给/项目」。改列表列/操作时三处同改。 -->
             <div class="view" id="v-work" style="display:none">
-              <p class="h2p" style="margin-top:0">工作范围 <span class="tiny dim">scope（Multica：Work tab 先切范围再看列表）</span></p>
+              <p class="h2p" style="margin-top:0">工作 · 指派给本 Agent 的任务 <span class="tiny dim">scope（Multica：Work tab 先切范围再看列表 · 与看板统一抽屉同一操作集）</span><span style="flex:1"></span><span class="pill" data-click data-goto="board.html">打开看板同款视图 →</span></p>
               <div style="display:flex;gap:6px;flex-wrap:wrap" id="work-scope">
-                <span class="chip ok active" data-click onclick="scopePick(this,'分配给我（assigned）：本 Agent 被指派的工作项')">分配给我 · 4</span>
+                <span class="chip ok active" data-click onclick="scopePick(this,'分配给我（assigned）：本 Agent 被指派的任务')">分配给我 · 4</span>
                 <span class="chip" data-click onclick="scopePick(this,'我创建的（created）：李工创建且指派给本 Agent 的')">我创建的 · 2</span>
                 <span class="chip" data-click data-toast="范围切换只影响列表过滤，URL 不变（原型示意）">＋ 自定义筛选</span>
               </div>
               <table class="tbl compact" style="margin-top:var(--s3)">
-                <thead><tr><th>工作项</th><th>状态</th><th>负责人</th><th>最近 run</th><th>更新</th></tr></thead>
+                <thead><tr><th>任务</th><th>状态</th><th>负责人</th><th>最近 run</th><th>更新</th><th>操作</th></tr></thead>
                 <tbody>
-                  <tr><td class="mono">AF-104 · 收件箱聚合规则</td><td><span class="chip ok">进行中</span></td><td>李工</td><td class="mono tiny">r-128 <span class="btn link" data-goto="replay.html">回放</span></td><td class="mono tiny">刚刚</td></tr>
-                  <tr><td class="mono">AF-116 · deferred 隐藏开关</td><td><span class="chip">排队</span></td><td>王五</td><td class="mono tiny">r-129 · queued（等待位 #1）</td><td class="mono tiny">12 分钟前</td></tr>
-                  <tr><td class="mono">AF-109 · 能力分组派生口径</td><td><span class="chip ok">已完成</span></td><td>李工</td><td class="mono tiny">r-124 <span class="btn link" data-goto="replay.html">回放</span></td><td class="mono tiny">3 天前</td></tr>
-                  <tr><td class="mono">AF-121 · 权限矩阵回归</td><td><span class="chip warn">阻塞</span></td><td>李工</td><td class="tiny dim">— · 缺 project:write 授权</td><td class="mono tiny">5 小时前</td></tr>
+                  <tr><td class="mono">AF-104 · 收件箱聚合规则</td><td><span class="chip ok">进行中</span></td><td>李工</td><td class="mono tiny">r-128 <span class="btn link" data-goto="replay.html">回放</span></td><td class="mono tiny">刚刚</td><td><span class="btn link" data-click data-pop="pop-wstatus">改状态 ▾</span></td></tr>
+                  <tr><td class="mono">AF-116 · deferred 隐藏开关</td><td><span class="chip">排队</span></td><td>王五</td><td class="mono tiny">r-129 · queued（等待位 #1）</td><td class="mono tiny">12 分钟前</td><td><span class="btn link" data-click data-pop="pop-wstatus">改状态 ▾</span></td></tr>
+                  <tr><td class="mono">AF-109 · 能力分组派生口径</td><td><span class="chip ok">已完成</span></td><td>李工</td><td class="mono tiny">r-124 <span class="btn link" data-goto="replay.html">回放</span></td><td class="mono tiny">3 天前</td><td><span class="btn link" data-click data-pop="pop-wstatus">改状态 ▾</span></td></tr>
+                  <tr><td class="mono">AF-121 · 权限矩阵回归</td><td><span class="chip warn">阻塞</span></td><td>李工</td><td class="tiny dim">— · 缺 project:write 授权</td><td class="mono tiny">5 小时前</td><td><span class="btn link" data-click data-pop="pop-wstatus">改状态 ▾</span></td></tr>
                 </tbody>
               </table>
-              <p class="tiny dim" style="margin-top:var(--s2)">指派新工作走头部「＋ 指派工作」（会入本 Agent 队列，等并发槽位释放）；工作项全量在 <a data-goto="board.html">看板</a>。取消不计入成功率（见概览口径）。</p>
+              <div class="pop" id="pop-wstatus"><p class="tiny dim" style="margin:0 0 6px"><b>改状态 · 本 Agent 的任务可操作（状态×角色门禁在转换层）</b></p>
+              <table class="tbl compact"><tbody>
+              <tr><td>排队 → 进行中</td><td class="tiny dim">只移动生命周期位置，不产生运行</td><td><span class="btn link" data-toast="AF-116：排队 → 进行中（起跑仍需显式运行请求 · 演示）">移入</span></td></tr>
+              <tr><td>进行中 → 审核中</td><td class="tiny dim">Agent 交付后置待验收</td><td><span class="btn link" data-toast="AF-104：进行中 → 审核中（不触发任何运行 · 演示）">流转</span></td></tr>
+              <tr><td>审核中 → 完成 done</td><td class="tiny dim">需证据 + 同伴复核 → 整页表单</td><td><span class="btn link" data-click data-goto="board__mark-done.html">标 done</span></td></tr>
+              <tr><td>done → 重开（进行中）</td><td class="tiny dim">仅终态行可见 · 需理由入审计</td><td><span class="btn link" data-toast="AF-109 重开为进行中 · 旧证据保留为快照（演示）">重开</span></td></tr>
+              <tr><td class="tiny dim">受理（triage 轴）/ 指派他人</td><td class="tiny dim">仅人成员视角可见 · Agent 侧永不可见</td><td><span class="chip">门禁隐藏</span></td></tr>
+              </tbody></table>
+              <p class="tiny dim" style="margin:6px 0 0">与看板统一抽屉 dr-task 的「改状态 ▾」同一组件、同一门禁（状态×角色）。</p></div>
+              <p class="tiny dim" style="margin-top:var(--s2)">指派新工作走头部「＋ 指派工作」（会入本 Agent 队列，等并发槽位释放）；任务全量在 <a data-goto="board.html">看板</a>——本标签页即看板 scope「指派给：本 Agent」的同一列表组件，行内「改状态」保持可操作语义。取消不计入成功率（见概览口径）。</p>
             </div>
 
             <!-- ==================== Tab 3 · 能力（二级子栏） ==================== -->
@@ -423,13 +433,13 @@
 <p class="tiny dim" style="padding:10px 18px"><b>演示数据说明（一）· 结构：</b>本页对齐一手侦察的 Multica Agent 详情页：<b>头部 + 三横幅位 + 四标签（概览 / 工作 / 能力 / 设置）</b>，能力与设置内再开二级子 Tab 横条（第二组仅在父 Tab 可见时显示）。头部只显示 <span class="mono">Updated 3 天前</span>——<b>刻意不显示创建时间</b>（Multica 口径：创建时间归审计事件查，详情页不让用户读一个没人用的时间戳）。概览 = 只读工作台（Now / 近 30 天 / 最近工作 + 右侧只读卡），编辑动作全部收进「设置」；「编辑 ▾」pop 只做跳转子区（页内切 Tab，不跳走）。旧「基础信息」大面板拆分去向：指令→能力·指令，技能→能力·技能，MCP / 集成→能力对应子栏，Access / 执行配置 / 闸门 / 探活→设置对应子栏，编排引用与知识源→能力·知识源与编排，探针时间线→设置·探活，近期会话与在途任务→概览 Now / 最近工作。凭据口径已按新宇宙更正：<b>旧「模型与凭据」分区（供应商 / 基础地址 / 掩码密钥三行）已整体删除</b>——模型目录由运行时（dsh --list-models）暴露，CLI 登录凭据留在运行时机器、平台不接收，探活只验 AgentFlow 侧服务健康。执行配置沿用上一轮新宇宙：dsh · stdio · CLI 自定义参数 · 集成 · 会话续跑 ✓。</p>
 
 <!-- ======== 浮层：模态 ======== -->
-<div class="modal" id="md-assign"><div style="padding:var(--s4)"><b>指派工作给「审查 Agent · 标准」</b><p class="small dim" style="margin:8px 0 4px">等价于建一条工作项并直接 assign 到本 Agent（会占并发槽；当前 4/6，槽满先排队）。</p>
-<div class="fld"><label>工作项标题</label><input placeholder="例：审查 AF-121 权限矩阵回归的 diff"></div>
+<div class="modal" id="md-assign"><div style="padding:var(--s4)"><b>指派工作给「审查 Agent · 标准」</b><p class="small dim" style="margin:8px 0 4px">等价于建一条任务并直接 assign 到本 Agent（会占并发槽；当前 4/6，槽满先排队）。</p>
+<div class="fld"><label>任务标题</label><input placeholder="例：审查 AF-121 权限矩阵回归的 diff"></div>
 <div class="fld"><label>所属项目</label><select><option selected>AgentFlow 主项目</option><option>前端重构</option><option>知识库运营</option></select></div>
 <div class="fld"><label>描述</label><textarea placeholder="验收口径 / 涉及仓库 / 期望产出（REVIEW.md）…"></textarea></div>
-<div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="工作项已创建并指派 · 已入队（等待位 #3）· 来源徽标=人点名 · 李工（演示）" data-close>指派并入队</button></div></div></div>
+<div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="任务已创建并指派 · 已入队（等待位 #3）· 来源徽标=人点名 · 李工（演示）" data-close>指派并入队</button></div></div></div>
 
-<div class="modal" id="md-cancel-run"><div style="padding:var(--s4)"><b>取消 run r-128？</b><p class="small dim" style="margin:8px 0 4px">r-128 当前 running 1m05s（seq 14 停在 human_approval 等待段）。取消<b>必填原因</b>、写回工作项 AF-104，且<b>不计入成功率</b>（成功率=完成÷(完成+失败)）。副作用不回滚：已发生的 tool 动作留在原地。</p>
+<div class="modal" id="md-cancel-run"><div style="padding:var(--s4)"><b>取消 run r-128？</b><p class="small dim" style="margin:8px 0 4px">r-128 当前 running 1m05s（seq 14 停在 human_approval 等待段）。取消<b>必填原因</b>、写回任务 AF-104，且<b>不计入成功率</b>（成功率=完成÷(完成+失败)）。副作用不回滚：已发生的 tool 动作留在原地。</p>
 <div class="fld"><label>原因（必填）</label><textarea placeholder="例：方向已废，AF-104 需求重写…"></textarea></div>
 <div style="text-align:right"><button class="btn sm" data-close>保留继续跑</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="r-128 已取消 · 审计 run:canceled（原因必填已落库）· 队列顶上来 r-129（演示）" data-close>确认取消</button></div></div></div>
 
@@ -509,7 +519,7 @@
 <tr><td class="mono">06-28</td><td>删除域不级联删除 Agent</td><td><span class="chip ok">生效</span></td></tr>
 <tr><td class="mono">06-20</td><td>Domain 可作安全边界（早期设想）</td><td><span class="chip bad">已废止 · 明写不是安全边界</span></td></tr>
 </tbody></table>
-<p style="margin-top:var(--s4)"><span class="btn link" data-toast="跳 §6.18 产物编辑器打开来源段落（演示 · 保存前自动备份）">看来源</span> <span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-mem">从本 Agent 断开</span></p></div></div>
+<p style="margin-top:var(--s4)"><span class="btn link" data-toast="以只读方式在「项目文件查看」打开来源段落（§6.18 编辑已下线 · 修改走本地/代码仓 · 演示）">看来源</span> <span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-mem">从本 Agent 断开</span></p></div></div>
 
 <div class="drawer" id="dr-health"><header><b>健康与探活配置</b><span class="chip ok"><span class="dot running" style="margin-right:4px"></span>healthy</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <dl class="kv"><dt>状态灯</dt><dd><span class="chip ok">running</span> · 5 态之一（idle / running / blocked / dead / failed）</dd><dt>探活对象</dt><dd>AgentFlow 侧服务健康（非模型 Key · CLI 登录凭据留在运行时机器，平台不接收）</dd><dt>周期 / 超时</dt><dd class="mono">60s · 5000ms</dd><dt>连续失败阈值</dt><dd class="mono">3 → 触发 caution 自动重启</dd><dt>退避</dt><dd class="mono">[1,2,4,8]s · 超阈值暂停本轮</dd><dt>本轮结果</dt><dd class="mono">14:35:10 · 200 OK · 42ms</dd><dt>近 1h 通过率</dt><dd><span class="chip warn">83%</span> 50/60（含 3 次已知抖动）</dd><dt>P50 / P95</dt><dd class="mono">41ms / 55ms</dd><dt>健康端点来源</dt><dd class="mono">daemon 上报 · 本 Agent 服务 /health（不存在模型侧鉴权地址概念）</dd><dt>下游依赖</dt><dd class="mono">agent-5（汇总）· 拓扑安全检查已计入</dd></dl>
@@ -560,5 +570,5 @@ function mcpMode(m,el){document.getElementById('mcp-vis').style.display=(m==='v'
 /* 深链：#view=<paneId> 直达（原型示意；#dr-x/#md-x/#pop-x 由 proto.js 负责） */
 document.addEventListener('DOMContentLoaded',function(){var h=location.hash;if(h.indexOf('#view=')===0){var id=h.slice(6);if(LBL[id]){applySwitch(id);}}});
 </script>
-<p class="tiny dim" style="padding:14px 18px">可点区演示（四 Tab 操作指引）：<b>头部</b>——presence chip → 探活抽屉 ·「展开」→ 描述全文 ·「💬 DM」→ 对话中心 ·「＋ 指派工作」→ 入队模态 ·「重启」→ toast（状态灯等复探才更新）·「⋯」→ 复制 / 导出 YAML / 归档模态 / 彻底删除前置检查页。<b>概览</b>——r-128「看 transcript」→ 回放 ·「取消 run」→ 必填原因模态（取消不计成功率）· 在途两行 → toast 回放 · 终态行 → transcript / 失败详情（rt-1-13:58 · 三件套 Retry / Edit as advanced form / 升级到人）· Show more → toast · 右卡均可跳对应子区。<b>工作</b>——scope chips 切换 toast · AF 行 → 回放。<b>能力</b>——指令 textarea · 启动语加删 toast（≤3 上限）· 技能「＋加绑」pop + 行内开关（三层开关）· MCP 可视化/JSON 双页签 + 三态规则 · 集成断开 · 知识源断开二次确认。<b>设置</b>——七子栏各带 sticky 保存底条（自动保存三态 + 保存全部 / 放弃）· 运行时下拉改选触发模型清空联动 toast · 探活抽屉 / 范围 pop / 时间线 fail 行 → 探针失败详情页。<b>未保存拦截</b>——任一输入敲一个字再切 Tab 即弹 md-discard（Keep editing / Discard changes）。<b>深链</b>——URL 带 <span class="mono">#view=sv-probe</span> 等可直达子区（原型示意）。　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（四 Tab 操作指引）：<b>头部</b>——presence chip → 探活抽屉 ·「展开」→ 描述全文 ·「💬 DM」→ 对话中心 ·「＋ 指派工作」→ 入队模态 ·「重启」→ toast（状态灯等复探才更新）·「⋯」→ 复制 / 导出 YAML / 归档模态 / 彻底删除前置检查页。<b>概览</b>——r-128「看 transcript」→ 回放 ·「取消 run」→ 必填原因模态（取消不计成功率）· 在途两行 → toast 回放 · 终态行 → transcript / 失败详情（rt-1-13:58 · 三件套 Retry / Edit as advanced form / 升级到人）· Show more → toast · 右卡均可跳对应子区。<b>工作</b>——「工作 · 指派给本 Agent 的任务」+「打开看板同款视图 →」board.html · scope chips 切换 toast · 表行「改状态 ▾」pop（状态×角色门禁 · 与看板统一抽屉 dr-task 同一组件）· 行内「回放」→ 回放页。<b>能力</b>——指令 textarea · 启动语加删 toast（≤3 上限）· 技能「＋加绑」pop + 行内开关（三层开关）· MCP 可视化/JSON 双页签 + 三态规则 · 集成断开 · 知识源断开二次确认。<b>设置</b>——七子栏各带 sticky 保存底条（自动保存三态 + 保存全部 / 放弃）· 运行时下拉改选触发模型清空联动 toast · 探活抽屉 / 范围 pop / 时间线 fail 行 → 探针失败详情页。<b>未保存拦截</b>——任一输入敲一个字再切 Tab 即弹 md-discard（Keep editing / Discard changes）。<b>深链</b>——URL 带 <span class="mono">#view=sv-probe</span> 等可直达子区（原型示意）。　按 Esc 关闭所有浮层。</p>
 </body></html>

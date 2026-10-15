@@ -3,7 +3,7 @@
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p17" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="audit.html">审计日志</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="audit.html">审计日志</span></div>
 <div class="detail-top"><span class="pill" data-back="approvals.html" data-click>← 返回 审批中心</span><span class="crumb"><b>审批中心 › 已处理 › AP-18 删除测试域</b></span><span class="chip bad">已驳回</span><span class="chip mono">decision=rejected</span></div>
 <div class="detail-body">
 <div class="callout bad"><p class="tiny" style="margin:0"><b>拒绝 ≠ REJECTED：</b>本单的 <span class="mono">decision=rejected</span> 只是<b>决策字段</b>；映射到流程是<b>走异常分支</b>（标记待人工 + 继续告警），<b>不是</b> A2A <span class="mono">TaskState.rejected</span>（那是受理方拒绝承接任务）。按 P1-12 语义：人在同一 task 上回复 → <b>task 延续、上下文不重建</b>。</p></div>

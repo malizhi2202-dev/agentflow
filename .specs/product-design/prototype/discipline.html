@@ -4,7 +4,7 @@
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p0" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workbench.html">工作台</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="projects__files.html">文件查看（只读）</span></div>
 <p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>§6.0 是全部页面的公共契约。本节为「条文 → 详解」的接线演示：<b>表格每一行可点</b>，抽屉内给出正例 / 反例各一段（条文原文以文档 §6.0 为准，抽屉演绎不入库）。</p>
 <div class="proto">
   <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/design-baseline/interaction-rules（§6.0 · 非路由）</span><span class="fake">演示数据</span></div>
@@ -31,9 +31,9 @@
         <tr data-click data-drawer="dr-d07"><td>⑦</td><td><b>草稿与滚动位是一等状态</b>：不同创建形态用互不覆盖的草稿槽 + 共享附件池；未完成草稿在入口页聚合提示；详情页返回时恢复滚动 memento</td><td>p8 · p18 · p19</td></tr>
         <tr data-click data-drawer="dr-d08"><td>⑧</td><td><b>不可信内容渲染边界下沉到显示端</b>：产物/附件预览一律 <span class="mono">iframe sandbox="allow-scripts" + srcdoc</span>——<span class="mono">.specs/</span> 的 HTML 预览必须照做（与运行时暂无沙箱不矛盾，见 §1.6.5 ① 与 P1-11）</td><td>p9 · p18</td></tr>
         <tr data-click data-drawer="dr-d09"><td>⑨</td><td><b>留痕要「表 + 界面」两步齐</b>：规则/编排版本、干预快照必须有可见消费界面（multica 有版本表却无展示页，为戒）；UI 可隐藏的调度行（如未启用升级）表必须保留供审计</td><td>p17 · p19</td></tr>
-        <tr data-click data-drawer="dr-d10"><td>⑩</td><td><b>status 与 triage 两根正交轴</b>：「到哪一步」≠「这算不算活」；受理门只拦从工作项<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</td><td>p17 · p20</td></tr>
-        <tr data-click data-drawer="dr-d11"><td>⑪</td><td><b>执行时间线记账面</b>：一次运行可挂多上下文（工作项/对话/自动化/评论线程）；「计划并入」与「实际投喂」双数组（计划 vs 收据）；转录带 seq + 调用 id + <b>截断标记</b>；取消人署名；wait_reason 作一等状态渲染；每 run 显示 tokens/USD</td><td>p10 · p22</td></tr>
-        <tr data-click data-drawer="dr-d12"><td>⑫</td><td><b>通知分层</b>：只 ping 需要拍板的人；通知目录读取失败宁多发不漏发（漏发会把工作项困住）；工作项推进后旧「运行失败」通知批量自愈归档；升级重评作 deferred 调度行而非提醒</td><td>p11 · p21</td></tr>
+        <tr data-click data-drawer="dr-d10"><td>⑩</td><td><b>status 与 triage 两根正交轴</b>：「到哪一步」≠「这算不算活」；受理门只拦从任务<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</td><td>p17 · p20</td></tr>
+        <tr data-click data-drawer="dr-d11"><td>⑪</td><td><b>执行时间线记账面</b>：一次运行可挂多上下文（任务/对话/自动化/评论线程）；「计划并入」与「实际投喂」双数组（计划 vs 收据）；转录带 seq + 调用 id + <b>截断标记</b>；取消人署名；wait_reason 作一等状态渲染；每 run 显示 tokens/USD</td><td>p10 · p22</td></tr>
+        <tr data-click data-drawer="dr-d12"><td>⑫</td><td><b>通知分层</b>：只 ping 需要拍板的人；通知目录读取失败宁多发不漏发（漏发会把任务困住）；任务推进后旧「运行失败」通知批量自愈归档；升级重评作 deferred 调度行而非提醒</td><td>p11 · p21</td></tr>
         <tr data-click data-drawer="dr-d13"><td>⑬</td><td><b>身份修复前不暴露任何对外写端点</b>：fail-open 身份存在期间，A2A M1+、webhook 回传等对外写面一律冻结——协议面第一块砖只能是只读 AgentCard（P0-1 是 P1-15 的硬前置）</td><td>P1-15 · <span class="mono">D-identity-and-security-2</span></td></tr>
       </tbody>
     </table>
@@ -46,7 +46,7 @@
 
 <div class="drawer" id="dr-d01"><header><b>纪律 ① · 统一详情骨架</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>条文原文以 §6.0 为准；下方正例 / 反例是为对齐形态写的演绎，不是文档正文。</p></div>
-<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>左 inspector（自动保存三态）+ 右 <span class="mono">?view=</span> 分段</dd><dt>落点页</dt><dd class="mono">p4 · p7 · p14 · p18 及所有详情页</dd><dt>适用面</dt><dd>全部详情形态：Agent / 工具 / 角色 / 产物编辑器</dd><dt>违反后果</dt><dd>同一产品在四处给出四种详情结构，用户每次都要重新学；无权限被跳走导致筛选与滚动全丢</dd><dt>关联纪律</dt><dd>⑥（权限渲染）· ⑦（滚动 memento）</dd><dt>核对状态</dt><dd><span class="chip ok">p4 p7 已自检</span> <span class="chip warn">p18 未核</span></dd></dl>
+<dl class="kv" style="margin-top:var(--s3)"><dt>条文要点</dt><dd>左 inspector（自动保存三态）+ 右 <span class="mono">?view=</span> 分段</dd><dt>落点页</dt><dd class="mono">p4 · p7 · p14 及所有详情页</dd><dt>适用面</dt><dd>全部详情形态：Agent / 工具 / 角色 / 项目详情 <span class="tiny dim">（原「产物编辑器」随 §6.18 下线，无详情形态可言；文件侧只读预览走 <span class="mono">projects__files.html</span> 右抽屉，不适用本条 inspector 结构）</span></dd><dt>违反后果</dt><dd>同一产品在四处给出四种详情结构，用户每次都要重新学；无权限被跳走导致筛选与滚动全丢</dd><dt>关联纪律</dt><dd>⑥（权限渲染）· ⑦（滚动 memento）</dd><dt>核对状态</dt><dd><span class="chip ok">p4 p7 已自检</span></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
 <div class="callout ok"><p class="tiny" style="margin:0">§6.4 Agent 详情：左侧 inspector 呈现基础信息并显示<b>已存</b>，右侧 <span class="mono">?view=probe</span> 分段切探针 / 记忆；账号无 <span class="mono">project:write</span> 时页内挂 Lock read-only，URL 与分段选择都不变，返回后仍在原位置。</p></div>
 <p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
@@ -91,13 +91,13 @@
 <div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>拒因文案示例为演绎；四道门顺序与 §6.5「校验不通过不落库」一致。</p></div>
 <dl class="kv" style="margin-top:var(--s3)"><dt>三件套</dt><dd>Retry with context · Edit as advanced form（回填原输入）· 升级到人</dd><dt>四道门</dt><dd class="mono">权限 → 运行时 → 配额 → 归因</dd><dt>落点页</dt><dd class="mono">p8 · p11 · p17</dd><dt>措辞纪律</dt><dd>拒因<b>原样 toast 不粉饰</b></dd><dt>关联自家事实</dt><dd>§1.6.5 ①「提示词契约 ≠ 门禁」：门要落在状态转换层</dd><dt>核对状态</dt><dd><span class="chip warn">p11 未铺</span></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
-<div class="callout ok"><p class="tiny" style="margin:0">run-8842 失败卡：三枚按钮齐全，Retry with context 沿用同一上下文快照；Edit as advanced form 回填原入参（含 <span class="mono">timeout=120s</span>）；升级到人则生成审批中心的待批工作项并署名。一键运行被配额门拒 → toast 原样写「429 配额：本日 Token 预算已用尽 1.2M/1.2M」，不改写成「操作失败请稍后重试」。</p></div>
+<div class="callout ok"><p class="tiny" style="margin:0">run-8842 失败卡：三枚按钮齐全，Retry with context 沿用同一上下文快照；Edit as advanced form 回填原入参（含 <span class="mono">timeout=120s</span>）；升级到人则生成审批中心的待批任务并署名。一键运行被配额门拒 → toast 原样写「429 配额：本日 Token 预算已用尽 1.2M/1.2M」，不改写成「操作失败请稍后重试」。</p></div>
 <p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
 <div class="callout bad"><p class="tiny" style="margin:0">失败只有一句「运行失败，请重试」+ 一枚重试按钮；用户点重试再次撞同一个 429，循环三次后被限流；原始入参丢失，无法回填只能重打。</p></div>
 <p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
 <table class="tbl compact"><tbody>
 <tr><td class="mono">md-gate-fail</td><td>本页失败原因模态示例</td><td><span class="chip ok">已接</span></td><td class="tiny dim">见本页抽屉操作</td></tr>
-<tr><td class="mono">升级到人</td><td>失败 → 审批工作项</td><td><span class="chip">未实装 · 见 §6.17</span></td><td class="tiny dim">目标形态</td></tr>
+<tr><td class="mono">升级到人</td><td>失败 → 审批任务</td><td><span class="chip">未实装 · 见 §6.17</span></td><td class="tiny dim">目标形态</td></tr>
 </tbody></table>
 <p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已记录「p11 失败卡三件套」走查项（演示）">记走查项</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
 
@@ -138,7 +138,7 @@
 <div class="callout bad"><p class="tiny" style="margin:0">一个全局 <span class="mono">localStorage.draft</span> 承载所有入口，第二个入口把第一份覆盖；附件各自复制成三份且不同步；返回时永远从列表顶部看起，用户靠肉眼找上次那行。</p></div>
 <p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
 <table class="tbl compact"><tbody>
-<tr><td class="mono">草稿槽分离</td><td>按创建形态命名</td><td><span class="chip">未实装 · 见 §6.18</span></td><td class="tiny dim">目标形态</td></tr>
+<tr><td class="mono">草稿槽分离</td><td>按创建形态命名</td><td><span class="chip bad">已撤销 · 随产物编辑（§6.18）下线</span></td><td class="tiny dim">无平台写入口，草稿槽随之取消</td></tr>
 <tr><td class="mono">scroll memento</td><td>返回恢复位</td><td><span class="chip">未实装</span></td><td class="tiny dim">目标形态</td></tr>
 </tbody></table>
 <p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已标记「纪律 ⑦ · p18 未核」并挂到走查清单（演示）">挂走查清单</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
@@ -153,7 +153,7 @@
 <p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
 <table class="tbl compact"><tbody>
 <tr><td class="mono">prototype/*.html</td><td>零外部资源 · 无远程脚本</td><td><span class="chip ok">已守</span></td><td class="tiny dim">本组 5 页一致</td></tr>
-<tr><td class="mono">srcdoc sandbox</td><td>产物预览容器</td><td><span class="chip">未实装 · 见 §6.9 §6.18</span></td><td class="tiny dim">目标形态</td></tr>
+<tr><td class="mono">srcdoc sandbox</td><td>产物预览容器</td><td><span class="chip">未实装 · 见 §6.9</span> <span class="tiny dim">只读文件预览按源码文本呈现，不内联渲染 HTML/JS</span></td><td class="tiny dim">目标形态</td></tr>
 </tbody></table>
 <p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已把「渲染边界核验」加入 P1-11 走查（演示）">加入走查</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
 
@@ -173,11 +173,11 @@
 
 <div class="drawer" id="dr-d10"><header><b>纪律 ⑩ · status 与 triage 两根正交轴</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>「到哪一步 ≠ 这算不算活」为条文原话的口语化复述。</p></div>
-<dl class="kv" style="margin-top:var(--s3)"><dt>两轴</dt><dd><span class="mono">status</span>：到哪一步 · <span class="mono">triage</span>：这算不算活</dd><dt>受理门</dt><dd>只拦从工作项<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</dd><dt>落点页</dt><dd class="mono">p17 · p20</dd><dt>关联裁定</dt><dd>§6.20 〔09-23 裁定⑦注〕与 <span class="mono">work_item</span> 双轴表结构</dd><dt>违反后果</dt><dd>「不算活」只能靠把状态改成关闭表达，工作项历史被污染</dd><dt>核对状态</dt><dd><span class="chip warn">p20 未铺</span></dd></dl>
+<dl class="kv" style="margin-top:var(--s3)"><dt>两轴</dt><dd><span class="mono">status</span>：到哪一步 · <span class="mono">triage</span>：这算不算活</dd><dt>受理门</dt><dd>只拦从任务<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</dd><dt>落点页</dt><dd class="mono">p17 · p20</dd><dt>关联裁定</dt><dd>§6.20 〔09-23 裁定⑦注〕与 <span class="mono">work_item</span> 双轴表结构</dd><dt>违反后果</dt><dd>「不算活」只能靠把状态改成关闭表达，任务历史被污染</dd><dt>核对状态</dt><dd><span class="chip warn">p20 未铺</span></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
 <div class="callout ok"><p class="tiny" style="margin:0">看板列仍是「未开始 / 进行中 / 审核中 / 已完成」，<span class="chip">待受理</span> 作为独立徽标叠加；值班在对话中心点名某 Agent 处理临时问题时，运行不经受理门直接起（人点名 = 已受理），自动推导执行者的运行才受拦。</p></div>
 <p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
-<div class="callout bad"><p class="tiny" style="margin:0">把「不算活」塞进 status：新增 <span class="mono">status=not_work</span>，于是「关闭」与「不算活」混成一个值，统计里凭空少了工作项；对话派发的运行也被受理门拦下，值班被迫先建工作项才能问一句问题。</p></div>
+<div class="callout bad"><p class="tiny" style="margin:0">把「不算活」塞进 status：新增 <span class="mono">status=not_work</span>，于是「关闭」与「不算活」混成一个值，统计里凭空少了任务；对话派发的运行也被受理门拦下，值班被迫先建任务才能问一句问题。</p></div>
 <p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
 <table class="tbl compact"><tbody>
 <tr><td class="mono">work_item.status</td><td>四类生命周期锚</td><td><span class="chip">未实装 · 见 §6.20</span></td><td class="tiny dim">目标形态</td></tr>
@@ -187,7 +187,7 @@
 
 <div class="drawer" id="dr-d11"><header><b>纪律 ⑪ · 执行时间线记账面</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>自家事实：回放消费表 <span class="mono">trace_spans</span> 当前 0 行（无产生端），故本条落地前置为 C10-0。</p></div>
-<dl class="kv" style="margin-top:var(--s3)"><dt>多上下文挂靠</dt><dd>一次运行可挂工作项 / 对话 / 自动化 / 评论线程</dd><dt>双数组</dt><dd>「计划并入」vs「实际投喂」＝计划 vs 收据</dd><dt>转录要求</dt><dd class="mono">seq + 调用 id + 截断标记</dd><dt>一等状态</dt><dd><span class="mono">wait_reason</span> 渲染 · 取消人署名 · 每 run tokens/USD</dd><dt>落点页</dt><dd class="mono">p10 · p22</dd><dt>核对状态</dt><dd><span class="chip bad">p22 规划中 · 产生端未落</span></dd></dl>
+<dl class="kv" style="margin-top:var(--s3)"><dt>多上下文挂靠</dt><dd>一次运行可挂任务 / 对话 / 自动化 / 评论线程</dd><dt>双数组</dt><dd>「计划并入」vs「实际投喂」＝计划 vs 收据</dd><dt>转录要求</dt><dd class="mono">seq + 调用 id + 截断标记</dd><dt>一等状态</dt><dd><span class="mono">wait_reason</span> 渲染 · 取消人署名 · 每 run tokens/USD</dd><dt>落点页</dt><dd class="mono">p10 · p22</dd><dt>核对状态</dt><dd><span class="chip bad">p22 规划中 · 产生端未落</span></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
 <div class="callout ok"><p class="tiny" style="margin:0">run-8842 回放头显示 <span class="mono">41.2k tok · $0.38 · 取消人 @王工 14:06</span>；每条转录带 <span class="mono">seq=17 · call_id=tc_9f2 · [已截断 3.2KB]</span>；「计划并入 3 上下文 / 实际投喂 2」并排显示，差集即证据；等待审批时 <span class="chip">wait_reason: human_approval</span> 是一等徽标而不是灰色一行小字。</p></div>
 <p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
@@ -201,15 +201,15 @@
 
 <div class="drawer" id="dr-d12"><header><b>纪律 ⑫ · 通知分层</b><span class="chip ok">已过审 · S7</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <div class="callout"><p class="tiny" style="margin:0"><b>演示态标注：</b>「宁多发不漏发」的失败策略是条文的显式取向，示例数字为演绎。</p></div>
-<dl class="kv" style="margin-top:var(--s3)"><dt>分层规则</dt><dd>只 ping 需要拍板的人</dd><dt>失败策略</dt><dd>通知目录读取失败<b>宁多发不漏发</b>（漏发会把工作项困住）</dd><dt>自愈</dt><dd>工作项推进后旧「运行失败」通知批量归档</dd><dt>升级重评</dt><dd>作 deferred 调度行，而非再发提醒</dd><dt>落点页</dt><dd class="mono">p11 · p21</dd><dt>核对状态</dt><dd><span class="chip warn">p21 未铺</span></dd></dl>
+<dl class="kv" style="margin-top:var(--s3)"><dt>分层规则</dt><dd>只 ping 需要拍板的人</dd><dt>失败策略</dt><dd>通知目录读取失败<b>宁多发不漏发</b>（漏发会把任务困住）</dd><dt>自愈</dt><dd>任务推进后旧「运行失败」通知批量归档</dd><dt>升级重评</dt><dd>作 deferred 调度行，而非再发提醒</dd><dt>落点页</dt><dd class="mono">p11 · p21</dd><dt>核对状态</dt><dd><span class="chip warn">p21 未铺</span></dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">正例（演示）</p>
-<div class="callout ok"><p class="tiny" style="margin:0">AF-116 需人拍板 → 只 ping 门禁负责人李工；通知目录接口 500 时按「全部相关人」发（多发 6 条可被忽略，漏发 1 条会卡死工作项）；AF-116 推进到 6-review 后，其历史 3 条「运行失败」通知被批量自愈归档并标注原因。</p></div>
+<div class="callout ok"><p class="tiny" style="margin:0">AF-116 需人拍板 → 只 ping 门禁负责人李工；通知目录接口 500 时按「全部相关人」发（多发 6 条可被忽略，漏发 1 条会卡死任务）；AF-116 推进到 6-review 后，其历史 3 条「运行失败」通知被批量自愈归档并标注原因。</p></div>
 <p class="h2p" style="margin-top:var(--s3)">反例（演示）</p>
-<div class="callout bad"><p class="tiny" style="margin:0">全群广播每次失败，一周 240 条后所有人静音（等于没有通知）；目录读取失败即静默跳过，唯一该拍板的人没收到，工作项原地卡 3 天；升级重评又发一遍提醒，同一件事被 ping 两次且互相不知道。</p></div>
+<div class="callout bad"><p class="tiny" style="margin:0">全群广播每次失败，一周 240 条后所有人静音（等于没有通知）；目录读取失败即静默跳过，唯一该拍板的人没收到，任务原地卡 3 天；升级重评又发一遍提醒，同一件事被 ping 两次且互相不知道。</p></div>
 <p class="h2p" style="margin-top:var(--s4)">本原型接线核对</p>
 <table class="tbl compact"><tbody>
 <tr><td class="mono">告警入口角标 3</td><td>未确认告警数（control-plane.html）</td><td><span class="chip ok">已接</span></td><td class="tiny dim">§5.1 底部告警入口</td></tr>
-<tr><td class="mono">批量自愈归档</td><td>旧通知随工作项推进归档</td><td><span class="chip">未实装 · 见 §6.21</span></td><td class="tiny dim">目标形态</td></tr>
+<tr><td class="mono">批量自愈归档</td><td>旧通知随任务推进归档</td><td><span class="chip">未实装 · 见 §6.21</span></td><td class="tiny dim">目标形态</td></tr>
 </tbody></table>
 <p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已按分层规则重算收件人：1 人（演示）">试算收件人</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-abolish">申请废止本条</button></p></div></div>
 

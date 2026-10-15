@@ -107,7 +107,7 @@ h4.blk .sub{font-size:11.5px;font-weight:400;color:var(--text-muted)}</style></h
     </div>
     <p class="hint" style="margin-top:6px">两组均为<b>原生单选按钮组</b>（点 label 即切选中态 · 纯 CSS 高亮，不依赖 JS；浮层引擎对可点区统一 preventDefault，故 chip 上不挂 toast，免得吞掉原生选中）——读当前值：<button class="btn sm" data-click data-toast="当前：状态 = 进行中（in_progress）· 优先级 = 中（medium）（演示）">读当前选择 ▸</button></p>
   </div>
-  <div class="callout warn" style="margin:var(--s3) 0 0"><p class="tiny" style="margin:0"><b>本页无「开始 / 结束时间」字段（已裁撤）。</b>理由见页脚一句：项目无期限概念，节奏由里程碑 / 工作项承载。</p></div>
+  <div class="callout warn" style="margin:var(--s3) 0 0"><p class="tiny" style="margin:0"><b>本页无「开始 / 结束时间」字段（已裁撤）。</b>理由见页脚一句：项目无期限概念，节奏由里程碑 / 任务承载。</p></div>
 </div>
 
 <h4 class="blk" id="sec-lead">4 · Leader <span class="sub">单选 · 候选 = 用户级 Agent 或其他 Agent（不含人）</span></h4>
@@ -209,14 +209,14 @@ h4.blk .sub{font-size:11.5px;font-weight:400;color:var(--text-muted)}</style></h
     <p class="tiny" style="margin:var(--s3) 0 0"><b>两条边界：</b>① <b>写入只进本空间</b>——L0-L3 任何一层都写不到公共知识，也写不到别的项目空间；② <b>公共知识只接收 L3</b>，且必须经<b>平台管理员评审</b>通过后按新版本发布（申请入口见 <span class="mono">knowledge.html</span> 的「申请晋升」）。</p></div>
 </div>
 
-<h4 class="blk" id="sec-rel">7 · 关联对象（多选）<span class="sub">Agent / 工作流 / 知识库 / 会话 / 工作项</span></h4>
-<p style="margin:0 0 6px"><span class="pill" data-click data-toast="关联对象：☑ Agent（成员表已含 3 个 Agent：Leader 个人 Agent + 审查 Agent + 王工个人 Agent）（演示）" style="border-color:var(--blue-border);color:var(--blue)">☑ Agent</span> <span class="pill" data-click data-toast="关联对象：☑ 工作流（收件箱聚合 wf-42 · 审查流水线 v3）（演示）" style="border-color:var(--blue-border);color:var(--blue)">☑ 工作流</span> <span class="pill" data-click data-toast="关联对象：☑ 知识库（专属空间自动创建 + 只读关联：公共知识 + 外部源）（演示）" style="border-color:var(--blue-border);color:var(--blue)">☑ 知识库</span> <span class="pill" data-click data-toast="关联对象：☐ 对话会话（从项目上下文发起的对话回填 project_id）（演示）">☐ 对话会话</span> <span class="pill" data-click data-toast="关联对象：☐ 工作项（看板 AF-1xx 挂靠本项目）（演示）">☐ 工作项</span></p>
-<div class="callout"><p class="tiny" style="margin:0">关联语义：<b>一 Agent 可属多项目，一项目可绑多 Agent</b>（N:N 连接表）；工作流 1:N 快照；知识库 = 专属空间 1:1 + 只读关联 N:N；对话会话 / 工作项 以 <span class="mono">project_id</span> 关联列挂靠。</p></div>
+<h4 class="blk" id="sec-rel">7 · 关联对象（多选）<span class="sub">Agent / 工作流 / 知识库 / 会话 / 任务</span></h4>
+<p style="margin:0 0 6px"><span class="pill" data-click data-toast="关联对象：☑ Agent（成员表已含 3 个 Agent：Leader 个人 Agent + 审查 Agent + 王工个人 Agent）（演示）" style="border-color:var(--blue-border);color:var(--blue)">☑ Agent</span> <span class="pill" data-click data-toast="关联对象：☑ 工作流（收件箱聚合 wf-42 · 审查流水线 v3）（演示）" style="border-color:var(--blue-border);color:var(--blue)">☑ 工作流</span> <span class="pill" data-click data-toast="关联对象：☑ 知识库（专属空间自动创建 + 只读关联：公共知识 + 外部源）（演示）" style="border-color:var(--blue-border);color:var(--blue)">☑ 知识库</span> <span class="pill" data-click data-toast="关联对象：☐ 对话会话（从项目上下文发起的对话回填 project_id）（演示）">☐ 对话会话</span> <span class="pill" data-click data-toast="关联对象：☐ 任务（看板 AF-1xx 挂靠本项目）（演示）">☐ 任务</span></p>
+<div class="callout"><p class="tiny" style="margin:0">关联语义：<b>一 Agent 可属多项目，一项目可绑多 Agent</b>（N:N 连接表）；工作流 1:N 快照；知识库 = 专属空间 1:1 + 只读关联 N:N；对话会话 / 任务 以 <span class="mono">project_id</span> 关联列挂靠。</p></div>
 
 <p style="margin-top:var(--s4)"><button class="btn primary" data-toast="已创建项目「agentflow」· 专属知识空间同步创建 · Leader：李工的个人 Agent（演示）">提交创建</button> <button class="btn" data-back="projects.html">取消 · 返回列表</button></p>
 <p class="tiny dim" style="margin:6px 0 0">创建仅写平台内登记（路径映射 · 成员分配 · 专属知识空间 · 关联台账），<b>不在盘上创建目录</b>；审计 <span class="mono">project:register</span> + <span class="mono">space:auto_created</span>（演示）。</p>
 <hr>
-<p class="tiny dim" style="margin:0"><b>字段裁撤说明（页脚）：</b>曾有「开始日期 / 目标日期」两项，现已删除——<b>项目无期限概念，节奏由里程碑 / 工作项承载</b>（工作项见 <span class="mono">board.html</span>）。状态与优先级保留为单选 chips；Leader 从「成员或 Agent 二选一」改为「仅 Agent（用户级 Agent 优先）」，人只出现在成员与审批里。</p>
+<p class="tiny dim" style="margin:0"><b>字段裁撤说明（页脚）：</b>曾有「开始日期 / 目标日期」两项，现已删除——<b>项目无期限概念，节奏由里程碑 / 任务承载</b>（任务见 <span class="mono">board.html</span>）。状态与优先级保留为单选 chips；Leader 从「成员或 Agent 二选一」改为「仅 Agent（用户级 Agent 优先）」，人只出现在成员与审批里。</p>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
 <p class="tiny dim" style="padding:14px 18px">可点区演示（独立表单页 · 纯静态）：名称 / 描述为两个独立输入框（描述 textarea）· 图标 = 9 个单选圆形 chip（跳过 + 8 emoji/字母 · 默认跳过）·「📁 选择目录…」→ toast + 路径 chip（✕ 可移除）· GitHub 输入框 +「⟱ 克隆并关联」→ 克隆 toast · 状态（未开始 / 进行中 / 已暂停 / 已完成）/ 优先级（低 / 中 / 高 / 紧急）/ 可见性 = 原生单选按钮组 chips（点 label 即切选中态 · 纯 CSS，chip 上不挂 toast 以免 preventDefault 吞掉选中）· <b>无开始 / 结束时间字段</b>（理由在页脚）· Leader 单选（用户级 Agent 组 + 其他 Agent 组 · 归档项置灰）→ 选人 toast · 成员 5 行「类型（用户级 Agent / Agent / 用户）/ 对象 / 角色」下拉 + 逐行移除，「＋ 加一行」→ toast（可继续添加；创建者 owner 行与 Leader 行不可移除）· 第 6 区为创建流程 callout（项目 1:1 专属空间 + 关联已有知识库只读多选）与 <b>L0-L3 总结写入</b>卡（演示口径 · 参考腾讯记忆分层）· 空间「进入」深链 → <span class="mono">knowledge.html#space-agentflow</span> ·「提交创建」→ toast（已创建项目「agentflow」· 专属知识空间同步创建 · Leader：李工的个人 Agent）· 取消 / 顶部「← 返回」→ 项目列表　按 Esc 关闭浮层。</p>

@@ -5,7 +5,7 @@
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p2" style="color:inherit">回文档</a></span>
 <div class="detail-top"><span class="pill" data-back="workbench.html" data-click>← 返回 工作台 · 变更总览</span><span class="crumb"><span class="dim">工作台 · 变更总览 /</span> <b>变更 agent-domains</b></span><span class="chip info">4-dev</span><span class="chip">风险 —</span></div>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="artifacts.html">产物编辑</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="stage-model.html">阶段模型</span><span class="pill" data-goto="projects__files.html">文件查看（只读）</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="board.html">任务看板</span></div>
 <div class="detail-body">
 <dl class="kv" style="margin-top:var(--s3)"><dt>Change ID / 标题</dt><dd class="mono">agent-domains · 隔离域（Domain）</dd><dt>当前阶段</dt><dd><span class="chip info">4-dev 开发执行</span> · 下一站 <span class="mono">5-test</span></dd><dt>任务进度</dt><dd class="mono">8/11（done 8 · in_progress 2 · blocked 1）</dd><dt>风险 / 阻塞</dt><dd><span class="chip ok">无风险标签</span> · 1 张卡 blocked 待解</dd><dt>范围</dt><dd class="mono">v1 域 CRUD · v2 域级配额 · out 域作为安全边界</dd><dt>更新时间</dt><dd class="mono">12 分钟前 · 李工</dd><dt>扫描来源</dt><dd class="mono">.specs/agent-domains/ · TTL 5s</dd></dl>
 <h4 class="blk">阶段进度（9 阶段 · 实测阶段名与门禁）</h4>
@@ -22,9 +22,9 @@
 </tbody></table>
 <h4 class="blk">产物清单</h4>
 <table class="tbl compact"><thead><tr><th>文件</th><th>状态</th><th>大小</th><th>操作</th></tr></thead><tbody>
-<tr><td class="mono">CHANGE.md</td><td><span class="chip ok">存在</span></td><td class="mono">3.1 KB</td><td><span class="btn link" data-toast="打开产物编辑器（§6.18 · 保存前自动备份保留 5 版）（演示）">编辑</span></td></tr>
-<tr><td class="mono">REQUIREMENT.md</td><td><span class="chip ok">存在</span></td><td class="mono">12.4 KB</td><td><span class="btn link" data-toast="打开产物编辑器（演示）">编辑</span></td></tr>
-<tr><td class="mono">DESIGN.md</td><td><span class="chip ok">存在</span></td><td class="mono">9.8 KB</td><td><span class="btn link" data-toast="打开产物编辑器（演示）">编辑</span></td></tr>
+<tr><td class="mono">CHANGE.md</td><td><span class="chip ok">存在</span></td><td class="mono">3.1 KB</td><td><span class="btn link" data-click data-goto="projects__files.html#fp-requirement">查看（只读）</span></td></tr>
+<tr><td class="mono">REQUIREMENT.md</td><td><span class="chip ok">存在</span></td><td class="mono">12.4 KB</td><td><span class="btn link" data-click data-goto="projects__files.html">查看（只读）</span></td></tr>
+<tr><td class="mono">DESIGN.md</td><td><span class="chip ok">存在</span></td><td class="mono">9.8 KB</td><td><span class="btn link" data-click data-goto="projects__files.html">查看（只读）</span></td></tr>
 <tr><td class="mono">TASK.md</td><td><span class="chip warn">1 卡 blocked</span></td><td class="mono">6.2 KB</td><td><span class="btn link" data-toast="已定位任务页签 T07 · blocked（演示）">定位 T07</span></td></tr>
 <tr><td class="mono">runtime.jsonl</td><td><span class="chip info">增量采集</span></td><td class="mono">41 KB</td><td><span class="btn link" data-toast="跳 §6.22 执行回放（依赖 trace 产生端 C10-0）（演示）">回放</span></td></tr>
 <tr><td class="mono">TEST.md / REVIEW.md</td><td><span class="chip">未生成</span></td><td class="mono">—</td><td class="tiny dim">5-test / 6-review 后出现</td></tr>
@@ -69,5 +69,5 @@
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [误建 · 已并入 agent-domains 作为子卡 ]</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已删除 · 工作台不再显示该变更（下次扫描生效）· 审计 chg:deleted（演示）" data-close>确认删除</button></div></div></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">本详情页由工作台变更浮层升格：小节全宽展示 · 「进入下一阶段 / 按门禁意见建卡」→ toast（写明服务端判据）· 「回退阶段」「删除变更」→ 影响清单 + 必填原因二次确认（本页引用到的二次确认 modal 自带副本）· 产物「编辑」→ toast 跳 §6.18 形态　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">本详情页由工作台变更浮层升格：小节全宽展示 · 「进入下一阶段 / 按门禁意见建卡」→ toast（写明服务端判据）· 「回退阶段」「删除变更」→ 影响清单 + 必填原因二次确认（本页引用到的二次确认 modal 自带副本）· 产物行「查看（只读）」→ <span class="mono">projects__files.html</span>（<b>§6.18 产物文档编辑已下线</b>：编辑由本地目录 / 代码仓承担，平台只读索引与追溯）　按 Esc 关闭浮层。</p>
 </body></html>

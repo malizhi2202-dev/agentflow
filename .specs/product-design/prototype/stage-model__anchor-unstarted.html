@@ -3,10 +3,10 @@
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">工作项看板</span><span class="pill" data-goto="artifacts.html">产物编辑</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="projects__files.html">文件查看（只读）</span></div>
 <div class="detail-top"><span class="pill" data-back="stage-model.html" data-click>← 返回 阶段模型配置</span><span class="crumb"><b>管理 › 阶段模型 › 锚 unstarted（5 个阶段）</b></span><span class="chip info">生命周期锚 · 5 / 9</span></div>
 <div class="detail-body">
-<dl class="kv"><dt>锚语义</dt><dd>「还没动」——只表达生命周期位置，<b>不授予任何行为</b>（§6.0 ⑩ / 6.20 同一条规矩）</dd><dt>本锚阶段数</dt><dd class="mono">5 / 9</dd><dt>停车行为</dt><dd><span class="chip bad">不继承</span>（停车 = 只有平台内置的停车锚才有）</dd><dt>评审 / 失败恢复行为</dt><dd><span class="chip bad">不继承</span></dd><dt>可自定义新阶段</dt><dd><span class="chip ok">可以</span> 新阶段必须选一个锚，选定后不可改</dd><dt>看板映射</dt><dd class="mono">6.20 列「未开始」</dd><dt>扫描判定</dt><dd class="mono">该阶段及之前产物全部缺失 → 工作项停在 unstarted</dd></dl>
+<dl class="kv"><dt>锚语义</dt><dd>「还没动」——只表达生命周期位置，<b>不授予任何行为</b>（§6.0 ⑩ / 6.20 同一条规矩）</dd><dt>本锚阶段数</dt><dd class="mono">5 / 9</dd><dt>停车行为</dt><dd><span class="chip bad">不继承</span>（停车 = 只有平台内置的停车锚才有）</dd><dt>评审 / 失败恢复行为</dt><dd><span class="chip bad">不继承</span></dd><dt>可自定义新阶段</dt><dd><span class="chip ok">可以</span> 新阶段必须选一个锚，选定后不可改</dd><dt>看板映射</dt><dd class="mono">6.20 列「未开始」</dd><dt>扫描判定</dt><dd class="mono">该阶段及之前产物全部缺失 → 任务停在 unstarted</dd></dl>
 <h4 class="blk">目录表（本锚 5 行）</h4>
 <table class="tbl compact"><thead><tr><th>阶段 ID</th><th>显示名</th><th>产物文件</th><th>门禁</th><th>操作</th></tr></thead><tbody>
 <tr><td class="mono" data-click data-goto="stage-model__stage-0-change.html">0-change</td><td>变更提案</td><td class="mono">CHANGE.md</td><td><span class="chip info">G1</span></td><td><span class="btn link" data-click data-goto="stage-model__stage-edit.html">编辑</span></td></tr>

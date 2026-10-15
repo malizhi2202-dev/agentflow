@@ -5,8 +5,8 @@
 .proto{margin:0 18px var(--s5);border-left:0;border-right:0;border-bottom:0}
 .proto-note{padding:0 18px;margin-top:14px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p22" style="color:inherit">回文档</a></span>
-<div class="detail-top"><span class="pill" data-back="replay.html" data-click>← 返回 执行回放</span><span class="crumb"><b>从失败步重跑 · run-8842（AF-116）</b></span><span class="chip bad">失败步 seq 7</span><span class="chip">需二次确认</span></div>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="replay__run.html">整轮回放</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="board.html">工作项看板</span></div>
+<div class="detail-top"><span class="pill" data-click data-goto="board__af-116.html">← 返回任务</span><span class="pill" data-back="replay.html" data-click>← 返回 执行回放</span><span class="crumb"><b>任务 AF-116 › run-8842 › 从失败步重跑</b></span><span class="chip bad">失败步 seq 7</span><span class="chip">需二次确认</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="replay__run.html">整轮回放</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="board.html">任务看板</span></div>
 <div class="detail-body">
 <div class="callout"><p class="tiny" style="margin:0">重跑是一次<b>新的运行请求</b>（新 run id），不是自动重试。下面把影响清单摊开，勾选要补投的上下文，再确认。</p></div>
 <h4 class="blk">影响清单</h4>
@@ -26,5 +26,5 @@
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
 <p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为「从失败步重跑」升格详情页（规划原型 · 6.22 界面尚不存在）。起点 / 补投上下文（计划 vs 收据）/ 预算 / 快照复用为设计意图演示，当前系统 <span class="mono">trace_spans</span> 实测 0 行、无动作级记录可支撑它——前置是 P2-4 的 <span class="mono">C10-0</span>（先补 INSERT + 父子链列）。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：影响清单为只读摊开 · 重跑参数把原浮层的「补投 ☑☐ / 上限 / 理由」升格为全宽 kv · 「回填编辑」→ toast · 「确认重跑」→ toast 并返回 replay.html · 顶部「← 返回」回执行回放　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：影响清单为只读摊开 · 重跑参数把原浮层的「补投 ☑☐ / 上限 / 理由」升格为全宽 kv · 「回填编辑」→ toast · 「确认重跑」→ toast 并返回 replay.html · 顶部返回链两级：「← 返回任务」→ board__af-116 整页（任务详情『run 历史』）·「← 返回」→ replay.html　按 Esc 关闭浮层。重跑也是一次新的运行请求：仍从任务/run 进入，无独立列表页。</p>
 </body></html>

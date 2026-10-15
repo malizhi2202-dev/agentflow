@@ -24,18 +24,18 @@
   "agent_id": 12,
   "name": "对账 Agent（临时）",
   "role_id": "custom_roles/2",
-  "model": "deepseek-v3",
-  "domain_id": null,
-  "api_key": "sk-***"
+  "model": "deepseek-official/deepseek-chat",
+  "runtime_id": 4,
+  "domain_id": null
 }</pre></div>
 </div>
 <h4 class="blk">落库字段（新增行）</h4>
 <table class="tbl compact"><thead><tr><th>字段</th><th>值</th><th>脱敏</th></tr></thead><tbody>
 <tr><td class="mono">agent_id</td><td class="mono tiny">12</td><td><span class="chip">—</span></td></tr>
 <tr><td class="mono">role_id</td><td class="mono tiny">custom_roles/2（数据对账专家）</td><td><span class="chip">—</span></td></tr>
-<tr><td class="mono">model</td><td class="mono tiny">deepseek-v3</td><td><span class="chip">—</span></td></tr>
-<tr><td class="mono">domain_id</td><td class="mono tiny">null → 默认域</td><td><span class="chip">—</span></td></tr>
-<tr><td class="mono">runtime / model</td><td class="mono tiny">dsh · deepseek-official/deepseek-chat（目录由运行时暴露 · 无平台侧凭据）</td><td><span class="chip">—</span></td></tr>
+<tr><td class="mono">model</td><td class="mono tiny">deepseek-official/deepseek-chat（目录由运行时广告 · provider/model）</td><td><span class="chip">—</span></td></tr>
+<tr><td class="mono">domain_id</td><td class="mono tiny">null → 「未分类」虚拟组（可事后归位）</td><td><span class="chip">—</span></td></tr>
+<tr><td class="mono">runtime_id</td><td class="mono tiny">4（dsh @ dev-01 · 创建即绑运行时 · 平台侧不存凭据）</td><td><span class="chip">—</span></td></tr>
 <tr><td class="mono">created_by</td><td class="mono tiny">testuser</td><td><span class="chip">—</span></td></tr>
 </tbody></table>
 <p style="margin-top:var(--s4)"><button class="btn sm" data-toast="已复制脱敏 JSON（演示）">复制 JSON</button> <button class="btn sm" data-toast="跳 §6.14 角色市场 · 数据对账专家（演示）">看来源角色</button></p>

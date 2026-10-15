@@ -1,12 +1,13 @@
 <!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>标记完成（附证据 + 同伴复核）· 工作项看板 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<title>标记完成（附证据 + 同伴复核）· 任务看板 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p20" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="workbench.html">工作台</span></div>
-<div class="detail-top"><span class="pill" data-back="board.html" data-click>← 返回 工作项看板</span><span class="crumb"><b>工作项 › AF-116 › 标记完成（done）</b></span><span class="chip warn">done 需证据 + 同伴复核</span><span class="chip bad">空手完成 = 可疑完成</span></div>
+<div class="detail-top"><span class="pill" data-back="board.html" data-click>← 返回 任务看板</span><span class="crumb"><b>任务 › AF-116 › 标记完成（done）</b></span><span class="chip warn">done 需证据 + 同伴复核</span><span class="chip bad">空手完成 = 可疑完成</span></div>
 <div class="detail-body">
 <h4 class="blk">标记 AF-116 为完成（done）</h4>
+<p class="tiny dim" style="margin:4px 0 0">入口链（演示）：看板列内卡片 → 统一抽屉 dr-task → 操作行「标 done →（证据表单）」；卡片上的「完成 / 完成（需证据）」与列抽屉行内「验收」同样落到本页。本页以 AF-116 为示例。</p>
 <p class="small dim" style="margin:8px 0"><b>done 需证据 + 同伴复核</b>（§1.6.5 ③）。空手完成会被记为「可疑完成」并推给复核人。</p>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">证据 1  [npx tsc --noEmit → 0 errors（输出粘贴 / 运行链接）] ✓
 证据 2  [run-8849（重跑成功）→ 回放 URL                    ] ✓
@@ -15,6 +16,6 @@
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-goto="board.html">取消 · 返回看板</button> <button class="btn sm" data-toast="已按「可疑完成」提交（无证据）· 复核人将收到收件箱条目（演示）">无证据提交</button> <button class="btn sm primary" data-toast="AF-116 → done · 证据链已固化（TEST.md@v4 + run-8849 + tsc 0 错误）· 旧失败通知自愈归档 · 审计 wi:done:evidenced" data-close>确认完成</button></div>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">本页由 board.html 的 <span class="mono">md-done</span> 二次确认升格而来：证据 3 条 + 复核人 + 未解决问题清单共 5 个输入字段，已超出「唯一输入是原因框」的 modal 边界（纪律 A），也不属只读抽屉（纪律 B），故整页展示。父页各卡片上的「完成（需证据）」按钮统一指向本页。</p>
+<p class="tiny dim" style="padding:14px 18px">本页由 board.html 的 <span class="mono">md-done</span> 二次确认升格而来：证据 3 条 + 复核人 + 未解决问题清单共 5 个输入字段，已超出「唯一输入是原因框」的 modal 边界（纪律 A），也不属只读抽屉（纪律 B），故整页展示。<b>详情两级机制下</b>：统一抽屉 dr-task 的操作行「标 done」、各卡片的「完成（需证据）」、列抽屉行内「验收」统一指向本页（此处指 AF-116 示例；AF-104 的「打回 / 验收」门禁差异在 dr-task 的注记里说明）。</p>
 <p class="tiny dim" style="padding:14px 18px">可点区演示：无证据提交 → toast（记为可疑完成并推给复核人）· 确认完成 → toast（证据链固化 + 旧失败通知自愈归档 + 审计 wi:done:evidenced）。</p>
 </body></html>
