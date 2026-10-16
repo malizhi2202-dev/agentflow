@@ -1,5 +1,8 @@
 # ② 竞品调研 + 本地真值 · S14 Agent 创建链路（第5轮 2026-09-23）
 
+> 〔口径注 2026-10-15〕本文档为历史评审/证据记录：其中「Provider/Base URL 配置」口径已被外部 CLI 运行时取代（`model_provider`/`api_key_encrypted` 等为冻结代码字段，技术句保留）；以 PRODUCT-DESIGN.html v12 为准
+
+
 > **联网方式**：`web_search` 工具本次报错（DeepSeek 未返回搜索结果块）→ 按协议改 `web_fetch` 直连种子 URL 与自然延伸页，抓取日期 2026-09-23。Salesforce Agentforce、OpenAI GPTs 帮助页、Coze 国际站三处未取到正文（404/403/内容类型不支持），已标「未联网验证」。
 
 ---

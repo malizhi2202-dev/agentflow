@@ -6,7 +6,7 @@ AgentFlow 能管控 Agent，但**没有一个让「人与 Agent 共同推进一�
 编排/工作流定义 → 调度队列 → Agent 执行 → 指标与告警；而人的介入只有「审批中心」一个窄口。
 结果是三件事断链：
 
-1. **没有工作项** → 无法回答「这件事现在谁在做、做到哪了」
+1. **没有任务** → 无法回答「这件事现在谁在做、做到哪了」
 2. **没有负责人** → 无法把一件事指派给「人」或「Agent」（全仓无 `assignee`）
 3. **没有关联** → `conversations`/`messages` 与 `.specs` 产物**无外键或字段关联**，
    会话一结束，上下文就散了；下一个 Agent 要从零猜
@@ -14,20 +14,20 @@ AgentFlow 能管控 Agent，但**没有一个让「人与 Agent 共同推进一�
 ## 发散：可选方案
 
 ### 方案 A · 最小侵入：给现有对象「挂」负责人与状态
-在 `conversations` 上加 `assignee_id` / `assignee_type`，复用现有会话做工作项。
+在 `conversations` 上加 `assignee_id` / `assignee_type`，复用现有会话做任务。
 - 优点：改动最小，一张表加两列。
 - 缺点：会话是「一次对话」，不是「一件要交付的事」；把交付语义塞进会话会重演今天「上下文散落」的问题。
 - 判断：**否**。语义错位，长期会更乱。
 
-### 方案 B · 新引入「工作项」一等实体（issue-like）
+### 方案 B · 新引入「任务」一等实体（issue-like）
 新增 `work_items`（id / project_id / title / description / status / assignee_type / assignee_id /
-created_by / change_id / parent_id）与 `work_item_events`（时间线），并让 `.specs/<change-id>/` 成为工作项的自然产物目录。
-- 优点：`change_id` 直接打通「工作项 ↔ 知识产物」这条今天断掉的链；状态可复用 Multica 的四类模型。
+created_by / change_id / parent_id）与 `work_item_events`（时间线），并让 `.specs/<change-id>/` 成为任务的自然产物目录。
+- 优点：`change_id` 直接打通「任务 ↔ 知识产物」这条今天断掉的链；状态可复用 Multica 的四类模型。
 - 缺点：引入新概念，需要 UI 与权限同步扩展。
 - 判断：**是**。这是唯一能同时解决三处断链的方案。
 
-### 方案 C · 直接把 `.specs/<change-id>` 当工作项
-不建表，用文件系统里已有的 change 目录充当工作项。
+### 方案 C · 直接把 `.specs/<change-id>` 当任务
+不建表，用文件系统里已有的 change 目录充当任务。
 - 优点：零数据库改动，产物天然归属。
 - 缺点：`.specs` 是**文件**不是记录，无法承载负责人、评论、时间线、并发状态与审计；
   且文件系统状态无法参与事务。**扫描式（file-existence）判定在并发下不可靠**。
@@ -35,7 +35,7 @@ created_by / change_id / parent_id）与 `work_item_events`（时间线），并
 
 ### 方案 D · 引入完整 Squad（人机混编 + leader 派活）
 在方案 B 之上再加 `squads` / `squad_members` 与 leader 路由。
-- 判断：**暂缓为议题**。团队级对象属路线图 W-2，先有小队之外的「工作项 + 负责人」才能谈编队。
+- 判断：**暂缓为议题**。团队级对象属路线图 W-2，先有小队之外的「任务 + 负责人」才能谈编队。
 
 ## 关键设计约束（来自竞品教训，必须前置决定）
 

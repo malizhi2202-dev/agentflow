@@ -1,4 +1,7 @@
 # RECON · S12 协作层落地形态 — 第 4 轮 ②
+
+> 〔口径注 2026-10-15〕本文档为历史评审/证据记录：其中「工作项」现称「任务」（`work_item*` 为冻结数据表名，技术句保留）；以 PRODUCT-DESIGN.html v12 为准
+
 > 状态：待审 · 2026-09-23 · 证据源：`../R4-CODEAUDIT.md` 议题5（本地真值）+ `D-multica-borrow-wave2/RECON.md`（轮2/3 已审深读，此处只引用不重做）+ `D-harness-landscape-2026/RECON.md`（amux/AgentTeams 行）
 
 ## ① 现状底账（本地实测，比轮1记录更具体）

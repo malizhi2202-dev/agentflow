@@ -1,5 +1,8 @@
 # ② 竞品做法 · S16 Team 组织实体（第 5 轮 · 联网查证）
 
+> 〔口径注 2026-10-15〕本文档为历史评审/证据记录：其中「Provider/Base URL 配置」口径已被外部 CLI 运行时取代（凭据留运行时 CLI 机器；竞品凭据归属为对比事实）；以 PRODUCT-DESIGN.html v12 为准
+
+
 > 取证方式：**`web_search` 失败**（后端返回「DeepSeek returned no web_search_tool_result blocks」，端点 `api.360.cn` 未启用原生搜索）→ 按协议改用 **`web_fetch` 直连种子 URL 与自然延伸页**。抓取日期：2026-09-23。
 >
 > **联网验证状态声明（逐条诚实标注）**

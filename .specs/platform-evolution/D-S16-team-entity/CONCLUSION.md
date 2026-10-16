@@ -32,7 +32,7 @@
 |---|---|---|---|
 | ✅ 核心必进（R2 首批 5 类） | `agents` / `orchestration_instances` + `orchestration_templates` / `workflows`(+snapshots) / `tools` / `knowledge_sources`(+tags) | `agent.py:14`、`orchestration.py:14,54`、`workflow.py:12`、`tool.py:12`、`knowledge_source.py:16` | 全是 `owner_id` 单值 + `visibility='private'` 默认（`agent.py:33` 等 5 处）——用户「用哪些资源」的字面对象 |
 | ✅ 次批 | `domains` / `projects` / `custom_roles` / `scheduled_tasks` / `channel_configs` | `domain.py:13`、`project.py:12`、`role_custom.py:12`、`scheduled_task.py:18`、`channel_config.py:17` | Domain 需先重述语义（§2）；`custom_roles` 是 Agent 人设不是权限（§2 术语冲突）；渠道=对外出口，归属不清=冒名发言风险 |
-| ✅ 团队级配置（新建） | 模型凭据池（Provider Key）、`team_quota` + 用量账本、审批人解析规则 | 现状 Key 逐 Agent 存密文（`agent.py:21`）、token 限在 Agent 与实例两级（`agent.py:25-26`、`orchestration.py:24-25`）、审批人=单值 `owner_id`（`human_approval.py:14`） | Dify「App 继承 workspace 模型配置」+ n8n「凭据建在项目里」+ K8s「聚合配额 + 对象计数」（E1/E3/E4） |
+| ✅ 团队级配置（新建） | 模型凭据池（Provider Key）〔2026-10-15 裁撤：由运行时发现（外部 CLI）取代〕、`team_quota` + 用量账本、审批人解析规则 | 现状 Key 逐 Agent 存密文（`agent.py:21`）、token 限在 Agent 与实例两级（`agent.py:25-26`、`orchestration.py:24-25`）、审批人=单值 `owner_id`（`human_approval.py:14`） | Dify「App 继承 workspace 模型配置」+ n8n「凭据建在项目里」+ K8s「聚合配额 + 对象计数」（E1/E3/E4） |
 | ⛔ 归属不动、按 Team 汇聚 | `conversations` / `messages` / `agent_memories` / `agent_probes(_latest)` / `trace_spans` / `metrics_raw` | `conversation.py:14`、`metrics.py:15,41`、`orchestration.py:88-100` | 派生/观测数据：随父资源作用域自动可见，**加 team_id 只会造成双写不一致**；成本汇总走查询侧 |
 | ⛔ 绝不挂 Team | `scheduling_queue` / `scheduler_queue` / `topology_snapshots` | `orchestration.py:65-80`、`scheduler_queue.py`；双 queue 语义重叠已由第 4 轮判定需先并表（`D-collaboration-layer-2/RECON.md` §①） | 内部执行态，团队层看不见也不该管；「第三张 queue 不许进来」同批纪律 |
 | ⛔ 明确不做 | 部门树 / 汇报线 / 嵌套 Team / 计费结算 | `CLAUDE.md` §1.4「多租户计费与配额结算=不做」；K8s「namespace 不可嵌套，每资源只在一个 namespace」（E4） | 嵌套一旦引入，4 字段壳问题升级为图问题；GitHub 嵌套 team 正文未联网验证（⚠），不据以设计 |
@@ -60,7 +60,7 @@
 2. **资产表加两列**：`team_id INT NULL →teams.id`、`owner_kind ENUM('personal','team','platform') DEFAULT 'personal'`，只动首批 5 类表。存量行默认 `personal` + 现值 `owner_id` 不变 → **零回填、可回滚、无停机**（expand/contract）。
 3. **判定改写**：`owner_kind='team'` 时按 `team_id ∈ 我的团队(含角色)` 放行；`personal` 时仍 `owner_id==me`；`platform`（如已 `published` 的模板市场，`orchestration.py:59`）全员可读。现有 `_filter_owner` 收敛到该判定，10 个路由文件逐个替换属 DESIGN 工作量，须与配额、审批同批审。
 4. **迁移与离场规则（照抄 Dify 三条 E1）**：成员移除→**鉴权立即失效但资产留在团队**（不级联删）；Owner 转让→验证码/双人确认，原 Owner 降为普通成员；`created_by`(=`owner_id` 原值)永久保留，用于审计与「谁建的」显示。
-5. **凭据与配额（R3）**：Team 层持模型 Provider Key 池（Agent 继承、可覆盖，E1）；`team_quota` 采 K8s 双形态——**聚合用量**（token/成本）+ **对象计数**（Agent 数、成员数、编排实例数，E4）；用量**落 MySQL 账本，不用进程内存**（`CLAUDE.md` S4：限流/队列/退避三处内存态是多副本翻车根因）；配额对象本身需**非团队成员不可删改**（E4「保护 enforcement 本身」）。
+5. **凭据与配额（R3）**：Team 层持模型 Provider Key 池（Agent 继承、可覆盖，E1）〔2026-10-15 裁撤：由运行时发现（外部 CLI）取代，凭据留运行时 CLI 机器〕；`team_quota` 采 K8s 双形态——**聚合用量**（token/成本）+ **对象计数**（Agent 数、成员数、编排实例数，E4）；用量**落 MySQL 账本，不用进程内存**（`CLAUDE.md` S4：限流/队列/退避三处内存态是多副本翻车根因）；配额对象本身需**非团队成员不可删改**（E4「保护 enforcement 本身」）。
 6. **硬前置门**：身份仍客户端自述（`main.py:196-199` 仅 localhost 闸门 + `auth.py:181-186` 缺身份回退 admin）时，Team 只是账面权限——任何客户端自称 `X-User-Id: 任意人` 即可读该人全部团队资产。**E8 的同类自证**：Coze Studio 已有完整资源分类与 PAT，官方仍直陈"部分 API 存在水平越权"。→ **排程：S3/身份三连（P0-1，已过审未解冻）必须先于 R2 的第 3 步（判定改写）落地**；两表与只读页可在其前做，但不得宣称隔离生效。
 
 ---
@@ -71,7 +71,7 @@
 |---|---|---|---|
 | **R1** | **一词一义裁定**：Team 只指组织团队；执行协作组落为编排实例的 `pattern` 协作预设枚举 | 在 `.specs/CONTEXT.md` 术语表 + 产品文档 §1.6 与编排 YAML schema 文档态加 `pattern` 字段说明，画布文案「团队」→「协作预设」 | 零代码、零解冻依赖，**立即可做** |
 | **R2** | **最小团队实体（主方向）**：`teams` + `team_members` 两表 + 首批 5 类资产 `team_id`/`owner_kind` + 可见性判定单点（两处校验）+ 团队只读页 | 解冻后垂直切片：「建 Team → 邀成员 → 把**一个 Agent 与一个 Workflow** 归属到 Team → 非成员 404」一条链跑通，其余资产同型复制 | 迁移需与迁移账本议题同批（现状 `database.py` 仅 3 条内联 ALTER）；判定改写涉 10 个路由 |
-| **R3** | **团队级凭据池 + 配额账本 + 审批人解析**（Team 才真正"管资源"的两块硬骨头） | R2 之后：Provider Key 上移到 `team_credentials`（Agent 继承可覆盖）+ `team_quota`/`quota_usage`（聚合+计数双形态、403 带条目、MySQL 账本）+ 审批人按团队角色解析 | **强依赖身份三连**；配额 enforcement 需先解决多副本内存态（S4） |
+| **R3** | **团队级凭据池 + 配额账本 + 审批人解析**（Team 才真正"管资源"的两块硬骨头） | R2 之后：Provider Key 上移到 `team_credentials`（Agent 继承可覆盖）〔2026-10-15 裁撤：由运行时发现（外部 CLI）取代〕+ `team_quota`/`quota_usage`（聚合+计数双形态、403 带条目、MySQL 账本）+ 审批人按团队角色解析 | **强依赖身份三连**；配额 enforcement 需先解决多副本内存态（S4） |
 
 **推荐次序**：R1（现在）→ R2（解冻后，且判定改写等在三连之后）→ R3。三者可分属不同 change。
 
@@ -113,7 +113,7 @@
 
 - 1.5.x「Domain 不是安全边界」段 → 补一句「Team（组织层）与 Domain（运行时层）正交，团队化后隔离口径改称『团队内隔离』」。
 - §1.6 建议条（编号待 ⑤ 分配，候选新条「Team 组织实体」）：R1 立即可做；R2/R3 标解冻依赖。
-- W-2（`ROADMAP.md:116`「Team/Squad 一等对象 + 团队级配额与审计 | S1-C5 | 需先有 work_items」）→ 建议改注：本包把「需先有 work_items」放宽为**可与协作层并行**（Team 依赖的是身份，不是工作项），并把 Squad 语义正式并入 R1 的 `pattern` 枚举。
+- W-2（`ROADMAP.md:116`「Team/Squad 一等对象 + 团队级配额与审计 | S1-C5 | 需先有 work_items」）→ 建议改注：本包把「需先有 work_items」放宽为**可与协作层并行**（Team 依赖的是身份，不是任务），并把 Squad 语义正式并入 R1 的 `pattern` 枚举。
 - 原型页：新增「团队」页（成员/角色/资源清单/配额）+ 资产详情卡「归属：个人 / 团队 / 平台」选择器（n8n「创建时选个人空间 or 项目」E3 的界面直译）。
 - 依赖序（防跑偏）：R1 →（身份三连 + 迁移账本）→ R2 → R3。
 
@@ -150,7 +150,7 @@ Team（新增 · 组织单元 · MySQL teams/team_members）
  └─ 正交保留：Domain=运行时隔离（非归属）、User=principal、Project=一次工作的容器
 ```
 
-**判定句**：`owner_kind=team` 的资源在 Team 页可见可管；Project 页 = 该次工作的**装配快照**（用了哪些 Agent/工作流/产物/工作项）；Agent 页反查「服务于哪些项目」（补 S15 拥有/引用两型）。关系收敛单点 `services/visibility.py`+中间件两处独立校验（项目纪律②）。
+**判定句**：`owner_kind=team` 的资源在 Team 页可见可管；Project 页 = 该次工作的**装配快照**（用了哪些 Agent/工作流/产物/任务）；Agent 页反查「服务于哪些项目」（补 S15 拥有/引用两型）。关系收敛单点 `services/visibility.py`+中间件两处独立校验（项目纪律②）。
 
 **原型体现**：`prototype/relations.html`（实体关系全景页）已上线——现状表+建议图+每实体抽屉；Team/Project 详情页待⑤过审后作为 R2 垂直切片一部分。
 

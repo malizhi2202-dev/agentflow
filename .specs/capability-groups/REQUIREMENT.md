@@ -38,7 +38,7 @@
 
 ### FR5: 无能力 Agent
 - 没有 capabilities 的 Agent 归入 "未分类" 组
-- 没有域归属的 agent 归入 "默认域"
+- 没有域归属的 agent 归入「未分类」虚拟组（domain_id NULL）
 
 ## 非功能需求
 

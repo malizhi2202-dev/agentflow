@@ -7,7 +7,7 @@
 
 | slug | 子议题 | 轮次 | 审核状态 |
 |---|---|---|---|
-| `collaboration-layer` | 协作层缺失：没有「工作项 / 负责人 / 收件箱」 | 1 | 通过 |
+| `collaboration-layer` | 协作层缺失：没有「任务 / 负责人 / 收件箱」 | 1 | 通过 |
 | `execution-isolation` | 执行隔离缺失：Agent 在平台进程内执行，无沙箱 | 1 | 通过 |
 | `identity-and-security` | 身份与安全模型：身份是客户端自述的 | 1 | 通过 |
 | `single-process-state` | 单进程状态与工程化交付 | 1 | 通过 |
@@ -50,12 +50,12 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 
 ### 子议题清单（5 条，本轮上限）
 
-#### S1 · 协作层缺失：没有「工作项 / 负责人 / 收件箱」
+#### S1 · 协作层缺失：没有「任务 / 负责人 / 收件箱」
 
 | 项 | 内容 |
 |---|---|
 | **议题** | AgentFlow 有 Agent 与编排，但没有让「人与 Agent 共同推进一件事」的那一层 |
-| **事实依据** | ① 26 张表（`grep -rho '__tablename__.*' backend/models/*.py \| wc -l` = 26）中**无任何工作项/工单实体**；`scheduled_tasks`/`scheduler_queue` 是内部执行队列，非团队可见工作项<br>② 全仓**无 `assignee` 字段**——`owner_id` 出现在 agent/memory/channel/conversation/domain 上，语义是归属/租户，不是「负责人」<br>③ `models/conversation.py`、`models/message.py` **不引用 `change_id` / `specs`** → 运行时会话与知识产物**无关联字段**<br>④ 全仓模型层**无 `blocker` / `blocked_reason`** 概念<br>⑤ 34 个页面（`ls frontend/src/pages/*.tsx \| wc -l`）**无团队/成员视图**；`UserManagement.tsx` 是管理员 CRUD，不是团队名册 |
+| **事实依据** | ① 26 张表（`grep -rho '__tablename__.*' backend/models/*.py \| wc -l` = 26）中**无任何任务类实体（work_items 表型）**；`scheduled_tasks`/`scheduler_queue` 是内部执行队列，非团队可见任务<br>② 全仓**无 `assignee` 字段**——`owner_id` 出现在 agent/memory/channel/conversation/domain 上，语义是归属/租户，不是「负责人」<br>③ `models/conversation.py`、`models/message.py` **不引用 `change_id` / `specs`** → 运行时会话与知识产物**无关联字段**<br>④ 全仓模型层**无 `blocker` / `blocked_reason`** 概念<br>⑤ 34 个页面（`ls frontend/src/pages/*.tsx \| wc -l`）**无团队/成员视图**；`UserManagement.tsx` 是管理员 CRUD，不是团队名册 |
 | **参照** | Multica：issue 有负责人（人**或** Agent）、四类状态生命周期、动态时间线、Inbox（只在需拍板时通知）、Squad（人机混编 + leader 派活） |
 | **slug** | `collaboration-layer` |
 

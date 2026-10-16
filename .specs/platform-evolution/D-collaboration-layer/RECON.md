@@ -1,5 +1,7 @@
 # ② 竞品侦察
 
+> 〔口径注 2026-10-15〕本文档为历史评审/证据记录：其中「工作项」现称「任务」（竞品语境下的 issue/工作项表述为对比事实，按原文保留）；以 PRODUCT-DESIGN.html v12 为准
+
 > 共享证据底座：`.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md`
 > 本节只摘与「协作层」直接相关的部分。
 

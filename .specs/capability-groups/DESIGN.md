@@ -12,13 +12,13 @@
 │  ┌───────────────────────────────────────────┐  │
 │  │  🏠 默认域  ──────── 5 个 Agent           │  │
 │  │  ┌─ 📦 code-review  (2 healthy / 3)  ▸   │  │
-│  │  │  ├─ Agent A: running  gpt-4            │  │
-│  │  │  └─ Agent B: standby  gpt-4            │  │
+│  │  │  ├─ Agent A: running  gpt-5-codex      │  │
+│  │  │  └─ Agent B: standby  gpt-5-codex      │  │
 │  │  ├─ 📦 python  (1 healthy / 2)  ▸        │  │
-│  │  │  ├─ Agent A: running  gpt-4            │  │  ← Agent A 同时出现
-│  │  │  └─ Agent C: dead  claude-3           │  │
+│  │  │  ├─ Agent A: running  gpt-5-codex      │  │  ← Agent A 同时出现
+│  │  │  └─ Agent C: dead  claude-sonnet-4.5  │  │
 │  │  └─ 📦 未分类  (1 healthy / 1)  ▸        │  │
-│  │     └─ Agent D: running  gpt-3.5         │  │
+│  │     └─ Agent D: running  deepseek-chat   │  │
 │  └───────────────────────────────────────────┘  │
 │  ┌───────────────────────────────────────────┐  │
 │  │  🔵 生产域  ──────── 3 个 Agent           │  │

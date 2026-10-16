@@ -13,7 +13,7 @@
 ### 方向一 · 「修管道」：最小必填集收敛 + 凭据外置 + 字段全可写（治 F-3/F-4/F-5/F-6/F-9）
 
 1. **最小必填集 = 2 项**：`name` + 一个可跑的模型档位引用；其余 22 字段全部有默认或可空（事实：24 字段里只有 `name` 真阻塞，且缺名现在返 500 而非 400，`agents_api.py:43/54`）。要求：入口层补 Pydantic schema，把「裸 dict 直建」变「契约校验后建」（与 CLAUDE.md「路由只做参数校验与鉴权」一致）。
-2. **api_key 从创建流彻底移出**，改为工作区/域级**模型档位（Model Profile）**，Agent 只存引用；创建期反馈改成正向的「连通性试跑」。竞品锚：Dify 的 Integrations→Model Provider + Default Models（凭据与默认模型属工作空间，不属单 App）；OpenAI 把 Vaults 列为独立于 Agent 配置的凭据面。事实锚：F-4 `agents_api.py:45` 用字面量 `"not_set"` 占位、F-9 `domain_api.py:243` 副本直接共用同一密文（不可独立轮换）。过渡纪律：现存 `api_key_encrypted` 列保留但降级为「档位未解析时的兜底」，新建一律走引用。
+2. **api_key 从创建流彻底移出**，改为工作区/域级**模型档位（Model Profile）**，Agent 只存引用〔2026-10-15 裁撤：由运行时发现（外部 CLI）取代——模型目录由运行时暴露，凭据留运行时 CLI 机器〕；创建期反馈改成正向的「连通性试跑」。竞品锚：Dify 的 Integrations→Model Provider + Default Models（凭据与默认模型属工作空间，不属单 App）；OpenAI 把 Vaults 列为独立于 Agent 配置的凭据面。事实锚：F-4 `agents_api.py:45` 用字面量 `"not_set"` 占位、F-9 `domain_api.py:243` 副本直接共用同一密文（不可独立轮换）。过渡纪律：现存 `api_key_encrypted` 列保留但降级为「档位未解析时的兜底」，新建一律走引用。
 3. **补全写入路径**（同批）：`system_prompt`/`role_def`/`sop`、`gate_pre_check`/`gate_post_check`/`io_filter`、`visibility`、`workflow_ids` 六组字段在创建与更新口都可写；顺手统一前端字段名 `gate_pre`/`gate_post` 与后端列名（F-6）。**这是任何创建形态的地基，不依赖解冻以外的新组件。**
 
 ### 方向二 · 「三入口一草稿」：空白快建 / 模板实例化 / 复制既有（+ 导入 YAML 复用编排 apply）（治 F-1/F-10/F-11/F-12）
@@ -47,7 +47,7 @@
 | C7「草稿存前端 localStorage」 | ❌ 否决 | 换设备即丢、无审计、与裁定⑦「不再新增文件态/浏览器态权威数据」方向相反。采纳其「草稿不落正式列表」的语义，落 `status=draft`。 |
 | C1 全量 5 步向导（身份→人格→模型→装配→试运行，步内字段不限） | ⚠ 裁剪采纳 | 预演失败（下）剧本 1 命中：字段预算失控。改为 **步数 ≤3、每步可填字段 ≤5、可跳过率 ≥60%**（C14 的硬预算），首屏只问方向一的最小必填集。 |
 | 「照搬 Agentforce：agent = 主题 + 动作 + 业务对象」 | ❌ 否决 | 依据未联网验证（RECON 三·1），且我们没有业务对象模型与动作语义层；只取其「角色/岗位作为可复用装配单元」的内核 → 方向二第 3 条。 |
-| 六 runtime 全档同等暴露 | ⚠ 分档 | 类比 Dify「推荐类型 + 明示 legacy」：`langgraph`（现默认，`models/agent.py:17`）标推荐，其余标可选/实验；不新增迁移墙（runtime 可改，`agents_api.py:89-92`）。 |
+| 六 runtime 全档同等暴露 | ⚠ 分档 | 类比 Dify「推荐类型 + 明示 legacy」：`langgraph`（现默认，`models/agent.py:17`）标推荐，其余标可选/实验；不新增迁移墙（runtime 可改，`agents_api.py:89-92`）。〔2026-10-15 裁撤：运行时层已由运行时发现（外部 AI 编码 CLI·daemon 探测注册）取代，模型目录由运行时暴露；本行仅为当时代码枚举形态的提案记录〕 |
 
 ---
 
