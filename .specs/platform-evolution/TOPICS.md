@@ -144,6 +144,8 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 
 | 子议题 | 一句话 | 依据 | 状态 |
 |---|---|---|---|
-| S21-harness2-fusion | Google Harness²（arXiv 2610.14224，/home/malizhi/project/harness2 全仓设计+代码精读）的**递归脚手架改进**糅进既有 S17-S20 框架：PPC 探针对比证据→提案制第三证据源；invariant⟂domain 二分→细化「声明式空间禁触代码」；improvement harness+evidence lessons→并入记忆四层与晋升门；递归深度/预算→RSI 开关卡组 | 用户原话+论文摘要一手（web_fetch 核验）+深读包 26dbf892（39 py 全量） | **已呈审⑤**（①-④ 四件齐，GD 3/3 带两前置） |
+| S21-harness2-fusion | Google Harness²（arXiv 2610.14224，/home/malizhi/project/harness2 全仓设计+代码精读）的**递归脚手架改进**糅进既有 S17-S20 框架：PPC 探针对比证据→提案制第三证据源；invariant⟂domain 二分→细化「声明式空间禁触代码」；improvement harness+evidence lessons→并入记忆四层与晋升门；递归深度/预算→RSI 开关卡组 | 用户原话+论文摘要一手（web_fetch 核验）+深读包 26dbf892（39 py 全量） | **通过（7 轮）** |
 
 > **前置裁定（用户 2026-10-23 原话，三条硬约束）**：①「糅合进我的 agentflow 的设计 如果有雏形或者相似的地方就在此基础上继续改」=深化既有件、**如无必要不要增加新的**（目标零新页）；②「修改相关对应的 md 文档和产品原型设计的 html 和 mock 界面」=允许动 `.specs` md + 原型 + PRODUCT-DESIGN；③「**不要改代码**」=裁定⑧继续生效，backend/frontend 零触碰。叠加既有边界：代码层禁自改进（第 6 轮前置裁定）与改进 harness 的边界必须在 CONCLUSION 显式对表——harness2 改的是 scaffold（prompt/工具/记忆/技能/编排=四类产物白名单内），不是平台代码；若其代码含「editor 可全量改 substrate」的危险默认，进《不该抄清单》。
+
+> **第 7 轮 ⑤ 完成（2026-10-23）**：S21 过审（用户「同意」）。R7-1..6 入 ROADMAP；不该抄 12 条随结论成文；实施波另 commit。
