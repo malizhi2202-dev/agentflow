@@ -24,6 +24,7 @@
           <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
           <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
           <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
           <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
           <div class="nav-grp">管理</div>
           <a data-goto="users.html"><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
@@ -46,7 +47,7 @@
 
             <div class="panel tight" id="pv-tree" style="padding:0;overflow:hidden">
               <div class="tree">
-                <div class="tree-row l1" data-click data-goto="control-plane__domain-default.html"><span class="caret">▼</span><svg class="icon" style="color:var(--blue)"><use href="#i-folder"/></svg><span class="name">默认域</span><span class="chip mono">5 个 Agent</span><span class="chip ok">4 healthy / 5</span></div>
+                <div class="tree-row l1" data-click data-goto="control-plane__domain-default.html"><span class="caret">▼</span><svg class="icon" style="color:var(--blue)"><use href="#i-folder"/></svg><span class="name">默认域</span><span class="chip">团队 · AgentFlow 平台团队</span><span class="chip mono">5 个 Agent</span><span class="chip ok">4 healthy / 5</span></div>
                 <div class="tree-row l2" data-click data-goto="control-plane__group-code-review.html"><span class="caret">▼</span><svg class="icon"><use href="#i-layers"/></svg><span class="name">code-review</span><span class="chip mono">3 个</span><span class="chip ok">2 healthy / 3</span></div>
                 <div class="tree-row l3"><span class="caret">·</span><span class="dot running"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 标准（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 标准</span><span class="chip mono">dsh · deepseek-official/deepseek-chat</span></div>
                 <div class="tree-row l3"><span class="caret">·</span><span class="dot idle"></span><span class="name" data-click data-toast="跳 §6.4 Agent 详情 · 审查 Agent · 备援（本页不重复铺开；见 agent-detail.html）（演示）">审查 Agent · 备援</span><span class="chip mono">codex · gpt-5-codex</span><span class="chip mono">standby</span></div>
@@ -105,6 +106,7 @@
               </tbody>
             </table>
             <p class="small dim">三个开关彼此独立、默认全关；域 owner 变更后旧绑定失效需重绑（不可变 principal 纪律，§1.6.5 ⑤）。微调工厂入口见 §6.24（本域开关已由 @liang 显式开启，审计 AF-9K2）。</p>
+            <p class="small dim"><b>三类入口共用同一权限与队列底座：</b>画布固定编排（wf 节点派单）· 对话决策微模型（0.60 阈值）· 小队 leader 语义委派（指派给小队 → leader 任务 → 真形 mention 委派，multica 方案）——三条入口都不绕四道门，最终都落同一条调度队列与同一份审计（小队时间线演示见 <span class="mono">squads__code-review.html</span>）。（Team ⟂ Domain：一个团队可拥有 0..N 个域，域仍是运行/路由轴，见 <a data-goto="teams__agentflow.html">团队详情④正交卡</a>）</p>
 
             <p class="h2p">最近调和动作 <span class="chip info">dangerous 行可点 → 审批详情</span></p>
             <div class="timeline">

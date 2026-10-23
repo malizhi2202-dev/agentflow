@@ -24,6 +24,7 @@
           <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
           <a data-goto="projects.html" class="active"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
           <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
           <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
           <div class="spacer"></div>
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
@@ -31,6 +32,7 @@
         <div class="app-main">
           <div class="app-top"><span class="crumb">项目 <span class="dim" data-click data-pop="pp-switch">· 当前：agentflow ▾</span></span><span class="right"><span class="chip mono">5 项目 · 5 专属空间（1:1）</span><button class="btn sm" data-toast="扫描已触发（演示）：重扫 5 个登记路径 · 提示词目录缺失 2 个 · 新增 0 · 耗时 340ms">扫描</button><button class="btn sm primary" data-click data-goto="projects__new.html">+ 新建项目</button></span></div>
           <div class="app-body">
+            <p class="tiny dim" style="margin:0 0 var(--s3)"><b>〔归属 · 过渡注〕项目可见性将移交团队：</b>组织团队 Team 承载「谁能看到本项目行与其 1:1 空间」的可见性判定；协作小队 Squad 只接指派与委派、<b>不参与可见性</b>（见 <span class="mono">teams.html</span> / <span class="mono">squads__code-review.html</span>）。移交完成前，现行「项目成员」模型仍是权威口径。</p>
             <table class="tbl compact">
               <thead><tr><th>项目</th><th>状态</th><th>优先级</th><th>Leader（个人 Agent）</th><th>成员数</th><th>知识空间 <span class="chip info" style="margin-left:4px">1:1</span></th><th>进度</th><th>路径</th><th>提示词目录</th><th>变更数</th><th>Agent 数</th><th>当前</th><th>操作</th></tr></thead>
               <tbody>

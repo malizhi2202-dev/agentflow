@@ -379,8 +379,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
   <span class="sep">/</span>
   <h1>产品设计文档 &amp; 界面原型</h1>
   <div class="tools">
-    <span class="chip mono">v10 · 2026-09-23</span>
-    <span class="chip mono">状态: 呈审中（v10 = 扫描发现落表 + 存储两档收口；v9「好的」已过审；过审链 v4·v5·v7·v8·v9 均原话晋级）</span>
+    <span class="chip mono">v14 · 2026-10-23</span>
+    <span class="chip mono">状态: 呈审中（v14 = 小队与语义自动执行（multica 方案）；v8「通过」v9「好的」已过审，过审链 v4·v5·v7·v8·v9 均原话晋级；v10-v13 为同步轮次）</span>
     <span class="chip warn">原型内所有数据均为演示假数据</span>
     <button class="btn sm" onclick="window.print()">打印 / 存 PDF</button>
   </div>
@@ -405,6 +405,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <a href="#s2-8">2.8 记忆与知识库</a>
     <a href="#s2-9">2.9 审批与人工闸门</a>
     <a href="#s2-10">2.10 角色与权限</a>
+    <a href="#s2-11">2.11 小队 Squad 与团队 Team</a>
     <p class="grp">架构</p>
     <a href="#s3">3 · 系统架构</a>
     <p class="grp">时序</p>
@@ -460,6 +461,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <a href="#p26" class="planned">6.26 执行隔离策略 ✱</a>
       <a href="#p27" class="planned">6.27 对外集成面 ✱</a>
     <a href="#p28">6.28 运行时发现</a>
+    <a href="#p29" class="planned">6.29 小队中心 ✱</a>
     <p class="grp">附录</p>
     <a href="#s7">7 · 角色权限矩阵</a>
     <a href="#s8">8 · 术语表</a>
@@ -565,6 +567,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>编排</td><td>调度队列</td><td>标签匹配 → 最小连接数选主；优先级出队；并发上限</td><td>§6.3</td></tr>
         <tr><td>执行</td><td>工作流</td><td>文本声明 + 可视化 DAG；发布即快照；可执行</td><td>§6.6</td></tr>
         <tr><td>执行</td><td>工具库</td><td>Plugin / Skill / MCP 三类；demo 下载；admin 禁用</td><td>§6.7</td></tr>
+        <tr><td>协作</td><td>小队 Squad <span class="chip warn">设计新表 · v14</span></td><td><b>执行层一等实体、可被指派</b>（<span class="chip ok">原型基线</span> <span class="mono">squads__code-review.html</span>）：1 leader Agent（online + 未归档 + 可调用，<b>位不排他</b>）+ 人/Agent 混编成员池（带角色标签，<b>标签不授权</b>）+ 自由协作指令；<b>squad 不拥有资产、不是成本主体</b>（成本记 leader 归因链）；指派任务给小队 = 平台机械解析为「给 leader 入队 leader 任务」，<b>无成员抢单</b>；协作靠 briefing 注入 + mention 链接 / 子任务指派二选一；leader 只推到 <span class="mono">in_review</span>，done 留人；<b>无轮次上限</b>（如实写）</td><td>§2.11 §6.29</td></tr>
+        <tr><td>协作</td><td>自动化 Autopilot + Quick Action <span class="chip warn">设计新表 · v14</span> <span class="chip ok">原型基线</span></td><td>触发 <span class="mono">schedule(cron) / webhook / api</span> → 动作 <span class="mono">create_issue / run_only</span>，标题模板 + 并发策略 <span class="mono">skip / queue / replace</span> + 规则版本快照；quick action = 保存的提示词绑单个目标、正文禁 mention；目标可为 Agent 或 Squad</td><td>§6.29</td></tr>
+        <tr><td>组织</td><td>团队 Team（资源容器）<span class="chip warn">设计新表 · v14</span> <span class="chip ok">原型基线</span></td><td><b>组织层归属与配额边界</b>（<span class="chip ok">原型基线</span> <span class="mono">teams.html · teams__agentflow.html</span>）：成员四档 Owner/Admin/Editor/Viewer（<b>三词分家</b>：<span class="mono">user.role</span> 平台级 ⟂ <span class="mono">team_members.role</span> 团队四档 ⟂ <span class="mono">CustomRole</span> Agent 人设）；首批 5 类资产挂 <span class="mono">team_id + owner_kind(personal|team|platform)</span>（<b>存量零回填、可回滚、无停机</b>）；配额<b>K8s 式双形态</b>（软限只告警 · 硬限 <span class="mono">403</span> 带条目化 reason）+ 对象计数（<b>协作小队不占额</b>）；Team ⟂ Domain（0..N）；<b>转让 Owner 双人确认</b>；三态 <span class="mono">active/paused/archived</span>，<b>归档可恢复</b>（资产转 <span class="mono">platform</span> 托管）</td><td>§6.29</td></tr>
                 <tr class="grp-row"><td colspan="4">决策层（System One · <span class="chip warn">已立项未实现</span> change: small-model-decisions）</td></tr>
         <tr><td>决策</td><td>决策模型目录与两步绑定</td><td>Choice / Bool / Score 类型化决策，校准概率输出；本地（llama.cpp / LM Studio）+ 云 API 双轨；登记≠启用，按用途三开关独立绑定，<b>未绑定=直通路由零介入（AC-0）</b></td><td>§6.23</td></tr>
         <tr><td>决策</td><td>分层路由与升级回退</td><td>调度候选选择 / 对话分诊 / 简单任务白名单派发；低置信自动升级大模型（<span class="mono">escalated</span>），失败回退直通（<span class="mono">decision_fallback</span>），全程入审计</td><td>§6.23</td></tr>
@@ -713,7 +718,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>P1-1</td><td><b>把「动作级审计」做成对外可验证的卖点</b>：统一 <span class="mono">audit.jsonl</span> 与 <span class="mono">audit_service</span> 两条写入路径；补齐「授权了什么 / 以谁权限 / 谁批准 / 执行证据」四要素；解决 1 万行轮转只留 5 份导致<b>历史不可查</b>的问题（改为可配置 + 可外送）</td><td>1.5.2 护城河①；Endor Labs 三层架构清单</td><td>中</td></tr>
         <tr><td>P1-2</td><td><b>把队列/路由升级为「可声明」</b>：现在优先级、并发上限靠实例字段与运行时状态，应引入 Kueue/Volcano 式的<b>配额与准入</b>（层级队列、<span class="mono">guarantee</span>/<span class="mono">deserved</span>/<span class="mono">capability</span>、公平共享、抢占、gang 语义）</td><td>1.5.2 护城河②；Kueue 2,993★ / Volcano 5,972★ 的成熟原语</td><td>高</td></tr>
         <tr><td>P1-3</td><td><b>知识产物监控升级为「可配置流程模型」</b>：把阶段/产物/门禁从代码搬到配置（复用已有的 <span class="mono">/api/admin/workflow</span> 与 <span class="mono">workflow.json</span>，让 <span class="mono">scanner</span> 与前端都从它读），使「不绑定任何开发流程」从口号变成事实</td><td>1.6.1 P0-6；§1.4「不绑定任何开发流程」</td><td>中</td></tr>
-        <tr><td>P1-4</td><td><b>补齐协作层最小集</b>：任务（含「负责人可以是人或 Agent」）+ 状态生命周期 + 收件箱（只在需人拍板时通知）。可借鉴 Multica 的四类状态（<span class="mono">unstarted/started/done/closed</span>）与「<b>状态标签不授予行为</b>」「进入状态≠启动 Agent」两条硬规矩。<b>09-23 schema 钉死（已过审 09-23）：缺口=两组表+一次并表；施工序=告警落表→并 queue→work_item 单表（status×triage 正交 · assignee 人/Agent 双轨 · done 附证据）→收件箱三规则；multica/amux 模式均轮 2/3 已审，不重查</b></td><td>1.5.2 差距⑤；Multica <span class="mono">docs/issue-status-lifecycle-rollout.md</span></td><td>高</td></tr>
+        <tr><td>P1-4</td><td><b>补齐协作层最小集</b>：任务（含「负责人可以是人或 Agent」）+ 状态生命周期 + 收件箱（只在需人拍板时通知）。可借鉴 Multica 的四类状态（<span class="mono">unstarted/started/done/closed</span>）与「<b>状态标签不授予行为</b>」「进入状态≠启动 Agent」两条硬规矩。<b>09-23 schema 钉死（已过审 09-23）：缺口=两组表+一次并表；施工序=告警落表→并 queue→work_item 单表（status×triage 正交 · assignee 人/Agent 双轨（<b>v14 扩三轨 <span class="mono">member|agent|squad</span></b>）· done 附证据）→收件箱三规则；multica/amux 模式均轮 2/3 已审，不重查</b></td><td>1.5.2 差距⑤；Multica <span class="mono">docs/issue-status-lifecycle-rollout.md</span></td><td>高</td></tr>
         <tr><td>P1-5</td><td><b>执行日志做到可回放</b>：每次工具调用 / 命令 / 报错带时间戳、可完整重放；当前有 <span class="mono">trace_spans</span> 但无按任务的完整回放视图</td><td>Multica「执行日志 → 可以完整回放」</td><td>中</td></tr>
         <tr><td>P1-6</td><td><b>成本归属</b>：把已采集的 token 用量做成组织/用户/会话三级预算与归因</td><td>OpenHands Enterprise 控制面四能力之一（Cost attribution）</td><td>中</td></tr>
         <tr><td>P1-7</td><td><b>调度状态外置 + 租约/心跳</b>（P0-9 的正解）：把队列、标签映射、退避、限流从进程内存搬到数据库，并引入任务租约与心跳，使多副本成为可能。这是所有「K8s 式」主张的<b>地基</b></td><td>Agno 的 <span class="mono">lock_grace_seconds</span> + 心跳；DBOS「无独立编排服务、每步一次写」</td><td>中</td></tr>
@@ -750,7 +755,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <thead><tr><th>#</th><th>空白</th><th>为什么是空白</th><th>难度</th></tr></thead>
       <tbody>
         <tr><td>W-1</td><td><b>把「质量 / 成本 / 安全」做成持续调和的期望状态</b></td><td>K8s 的期望状态是<b>确定性</b>的（3 个副本就是 3 个）；Agent 的期望状态天然含<b>质量、成本、安全</b>这些非确定性目标。全生态<b>零先例</b>——最接近的只有 Récif 的 eval-gated 发布（10% canary → 用 MLflow 评分决定放行或回滚），但<b>它没有 reconcile 循环</b>。这是唯一可能做到第一的位置。<b>建议先做只告警不动手的人机协作版</b>，避免自愈抖动</td><td>高</td></tr>
-        <tr><td>W-2</td><td><b>Team 作为一等对象 + 团队级配额与审计</b></td><td>kagent 的 API 里 <span class="mono">Team</span> / <span class="mono">Graph</span> / <span class="mono">Workflow</span> / <span class="mono">Queue</span> / <span class="mono">Quota</span> / <span class="mono">Lease</span> 关键词计数<b>全部为 0</b>。真正的「团队」只以<b>实验特性</b>存在于 Claude Code Agent Teams（默认关闭，需环境变量开启）与 Cline，且<b>两者都没有配额、隔离域、审计</b>。AgentFlow 已有「隔离域」这个天然的团队容器</td><td>中</td></tr>
+        <tr><td>W-2</td><td><b>Team 作为一等对象 + 团队级配额与审计</b><span class="tiny dim">〔v14 分两层落档〕</span></td><td><b>〔2026-10-23 更新〕本差距现按两层分开落：<span class="mono">Team</span>（组织层资源容器 · 归属 / 四档角色 / 配额 / 审计）已定形为 §3.3 设计表 + §6.29 A 段；<span class="mono">Squad</span>（执行层可指派一等实体 · leader 协议委派 + autopilot 触发）见 §2.11 / §6.29 A·B——执行层<b>不再采用「仅编排实例预设字段」形态</b>（D-S16 R1 该句已被修订，组织层 R2/R3 不变）。原差距判读仍成立 ——</b>kagent 的 API 里 <span class="mono">Team</span> / <span class="mono">Graph</span> / <span class="mono">Workflow</span> / <span class="mono">Queue</span> / <span class="mono">Quota</span> / <span class="mono">Lease</span> 关键词计数<b>全部为 0</b>。真正的「团队」只以<b>实验特性</b>存在于 Claude Code Agent Teams（默认关闭，需环境变量开启）与 Cline，且<b>两者都没有配额、隔离域、审计</b>。AgentFlow 已有「隔离域」这个天然的团队容器</td><td>中</td></tr>
         <tr><td>W-3</td><td><b>Agent 注册中心 / 目录治理</b></td><td>四个标准<b>共同留白</b>：A2A 规范<b>明确拒绝</b>规定 registry API；MCP Registry 只管 server、仍是 preview、<b>不支持私有 server 且不设计为自托管</b>；ACP 从未进入规范且已归档；<b>只有 AGNTCY Directory 认真做了企业级目录</b></td><td>中</td></tr>
         <tr><td>W-4</td><td><b>「配额 + 渐进扩容 + 沙箱 + 审计」四层整合</b></td><td>四层各自都有成熟实现（Kueue/Volcano · Knative · agent-sandbox · Endor Labs 三层架构），但<b>从未被同一项目组合</b>（2026-09-22 第 3 轮当日 20+ 项目实报复核：仍无人组装，维持本表头名空白）。Kueue 已有官方「Run A Sandbox」集成页（2026-04-19），说明「批调度 × 沙箱」已被 K8s 社区起步，但四层整合仍空</td><td>高</td></tr>
       </tbody>
@@ -805,7 +810,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <p class="q">本章回答：AgentFlow 用哪些名词思考问题，这些名词之间是什么关系。概念定名后，§3 架构与 §5 指南才可指认。</p>
 
     <div class="callout">
-      <p><b>概念地图：</b>隔离域 <span class="mono">⊃</span> 能力分组 <span class="mono">⊃</span> Agent；Agent 由 编排拓扑 连成链路；编排的期望状态由 Reconcile 调和；Agent 的存活由 探针 判定；Agent 的产出沉淀为 工作流知识产物 与 记忆/知识库；一切变更经 权限 判定并落入 审计。</p>
+      <p><b>概念地图：</b>隔离域 <span class="mono">⊃</span> 能力分组 <span class="mono">⊃</span> Agent；Agent 由 编排拓扑 连成链路；编排的期望状态由 Reconcile 调和；Agent 的存活由 探针 判定；Agent 的产出沉淀为 工作流知识产物 与 记忆/知识库；一切变更经 权限 判定并落入 审计。<b>〔v14 补两层〕</b>组织层 <b>Team（团队）</b>=资源归属容器；执行层 <b>Squad（协作小队）</b>=可被指派的编组（leader 协议委派）；两者与 Domain 三者正交（§2.11）。</p>
     </div>
 
     <h3 id="s2-1">2.1 隔离域 Domain</h3>
@@ -869,6 +874,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>并发上限</td><td><span class="mono">max_concurrency</span></td><td>负载率 = 当前并发 / 上限；为 0 时按 1 处理；生效并发取「daemon 全机 ≤20 与单 Agent ≤6」的较小值（§6.28）</td></tr>
         <tr><td>可见性</td><td><span class="mono">private</span> / <span class="mono">public</span></td><td>运行时默认 private、仅 owner 可置 public——public 只共享路由权，不共享该 CLI 的登录凭据（§6.28）</td></tr>
         <tr><td>能力集</td><td>CLI 自定义参数 / 环境变量 / 集成 / 会话续跑</td><td>CLI 参数=<span class="mono">exec</span> 数组、无 shell 展开、禁放凭据；环境变量=服务端存、值不回读、owner/admin 解锁入审计、保留变量不可覆盖、专用端点整包保存；<b>集成=IM 通道连接器</b>——六类通道（飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM），卡片状态机＝未启用（平台 configured 门）/ 不可用预览 / 未连接 / 已连接（bot 身份回显）/ 无权限只读降级，Lark 扫码 device-flow、其余 BYO 密钥（保存前在线验证，400=无效、409=归属冲突），密钥三原则＝写-only 不回显 · 改密=断开重连 · AES-256-GCM+全局 DEK 落库（§3.3 <span class="mono">integrations</span> 表），断开=软撤销+必填原因，连接后闭环＝IM 消息→会话→run→回复写回，权限两档＝owner 自助（Lark/钉钉/自托管）vs 仅平台管理员（Slack/企微/Telegram）（§6.4·§7）；会话续跑=存会话 id（mcode 等不支持）。「复制到新运行时」：模型类字段清空重选，env 值与 MCP 配置从不复制（§6.4）</td></tr>
+        <tr><td>编组 <span class="chip warn">v14 新增</span></td><td><b>协作小队 Squad</b>（执行层 · 可被指派）</td><td>Agent 与人可被编成一支<b>可被指派的一等小队</b>：<b>1 个 leader Agent</b>（必为 Agent、未归档、可调用，改设需校验）+ 混编成员（自由文本角色标签，<b>标签不授权</b>）+ 自由协作指令。指派给小队 = 平台<b>机械解析</b>为「给 leader 入队 leader 任务」（<b>无成员抢单</b>）；每次实际运行仍按<b>链顶人类 originator</b> 逐次过 <span class="mono">canInvokeAgent</span>。与组织层 <b>Team</b>（资源容器）一词一义、与 §6.4「集成」（对外 IM 出口）互不混用。<b>完整概念与界面见 §2.11 / §6.29</b></td></tr>
       </tbody>
     </table>
 
@@ -1044,6 +1050,43 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <li><b>项目可见性</b>：admin 未指定 <span class="mono">project_ids</span> 时表示「全部可见」；普通用户只能看到被分配的项目；未分配任何项目 = 看不到任何项目。</li>
     </ul>
     <p class="small muted"><b>与其他概念：</b>权限决定 §5.0 的模块可见性，并直接映射到 §7 的角色权限矩阵。</p>
+
+    <h3 id="s2-11">2.11 小队 Squad 与团队 Team <span class="chip warn">v14 新增 · 2026-10-23 裁定（multica 方案）</span></h3>
+    <p class="q">本节回答：多个 Agent 与人「一起干活」在平台里到底是什么对象、能被谁指派、权限怎么算。这是<b>两层两词</b>——先把两层分清，再谈细节。</p>
+    <div class="callout">
+      <p><b>〔2026-10-23 用户裁定〕</b>画布与 workflows <b>不新增动态模式</b>，固定编排维持原样；<b>自动化编排执行</b>采纳 multica 方案 = <b>协作小队 Squad 一等实体 + leader 协议委派 + autopilot 式触发</b>。两层一词一义：<b>组织层 Team</b>（资源容器，D-S16 裁定 R2/R3 原样不变）· <b>执行层 Squad</b>（可被指派的一级目标）。</p>
+    </div>
+    <table class="tbl compact">
+      <thead><tr><th></th><th>团队 Team（组织层）</th><th>小队 Squad（执行层）</th></tr></thead>
+      <tbody>
+        <tr><td>回答的问题</td><td>谁<b>拥有</b>这些资源、谁能对它们动手</td><td>这件事<b>由谁协作完成</b>、下一步派给谁</td></tr>
+        <tr><td>成员</td><td>人（含平台角色与团队角色）</td><td>1 个 <b>leader Agent</b> + Agent / 人混合成员（各带自由文本角色标签，<b>标签不授予任何权限</b>）</td></tr>
+        <tr><td>可被指派</td><td>否——它是归属容器，不是任务负责人</td><td><b>是</b>——任务的 <span class="mono">assignee_type</span> 枚举之一，与 <span class="mono">member / agent</span> 并列</td></tr>
+        <tr><td>生命周期</td><td>持久、跨项目；三态 <span class="mono">active / paused / archived</span>——<b>暂停</b>停配额新增与新增指派，<b>归档可恢复</b>（资产转 <span class="mono">platform</span> 托管）</td><td>持久；<b>归档不可恢复</b>（squad 无资产可托管，留空壳只会让人误以为还能指派）——存量指派 <span class="mono">403 squad_archived</span>、自动化转 <span class="mono">disabled</span>、<b>在途 run 不撤回、跑完为止</b></td></tr>
+        <tr><td>界面 / 表</td><td>§6.29 · <span class="mono">teams · team_members</span></td><td>§6.29 · <span class="mono">squad · squad_member</span></td></tr>
+      </tbody>
+    </table>
+    <p><b>小队的构成（关键规则）</b></p>
+    <ul class="small">
+      <li><b>leader 必为 Agent</b>：<b>人不可当 leader</b>，理由明写在表单上——<b>人的在线态不由平台判定，无法保证被唤醒</b>；候选下拉<b>只列 online + 未归档 + 对链顶人类可调用</b>的 Agent（offline / 已归档灰显并带拒因，不静默隐藏）。<b>leader 位不排他</b>：同一 Agent 可为多支小队当 leader，成本各自记在它头上。<b>squad 不拥有资产、也不是成本主体</b>——成员委派产生的 token / 成本一律记在 <b>leader 的 run 归因链</b>上，配额累加落在 <b>leader 所属团队</b>。<span class="mono">leader_id</span> 外键 <span class="mono">ON DELETE RESTRICT</span>：<b>归档该 Agent 的前置检查拒 <span class="mono">409 leader_bound</span></b>，必须先改设 leader。<b>改设走两条独立校验</b>（入口 + 中间件各一次），不过则 <span class="mono">403</span> 带拒因（<span class="mono">leader_archived</span> / <span class="mono">not_callable</span>）；<b>改设只影响此后新入队的 leader 任务，在途不迁移、旧 leader 的在跑 run 不撤回</b>。</li>
+      <li><b>成员池两类可混编</b>（人 + Agent 交替）：<span class="mono">member_type ∈ {agent, member}</span> + 自由文本 <span class="mono">role</span>（如「审查人」「实现者」「复核人（done 门）」「记录员」）。<b>标签是 leader 挑人的依据，不授予任何权限</b>（grants no permissions，同 <span class="mono">agents.capabilities</span> 是描述不是授权）；每行同时带 <b>skills 标签 + 在线态 + 可直接粘贴的真形 mention</b>，<b>人成员的 mention 只发通知、不产生运行</b>。<b>池子无上限字段</b>（对象计数在团队配额里管 Agent 总数），<b>leader 不占池位也可不选</b>——它恒为执行主体。<b>入池即存（低敏），不落草稿箱</b>。</li>
+      <li><b>自由协作指令</b>：<span class="mono">instructions</span> 是一段自由文本（Markdown），表达「这支小队怎么干活」；平台<b>不提供任何结构化路由配置</b>——路由规则全部由硬编码协作协议 + 注入名册 + 这段指令三者合成（见 §6.29 协作协议面板）。</li>
+    </ul>
+    <p><b>指派语义（这是 Squad 成为一等实体的唯一理由）</b></p>
+    <ul class="small">
+      <li><b>一条机械解析，不含智能</b>：任务指派给小队 = 平台解析为「<b>给 leader 入队一条 leader 任务</b>」。<b>没有成员抢单</b>——成员看不到别人的队列，<b>界面上根本没有「认领」按钮</b>；也没有并发唤醒全员、没有负载均衡——multica 实测口径：<i>assign 给 squad 不会同时跑所有 agent，先唤醒 leader，由它决定下一步</i>。</li>
+      <li><b>入队前两道校验</b>：小队未归档 + leader 当前可被调用（<span class="mono">canInvokeAgent</span>）；任一不过 → <b>403</b>（拒因原样 toast，不粉饰）。通过后 <span class="mono">(issue, agent)</span> 维度做<b>活跃任务合并去重</b>：leader 已有未开始的待处理任务时不再重复塞行（后到的唤醒折进 <span class="mono">coalesced_comment_ids</span>，实际投喂另存一份收据）。<b>入队 ≠ 起跑</b>：leader 拿到的是<b>接收位</b>（须被 claim），<b>成员池此时不被通知</b>。</li>
+      <li><b>入队 ≠ 起跑</b>：leader 拿到的是<b>接收位</b>（须被 claim），<b>成员池此时不被通知</b>；<b>受理门不因小队而绕过</b>——<span class="mono">triage</span> 未 accept 前禁止任何派生执行（自动派单 / 触发规则 / 小队委派同拦），<b>@mention 指名除外</b>。</li>
+      <li><b>委派靠 mention 链接</b>：leader 想派给成员，写 <span class="mono">[@名字](mention://agent/&lt;uuid&gt;)</span> 或建子任务指派——二者<b>二选一</b>（<b>两个都做 = 双触发，平台在 evaluated 审计里标 <span class="mono">double_trigger</span> 并拒第二次</b>）；<b>写错形态不报错、只会静默不委派</b>，所以名册必须给「可粘贴 mention」，见 §6.29 硬契约。</li>
+    </ul>
+    <p><b>权限：小队不是授权单位</b></p>
+    <ul class="small">
+      <li><b>不按小队授权</b>：成员「入队」<b>不</b>产生任何可调用权。每一次实际运行仍按<b>委派链顶的人类 originator</b> 逐次过 <span class="mono">canInvokeAgent</span> 判定——同一成员在 A 小队里，不代表 B 人类 owner 的任务能调它。</li>
+      <li><b>可见 ≠ 可运行</b>：沿用两轴分离（<span class="mono">canAccessPrivateAgent</span> 允许管理员，<span class="mono">canInvokeAgent</span> <b>拒绝</b>管理员旁路，§6.4 Access）。小队只改变「谁会被叫醒」，不改变「谁被允许跑」。</li>
+      <li>成员入队/退队、改指令、改 leader、归档 = <b>写操作</b>，需<b>小队 creator 或平台管理员</b>（§7）；<b>资产归属仍看 Team</b>（组织层），与本节互不替代——<b>squad 与 team 之间没有外键</b>，故团队 Admin <b>不</b>因团队而获得小队管理权。</li>
+      <li><b>委派不绕过审批门</b>：人批节点（如 <span class="mono">AP-31</span>）的<b>审批人解析按「归属团队 + Access」，不按小队</b>；<b>收件箱也没有小队轨</b>（<span class="mono">recipient_type</span> 保持人 / Agent 两轨）——通知永远落到具体人或 Agent，否则「小队里的谁」不可寻址。</li>
+    </ul>
+    <p class="small muted"><b>与其他概念：</b>Squad 是<b>语义协作</b>路径，与 §2.4 编排（<b>固定编排</b>：画布 / YAML / 连线策略 / Reconcile）是<b>两条路、两副面孔</b>——固定编排改图，动态协作改任务与评论；<b>共享同一套路由、权限、队列、配额与审计底座</b>，因此小队<b>不生成画布 YAML</b>；<b>唯一允许的互转方向</b>是「人把某条固定委派链手工重画成工作流」，平台<b>不自动反导</b>。与 §2.1 隔离域正交：域管「在哪跑、怎么路由扩容」，Team 管「谁的」，Squad 管「这次谁和谁一起干」。与 §6.4「集成」（IM 通道＝<b>对外消息出口</b>）互不混用：Squad 是<b>站内编组</b>。<b>〔易混词〕</b>本节的小队 <span class="mono">leader</span> 与 §6.13 项目详情里的「Leader」<b>不是同一个东西</b>：前者是<b>被入队 leader 任务的 Agent</b>（执行层、可改设、有校验），后者是<b>项目的负责人字段</b>（组织侧、人 / 用户级 Agent 皆可为）；两处文案与字段名不得互相引用。</p>
   </section>
 
   <!-- ══════════════════ 3 ══════════════════ -->
@@ -1134,7 +1177,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     </table>
 
     <h3 id="s3-3">3.3 数据模型</h3>
-    <p class="lead">26 张表按域归组如下（表名取自模型 <span class="mono">__tablename__</span>）；标「设计新表」的行为目标态（v13 裁定 · 裁定⑦ MySQL 权威档），现状代码尚无对应模型。</p>
+    <p class="lead">现状 26 张表 + 目标态设计新表按域归组如下（现状表名取自模型 <span class="mono">__tablename__</span>）；标「设计新表」的行为目标态（v13 集成裁定 · v14 小队/团队/自动化裁定 · 一律裁定⑦ MySQL 权威档），现状代码尚无对应模型。<b>v14 新增：</b><span class="mono">teams · team_members · squad · squad_member · autopilot · autopilot_trigger · autopilot_run · quick_action</span> 八张 + 任务队列表扩列设计注（<span class="mono">is_leader_task / squad_id / trigger_comment_id / coalesced_comment_ids / handoff_note / priority / fire_at</span>）与 <span class="mono">assignee_type</span> 三轨枚举扩，详见 §2.11 与 §6.29。</p>
     <table class="tbl">
       <thead><tr><th>域</th><th>表</th><th>关键字段 / 关系</th></tr></thead>
       <tbody>
@@ -1154,6 +1197,12 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>对话</td><td class="mono">conversations · <span class="mono">messages</span></td><td>会话与消息（含工具调用块）</td></tr>
         <tr><td>渠道</td><td class="mono">channel_configs</td><td>飞书 / 钉钉 / Slack / Telegram / 邮件配置与凭据</td></tr>
         <tr><td>集成 <span class="chip warn">设计新表 · v13</span></td><td class="mono">integrations</td><td>Agent 级 IM 通道连接（与平台渠道不同层）：<span class="mono">channel_type</span> ∈ {lark, slack, dingtalk, wecom, telegram, self_hosted_im} 六类 · <span class="mono">config</span> JSONB <b>密文</b>（AES-256-GCM + 全局 DEK）· <span class="mono">status</span> ∈ {active, revoked}（<b>软撤销保留审计</b>）· <span class="mono">UNIQUE(workspace, agent, channel_type)</span>；配套入站去重、审计流水、绑定令牌 TTL 三表（裁定⑦ MySQL 权威档）。详见 §2.3 / §6.4 集成子栏</td></tr>
+        <tr class="grp-row"><td colspan="3">小队 · 团队 · 自动化 <span class="chip warn">v14 设计新表 · 2026-10-23 裁定（multica 方案）· 全部按裁定⑦ MySQL 权威档书写</span></td></tr>
+        <tr><td>团队 <span class="chip warn">设计新表 · v14</span></td><td class="mono">teams · team_members</td><td>组织层资源容器（D-S16 R2 原裁定不变）：<span class="mono">teams(id, name, slug, owner_user_id → users.id, status, token_soft_limit, token_hard_limit, created_at)</span>；<span class="mono">team_members(team_id → teams.id, user_id → users.id, role ∈ {owner, admin, editor, viewer}, created_at, created_by, <b>UNIQUE(team_id, user_id)</b>)</span>——<b>day-1 真外键</b>，不重演无约束 String 的债；成员表依赖裁定⑦ 的 <span class="mono">users</span> 表化，<b>与身份三连同批，不得先建表后补外键</b>。<span class="mono">teams.status ∈ {active, paused, archived}</span>（<b>暂停 = 停配额新增与成员加入、拒绝新增指派、资产原地保留</b>；<b>归档 = 可恢复</b>，资产转 <span class="mono">platform</span> 托管——<b>与小队归档「不可恢复」刻意相反</b>，§6.29）；<span class="mono">team_quota</span> 承载对象计数（与聚合用量同表族）；<b>资产表加两列</b> <span class="mono">team_id INT NULL → teams.id</span> + <span class="mono">owner_kind ENUM('personal','team','platform') DEFAULT 'personal'</span>，<b>存量零回填、可回滚、无停机</b>（expand/contract）。<b>〔首批清单 · 原型口径〕</b><span class="mono">agents / workflows / tools / knowledge_sources / domains</span> 五类（<span class="mono">domains.team_id</span> 新列），<b>编排实例与模板列次批</b>——与 D-S16 R2 原清单（含 <span class="mono">orchestration_instances/templates</span>、域列次批）<b>差一处，待人工二选一收口，两处不得同时声称首批</b>（§6.29 A②）</td></tr>
+        <tr><td>小队 <span class="chip warn">设计新表 · v14</span></td><td class="mono">squad · squad_member</td><td>执行层可指派一等实体：<span class="mono">squad(id, name, leader_id <b>NOT NULL → agents.id ON DELETE RESTRICT</b>, instructions TEXT, creator_id, avatar_url, archived_at NULL, archive_reason TEXT, created_at)</span>；<b>无 <span class="mono">team_id</span> 外键</b>（原型锁死口径：<b>Team 与 Squad 无外键关系</b>——同一批 Agent 既可被某 Team 拥有，也可被任意多个 Squad 选为成员，「拥有」与「一起干活」是两件事）；<b>同一 Agent 可为多支小队的 leader（leader 位不排他）</b>，成本各自记在它头上；<span class="mono">squad_member(squad_id → squad.id, member_type ∈ {agent, member}, agent_id NULL, user_id NULL, role <b>自由文本</b>, created_at, created_by, UNIQUE(squad_id, member_type, agent_id/user_id))</span>。<b>无任何结构化路由列</b>——协作规则 = 硬编码协议 + 注入 Roster + <span class="mono">instructions</span>（§6.29）；<span class="mono">role</span> 只是文案，<b>不授予权限</b>；<span class="mono">archived_at</span> 非空 = <b>不可恢复</b>、存量指派 <span class="mono">403 squad_archived</span>、指向它的自动化自动转 <span class="mono">disabled</span>（不静默删行），<b>在途 run 不撤回、跑完为止</b>。<b>squad 不是成本主体</b>：成员委派产生的 token / 成本记在 <b>leader 的 run 归因链</b>上（<span class="mono">squad=sq-1 · leader=agent-5 · chain_top_human=user:1</span>），配额累加落在 <b>leader 所属团队</b>的账上——<b>squad 不参与账单主体、不占团队对象计数额度</b></td></tr>
+        <tr><td>任务队列 <span class="chip warn">v14 设计注 · 扩列</span></td><td class="mono">任务队列表（并入 P1-16 并表后的运行枢纽）</td><td>本包新增列的设计注（<b>不新造第四张 queue</b>——「第三张 queue 不许进来」纪律沿用，队列面先由 P1-16 并表收口）：<span class="mono">is_leader_task BOOL</span>（leader 任务标记，驱动时间线与「evaluated 记账」审计归因）· <span class="mono">squad_id NULL → squad.id</span>（本次运行所属小队）· <span class="mono">trigger_comment_id NULL</span>（触发本次运行的评论，兜底唤醒与回放用）· <span class="mono">coalesced_comment_ids JSONB</span>（<b>计划并入</b>的评论 id 数组，与「实际投喂」收据分账，§6.0 ⑪）· <span class="mono">handoff_note TEXT</span>（交接说明，渲染进开场 prompt，<b>不伪造评论</b>）· <span class="mono">priority</span> · <span class="mono">fire_at</span>（延迟起跑 / 唤醒时点）。会话续用键为 <span class="mono">(agent_id, issue_id)</span> 对而非 task（沿用既有设计注）</td></tr>
+        <tr><td>自动化 <span class="chip warn">设计新表 · v14</span></td><td class="mono">autopilot · autopilot_trigger · autopilot_run</td><td><span class="mono">autopilot(id, name, assignee_type ∈ {agent, squad}, assignee_id, execution_mode ∈ {create_issue, run_only}, issue_title_template, concurrency_policy ∈ {skip, queue, replace}, spec_version, status ∈ {enabled, disabled, paused}, created_by)</span>——<b>不挂 <span class="mono">team_id</span></b>：归属看目标（指向 squad 时成本与配额沿 leader 归因链落到 leader 所属团队，指向 Agent 时落该 Agent 归属），<b>不给规则本身造第二个归属主体</b>；<b>目标 squad 归档 → 规则自动转 <span class="mono">disabled</span>（不静默删行）</b>；<b>小队页内建规则目标固定为本队</b>，跨队复用走工作流 / 画布；<span class="mono">autopilot_trigger(autopilot_id → autopilot.id, kind ∈ {schedule, webhook, api}, cron_expression, timezone, webhook_token 写-only · HMAC 签名校验)</span>（三型落点：<span class="mono">cron 30 8 * * 1-5</span> · <span class="mono">POST /hooks/af/{squad}/pr</span> · <span class="mono">POST /squads/{id}/assign</span>，<b>api 触发按 PAT 计 owner</b>）；<span class="mono">autopilot_run(id, autopilot_id, spec_version, status, issue_id NULL, task_id NULL, failure_reason)</span>——<b><span class="mono">failure_reason</span> 区分「门」与「活」：签名不符 = <span class="mono">401</span> 与业务失败不同码</b>；<b><span class="mono">replace</span> 取消的在途 run 不计入成功率</b>——<b>每次运行记当时的规则版本快照</b>（§6.0 ⑨ 留痕「表 + 界面」两步齐）。配套 <span class="mono">quick_action(id, name, prompt 正文<b>禁 mention</b>（校验期直接拒 <span class="mono">quick_action_mention_forbidden</span>）, target_type ∈ {agent, squad}, target_id, visibility ∈ {public, private}, status, use_count, archived_at)</span>＝保存的提示词绑单个目标、点击即跑（§6.0 ⑤）</td></tr>
+        <tr><td>指派枚举 <span class="chip warn">v14 扩枚举</span></td><td class="mono">任务.assignee_type / inbox.recipient_type</td><td><span class="mono">assignee_type</span> 由「人 / Agent」双轨扩为 <span class="mono">member | agent | <b>squad</b></span> 三轨（P1-4 / P1-16 的 assignee 双轨设计注的连带修订）；指到 squad 时行内同时存<b>解析出的 leader</b>（不可变），便于回放归因；收件箱 <span class="mono">recipient_type</span> 保持人 / Agent 两轨——<b>小队不收件箱</b>，通知永远落到具体人或 Agent（否则「小队里的谁」不可寻址）；<b>审批人解析按「归属团队 + Access」，不按小队</b></td></tr>
         <tr class="grp-row"><td colspan="3">观测与治理</td></tr>
         <tr><td>指标</td><td class="mono">metrics_raw · <span class="mono">session_metrics</span> · <span class="mono">trace_spans</span></td><td>原始指标 / 会话级 Token 与时长 / 跨 Agent 调用链</td></tr>
         <tr><td>审批</td><td class="mono">human_approvals</td><td>待办审批请求与决策记录</td></tr>
@@ -1345,6 +1394,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>审计日志</td><td>审计日志（管理区）</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-yes">●</td><td class="mono">audit:view</td></tr>
         <tr><td>用户与权限</td><td>用户管理（管理区）</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono">user:manage</td></tr>
         <tr><td>审批中心</td><td>审批</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td><td class="mono">project:read (决策需 write)</td></tr>
+        <tr><td>小队中心（组织团队 Team + 协作小队 Squad）<span class="chip warn">规划</span></td><td>小队中心（左侧导航双 tab）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（本团队内）</span></td><td class="c dot-eye">○<span class="tiny dim">（Viewer 档）</span></td><td class="c dot-eye">○<span class="tiny dim">（只读 + 审计）</span></td><td class="mono">project:read（建团 / 建队需 write；<b>指派给小队需 canInvoke(leader)</b>；<b>不按小队授权、审批人解析也不按小队</b>；两 tab <b>不共享筛选器</b>：Team 按 Owner、Squad 按 leader）</td></tr>
         <tr><td>只读文件查看（原产物文档编辑·已下线）</td><td>项目 → 文件 / 变更详情 → 文档</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="mono">project:read（编辑入口已下线，无写形态）</td></tr>
       </tbody>
     </table>
@@ -1501,9 +1551,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <p><b>谁能用</b>：目录登记=平台管理员；用途绑定与阈值=域 owner/管理员；微调开关=域 owner（仅本域数据）；切生产=过自测门槛者。<b>操作路径</b>：①设置连接（本地 llama.cpp/LM Studio OpenAI 兼容口，或云 API+密钥）→ 目录健康态变绿；②到「域策略」把该模型绑到具体用途（三个开关独立）——<b>只做完①，一切流量仍走直通路由</b>；③低置信阈值与审计在决策页可查（每次决策记概率分布与耗时）。<b>微调</b>：开域开关 → 选对话/记忆切片 → 硬件预检（不过则灰显明说）→ 平台生成任务调用本机 LLaMA-Factory → 产物登记新版本 → 自测报告 → 过门槛一键切生产/回滚。<b>对话内入口</b>：<span class="mono">/决策模型 推荐|登记|微调|评测|状态</span>（未开对应能力的域，命令不产生效果）。<b>环境参谋</b>：<span class="mono">/决策模型 方案</span> 或 §6.25 页——画像→出方案（命令/脚本/路径），执行与否用户决定。详见 §2.7 与 §6.23-6.25。</p>
 
     <h2 class="sec"><span class="num">6</span>界面原型</h2>
-     <span class="chip info">⚡ <b>交互原型 v1 全量上线</b>：28 页全部可点（详情抽屉/二次确认/选择弹层/toast + <b>跨页深链</b>，同一 mock 数据宇宙：agent-7、r-128、Notion 401、wf-42 冲突）。入口：<a href="prototype/index.html" class="mono" style="color:inherit">prototype/index.html</a>，或 5173 前端左上角「文档资料 · 原型」（<a class="mono" href="http://127.0.0.1:5173/prototype/index.html">/prototype/</a>）</span>
+     <span class="chip info">⚡ <b>交互原型 v1 全量上线</b>：133 页全部可点（详情抽屉/二次确认/选择弹层/toast + <b>跨页深链</b>，同一 mock 数据宇宙：agent-7、r-128、Notion 401、wf-42 冲突）。入口：<a href="prototype/index.html" class="mono" style="color:inherit">prototype/index.html</a>，或 5173 前端左上角「文档资料 · 原型」（<a class="mono" href="http://127.0.0.1:5173/prototype/index.html">/prototype/</a>）</span>
     <h3 id="p0">6.0 全局交互纪律（12 条 · 所有页面的公共约束）</h3>
-    <p class="lead">2026-09-22 第 3 轮过审结论（S7）：以下 12 条来自对 multica 全量 UI 层（55 路由）与协作机制的深读，是本平台全部详情页/列表页/实时视图的<b>公共交互契约</b>——先立纪律，再画页面；下文 p1–p22 的每处设计以本表为准，冲突时本表优先。</p>
+    <p class="lead">2026-09-22 第 3 轮过审结论（S7）：以下 12 条来自对 multica 全量 UI 层（55 路由）与协作机制的深读，是本平台全部详情页/列表页/实时视图的<b>公共交互契约</b>——先立纪律，再画页面；下文 p1–p29 的每处设计以本表为准，冲突时本表优先。</p>
     <table class="tbl compact">
       <thead><tr><th>#</th><th>纪律</th><th>落点页</th></tr></thead>
       <tbody>
@@ -1511,18 +1561,18 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>②</td><td><b>视图即链接</b>：保存视图 = 筛选快照（status/priority/assignee/creator/project/label/property 等字段全集）+ <span class="mono">?view=&lt;id&gt;</span> URL 双向同步，天然可分享；自定义属性可作分组维</td><td>p6 · p12 · p15 · p20</td></tr>
         <tr><td>③</td><td><b>Runtime 健康四态</b> online / recently_lost / offline / long_offline；<b>判定阈值写进产品文案</b>（如 daemon 心跳 15s / 离线判定 ≤3min 式明说）；工作量折进健康列；Cost·7d 带环比；缺价模型显式告警</td><td>p10 · p22 · p28</td></tr>
         <tr><td>④</td><td><b>失败卡片固定三件套</b>：Retry with context / Edit as advanced form（回填原输入）/ 升级到人；一键运行先过<b>权限·运行时·配额·归因四道门</b>，拒因原样 toast 不粉饰</td><td>p8 · p11 · p17</td></tr>
-        <tr><td>⑤</td><td><b>Quick Actions</b>：管理员把命名 prompt 绑定为 Agent 动作，点击即跑、无输入框，public/private + 用量计数 + 可归档；「并入已有运行」用中性措辞，不谎报新启动</td><td>p7 · p14 · p19</td></tr>
+        <tr><td>⑤</td><td><b>Quick Actions</b>：管理员把命名 prompt 绑定为 Agent 动作，点击即跑、无输入框，public/private + 用量计数 + 可归档；「并入已有运行」用中性措辞，不谎报新启动</td><td>p7 · p14 · p19 · <b>p29</b></td></tr>
         <tr><td>⑥</td><td><b>权限渲染纯函数化</b>：<span class="mono">{allowed, reason}</span> 稳定枚举决定 UI 变体（不解析字符串）；<b>private 连管理员也不旁路</b>；未实装的授权位显式 INERT；鉴权源唯一为「可调用目标」，visibility 降为展示字段</td><td>p16 · 全站</td></tr>
         <tr><td>⑦</td><td><b>草稿与滚动位是一等状态</b>：不同创建形态用互不覆盖的草稿槽 + 共享附件池；未完成草稿在入口页聚合提示；详情页返回时恢复滚动 memento</td><td>p8 · p19</td></tr>
         <tr><td>⑧</td><td><b>不可信内容渲染边界下沉到显示端</b>：产物/附件预览一律 <span class="mono">iframe sandbox="allow-scripts" + srcdoc</span>——<span class="mono">.specs/</span> 的 HTML 预览必须照做（与运行时暂无沙箱不矛盾，见 §1.6.5 ① 与 P1-11）</td><td>p9 · p13b</td></tr>
         <tr><td>⑨</td><td><b>留痕要「表 + 界面」两步齐</b>：规则/编排版本、干预快照必须有可见消费界面（multica 有版本表却无展示页，为戒）；UI 可隐藏的调度行（如未启用升级）表必须保留供审计</td><td>p17 · p19</td></tr>
-        <tr><td>⑩</td><td><b>status 与 triage 两根正交轴</b>：「到哪一步」≠「这算不算活」；受理门只拦从任务<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话</td><td>p17 · p20</td></tr>
+        <tr><td>⑩</td><td><b>status 与 triage 两根正交轴</b>：「到哪一步」≠「这算不算活」；受理门只拦从任务<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发的对话；<b>小队同理</b>：Triage 中禁派生执行、@mention 指名除外</td><td>p17 · p20 · <b>p29</b></td></tr>
         <tr><td>⑪</td><td><b>执行时间线记账面</b>：一次运行可挂多上下文（任务/对话/自动化/评论线程）；「计划并入」与「实际投喂」双数组（计划 vs 收据）；转录带 seq + 调用 id + <b>截断标记</b>；取消人署名；wait_reason 作一等状态渲染；每 run 显示 tokens/USD</td><td>p10 · p22</td></tr>
         <tr><td>⑫</td><td><b>通知分层</b>：只 ping 需要拍板的人；通知目录读取失败宁多发不漏发（漏发会把任务困住）；任务推进后旧「运行失败」通知批量自愈归档；升级重评作 deferred 调度行而非提醒</td><td>p11 · p21</td></tr>
               <tr><td>⑬</td><td><b>身份修复前不暴露任何对外写端点</b>：fail-open 身份存在期间，A2A M1+、webhook 回传等对外写面一律冻结——协议面第一块砖只能是只读 AgentCard（P0-1 是 P1-15 的硬前置）</td><td>P1-15 · <span class="mono">D-identity-and-security-2</span></td></tr>
       </tbody>
     </table>
-    <p class="q">本章回答：系统长什么样。18 张原型覆盖 §5 的全部模块，布局与真实系统一致，数据全部为演示假数据。</p>
+    <p class="q">本章回答：系统长什么样。133 页原型覆盖 §5/§6 的全部模块，布局与真实系统一致，数据全部为演示假数据。</p>
 
     <div class="callout warn">
       <p><b>原型用途是「对齐形态与流程」，不是像素级设计交付。</b>真实页面中的按钮启用态、空态与错误态由角色与数据决定，请以 §5 的模块说明为准。每页底部均有「演示数据说明」。</p>
@@ -1786,12 +1836,12 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
                     <dt>模型 / thinking</dt><dd class="mono">deepseek-official/deepseek-chat · medium <span class="tiny dim">换运行时清空重选</span></dd>
                     <dt>归属域</dt><dd>默认域 <span class="tiny dim">不选域 =「未分类」虚拟组，事后可归位</span></dd>
                     <dt>能力标签</dt><dd><span class="pill mono">code-review</span> <span class="pill mono">python</span></dd>
-                    <dt>可见性 / 运行</dt><dd><span class="chip">private</span> <span class="tiny dim">Access 两轴：可见 ≠ 可运行，另配 Autopilot 许可</span></dd>
+                    <dt>可见性 / 运行</dt><dd><span class="chip">private</span> <span class="tiny dim">Access 两轴：可见 ≠ 可运行，另配 Autopilot 许可；<b>〔v14〕小队不是授权单位</b>——成员入队不改变本页任何判定，逐次仍按链顶人类过 <span class="mono">canInvokeAgent</span>（§2.11）</span></dd>
                   </dl>
                 </div>
                 <div class="callout" style="margin-top:var(--s3)">
                   <p class="tiny" style="margin:0"><b>二级子栏一览（分区集合与创建向导同源 · 两入口一份配置）：</b>能力＝指令 / 技能 / MCP / 集成 / 知识源；设置＝访问 Access / 环境变量 / CLI 参数 / 执行设置 / 闸门 / 探活（可选平台侧服务健康 + daemon 15s 心跳 · 仅创建后配置）/ 危险区（归档软删 + Restore · 彻底删除 · 复制 · 仅创建后配置）。</p>
-                  <p class="tiny" style="margin:8px 0 0"><b>能力区全量行级可编辑：</b>指令＝单条 Markdown 编辑器 + 双层模型——平台维护只读层随部署更新、不落库，用户层永不覆盖，claim 时两层合成注入运行时系统提示的 <span class="mono">## Agent Identity</span> 节；会话开场白＝≤3 行卡片（label≤80 / prompt≤4000 校验）。技能＝开关 + 新建 / 删除 / 改名（名称正则 + 查重；运行时注入层技能不可删除、只可停用；三层开关 + 注入路径随运行时 <span class="mono">.dsh/skills/ · $CODEX_HOME/skills/ · per-run HERMES_HOME</span>）。MCP＝行级增删改（表单 | JSON 双 tab，不可表单表达的类型禁用表单 tab、防静默改写；三态沿用：字段省略=不变 · <span class="mono">null</span>=清空 · 对象=整体替换；含 token 写-only redacted 不回显）。集成＝IM 通道连接器：六类通道（飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM）；卡片状态机＝未启用（平台 configured 门）/ 不可用预览 / 未连接 / 已连接（bot 身份回显）/ 无权限只读降级；连接流程＝Lark 扫码 device-flow、其余 BYO 密钥（password 遮蔽输入，保存前在线验证 auth.test/getMe/probe——400=密钥无效、409=归属冲突专属文案）；密钥三原则＝写-only 不回显、改密=断开重连、落库 AES-256-GCM+全局 DEK（§3.3）；断开＝软撤销 + 必填原因；连接后闭环＝IM 消息→会话→run→回复写回，未绑定用户经 redeem 链接双因子绑定；自托管 IM 含入站白名单；权限两档＝agent owner 自助（Lark/钉钉/自托管 IM）vs 仅平台管理员（Slack/企微/Telegram），通道列表全员只读（§7）。知识源＝关联 / 移除（移除仅解除引用、保留已摄入快照）/ 外部源「更新凭据」（写-only）。</p>
+                  <p class="tiny" style="margin:8px 0 0"><b>能力区全量行级可编辑：</b>指令＝单条 Markdown 编辑器 + 双层模型——平台维护只读层随部署更新、不落库，用户层永不覆盖，claim 时两层合成注入运行时系统提示的 <span class="mono">## Agent Identity</span> 节；会话开场白＝≤3 行卡片（label≤80 / prompt≤4000 校验）。技能＝开关 + 新建 / 删除 / 改名（名称正则 + 查重；运行时注入层技能不可删除、只可停用；三层开关 + 注入路径随运行时 <span class="mono">.dsh/skills/ · $CODEX_HOME/skills/ · per-run HERMES_HOME</span>）。MCP＝行级增删改（表单 | JSON 双 tab，不可表单表达的类型禁用表单 tab、防静默改写；三态沿用：字段省略=不变 · <span class="mono">null</span>=清空 · 对象=整体替换；含 token 写-only redacted 不回显）。集成＝IM 通道连接器：六类通道（飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM）；卡片状态机＝未启用（平台 configured 门）/ 不可用预览 / 未连接 / 已连接（bot 身份回显）/ 无权限只读降级；连接流程＝Lark 扫码 device-flow、其余 BYO 密钥（password 遮蔽输入，保存前在线验证 auth.test/getMe/probe——400=密钥无效、409=归属冲突专属文案）；密钥三原则＝写-only 不回显、改密=断开重连、落库 AES-256-GCM+全局 DEK（§3.3）；断开＝软撤销 + 必填原因；连接后闭环＝IM 消息→会话→run→回复写回，未绑定用户经 redeem 链接双因子绑定；自托管 IM 含入站白名单；权限两档＝agent owner 自助（Lark/钉钉/自托管 IM）vs 仅平台管理员（Slack/企微/Telegram），通道列表全员只读（§7）。<b>〔v14 界分句〕集成=对外消息出口</b>——把站内 Agent 接到站外 IM；<b>Squad=站内编组</b>——把站内 Agent 与人编成一支可指派的协作小队（§2.11 · §6.29）：一个跨出边界、一个不跨边界，两词两事、界面与文档互不混用，集成子栏里不出现「小队」，小队页面里不出现通道。知识源＝关联 / 移除（移除仅解除引用、保留已摄入快照）/ 外部源「更新凭据」（写-only）。</p>
                   <p class="tiny" style="margin:8px 0 0"><b>设置区编辑形态：</b>环境变量＝行 CRUD + <span class="mono">****</span> 保留哨兵 + 批量 .env 导入/导出双模（canEdit 才渲染入口、值不回读、owner/admin 解锁入审计、保留变量不可覆盖、专用端点整包保存等既有口径不变）。CLI 参数＝行级编辑器 + launch 预览（exec 数组 · 无 shell 展开 · 禁放凭据；参数顺序句见 §6.28）。<b>保存语义分级总句：</b>低敏即存（技能开关 / MCP 行操作 / 知识源关联·移除）与高敏草稿（指令 / 环境变量 / CLI 参数——入草稿槽、dirty 切栏拦截，与切页拦截同一机制）两套并存，分工线标注在栏头，用户无需猜测某栏保存形态。</p>
                 </div>
                 <div class="callout bad" style="margin-top:var(--s3)">
@@ -2764,9 +2814,9 @@ edges:
     </div>
 
     <h3 id="p20">6.20 任务看板 <span class="chip warn">规划原型 · 未实现</span></h3>
-    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：补齐协作层最小集。<b>负责人可以是人或 Agent</b>，这是与 Multica 对齐的关键一列；状态采用四类生命周期（未开始 / 进行中 / 完成 / 关闭），并遵守「<b>状态标签不授予行为</b>」——进入「进行中」不等于自动启动 Agent。<b>2026-09-22 补（S7）：状态与「待受理」为两根正交轴——前者答「到哪一步」、后者答「这算不算活」，受理门只拦自动推导执行者的运行、不拦人点名派发（multica 483 迁移的显式反悔教训）；完成态建议按 §1.6.5 ③ 加「需证据 + 同伴复核」。</b><b>此界面尚不存在</b>。</p>
+    <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：补齐协作层最小集。<b>负责人可以是人或 Agent</b>（<b>2026-10-23 v14 扩为三轨：<span class="mono">member | agent | squad</span></b>——指到小队时负责人位显示「<span class="mono">小队 · 名称（leader X）</span>」chip，卡片与抽屉的规则不变，详见 §6.29 B），这是与 Multica 对齐的关键一列；状态采用四类生命周期（未开始 / 进行中 / 完成 / 关闭），并遵守「<b>状态标签不授予行为</b>」——进入「进行中」不等于自动启动 Agent。<b>2026-09-22 补（S7）：状态与「待受理」为两根正交轴——前者答「到哪一步」、后者答「这算不算活」，受理门只拦自动推导执行者的运行、不拦人点名派发（multica 483 迁移的显式反悔教训）；完成态建议按 §1.6.5 ③ 加「需证据 + 同伴复核」。</b><b>此界面尚不存在</b>。</p>
     <p class="tiny dim">〔09-23 裁定⑦注〕告警属可计量追踪数据——P1-16 落表的表建在 <b>MySQL</b>（告警表+去重键+保留策略列），与 work_item 族同库；进程内环形 500 条形态退役。</p>
-    <p class="tiny dim">〔第 4 轮 schema 注〕目标两组表+一次并表（P1-16 前置）：work_item 单表含 status×triage 双轴、assignee 人/Agent 双轨（owner_id 保持归属语义不动）、done 附证据；运行经 work_item_runs 连接表挂多上下文。</p>
+    <p class="tiny dim">〔第 4 轮 schema 注〕目标两组表+一次并表（P1-16 前置）：work_item 单表含 status×triage 双轴、assignee 人/Agent 双轨（owner_id 保持归属语义不动）、done 附证据；运行经 work_item_runs 连接表挂多上下文。<b>〔2026-10-23 v14 连带修订〕assignee 双轨扩三轨：<span class="mono">member | agent | squad</span></b>——指到「小队」时由平台机械解析为「给 leader 入队 leader 任务」（<b>无成员抢单</b>），行内同时存解析出的 leader 供回放归因；<b>卡片与抽屉上的负责人列允许显示小队名 + leader 角标</b>，但受理门、状态语义、done 证据规则一律不变（详见 §2.11 与 §6.29）。</p>
     <p class="tiny dim">〔2026-10-15 裁定·详情机制统一〕卡片点击<b>一律</b>右侧统一抽屉（状态/指派/优先级等操作均可在抽屉完成）；完整详情整页仅作二级落点——同一机制贯穿，不再页面/弹窗混用。</p>
     <p class="tiny dim">〔2026-10-15 裁定·三视角同一组件〕任务列表为同一组件复用三处：成员详情=「我所属的任务」、Agent 详情=「指派给本 Agent 的任务」、项目详情=「本项目关联的任务」；scope 只是查询条件，不另做页面、不另做交互。</p>
     <div class="proto">
@@ -2820,7 +2870,7 @@ edges:
 
     <h3 id="p21">6.21 收件箱 <span class="chip warn">规划原型 · 未实现</span></h3>
     <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：<b>只在需要人拍板时通知，而不是每一步都来烦你</b>。与现有「告警中心」（30 秒巡检、面向系统异常）分工不同：收件箱面向<b>需要人决策的工作流节点</b>。<b>2026-09-22 补（S7）：执行 §6.0 ⑫ 通知分层三规则（值得打扰才 ping / 读失败宁多发不漏发 / 旧失败随任务推进自愈归档）；失败通知条目带 ④ 三件套入口；审批条目语义向 A2A HITL 扩展的「挂起→同任务延续」对齐（P1-12）。</b><b>此界面尚不存在</b>。</p>
-    <p class="tiny dim">〔2026-10-15 裁定·收件箱升级〕①<b>点开通知 = 完整上下文线程</b>：引发该通知的讨论/活动链在右侧抽屉内直接读完，不再跳页找线索；②既有理念不变——<b>值得打扰才 ping</b>（通知量与「需要人的次数」相等）；③入箱仅三类条件命中之一：<b>@我 / 我订阅（对象或项目）/ 我负责（负责人含人、Agent 双轨）</b>。</p>
+    <p class="tiny dim">〔2026-10-15 裁定·收件箱升级〕①<b>点开通知 = 完整上下文线程</b>：引发该通知的讨论/活动链在右侧抽屉内直接读完，不再跳页找线索；②既有理念不变——<b>值得打扰才 ping</b>（通知量与「需要人的次数」相等）；③入箱仅三类条件命中之一：<b>@我 / 我订阅（对象或项目）/ 我负责（负责人含人、Agent、<b>小队</b>三轨，v14）——<b>但「小队」本身不收件箱</b>：<span class="mono">recipient_type</span> 仍是人 / Agent 两轨，指派给小队产生的待办<b>一律落到 leader 这个 Agent 的负责人身上</b>，否则「小队里的谁」不可寻址（§2.11 · §6.29 B）</b>。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/inbox</span><span class="fake">规划原型</span></div>
       <div class="app">
@@ -3140,6 +3190,233 @@ edges:
     </div>
     <p class="tiny dim"><b>演示数据说明：</b>机器名、CLI 版本与模型清单为演示值；模型目录真实来源为运行时 <span class="mono">--list-models</span> 广告解析（离线刷新得空列表）。旧文档中「Agent 配 Provider / Base URL / API Key（<span class="mono">sk-***</span>）」的配置面已整体废除，探活改为可选的平台侧服务健康检查；LangGraph / LangChain / AutoGen / CrewAI 不再作为运行时表述——运行时只有成员机器上探测到的 AI 编码 CLI（本页）。会话续跑、托管 MCP、Skill 注入三项能力差异在 <span class="mono">agents__new.html</span> 表单中实时联动。</p>
 
+    <h3 id="p29">6.29 小队中心 <span class="chip warn">规划原型 · 未实现</span> <span class="chip ok">三包原型已建 · 形态基线</span></h3>
+    <p class="proto-note"><span class="chip ok">原型基线</span>本节是 <b>2026-10-23 裁定的落点</b>：自动化编排执行<b>采纳 multica 方案</b>——<b>协作小队 Squad 升为可指派的一等实体 + leader 协议委派 + autopilot 式触发</b>；<b>画布与 workflows 不新增动态模式，固定编排维持原样</b>（§6.5 / §6.6 本节零改动，实测两节与上一版逐字一致）。页面<b>定名「小队中心」，URL <span class="mono">/teams</span>，双 tab 并列且不共享筛选器</b>：<b>「组织层 · 团队 Team」</b>（<span class="mono">tv-org</span> · 按 Owner 过滤）与<b>「执行编队 · 协作小队 Squad」</b>（<span class="mono">tv-sqd</span> · 按 leader 过滤）。<b>两 tab 一词一义、互不嵌套</b>：Team 不可被指派，Squad 不可拥有资源；<b>Team 与 Squad 之间无外键关系</b>——同一批 Agent 既被某 Team 拥有，也可被任意多个 Squad 选为成员，「拥有」与「一起干活」是两件事。<b>已落地三包原型（形态基线）</b>：<span class="mono">teams.html</span>（双 tab 列表 + 建团 / 建队两套表单 + 指派语义注）· <span class="mono">teams__agentflow.html</span>（组织详情八分区：成员四档 / 拥有资源五组 / 配额双形态 / Team ⟂ Domain / 审计边界 / 权限矩阵 / 相邻概念分工 / 危险区）· <span class="mono">squads__code-review.html</span>（小队详情八分区：leader / 成员池 / 协作指令 / 协作协议 / 协作时间线 / 自动化 / 沉淀与导出 / 危险区）；挂载面在 <span class="mono">board.html · board__af-*.html</span>（负责人位三轨指派 + 受理门注记）、<span class="mono">chat.html</span>（mention 与兜底唤醒）、<span class="mono">replay</span> 家族（leader 任务与 evaluated 记账）、<span class="mono">agent-detail.html</span> 家族（归档前置检查列「被哪些小队选为 leader」）、<span class="mono">audit.html#team-agentflow</span>（按队过滤深链）。<b>原型是演示假数据，后端 <span class="mono">grep team|squad</span> 仍 0 命中</b>（裁定⑧ 开发冻结）。</p>
+
+    <div class="callout">
+      <p><b>本节解决什么、不解决什么：</b>Squad 回答「<b>一件活交给一队人 + Agent，谁先醒、怎么派、怎么收口、成本记在谁头上</b>」；它<b>不</b>回答「这条链路的拓扑长什么样」——后者永远是画布与 YAML（§6.5）。所以本节<b>不新增第三种编排形态、不生成画布 YAML、不改 13 种连线策略</b>，两路只共享<b>同一套路由 / 权限 / 队列 / 配额 / 审计底座</b>。口径来源：multica <span class="mono">084_squad</span> / <span class="mono">042_autopilot</span> 迁移与 <span class="mono">squads.mdx</span> / <span class="mono">autopilots.mdx</span> 实测（§1.6.6）；组织层承 D-S16 裁定 R2/R3 原样。</p>
+    </div>
+
+    <p class="h2p">A. 组织层 · 团队 Team（<span class="mono">tv-org</span> · 建团表单 + 组织详情八分区）</p>
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/teams · teams.html</span><span class="fake">原型基线</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a><svg class="icon"><use href="#i-branch"/></svg>任务</a>
+          <a class="active"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
+          <a><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <div class="nav-grp">管理</div>
+          <a><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
+          <a><svg class="icon"><use href="#i-file"/></svg>审计日志</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">小队中心 <span class="dim">· 团队 3 · 小队 3</span></span><span class="right"><button class="btn sm">+ 新建团队</button><button class="btn sm primary">+ 新建小队</button></span></div>
+          <div class="app-body">
+            <div class="tabs"><span class="tab active">组织层 · 团队 Team</span><span class="tab">执行编队 · 协作小队 Squad</span></div>
+            <p class="tiny dim" style="margin:var(--s2) 0">页头先做 disambiguation（一词一义，禁止混用）：<b>组织层 = 团队 Team</b>（谁拥有资源：成员 + 角色 + 配额 + 审计边界）｜<b>执行层 = 协作小队 Squad</b>（这次协作由哪个 leader + 成员池干，是可被指派的一级目标）。<b>反过来用即口径破坏</b>：Team 不可被指派，Squad 不可拥有资源。</p>
+            <p class="h2p" style="margin-top:var(--s3)">建团表单（与建队表单同抽屉骨架 · 两套字段不共用）</p>
+            <div class="panel tight">
+              <dl class="kv">
+                <dt>名称 *</dt><dd>≤40 字 · <b>同工作区内重名当场拒 <span class="mono">409</span></b>（不是静默改名）</dd>
+                <dt>Slug *</dt><dd>正则 <span class="mono">^[a-z][a-z0-9-]{1,31}$</span> · 小写字母开头；<b>用途是深链与审计过滤 <span class="mono">team=slug</span></b>，不是显示名</dd>
+                <dt>描述</dt><dd>可选 · <b>只在列表与详情头部显示，不进任何提示词</b>（与小队指令分账）</dd>
+                <dt>Owner（唯一）</dt><dd><b>恒 1 人 · 必须是本队成员</b>；下拉只列在职用户。<b>转让 Owner = 双人确认</b>（输入团队名 + 验证码），<b>不接受「离职自动顺延」</b>——无主团队显式报错，不猜归属。创建动作<b>只建 Team 行 + Owner 成员行，不动任何资产表</b></dd>
+                <dt>初始成员</dt><dd>持续行 · 每人一行带 ✕（未提交行可撤）· <b>Owner 不入此表</b>（单独字段，避免两行 Owner）；<b>加人只改 <span class="mono">team_members</span>，不自动取得其个人资产</b>；<b>Agent 不入成员册——成员只有人</b>，Agent 是本页「拥有资源」</dd>
+                <dt>配额两值</dt><dd>token · 近 30 天滚动 · K8s 式双限：<b>软限 = 达到只告警不拦</b>（进收件箱 + 详情页横幅），<b>硬限 = 达到拒绝新运行 <span class="mono">403 quota_hard_limit</span> 并写明违反哪条</b>；对象计数另在详情页配额段设。<b>403 的 <span class="mono">reason</span> 必须带具体条目</b>（<span class="mono">team=agentflow · kind=token · hard=100000 · used=100231</span>），<b>前端 <span class="mono">switch(reason)</span> 渲染、不解析字符串</b>（§6.0 ⑥）。配额对象本身<b>非团队成员不可删改</b>（保护 enforcement）</dd>
+              </dl>
+            </div>
+            <p class="h2p" style="margin-top:var(--s4)">组织详情八分区（<span class="mono">teams__agentflow.html</span> · 只讲组织层）</p>
+            <table class="tbl compact">
+              <thead><tr><th class="c">分区</th><th>内容与硬口径</th></tr></thead>
+              <tbody>
+                <tr><td class="c mono">① 成员</td><td><b>四档角色 Owner / Admin / Editor / Viewer</b>（Dify 四分 ∪ Langfuse「继承 + 项目级覆盖」）由 <span class="mono">team_members.role</span> 承载。<b>三词分家防术语漂移</b>：<span class="mono">user.role</span>=平台级（admin/user）｜<span class="mono">team_members.role</span>=团队内四档｜<span class="mono">CustomRole</span>=Agent 人设，<b>与权限无关</b>。逐档语义：Owner 恒定 1 人 · 可删队；Admin 可管成员与配额、<b>不能删队</b>；Editor 可编辑本队资产、<b>不可管成员</b>；Viewer 只读 + 审计查看（<span class="mono">audit:view</span> 与此<b>正交</b>）。<b>移除成员 = 鉴权立即失效但资产留在团队</b>（不级联删、不改 <span class="mono">owner_id</span> 原值，<span class="mono">created_by</span> 永久保留）</td></tr>
+                <tr><td class="c mono">② 拥有资源</td><td><b>五组</b>（<span class="mono">owner_kind=team ∧ team_id=1</span>）：<b>Agent / 工作流 / 工具 / 知识源 / 域</b>。<b>「工具」= 库条目（可绑给任意 Agent），不是小队成员</b>；<b>公共知识库 = <span class="mono">owner_kind=platform</span>，不在本队清单内</b>；<b>域走 <span class="mono">domains.team_id</span> 新列，但域仍是「逻辑分组、不是安全边界」</b>。<b>归属变更的唯一姿势 = 一次显式转让</b>（原 owner 确认 + 审计 <span class="mono">asset:reowned</span>），挂过来后<b>原个人不再自动拥有编辑权</b>（只剩被委派到的运行权），反向同理。<b>不做多归属</b>：跨队共享走 <span class="mono">platform</span> 与模板市场 <span class="mono">published</span> 位。<b>不做</b>：部门树 / 汇报线 / 嵌套团队。<b>〔口径差 · 待裁定〕</b>D-S16 R2 原首批五类含 <span class="mono">orchestration_instances/templates</span>、域列次批；原型把<b>域提前进五组、编排实例与模板后移次批</b>——本文按<b>原型基线</b>书写（原型是形态基线），差异如实标注，进 §7 解冻评审时二选一收口，<b>不得两处都声称是首批</b></td></tr>
+                <tr><td class="c mono">③ 配额与用量</td><td>K8s 式<b>双形态</b>：<b>A 聚合用量</b>（token / 成本 · 近 30 天滚动 · 带环比，与监控同源）+ <b>B 对象计数</b>（同表 <span class="mono">team_quota</span>：Agent / 工作流 / 工具 / 知识源 / 域 / 成员各一行，<b>协作小队一行「不占额 · 只读计数」</b>——squad 不属团队故不计额）。<b>软限告警去重键 <span class="mono">team+kind+soft</span>，24h 内不重复推</b>；硬限<b>不拦已跑完的记账、不拦人看板</b>（只拒新运行）；<b>改值需 Owner/Admin 且改后保留旧值快照并入审计</b>。<b>用量落 MySQL 账本，不用进程内存</b>（S4 三处内存态教训）</td></tr>
+                <tr><td class="c mono">④ Team ⟂ Domain</td><td>一个 Team 拥有 <b>0..N</b> 个 Domain，<b>不是改名、不是合并</b>：Team 回答<b>谁的</b>（人册 + 角色 + 配额 + 审计边界），Domain 回答<b>在哪跑、怎么路由 / 扩容 / 自愈</b>。Team 落地后原「域内隔离」口径一律改称<b>「团队内隔离」</b>——文档里不允许出现两个"边界"</td></tr>
+                <tr><td class="c mono">⑤ 审计边界</td><td>本队资产的<b>一切操作</b>（成员变更 / 配额改值 / 归属转让 / 归档）落 <span class="mono">audit</span> 且<b>可按 <span class="mono">team=slug</span> 过滤</b> → <span class="mono">audit.html#team-agentflow</span> 深链。<b>〔挂载缺口〕</b><span class="mono">teams.html</span> 已给出该深链，但 <span class="mono">audit.html</span> 侧<b>尚无 team 筛选器与 <span class="mono">#team-*</span> 锚点</b>——按 §6.0 ⑨「留痕要表 + 界面两步齐」，此为原型待补项，不代表能力已具备</td></tr>
+                <tr><td class="c mono">⑥ 权限矩阵</td><td><b>四档 × 操作</b>逐格明写（§7 同步），<b>判定单点</b>（一个可见性判定函数 + 查询中间件<b>两处独立校验</b>）；越权与「资源不存在」统一 <span class="mono">404</span>，<b>配额与门禁拒绝用 <span class="mono">403</span> 且带条目化 reason</b></td></tr>
+                <tr><td class="c mono">⑦ 状态</td><td><span class="mono">active</span> / <b><span class="mono">paused</span> 暂停</b> / <b><span class="mono">archived</span> 归档</b> 三态。<b>暂停 = 停配额新增与成员加入、资产原地保留、<u>暂停期拒绝新增指派</u>、用量冻结在暂停时刻</b>（同一列表组件的第四种行态，不是新页面）</td></tr>
+                <tr><td class="c mono">⑧ 危险区</td><td><b>团队归档 = 可恢复</b>（资产转 <span class="mono">owner_kind=platform</span> 托管：全员可读、无人可改，直到被别的团队接手）——<b>与小队归档（不可恢复）刻意相反</b>，理由见 B 段末。<b>不级联删资产</b>；成员鉴权即刻失效。归档前弹「确认归档团队 agentflow」输入名校验 + 列受影响资产数 + 必填原因。<b>无 Restore 之外的批量恢复 / 无计费结算 / 无席位</b>（§1.4 边界）</td></tr>
+              </tbody>
+            </table>
+            <div class="callout warn">
+              <p><b>硬前置门（写在这里给工程看，不可绕）：</b>Team 的<b>判定改写</b>必须排在<b>身份三连（P0-1）之后</b>——现状身份仍由客户端自述（缺身份回退 admin），此时任何 Team 页都只是<b>账面权限</b>（自称任意人即可读其全部团队资产）。解冻前可做的只有<b>两表（day-1 真外键，与 <span class="mono">users</span> 表化同批）+ 只读页</b>，<b>且文档与界面禁用「隔离」措辞</b>。本页全部为<b>目标态设计</b>。</p>
+            </div>
+
+            <p class="h2p" style="margin-top:var(--s5)">B. 执行编队 · 协作小队 Squad（<span class="mono">tv-sqd</span> · 建队表单 → 小队详情八分区）</p>
+            <p class="h2p">建队表单（执行层编队 · <b>不建资产、不建配额</b>，建完即在看板「指派给… ▸ 小队 ▸」出现）</p>
+            <div class="panel tight">
+              <dl class="kv">
+                <dt>名称 *</dt><dd>同工作区内唯一；<b>显示在工作板负责人位的 chip 上</b>（「<span class="mono">小队 · 代码审查小队（leader 汇总 Agent）</span>」）</dd>
+                <dt>Leader *</dt><dd><b>必为 Agent · 人不可选（不列出）</b>——理由写进表单：<b>人的在线态不由平台判定，无法保证被唤醒</b>。下拉<b>只列 online + 未归档</b>的 Agent，逐行带 <span class="mono">idle / working / queued</span> 与 <span class="mono">unstable</span> 灯注；offline、已归档两类<b>灰显不可选并带拒因</b>。<b>leader 位不排他</b>：同一 Agent 可为多支小队的 leader，成本各自记在它头上。<b>无「归属团队」字段</b>（Team ⟂ Squad 无外键）</dd>
+                <dt>成员池</dt><dd>多选 · <b>Agent + 人 混合</b>，每行带<b>自由文本角色标签</b>（审查人 / 实现者 / 复核人（done 门）/ 记录员…）——<b>标签是 leader 挑人的依据，不授予任何权限</b>。<b>入池即存（低敏），池子无上限字段</b>（对象计数在团队配额里管 Agent 总数）；<b>leader 不占池位也可不选</b>，它恒为执行主体。人的「在线」由登录心跳给出且<b>不可暂存续投</b></dd>
+                <dt>协作指令</dt><dd><span class="mono">squad.instructions</span> · <b>纯文本提示词</b>：不进画布、不是 YAML 节点、<b>无结构化路由配置列</b>。带字数计数 + <b>低敏即存</b>（失焦或点保存即落库并记 <span class="mono">squad:instructions_updated</span>，旧值入版本快照；<b>不进草稿箱、不弹未保存拦截</b>）+ 「插入标准模板」+ <b>「预览拼装后的 briefing」抽屉</b></dd>
+              </dl>
+            </div>
+            <div class="callout">
+              <p><b>指派语义（与看板同一口径）：</b>「指派给小队」= 负责人位显示小队 + leader，<b>平台给 leader 入队一条 leader 任务</b>（<span class="mono">is_leader_task</span> · 同 <span class="mono">(任务, Agent)</span> 活跃任务<b>合并去重</b>）。<b>无成员抢单</b>——<b>成员看不到别人的队列，界面上根本没有「认领」按钮</b>；leader 拿到的也只是<b>接收位</b>（<span class="mono">enqueue → 等待位 #N</span>），<b>入队 ≠ 起跑</b>，须被 claim；<b>成员池此时不被通知</b>。<b>受理门不因小队而绕过</b>：<span class="mono">triage</span> 未 accept 前禁止任何派生执行（自动派单 / 触发规则 / 小队委派同拦），<b>@mention 指名除外</b>。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/squads/code-review · squads__code-review.html</span><span class="fake">原型基线</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a><svg class="icon"><use href="#i-branch"/></svg>任务</a>
+          <a class="active"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
+          <a><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a><svg class="icon"><use href="#i-inbox"/></svg>收件箱<span class="badge">2</span></a>
+          <a><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <div class="nav-grp">管理</div>
+          <a><svg class="icon"><use href="#i-shield"/></svg>审批中心</a>
+          <a><svg class="icon"><use href="#i-file"/></svg>审计日志</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">小队中心 <span class="dim">/</span> 代码审查小队 <span class="chip ok">active sq-1</span></span><span class="right"><span class="chip mono">squad_id=1</span><span class="chip mono">leader=agent-5</span><span class="chip mono">成员池 4</span><span class="chip mono">被指派中 1 · AF-116</span><button class="btn sm">⧉ 导出为模板</button><button class="btn sm primary">编辑</button></span></div>
+          <div class="app-body">
+            <div class="callout" style="margin-top:0">
+              <p><b>页头总口径（一行锁死四件事）：</b>本页 = <b>执行层</b>。<b>协作小队不拥有 Agent、工作流、工具、知识源或域</b>——那五类资产全部归团队（组织层）。<b>成本与执行一律归 leader Agent 记账</b>：成员被委派产生的 token / 成本，账单<b>落在 leader 的 run 归因链上</b>，<b>不落 squad，也不落成员所属团队</b>（累加在 <b>leader 所属团队</b>的账上）。指派给小队 = 平台给 leader 入队一条 leader 任务，<b>无成员抢单</b>。</p>
+            </div>
+            <p class="h2p">① Leader · ② 成员池 · ③ 协作指令（见上节表单）→ ④ 协作协议面板</p>
+            <div class="grid g2" style="align-items:start">
+              <div class="panel">
+                <p class="small" style="margin:0 0 6px"><b>Operating Protocol 摘要（平台维护 · 全 squad 同一份 · 版本随平台 · 本队不可编辑）</b></p>
+                <ul class="small" style="margin:0">
+                  <li><b>只协调、不动手</b>：leader 不亲自读代码、不亲自改产物。</li>
+                  <li><b>每轮一条委派评论</b>：同一轮写多条 = 多次触发，禁止。</li>
+                  <li><b>不写 <span class="mono">[@Name](mention://agent/&lt;uuid&gt;)</span> 链接 = 不委派</b>：纯文本 @ 只是提醒，<b>不产生任何运行</b>。这是<b>平台侧硬契约</b>——<b>写错形态不报错、只会静默不委派</b>，所以名册必须提供「<b>可粘贴 mention</b>」列（复制出的是真形 markdown 链接）。</li>
+                  <li><b>建子任务指派 与 @mention 二选一</b>：两件事都做 = <b>双触发</b>（子任务跑一次 + mention 再跑一次），<b>平台在 evaluated 审计里把这种重复标 <span class="mono">double_trigger</span> 并拒第二次</b>。</li>
+                  <li><b>结论停在 <span class="mono">in_review</span>，<span class="mono">done</span> 留给人工复核</b>：「需人批」规则加在<b>状态转换层</b>（动作者类型 × 目标状态），<b>不只写进提示词</b>（CLAUDE.md 纪律）。</li>
+                  <li><b>交接必须写 <span class="mono">handoff_note</span></b>（范围 / 已盘点点位 / 期望产物路径 / 禁做项），<b>不复制整段任务正文</b>；<b>不给自己发 mention</b>；不并行开第二条委派线；<b>成员 run 失败只上报、不自动重试</b>。</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <p class="small" style="margin:0 0 6px"><b>briefing 注入机制（拼装顺序固定 · 只在 run 上下文，不回写 Agent 指令）</b></p>
+                <div class="flow" style="margin:0">
+                  <span class="step">平台只读层<br><span class="tiny dim">随部署更新 · 不落库</span></span><span class="to">＋</span>
+                  <span class="step">用户指令层<br><span class="tiny dim">Agent 详情 · 能力·指令</span></span><span class="to">＋</span>
+                  <span class="step hi">Operating Protocol<br><span class="tiny dim">④ 段 · 平台同一份</span></span><span class="to">＋</span>
+                  <span class="step hi">成员名册<br><span class="tiny dim">skills + 在线态 + 真形 mention</span></span><span class="to">＋</span>
+                  <span class="step hi">本队 instructions<br><span class="tiny dim">③ 段 · squad 自有</span></span>
+                </div>
+                <p class="tiny dim" style="margin:6px 0 0">leader 任务<b>被 claim 时</b>，平台把<b>后三段拼到 leader 指令尾部</b>作为同一次运行上下文：<b>不覆盖平台基础提示，也不写回 Agent 的「能力 · 指令」字段</b>；三段一律接在前两段之后，claim 时合成后一并注入运行时系统提示的 <span class="mono">## Agent Identity</span> 节——<b>与 Agent 指令双层模型同一条缝</b>。<b>名册实时取，不是快照</b>；<b>拼装结果只在 run 上下文里，用「预览 briefing」抽屉看，Agent 详情页的指令区不显示这三段</b>（分账，避免有人误当 Agent 自己的提示词去改）。</p>
+              </div>
+            </div>
+            <p class="h2p" style="margin-top:var(--s4)">⑤ 协作时间线（八类节点 · <b>记账面，不是 transcript</b>）</p>
+            <table class="tbl compact">
+              <thead><tr><th>时刻</th><th>节点（类型 chip）</th><th>发生了什么 · <b>每行 hover = 规则注</b></th></tr></thead>
+              <tbody>
+                <tr><td class="mono">14:02</td><td><span class="chip purple">人批 / 人指派</span></td><td>李工（<b>链顶人类锚 <span class="mono">user:1</span></b>）把 <b>AF-116「修复 32 个 TS 错误」</b>指派给<b>小队 · 代码审查小队</b>并附一句「先看构建，再出审查发现，结论别自己合」。<b>指派对象是一级可指派目标，不是分组标签</b>；同一时刻 <span class="mono">triage=accepted</span> 才进派单池</td></tr>
+                <tr><td class="mono">14:02:03</td><td><span class="chip mono">leader 任务入队</span></td><td><span class="mono">enqueue → agent-5 · is_leader_task=true · 等待位 #1</span>；<b>命中同 (AF-116, agent-5) 的在途 leader 任务 → 合并去重、不新建</b>。<b>入队 ≠ 起跑</b>；<b>成员池此时不被通知</b></td></tr>
+                <tr><td class="mono">14:02:41</td><td><span class="chip">leader run</span></td><td><span class="mono">r-131</span> 读任务正文 + 32 处报错清单 → 判定属「前端构建 + 规范审查」两件事 → <b>本轮选择先委派构建，等回流再决定第二跳</b>。<b>协调 run 本身很薄（1.9k tok · 6.2s），也计入归因链</b></td></tr>
+                <tr><td class="mono">14:02:52</td><td><span class="chip purple">leader 委派</span></td><td><b>本轮第 1 条 = 唯一一条</b>：<span class="mono">[@审查 Agent·标准](mention://agent/a7f3…)</span> 复核 tsc 输出与修复面、<b>不动代码</b>；<span class="mono">handoff_note = {范围 · 已盘点点位 · 审查窗口 · 期望产物 REVIEW.md · 禁: 改代码/合并/回外部评论}</span>。<b>注：<span class="mono">handoff_note</span> 渲染进成员的开场 prompt，不是伪造一条评论</b>；<b>委派不带上下文快照</b>（不塞文件内容、不塞前序转录副本——<b>成员自己读</b>，快照会过期、会双份不一致），评论流里只有 leader 这一条真形 mention</td></tr>
+                <tr><td class="mono">14:02:53</td><td><span class="chip info">evaluated 审计</span></td><td><b>每轮候选逐行留痕</b> <span class="mono">候选成员 · outcome ∈ action | no_action | failed · reason</span>：被委派者 <span class="mono">action</span>（reason=<b>按 skills 匹配</b>，该 reason 是<b>稳定枚举</b>）；skills 匹配但<b>错峰等回流</b>者 <span class="mono">no_action</span>（不产生 run）；<b>未入池 + offline</b> 误点 <span class="mono">failed</span>（若真写出 mention 即转 <span class="mono">runtime_offline</span> 暂存）。<b>三行都留痕，否则「为什么没派给某人」不可复盘</b></td></tr>
+                <tr><td class="mono">14:06:11</td><td><span class="chip ok">成员 run</span></td><td><span class="mono">r-128</span> 产出 <span class="mono">REVIEW.md</span>（12 条发现 · 3 blocker）· <b>停在等审批 <span class="mono">AP-31</span></b>（写文件需 <span class="mono">project:write</span>）→ 人批通过后续跑至 success · 21,004 tok / 8.2s。<b>注：<span class="mono">AP-31</span> 是人批节点，与 squad 无关——委派不绕过审批门，审批人解析按「归属团队 + Access」，不按小队</b></td></tr>
+                <tr><td class="mono">14:06:12</td><td><span class="chip warn">系统唤醒</span></td><td>成员完成 → <b>评论兜底唤醒 leader 续跑</b>（<b>run 结束事件 + 评论事件双投递，任一到达即可</b>；同刻到达<b>幂等只起一次</b>）· 队列行记 <span class="mono">trigger_comment_id</span></td></tr>
+                <tr><td class="mono">14:07:02</td><td><span class="chip purple">leader 委派 · 二选一</span></td><td>本轮改为<b>建子任务 AF-116-2「按 REVIEW.md 修 TS 报错」并指派前端 Agent</b>，<b>不再写 @mention</b>（两件事都做 = 双触发，第二次被 evaluated 标 <span class="mono">double_trigger</span> 并拒）。<b>子任务挂父项 AF-116</b>；<b>状态标签不授予行为</b>——进「进行中」不等于自动起跑，仍需显式运行请求</td></tr>
+                <tr><td class="mono">14:19:30</td><td><span class="chip warn">系统唤醒 · stage barrier</span></td><td>AF-116-2 → <span class="mono">in_review</span>；<b>平台署名</b>写一条系统评论「<span class="mono">stage=5-test · barrier=同阶段兄弟任务 2/2 已交付 · next-stage 指令：可进入 REVIEW 汇总，禁写产物</span>」→ <b>唤醒父 leader</b>（<span class="mono">r-131</span> 第三次 claim）。<b>barrier 与 next-stage 来自阶段模型（§6.19），leader 只读不改</b>；「需人批」的动作规则在状态转换层，<b>不靠这段提示词</b></td></tr>
+                <tr><td class="mono">14:20:05</td><td><span class="chip purple">leader 收尾</span></td><td>停笔 <span class="mono">in_review</span>：一条汇总评论（3 blocker 已修 · 12 条发现 · <b>@李工 请复核</b>）；<b>不写 done</b>（done 需证据 + 同伴复核，§6.20 标 done 整页）</td></tr>
+                <tr><td class="mono">14:31</td><td><span class="chip bad">失败分支（另一次 run）</span></td><td>前端 Agent <span class="mono">r-122</span> 断在 <span class="mono">exit 1 · seq 9</span> → 平台 <span class="mono">TaskFailed</span> → <b>收件箱 <span class="mono">action_required</span>（同签名 2 次已合并为 1 条）</b> → <b>仅人工重跑，且重跑保留原委派角色</b>（仍是「实现者」，<b>leader 不重新 evaluated、不改派</b>）。<b>leader 不自动重试、平台也不自动重试；失败不产生新 leader 任务</b>，除非人在收件箱点「重新交给 leader」</td></tr>
+                <tr><td class="mono">14:31</td><td><span class="chip ok">人批 done</span></td><td>复核通过 → <b>AF-116 done</b>（证据：tsc 零错误 + <span class="mono">REVIEW.md</span>）· 审计 <span class="mono">wi:done · actor=李工 · via=squad sq-1 · leader=agent-5</span></td></tr>
+              </tbody>
+            </table>
+            <p class="tiny dim"><b>时间线总注四条（界面直接印在卡片底部）</b>：① 离线 = <span class="mono">runtime_offline</span> 暂存不丢；② 同 (任务, Agent) 活跃任务合并；③ 自触发抑制<b>角色感知</b>；④ <b>无轮次上限</b>。<b>代价明说：一支小队可以无限互相唤醒</b>，成本由<b>团队配额硬限 + 收件箱 <span class="mono">action_required</span> + 人点 <span class="mono">done</span></b> 三道闸兜住，<b>不是</b>轮次计数器——<b>要加数值上限须独立裁定并进 §7</b>，不在本档默认。另：委派型订阅者对 <span class="mono">mentioned / task_failed / agent_blocked</span> 三类<b>无条件投递</b>（收件箱不漏）。时间线是<b>记账面</b>，看单 run 逐步过程点「执行回放」（§6.22）。</p>
+            <p class="h2p" style="margin-top:var(--s4)">⑥ 自动化（autopilot 式规则 · <b>目标固定为本队</b> = 入队 leader 任务）</p>
+            <table class="tbl compact">
+              <thead><tr><th>规则</th><th>触发</th><th>动作</th><th>并发</th><th class="c">最近触发</th><th>版本</th></tr></thead>
+              <tbody>
+                <tr><td><b>日会前审查</b><br><span class="tiny dim">每天工作日照过一遍待审 PR</span></td><td><span class="chip info">cron</span> <span class="mono">30 8 * * 1-5</span></td><td><span class="mono">create_issue</span> 建任务并进派单池</td><td><span class="chip ok">skip</span> / queue / replace</td><td class="c mono">09-23 08:30 · 已入队 r-130</td><td class="c mono">v3</td></tr>
+                <tr><td><b>触发 PR webhook</b><br><span class="tiny dim">外部 CI 打 webhook，带 PR 元数据</span></td><td><span class="chip purple">webhook</span> <span class="mono">POST /hooks/af/sq-1/pr</span> · HMAC</td><td><span class="mono">run_only</span> 不建任务，直接给 leader 入队</td><td>skip / <span class="chip warn">queue</span> / replace</td><td class="c mono">09-22 17:40 · <b>拒 1 次（签名不符 401）</b></td><td class="c mono">v2</td></tr>
+                <tr><td><b>端点与凭据 API 手动编排</b></td><td><span class="chip">api</span> <span class="mono">POST /squads/1/assign</span>（<b>PAT 计 owner</b>）</td><td><span class="mono">create_issue</span></td><td>skip / queue / <span class="chip bad">replace</span></td><td class="c mono">09-21 11:02 · 替换 1 条在途</td><td class="c mono">v1</td></tr>
+                <tr><td><span class="dim">旧值守轮</span> <span class="chip warn">已停用</span><br><span class="tiny dim">目标队已归档 → 规则自动转 disabled</span></td><td><span class="chip info">cron</span> <span class="mono">*/5 * * * *</span></td><td><span class="mono">run_only</span></td><td class="mono dim">—</td><td class="c mono">09-11 09:40 末次</td><td class="c mono">v5</td></tr>
+              </tbody>
+            </table>
+            <ul class="small">
+              <li><b>并发三策略语义唯一化（界面三选一并注死）</b>：<span class="mono">skip</span> = 在途则跳过本次（不新建）· <span class="mono">queue</span> = 排队等前一条终态 · <span class="mono">replace</span> = <b>取消同规则在途 leader 任务再入队（取消的 run 不计成功率）</b>。</li>
+              <li><b>动作只有两档</b>：<span class="mono">create_issue</span>（<b>留任务痕迹，人可在看板看到</b>）/ <span class="mono">run_only</span>（<b>不留任务，只入队 leader 任务——审计照记</b>，界面显式写「本次不生成任务」，不谎报）。</li>
+              <li><b>每次运行记规则版本快照</b>（<span class="mono">v1…v5</span> 可见、「为何停用」可查）——「当时按哪份规则跑的」必须可回放（§6.0 ⑨「表 + 界面两步齐」）。</li>
+              <li><b>自动派生执行同受 triage 受理门约束</b>；<b>webhook 凭据写-only 不回显、改密=断开重连</b>（§6.4 密钥三原则同源）；<b>签名不符 401 与业务失败分开显示</b>（一个是门、一个是活）。</li>
+              <li><b>小队页内建规则不改目标；跨队复用请去工作流或画布</b>——不给「一条规则打多支小队」留口子。</li>
+            </ul>
+            <p class="h2p">Quick Actions（保存的提示词 · 点击即跑 · <b>单目标绑定</b> · §6.0 ⑤）</p>
+            <div class="grid g2" style="align-items:start">
+              <div class="panel tight">
+                <p class="small" style="margin:0"><b>三张卡（同一行的三种态）</b>：<span class="pill mono">跑一遍 TS 构建检查</span> 用量 128 · <span class="pill mono">汇总本轮发现给复核人</span> 用量 41 · <span class="pill mono dim">委派给审查 Agent</span> <span class="chip bad">正文含 @mention → 禁用</span>。<b>保存提示词时把目标绑死为单一对象</b>（本队 leader 或某个成员），运行<b>无输入框</b>。</p>
+              </div>
+              <div class="panel tight">
+                <p class="small" style="margin:0"><b>正文禁用 mention 链接</b>——写了就与「委派」双通道，<b>平台在校验期直接拒 <span class="mono">quick_action_mention_forbidden</span></b>（第三张灰卡即该分支）。<b>Quick Action 与自动化同规</b>；被并入已有 run 时说「已并入」，<b>不谎报新启动</b>。</p>
+              </div>
+            </div>
+            <p class="h2p" style="margin-top:var(--s4)">⑦ 沉淀与导出（受审模板 · 声明式 · 不含运行细节）</p>
+            <table class="tbl compact">
+              <thead><tr><th>维度</th><th>口径</th></tr></thead>
+              <tbody>
+                <tr><td><b>导出内容（白名单）</b></td><td>只导<b>声明式</b>：<span class="mono">squad</span> 名 + 成员<b>名</b> + skills 标签 + 协作指令 + 关联自动化规则的<b>声明部分</b>。送审动作 = 「<span class="mono">已提交模板审核：tpl-squad-code-review</span>」，<b>走审批中心同道评审门</b>（与工具库 / 角色市场同构，§6.7 / §6.14）</td></tr>
+                <tr><td><b>剔除内容（黑名单 · 白名单外一律不导）</b></td><td><b>不含 id / uuid / runtime 绑定 / 凭据 / 环境变量 / 时间线</b>；<b>协议本体以 <span class="mono">ref</span> 引用平台版本、不内嵌副本</b>（防两处漂移）；<b>模板内出现 <span class="mono">mention://agent/&lt;uuid&gt;</span> = 校验期硬错误</b>——multica 实测 kit 里 13 个 fixture 残留 27 个硬编码 uuid，新工作区<b>静默指向不存在的 agent 且校验抓不到</b>，本节以此为戒</td></tr>
+                <tr><td><b>导入语义</b></td><td><b>按名匹配</b>：同名小队已存在 → <b>永不覆盖</b>（当场报「已存在，跳过」）；成员 Agent <b>按名在目标工作区解析，解析不到 → 整包失败并列出缺失清单</b>（<b>宁可不装，不装半支</b>；对不上的成员一律列<b>待确认清单</b>，<b>不静默建 Agent</b>）；<b>owner / creator 按导入者重解析，不写死</b></td></tr>
+                <tr><td><b>已知缺口</b></td><td><b>无版本 / 无更新 / 无卸载路径</b>（multica 同缺，为戒）；<b>〔原型内部待统一〕</b>⑦ 段「列成待确认清单」与导出预览「整包失败并列缺失清单」两处措辞需收口，本文以<b>整包失败</b>为准（宁可不装）</td></tr>
+                <tr><td><b>为什么动态协作不生成画布 YAML</b></td><td><b>动态协作不生成画布 YAML——固定编排请去画布，两者共享路由 / 权限 / 队列底座</b>。<b>小队的时间线是「涌现」的</b>（leader 每轮按 skills 决定下一跳），<b>画布是「声明」的</b>（节点与边先画死）；<b>把涌现结果反导成 YAML，会造出一张「看起来可控、其实每次跑都不一样」的假图</b>。<b>可预测性</b>：画布=每轮同图 · squad=同指令可不同跳；<b>互补而非替代</b>。<b>共享底座（同一套）</b>：自动路由 · 可调用目标判定 · 队列合并 · 配额 · 审计。<b>不共享</b>：拓扑、连线策略、Reconcile 期望态。<b>互转只允许一个方向</b>：「把某条固定委派链沉淀成工作流」——<b>人在画布手工重画，平台不自动反导</b></td></tr>
+              </tbody>
+            </table>
+            <div class="callout warn">
+              <p><b>④-⑦ 之外的三处「与 Agent 分账」（防串页硬口径）：</b>① briefing 三段<b>不回写</b> Agent「能力 · 指令」，Agent 详情页也<b>不显示</b>这三段；② <b>审批门不由委派绕过</b>（<span class="mono">AP-31</span> 审批人解析按归属团队 + Access，<b>不按小队</b>）；③ <b>收件箱 <span class="mono">recipient_type</span> 保持人 / Agent 两轨——<u>小队不收件箱</u></b>，通知永远落到具体人或 Agent（否则「小队里的谁」不可寻址）。三处分账在界面与文档同时写，任一处缺写即视为口径破坏。</p>
+            </div>
+            <div class="callout bad">
+              <p><b>⑧ 危险区 · 归档协作小队 = 不可恢复（与团队归档相反）。</b><b>理由（不是遗漏，是设计）</b>：squad <b>无资产可托管</b>，留一个空壳只会让人<b>误以为还能指派</b>——团队归档可恢复是因为资产有 <span class="mono">platform</span> 托管去处，小队没有。归档后逐条后果：<b>① 存量任务再指派给本队 → <span class="mono">403 squad_archived</span></b>，<b>自动化规则触发同受此拒 → 目标失效后规则自动转 <span class="mono">disabled</span>，不静默删</b>；<b>② 在途 leader 任务与成员 run 不中断、跑完为止，成本仍归 leader</b>（<b>不撤回、不取消</b>——与「改设 leader 不动在途」同一原则）；<b>③ 时间线与 evaluated 留痕转只读</b>，可按 <span class="mono">squad=sq-9</span> 在审计查；<b>④ 成员不受任何影响</b>（Agent 归团队、人归用户册，<b>池位本来就是引用</b>）；<b>⑤ 必填原因，且原因随 squad 快照永久保留</b>。<b>要「再来一次」= 用导出的模板重新建队</b>。归档卡片须并排显示<b>对照句</b>：「团队归档 = 可恢复（资产转 <span class="mono">platform</span> 托管）」，避免复用同一句「归档后可恢复」。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="h2p" style="margin-top:var(--s5)">C. 消息语义（<b>无专用 A2A 表</b> · 全部复用既有面）</p>
+    <table class="tbl">
+      <thead><tr><th>规则</th><th>口径</th><th>为什么这么定</th></tr></thead>
+      <tbody>
+        <tr><td><b>没有「小队消息表」</b></td><td>成员之间<b>没有私有通道</b>：协作消息只有两种表达——<b>mention 评论</b>（同一任务线程里写真形 @ 链接）或<b>子任务指派</b>，<b>二选一</b>（同用被 <span class="mono">double_trigger</span> 拒第二次）。<b>人成员 mention 只发通知，不产生运行</b>。</td><td>评论是既有一等对象（时间线 / 回放 / 审计都读它）；再造一张 A2A 消息表 = 同一句话两处存在，必然漂移。</td></tr>
+        <tr><td><b>队列行带四件套</b></td><td><span class="mono">trigger_comment_id</span>（哪条评论叫醒我）· <span class="mono">coalesced_comment_ids</span>（<b>计划并入</b>数组）+ <b>实际投喂</b>数组（<b>计划 vs 收据分账</b>，§6.0 ⑪）· <span class="mono">handoff_note</span>（<b>渲染进开场 prompt，不伪造评论</b>，界面以「交接说明」独立块显示、署名与评论区分）· <span class="mono">is_leader_task / squad_id</span>（归因链）。</td><td>「谁在什么时候因为什么叫醒谁」必须可查；不分开记账就答不出「为什么它只跑了一次」。</td></tr>
+        <tr><td><b>不带上下文快照</b></td><td>委派消息<b>不携带</b>文件内容、diff 或前序转录副本；成员拿到的是目标 + 链接 + 交接说明，<b>正文一律自己读</b>。</td><td>快照会过期、会双份不一致；知识产物与 <span class="mono">.specs/</span> 是唯一真相源（§2.7）。</td></tr>
+        <tr><td><b>双投递 + 幂等</b></td><td>成员 run 结束事件与评论事件<b>两条都投</b>，任一到达即可唤醒 leader；<b>同刻到达只起一次</b>。</td><td>少一条通道就可能永远不醒；不做幂等就会双跑——两条一起要。</td></tr>
+        <tr><td><b>离线不丢（Agent）· 不可暂存（人）</b></td><td>Agent 成员离线 → <span class="mono">runtime_offline</span>，<b>委派暂存入队不丢弃</b>，心跳恢复后自动续投，<b>超 TTL 才判 <span class="mono">queued_expired</span> 并升收件箱</b>（阈值沿用 §6.28：daemon 心跳 15s / 离线判定 ≤3min，界面写明）；<b>人的在线由登录心跳给出，且不做暂存续投</b>——人不在就只发通知。</td><td>「叫醒失败」与「它还没醒」必须可分；静默丢消息是最贵的一类 bug。</td></tr>
+      </tbody>
+    </table>
+
+    <p class="h2p" style="margin-top:var(--s4)">D. 防护四件 + 一条如实写明的空缺</p>
+    <ul class="small">
+      <li><b>同 (任务, Agent) 活跃任务合并</b>：同一任务、同一 Agent 的在途运行<b>合并为一条</b>（后到的唤醒折进 <span class="mono">coalesced_comment_ids</span>），时间线显示「N 条评论合并为一次唤醒」。leader <b>连发两次 mention 同一 Agent 同一任务 = 一条 run</b>。</li>
+      <li><b>角色感知自触发抑制</b>：<b>leader mention leader（含自己）不唤醒新 leader 任务</b>；<b>成员 mention 自己照常走通用规则</b>。<b>不是「丢弃自己发的消息」</b>——人写的评论照样叫醒 leader（人的追问必须进）。<b>全平台唯一一处自动抑制规则，界面必须写。</b></li>
+      <li><b>同 HEAD 复审去重</b>：同分支同 commit 已出过结论 → <b>不重跑</b>，复用上次结论并在时间线标「<span class="mono">dedup: HEAD 已评审</span>」——省一整轮模型调用。</li>
+      <li><b>无轮次上限（刻意不设限）</b>：<b>本平台不对 leader 的委派轮次设上限</b>，靠「<b>每轮一条 + 去重 + 自触发抑制</b>」三条防失控；<b>异常成本走配额硬限与告警</b>。任何数值都是拍出来的，且会把「协作没做完」伪装成「跑挂了」。要加须独立裁定并进 §7。</li>
+    </ul>
+
+    <p class="h2p" style="margin-top:var(--s4)">E. 人批三道门（规则写在<b>状态转换层</b>，不写进提示词）</p>
+    <table class="tbl compact">
+      <thead><tr><th>门禁</th><th>拦截点</th><th>放行条件</th><th>例外</th></tr></thead>
+      <tbody>
+        <tr><td><b>① Triage 受理门</b></td><td>任务处于<b>待受理（triage）</b>时<b>禁止任何派生执行</b>——leader 不入队、mention 不产生 run、自动化命中也不跑（<b>自动派单 / 触发规则 / 小队委派同拦</b>）。</td><td>人点「受理（accept）」后放行；<span class="mono">triage=accepted</span> 才进派单池。</td><td><b>@mention 指名除外</b>（人显式 @ = 人点名派发，视同直接放行）——与 §6.0 ⑩ 完全同一句。</td></tr>
+        <tr><td><b>② <span class="mono">in_review</span> / <span class="mono">done</span> 分界</b></td><td>leader 与成员<b>只能推到 <span class="mono">in_review</span></b>；<span class="mono">done</span> 写权限在平台层<b>拒绝 Agent 作者</b>。</td><td>人点 done（带证据 + 同伴复核，§6.20）。</td><td><b>无例外</b>——「leader 声称已验收」的评论文本界面一律不认。</td></tr>
+        <tr><td><b>③ 失败升格收件箱</b></td><td>成员 / leader / 自动化失败一律 <span class="mono">TaskFailed</span> → 收件箱 <span class="mono">action_required</span>；<b>leader 与平台都不自动重试</b>，失败<b>不产生新 leader 任务</b>。</td><td>人点「重跑」（三件套 Retry with context / Edit as advanced form / 升级到人，§6.0 ④），或点「重新交给 leader」。</td><td><b>重跑保留原委派角色</b>（仍是「实现者」，<b>leader 不重新 evaluated、不改派</b>）；自动暂停只是止损，<b>恢复需人</b>。<b>收件箱同签名合并为 1 条</b>（§6.0 ⑫）。</td></tr>
+      </tbody>
+    </table>
+    <p class="tiny dim">〔CLAUDE.md 纪律对齐〕三道门全部落在<b>状态转换层（动作者类型 × 目标状态）</b>与队列入口，并在<b>入队校验 + 状态转换中间件两处独立校验</b>；<b>提示词契约不等于门禁</b>——Operating Protocol 里那六条是「告知」，这三道门是「拦截」，缺一即口径破坏。</p>
+
+    <p class="tiny dim"><b>演示数据说明：</b>本页数字全部为<b>原型演示假数据</b>（团队 3 / 小队 3 / sq-1…sq-9 / AF-116 · AF-109 / r-122 · r-128 · r-130 · r-131 / AP-31 / 14 轮 0 抢单）。<b>原型三包已落地（形态基线），后端仍零实现</b>：现状 <span class="mono">grep team</span> 与 <span class="mono">grep -i squad</span> 后端均 <b>0 命中</b>，<b>零张表存在</b>；本节表名（<span class="mono">teams · team_members · team_quota · squad · squad_member · autopilot · autopilot_trigger · autopilot_run · quick_action</span>）与队列扩列<b>全是设计新表 / 设计注</b>（§3.3），按<b>裁定⑦ MySQL 权威档</b>书写。<b>两处待人工收口</b>：① 首批五类资产清单（原型「域提前入五组、编排实例与模板后移」vs D-S16 R2 原清单，见 A 段②）；② 导出导入措辞（待确认清单 vs 整包失败，见 ⑦）。<b>解冻依赖</b>（裁定⑧）：Team 判定改写须先完成身份三连 P0-1；队列扩列须与 P1-16「并表 + 告警落表」同批，<b>禁止先造第三张 queue</b>。<b>〔其余挂载缺口 · 待补三处〕</b>① <span class="mono">audit.html</span> 无 team 筛选器与锚点（见 A 段⑤）；② <span class="mono">control-plane.html</span>（域管控面）<b>未挂 <span class="mono">domains.team_id</span> 归属显示</b>，而 A 段②与 <span class="mono">teams__agentflow.html</span> 已按「域入五组」书写——两处须同批补齐，否则「域可归属」在界面上无处可验；③ <span class="mono">chat.html</span> 的 mention 兜底唤醒仅有 2 处轻挂，<b>缺「同刻双投递幂等」与 <span class="mono">coalesced</span> 计划/收据的可见呈现</b>（§6.0 ⑪ 要求两数组都可见）。三处均为<b>原型/挂载工作量，不是本档的已具备能力</b>。D-S16 包内「执行层落为编排实例 <span class="mono">pattern</span> 预设字段」的原裁定，已被 2026-10-23 裁定修订为「<b>Squad 一等实体 + leader 协议委派</b>」（组织层 R2/R3 与其余结论不变），详见 <span class="mono">.specs/platform-evolution/D-S16-team-entity/CONCLUSION.md</span> 页首裁定行。</p>
+
     <h2 class="sec"><span class="num">7</span>角色权限矩阵</h2>
     <p class="q">本章回答：进去之后能做什么。矩阵必须与 §5.0 的模块可见性一致。</p>
 
@@ -3174,6 +3451,20 @@ edges:
         <tr><td>删除域 <span class="chip bad">危险</span></td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td></tr>
         <tr><td>审批中心（查看待办）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td></tr>
         <tr><td>审批决策（批准 / 驳回）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-yes">●</td></tr>
+        <tr class="grp-row"><td colspan="5">小队与团队 <span class="chip warn">v14 规划 · 设计态</span>（团队四档角色 × 小队管理权 × 指派门槛）</td></tr>
+        <tr><td>小队中心 · 组织团队：建团 / 改名 / 改描述 / <b>暂停</b>（<span class="mono">paused</span> 停配额新增与成员加入、<b>拒新增指派</b>） <span class="mono tiny">teams</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（建团即 Owner；<b>团队角色 Owner/Admin 可改</b>）</span></td><td class="c dot-eye">○<span class="tiny dim">（Viewer 只读）</span></td><td class="c dot-eye">○<span class="tiny dim">（只读）</span></td><td class="mono">project:write（团队内动作由<b>团队四档</b>决定：Owner / Admin / Editor / Viewer；<b>建团只建 Team 行 + Owner 成员行，不动资产表</b>）</td></tr>
+        <tr><td>组织团队 · 改成员与角色（邀请 / 移除 / 升降档）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（Owner / Admin）</span></td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono">Owner / Admin 档；<b>Editor 与 Viewer 不可动成员</b>；移除后<b>鉴权立即失效、资产留团队</b>（§6.29 A 段）</td></tr>
+        <tr><td>组织团队 · <b>转让 Owner</b> <span class="chip bad">危险</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（仅本团队 Owner）</span></td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono">仅 Owner；<b>需确认</b>（输入团队名 + 验证码），原 Owner 降为普通成员，全程入审计</td></tr>
+        <tr><td>组织团队 · 配额改（软 / 硬 / 对象计数） <span class="chip bad">危险</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（Owner / Admin）</span></td><td class="c dot-no">—</td><td class="c dot-eye">○<span class="tiny dim">（可读）</span></td><td class="mono"><b>非团队成员不可删改配额本身</b>（保护 enforcement）；拒绝用 403 且<b>点名违反哪一条</b></td></tr>
+        <tr><td>组织团队 · 归档（资产转 platform 托管） <span class="chip bad">危险</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（仅 Owner）</span></td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono">仅 Owner + 输入名校验 + 必填原因；<b>可恢复</b>：资产转 <span class="mono">owner_kind=platform</span> 托管（<b>与小队归档语义相反，界面不得复用同一句文案</b>）；<b>不级联删资产</b>；成员鉴权即刻失效</td></tr>
+        <tr><td>协作小队 · 建队（选 leader + 成员 + 指令） <span class="mono tiny">squad</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（须能 <span class="mono">canInvoke</span> 所选 leader）</span></td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono">project:write + <b>leader 校验</b>（未归档 Agent、可调用；否则拒建并给拒因）</td></tr>
+        <tr><td>协作小队 · <b>改设 leader</b> <span class="chip bad">危险</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（creator 或平台管理员）</span></td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono">两条独立校验（入口 + 中间件）：目标须 <b>online + 未归档 + 可调用</b>，否则 <b>403</b> 带拒因 <span class="mono">leader_archived / not_callable</span>；<span class="mono">leader_id</span> RESTRICT → <b>归档该 Agent 前置检查拒 409 leader_bound</b>；改设<b>不动在途任务</b></td></tr>
+        <tr><td>协作小队 · 成员池增删 / 改角色标签（入池即存）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（creator <b>或</b>平台管理员）</span></td><td class="c dot-no">—</td><td class="c dot-eye">○<span class="tiny dim">（名册只读）</span></td><td class="mono">creator 或平台管理员；<b>squad 与 team 无外键 → 团队 Admin 不因团队获得小队管理权</b>；<b>角色标签不授予任何权限</b>，入队 / 退队<b>不产生</b>可调用权（§2.11）</td></tr>
+        <tr><td>协作小队 · 改协作指令 / 导出为模板</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（creator / Admin；指令为高敏草稿）</span></td><td class="c dot-no">—</td><td class="c dot-eye">○<span class="tiny dim">（可读）</span></td><td class="mono">creator 或平台管理员（指令为<b>低敏即存</b>并记 <span class="mono">squad:instructions_updated</span>、旧值入版本快照）；导出＝<b>受审声明式模板</b>进模板市场同道评审门，<b>剔除 id / uuid / runtime / 凭据 / env / 时间线</b>（§6.29 ⑦）</td></tr>
+        <tr><td>协作小队 · <b>归档（不可恢复）</b> <span class="chip bad">危险</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（creator / Admin）</span></td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono"><b>无 Restore</b>（与团队归档相反）；<b>在途 run 不撤回、跑完为止</b>；<b>存量指派 403 squad_archived</b>，指向它的<b>自动化自动转 disabled（不静默删）</b>；<b>必填原因并随快照永久保留</b>；时间线转只读</td></tr>
+        <tr><td><b>把任务指派给小队</b>（含 autopilot 指向小队）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（需 <span class="mono">canInvoke(leader)</span>）</span></td><td class="c dot-eye">○<span class="tiny dim">（可指派自己可调用者）</span></td><td class="c dot-no">—</td><td class="mono">两道校验：<b>小队未归档 + leader 可调用</b>，否则 <b>403</b>；<span class="mono">(issue, agent)</span> 待处理去重；<b>权限逐次判定，不按小队授权</b></td></tr>
+        <tr><td>自动化 · Autopilot 建 / 改 / 启停 / Replay webhook</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（目标须自身可调用）</span></td><td class="c dot-no">—</td><td class="c dot-eye">○<span class="tiny dim">（运行历史只读）</span></td><td class="mono">token 写-only · <b>webhook 签名不符 = 401，与业务失败分开显示</b>；<b>小队页内建规则目标固定为本队</b>（跨队复用去工作流 / 画布）；每次运行记<b>规则版本快照 <span class="mono">spec_version</span>（v1…v5 可见 + 「为何停用」可查）</b>；自动暂停后<b>恢复需人</b>；<b>归档目标 → 自动 disabled</b></td></tr>
+        <tr><td>Quick Action 建 / 归档（正文禁 mention）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（仅本目标 owner）</span></td><td class="c dot-eye">○<span class="tiny dim">（public 可点）</span></td><td class="c dot-no">—</td><td class="mono">正文含 mention 链接 = <b>校验期直接拒 <span class="mono">quick_action_mention_forbidden</span></b>（一次点击只唤醒绑定目标）；<b>沿用 §6.0 ⑤</b></td></tr>
         <tr class="grp-row"><td colspan="5">知识与观测</td></tr>
         <tr><td>知识库（查看 / 检索）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td></tr>
         <tr><td>知识库上传 / 删除</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td></tr>
@@ -3264,6 +3555,17 @@ edges:
         <tr><td><b>三指标自测</b></td><td>准确率 / ECE（校准误差，越小越可信）/ 与前一生产版本决策一致率；默认门槛 accuracy ≥80% 且 ECE ≤0.05，服务端门禁。</td><td>§6.24</td></tr>
         <tr><td><b>机器画像</b></td><td>参谋对本机硬件与后端能力（Metal/CUDA/Vulkan）的 ≤5s 探测结果；存本机、默认不上传。</td><td>§6.25</td></tr>
         <tr><td><b>环境参谋 · 只出方案</b></td><td>画像→方案库→分层部署方案的向导，<b>平台零执行</b>（交付形态：可复制命令/可下载脚本/操作路径），装不装由用户决定；连通状态靠只读再探测刷新。</td><td>§2.7 · §6.25</td></tr>
+      <tr class="grp-row"><td colspan="3">小队与自动化 <span class="chip warn">v14 新增 · 2026-10-23 裁定（multica 方案）</span></td></tr>
+        <tr><td><b>组织团队</b><br><span class="tiny dim">Team（组织层）</span></td><td>资源归属与配额边界的<b>容器</b>：成员四档 <span class="mono">Owner / Admin / Editor / Viewer</span>、首批 5 类资产挂 <span class="mono">team_id + owner_kind(personal|team|platform)</span>（存量零回填、可回滚）、软/硬配额 + 对象计数、Team ⟂ Domain（0..N）。<b>不可被指派</b>。承 D-S16 裁定 R2/R3，原样不变。</td><td>§2.11 · §6.29 A</td></tr>
+        <tr><td><b>协作小队</b><br><span class="tiny dim">Squad（执行层）</span></td><td><b>可被指派的一等实体</b>：1 个 leader Agent（必为 Agent、未归档、可调用；改设需校验）+ 人 / Agent 混合成员（带自由文本角色标签，<b>标签不授权</b>）+ 自由文本协作指令。<b>无任何结构化路由配置</b>。<b>squad 不拥有资产、不是成本主体</b>（成本记 leader 归因链、配额累加在 leader 所属团队）；<b>与 Team 无外键</b>；归档<b>不可恢复</b>且存量指派 <span class="mono">403 squad_archived</span>、<b>在途 run 不撤回</b>。<b>与 Team 一词一义、与「集成」（对外 IM 出口）互不混用。</b></td><td>§2.11 · §6.29 B</td></tr>
+        <tr><td><b>leader 任务</b><br><span class="tiny dim">is_leader_task</span></td><td>「把任务指派给小队」被平台<b>机械解析</b>成的唯一产物：<b>给 leader 入队一条带 <span class="mono">is_leader_task=1 + squad_id</span> 标记的任务</b>。<b>没有成员抢单（界面无「认领」按钮）、没有全员并发唤醒</b>；入队前校验小队未归档 + leader 可调用（否则 403），并按 <span class="mono">(issue, agent)</span> <b>活跃任务合并去重</b>；<b>入队 ≠ 起跑</b>——leader 只拿到接收位，须被 claim，且 <span class="mono">triage</span> 未 accept 前不派生执行。</td><td>§2.11 · §6.29 B</td></tr>
+        <tr><td><b>briefing 注入</b></td><td>leader claim 任务时，把<b>硬编码 Operating Protocol + Roster（成员名册含 skills 与可直接粘贴的 mention 链接）+ 小队指令</b>三段<b>拼在 leader 指令尾部</b>一并注入运行时系统提示的 <span class="mono">## Agent Identity</span> 节——<b>不覆盖平台只读层与用户指令层、不回写 Agent「能力 · 指令」</b>；<b>名册实时取非快照</b>、<b>不带上下文快照</b>；<b>拼装结果只在 run 上下文里（预览抽屉看），Agent 详情页不显示这三段</b>。</td><td>§6.29 B</td></tr>
+        <tr><td><b>mention 链接</b><br><span class="tiny dim">[@Name](mention://agent/&lt;uuid&gt;)</span></td><td>leader 委派成员的<b>唯一显式语法</b>（或与子任务指派二选一）。<b>不写链接 = 不委派</b>：只提名字、只说「谁看一下」不产生任何运行，平台<b>不做模糊匹配、也不报错（只会静默不委派）</b>——所以名册必须给「可粘贴 mention」列；与子任务指派<b>二选一</b>，<b>同用被 <span class="mono">double_trigger</span> 拒第二次</b>；<b>人成员 mention 只发通知、不产生运行</b>。该语法<b>禁止进入导出模板</b>（uuid 跨工作区静默失效是 multica 实测教训）。</td><td>§6.29 B④ · B⑦</td></tr>
+        <tr><td><b>evaluated 记账</b></td><td>leader 每一轮<b>对每个候选成员</b>都落一行 <span class="mono">action | no_action | failed</span> + <span class="mono">reason</span>（<b>reason 是稳定枚举</b>，如「按 skills 匹配」，前端 <span class="mono">switch(reason)</span> 渲染，§6.0 ⑥）——<b>「决定不派活」与「误点未入池成员」都留痕</b>，否则界面上分不清「卡住」与「判断无需协作」，也答不出「为什么没派给某人」。</td><td>§6.29 B</td></tr>
+        <tr><td><b>Triage 门</b></td><td>三门禁之一（规则在<b>状态转换层</b>，不在提示词里）：任务处于<b>待受理</b>态时禁止任何派生执行（<b>自动派单 / 触发规则 / 小队委派同拦</b>——leader 不叫醒、mention 不产生 run、自动化命中也不跑），<b>人 accept 后放行</b>；<b>人 @ 指名除外</b>（视同人点名派发）。另两门：<span class="mono">in_review</span> 由 Agent 推、<span class="mono">done</span> 由人点；失败升格收件箱 <span class="mono">action_required</span>、<b>仅人工重跑且保留原角色</b>。</td><td>§6.29 E · §6.0 ⑩</td></tr>
+        <tr><td><b>Quick Action</b></td><td>把<b>保存的提示词绑定到单个目标</b>（一个 Agent 或一支小队）的命名动作：点击即跑、无输入框、public/private + 用量计数 + 可归档。<b>正文禁用 mention 链接</b>——一次点击只唤醒被绑目标，要多人协作请改指派小队走 leader 委派。</td><td>§6.29 B⑥ · §6.0 ⑤</td></tr>
+        <tr><td><b>受审模板导出</b><br><span class="tiny dim">starterkit 式</span></td><td>把一支小队导出为<b>声明式模板 bundle</b>（<span class="mono">squad</span> 名 / 成员<b>名</b> + skills 标签 / 协作指令 / 自动化规则的声明部分），<b>协议本体以 <span class="mono">ref</span> 引用平台版本、不内嵌副本</b>，<b>不含 id · runtime 绑定 · 凭据 · env · MCP 配置</b>；进模板市场<b>走同一道评审门</b>；导入<b>按名称唯一认领、同名永不覆盖、引用不可解析=整包失败</b>。<b>无版本 / 更新 / 卸载路径 = 已知缺口</b>。<b>不生成画布 YAML。</b></td><td>§6.29 B⑦</td></tr>
+        <tr><td><b>Autopilot</b><br><span class="tiny dim">autopilot · _trigger · _run</span></td><td>站内自动化规则：<b>触发</b> <span class="mono">schedule(cron+tz) / webhook / api</span> → <b>动作</b> <span class="mono">create_issue / run_only</span>（后者不建任务，界面明写「本次不生成任务」）+ 标题模板；<b>并发</b> <span class="mono">skip / queue / replace</span>；每次运行记<b>规则版本快照</b> <span class="mono">spec_version</span>；失败率门只做<b>止损暂停，恢复需人</b>。目标可为 Agent 或 Squad。</td><td>§6.29 B · §3.3</td></tr>
       </tbody>
     </table>
   </section>
@@ -3338,11 +3640,13 @@ edges:
     <h3>Q24 · 仓库是公开的，历史里到底有没有东西漏出去？</h3>
     <p><b>A：</b>查清了——<b>没有</b>。56 个 commit（main 5 + 已推送的 agent/* 分支 50+）100% 全量扫描非抽样，node_modules 排除后 588 唯一路径全过模式集（sk-/ghp_/xoxb/AKIA/webhook/私钥块/赋值式 key）：全部命中都是测试占位符或压缩产物误匹配；users.json、.env、*.pem/id_rsa 类文件<b>从未以对象形式出现在任何历史中</b>。所以无需紧急轮换任何东西。剩下的不是「泄露」而是三件「强度与卫生」（已入 P0-10）。漏区如实声明：二进制 blob 未逐字节扫、悬空对象不可证伪、远端分支枚举受 API 限流——若你记得某次手工测试真用过线上 key，给厂商标记可按 blob 精查补录。</p>
     <h3>Q25 · Agent 能连外部 IM（飞书/Lark、Slack、钉钉…）直接收发消息吗？</h3>
-    <p><b>A：</b>能——Agent 详情「能力 → 集成」子栏就是 <b>IM 通道连接器</b>（§2.3 / §6.4）：六类通道＝飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM；Lark 扫码 device-flow、其余 BYO 密钥并保存前在线验证。权限两档：Lark/钉钉/自托管 IM 由 agent owner 自助连接，Slack/企业微信/Telegram 仅平台管理员，通道列表全员只读（§7）。密钥三原则：写-only 不回显、改密=断开重连、AES-256-GCM+全局 DEK 落库；断开=软撤销+必填原因、审计不丢（§3.3 <span class="mono">integrations</span>）。连上后的闭环＝IM 消息→会话→run→回复写回；平台侧未绑定的 IM 用户凭 redeem 链接双因子绑定才能触达。两句别混：这与 §6.8 对话中心「渠道」（平台级入口）不同层，更与 §6.28 运行时发现无关——后者注册执行环境、前者接消息通道。</p>
+    <p><b>A：</b>能——Agent 详情「能力 → 集成」子栏就是 <b>IM 通道连接器</b>（§2.3 / §6.4）：六类通道＝飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM；Lark 扫码 device-flow、其余 BYO 密钥并保存前在线验证。权限两档：Lark/钉钉/自托管 IM 由 agent owner 自助连接，Slack/企业微信/Telegram 仅平台管理员，通道列表全员只读（§7）。密钥三原则：写-only 不回显、改密=断开重连、AES-256-GCM+全局 DEK 落库；断开=软撤销+必填原因、审计不丢（§3.3 <span class="mono">integrations</span>）。连上后的闭环＝IM 消息→会话→run→回复写回；平台侧未绑定的 IM 用户凭 redeem 链接双因子绑定才能触达。两句别混：这与 §6.8 对话中心「渠道」（平台级入口）不同层，更与 §6.28 运行时发现无关——后者注册执行环境、前者接消息通道。<b>〔v14 补第三句〕</b>也与 §6.29 小队中心无关：集成是<b>对外消息出口</b>，Squad 是<b>站内编组</b>。</p>
+    <h3>Q26 · 把一个任务指派给「小队」，究竟发生了什么？</h3>
+    <p><b>A：</b>一条链路，全程机械、不含抢单：<b>① 你选 <span class="mono">assignee=小队 code-review</span></b> → ② 平台校验小队未归档 + leader 当前可被调用（<span class="mono">canInvokeAgent</span>），任一不过当场 <span class="mono">403</span> 并给拒因 → ③ 按 <span class="mono">(issue, agent)</span> 待处理去重（leader 已有未开始的待处理任务就不再塞一行）→ ④ 入队<b>一条 leader 任务</b>（<span class="mono">is_leader_task=1 · squad_id</span>）→ ⑤ leader claim 时被注入 <b>briefing</b>（硬编码协作协议 + Roster 名册含成员 skills 与可直接粘贴的 mention 链接 + 小队指令，拼在指令尾部、不覆盖平台层、<b>不带上下文快照</b>）→ ⑥ leader 这一轮要么<b>写 <span class="mono">[@Name](mention://agent/&lt;uuid&gt;)</span></b>、要么<b>建子任务指派</b>（二选一，同用会双跑；<b>不写=不委派</b>），每轮一条委派评论 → ⑦ 被 @ 的成员<b>自己入队自己跑</b>，离线时 <span class="mono">runtime_offline</span> 暂存不丢 → ⑧ 子任务全过本阶段时<b>系统评论（stage barrier）唤醒父 leader</b> 收敛 → ⑨ leader <b>只推到 <span class="mono">in_review</span></b>，<span class="mono">done</span> 由人点（带证据）；<b>失败不产生新 leader 任务</b>，失败升收件箱 <span class="mono">action_required</span>、<b>仅人工重跑且保留原角色</b>。leader 每轮无论派没派活都落 <span class="mono">evaluated</span> 记账（<span class="mono">action|no_action|failed</span> + reason 稳定枚举，<b>「决定不派活」也留痕</b>）。<b>入队 ≠ 起跑</b>：leader 拿到的是<b>接收位</b>（须被 claim），<b>成员池此时不被通知</b>。<b>两件常被误当成有的东西：①没有成员抢单</b>——成员看不到别人的队列、界面上没有「认领」按钮，指派小队不会全员并发开跑，只有 leader 先醒（multica 实测口径：<i>assign 给 squad 不会同时跑所有 agent，先唤醒 leader 由它决定下一步</i>）；<b>②没有小队授权</b>——成员入队<b>不</b>产生任何可调用权，每一次实际运行仍按<b>委派链顶的人类 originator</b> 逐次过 <span class="mono">canInvokeAgent</span> 判定，同一成员在 A 小队不代表 B 用户的任务能调它。另注三条：<b>① 无轮次上限</b>（如实写），靠「每轮一条 + 去重 + 自触发抑制」三条防失控，异常成本走<b>配额硬限与告警</b>；<b>② 小队不是成本主体</b>——成员委派产生的 token / 成本记在 <b>leader 的 run 归因链</b>上，配额累加落在 <b>leader 所属团队</b>的账上；<b>③ 委派不绕过审批门</b>，人批节点的审批人解析按「归属团队 + Access」，<b>不按小队</b>。要拓扑与自动执行，走画布那一路（§6.5）——<b>固定编排维持原样，画布与 workflows 不新增动态模式，动态协作也不生成画布 YAML</b>，两路只共享路由 / 权限 / 队列底座（§2.11 · §6.29）。</p>
 </section>
 
   <footer class="doc-foot">
-    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）· <b>v11 · 2026-10-15：运行时口径同步</b>（本轮对齐 10 月原型：运行时=成员机器上的外部 AI 编码 CLI，daemon 15s 心跳探测注册、新增 §6.28 运行时发现；Agent 配置面废除 Provider/Base URL/API Key；Agent 详情=四标签；对话中心=1:1 私密会话；知识库=公共知识+知识空间（L0-L3）；用户级 Agent 1:1；角色=CustomRole 14 字段；画布 Apply=应用内 diff 模态；新建项目无起止时间；全文清除 LangGraph/LangChain/AutoGen/CrewAI 作为运行时的表述）· <b>v12 · 2026-10-15 · 任务化收敛与产物编辑下线</b>（产物文档编辑 UI 整节裁撤（§5.18/§6.18）→ 只读文件查看 §5.13/§6.13b 新增，能力地图/§5.0 可见性/§7 权限矩阵同步撤编辑行；阶段模型非孤立实证句入 §6.19；看板详情一律右侧统一抽屉 + 三视角任务列表同一组件（§6.20）；收件箱升级=点开通知即完整上下文线程 + 三类入箱条件（§6.21）；执行回放=任务回放、无独立列表页、入口链与「任务 › run › 执行回放」面包屑（§6.22）；全站「工作项→任务」改名于本版落地并做语义连带统一）· <b>v13 · 2026-10-15 · 能力全可编辑与 IM 集成</b>（三条裁定落档：① 创建向导与详情页共用同一分区集合与字段——两种入口一份配置，工具库同源模式推广（§6.4/§5.4）；② 集成=IM 通道连接器——六类通道 / 卡片五态状态机 / Lark device-flow 与 BYO 密钥在线验证 / 密钥三原则（写-only、改密=断开重连、AES-256-GCM+全局 DEK）/ 断开软撤销 / owner 自助与仅平台管理员两档 / 通道列表全员只读（§2.3·§6.4·§7·§6.28），§3.3 新增 <span class="mono">integrations</span> 设计表（MySQL 权威档）；③ 能力区全量行级可编辑 + 「低敏即存 / 高敏草稿」保存分级总句（指令双层模型与开场白卡 · 技能行 CRUD · MCP 双 tab · 知识源关联/移除/更新凭据 · env 保留哨兵与 .env 双模 · CLI 参数行编辑器+launch 预览，§6.4/§5.4）；§8 术语四行：集成 / 通道安装 / 软撤销 / 保留哨兵；FAQ 新增 Q25）</p>
+    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）· <b>v11 · 2026-10-15：运行时口径同步</b>（本轮对齐 10 月原型：运行时=成员机器上的外部 AI 编码 CLI，daemon 15s 心跳探测注册、新增 §6.28 运行时发现；Agent 配置面废除 Provider/Base URL/API Key；Agent 详情=四标签；对话中心=1:1 私密会话；知识库=公共知识+知识空间（L0-L3）；用户级 Agent 1:1；角色=CustomRole 14 字段；画布 Apply=应用内 diff 模态；新建项目无起止时间；全文清除 LangGraph/LangChain/AutoGen/CrewAI 作为运行时的表述）· <b>v12 · 2026-10-15 · 任务化收敛与产物编辑下线</b>（产物文档编辑 UI 整节裁撤（§5.18/§6.18）→ 只读文件查看 §5.13/§6.13b 新增，能力地图/§5.0 可见性/§7 权限矩阵同步撤编辑行；阶段模型非孤立实证句入 §6.19；看板详情一律右侧统一抽屉 + 三视角任务列表同一组件（§6.20）；收件箱升级=点开通知即完整上下文线程 + 三类入箱条件（§6.21）；执行回放=任务回放、无独立列表页、入口链与「任务 › run › 执行回放」面包屑（§6.22）；全站「工作项→任务」改名于本版落地并做语义连带统一）· <b>v13 · 2026-10-15 · 能力全可编辑与 IM 集成</b>（三条裁定落档：① 创建向导与详情页共用同一分区集合与字段——两种入口一份配置，工具库同源模式推广（§6.4/§5.4）；② 集成=IM 通道连接器——六类通道 / 卡片五态状态机 / Lark device-flow 与 BYO 密钥在线验证 / 密钥三原则（写-only、改密=断开重连、AES-256-GCM+全局 DEK）/ 断开软撤销 / owner 自助与仅平台管理员两档 / 通道列表全员只读（§2.3·§6.4·§7·§6.28），§3.3 新增 <span class="mono">integrations</span> 设计表（MySQL 权威档）；③ 能力区全量行级可编辑 + 「低敏即存 / 高敏草稿」保存分级总句（指令双层模型与开场白卡 · 技能行 CRUD · MCP 双 tab · 知识源关联/移除/更新凭据 · env 保留哨兵与 .env 双模 · CLI 参数行编辑器+launch 预览，§6.4/§5.4）；§8 术语四行：集成 / 通道安装 / 软撤销 / 保留哨兵；FAQ 新增 Q25）· <b>v14 · 2026-10-23 · 小队与语义自动执行（multica 方案）</b>（用户裁定三条落档：① <b>画布 / workflows 不新增动态模式，固定编排维持原样</b>；② <b>自动化编排执行采纳 multica 方案</b>——协作小队 Squad 升为<b>可指派的一等实体</b>（1 leader Agent + 人/Agent 混编成员 + 自由指令），指派=机械解析为「给 leader 入队 leader 任务」<b>无成员抢单</b>，协作靠 <b>briefing 注入（Operating Protocol + Roster + 指令拼尾部，不覆盖平台层、不带上下文快照）</b>+ mention 链接 / 子任务指派<b>二选一</b>，leader <b>只推到 in_review、done 留人</b>，<b>权限不按小队授权</b>（逐次按链顶人类 originator 过 <span class="mono">canInvokeAgent</span>）；③ <b>两层一词一义</b>：组织层 Team（资源容器，D-S16 R2/R3 原裁定不变）⟂ 执行层 Squad（可指派目标）。新增 §2.11 概念节 + §6.29「小队中心」（双 tab / 建团建队 / 组织详情四档+五类资产+配额 403 / squad 详情：协作协议面板、协作时间线含 <span class="mono">evaluated</span> 记账与 stage barrier、消息语义、防护三件与<b>无轮次上限如实写</b>、人批三门禁、autopilot + quick action、受审模板导出、归档不可恢复）；§3.3 新增 <span class="mono">teams · team_members · squad · squad_member · autopilot · autopilot_trigger · autopilot_run · quick_action</span> 八张设计表 + 任务队列扩列设计注（<span class="mono">is_leader_task / squad_id / trigger_comment_id / coalesced_comment_ids / handoff_note / priority / fire_at</span>）+ <span class="mono">assignee_type</span> 三轨枚举，全按裁定⑦ MySQL 档；§1.3 / §5.0 / §7 权限矩阵 / §8 术语十行 / FAQ Q26 同步注册；§6.4 加「IM 通道=对外出口 · Squad=站内编组」界分句；D-S16 CONCLUSION.md 页首落同款裁定修订行。<b>原型三包已落地为形态基线</b>（<span class="mono">teams.html · teams__agentflow.html · squads__code-review.html</span> + board / chat / replay / agent-detail / users 家族挂载），本节正文按<b>原型实测口径</b>书写并如实标注三处挂载缺口（audit 无 team 筛选、control-plane 未挂 <span class="mono">domains.team_id</span>、chat 缺双投递幂等与 coalesced 呈现）与两处<b>待人工收口的口径差</b>（首批五类清单含域 vs D-S16 R2、导出导入措辞））</p>
     <p>第 4 轮证据链：<span class="mono">.specs/platform-evolution/D-{execution-isolation-2, declarative-api, otel-observability, a2a-protocol-surface, collaboration-layer-2, identity-and-security-2}</span> + <span class="mono">R4-CODEAUDIT.md</span>（2026-09-23，六路 agent 交叉验证）</p>
     <p>单文件自包含 HTML，零外部依赖（无 CDN / 无外链字体 / 无外部图片）；设计令牌与产品源码 <span class="mono">frontend/src/styles/tokens.css</span> 同源；§6 全部数据为演示假数据，其中 6.19–6.22 为<b>明确标注的规划原型</b>。</p>
     <p>数量口径来自对当前代码库与 <span class="mono">.specs/</span> 产物的实测扫描（2026-09-21）：后端 117 个 <span class="mono">.py</span> 模块（含 8 个测试文件）/ 28 个路由模块 / 169 个端点 / 132 条路径 / 19 个 ORM 模型模块 → 26 张表 / 24 个服务 + 5 个渠道适配器 / 4 个引擎模块 / 4 个运行时适配器；前端 100 个 <span class="mono">ts/tsx</span> / 34 个页面 / 28 个组件 + 13 个 Edge 组件 / 12 个 Zustand store。凡属推测或未实现的内容已在正文标注「待确认」。</p>

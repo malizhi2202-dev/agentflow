@@ -23,6 +23,7 @@
           <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
           <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
           <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
           <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
           <div class="spacer"></div>
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
@@ -36,6 +37,7 @@
               <span class="pill mono">🔍 搜索工作流…</span>
             </div>
             <table class="tbl compact">
+        <caption class="tiny dim">归属注：工作流与 Agent 同批资产化——行归属 <span class="mono">owner_kind</span>（personal/team/platform）chip 位与工具库、知识库同口径；团队拥有资源列表见 <a data-goto="teams__agentflow.html">AgentFlow 平台团队</a>。（演示口径）</caption>
               <thead><tr><th>名称</th><th>状态</th><th>版本</th><th>步骤</th><th>最后执行</th><th>成功率</th><th>操作</th></tr></thead>
               <tbody>
                 <tr><td><b data-click data-goto="workflows__review-pipeline.html" style="color:var(--blue)">审查流水线</b><br><span class="tiny dim">review-pipeline</span></td><td><span class="chip ok">已发布</span></td><td class="mono">v3</td><td class="mono">6</td><td class="mono">14:31</td><td><span class="chip ok">98%</span></td><td><span class="btn link" data-toast="运行请求已入队 · task-12 · priority 100 · 目标按标签路由自动分配（演示）">执行</span><span class="btn link" data-toast="进入编辑 → 跳转编排画布（画布双向同步见文档 §6.5）">编辑</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-stop">停止</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>

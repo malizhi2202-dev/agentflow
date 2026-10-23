@@ -1,5 +1,6 @@
 # ③ 结论与建议 · S16 Team 组织实体
 > 状态：待审⑤（第 5 轮 · 2026-09-23）· 依据 ①BRAINSTORM + ②RECON（E1-E8 一手原文）+ 本地代码事实（file:line）
+> **〔2026-10-23 用户裁定〕执行层落法修订：采纳 multica squad 方案——协作小队升格为可指派一等实体（leader 协议委派），不再采用『仅编排实例预设字段』形态；组织层 Team 裁定(R2/R3)与本包其余结论不受影响。产品口径以 PRODUCT-DESIGN v14 §6.29 为准，本包维持待审⑤流转。**
 > 本包零代码改动；以下 schema/字段仅为 DESIGN 输入，禁止写成「已具备」措辞（承第 4 轮同口径约束）。
 
 ---
@@ -13,7 +14,7 @@
 | 回答的问题 | **谁拥有这些资源、谁能对它们动手** | **这一次运行由哪些 Agent、按什么策略协作** |
 | 主语 | 人（principal） | 一次部署/运行 |
 | 生命周期 | 持久，跨项目 | 与编排实例同生死，可重复跑 |
-| 我们代码里的落点 | **不存在**（`grep team` 后端 0 命中；`domain.py:8-14` 只是 4 字段壳） | **已存在** = `OrchestrationInstance`（`orchestration.py:13-28`：`owner_id` + `agent_ids` 成员清单 + `yaml_raw`/`edges_json` 拓扑 + token 软/硬限 + `on_failure`） |
+| 我们代码里的落点 | **不存在**（`grep team` 后端 0 命中；`domain.py:8-14` 只是 4 字段壳） | **已存在** = `OrchestrationInstance`（`orchestration.py:13-28`：`owner_id` + `agent_ids` 成员清单 + `yaml_raw`/`edges_json` 拓扑 + token 软/硬限 + `on_failure`）〔已被 2026-10-23 裁定修订，见页首〕 |
 | 竞品证据 | Dify workspace（E1）/ Langfuse org→project（E2）/ n8n projects（E3）/ K8s namespace（E4） | AutoGen team 预设（E5）/ CrewAI Crew+Process（E6）/ MAF 不用 team 一词（E7） |
 | 关键判读 | 四家全都**建了成员表**，无一家用视图代替（反 K11） | 没有一家把执行期协作组当**资产实体**：它是预设/策略，有状态、可 reset（E5） |
 
@@ -69,7 +70,7 @@
 
 | # | 方向 | 一句话落地路径 | 成本/风险 |
 |---|---|---|---|
-| **R1** | **一词一义裁定**：Team 只指组织团队；执行协作组落为编排实例的 `pattern` 协作预设枚举 | 在 `.specs/CONTEXT.md` 术语表 + 产品文档 §1.6 与编排 YAML schema 文档态加 `pattern` 字段说明，画布文案「团队」→「协作预设」 | 零代码、零解冻依赖，**立即可做** |
+| **R1** | **一词一义裁定**：Team 只指组织团队；执行协作组落为编排实例的 `pattern` 协作预设枚举〔已被 2026-10-23 裁定修订，见页首〕 | 在 `.specs/CONTEXT.md` 术语表 + 产品文档 §1.6 与编排 YAML schema 文档态加 `pattern` 字段说明，画布文案「团队」→「协作预设」 | 零代码、零解冻依赖，**立即可做** |
 | **R2** | **最小团队实体（主方向）**：`teams` + `team_members` 两表 + 首批 5 类资产 `team_id`/`owner_kind` + 可见性判定单点（两处校验）+ 团队只读页 | 解冻后垂直切片：「建 Team → 邀成员 → 把**一个 Agent 与一个 Workflow** 归属到 Team → 非成员 404」一条链跑通，其余资产同型复制 | 迁移需与迁移账本议题同批（现状 `database.py` 仅 3 条内联 ALTER）；判定改写涉 10 个路由 |
 | **R3** | **团队级凭据池 + 配额账本 + 审批人解析**（Team 才真正"管资源"的两块硬骨头） | R2 之后：Provider Key 上移到 `team_credentials`（Agent 继承可覆盖）〔2026-10-15 裁撤：由运行时发现（外部 CLI）取代〕+ `team_quota`/`quota_usage`（聚合+计数双形态、403 带条目、MySQL 账本）+ 审批人按团队角色解析 | **强依赖身份三连**；配额 enforcement 需先解决多副本内存态（S4） |
 

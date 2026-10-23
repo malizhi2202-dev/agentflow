@@ -63,7 +63,7 @@ details.fold>summary b{color:var(--text);font-weight:600}
 <div class="detail-top"><span class="pill" data-back="agent-detail.html" data-click>← 返回 Agent 详情</span><span class="crumb"><span class="dim">Agent / 审查 Agent · 标准 /</span> <b>完整配置（编辑）</b></span><span class="chip ok">running</span><span class="chip warn">演示草稿 · 4 处改动</span></div>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent 详情</span><span class="pill" data-goto="agents.html">Agent 列表</span><span class="pill" data-goto="runtimes.html">运行时发现</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="knowledge.html">知识库</span><span class="pill" data-goto="audit.html">审计日志</span></div>
 <div class="detail-body">
-<p class="proto-note"><span class="chip warn">演示数据</span>本页为该 Agent 的<b>全字段编辑落地页</b>（17 分区 · 编辑态 · 9A 为新增「集成（IM 通道）」）。现值全为 mock：名称 <span class="mono">审查 Agent · 标准</span> · 运行时 <span class="mono">dsh · stdio · 在线</span> · 模型 <span class="mono">deepseek-official/deepseek-chat</span> · thinking <span class="mono">medium</span> · 并发 <span class="mono">6</span> · 域 <span class="mono">未分类</span> · 技能 3 · MCP 2 · 对外集成 2 · <b>IM 通道 6 平台 = 2 已连（飞书 · Slack）+ 2 未连接（钉钉 · 自托管 IM · 密钥行已解锁示例）+ 2 灰置（企微未启用 · Telegram 预览）</b> · env 1 项 <span class="mono">***</span> · CLI <span class="mono">--sandbox read-only</span> · 闸门 4 行。</p>
+<p class="proto-note"><span class="chip warn">演示数据</span>本页为该 Agent 的<b>全字段编辑落地页</b>（17 分区 · 编辑态 · 9A 为新增「集成（IM 通道）」）。现值全为 mock：名称 <span class="mono">审查 Agent · 标准</span> · 运行时 <span class="mono">dsh · stdio · 在线</span> · 模型 <span class="mono">deepseek-official/deepseek-chat</span> · thinking <span class="mono">medium</span> · 并发 <span class="mono">6</span> · 域 <span class="mono">未分类</span> · 归属团队 <span class="mono">AgentFlow 平台团队（owner_kind=team · 转移走即时端点）</span> · 技能 3 · MCP 2 · 对外集成 2 · <b>IM 通道 6 平台 = 2 已连（飞书 · Slack）+ 2 未连接（钉钉 · 自托管 IM · 密钥行已解锁示例）+ 2 灰置（企微未启用 · Telegram 预览）</b> · env 1 项 <span class="mono">***</span> · CLI <span class="mono">--sandbox read-only</span> · 闸门 4 行。</p>
 
 <div class="callout">
   <p class="tiny" style="margin:0"><b>本页 = Agent 全字段编辑落地页</b>（对齐 Multica 详情页 Settings / Capabilities 字段全集，编辑态）。详情内各子区的「编辑」与本表单<b>字段同源、写同一草稿槽</b>：任一处改动，另一处读到的是同一份未提交草稿；<span class="btn link" style="padding:0" data-click data-drawer="dr-draft">看草稿槽与同源映射</span>。</p>
@@ -72,7 +72,7 @@ details.fold>summary b{color:var(--text);font-weight:600}
 </div>
 <p class="tiny dim" style="margin:var(--s3) 0 6px">17 分区直达（页内锚点 · 各分区字段与本表单同源 · 9A = 集成（IM 通道））：</p>
 <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:var(--s3)">
-  <a class="pill" href="#sec1">1 标识</a><a class="pill" href="#sec2">2 域归属</a><a class="pill" href="#sec3">3 指令与开场白</a><a class="pill" href="#sec4">4 运行时与模型</a><a class="pill" href="#sec5">5 执行设置</a><a class="pill" href="#sec6">6 环境变量</a><a class="pill" href="#sec7">7 CLI 参数</a><a class="pill" href="#sec8">8 MCP</a><a class="pill" href="#sec9">9 对外集成</a><a class="pill" href="#sec-im" style="border-color:var(--blue-border);color:var(--blue)">9A IM 通道</a><a class="pill" href="#sec10">10 技能</a><a class="pill" href="#sec11">11 知识源</a><a class="pill" href="#sec12">12 编排引用</a><a class="pill" href="#sec13">13 Access</a><a class="pill" href="#sec14">14 闸门</a><a class="pill" href="#sec15">15 探活</a><a class="pill" href="#sec16">16 危险区</a>
+  <a class="pill" href="#sec1">1 标识</a><a class="pill" href="#sec2">2 域/团队归属</a><a class="pill" href="#sec3">3 指令与开场白</a><a class="pill" href="#sec4">4 运行时与模型</a><a class="pill" href="#sec5">5 执行设置</a><a class="pill" href="#sec6">6 环境变量</a><a class="pill" href="#sec7">7 CLI 参数</a><a class="pill" href="#sec8">8 MCP</a><a class="pill" href="#sec9">9 对外集成</a><a class="pill" href="#sec-im" style="border-color:var(--blue-border);color:var(--blue)">9A IM 通道</a><a class="pill" href="#sec10">10 技能</a><a class="pill" href="#sec11">11 知识源</a><a class="pill" href="#sec12">12 编排引用</a><a class="pill" href="#sec13">13 Access</a><a class="pill" href="#sec14">14 闸门</a><a class="pill" href="#sec15">15 探活</a><a class="pill" href="#sec16">16 危险区</a>
 </div>
 
 <h4 class="blk" id="sec1">1 · 标识</h4>
@@ -85,11 +85,24 @@ details.fold>summary b{color:var(--text);font-weight:600}
   </div>
 </div>
 
-<h4 class="blk" id="sec2">2 · 域归属 <span class="chip info">可选 · 非安全边界</span></h4>
+<h4 class="blk" id="sec2">2 · 域归属 <span class="chip info">可选 · 非安全边界</span> <span class="chip">+ 归属团队（正交轴）</span></h4>
 <div class="panel">
   <div class="fld" style="max-width:420px"><label>所属域</label>
     <select><option>默认域</option><option>生产域</option><option>测试域</option><option selected>未分类（当前值 · 暂不归属）</option></select>
     <p class="hint">现值 = <b>未分类</b>（<span class="mono">domain_id = NULL</span>）。能力组按技能派生：<span class="mono">code-review</span> <span class="mono">python</span>（多标签=同时出现在多个能力组，属预期）。</p>
+  </div>
+  <div class="fld" style="max-width:420px"><label>归属团队 <span class="chip warn">🔒 改动不走本下拉 → 下方「转移团队」</span></label>
+    <select disabled style="opacity:.72">
+      <option>个人 · personal（新建默认口径 · team_id=NULL）</option>
+      <option selected>AgentFlow 平台团队（当前值 · owner_kind=team）</option>
+    </select>
+    <p class="hint">换团队<b>不是普通字段编辑</b>——是转移动作（需目标团队 Admin 确认 + 必填原因 + 审计），故本下拉在编辑态只读、<b>不进全字段草稿槽</b>；现值见概览「归属团队」行与 <span class="pill" data-goto="teams__agentflow.html" data-click>AgentFlow 平台团队 ▸</span>。</p>
+    <p class="hint" style="margin-top:4px"><b>owner_kind 三态：</b><span class="mono">personal</span> 个人自持（创建默认 · <span class="mono">team_id=NULL</span>）· <span class="mono">team</span> 团队资产（<span class="mono">team_id</span> 必填 · 判定句：<span class="mono">owner_kind=team</span> 的资源在 Team 页可管）· <span class="mono">platform</span> 平台级资产（不属任何团队 · 仅平台管理员设定）。资产表带 <span class="mono">team_id + owner_kind</span> 两列（首批五类：Agent / Workflow / 编排实例 / 工具 / 知识源）。<b>Team 回答「谁的」· Domain 回答「在哪跑」</b>——两轴正交，一个 Team 可拥有跨多域的资产。</p>
+  </div>
+  <div class="fld" style="max-width:560px;border:1px solid rgba(224,85,85,.34);border-radius:var(--r-md);padding:10px 12px;background:var(--bg-main)">
+    <label style="color:var(--red)"><b>转移团队</b> <span class="chip bad">危险动作 · 独立动作行</span></label>
+    <p class="tiny" style="margin:0 0 6px">现值 <b>AgentFlow 平台团队</b> → 目标团队 + Admin 确认 + 必填原因。<button class="btn sm" style="color:var(--red);border-color:var(--red);margin-left:6px" data-click data-modal="md-team-move">发起转移…</button></p>
+    <p class="hint" style="margin:0"><b>不进全字段草稿槽：</b>本动作是<b>一次独立请求</b>（<span class="mono">PUT /api/agents/1/team</span> · 带 Admin 确认与原因）——当场校验当场受理，不随页底「保存全部」提交，也不被「放弃」清掉；与 9A 区 IM 通道子区同属<b>即时请求例外口径</b>（同 6 区 env 专用端点、8 区 MCP 即存；见 <span class="btn link" style="padding:0" data-click data-drawer="dr-draft">草稿槽与同源映射</span>）。生效前资产仍记原团队名下 · <span class="mono">agent:team_transferred</span> 留痕。</p>
   </div>
   <div class="callout" style="margin:var(--s2) 0 0">
     <p class="tiny" style="margin:0">① 域是<b>可选</b>字段：不选即 <span class="mono">domain_id NULL</span>（外键 SET NULL），Agent 不隶属任何域。<br>② 管控面把无域 Agent 收进「<b>未分类</b>」虚拟分组（不建表），随时可「归入域」事后指定。<br>③ 域只是分组与共享记忆边界，<b>不是安全边界</b>；自动路由按能力标签，不按域。<br>④ <b>删域不级联删 Agent</b>：其 <span class="mono">domain_id</span> 置 NULL 回落未分类（<span class="btn link" style="padding:0" data-goto="control-plane.html">管控面 · 域列表</span>）。</p>
@@ -379,7 +392,7 @@ details.fold>summary b{color:var(--text);font-weight:600}
   <span class="chip" data-click data-pop="pp-autosave" style="cursor:pointer">自动保存：保存中…</span>
   <span class="chip ok">已存 · 14:38:12</span>
   <span class="chip bad">失败 · 2 处校验未过（见 3 区「开场白必填」· 5 区「会话轮次上限」）</span>
-  <span class="chip warn">dirty · 4 处未提交</span><span class="dim tiny">三态：保存中 → 已存 / 失败（失败在<b>字段旁</b>页内显错，不弹全局 toast、不落库）· 任一字段 dirty 即触发拦截（含 3 区开场白行卡）·「放弃」只清本表单草稿槽，<b>不覆盖其它入口草稿</b> · 8 / 9A 区<b>即时落库</b>不在此条；6 区行改动在草稿内、提交时<b>另走专用端点</b></span>
+  <span class="chip warn">dirty · 4 处未提交</span><span class="dim tiny">三态：保存中 → 已存 / 失败（失败在<b>字段旁</b>页内显错，不弹全局 toast、不落库）· 任一字段 dirty 即触发拦截（含 3 区开场白行卡）·「放弃」只清本表单草稿槽，<b>不覆盖其它入口草稿</b> · 8 / 9A 区<b>即时落库</b>不在此条；6 区行改动在草稿内、提交时<b>另走专用端点</b>；2 区<b>转移团队</b>同样即时端点、不入本草稿</span>
   <span style="flex:1"></span>
   <button class="btn sm primary" data-click data-toast="被拦截：2 处校验未过（3 区开场白 label 必填 · 5 区会话轮次上限须 ≤ 200）—— 校验全过才放开提交，未落库任何字段（演示 · dirty 即拦）">保存全部</button>
   <button class="btn sm" data-click data-modal="md-discard">放弃</button>
@@ -395,6 +408,7 @@ details.fold>summary b{color:var(--text);font-weight:600}
   <table class="tbl compact"><thead><tr><th>详情页子区</th><th>本表单分区</th><th>字段</th></tr></thead><tbody>
     <tr><td class="tiny">基础信息面板</td><td class="mono">1 · 标识</td><td class="tiny">名称 / 别名 / 头像 / 描述</td></tr>
     <tr><td class="tiny">归属与能力组</td><td class="mono">2 · 域归属</td><td class="tiny">domain_id（可 NULL）· 能力标签派生</td></tr>
+    <tr><td class="tiny">通用子栏「归属团队 / 转移团队」</td><td class="mono">2 · 域归属（团队行）</td><td class="tiny">team_id · owner_kind（三态）· 转移=Admin 确认 + 必填原因 <span class="chip warn">即时端点 PUT /agents/1/team · 不入草稿</span></td></tr>
     <tr><td class="tiny">指令 / 开场白</td><td class="mono">3 · 指令与开场白</td><td class="tiny">instructions · prompts[≤3]（label + prompt 必填）· 平台维护层只读不入槽</td></tr>
     <tr><td class="tiny">执行配置面板</td><td class="mono">4 · 运行时与模型 / 5 · 执行设置</td><td class="tiny">runtime · model · thinking · 并发 · 超时 · 重试 · 预算</td></tr>
     <tr><td class="tiny">MCP / 对外集成 / 技能</td><td class="mono">8 / 9 / 10</td><td class="tiny">mcp_config（三态 · 表单|JSON 双 tab）· 连接引用 · 技能版本锁定</td></tr>
@@ -402,7 +416,7 @@ details.fold>summary b{color:var(--text);font-weight:600}
     <tr><td class="tiny">探针抽屉（dr-health）</td><td class="mono">15 · 健康与探活</td><td class="tiny">health_url · 周期 · 阈值</td></tr>
     <tr><td class="tiny">编辑 pop「并发与容量」</td><td class="mono">5 · 执行设置</td><td class="tiny">同一字段的局部入口（改后此处同步）</td></tr>
   </tbody></table>
-  <p class="tiny" style="margin:var(--s3) 0 0"><b>三种写路径（都不同于普通字段）：</b>① <b>6 区 env</b>——行改动<b>在</b>本草稿内，但提交时<b>单独走专用端点</b> <span class="mono">PUT /agents/1/env</span>（带 <span class="mono">rev</span>），<b>不进全字段请求体</b>，保存后不回显；② <b>8 区 MCP</b>——<b>行尾即存</b>，不等「保存全部」；③ <b>9A 区 IM 通道</b>——连接 / 断开 / 改密 / 白名单<b>每步一次即时请求 + 在线验证</b>，<b>不被「放弃」清掉</b>。三者<b>共写-only 与 <span class="mono">****</span> 保留哨兵</b>口径。知识源与编排引用是<b>关系表</b>，不进配置草稿；<b>平台维护层指令</b>只读、亦不入槽。</p>
+  <p class="tiny" style="margin:var(--s3) 0 0"><b>四种写路径（都不同于普通字段）：</b>① <b>6 区 env</b>——行改动<b>在</b>本草稿内，但提交时<b>单独走专用端点</b> <span class="mono">PUT /agents/1/env</span>（带 <span class="mono">rev</span>），<b>不进全字段请求体</b>，保存后不回显；② <b>8 区 MCP</b>——<b>行尾即存</b>，不等「保存全部」；③ <b>9A 区 IM 通道</b>——连接 / 断开 / 改密 / 白名单<b>每步一次即时请求 + 在线验证</b>，<b>不被「放弃」清掉</b>；④ <b>2 区转移团队</b>——<b>归属关系变更不是字段编辑</b>：Admin 确认 + 必填原因，一次即时请求 <span class="mono">PUT /agents/1/team</span>，团队下拉只读，不进草稿、不随「保存全部」、不被「放弃」清掉。①②③ 共用 write-only 与 <span class="mono">****</span> 保留哨兵口径。知识源与编排引用是<b>关系表</b>，不进配置草稿；<b>平台维护层指令</b>只读、亦不入槽。</p>
   <p class="tiny dim" style="margin:var(--s2) 0 0">草稿是一等状态（§6.0 ⑦）：换页、重载、被他人提交都不清你的草稿；「放弃」只清本槽，不覆盖其它入口草稿。</p>
 </div></div>
 
@@ -412,7 +426,7 @@ details.fold>summary b{color:var(--text);font-weight:600}
 <tr><td><span class="chip ok">已存</span></td><td class="tiny">回读版本号 · 页头「演示草稿 · 4 处改动」随之清零</td></tr>
 <tr><td><span class="chip bad">失败</span></td><td class="tiny">页内<b>字段旁</b>显错 + 保留你的输入 · <b>dirty 即拦「保存全部」</b>（本页演示态即卡在此：3 区开场白必填 + 5 区轮次上限）；412 走重载 / 合并 / 强制覆盖三选一</td></tr>
 </tbody></table>
-<p class="tiny dim" style="margin:6px 0 0">保存的是<b>期望态</b>；实例仍跑旧配置，需显式重启（§5.4）。<b>写路径分工</b>：6 区 env 行改动<b>入草稿</b>、提交时<b>另走专用端点</b>（带 rev）；8 区 MCP 与 9A 区 IM 通道<b>即时落库</b>，不等「保存全部」。三处都<b>不回显明文</b>。</p></div>
+<p class="tiny dim" style="margin:6px 0 0">保存的是<b>期望态</b>；实例仍跑旧配置，需显式重启（§5.4）。<b>写路径分工</b>：6 区 env 行改动<b>入草稿</b>、提交时<b>另走专用端点</b>（带 rev）；8 区 MCP 与 9A 区 IM 通道<b>即时落库</b>，不等「保存全部」；<b>2 区转移团队</b>同属即时端点例外（Admin 确认 + 必填原因 · <span class="mono">PUT /agents/1/team</span>）。前两者都<b>不回显明文</b>。</p></div>
 
 <div class="modal" id="md-discard"><div style="padding:var(--s4)"><b style="color:var(--red)">放弃本表单的全部未保存改动？</b>
 <p class="small dim" style="margin:8px 0 4px">将丢弃 <b>4 处</b>改动（① 域归属 → 默认域 ② 会话轮次上限 500 ③ 开场白删第 1 条 ④ 开场白新增行的 label 未填·校验未过）并回到最近一次已存版本 <span class="mono">cfg-1198</span>。</p>
@@ -430,6 +444,15 @@ details.fold>summary b{color:var(--text);font-weight:600}
 <tr><td>凭据主体</td><td class="mono">af-bot</td><td><span class="chip ok">保留 · 不撤销</span></td></tr>
 <tr><td>在途 run</td><td class="mono">task-9 正在用该连接</td><td><span class="chip info">本轮结束后生效</span></td></tr>
 </tbody></table><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开连接引用 · 审计 integration:detached（演示）" data-close>确认断开</button></div></div></div>
+
+<div class="modal" id="md-team-move"><div style="padding:var(--s4)"><b style="color:var(--red)">转移团队 · Agent「审查 Agent · 标准」</b>
+<p class="small dim" style="margin:8px 0 4px">换团队 = <b>转移动作</b>而非改字段：目标团队 + Admin 确认 + 必填原因三项齐，走<b>一次独立请求</b>（<span class="mono">PUT /api/agents/1/team</span>）——<b>不进全字段草稿</b>、不随「保存全部」提交、不被「放弃」清掉（每步即时请求，口径同 9A 区 IM 通道子区句）。</p>
+<div class="fld"><label>目标团队 <b class="need">*</b> <span class="dim">（现值：AgentFlow 平台团队 · owner_kind=team）</span></label><select><option selected>个人 · personal（回自持 · team_id=NULL · owner_kind=personal）</option><option disabled>测试团队（暂停 · 灰置 · 不接受转入 → 400）</option></select><p class="hint">个人 = 创建默认口径；owner_kind 三态（personal · team · platform）注见 2 区。判定句：owner_kind=team 的资源在 Team 页可管。</p></div>
+<div class="fld"><label>Admin 确认 <b class="need">*</b></label><p class="tiny" style="margin:0"><span class="chip warn" data-click data-toast="已勾选：以 Admin 身份确认（状态转换层门禁：动作者须 Admin · 目标团队 Admin 再复核 · 落审计 agent:team_transferred · 演示）">☐ 以 Admin 身份确认（双人复核）</span> <span class="dim tiny">规则加在状态转换层，不只写进表单提示——缺确认整单拒收。</span></p></div>
+<div class="fld"><label>转移原因 <b class="need">*</b> <span class="dim">（必填 · ≤ 200 字 · 入审计，不给默认值）</span></label><input class="mono" value="审查线并入个人实验位，平台团队释放资产配额"><p class="hint">留空则确认钮真实不可点（演示态已填示例值）——<b>同 9A 区断开原因口径</b>。</p></div>
+<div style="text-align:right;margin-top:var(--s2)"><button class="btn sm" data-close>取消（保持不动）</button> <button class="btn sm primary" data-click data-toast="转移入草稿 · 提交走专用端点（PUT /api/agents/1/team · 即时请求不随「保存全部」）· 待目标团队 Admin 复核，生效前资产仍记原团队名下（演示）" data-close>发起转移（即时请求）</button></div>
+<div class="callout" style="margin:var(--s2) 0 0"><p class="tiny" style="margin:0"><b>提交后影响面（转移 ≠ 改名）：</b>本 Agent 的账单与审批链随目标团队走（<span class="mono">team_quota</span> · 审批人解析），成员可见面按目标团队名册换算；<b>不动域归属</b>（Team 回答谁的 · Domain 回答在哪跑，两轴正交），<b>不动 IM 连接与所在小队成员关系</b>（<span class="mono">squads__code-review.html</span> 属执行层编组，非资产归属）。</p></div>
+</div></div>
 
 <div class="modal" id="md-im-disconnect"><div style="padding:var(--s4)"><b style="color:var(--red)">断开该 IM 通道与本 Agent 的绑定？</b>
 <p class="small dim" style="margin:8px 0 4px">断开 = <b>软撤销</b>：通道行转 <span class="mono">unbound</span>（不物删），<b>必填原因</b>，操作者与原因入审计 <span class="mono">im:unbound</span>；<b>凭据留平台加密态 · 入站会话历史快照保留 · 重新填单即可重连</b>。</p>
@@ -450,5 +473,5 @@ details.fold>summary b{color:var(--text);font-weight:600}
 </tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [已由备援接管 · 本实例退役保留      ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="仍有 2 个在途任务：请先终止或改派（演示 · 确认钮拒因真实）" data-close>确认归档</button></div></div></div>
 
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">本页 = 详情页「完整配置 ▸」升格的<b>全字段编辑落地页</b>（17 分区 · 对齐 Multica Settings / Capabilities 字段全集；<b>9A 集成（IM 通道）</b>为新增分区，锚点 <span class="mono">#sec-im</span> 独立编号，<b>不改动既有 <span class="mono">#sec1..16</span> 锚点</b>，旧深链不破）。可点区演示：面包屑「← 返回」与底条「回详情」→ <span class="mono">agent-detail.html</span>（并行重构中，仅链接不改动）·「去运行时发现添加 →」/「凭据口径」注内链 → <span class="mono">runtimes.html</span> · 运行时下拉仅在线项可选（copilot 离线置灰）·「⟳ 刷新模型列表」→ toast · 8 区三态单选为<b>纯 CSS 联动</b>（点「清空」出拒因面板，点「整体替换」出 JSON 编辑框）· 3 区「平台维护层」→ 原生 <span class="mono">&lt;details&gt;</span> 折叠卡（只读 · 不入草稿）· 3 区开场白行卡「✕ / ＋ 添加开场白 / 设为默认」→ toast（未填 label 的行<b>就地红注</b>并把底条推成失败态）· 6 区「⤓ .env」两枚模式 chip → 覆盖同名 / 仅新增 toast · 6 区「👁 解锁」→ 二次确认 + <b>30s 遮回 <span class="mono">****</span></b> toast · <b>清空无「留空即清空」按钮</b>——只能删整行或改值（说明句给口径），<span class="mono">****</span> = 未改保留哨兵 · 7 区「＋ 加一项」一行一项校验红注 + <b>launch 预览</b>（只读、随增删重算）· 8 区「行尾」双 tab 两枚 chip → 表单可用 / sse 禁表单 toast · <b>9A 区（IM 通道 · 6 平台行表）</b>：飞书 / Slack 已连行「⟳ 重验 / 看入站 / 看绑定 / 改密…」→ 写-only 与两层同源口径 toast、「断开…」→ <span class="mono">md-im-disconnect</span>（<b>必填原因 · 软撤销保留审计 im:unbound · 释放唯一 bot 槽 → 重连免 409</b>）· 钉钉 / 自托管 IM「连接 ▸」→ 解锁 <span class="mono">password</span> 密钥行，行内「验证后落库 / 模拟 400 / 模拟 409」三分支各出对应 toast（400 保留输入不落库、409 通道 × Agent 唯一冲突需先断旧连接）· 自托管 IM 子区 <b>allow_from 入站白名单</b>：chip「＋ 加一条 / ✕」与子表「✕ 移除」→ 二次确认口径 toast · 企业微信（未启用 · configured 门）/ Telegram（预览 · 传输未实现）灰置行的 disabled 按钮 → 注门 toast · 管理权 chip（owner 自助 / 仅管理员）→ 权限位说明 toast · 各「删除 / 断开 / 解绑」→ toast 或二次确认 modal · 底条三态 chip → pop、放弃 → modal（草稿槽独立注 + 三种写路径分工）、<b>保存全部 → 本页演示态被校验拦截</b>（2 处未过 → toast 点名并停在字段旁；清掉拦截后才含「实例未重启」口径）· 危险区：归档 → 带在途检查的确认 modal、彻底删除 → <span class="mono">agent-detail__delete-agent.html</span>、复制 → toast（模型类清空 / env 与 MCP 从不复制）　页内数值全为演示 · 浮层闭环：<span class="mono">dr-draft</span> / <span class="mono">pp-autosave</span> / <span class="mono">md-discard</span> / <span class="mono">md-unlink-kb</span> / <span class="mono">md-unlink-int</span> / <span class="mono">md-im-disconnect</span> / <span class="mono">md-archive</span> 均有触发器且可 Esc 关。按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">本页 = 详情页「完整配置 ▸」升格的<b>全字段编辑落地页</b>（17 分区 · 对齐 Multica Settings / Capabilities 字段全集；<b>9A 集成（IM 通道）</b>为新增分区，锚点 <span class="mono">#sec-im</span> 独立编号，<b>不改动既有 <span class="mono">#sec1..16</span> 锚点</b>，旧深链不破）。可点区演示：面包屑「← 返回」与底条「回详情」→ <span class="mono">agent-detail.html</span>（并行重构中，仅链接不改动）·「去运行时发现添加 →」/「凭据口径」注内链 → <span class="mono">runtimes.html</span> · 运行时下拉仅在线项可选（copilot 离线置灰）·「⟳ 刷新模型列表」→ toast · 8 区三态单选为<b>纯 CSS 联动</b>（点「清空」出拒因面板，点「整体替换」出 JSON 编辑框）· 3 区「平台维护层」→ 原生 <span class="mono">&lt;details&gt;</span> 折叠卡（只读 · 不入草稿）· 3 区开场白行卡「✕ / ＋ 添加开场白 / 设为默认」→ toast（未填 label 的行<b>就地红注</b>并把底条推成失败态）· 6 区「⤓ .env」两枚模式 chip → 覆盖同名 / 仅新增 toast · 6 区「👁 解锁」→ 二次确认 + <b>30s 遮回 <span class="mono">****</span></b> toast · <b>清空无「留空即清空」按钮</b>——只能删整行或改值（说明句给口径），<span class="mono">****</span> = 未改保留哨兵 · 7 区「＋ 加一项」一行一项校验红注 + <b>launch 预览</b>（只读、随增删重算）· 8 区「行尾」双 tab 两枚 chip → 表单可用 / sse 禁表单 toast · <b>9A 区（IM 通道 · 6 平台行表）</b>：飞书 / Slack 已连行「⟳ 重验 / 看入站 / 看绑定 / 改密…」→ 写-only 与两层同源口径 toast、「断开…」→ <span class="mono">md-im-disconnect</span>（<b>必填原因 · 软撤销保留审计 im:unbound · 释放唯一 bot 槽 → 重连免 409</b>）· 钉钉 / 自托管 IM「连接 ▸」→ 解锁 <span class="mono">password</span> 密钥行，行内「验证后落库 / 模拟 400 / 模拟 409」三分支各出对应 toast（400 保留输入不落库、409 通道 × Agent 唯一冲突需先断旧连接）· 自托管 IM 子区 <b>allow_from 入站白名单</b>：chip「＋ 加一条 / ✕」与子表「✕ 移除」→ 二次确认口径 toast · 企业微信（未启用 · configured 门）/ Telegram（预览 · 传输未实现）灰置行的 disabled 按钮 → 注门 toast · 管理权 chip（owner 自助 / 仅管理员）→ 权限位说明 toast · 各「删除 / 断开 / 解绑」→ toast 或二次确认 modal · 底条三态 chip → pop、放弃 → modal（草稿槽独立注 + 三种写路径分工）、<b>保存全部 → 本页演示态被校验拦截</b>（2 处未过 → toast 点名并停在字段旁；清掉拦截后才含「实例未重启」口径）· 危险区：归档 → 带在途检查的确认 modal、彻底删除 → <span class="mono">agent-detail__delete-agent.html</span>、复制 → toast（模型类清空 / env 与 MCP 从不复制）· <b>2 区归属团队</b>：下拉只读（换团队不改字段）·「发起转移…」→ <span class="mono">md-team-move</span>（目标团队 + Admin 确认 + 必填原因 → toast「转移入草稿 · 提交走专用端点」——一次独立请求，与 6 / 8 / 9A 区同例外口径；测试团队暂停灰置 400 拒）·「AgentFlow 平台团队 ▸」→ <span class="mono">teams__agentflow.html</span>（用户包在建）　页内数值全为演示 · 浮层闭环：<span class="mono">dr-draft</span> / <span class="mono">pp-autosave</span> / <span class="mono">md-discard</span> / <span class="mono">md-unlink-kb</span> / <span class="mono">md-unlink-int</span> / <span class="mono">md-im-disconnect</span> / <span class="mono">md-team-move</span> / <span class="mono">md-archive</span> 均有触发器且可 Esc 关。按 Esc 关闭浮层。</p>
 </body></html>

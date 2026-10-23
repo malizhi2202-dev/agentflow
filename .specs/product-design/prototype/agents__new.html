@@ -83,10 +83,18 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue)}
   </div>
 </div>
 
-<h4 class="blk" id="sec-own">2 · 归属 <span class="chip info">域可空 · 项目 N:N</span> <span class="chip">= 详情页「设置 · 通用」归属域</span></h4>
+<h4 class="blk" id="sec-own">2 · 归属 <span class="chip info">域可空 · 项目 N:N · Team 回答「谁的」</span> <span class="chip">= 详情页「设置 · 通用」归属域 / 归属团队</span></h4>
 <div class="panel">
   <div class="grid g2">
-    <div class="fld"><label>所属域 <span class="dim">（可选 · 不选=未分类 · 事后可在管控面指定）</span></label>
+    <div class="fld"><label>归属团队 <b class="need">*</b> <span class="dim">（单选 · 谁的资产 · 组织层）</span></label>
+      <div class="tri">
+        <input type="radio" name="team" id="team-self" checked><label for="team-self">个人 · personal（默认）</label>
+        <input type="radio" name="team" id="team-af"><label for="team-af">团队 · AgentFlow 平台团队</label>
+        <input type="radio" name="team" id="team-test" disabled><label for="team-test" style="opacity:.45;cursor:not-allowed">团队 · 测试团队（暂停）</label>
+      </div>
+      <p class="hint" style="margin-top:6px">资产表带 <span class="mono">team_id + owner_kind</span> 两列（选个人 = <span class="mono">owner_kind=personal · team_id=NULL</span>）；<b>换团队 = 转移动作，需 Admin 确认 + 审计</b>——创建期是初选、编辑期不给直接改，转移入口在详情页「设置 · 通用 · 归属团队」。宇宙值见 <span class="pill" data-goto="teams__agentflow.html" data-click>AgentFlow 平台团队 →</span>。</p>
+    </div>
+    <div class="fld"><label>所属域 <span class="dim">（可选 · 不选=未分类 · 事后可在管控面指定 · 与团队正交）</span></label>
       <select>
         <option>默认域</option>
         <option>生产域</option>
@@ -95,15 +103,16 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue)}
       </select>
       <p class="hint">不选即 <span class="mono">domain_id=NULL</span>（外键 SET NULL）。</p>
     </div>
-    <div class="fld"><label>所属项目 <span class="dim">（可多选 · 与 Agent 为 N:N）</span></label>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <span class="pill chip-toggle" data-click data-toast="已关联项目：AgentFlow 主项目（演示）">AgentFlow 主项目 ✓</span>
-        <span class="pill" data-click data-toast="已关联项目：前端重构（演示）">前端重构</span>
-        <span class="pill" data-click data-toast="已关联项目：知识库运营（演示）">知识库运营</span>
-        <span class="pill" data-click data-toast="不选=不属于任何项目 · 详情页「工作」标签显示为空（演示）">不关联</span>
-      </div>
-      <p class="hint">一 Agent 可属多项目、一项目可绑多 Agent（N:N 连接表）；知识空间与项目 1:1，随项目自动创建。</p>
+  </div>
+  <p class="hint" style="margin:2px 0 var(--s3)"><b>两者正交：Team 回答「谁的」（资产归属与协作）· Domain 回答「在哪跑」（调度与共享记忆分组，非安全边界）</b>——一个 Team 可拥有跨多域的资产，同域 Agent 也可来自不同 Team，互不吞并。</p>
+  <div class="fld"><label>所属项目 <span class="dim">（可多选 · 与 Agent 为 N:N）</span></label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="pill chip-toggle" data-click data-toast="已关联项目：AgentFlow 主项目（演示）">AgentFlow 主项目 ✓</span>
+      <span class="pill" data-click data-toast="已关联项目：前端重构（演示）">前端重构</span>
+      <span class="pill" data-click data-toast="已关联项目：知识库运营（演示）">知识库运营</span>
+      <span class="pill" data-click data-toast="不选=不属于任何项目 · 详情页「工作」标签显示为空（演示）">不关联</span>
     </div>
+    <p class="hint">一 Agent 可属多项目、一项目可绑多 Agent（N:N 连接表）；知识空间与项目 1:1，随项目自动创建；项目可见性将移交团队（过渡）。</p>
   </div>
   <div class="callout" style="margin:var(--s2) 0 0">
     <p class="tiny" style="margin:0">① 创建时域是<b>可选</b>字段：不选即 <span class="mono">domain_id=NULL</span>（外键 SET NULL），Agent 不隶属任何域。<br>② 管控面把无域 Agent 收进「未分类」虚拟分组，随时可「归入域」事后指定。<br>③ 域只是分组与共享记忆边界，<b>非安全边界</b>；自动路由按能力标签；删除域时其 Agent 回落未分类。</p>
@@ -191,6 +200,7 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue)}
 </div>
 
 <h4 class="blk" id="sec-int">7 · 能力 · 集成 <span class="chip info">IM 通道连接器 · 6 类通道</span></h4>
+<p class="tiny" style="margin:0 0 var(--s2)"><b>界分：</b><span class="chip">IM 通道 = 对外消息出口；协作小队 = 站内 Agent 编组，互不混用</span>——小队是执行层编组（leader + 成员池 · 可被指派），不在本区配置：<span class="pill" data-goto="squads__code-review.html" data-click>协作小队 · 代码审查小队 →</span></p>
 <div class="callout"><p class="tiny" style="margin:0 0 4px"><b>连接后闭环：</b>IM 消息 → 平台会话 → Agent run → 回复写回原聊天。<b>一通道 × 一 Agent 仅一 bot</b>（<span class="mono">UNIQUE(workspace, agent, channel_type)</span>），同 Agent 可并挂多平台。集成不是泛义「外部服务授权」：GitHub / CI 那类属 MCP 与工具库，IM 通道才是本区。</p>
   <p class="tiny" style="margin:0"><b>卡片五态：</b>未启用（平台 <span class="mono">configured</span> 门）/ 不可用预览 / 未连接 / 已连接（bot 身份回显）/ 无权限只读降级。<b>密钥三原则：</b>写-only 不回显 · 改密钥=断开重连 · AES-256-GCM + 全局 DEK 落库。<b>断开=软撤销</b>（<span class="mono">status=revoked</span> 不物理删行）+ 必填原因。</p></div>
 <div class="imgrid">
@@ -316,7 +326,7 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue)}
 
 <div style="display:flex;gap:var(--s2);margin-top:var(--s5)">
   <button class="btn" data-back="agents.html">取消</button>
-  <button class="btn primary" data-toast="已创建 Agent「审查 Agent · 标准」· 未归属域（未分类）· 关联项目 AgentFlow 主项目 · 运行时 DeepSeek Harness · 模型 deepseek-official/deepseek-chat · 创建后 IM 六通道均为未连接，到详情页「能力 · 集成」再连（演示）">创建 Agent</button>
+  <button class="btn primary" data-toast="已创建 Agent「审查 Agent · 标准」· 未归属域（未分类）· 归属团队 = 个人 · personal（默认 · owner_kind=personal · team_id=NULL；换团队走详情页转移动作）· 关联项目 AgentFlow 主项目 · 运行时 DeepSeek Harness · 模型 deepseek-official/deepseek-chat · 创建后 IM 六通道均为未连接，到详情页「能力 · 集成」再连（演示）">创建 Agent</button>
 </div>
 <p class="hint" style="margin:8px 0 0">复制语义：拷贝到新运行时时「模型 / thinking 档 / 服务档」清空需重选；环境变量值、MCP 配置与 IM 通道凭据从不复制（换实例=重新连接、重新在线验证）。</p>
 </div>
@@ -374,6 +384,6 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue)}
 </div></div>
 
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明（同一 mock 宇宙）：</b>本页所有值均为演示编造，<b>不落库、不发真实请求</b>。新增宇宙值：<b>飞书通道已连接 · bot「AF-草稿演示号」（app_id cli_a97f…）</b>，与 <span class="mono">agent-detail.html</span> / <span class="mono">chat.html</span> 引用同一 bot 名；本页 <b>Slack 保持「未连接」</b>——它修正的是早先「Slack 已绑」的口径冲突：那条属<b>对话中心平台级渠道</b>（§6.8 · 工作区级安装），不等于本 Agent 的 IM 通道连接，两层不同主体、不同表（<span class="mono">channel_configs</span> vs <span class="mono">integrations</span>）。企业微信 <span class="mono">configured=false</span>（平台级门未开）、Telegram 传输未实现，均为如实标注而非遗漏。运行时 dsh 在线、模型 2 个、并发 6 / 全机 20、技能 2、MCP 2、知识源 2 + 1 冻结、启动语 2/3 条，沿用全站既有 mock 口径。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：起始点二选一（默认「空白创建」）· 顶部 13 个 <span class="mono">#sec-*</span> 分区锚点（节名与详情页「能力 / 设置」子栏 1:1）· 图标与项目 / 域 / 访问两轴 radio（可见 = <span class="mono">#vis-priv</span> <span class="mono">#vis-ws</span> · 可运行 = <span class="mono">#run-me</span> <span class="mono">#run-some</span> <span class="mono">#run-all</span> · radio 不挂 toast，取值走「读当前选择 ▸」）· 运行时下拉仅列在线项（copilot 置灰）·「去运行时发现添加 →」→ <span class="mono">runtimes.html</span> ·「⟳ 刷新模型列表」→ toast · 技能 / MCP / 知识源 / 触发许可 chips → toast · <b>能力 · 集成</b> 六卡：飞书「断开连接」→ <span class="mono">md-im-disc</span>（软撤销 + 必填原因）、「查看入站会话」→ toast；Slack「⟴ 连接」→ <span class="mono">md-im-slack</span>（BYO 双 token · 400 / 409 文案）；钉钉 → <span class="mono">md-im-ding</span>；自托管 IM（Tuitui 位）→ <span class="mono">md-im-self</span>（三字段 + <span class="mono">allow_from</span> 白名单 chips 可删可加）；企微灰卡（configured 门不可点）、Telegram「为什么点不动」→ toast · 深链 <span class="mono">#md-im-disc</span> 等可直达模态 · 探活 / 危险区位置 → 一条说明 callout · 「取消」返回 <span class="mono">agents.html</span> · 「创建 Agent」→ toast（提示创建后到详情页连 IM）· 底部两行分别为复制语义与演示数据说明　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明（同一 mock 宇宙）：</b>本页所有值均为演示编造，<b>不落库、不发真实请求</b>。新增宇宙值：<b>飞书通道已连接 · bot「AF-草稿演示号」（app_id cli_a97f…）</b>，与 <span class="mono">agent-detail.html</span> / <span class="mono">chat.html</span> 引用同一 bot 名；本页 <b>Slack 保持「未连接」</b>——它修正的是早先「Slack 已绑」的口径冲突：那条属<b>对话中心平台级渠道</b>（§6.8 · 工作区级安装），不等于本 Agent 的 IM 通道连接，两层不同主体、不同表（<span class="mono">channel_configs</span> vs <span class="mono">integrations</span>）。企业微信 <span class="mono">configured=false</span>（平台级门未开）、Telegram 传输未实现，均为如实标注而非遗漏。运行时 dsh 在线、模型 2 个、并发 6 / 全机 20、技能 2、MCP 2、知识源 2 + 1 冻结、启动语 2/3 条，沿用全站既有 mock 口径。归属轴宇宙值：团队清单 = <b>个人 · personal（默认）/ AgentFlow 平台团队 / 测试团队（暂停 · 灰置）</b>，与 <span class="mono">teams__agentflow.html</span>（用户包在建）同源；§7 界分句指向 <span class="mono">squads__code-review.html</span>（协作小队 · 代码审查小队 · 同包在建）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：起始点二选一（默认「空白创建」）· 顶部 13 个 <span class="mono">#sec-*</span> 分区锚点（节名与详情页「能力 / 设置」子栏 1:1）· 图标与项目 / 域 / 团队 / 访问两轴 radio（团队 = <span class="mono">#team-self</span> <span class="mono">#team-af</span> <span class="mono">#team-test</span>（暂停灰置） · 可见 = <span class="mono">#vis-priv</span> <span class="mono">#vis-ws</span> · 可运行 = <span class="mono">#run-me</span> <span class="mono">#run-some</span> <span class="mono">#run-all</span> · radio 不挂 toast，取值走「读当前选择 ▸」）· §7 头部界分 chip → <span class="mono">squads__code-review.html</span> · 运行时下拉仅列在线项（copilot 置灰）·「去运行时发现添加 →」→ <span class="mono">runtimes.html</span> ·「⟳ 刷新模型列表」→ toast · 技能 / MCP / 知识源 / 触发许可 chips → toast · <b>能力 · 集成</b> 六卡：飞书「断开连接」→ <span class="mono">md-im-disc</span>（软撤销 + 必填原因）、「查看入站会话」→ toast；Slack「⟴ 连接」→ <span class="mono">md-im-slack</span>（BYO 双 token · 400 / 409 文案）；钉钉 → <span class="mono">md-im-ding</span>；自托管 IM（Tuitui 位）→ <span class="mono">md-im-self</span>（三字段 + <span class="mono">allow_from</span> 白名单 chips 可删可加）；企微灰卡（configured 门不可点）、Telegram「为什么点不动」→ toast · 深链 <span class="mono">#md-im-disc</span> 等可直达模态 · 探活 / 危险区位置 → 一条说明 callout · 「取消」返回 <span class="mono">agents.html</span> · 「创建 Agent」→ toast（提示创建后到详情页连 IM）· 底部两行分别为复制语义与演示数据说明　按 Esc 关闭浮层。</p>
 </body></html>

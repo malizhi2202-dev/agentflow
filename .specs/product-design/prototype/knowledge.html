@@ -32,6 +32,7 @@ tr[id],div[id]{scroll-margin-top:46px}
           <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
           <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
           <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
           <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
           <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
           <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
@@ -80,6 +81,7 @@ tr[id],div[id]{scroll-margin-top:46px}
             <div class="callout" style="margin:0 0 var(--s2)"><p class="tiny" style="margin:0"><b>写不进去，是设计而非缺能：</b>公共知识无「编辑 / 重建索引 / 删除」行操作——改它要走<b>晋升与评审</b>：空间侧 L3 沉淀 → 提交申请 → 平台管理员评审 → 通过后作为新版本发布（<span class="mono">auth:knowledge_promoted</span> 入审计）。<span class="btn link" data-click data-modal="md-promote">申请晋升一篇到公共知识 →</span></p></div>
 
             <h4 class="sec-h" id="spaces"><span class="n">§2</span> 知识空间 <span class="chip info">与项目一一对应 · 成员读写</span><span class="desc">非成员不可见（越权统一 404）· 空间成员（用户与 Agent）可读 + 可写 · 项目自身亦可读写</span></h4>
+            <p class="tiny dim" style="margin:0 0 var(--s2)"><b>归属（过渡注）：</b>空间归属目前唯一 = 所属项目（1:1 判定不变）；后续可再挂「团队」作用域——组织团队 Team / 协作小队 Squad（见 <span class="mono">teams.html</span>）按「团队成员只读引用」级关联空间，不产生第二个可写空间。</p>
             <table class="tbl compact">
               <thead><tr><th>知识空间</th><th>所属项目</th><th>成员数</th><th>文档数</th><th>最近写入</th><th>操作</th></tr></thead>
               <tbody>
