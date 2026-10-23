@@ -36,6 +36,10 @@
 <p class="tiny dim" style="margin-top:6px">瀑布按「步 token ÷ 最大步（seq 6 = 16,420）」归一。入参占大头即说明<b>上下文投喂过宽</b>（seq 6 把 tsc 全文错误倒回上下文）；可折叠的原始出参在每步详情里。</p>
 <h4 class="blk">实时增量（⑧ 契约：推送只降延迟，形状与查询响应一致）</h4>
 <div class="timeline"><p class="tl-item"><b>seq 8 14:06:23</b> failed:no-progress · 收尾写入 7 步 · 3 条同类失败通知待自愈归档</p><p class="tl-item fail">seq 7 14:04:20 edit 被 gate_registry 拦截（<span class="mono">as any</span>）</p><p class="tl-item">seq 6 14:03:02 tsc 31 errors · 出参截断标记 truncated（留 2KB / 原 4.2KB）</p><p class="tl-item">SSE 增量：本 run 推送 6 次 · 与 GET 全量一致（<b>推送不改变形状</b>）</p></div>
+<h4 class="blk">终态语义与重跑身份（口径卡 · 纯文 · 2026-10-23 R8-11）</h4>
+<p class="tiny" style="margin:0 0 6px"><b>「无事发生 kept」是合法终态：</b>Agent 查完交回<b>空 diff</b> —— 不判失败、也不在报告里隐身（kept 与本页上方 <span class="mono">failed:no-progress</span> 同列终态词表，语义是「无事可做而正确退出」≠失败≠成功交付）。兜底告警：全局 kept 占比 <b>≥80%</b>（演示值）触发「<b>在池外抄参考</b>」告警——单次无事发生合法，全员无事发生是选择器病了。</p>
+<p class="tiny" style="margin:0 0 6px"><b>重跑身份 = 整包 13 键</b>（含完整任务流与 seed）：下方「从失败步重跑」要续跑得 13 键全等；对不上<b>唯一出路是新目录</b>重开一轮，<b>不做合并</b>、不出「部分复用」提示。</p>
+<p class="tiny" style="margin:0 0 6px"><b>账本失效按内容指纹、不按时间戳：</b>篡改或删单件产物 → 仅该件从「ok」转重算，兄弟步仍保持 skipped；只改时间戳不触发任何失效（演示口径）。</p>
 <h4 class="blk">操作</h4>
 <p><button class="btn sm primary" data-click data-goto="replay__rerun.html">从失败步重跑</button> <button class="btn sm" data-toast="已导出 JSONL（含 17 次工具调用入出参 · 演示）">导出 JSONL</button> <button class="btn sm" data-click data-goto="replay.html">看任务全部 run（按任务聚合）</button> <button class="btn sm" data-click data-goto="board__af-116.html">回任务详情（run 历史）</button></p>
 </div>

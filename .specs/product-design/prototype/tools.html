@@ -40,6 +40,7 @@
               <span style="flex:1"></span><span class="pill mono">🔍 搜索工具…</span>
             </div>
             <p class="tiny dim" style="margin:0 0 var(--s3)"><b>列表「归属」语义一行（owner_kind · 过渡注）：</b><span class="chip mono">platform · 内置</span> <span class="chip mono">user · 个人</span> <span class="chip mono">team · 小队共享</span>——演示：「代码审查」Skill = <span class="chip info">team · 代码审查小队</span>（成员可引用、非全平台公开；删改仍按状态×角色，归属不授予行为）。</p>
+            <p class="tiny dim" style="margin:0 0 var(--s3)"><b>Skill 卡两行口径（2026-10-23 R8-9 · 纯指针不复述细则）：</b><b>来源已钉住的技能卡，刷新 = 换内容保身份</b>——只换正文与随附文件，库内 id 与全部 Agent 绑定不变；<b>导入同名 = 四态选择（fail / overwrite / rename / skip），覆盖权限窄于编辑权限</b>——权威句在技能详情页（「代码审查」卡即是），本页卡片数据不因此改动。</p>
             <div class="grid g3">
               <div class="panel"><div data-click data-goto="tools__fs-read-write.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">文件读写</span><span class="chip info">Plugin</span></div><p class="tiny muted" style="margin:5px 0">本地文件系统读写，支持路径白名单</p><div style="margin-top:6px"><span class="chip mono">8 参数</span> <span class="chip ok">启用</span></div></div><div class="card-foot"><span class="chip">被 3 个 Agent 引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
               <div class="panel"><div data-click data-goto="tools__fs-read-write.html"><div style="display:flex;gap:6px;align-items:center"><span class="h2p" style="margin:0">Shell 执行</span><span class="chip info">Plugin</span></div><p class="tiny muted" style="margin:5px 0">受安全栅栏约束的命令执行</p><div style="margin-top:6px"><span class="chip mono">5 参数</span> <span class="chip ok">启用</span></div></div><div class="card-foot"><span class="chip">被 2 个 Agent 引用</span><span style="flex:1"></span><span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></div></div>
@@ -54,6 +55,7 @@
             <div class="callout bad" style="margin-top:var(--s4)">
               <p><b>错误态示例：</b>MCP 服务连接失败时卡片保持可见但标注「连接失败」，并提示「重试连接」——不隐藏、不删除，避免用户误以为工具不存在。</p>
             </div>
+            <div class="callout" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>模板导出闭环三句（2026-10-23 R8-9 · 模板与工具同库同门，模板市场落点即本页，故三句挂此）：</b>① <b>导出字节稳定，diff 即评审</b>——同一份模板两次导出逐字节一致，评审读 diff 不读包；② <b>机器本地字段剥离，非空即停发</b>——导出前剥掉机器本地字段，剥不干净（剥离后仍非空）就<b>停发这份导出</b>，<b>不静默丢差</b>照样发；③ <b>导出后再校验，只回答是否漂移</b>——校验只说「这份导出与源一致 / 已漂移」，不改内容、不补字段。</p></div>
           </div>
         </div>
       </div>

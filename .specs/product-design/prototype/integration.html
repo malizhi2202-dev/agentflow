@@ -107,6 +107,7 @@
               </div>
             </div>
             <div class="callout warn" style="margin-top:var(--s2)"><p class="tiny" style="margin:0"><b>已知限制（与本页 <span class="mono">watch</span> 同源，写在界面上不藏在文档里）：</b>外部渠道连接由<b>单一持有进程</b>路由（与 change_log / 调度队列同一处进程内状态）——<b>多副本部署下，非持有副本在重连窗口内的回复不送达，计入丢弃计数</b>。当前承诺 = <b>单副本</b>；跨副本前不承诺「消息必达」。<span class="btn link" data-goto="integration__watch.html" data-click>看 watch 侧同一句坦白与 cursor 语义 →</span></p></div>
+            <p class="tiny" style="margin:var(--s2) 0 0"><b>出站投递与媒体三句（2026-10-23 R8-6 · 口径句非编造值，权威在此一处）：</b>① <b>同任务重试必须续写上一轮回复，不另起一条</b>——重试链按轮次归根，第二次尝试在 Bot 上一条回复上<b>续写</b>；同一问题被答两遍是事故，不是重试。② <b>发送状态未知即全线终止</b>：请求已发出而回执不明 = 该轮出站全部停止；<b>无幂等键的渠道不可重发</b>（宁可少发不可双发；上方「写回重试 3 次」只对<b>确定失败</b>成立）。③ <b>媒体先写待落账、绑定成功账目即消失</b>——文件先落 pending 账再上传，绑定进消息的瞬间销账；账上残留的都是没落成的，清扫与对账都有依据。</p>
           </div>
         </div>
       </div>

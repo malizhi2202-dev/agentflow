@@ -64,6 +64,8 @@
                   <tr><td class="tiny">Run 状态与结果（档案 · 见 <a href="#rt-runfile" style="color:var(--blue)">右卡</a>）</td><td class="tiny">真实文件改动与命令执行</td></tr>
                 </tbody></table>
                 <p class="tiny" style="margin:6px 0 0"><b>这层边界在云与自托管是同一套</b>——换部署形态不换分账位置。两条例外如实写：<b>① Agent 自定义环境变量与 MCP 配置存在服务端，执行时下发给 runtime</b>（界面对外只给掩码 <span class="mono">***</span>，见 <span class="pill" data-goto="agent-detail__config.html#sec6" data-click>配置 · 6 区</span>）；<b>② Domain 不是安全边界</b>（只是分组与共享记忆边界，见 <span class="pill" data-goto="control-plane.html" data-click>管控面</span> 与 <span class="pill" data-goto="agent-detail__config.html#sec2" data-click>配置 · 2 区</span>）——本页说的「边界」指数据与执行各落在哪一侧，不是权限隔离声明。</p>
+                <p class="tiny" style="margin:6px 0 0"><b>运行凭据三短句（2026-10-23 R8-7 · 口径注，不改上方分账）：</b>① <b>owner 缺失宁取消任务，不回退个人凭据</b>——run 级临时令牌铸不出来就取消该次执行，绝不降级借用机器属主的 CLI 登录态去跑；② <b>凭据缓存 TTL = min(10 分, 令牌剩余寿命)</b>，缓存故障不阻断执行、<b>降级直查</b>（撤销生效窗最长约 10 分钟是有意权衡，不是漏洞）；③ <b>RPC 结果不确定时禁止 HTTP 兜底防双领</b>——帧已发出而连接断了 = 领取结果未知，此时补一次 HTTP 领取可能造成同一任务被双领，宁可等超时回收再重派。</p>
+                <p class="tiny dim" style="margin:6px 0 0"><b>能力协商一句：</b>协商用 <b>capability 列表</b>不用版本号——<b>版本够新 ≠ 实现存在</b>；协商缺省按<b>最老客户端</b>处理（fail-closed），且<b>协商结果禁用于安全判断</b>（只决定功能可见性，不决定权限边界）。</p>
             </div>
             <div class="panel tight" style="margin:0 0 var(--s3)">
               <p class="tiny muted" style="margin:0 0 8px">本机适配器探测 · <span class="chip ok">现状已实现</span>（<span class="mono">backend/runtime/adapters/</span> · <span class="mono">get_adapters()</span>）— 目前仅供「运行时监控」消费（RuntimeEvent 观测）；<b>本模块的目标是把探测结果接进运行时注册表与模型目录</b>。探测方式 = <b>CLI 日志目录指纹</b>（非 PATH 探测），解析其 JSONL 会话得 模型 / tokens / 工具调用 / @引用，缓存 60s。数值为演示。</p>

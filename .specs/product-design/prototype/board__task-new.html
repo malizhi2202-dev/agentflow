@@ -6,7 +6,7 @@
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="workbench.html">工作台</span></div>
 <div class="detail-top"><span class="pill" data-back="board.html" data-click>← 返回 任务看板</span><span class="crumb"><b>任务 › 新建（POST /api/work-items）</b></span><span class="chip warn">未提交</span><span class="chip bad">创建 ≠ 派单</span></div>
 <div class="detail-body">
-<div class="callout bad"><p class="tiny" style="margin:0"><b>注意：创建 ≠ 派单。</b>保存只写 work_item 行（status=unstarted、triage=untriaged）；要跑 Agent 需<b>另外</b>产生运行请求，且要过受理门与四道门。（受理门 = <b>自研正交轴</b>：竞品 multica 无受理态，其 7 态×4 类别里 triage 0 命中——详见 board.html 未开始列注记。）</p></div>
+<div class="callout bad"><p class="tiny" style="margin:0"><b>注意：创建 ≠ 派单。</b>保存只写 work_item 行（status=unstarted、triage=untriaged）；要跑 Agent 需<b>另外</b>产生运行请求，且要过受理门与四道门。（受理门 = <b>同构实证轴</b> · 2026-10-23 代码校正：multica 代码已落地 <span class="mono">triage_state</span> 正交列（可空列+专属准入码+重复守卫豁免，dispatch/reason.go 实证），其 docs 未写=文档滞后，旧「竞品 multica 无受理态、triage 0 命中」句作废——详见 board.html 未开始列注记。）</p></div>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px">title    [知识库支持 .xlsx 白名单          ]
 status   ( ) unstarted (*) started ( ) done ( ) cancelled   ← 语义锚（终态 mono 统一 cancelled 双 l），与 triage 正交
 triage   (*) untriaged  ( ) accepted  ( ) not-needed

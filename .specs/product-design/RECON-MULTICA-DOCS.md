@@ -8,6 +8,8 @@
 
 ## 四条纠偏（本档的结论骨架）
 
+> **〔2026-10-23 更新 · 第 8 轮代码层扫描（D-S22）〕**附录 A「multica 无」清单**①（无 triage 态）与③（无规则版本账本）两条已被代码层实证翻转**（本档已就地改文，警示保留于该两条内）；四则其余与清单其余「multica 无」条目**仍然有效**。其 docs 系统性滞后于后端——**引用前查码**（证据：`.specs/platform-evolution/D-S22-multica-code/RECON-server.md` / `RECON-client.md`，全带行号）。
+
 | # | 纠偏 | 证据 |
 |---|---|---|
 | **纠偏①** | **状态由 Agent 在运行中显式写**，服务端不因 run 起/止翻状态；只有两条系统例外（失败回收、PR 合并置 done）。 | `issues.mdx:66`、`issues.mdx:69-72`、`tasks.mdx:86`、`assigning-issues.mdx:68` |
@@ -166,9 +168,9 @@
 - **E-2｜文档 ⟂ 代码分歧（归档状态是否须迁空）**：`.mdx` 只说「归档=下架不删、在其上的 issue 保留」（`issues.mdx:95`），**没有任何 409 前置**；409 在代码里——`server/internal/handler/issue_status.go:427-431` 返回 `code=issue_status_in_use` + `issue_count` 与 "move them to another status first"，内置态 403；`server/pkg/db/queries/issue_status.sql:106-118` 的计数注释明写 "Archive precondition, **including terminal issues**"，并 `LockIssueStatusCatalog` 取 EXCLUSIVE。→ 文档层为「不阻塞」，代码层为「须迁空」，v16 采**代码口径**并标注分歧来源为代码非文档。
 - **E-3｜拼写**：multica 用英式双 l `cancelled`（`issues.mdx:50`、`tasks.mdx:46`、`developers/conventions.mdx:204` 明文规定）。我方 PRODUCT-DESIGN.html v15 **零** `cancel*` 命中，v16 起在 run 八态、删除⟂关闭、熔断分母三处统一写 `cancelled`。
 - **「multica 无」清单（grep 全库英文正文 0 命中为证）**：
-  ① **无 `triage` 态**（我方受理/分诊态为自研，不得写「对齐 multica」）；
+  ① **无 `triage` 态 → 已翻转（2026-10-23 · D-S22 代码层实证）**：`triage_state` 可空列＋`issue_triage_guard` 守卫＋dispatch 专属拒因已实装（483 迁移 / `reason.go`），docs 全树零命中＝**后端先行、文档没跟上**——我方「待受理」轴由「自研、不得写对齐 multica」**获同构实证**（三条更细规则可并，见 D-S22 R8-1）。**其 docs 滞后，引用前查码**；
   ② **无 `reconcile` 一词**（无调和引擎、无自愈总闸，见易抄歪 ③）；
-  ③ **无自动化规则版本账本**（无 `spec_version`/快照/diff 面）；
+  ③ **无自动化规则版本账本 → 已翻转（2026-10-23 · D-S22 代码层实证）**：`rule_versions` 不可变行实存（迁移 186/189/449）——语义＝**只有实质发布（启停 / 改触发 / 改目标 / 改指令）追加行**，改名写描述不转移责任；`created_by` 专供授权、`published_by` 纯审计不得当授权输入；回填刻意不精确、无主老 trigger 故意 NULL 让派发 fail-closed（不给恢复路径）。**其 docs 滞后（本轮取证 43 篇主题零命中），引用前查码**；
   ④ **无「链顶人类」措辞**——它的问责实现是 run-scoped `mat_` 短票四锚（用户 × workspace × Agent × run）+ ≤24h + run 结束即焚（`auth-tokens.mdx:80`）、够不到仅人操作（`:82`）；我方保留该措辞但**必须挂在同一组机制上**，不作口号用；
   ⑤ **无 Guest 角色**（只有 owner/admin/member 三档，`members-roles.mdx:8`）；
   ⑥ **无「单触发器 UI 启停」**（`autopilots.mdx:39` 只有整条规则在 UI，单个触发器仅 CLI）；
@@ -201,3 +203,5 @@
 | A-4 | 「子进程继承 every environment variable」记在 `daemon-runtimes.mdx:111` | 原句为「inherits all of them, including `MULTICA_TOKEN`」，语义一致、措辞已按原文收紧 |
 
 另：`developers/` 下 3 篇（architecture / contributing / conventions）计入范围；E-1（46→45 篇）、E-2（归档态 409 只在代码不在文档）两处按附录 A 执行。
+
+> **RECON 指针（2026-10-23 · 第 8 轮）**：本档=文档层事实档；**代码层**事实（含附录 A ①③ 两处翻转的全部行号证据，及「引用其 docs 前须复核代码」清单）见 `.specs/platform-evolution/D-S22-multica-code/RECON-server.md` / `RECON-client.md`，裁决见同包 `CONCLUSION.md`。
