@@ -34,3 +34,8 @@
 ## 🟡 观察（摘重要，暂不并）
 WireCategory 展示适配器防装机破坏+非拉丁名退化 `started_2`（agent 锚点是类别非名）+目录扩展不定义 built-in；浮点排序中点间距耗尽 409 宁死不静默重排（锚点读不同事务=自认缺口）；share link 每 ws 恒一条 active 轮换即撤销+同事务结清 pending 邀请；限流桶键含路径+Lua 原子+fail-open+XFF 最右非可信+webhook 三桶先挡随机 token 扫库+600/IP 绝对熔断连成功也扣；死表 github_pending_check_suite/pending_installation 无 reaper/issue_dependency 只活在 schema（无读写无环检测）；reactions 真插入才 bump revision 重复零事件；PAT 3 天轮询 CAS 谓词化/session 续期三条件（仅安全方法防自毁 CSRF+半衰期钳）/验证码第 5 次后旧码隐形/channel_binding TTL 写进 DB CHECK 应用改不动/instance_secret 插入后重读收敛 DEK+down 故意不删行（删键=报废全部密文）；taskfailure 27 码+4 裸串、数字边界守卫「1500ms 不得进 5xx 桶」、SQL CASE 真源 Go 锁步；dbid 混装 v4+v7 故禁回读/凭据/租约；FF "42%"确定性分桶、三枚退役开关因老客户端硬编码 true 继续下发（停发即弄坏装机）；redact 恰 15 正则 map 键永不脱敏深 32 fail-closed call-site 制；maintenance Step savepoint 失败自动 paused 要人 resume、账本说跑过≠schema 还在（pg_get_expr 复核 CHECK 体）、未完以 incomplete 码 2 退；dbreader 熔断恢复由业务读半开非后台 ping；pin 老客户端遇未知型 404 后永久自动取消置顶（破坏性兼容教训）；防自嵌套 marker「读不到=无信号绝不 fail-closed」；DB trigger 当唯一真源（终态转换散在 ~12 条查询，trigger 让未来绕不过）；配额挂编号分配唯一入口**超限回滚但编号跳号有意设计**、策略开事务前解析防网络持库锁；ACP deliverable tracker「工具调用是唯一边界」切 narration 防泄漏进频道、effort configOptions 发现+运行中热推、usage 每桶 max 调和。
 > 未覆盖（如实）：前端 packages 行为镜像、service 大文件全量、导出面（handler 层无导出端点已证）、analytics 事件明细。
+
+## ④ GD 勘误注（2026-10-23 · 面板实核 10 处行号全实存，三处引段修正）
+- webhook dedupe-NULL：注释实在 `webhook_delivery.go:232`、插入 `:312-326`（原文引段 :288-325 微偏）；「只挡 rejected/无效签名/无 body」于 :253-258 逐字成立。
+- `plugin.go:333,419` 须写作 **`service/plugin.go`**（handler/ 有同名文件）。
+- `run_sweep.py:209-235` 续跑身份实为 **13 键**（非「12 项」）。
