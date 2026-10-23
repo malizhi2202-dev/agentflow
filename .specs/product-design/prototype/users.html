@@ -36,7 +36,7 @@
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">用户管理</span><span class="right"><span class="chip mono">users.json</span><span class="pill" data-click data-pop="pp-filter">筛选：全部 ▾</span><button class="btn sm primary" data-click data-goto="users__user-new.html">+ 新建用户</button></span></div>
+          <div class="app-top"><span class="crumb">用户管理</span><span class="right"><span class="chip mono">users.json</span><span class="pill" data-click data-pop="pp-filter">筛选：全部 ▾</span><button class="btn sm" data-click data-modal="md-invite">＋ 邀请成员</button><button class="btn sm primary" data-click data-goto="users__user-new.html">+ 新建用户</button></span></div>
           <div class="app-body">
             <div class="grid g2" style="align-items:start;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)">
               <div>
@@ -141,6 +141,16 @@
 <tr><td>有未轮换出厂口令</td><td class="mono tiny">1</td><td><span class="btn link" data-toast="筛选：must_change_password 或存量无盐哈希 → admin 1 行（红条）（演示）" data-close>选</span></td></tr>
 <tr><td>可见项目 = 全部</td><td class="mono tiny">2</td><td><span class="btn link" data-toast="筛选：project_ids 未指定 → admin + wangwu（演示）" data-close>选</span></td></tr>
 </tbody></table></div>
+<div class="modal" id="md-invite"><div style="padding:var(--s4)"><b>邀请成员 · 邮件加入链接（演示）</b>
+<p class="small dim" style="margin:8px 0">被邀请人邮箱收一封邀请邮件：<b>接受链接 7 天有效 · 只在邮件正文</b>——<b style="color:var(--red)">产品内没有任何可查看 / 可复制 / 可再发的邀请链接口</b>（政策原文与 owner 侧三条硬规矩见 <span class="mono">users__admin.html</span>「入职与 owner 侧的三条硬规矩」，此处一句挂靠不重抄）。邀请<b>只授 workspace 角色 admin / member 二选一</b>；<b>owner 不走邀请路径</b>（须本人入职后由既有 owner 提升）。</p>
+<table class="tbl compact"><tbody>
+<tr><td>邀请邮箱</td><td class="tiny"><input value="lisi.new@example.com" style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:6px 8px;font:12px var(--font-mono);width:240px"> <span class="tiny dim">（演示值）</span></td></tr>
+<tr><td>workspace 角色</td><td class="tiny"><label style="margin-right:10px"><input type="radio" name="inv-role"> admin</label><label><input type="radio" name="inv-role" checked> member</label> <span class="tiny dim">二选一 · 单选（owner 不在此列 · 2026-10-23）</span></td></tr>
+<tr><td>加入本项目</td><td class="tiny"><label><input type="checkbox" checked> ☑ 加入本项目（默认勾）</label> <span class="tiny dim">= 进 <span class="mono">project_ids</span> 台账——<b>与专属知识空间成员同一份台账</b>；不勾 = 只进 workspace，项目名单与空间可见照旧不含他</span></td></tr>
+<tr><td>审计</td><td class="tiny"><span class="mono">user:invited + project:member_added</span> <span class="chip">演示</span></td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin-top:6px">被邀请人接受后按新建用户同一规则同步生成其 1:1 个人 Agent（默认私有 · 域=未分类）；未接受前不入册。本模态在 users.html 与 projects__agentflow.html <b>各建一份、同一模态文案</b>（跨页不能共用浮层）；第三入口 = <span class="mono">users__admin.html</span>「发新成员邀请」钮。</p>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="✓ 邀请邮件已发出 · 链接只在邮件正文（7 天有效）· 角色=member · 已勾「加入本项目」→ project_ids 台账（与专属空间同一份）· 未接受前不入册 · 审计 user:invited + project:member_added（演示）" data-close>发送邀请</button></div></div></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
 <p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明：</b>用户名与角色为演示值；6 个权限点名称与说明与源码 <span class="mono">PERMISSION_DEFS</span> 完全一致。用户数据存于 <span class="mono">users.json</span>（跨项目共享、原子写 + 文件锁）。<b>红注（两处规划态）：</b>① <span class="mono">users.json</span> → <b>MySQL <span class="mono">users</span> 表</b> 为<b>裁定⑦</b>（可计量追踪数据权威库 = MySQL，文件态退役）；② 活跃会话列表与单条撤销属 <b>P0-1 规划态</b>——当前身份来自 <span class="mono">X-User-Id</span> 请求头，尚无会话表可撤销。出厂口令 <span class="mono">123456</span> 在 P0-2 清零，故新建用户表单的「初始口令」字段以划除态呈现。admin 的 6 项权限为<b>恒真豁免、不可削减</b>。「个人 Agent」列为演示投影：每用户 1:1 自动生成的个人 Agent（命名规则「&lt;显示名&gt; · 个人」，已有名字如「运维哨兵」则保留直链；可见性默认 private · 域=未分类），详情演示页统一指向 <span class="mono">agent-detail.html</span>。</p>
 可点区演示（本轮交互重分级后）：用户名 / 行内「详情 · 编辑」/ 右栏面板标题 → <b>独立详情页</b>（users__testuser · users__admin · users__lisi · users__wangwu · users__newbie：权限点表 · 活跃会话 + 单条撤销 · 变更历史时间线 · 保存与重置入口全宽展示）· 「个人 Agent」列名称 → <span class="mono">agent-detail.html</span>（1:1 个人 Agent 详情演示）· 顶栏「+ 新建用户」→ <b>独立表单页</b> users__user-new（原新建弹层已升格 · 页内含同步生成个人 Agent 预览卡）· 行内「改角色」/「删除」/「重置密码」/「撤销会话」→ 一屏读得完的二次确认 modal（影响清单 + 唯一原因框）· 「筛选：全部 ▾」→ 选项 ≤ 8 的选择器 pop · 保存 / 导出快照 → toast · admin 行「改角色（禁用）」「删除（禁用）」→ 拒绝原因 toast　按 Esc 关闭所有浮层。

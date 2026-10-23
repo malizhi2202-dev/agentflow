@@ -160,3 +160,5 @@ Team（新增 · 组织单元 · MySQL teams/team_members）
 ## ⑤ 用户意见补记（2026-09-23 · 原话：「结合我现有代码 我现在代码已经可以创建agent了 并且关联了一些实体 在此基础上扩充 但是没有team的概念」）
 
 **用户原话确认 S16 是本轮唯一真缺概念：「我现在代码已经可以创建 agent 了…但是没有 team 的概念」——**Agent 创建/关联侧走 S14/S15 增量路线即可，Team 无既有代码包袱，按 R2 直接建：`teams` + `team_members`（MySQL day-1 真外键）+ 首批五类资产（agents/workflows/orchestration/tools/knowledge_sources）各加 `team_id + owner_kind`，**存量行 owner_kind 默认 personal 零回填**。执行协作组语义仍按 R1 一词一义（pattern 枚举，不建实体）。Project 归 Team 之下 + `project_agents` 连接表（§5）继续作为关系收口项。
+
+> **〔口径收口注 · 2026-10-23〕** 本结论 R2 首批五类（含 orchestration_instances/templates、域次批）与小队轮原型形态存在差项。经专家团投票（架构师/研发负责人/产品负责人 3/3 全票，R13.2 全票自动执行）**按原型口径收口：首批=agents/workflows/tools/knowledge_sources/域，编排实例与模板列次批**。本段上方 R2 原文保留为历史注，不再是并行口径；编排次批为 ROADMAP 承诺项不得无限顺延。理由：域=4 字段壳零回填且为导航骨架刚需；编排=草稿/发布/模板/市场多态所有权模型，首批纳入使实施波风险翻倍（R19 阶梯律·最少实现）。
