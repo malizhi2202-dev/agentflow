@@ -3,7 +3,7 @@
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p16" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="audit.html">审计日志</span><span class="pill" data-goto="login.html">登录</span><span class="pill" data-goto="approvals.html">审批中心</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="audit.html">审计日志</span><span class="pill" data-goto="login.html">登录</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="control-plane.html">管控面 · 维护作业</span><span class="pill" data-goto="agent-detail.html">Agent（Access 与归档）</span><span class="pill" data-goto="runtimes.html">运行时（停用 / 清理）</span></div>
 <div class="detail-top"><span class="pill" data-back="users.html" data-click>← 返回 用户与权限</span><span class="crumb"><b>用户管理 › 用户 · admin（李工）</b></span><span class="chip bad">admin · 唯一豁免账号</span><span class="chip mono">全部 6 项</span></div>
 <div class="detail-body">
 <div class="callout bad"><p class="tiny" style="margin:0"><b>豁免逻辑（不可削减）：</b>admin 角色在权限检查处<b>直接放行</b>，<span class="mono">custom_permissions</span> 对 admin <b>无意义</b>。此处 6 项全绿是「恒真」呈现，<b>不能逐项取消勾选</b>——试图削减会把唯一管理员锁死，界面直接禁用该操作。</p></div>
@@ -31,6 +31,9 @@
 <tr><td class="mono tiny">sess_pat_cron</td><td class="mono tiny">本机回环</td><td class="mono tiny">PAT · cron</td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-rev">撤销</span></td></tr>
 </tbody></table>
 <p class="tiny dim" style="margin-top:var(--s3)">撤销<b>自己当前会话</b>会立刻把本页踢出登录——界面须二次确认并明示这一点（见弹层文案）。</p>
+<h4 class="blk">移除成员（离职处置）· blast radius 事实清单 <span class="chip warn">规划 · 未实现</span> <span class="chip info">10-23 补</span></h4>
+<div class="callout bad"><p class="tiny" style="margin:0"><b>本页账号不适用：</b>admin 是唯一豁免账号——<b>不可改角色、不可移除、不可置离职</b>（删掉就无人再能分配权限）。故下方抽屉的演示对象取 <span class="mono">wangwu（王五 · member）</span>；同一份清单也解释了父页 <span class="mono">users.html</span> 的「删除」行为何必须先读影响清单。</p></div>
+<p style="margin:var(--s2) 0 0"><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-drawer="dr-offboard">查看「移除成员」影响清单 ▸</button> <button class="btn sm" data-toast="✓ 邀请邮件已发出 · 链接 7 天有效 · <b>只在邮件里，产品内没有可查看/可复制的邀请链接口</b> · 角色二选一 admin / member（owner 不在此路径）· 审计 user:invited（演示）">发新成员邀请</button></p>
 <p style="margin-top:var(--s4)"><button class="btn sm" style="opacity:.5" data-toast="✗ admin 是唯一豁免账号：不可改角色、不可删除、权限点不可削减（演示态拒绝原因）">改角色（禁用）</button> <button class="btn sm" data-click data-modal="md-pwd">重置密码</button> <button class="btn sm" style="opacity:.5" data-toast="✗ 不可删除唯一 admin 账号（演示态拒绝原因）">删除（禁用）</button></p>
 </div>
 <div class="modal" id="md-pwd"><div style="padding:var(--s4)"><b>重置 testuser 的口令？</b>
@@ -50,7 +53,34 @@
 <tr><td class="mono tiny dim">sess_4b7e…c8</td><td class="mono tiny dim">127.0.0.1 · 09-21 09:02</td><td><span class="chip ok">不受影响</span></td></tr>
 </tbody></table>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已撤销该会话（sessions 表行标记 revoked）· 审计 auth:session_revoked（演示）" data-close>确认撤销</button></div></div></div>
+<div class="drawer" id="dr-offboard"><header><b>移除成员（离职处置）· wangwu（王五 · member）</b><span class="chip bad">不可逆链式动作</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout warn"><p class="tiny" style="margin:0"><b>移除一个账号从来不是「删一行用户」：</b>它同时是<b>一次资产处置</b>。下面九条就是它实际会牵动的东西——逐条按人可读的口径写在这里，<b>而不是等运维在库里撞见</b>。<b>必填原因</b>，二次确认，逐项入审计。</p></div>
+<p class="h2p" style="margin-top:var(--s4)">留档面（移除<b>不动</b>它们）</p>
+<table class="tbl compact"><thead><tr><th>对象</th><th>移除后</th></tr></thead><tbody>
+<tr><td>他名下的 issue / 任务</td><td class="tiny"><span class="chip ok">留档</span> 署名不变（<span class="mono">created_by=wangwu</span> 仍可查），不随账号消失、不改写作者</td></tr>
+<tr><td>他写的评论与审批签批</td><td class="tiny"><span class="chip ok">留档</span> 线程完整保留（撤掉评论等于篡改协作历史）；审批单上的<b>已发生签批</b>不回收</td></tr>
+<tr><td>审计与历史动作</td><td class="tiny"><span class="chip ok">留档</span> 追加写、不可改删；账号移除后 <span class="mono">actor=wangwu</span> 依旧可检索</td></tr>
+</tbody></table>
+<p class="h2p" style="margin-top:var(--s4)">处置面（移除<b>连带</b>发生的事）</p>
+<table class="tbl compact"><thead><tr><th>对象</th><th>连带动作</th><th>口径</th></tr></thead><tbody>
+<tr><td>其名下 <b>runtime</b></td><td><span class="chip bad">停用</span></td><td class="tiny">他注册的运行时（机器 × CLI）转<b>停用</b>、不再参与派单；<b>不是删记录</b>——机器上的 daemon 若仍在跑，注册与心跳照旧，只是不再有归属人的路由权</td></tr>
+<tr><td>其<b>绑定的 Agent</b></td><td><span class="chip warn">归档</span></td><td class="tiny">他 owner 的 Agent 一律<b>软归档</b>（<span class="mono">archived_at</span> + 操作者）——可恢复，<b>不静默删除</b>；编排引用与历史 run 全部留在原处</td></tr>
+<tr><td>其<b>未完成的 run</b></td><td><span class="chip bad">取消</span></td><td class="tiny">在途与排队的 run 全部取消；<b>已发生的外部副作用不回滚</b>，取消不计入成功率（口径同 <span class="mono">agent-detail.html</span> 取消 run）</td></tr>
+<tr><td>其在各 Agent <b>Access</b> 上的授权</td><td><span class="chip bad">回收 · 且不自动恢复</span></td><td class="tiny">他被加进去的「可运行 / 可见」名单逐项移除。<b>重入职不自动恢复</b>：Access 由<b>各 Agent 的 owner 逐个再授一次</b>——不给「人回来了就全自动有权」留任何口子</td></tr>
+<tr><td>其活跃会话与 PAT</td><td><span class="chip bad">全部作废</span></td><td class="tiny">与「改角色必旋转会话」同一条纪律：权限变了旧会话不能继续持有变更前权限</td></tr>
+<tr><td>可见项目 / 权限点勾选</td><td><span class="chip warn">随账号消失</span></td><td class="tiny"><span class="mono">project_ids</span> 与 <span class="mono">custom_permissions</span> 不转人、不继承</td></tr>
+</tbody></table>
+<p class="h2p" style="margin-top:var(--s4)">入职与 owner 侧的三条硬规矩</p>
+<table class="tbl compact"><tbody>
+<tr><td>邀请能授什么角色</td><td class="tiny"><b>只能授 admin / member 两档</b>。<b>owner 不在邀请路径里</b>——须本人入职后，由<b>既有 owner 提升</b>（换的是「谁拥有这个工作区」，不能让一封邮件顺手改）</td></tr>
+<tr><td>邀请链接</td><td class="tiny"><b>7 天有效</b>；<b>只出现在邮件正文里，产品内没有任何查看 / 复制 / 再发入口</b>（界面上不留可转卖的凭据）；过期即作废，重发=换新链</td></tr>
+<tr><td><b>最后一个 owner</b></td><td class="tiny" style="color:var(--red)"><b>不能降级、不能被移除、不能置离职。</b>必须先由他把 owner 提给继任者，再谈自己的去处——守卫在服务端，不靠界面禁用按钮（与本页 admin「不可改角色 / 不可删除」同源）</td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [离职流程第 3 步，账号与资产同步处置    ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消（只停会话 · 不动资产）</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已移除 wangwu · 2 个 runtime 停用 · 3 个 Agent 归档（可恢复）· 5 个未完成 run 取消 · 7 处 Access 授权回收（重入职不自动恢复）· issue / 评论留档 · 审计 user:offboarded（演示）" data-close>确认移除并连带处置</button></div>
+<p class="tiny dim" style="margin-top:6px">数值（2 runtime / 3 Agent / 5 run / 7 处 Access）为演示编造；<b>九条连带口径</b>是本轮 10-23 补的事实校正，后端当前<b>无 offboarding 作业</b>——批量改写在实现侧必须走 <a data-goto="control-plane.html">管控面「维护作业」</a>由人批（纪律：<b>全库级批量写不允许自动发生</b>）。</p></div></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
 <p class="tiny dim" style="padding:14px 18px">本页由 users.html 的 <span class="mono">dr-user-admin</span> 抽屉升格而来（权限点表 + 活跃会话撤销操作链，侧栏装不下）。admin 的 6 项权限为<b>恒真豁免、不可削减</b>；改角色与删除在父页即被拒（拒绝原因走 toast）。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：撤销会话 → 二次确认 modal（含「撤销自己当前会话会立刻掉登录」提示）· 重置密码 → 必填理由 modal · 禁用按钮 → 拒绝原因 toast。</p>
+<p class="tiny dim" style="padding:0 18px"><b>本轮（10-23）新增「移除成员 · blast radius 事实清单」抽屉：</b>九条口径为<b>事实校正</b>（离职处置的连带面）。<b>当前后端无任何 offboarding 实现</b>——现在删除账号只删 <span class="mono">users.json</span> 一行 + 清会话，runtime / Agent / run / Access 四类<b>全都不动</b>，正是本抽屉要消掉的缺口。<b>演示编造值：</b>2 个 runtime / 3 个归档 Agent / 5 个取消 run / 7 处 Access 回收等计数。<b>与本页既有口径的界分：</b>「历史审计与产物署名留档」沿用父页 <span class="mono">users.html</span> 删除弹层的既有结论（追加写不可改删）；「权限变更必旋转会话」沿用 P0-1；「软归档可恢复 · 取消 run 不计入成功率」沿用 <span class="mono">agent-detail.html</span> 同名口径。<b>owner 侧三条（邀请只授 admin/member、owner 须由既有 owner 提升、链接 7 天且只在邮件里、最后一个 owner 不可降级 / 移除 / 离职）为政策口径</b>，实现尚未存在。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：撤销会话 → 二次确认 modal（含「撤销自己当前会话会立刻掉登录」提示）· 重置密码 → 必填理由 modal · 禁用按钮 → 拒绝原因 toast · <b>「查看移除成员影响清单」→ <span class="mono">dr-offboard</span> 抽屉</b>（留档面 3 行 + 处置面 6 行 + owner 侧 3 条 + 必填原因 + 确认 toast 逐项报连带计数）· <b>「发新成员邀请」→ toast</b>（只授 admin/member · 7 天有效 · 链接只在邮件里）· <b>「移除 admin（禁用）」→ 最后一名 owner 守卫拒绝 toast</b> · 抽屉内「管控面 · 维护作业」→ 跨页跳转　按 Esc 关闭所有浮层。</p>
 </body></html>

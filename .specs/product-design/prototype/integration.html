@@ -7,7 +7,7 @@
 .proto-note{padding:0 18px;margin-top:14px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p27" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="isolation.html">执行隔离</span><span class="pill" data-goto="tools.html">工具市场</span><span class="pill" data-goto="env-advisor.html">环境参谋</span></div>
-    <p class="proto-note"><span class="chip warn">规划原型</span>第 4 轮三议题共用的对外面（<span class="chip ok">已过审</span>）：<b>协议区</b>对应 P1-15（A2A M0 静态卡）+ P2-1/P1-12；<b>契约区</b>对应 P2-5 四件组；<b>可观测区</b>对应 P2-4 三档。三区各带「未启用」如实灰态——先让承诺小于实现。§6.0 纪律适用：一切复制走 ⧉、破坏性开关二次确认。<b>此界面尚不存在</b>。</p>
+    <p class="proto-note"><span class="chip warn">规划原型</span>第 4 轮三议题共用的对外面（<span class="chip ok">已过审</span>）：<b>协议区</b>对应 P1-15（A2A M0 静态卡）+ P2-1/P1-12；<b>契约区</b>对应 P2-5 四件组；<b>可观测区</b>对应 P2-4 三档。三区各带「未启用」如实灰态——先让承诺小于实现。<b>第四区「外部消息渠道」= 消息传递域补强</b>（对齐 Multica channels）：<b>只讲语义</b>（谁能触发 / 消息去哪 / 命令表 / 绑定链 / 隔离粒度 / 丢弃口径）；凭据与连接管理仍在 <a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">§6.4 Agent 详情「能力 · 集成」六卡</a>、会话内那条绑定条在 <a href="chat.html" style="color:inherit">§6.8 对话中心</a>——<b>三处一份口径，不各说一套</b>。§6.0 纪律适用：一切复制走 ⧉、破坏性开关二次确认。<b>此界面尚不存在</b>。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/integration</span></div>
       <div class="app">
@@ -21,7 +21,7 @@
           <a><svg class="icon"><use href="#i-gear"/></svg>系统设置</a>
         </aside>
         <div class="app-main">
-          <div class="app-top"><span class="crumb">管理 <span class="dim">· 对外集成面</span></span><span class="right"><button class="btn sm" data-click data-pop="pop-copy">⧉ 复制集成片段 ▾</button></span><span class="tabs"><span class="tab active" data-click data-toast="协议区（当前视图）：A2A M0 静态卡 + M1-lite 闸口状态">协议</span><span class="tab" data-click data-toast="契约区：apiVersion / ETag / conditions / watch 四件组（本视图已同页展示，演示不切页）">契约</span><span class="tab" data-click data-toast="可观测区：前置 + A/B 三档（本视图已同页展示）">可观测</span></span></div>
+          <div class="app-top"><span class="crumb">管理 <span class="dim">· 对外集成面</span></span><span class="right"><button class="btn sm" data-click data-pop="pop-copy">⧉ 复制集成片段 ▾</button></span><span class="tabs"><span class="tab active" data-click data-toast="协议区（当前视图）：A2A M0 静态卡 + M1-lite 闸口状态">协议</span><span class="tab" data-click data-toast="契约区：apiVersion / ETag / conditions / watch 四件组（本视图已同页展示，演示不切页）">契约</span><span class="tab" data-click data-toast="可观测区：前置 + A/B 三档（本视图已同页展示）">可观测</span><span class="tab" data-click data-toast="外部消息渠道（本页第四区）：只管 IM 进出站语义。凭据与 Agent 级六卡在「Agent 详情 · 能力 → 集成」，不在此页">渠道</span></span></div>
           <div class="app-body">
             <div class="callout"><p><b>协议 · A2A（P1-15<span class="chip ok">已过审</span>）：</b>M0 只发<b>静态 AgentCard</b>——必填 8 项、capabilities 全 false（streaming/push 未实现就不声明）、只含 public 可见域 Agent、敏感详情走鉴权扩展卡。M1-lite（SendMessage+GetTask+INPUT_REQUIRED 挂起→同 task 续跑）以 <b>P0-1 身份修复为硬闸</b>（§1.6.5 ⑬）；M2（SSE 长连+webhook 回传）冻结。registry 官方留白——目录治理是我们地盘。</p></div>
             <table class="tbl">
@@ -59,6 +59,54 @@
               <div class="callout warn" style="margin:0"><p><b>三区共同的灰态诚实：</b>本页所有对外面当前状态 = <span class="chip">未启用</span>。<b>宁缺页不空挂</b>：卡片里的 URL 指向不存在的端点=信誉成本，所以 M0 卡片连 published 时间都不写死（由生成时刻决定）。</p></div>
               <div class="callout ok" style="margin:0"><p><b>目录治理是我们的地盘：</b>官方明文不做 curated registry → 我们的「按可见域生成卡片 + 鉴权扩展卡」不是补协议缺漏，是差异化。协议面第一块砖只能是<b>只读</b>卡片。</p></div>
             </div>
+            <p class="h2p" style="margin-top:var(--s4)">外部消息渠道 · IM 进出站 <span class="chip info">消息传递域 · 对齐 Multica channels</span></p>
+            <div class="callout" style="margin-bottom:var(--s2)"><p class="tiny" style="margin:0"><b>先把层划清，别混：</b>上面三区是<b>平台 ↔ 外部系统</b>（A2A 卡片 / 契约 / 可观测出口）；本区只管一件事——<b>IM 消息怎么进出、谁能触发、回复回到哪</b>。<b>凭据与连接卡片不在这里</b>：Agent 级 IM 六卡在<a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">Agent 详情「能力 · 集成」</a>（<span class="mono">integrations</span> 行 · 断开=软撤销 · 密钥写-only · <b>改密钥 = 断开重连</b>——这三条本页不改写，沿用同口径），会话内那条渠道绑定条在<a href="chat.html" style="color:inherit">对话中心</a>。<b>本区零开关</b>：只有语义呈现，不提供连接 / 解绑 / 换凭据 / 改白名单任何动作——与上面三区的冻结纪律同一条（§6.0 + §6.27）。</p></div>
+            <table class="tbl">
+              <thead><tr><th>平台</th><th>私聊 DM</th><th>群聊</th><th>今日入站形态 <span class="chip">演示口径</span></th></tr></thead>
+              <tbody>
+                <tr><td><b>飞书 / Lark</b></td><td><span class="chip ok">支持</span></td><td>需 <b>@Bot</b></td><td class="tiny">文本 + 图片 / 文件（尽力而为）· 不支持的形态<b>回一句人话</b></td></tr>
+                <tr><td><b>Slack</b></td><td><span class="chip ok">支持</span></td><td>需 <b>@Bot</b>（app mention）</td><td class="tiny">文本 + 附件</td></tr>
+                <tr><td><b>钉钉</b></td><td><span class="chip ok">支持</span></td><td>需 <b>@Bot</b></td><td class="tiny">仅文本 · 语音 / 图片 / 文件 → 人话回复</td></tr>
+                <tr><td><b>企业微信</b></td><td><span class="chip ok">支持</span></td><td>需 <b>@Bot</b></td><td class="tiny">仅文本 · 语音 / 图片 / 文件 → 人话回复</td></tr>
+                <tr><td><b>Telegram</b></td><td><span class="chip ok">支持</span></td><td>需 <b>@Bot</b>（论坛群按 topic）</td><td class="tiny">仅文本 · 语音 / 图片 / 文件 → 人话回复</td></tr>
+              </tbody>
+            </table>
+            <p class="tiny dim"><b>三句硬口径（五平台通用）：</b>① <b>全支持私聊 DM</b>；② <b>群里必须 @Bot 才处理</b>——<b>不 @Bot 的消息既不触发，也不进 Agent 上下文</b>，<b>Agent 永远不自动读整群历史</b>；③ <b>一个 Bot 只对一个 Agent（死绑定）</b>：绑定关系 = <span class="mono">UNIQUE(workspace, agent, channel_type)</span> + 通道 × Agent 唯一 bot（同渠道重复连接 <span class="mono">409</span>），<b>要多个 Agent 收信就接多个 Bot</b>，不在一个 Bot 上做分发路由。<br><b>矩阵口径：</b>本表 = 与 Multica 对齐的 <b>5 类 IM 入站规则</b>；§6.4 六卡家族另有<b>自托管 IM</b>（走同一套门禁与回复写回，多一个 <span class="mono">allow_from</span> 白名单），§6.8 句里出现的<b>邮件</b>不在本矩阵——<b>不为渠道语义另造第六套说法</b>，三处（本页 / 六卡 / 对话中心）一份口径。</p>
+            <p class="h2p" style="margin-top:var(--s3)">渠道命令 · 命令不是对话轮 <span class="chip info">命令表</span></p>
+            <table class="tbl">
+              <thead><tr><th>命令</th><th>性质</th><th>行为</th><th>结果去哪</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">/issue</td><td class="tiny"><b>命令</b>，不是一轮对话</td><td class="tiny">就地把手头话题升格为任务；<b>Slack 差异</b>=Agent 先把描述整理成文再建，其余平台<b>按原文建</b></td><td class="tiny">建完把<b>任务链接发回原平台原会话</b>；<b>不留在 Chat 里</b>（站内私聊与渠道会话不同账）</td></tr>
+                <tr><td class="mono">/new</td><td class="tiny">开新会话</td><td class="tiny">下一条消息进<b>新会话</b>；<b>旧会话仍保留</b>（可回看、可继续被搜索）</td><td class="tiny">原平台提示「已开新会话」</td></tr>
+                <tr><td class="mono">/clear</td><td class="tiny">清上下文，<b>不删历史</b></td><td class="tiny">只清 <b>Agent 可见上下文</b>；<b>平台侧全量消息历史仍在</b>——审计查得到，隐私也不裸奔（两全就这一句）</td><td class="tiny">原平台提示「上下文已清空」</td></tr>
+                <tr><td class="mono">其余文本</td><td class="tiny">对话轮</td><td class="tiny">按常规进会话 → 一条消息 = 一个 run（与站内 chat 同一账）</td><td class="tiny">回复写回<b>原平台原会话</b></td></tr>
+              </tbody>
+            </table>
+            <div class="grid g2" style="align-items:start;margin-top:var(--s3)">
+              <div>
+                <p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">账号绑定 · 一次一链路</p>
+                <ol class="tiny dim" style="margin:0 0 0 18px;line-height:1.9">
+                  <li>IM 侧用户<b>首次 DM 该 Bot</b>（此刻平台还不知道他是谁）→ 只收到一条<b>绑定链接</b>：不回答问题、不起 run、不进会话。</li>
+                  <li>点链接 → 登录 → <b>把该 IM 账号关联到工作区成员身份</b>（即 §6.4 的 <b>redeem 链接双因子绑定</b>：IM 账号 + 平台账号各认一次，同一条链不另起一套）。</li>
+                  <li><b>绑定完成后才真正跑 Agent</b>——绑定前的一条消息不入库为 run，只留一条待绑定事件。</li>
+                  <li><b>每条入站消息都重校验</b>：绑定是否还在 + 该成员是否还在空间；<b>离空间即失效</b>（不等下次同步，当条直接拒）。</li>
+                </ol>
+                <p class="tiny" style="margin:6px 0 0"><b>绑定只回答「发信人是谁」</b>：它<b>不会</b>把平台里其他人自动拉进工作区，也不因为群里有人 @ 了 Bot 就给未绑定成员开权限。绑定 ≠ 准入：能不能触达仍由各通道的 <span class="mono">allow_from</span> 白名单决定（<b>空名单 = 全拒</b>，不是全放 · §6.4 同口径）。</p>
+                <p><button class="btn sm" data-click data-pop="pp-chan-seq">▶ 看一条真实入站序列（含未绑定 / 未 @ / 语音）▸</button></p>
+              </div>
+              <div>
+                <p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">会话隔离粒度 · 小表</p>
+                <table class="tbl compact"><thead><tr><th>场景</th><th>会话份数</th></tr></thead><tbody>
+                  <tr><td class="tiny">Slack 私聊</td><td class="tiny">1 个用户 ↔ 1 份会话</td></tr>
+                  <tr><td class="tiny">Slack 群聊</td><td class="tiny"><b>按 thread 各一份</b>（同群不同线程互不串上下文）</td></tr>
+                  <tr><td class="tiny">飞书 / Lark 群</td><td class="tiny"><b>按 chat 一份</b>（同一群内 @ 共享一份）</td></tr>
+                  <tr><td class="tiny">Telegram 论坛群</td><td class="tiny"><b>按 topic 各一份</b>；普通群按 chat 一份 <span class="chip">演示口径</span></td></tr>
+                  <tr><td class="tiny">钉钉 / 企业微信群</td><td class="tiny">按 chat 一份 <span class="chip">演示口径</span></td></tr>
+                </tbody></table>
+                <p class="tiny dim" style="margin:6px 0 0"><b>断开之后：</b>「断开」是软撤销——Bot <b>停止收新消息</b>，回复写回同时关闭；<b>已有会话与运行记录保留</b>（历史可读、审计可查、重连即新安装）。改密钥走<b>同一条链</b>：新凭据验证通过的瞬间旧凭据即失效 = 断开重连，不出现两把钥匙同时收信。</p>
+              </div>
+            </div>
+            <div class="callout warn" style="margin-top:var(--s2)"><p class="tiny" style="margin:0"><b>已知限制（与本页 <span class="mono">watch</span> 同源，写在界面上不藏在文档里）：</b>外部渠道连接由<b>单一持有进程</b>路由（与 change_log / 调度队列同一处进程内状态）——<b>多副本部署下，非持有副本在重连窗口内的回复不送达，计入丢弃计数</b>。当前承诺 = <b>单副本</b>；跨副本前不承诺「消息必达」。<span class="btn link" data-goto="integration__watch.html" data-click>看 watch 侧同一句坦白与 cursor 语义 →</span></p></div>
           </div>
         </div>
       </div>
@@ -72,6 +120,20 @@
 <tr data-click data-toast="✓ 已复制 env 片段（演示）· 写入需二次确认"><td>AF_ENABLE_METRICS env 片段</td><td><span class="chip">未设</span></td><td><span class="btn link">⧉</span></td></tr>
 <tr style="opacity:.5"><td>webhook 回传配置</td><td><span class="chip bad">M2 冻结</span></td><td><span class="btn link" data-click data-toast="✗ 不提供：M2（streaming+push）冻结到 A2A v1.1 再议；SSRF 面 + 单进程长连正面冲突">为何没有</span></td></tr>
 </tbody></table>
+<p style="margin-top:var(--s2)"><button class="btn sm" data-close>关闭</button></p></div>
+
+<div class="pop" id="pp-chan-seq" style="max-width:560px">
+<p class="tiny dim" style="margin:0 0 6px"><b>▼ 一条真实入站序列（mock open · 七步，其中三步是「被拒」）</b>　用户名 / 时间 / 任务号沿用同一 mock 宇宙，链路形态为演示口径</p>
+<table class="tbl compact"><thead><tr><th>入站</th><th>平台反应</th><th>为什么</th></tr></thead><tbody>
+<tr><td class="tiny">王工私聊 Bot：「帮我看下登录 500」 <span class="chip warn">未绑定</span></td><td class="tiny">只回一句「先绑一下账号：<span class="mono">&lt;redeem 链接&gt;</span>（15 分钟内有效）」</td><td class="tiny">绑定前<b>不跑 Agent</b>、不起 run、不进会话</td></tr>
+<tr><td class="tiny">王工点链接 → 登录 → 关联成员身份</td><td class="tiny"><span class="chip ok">已绑定 · 数据域成员</span>；<b>上一条不补跑</b>，请他重发</td><td class="tiny">绑定只认这次动作，不追溯历史消息</td></tr>
+<tr><td class="tiny">重发同一句</td><td class="tiny">进会话 → 1 个 run → 回复写回私聊</td><td class="tiny">一条消息 = 一个 run（与站内对话同一本账）</td></tr>
+<tr><td class="tiny">群里发「谁看下这个日志」（<b>没 @</b>）</td><td class="tiny"><b>什么都不做</b></td><td class="tiny">既不触发，也<b>不进 Agent 上下文</b>——Agent 永远不自动读整群历史</td></tr>
+<tr><td class="tiny">群里 <b>@Bot</b> <span class="mono">/issue 登录 500 修一下</span></td><td class="tiny">建任务 <span class="mono">AF-118</span> · 链接<b>发回原群</b></td><td class="tiny">命令不是对话轮；结果<b>不留在 Chat 里</b></td></tr>
+<tr><td class="tiny">私聊发<b>语音</b>（钉钉 / 企微 / Telegram）</td><td class="tiny">回人话：「我现在只能读文字——语音 / 图片 / 文件暂时打不开，转成文字或贴进会话我就能处理。」</td><td class="tiny"><b>不静默丢弃</b>：让人知道「被看见了，只是没读懂」</td></tr>
+<tr><td class="tiny"><span class="mono">/clear</span> → <span class="mono">/new</span></td><td class="tiny">先清 Agent 可见上下文（<b>平台全量历史仍在</b>），再开新会话（<b>旧会话仍存</b>）</td><td class="tiny">两条命令各管一件事：清上下文 ≠ 换会话</td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0"><b>出站同律：</b>回复只写回<b>它来的那一条会话</b>（Slack 回 thread、飞书回 chat、Telegram 论坛回 topic），不跨会话广播；写回连续失败重试 3 次后升收件箱并<b>计入丢弃计数</b>（演示口径）。</p>
 <p style="margin-top:var(--s2)"><button class="btn sm" data-close>关闭</button></p></div>
 
 <div class="drawer" id="dr-m1"><header><b style="color:var(--red)">开启 M1-lite —— 被拦下（这就是演示）</b><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body"><div class="callout bad" style="margin:10px 0"><p class="tiny" style="margin:0"><b>§1.6.5 纪律 ⑬：</b>身份修复前不暴露任何对外写端点。当前 <span class="mono">X-User-Id</span> 身份为 <b>fail-open</b>（缺身份即回退 admin），把它挂到对外写面 = 给全网开门。所以 M1 的硬前置是 <b>P0-1 落地 + 单副本承诺书面化</b>，不是工作量。</p></div>
@@ -117,6 +179,6 @@
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已生成下架建议 + 承诺撤回记录（演示）· 审计 integration_surface_revoked" data-close>确认撤销</button></div></div></div>
 
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:0 18px 6px"><b>演示数据说明：</b>三区承诺与拦阻理由均为 §6.27 原文（§1.6 P1-15 / P2-4 / P2-5 已过审条目、§1.6.5 ⑬ 纪律句、必填 8 项与 capabilities 全 false、change_log 同事务 + cursor 重发 + resync、AF_ENABLE_METRICS / AF_OTLP_ENDPOINT 未设、trace_spans 0 行）。卡片 JSON 的具体内容（Agent 名、skills 两条、token 计数、指标名与样本值 1191 等）为按 §6.12 口径拼装的演示值，真实实现尚未产生该端点；M1-lite 的 403 响应体、watch 帧样例同样是形态演示。本页不存在任何挂载 / 写 env / 外连动作。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：协议表「整卡 JSON」行 / 「查看卡片」→ 独立详情页 <span class="mono">integration__card.html</span>（只读 · 逐字段核对 + ⧉ 复制 toast）· 「开启 M1-lite」→ <b>被拦抽屉</b>（§1.6.5 ⑬ 拦截文案即演示，无绕过入口）· 契约表「看 watch curl」「看请求/响应原文」→ 独立详情页 <span class="mono">integration__watch.html</span> / <span class="mono">integration__etag.html</span>（curl / SSE 帧 / resync + ⧉ 复制）· 可观测表「档位详情」→ 独立详情页 <span class="mono">integration__obs.html</span> · 「开启开关 / 配置端点」→ 二次确认模态（暴露面与前置未达清单 + 原因输入）· 「撤销已开的对外面」→ 破坏性二次确认 · 顶栏 tabs / 复制片段 → toast 与 pop · Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:0 18px 6px"><b>演示数据说明：</b>三区承诺与拦阻理由均为 §6.27 原文（§1.6 P1-15 / P2-4 / P2-5 已过审条目、§1.6.5 ⑬ 纪律句、必填 8 项与 capabilities 全 false、change_log 同事务 + cursor 重发 + resync、AF_ENABLE_METRICS / AF_OTLP_ENDPOINT 未设、trace_spans 0 行）。卡片 JSON 的具体内容（Agent 名、skills 两条、token 计数、指标名与样本值 1191 等）为按 §6.12 口径拼装的演示值，真实实现尚未产生该端点；M1-lite 的 403 响应体、watch 帧样例同样是形态演示。本页不存在任何挂载 / 写 env / 外连动作。<b>第四区（外部消息渠道）新增：</b>标了 <span class="chip">演示口径</span> 的三处——入站形态列（飞书 / Slack 附件、其余今日只收文本）、Telegram 普通群与钉钉 / 企业微信的会话粒度、redeem 链接 15 分钟有效窗与写回重试 3 次、<span class="mono">AF-118</span> 任务号——均为演示值，非已实现契约；而「群里必须 @Bot 才处理 / 不 @ 既不触发也不进上下文 / 一 Bot 一 Agent 死绑定 / <span class="mono">/issue · /new · /clear</span> 三条命令语义 / 绑定后才跑 Agent 且每条重校验 / 不支持媒体回人话 / 断开后已有会话与运行记录保留 / 多副本重连窗口回复计入丢弃」<b>是口径句（对齐 Multica channels），不属编造值</b>。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：协议表「整卡 JSON」行 / 「查看卡片」→ 独立详情页 <span class="mono">integration__card.html</span>（只读 · 逐字段核对 + ⧉ 复制 toast）· 「开启 M1-lite」→ <b>被拦抽屉</b>（§1.6.5 ⑬ 拦截文案即演示，无绕过入口）· 契约表「看 watch curl」「看请求/响应原文」→ 独立详情页 <span class="mono">integration__watch.html</span> / <span class="mono">integration__etag.html</span>（curl / SSE 帧 / resync + ⧉ 复制）· 可观测表「档位详情」→ 独立详情页 <span class="mono">integration__obs.html</span> · 「开启开关 / 配置端点」→ 二次确认模态（暴露面与前置未达清单 + 原因输入）· 「撤销已开的对外面」→ 破坏性二次确认 · 顶栏 tabs / 复制片段 → toast 与 pop · <b>第四区「外部消息渠道」</b>：平台矩阵 / 命令表 / 隔离粒度小表为只读表格（无按钮＝不提供任何连接操作，连接与凭据只在 §6.4 六卡）· 「▶ 看一条真实入站序列 ▸」→ <span class="mono">pp-chan-seq</span>（七步：未绑定只回链接、绑定不补跑、未 @ 什么都不做、<span class="mono">/issue</span> 回原群、语音回人话、<span class="mono">/clear→/new</span> 两两分明）· 已知限制条「看 watch 侧同一句坦白」→ <span class="mono">integration__watch.html</span> · Esc 关闭所有浮层。</p>
 </body></html>

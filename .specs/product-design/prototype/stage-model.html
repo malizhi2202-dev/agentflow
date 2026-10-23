@@ -5,7 +5,7 @@
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p19" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="projects__files.html">文件查看（只读）</span></div>
-<p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P0-6 / P1-3</b>：把当前硬编码在 13 个文件里的 9 阶段与产物文件名，收敛为可编辑的配置。<b>此界面尚不存在</b>，用于表达目标形态。真实系统已有 <span class="mono">GET/PUT /api/admin/workflow</span> 与 <span class="mono">workflow.json</span> 作为落点。<b>2026-09-22（S7 过审）：业界成型解已呈——阶段做成「目录表 + 4 个语义锚（unstarted/started/done/closed）」，自定义阶段只继承生命周期、禁止继承停车/评审/失败恢复行为，锚归类建后不可改（multica 迁移 332/337 实证 + 537 对迁移的机械不变量测试护航）。原「是否允许用户自定义阶段模型」的待裁定项，决策成本由开放设计降为方案采纳。<b>09-23 复核：</b>「13 个文件」系 <span class="mono">grep -l "0-change"</span> 口径，阶段字面量口径后端实测 6——采纳实施前重新盘点。</b></p>
+<p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P0-6 / P1-3</b>：把当前硬编码在 13 个文件里的 9 阶段与产物文件名，收敛为可编辑的配置。<b>此界面尚不存在</b>，用于表达目标形态。真实系统已有 <span class="mono">GET/PUT /api/admin/workflow</span> 与 <span class="mono">workflow.json</span> 作为落点。<b>2026-09-22（S7 过审）：业界成型解已呈——阶段做成「目录表 + 4 个语义锚（unstarted/started/done/closed）」，自定义阶段只继承生命周期、禁止继承停车/评审/失败恢复行为，锚归类建后不可改（multica 迁移 332/337 实证 + 537 对迁移的机械不变量测试护航）。原「是否允许用户自定义阶段模型」的待裁定项，决策成本由开放设计降为方案采纳。<b>10-23 事实校正：</b>「4 语义锚」的<b>行为侧</b>按 multica 一手清单补齐为 <b>7 个内置状态 key × 4 个生命周期类别</b>，并钉死一条：<b>四个内置行为只挂固定 key（backlog 停车 / in_review 结束自动化 / blocked 失败处理 / in_progress 失败回收），自定义状态只继承类别、不继承行为</b>——见本页下方「状态-行为锚 · multica 完整清单」。<b>09-23 复核：</b>「13 个文件」系 <span class="mono">grep -l "0-change"</span> 口径，阶段字面量口径后端实测 6——采纳实施前重新盘点。</b></p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/workflow-model</span><span class="fake">规划原型</span></div>
       <div class="app">
@@ -16,6 +16,7 @@
           <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
           <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
           <a data-goto="memory.html"><svg class="icon"><use href="#i-book"/></svg>记忆中心</a>
+          <a data-goto="automations.html"><svg class="icon"><use href="#i-refresh"/></svg>自动化中心</a>
           <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
           <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
           <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
@@ -44,6 +45,34 @@
                 <tr><td colspan="7" style="text-align:center"><span class="btn link" data-click data-goto="stage-model__stage-new.html">+ 新增阶段</span> <span class="btn link" data-click data-pop="pp-io">导入 / 导出 JSON</span> <span class="btn link" data-toast="已按当前配置导出 workflow.json（演示）">导出当前配置</span></td></tr>
               </tbody>
             </table>
+            <p class="h2p" style="margin-top:var(--s5)">状态-行为锚 · multica 完整清单 <span class="chip info">7 内置态 × 4 类别</span> <span class="chip warn">事实校正 · 2026-10-23</span></p>
+            <div class="panel tight">
+              <p class="tiny" style="margin:0 0 var(--s3)">上方目录表用 <b>4 个生命周期类别</b>（unstarted / started / done / closed，即原页所称「4 语义锚」）给阶段定位；任务侧的<b>状态</b>是挂在同一套类别下的 <b>7 个内置 key</b>。<b>本轮校正的是一条容易记反的规矩：行为不挂在类别上，只挂在这 7 个固定 key 上。</b>把某个阶段 / 状态归进一个类别，只决定它在看板上的位置与进度分母，<b>不带来任何行为</b>。</p>
+              <table class="tbl compact" style="margin-bottom:0">
+                <thead><tr><th>类别<span class="tiny dim">（建后不可改）</span></th><th>内置状态 key<span class="tiny dim">（7 个）</span></th><th>挂在该 key 上的内置行为<span class="tiny dim">（4 个，一 key 一个）</span></th><th>自定义态归进同一类别会得到什么</th></tr></thead>
+                <tbody>
+                  <tr class="grp-row"><td colspan="4"><b>unstarted · 还没动</b> —— 内置 2 态</td></tr>
+                  <tr><td class="mono">unstarted</td><td class="mono"><b>backlog</b> <span class="chip warn">唯一停车态</span></td><td class="tiny"><b>停车</b>：把任务指派给 Agent <b>不建 run</b>——挂在 backlog 上等，改到可跑态才开工</td><td class="tiny">只继承「未开始」的位置与进度口径；<b>不停车</b>（停车 = 状态标识，<b>不是</b>类别属性）</td></tr>
+                  <tr><td class="mono">unstarted</td><td class="mono"><b>todo</b></td><td class="tiny">无内置行为</td><td class="tiny">指派即建 run 入队（与 backlog 的唯一区别就在这里）</td></tr>
+                  <tr class="grp-row"><td colspan="4"><b>started · 正在做</b> —— 内置 3 态</td></tr>
+                  <tr><td class="mono">started</td><td class="mono"><b>in_progress</b></td><td class="tiny"><b>失败回收</b>：该态上的 run 失败 → 状态<b>回 todo</b>，不留在「进行中」装忙</td><td class="tiny">不继承失败回收：自定义 Started 态失败后<b>停在原地</b>等人处置</td></tr>
+                  <tr><td class="mono">started</td><td class="mono"><b>in_review</b></td><td class="tiny"><b>结束自动化运行</b>：进入该态 → 该任务在跑的自动化 run 收尾，不再续跑（评审中不该还有机器在改）</td><td class="tiny">不继承：<b>进入自定义 Started 态不是命令 Agent 收工</b></td></tr>
+                  <tr><td class="mono">started</td><td class="mono"><b>blocked</b></td><td class="tiny"><b>失败处理</b>：run 失败的落点之一（转受阻 + 升收件箱等人 · 受阻理由留痕）</td><td class="tiny">不继承：<b>进入自定义 Started 态不是命令 Agent 判败</b></td></tr>
+                  <tr class="grp-row"><td colspan="4"><b>done · 完成</b> —— 内置 1 态</td></tr>
+                  <tr><td class="mono">done</td><td class="mono"><b>done</b></td><td class="tiny">终态；<b>在 done 上指派 Agent 同样立刻开跑</b>——停车只认 backlog 这一个 key</td><td class="tiny">继承终态与进度分母；<b>不</b>继承「完成需证据」等按 key 配的门禁</td></tr>
+                  <tr class="grp-row"><td colspan="4"><b>closed · 关闭</b> —— 内置 1 态</td></tr>
+                  <tr><td class="mono">closed</td><td class="mono"><b>cancelled</b> <span class="chip info">拼写：双 l，不是 canceled</span></td><td class="tiny">终态；在其上指派<b>也会立刻开跑</b>（真要停下靠归档与权限，不靠态）</td><td class="tiny">只继承生命周期类别，四个内置行为一个都拿不到</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p style="margin:var(--s2) 0 0"><button class="btn sm" data-toast="✓ 指派后状态仍是 backlog 且未建 run：停车行为只认 backlog 这一个 key（演示）">在 backlog 上指派 Agent</button> <button class="btn sm" data-toast="✓ 指派立刻建 run：自定义 unstarted 态（如「待排期」）不停车——停车不是类别属性（演示）">在自定义 unstarted 态上指派</button> <button class="btn sm" data-toast="✗ 400 category_immutable：类别建后不可改——改了会把该态下全量历史任务静默挪到另一条生命周期轨道（演示）">改 Code Review 的类别为 unstarted</button> <button class="btn sm" data-toast="✗ 409 issue_status_in_use · issue_count=7：QA 列还有 7 个任务，必须先迁空再归档（归档≠删除）（演示）">归档自定义态「QA」</button></p>
+            <p class="tiny dim" style="margin:6px 0 0">四枚按钮只把清单里<b>最反直觉的四条事实</b>做成可点口径，<b>不落库</b>；done 的<b>证据门</b>与状态在看板上的实际渲染见 <a data-goto="board.html">任务看板</a> / <a data-goto="board__mark-done.html">标 done</a>，本页不重复。</p>
+
+            <div class="callout warn" style="margin-top:var(--s2)"><p class="tiny" style="margin:0"><b>五条配套边界（都是行为不继承这条主线的推论）：</b>① <b>自定义 unstarted 不停车</b>——backlog 是唯一停车态，停车是<b>状态标识</b>不是类别属性；同理 <b>done / cancelled 上指派也会立刻开跑</b>。② <b>自定义状态只继承生命周期类别，不继承那四个内置行为</b>——「进入自定义 Started 态」<b>不是</b>命令 Agent 开工 / 收工 / 判败。③ <b>看板 · 列表 · 泳道的分栏用具体状态，不按类别合并</b>——<span class="mono">Code Review</span> 与 <span class="mono">QA</span> 是两个自定义态就<b>各占一列</b>；把它们并进「Started」一列，等于把团队赖以协作的评审可视化直接吃掉。④ <b>类别建后不可改</b>——改类别会把该态下<b>全量历史任务</b>静默挪到另一条生命周期轨道（进度分母 · 终态判定 · 收件箱自愈归档条件一起跟着改写），无提示、可回滚成本极高。⑤ <b>归档不退删除</b>：归档是软撤销（<span class="mono">archived_at</span> + 操作者，可恢复），<b>不是</b>删除；<b>自定义态归档前必须先迁空</b>，否则 <span class="mono">409 issue_status_in_use</span> 并回 <span class="mono">issue_count</span>（还有多少任务压在上面），由人先迁再归档。</p></div>
+            <div class="callout"><p class="tiny" style="margin:0"><b>triage 注（别把两件事混成一件）：</b>受理门 <span class="mono">triage</span> 是 <b>AgentFlow 自研的正交轴，multica 全文无此态</b>——上面 7 个内置态与 4 类别都在 <span class="mono">status</span> 这一根轴上，答「到哪一步」；<span class="mono">triage</span> 独立答「这算不算活（要不要自动派执行者）」，只拦<b>自动推导</b>执行者的运行，放行<b>人点名</b>派发。故本页清单不含 triage，看板列也不因它增列（消费面见 <span class="mono">board.html</span> status×triage 正交表）。</p></div>
+
+
             <div class="callout warn" style="margin-top:10px"><p><b>「不绑定任何开发流程」的落地检验：</b>当这张表可以被改成一个 5 阶段或 12 阶段的模型、且不需要改任何代码时，§1.4 的这条边界才算成立。当前不成立。</p></div>
             <div class="callout bad" style="margin-top:10px"><p><b>保存动作的现状（必须写明）：</b>「保存」走的是 <span class="mono">PUT /api/admin/workflow</span>，语义为<b>整包盲覆盖</b>——请求体就是新的 <span class="mono">workflow.json</span> 全文，服务端不比对版本，谁最后点保存谁吃掉前面所有人的改动。<b>本表单打开后拿不到 ETag</b>，多人（或 Agent）同时编辑不会有任何提示。<span class="mono">P2-5 第一批</span>（ETag/If-Match→412）落地后，本页保存遇到冲突应改为 412 + 冲突抽屉，而不是当前的静默覆盖。</p></div>
           </div>
@@ -88,6 +117,6 @@
 <tr><td class="mono">legacy-monolith</td><td class="tiny">12 阶段 · 2 终态锚</td><td><span class="btn link" data-toast="已切到 legacy-monolith（演示）">切换</span></td></tr>
 <tr><td class="tiny dim">新建项目模型</td><td class="tiny dim">从默认 9 阶段起步</td><td><span class="btn link" data-toast="已按默认模型创建新项目配置（演示）">创建</span></td></tr>
 </tbody></table></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为<b>规划原型</b>（6.19 界面尚不存在）。9 行阶段、产物文件名、门禁编号（G1 / 需求门 / G2 / G2a / Task / G3 / 测试门 / G4）与提示词路径逐条取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.19 与 §1.6 P0-6 / P1-3；4 语义锚（unstarted / started / done / closed）、「锚归类建后不可改」「自定义阶段禁止继承停车 / 评审 / 失败恢复行为」取自 09-22 S7 过审结论；「13 个文件」与「阶段字面量后端实测 6 处」两种口径同时保留（09-23 复核）。「整包盲覆盖」「不带 If-Match」「Agent 14:04 覆盖人工改动」是对<b>现状</b> <span class="mono">workflow.json</span> PUT 的演示化表述；ETag 式基线值、变更时间线、diff 行数与「2b-perf-baseline」示例阶段为编造。删除终态锚的下游影响清单按 §6.19 / §6.20 / §6.21 的映射关系推演，非已实现行为。</p>
-可点区演示（本轮交互重分级后）：阶段 ID 单元格 / 行内「编辑」→ <b>独立页</b>：0-change 行 → stage-model__stage-0-change，1-requirement / 2-design / 2a-ui-design / 3-task → stage-model__anchor-unstarted，4-dev / 5-test / 6-review → stage-model__anchor-started，7-integration → stage-model__anchor-done（终态锚下游影响清单）· 表单类一律整页：编辑表单 stage-model__stage-edit、新增表单 stage-model__stage-new、保存前覆盖面预览 stage-model__save-preview · 顶栏 chip「PUT 整包盲覆盖」→ save-preview 页 · 「重置为默认」/ 删除阶段 / 删除终态锚 / 仍然整包覆盖 → 一屏读得完的二次确认 modal· 「导入 / 导出 ▾」「项目 ▾」→ 选择器 pop　按 Esc 关闭所有浮层。
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为<b>规划原型</b>（6.19 界面尚不存在）。9 行阶段、产物文件名、门禁编号（G1 / 需求门 / G2 / G2a / Task / G3 / 测试门 / G4）与提示词路径逐条取自 <span class="mono">PRODUCT-DESIGN.html</span> §6.19 与 §1.6 P0-6 / P1-3；4 语义锚（unstarted / started / done / closed）、「锚归类建后不可改」「自定义阶段禁止继承停车 / 评审 / 失败恢复行为」取自 09-22 S7 过审结论；「13 个文件」与「阶段字面量后端实测 6 处」两种口径同时保留（09-23 复核）。「整包盲覆盖」「不带 If-Match」「Agent 14:04 覆盖人工改动」是对<b>现状</b> <span class="mono">workflow.json</span> PUT 的演示化表述；ETag 式基线值、变更时间线、diff 行数与「2b-perf-baseline」示例阶段为编造。删除终态锚的下游影响清单按 §6.19 / §6.20 / §6.21 的映射关系推演，非已实现行为。<b>本轮新增「状态-行为锚 · multica 完整清单」表：</b>7 个内置 key（<span class="mono">backlog / todo / in_progress / in_review / blocked / done / cancelled</span>，末项<b>双 l</b>）归 4 类别、「四个内置行为只挂固定 key」、自定义 <span class="mono">unstarted</span> <b>不停车</b>、<span class="mono">done / cancelled</span> 上指派<b>也立刻开跑</b>、分栏按<b>具体状态</b>不按类别合并、类别建后<b>不可改</b>、<span class="mono">409 issue_status_in_use</span> + <span class="mono">issue_count</span> 与「归档不退删除」——逐条取自 10-23 multica 一手清单复核，<b>非本仓已实现行为</b>；表内 <span class="mono">Code Review</span> / <span class="mono">QA</span> / 「待排期」三个自定义态名与「QA 剩 7 个任务」计数为演示编造。<b>triage 注为本页自研声明：</b>受理门是 AgentFlow 的正交轴，multica 无此态，故不列进 7 态清单。</p>
+可点区演示（本轮交互重分级后）：阶段 ID 单元格 / 行内「编辑」→ <b>独立页</b>：0-change 行 → stage-model__stage-0-change，1-requirement / 2-design / 2a-ui-design / 3-task → stage-model__anchor-unstarted，4-dev / 5-test / 6-review → stage-model__anchor-started，7-integration → stage-model__anchor-done（终态锚下游影响清单）· 表单类一律整页：编辑表单 stage-model__stage-edit、新增表单 stage-model__stage-new、保存前覆盖面预览 stage-model__save-preview · 顶栏 chip「PUT 整包盲覆盖」→ save-preview 页 · 「重置为默认」/ 删除阶段 / 删除终态锚 / 仍然整包覆盖 → 一屏读得完的二次确认 modal· 「导入 / 导出 ▾」「项目 ▾」→ 选择器 pop · <b>新增「状态-行为锚 · multica 完整清单」为纯文表（无浮层）</b>，其下四枚事实按钮 → toast 各表一条行为事实：在 backlog 指派（不建 run · 唯一停车态）· 在自定义 unstarted 指派（立刻建 run · 停车不是类别属性）· 改类别 → <span class="mono">400 category_immutable</span> · 归档非空自定义态 → <span class="mono">409 issue_status_in_use + issue_count</span>；「五条配套边界」与「triage 注」两张 callout 同为纯文　按 Esc 关闭所有浮层。
 </body></html>

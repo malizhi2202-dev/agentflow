@@ -1,0 +1,460 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>自动化中心 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}.nowrap{white-space:nowrap}
+h4.blk{font-size:13px;font-weight:700;margin:var(--s5) 0 var(--s2);display:flex;align-items:center;gap:8px}
+h4.blk .desc{font-weight:400;color:var(--text-muted);font-size:11.5px}
+tr[id],div[id]{scroll-margin-top:46px}
+.fld{margin-bottom:var(--s3)}.fld label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px}.fld label b{color:var(--text)}
+.fld input,.fld select,.fld textarea{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:7px 9px;font:12.5px var(--font);width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:1px solid var(--blue);border-color:var(--blue)}
+.fld .hint{font-size:11px;color:var(--text-muted);margin-top:3px}
+.fld textarea{min-height:52px;resize:vertical;font-family:var(--font-mono);font-size:11.5px}
+.av{width:22px;height:22px;border-radius:50%;background:var(--bg-main);border:1px solid var(--border-strong);display:inline-grid;place-items:center;font-size:10.5px;color:var(--text-secondary);flex:none}
+.av.ai{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)}
+.tri{display:flex;gap:4px;align-items:center}.tri .chip{cursor:pointer}.tri .chip.on{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.xscroll{overflow-x:auto}.xscroll .tbl{min-width:940px}
+.trow{display:grid;grid-template-columns:.8fr 1.5fr 1fr auto;gap:6px;align-items:center;margin-bottom:6px}
+.trow select,.trow input{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:5px 7px;font:11.5px var(--font-mono);width:100%}
+.tabs .tab{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;text-decoration:none}
+.tabs .tab:hover{text-decoration:none}
+.nrun{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.mono-blk{font-family:var(--font-mono);font-size:11.5px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:9px;margin:0;white-space:pre-wrap}
+.tok{font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:2px 6px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p29" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="squads__code-review.html">小队详情 · ⑥ 自动化（局部视图 · 同一口径）</span><span class="pill" data-goto="board.html">任务看板（create_issue 落点）</span><span class="pill" data-goto="control-plane.html">Agent 管控（在线 / 队列）</span><span class="pill" data-goto="approvals.html">审批中心（人批门）</span><span class="pill" data-goto="integration.html">对外集成面（端点与凭据）</span><span class="pill" data-goto="runtimes.html">运行时发现（在线判定）</span></div>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">全局横切</span>本页 = <b>自动化中心</b>：一张表看完<b>全平台</b>的自动化（负责人可以是任意 Agent 或任意 Squad）。<a data-goto="squads__code-review.html">小队详情页 ⑥ 段</a>是<b>同一批规则的局部视图</b>（目标固定为本队），两页<b>措辞与口径逐字一致</b>：动作两档 <span class="mono">create_issue / run_only</span>、并发三态 <span class="mono">skip / queue / replace</span>、<span class="mono">spec_version</span> 版本快照、失败率门「<b>止损非自愈 · 恢复必须人点</b>」。局部视图建规则不改目标；<b>本页新建时负责人二轨自选</b>。</p>
+<div class="callout" style="margin:12px 18px 0"><p class="tiny" style="margin:0"><b>一条自动化 = Runbook（目标 / 背景 / 约束 / 步骤）＋ 负责人（Agent 或 Squad 二轨）＋ N 个触发器。</b>三件事<b>分账</b>：Runbook 说清「要干什么、边界在哪」，负责人决定「谁去干、成本记在谁头上」，触发器决定「什么时候被叫醒」。<b>Runbook 每次运行读当前值</b>（multica 基线口径）——改了立刻生效、不回溯在途 run；<span class="chip warn">agentflow 自证条款</span> 我们额外记 <span class="mono">spec_version</span> 快照，见 §H 对照表。</p></div>
+<div class="callout warn" style="margin:var(--s2) 18px 0"><p class="tiny" style="margin:0"><b>触发器只有 <span class="mono">schedule</span> 与 <span class="mono">webhook</span> 两类；「手动 Run now」是第三入口、不算触发器。</b>Run now 走<b>同一份 Runbook、同一个负责人、同一种执行模式</b>，只是由人点；它<b>不进</b>「触发器摘要」列、<b>不计</b>触发器数。<span class="chip info">agentflow 自扩展 · 明写</span> 本页仍保留 v14 的 <span class="mono">api</span> 型作第三类触发器——<b>multica 的 API 路径就是 webhook URL / CLI</b>，没有独立的 api 触发型；对照注见 §H 与「＋ 新建自动化」里的 kind 行。</p></div>
+<div class="callout bad" style="margin:var(--s2) 18px 0"><p class="tiny" style="margin:0"><b>能管自动化 ≠ 能跑它的 Agent。</b>一条规则每次触发，派生执行照旧按<b>链顶人类</b>过「可调用目标」判定（<b>Agent Access 另行判定</b>，规则不授予调用权），也<b>不绕过 triage 受理门与配额硬限</b>——<b>规则不是后门</b>。建与管：任何成员可建；<b>创建者 + 所属 owner / admin</b> 可编辑；协作者可管理<b>但不可转授权</b>（§G）。</p></div>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/automations</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
+          <a data-goto="automations.html" class="active"><svg class="icon"><use href="#i-refresh"/></svg>自动化中心</a>
+          <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">自动化中心 <span class="dim">· 全局横切 · 本域 = AgentFlow 平台研发空间</span></span><span class="chip mono">规则 4</span><span class="chip ok">enabled 2</span><span class="chip warn">paused 1 · 熔断待人工恢复</span><span class="chip bad">archived 1</span><span class="right">
+            <button class="btn sm" data-click data-pop="pp-failrate">失败率口径 ▾</button>
+            <button class="btn sm primary" data-click data-modal="md-auto-new">＋ 新建自动化</button>
+          </span></div>
+          <div class="app-body">
+
+            <div class="grid g4" style="margin-bottom:var(--s3)">
+              <div class="stat"><div class="stat-label">自动化规则</div><div class="stat-value">4</div><div class="stat-sub" title="enabled 2 · paused 1 · archived 1">enabled 2 · paused 1 · archived 1</div></div>
+              <div class="stat"><div class="stat-label">近 7d 触发</div><div class="stat-value">73</div><div class="stat-sub">完结 63 · skipped 6 · cancelled 3 · 门拒 1</div></div>
+              <div class="stat"><div class="stat-label">近 7d 失败率</div><div class="stat-value" style="color:var(--orange)">76.2<span style="font-size:14px">%</span></div><div class="stat-sub" title="取消与「门」都不计入分母">48/63 · 取消与门不计 · 47 项来自 af-auto-2</div></div>
+              <div class="stat"><div class="stat-label">webhook 投递 · 7d</div><div class="stat-value">62</div><div class="stat-sub">200 类 59（acc 47 / skip 5 / dup 4 / ign 3）· 非 200 3</div></div>
+            </div>
+            <p class="tiny dim" style="margin:0 0 var(--s3)"><b>四卡数字先给自己算一遍（演示口径要能加得回来）：</b>触发 <span class="mono">73</span> = 完结 <span class="mono">63</span> + skipped <span class="mono">6</span> + replace 取消 <span class="mono">3</span> + 门拒 <span class="mono">1</span>；失败 <span class="mono">48</span> 里 <span class="mono">47</span> 来自 <span class="mono">af-auto-2</span>（熔断那条）、<span class="mono">1</span> 来自 af-auto-1；<b>投递 <span class="mono">62</span> 全来自 af-auto-2 的 webhook</b>——其余两条没有 webhook 触发器，它们的「详情」里投递记录 tab 是<b>空态</b>（不放 0 条投递的假数据）。<b>全平台失败率被一条烧起来的规则拉高，是这张表想说的事，不是口径写错。</b></p>
+
+            <h4 class="blk" id="list">① 自动化清单 <span class="desc">—— 列 = 名称 / 负责人轨 chip / 触发器摘要 / 执行模式 / 状态 / 近 7d 失败率 / 操作</span></h4>
+            <div class="xscroll"><table class="tbl compact"><thead><tr><th>名称</th><th>负责人轨</th><th>触发器摘要</th><th>执行模式</th><th>状态</th><th>近 7d 失败率 <span class="chip info" data-click data-pop="pp-failrate" style="height:16px;padding:0 5px">口径 ▾</span></th><th></th></tr></thead><tbody>
+              <tr><td><b>日会前审查</b> <span class="chip mono" data-click data-toast="规则版本 v3：每次改动存版本快照，可看 diff / 回滚到 v1（审计 autopilot:updated）（演示）">v3</span><div class="tiny dim">每天工作日照过一遍待审 PR · <span class="mono">af-auto-1</span></div><div class="tiny dim"><span class="btn link" style="padding:0" data-goto="squads__code-review.html#auto">= 小队页 ⑥ 第一行（局部视图）→</span></div></td>
+                <td><span class="chip purple">Squad · 代码审查小队</span><div class="tiny dim mono">sq-1 · leader 汇总 Agent agent-5</div><div class="tiny dim">成本沿 leader 归因链落 leader 所属团队 <span class="mono">agentflow</span>；<b>不给规则本身造第二个归属主体</b></div></td>
+                <td><span class="chip warn">schedule</span> <span class="mono tiny">30 8 * * 1-5</span> <span class="chip mono tiny">Asia/Shanghai</span><div class="tiny dim">1 个触发器 · t-11 · <span class="chip ok" style="height:16px;padding:0 5px" data-click onclick="tgSwap(this)">开</span> 启停</div><div class="tiny dim">Next runs：<span class="mono">09-24 08:30 · 09-25 08:30 · 09-28 08:30</span> <span data-click class="btn link" style="padding:0" data-toast="Next runs 预览（IANA Asia/Shanghai · 5 段 cron 无秒位 · 跳过周末）：09-24（四）08:30 / 09-25（五）08:30 / 09-28（一）08:30（演示）">展开 ▸</span></div></td>
+                <td><span class="chip info">create_issue</span> <span class="tiny dim">建任务并进派单池</span><div class="tiny dim">讨论 / 状态 / 运行都挂在任务上</div></td>
+                <td><span class="chip ok">运行中</span><div class="tiny dim mono">末次 09-23 08:30 · 已入队 r-130</div></td>
+                <td><div class="nrun"><span class="bar" style="width:58px"><i class="o" style="width:17%"></i></span><span class="mono tiny">16.7%</span></div><div class="tiny dim">1 败 / 6 完结 · <b>样本小（&lt;50）不进熔断判定</b></div></td>
+                <td class="nowrap"><span class="btn link" data-click data-drawer="dr-auto">详情</span> <span class="btn link" data-click data-toast="Run now 已触发（第三入口，不算触发器）：走同一 Runbook · 同一负责人 · create_issue 照建任务并通知订阅者 · 审计 actor=李工 · via=manual（演示）">▶ Run now</span> <span class="btn link" data-click data-toast="手动暂停：停 schedule + webhook + Run now 三件事一起停，在途 run 跑完为止（演示）">暂停</span></td></tr>
+              <tr><td><b>发布冒烟</b> <span class="chip mono" data-click data-toast="v4：熔断前最后一次改动是 09-20 加了一条事件过滤；每次运行记当时版本，可指回（演示）">v4</span><div class="tiny dim">部署完成后跑冒烟集 · <span class="mono">af-auto-2</span></div></td>
+                <td><span class="chip info">Agent · 汇总 Agent</span><span class="mono tiny dim">agent-5</span><div class="tiny dim">负责人二轨的另一轨：指向 Agent 时成本与配额落<b>该 Agent 的归属团队</b></div></td>
+                <td><span class="chip purple">webhook</span> <span class="mono tiny">POST /hooks/af/auto-2/deploy</span> <span class="chip" style="height:16px;padding:0 5px">HMAC</span><div class="tiny dim">+1 <span class="chip warn">schedule</span> <span class="mono">0 2 * * *</span>（每日兜底重扫）· t-22 · <span class="chip" style="height:16px;padding:0 5px" data-click onclick="tgSwap(this)">关</span> 启停 <span class="chip info" style="height:16px;padding:0 5px" title="multica 侧单触发器启停只有 CLI（已知缺口）；本页 UI 直接给开关">自扩展</span></div><div class="tiny dim"><span class="btn link" style="padding:0" data-click data-drawer="dr-auto">事件过滤 2 行 · 看投递 →</span></div></td>
+                <td><span class="chip">run_only</span> <span class="tiny dim">不建任务，直接入队</span><div class="tiny dim">只进自动化运行史，<b>无协作记录</b></div></td>
+                <td><span class="chip warn">暂停</span> <span class="chip bad" style="height:16px;padding:0 5px">失败熔断 09-21</span><div class="tiny dim">自动暂停并通知创建者 · <b>待人工恢复</b></div></td>
+                <td><div class="nrun"><span class="bar" style="width:58px"><i class="r" style="width:92%"></i></span><span class="mono tiny" style="color:var(--red)">92.2%</span></div><div class="tiny dim">47 败 / 51 完结 · ≥50 且 ≥90% → 命中门</div></td>
+                <td class="nowrap"><span class="btn link" data-click data-drawer="dr-auto">详情</span> <span class="btn link" data-click data-toast="恢复由人点（止损非自愈）：先修 Runbook 或目标，再点恢复 → 三个入口重新生效；审计 autopilot:resumed · actor=李工（演示）">恢复</span> <span class="btn link" style="color:var(--red)" data-click data-modal="md-archive">归档…</span></td></tr>
+              <tr><td><b>日报归档</b> <span class="chip mono" data-click data-toast="v1 即当前版本（新建后未改动）（演示）">v1</span><div class="tiny dim">每天把当日 run 摘要归档进知识库草稿 · <span class="mono">af-auto-3</span></div></td>
+                <td><span class="chip info">Agent · 文档助手</span><span class="mono tiny dim">agent-6</span><div class="tiny dim">个人 Agent 也可当负责人（不要求属于某小队）</div></td>
+                <td><span class="chip warn">schedule</span> <span class="mono tiny">0 22 * * *</span> <span class="chip mono tiny">Asia/Shanghai</span><div class="tiny dim">1 个触发器 · t-31 · <span class="chip ok" style="height:16px;padding:0 5px" data-click onclick="tgSwap(this)">开</span> 启停</div><div class="tiny dim">Next runs：<span class="mono">09-24 22:00 · 09-25 22:00 · 09-26 22:00</span></div></td>
+                <td><span class="chip">run_only</span> <span class="tiny dim">不建任务</span><div class="tiny dim">订阅者字段<b>灰显</b>：不留任务 = 无处通知</div></td>
+                <td><span class="chip ok">运行中</span> <span class="chip bad" style="height:16px;padding:0 5px">末次 skipped</span><div class="tiny dim">09-23 22:00 · 触发时 runtime 离线</div></td>
+                <td><div class="nrun"><span class="bar" style="width:58px"><i class="g" style="width:0%"></i></span><span class="mono tiny">0.0%</span></div><div class="tiny dim">0 败 / 6 完结 · <b>skipped 不计失败</b>：没结果就什么都不留</div></td>
+                <td class="nowrap"><span class="btn link" data-click data-drawer="dr-auto">详情</span> <span class="btn link" data-click data-toast="skipped 的语义：run_only 触发时负责人运行时必须在线——离线即 skipped，不留等待任务、不排队续投（与「指派的 runtime_offline 暂存不丢」不同：那是人派活，这是定时器）；本次只在运行史留一行 skipped（演示）">skipped 是什么意思</span></td></tr>
+              <tr class="grp-row"><td colspan="7">已归档示例 —— <b>删除 = 归档</b>：停未来触发（schedule + webhook + Run now 一起停），历史运行史与投递记录<b>全部保留</b>、只读可查</td></tr>
+              <tr style="opacity:.6"><td class="dim"><b>旧值守轮询</b> <span class="chip dim mono">v5</span><div class="tiny dim">目标失效后已无人接管 · <span class="mono">af-auto-4</span></div></td>
+                <td class="dim"><span class="chip bad">Squad · 旧运维值守队（已归档）</span><div class="tiny dim mono">sq-9 · archived</div><div class="tiny dim">09-16 目标队归档 → 规则自动转 <span class="mono">disabled</span>（<b>不静默删行</b>），再启用需换目标（与小队页同一口径）</div></td>
+                <td><span class="chip dim">schedule</span> <span class="mono tiny dim">*/5 * * * *</span><div class="tiny dim">t-41 · 随规则归档一并停</div></td>
+                <td><span class="chip dim">run_only</span></td>
+                <td><span class="chip bad">已归档</span><div class="tiny dim mono">09-20 归档 · 李工 · 原因随快照保留</div></td>
+                <td class="dim">—（归档后不统计）<div class="tiny dim">末窗 93.5% · 58 败 / 62 完结 · 09-11 曾命中熔断门并通知创建者</div></td>
+                <td class="nowrap"><span class="btn link" data-click data-toast="归档只停未来触发：运行史 214 行与投递记录照旧可按 af-auto-4 在审计查（audit.html?autopilot=af-auto-4）；无「恢复触发」按钮——要再跑得新建规则（演示）">归档说明</span> <span class="btn link" data-click data-drawer="dr-auto">历史运行</span></td></tr>
+            </tbody></table></div>
+            <p class="tiny dim" style="margin:6px 0 var(--s3)">并发语义三态唯一化（与小队页逐字同）：<span class="tri"><span class="chip ok on">skip</span></span>=在途则跳过本次（不新建）· <span class="tri"><span class="chip ok on">queue</span></span>=排队等前一条终态 · <span class="tri"><span class="chip ok on">replace</span></span>=取消在途再入队（<b>取消的 run 不计成功率分母</b>）。<b>动作只有两档</b>：<span class="mono">create_issue</span>（留痕在任务上）与 <span class="mono">run_only</span>（<b>本次不生成任务</b>，只留运行账——界面明写，不谎报）。每次运行记规则版本快照 <span class="mono">spec_version</span>——「当时按哪份规则跑的」可回放可归因。<b>失败率门自动暂停是止损，不是自愈</b>：恢复必须人点。自动派生执行同受 <b>triage 受理门</b>约束。</p>
+
+            <h4 class="blk" id="parts">② 一条自动化的三段构成 <span class="desc">—— Runbook 归 Runbook，负责人归负责人，触发器归触发器</span></h4>
+            <div class="grid g3" style="align-items:start">
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">Runbook（四段 · 必填）</p>
+                <table class="tbl compact" style="margin:0"><tbody>
+                <tr><td><b>目标</b></td><td class="tiny">要达成什么，一句话可判成败</td></tr>
+                <tr><td><b>背景</b></td><td class="tiny">为什么现在做、上下文在哪（任务 / 仓库 / 文档指针）</td></tr>
+                <tr><td><b>约束</b></td><td class="tiny">不许碰什么：禁写产物、禁合并、结论停在 <span class="mono">in_review</span></td></tr>
+                <tr><td><b>步骤</b></td><td class="tiny">有序动作清单，负责人可偏离但须在结论里说明</td></tr>
+                </tbody></table>
+                <p class="tiny dim" style="margin:6px 0 0"><b>每次运行读当前值</b>（multica 基线）：改 Runbook 立即对<b>此后</b>触发生效，<b>不回溯</b>在途 run。版本账本是我们加的，见 §H。</p></div>
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">负责人（二轨 · 单选）</p>
+                <table class="tbl compact" style="margin:0"><tbody>
+                <tr><td><span class="chip info">Agent</span></td><td class="tiny">直接给该 Agent 入队；成本与配额落<b>它归属的团队</b></td></tr>
+                <tr><td><span class="chip purple">Squad</span></td><td class="tiny">= 给 leader <b>入队一条 leader 任务</b>（<span class="mono">is_leader_task</span>），<b>无成员抢单</b>；成本沿 leader 归因链落 leader 所属团队</td></tr>
+                <tr><td>不可混指</td><td class="tiny">一条规则<b>只认一个</b>负责人；要两条线跑就建两条规则，各自有版本与账</td></tr>
+                <tr><td>拒因</td><td class="tiny">目标已归档 / 当前调用者不可调用 → <span class="mono">403 not_callable · assignee_archived</span>，原样给出，不降级成「保存成功」</td></tr>
+                </tbody></table>
+                <p class="tiny dim" style="margin:6px 0 0">归档目标<b>不会</b>连带删掉规则：规则转 <span class="mono">disabled</span>，「不静默删」与小队页同一句。详见 <a data-goto="squads__code-review.html">小队详情 · 危险区</a>。</p></div>
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">触发器（N 个 · 可并存）</p>
+                <table class="tbl compact" style="margin:0"><tbody>
+                <tr><td><span class="chip warn">schedule</span></td><td class="tiny"><b>可多条并存</b>（工作日 08:30 + 周五 16:00 复盘各一条），互不覆盖；5 段 cron（<b>无秒位</b>）+ IANA 时区</td></tr>
+                <tr><td><span class="chip purple">webhook</span></td><td class="tiny">一条规则一个 URL（含遮蔽 token）；载荷 JSON <b>≤256KiB</b>；事件过滤 + 投递记录</td></tr>
+                <tr><td><span class="chip">api</span> <span class="chip info" style="height:16px;padding:0 5px">自扩展</span></td><td class="tiny">v14 保留的第三类（<span class="mono">POST /squads/1/assign · PAT 计 owner</span>）。<b>multica 只有两类的对照注在 §H</b></td></tr>
+                <tr><td>Run now</td><td class="tiny"><b>第三入口，不算触发器</b>：人点一下，走同一 Runbook / 负责人 / 执行模式，不进触发器摘要列、不计触发器数</td></tr>
+                </tbody></table>
+                <p class="tiny dim" style="margin:6px 0 0">单个触发器可独立启停（<span class="chip info" style="height:16px;padding:0 5px">自扩展</span> multica 侧仅 CLI，属已知缺口）；<b>整条规则</b>的启停是另一件事——见 §F。</p></div>
+            </div>
+
+            <h4 class="blk" id="sched">③ schedule 触发器 <span class="desc">—— 多 schedule 并存 · 5 段无秒位 · IANA 时区 · Next runs 必显</span></h4>
+            <div class="grid g2" style="align-items:start">
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">表达式与时区</p>
+                <table class="tbl compact" style="margin:0"><tbody>
+                <tr><td>段数</td><td class="tiny"><b>5 段</b> <span class="mono">分 时 日 月 周</span> · <b>没有秒位</b>——最小粒度 1 分钟；要秒级请走代码，界面不提供</td></tr>
+                <tr><td>解析</td><td class="tiny"><b>服务端解析</b>，非法表达式 <span class="mono">422</span> 直给错因（不静默按「永不触发」存下来）</td></tr>
+                <tr><td>时区</td><td class="tiny">IANA 名称（<span class="mono">Asia/Shanghai · America/New_York · Europe/Berlin</span>），DST 跳变按 IANA 规则；<b>默认 Asia/Shanghai，非默认显式标注</b>（与小队页同句）</td></tr>
+                <tr><td>并存</td><td class="tiny">同一条规则可挂<b>多条 schedule</b>：各自一行、各自可停用，删一条不影响其余</td></tr>
+                <tr><td>启停</td><td class="tiny"><span class="chip info">agentflow 自扩展</span> 触发器行给「开 / 关」开关；<b>multica 侧只有整条规则启停 + 单触发器仅 CLI</b>，我们把它搬进 UI（已知缺口的补位）</td></tr>
+                </tbody></table></div>
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">Next runs 预览（<b>必显</b> · 保存前必须看到）</p>
+                <p class="tiny muted" style="margin:0 0 6px">不预览就<b>不给保存</b>——「我以为每天跑，其实一条都不会触发」是 cron 最贵的错法，界面直接堵掉。</p>
+                <table class="tbl compact" style="margin:0"><thead><tr><th class="mono">cron</th><th class="mono">时区</th><th>接下来 3 次（演示 · 探针窗 09-23）</th></tr></thead><tbody>
+                <tr><td class="mono tiny">30 8 * * 1-5</td><td class="mono tiny">Asia/Shanghai</td><td class="mono tiny">09-24（四）08:30 · 09-25（五）08:30 · <b>09-28（一）08:30</b> <span class="chip" style="height:16px;padding:0 5px">跳过周末</span></td></tr>
+                <tr><td class="mono tiny">0 2 * * *</td><td class="mono tiny">America/New_York</td><td class="mono tiny">09-24 02:00 · 09-25 02:00 · 09-26 02:00 <span class="chip warn" style="height:16px;padding:0 5px">非默认时区已标注</span></td></tr>
+                <tr><td class="mono tiny">0 0 1 1 *</td><td class="mono tiny">Asia/Shanghai</td><td class="mono tiny">2027-01-01 00:00 · 2028-01-01 00:00 · 2029-01-01 00:00 <span class="tiny dim">预览把「一年一次」摊到脸上</span></td></tr>
+                </tbody></table>
+                <p class="tiny dim" style="margin:6px 0 0">停用中的触发器<b>不显示未来时刻</b>（显式写「停用中 · 无未来触发」），避免看着像在跑。</p></div>
+            </div>
+
+            <h4 class="blk" id="wh">④ webhook 触发器 <span class="desc">—— 载荷上限 · 幂等 · 遮蔽与 Rotate · 事件过滤 · 六步推断 · 响应语义</span></h4>
+            <div class="grid g2" style="align-items:start">
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">收：怎么把一次投递判成一次可跑的事</p>
+                <table class="tbl compact" style="margin:0"><tbody>
+                <tr><td>载荷</td><td class="tiny">JSON <b>≤ 256KiB</b>，超限 <span class="mono">413</span> 并在投递记录留失败原因（不截断后照跑）</td></tr>
+                <tr><td>幂等</td><td class="tiny"><span class="mono">Idempotency-Key</span> 命中已见键 → <span class="mono">200 duplicate</span>，<b>只留投递记录、不新建运行</b>；GitHub 另按 <span class="mono">X-GitHub-Delivery</span> 去重（两个键分开记账）</td></tr>
+                <tr><td>凭据</td><td class="tiny">URL 内 token <b>遮蔽显示</b>（<span class="tok">af_wh_9f4c…e21</span>）· 写-only <b>不回显</b>、改密 = 断开重连（同 §6.4 密钥原则）· <span class="btn link" style="padding:0" data-click data-modal="md-rotate">Rotate URL →</span> <b>旧 URL 立即失效</b></td></tr>
+                <tr><td>签名</td><td class="tiny">HMAC 不符 → <span class="mono">401</span>，<b>与业务失败分开显示</b>（一个是门、一个是活；与小队页同一句）</td></tr>
+                <tr><td>事件过滤</td><td class="tiny">一行 = <span class="mono">event</span> + 可选 <span class="mono">actions</span>；<b>任一行匹配即跑</b>；<b>空规则 = 全收</b>（不是全拒）</td></tr>
+                </tbody></table>
+                <p class="h2p" style="margin:var(--s3) 0 6px">六步事件推断（按序取第一个命中的）</p>
+                <ol class="tiny muted" style="margin:0;padding-left:18px">
+                <li>载荷里的 <span class="mono">event</span> 字段（显式，最优先）</li>
+                <li><span class="mono">X-GitHub-Event</span> ＋ 正文 <span class="mono">action</span></li>
+                <li><span class="mono">X-Gitlab-Event</span></li>
+                <li><span class="mono">X-Event-Type</span></li>
+                <li>正文里的 <span class="mono">type</span> / <span class="mono">action</span></li>
+                <li>兜底：<span class="mono">webhook.received</span>（什么都没认出来，仍收、仍记账）</li>
+                </ol>
+                <p class="tiny dim" style="margin:6px 0 0">端点与凭据的轮换面在 <a data-goto="integration.html">对外集成面</a>（与小队页「端点与凭据」同一落点）。</p></div>
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">响应语义：业务性「不跑」也回 200</p>
+                <table class="tbl compact" style="margin:0"><tbody>
+                <tr><td><span class="chip ok">200 accepted</span></td><td class="tiny">收下了并派生成运行——运行结果<b>另</b>在运行史里，不在此刻的响应里</td></tr>
+                <tr><td><span class="chip warn">200 skipped</span></td><td class="tiny">规则在跑但这次<b>不跑</b>：并发 <span class="mono">skip</span> 命中在途、负责人离线（run_only）、门未放行</td></tr>
+                <tr><td><span class="chip">200 ignored</span></td><td class="tiny">事件过滤<b>未命中</b>，看完就放下</td></tr>
+                <tr><td><span class="chip info">200 duplicate</span></td><td class="tiny">幂等键命中，已有那次在账上</td></tr>
+                </tbody></table>
+                <p class="tiny dim" style="margin:6px 0 0"><b>为什么四类都是 200：业务性不跑返 200，防上游重试风暴</b>——上游只对非 2xx 重试，把「过滤掉了」回成 4xx 会让 CI 反复重投。非 200 一族（<span class="mono">400 / 401 / 404 / 413 / 429 / 500</span>）留给<b>调用方自己能修的技术性拒绝</b>，明细见抽屉「响应码表」小卡。</p></div>
+            </div>
+
+            <h4 class="blk" id="mode">⑤ 执行模式：create_issue ⟂ run_only <span class="desc">—— 取舍句写在选择器上，不藏在文档里</span></h4>
+            <table class="tbl compact"><thead><tr><th>维度</th><th><span class="chip info">create_issue</span> 建任务</th><th><span class="chip">run_only</span> 只运行</th></tr></thead><tbody>
+              <tr><td>一句话取舍</td><td class="tiny"><b>需要人看或跟人干的活</b>——讨论、状态、运行全部挂在任务上，看板与收件箱都能看到</td><td class="tiny"><b>只要结果、不留协作记录的活</b>——只进自动化运行史，没有任务卡、没有评论线</td></tr>
+              <tr><td>留痕</td><td class="tiny">任务（含 <span class="mono">AF-xxx</span>）+ run + 订阅者通知 + 审计</td><td class="tiny">run + 运行史一行 + 审计；<b>本次不生成任务</b>（界面明写，不谎报）</td></tr>
+              <tr><td>触发时负责人离线</td><td class="tiny">任务照建，<span class="mono">runtime_offline</span> <b>暂存不丢</b>，心跳恢复自动续投（人派的活不能凭空消失）</td><td class="tiny"><b>直接 skipped · 不留等待任务</b>——定时器派的活没人补跑，等下去只会攒一库僵尸卡</td></tr>
+              <tr><td>没有结果时</td><td class="tiny">任务还在（可复盘、可人接手）</td><td class="tiny"><b>什么都不留</b>：没产出就没有载体，只有运行史里一行终态</td></tr>
+              <tr><td>订阅者字段</td><td class="tiny">有：<b>建单后通知谁</b>（人 / 收件箱 / 委派型订阅者）</td><td class="tiny"><b>无</b>（灰显）：不留任务 = 无处通知；要人知道就改 create_issue</td></tr>
+              <tr><td>成功率口径</td><td class="tiny" rowspan="1">分母 = 完结（完成 + 失败），<b>replace 取消的 run 不计</b>；两档同口径</td><td class="tiny">同上（<span class="btn link" style="padding:0" data-click data-pop="pp-failrate">口径 ▾</span>）</td></tr>
+              <tr><td>对照落点</td><td class="tiny"><a data-goto="board.html">任务看板</a> · <a data-goto="inbox.html">收件箱</a></td><td class="tiny">本页运行史（抽屉 · 投递记录旁）· <a data-goto="replay.html">执行回放</a></td></tr>
+            </tbody></table>
+
+            <h4 class="blk" id="ledger">⑥ 两级账本 + Replay <span class="desc">—— 运行史是「跑了什么」，投递记录是「外面投了什么」</span></h4>
+            <div class="grid g3" style="align-items:start">
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">第一级 · 自动化运行史</p>
+                <p class="tiny muted" style="margin:0">每条<b>触发</b>一行（含 skipped / duplicate 造成的「不跑」）：<span class="mono">触发源</span>（哪个触发器 / Run now）· <span class="mono">时间</span> · <span class="mono">状态</span> · <span class="mono">关联任务或 run</span> · <span class="mono">失败原因</span>。<b>失败原因区分「门」与「活」</b>：<span class="mono">401</span> 签名不符与 <span class="mono">exit 1</span> 业务失败不同码、不同色。</p></div>
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">第二级 · webhook 投递记录</p>
+                <p class="tiny muted" style="margin:0">每个<b>到达</b>一行，<b>跑没跑都记</b>：<span class="mono">d-xx</span> 投递号 · <span class="mono">解析后事件</span>（六步推断的结果）· <span class="mono">响应</span>（200 四类 / 非 200）· <span class="mono">去重信息</span>（命中哪个键）· <span class="mono">失败原因</span>。</p></div>
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">Replay（重放一条投递）</p>
+                <ul class="tiny muted" style="margin:0;padding-left:18px"><li><b>永远新增，不改旧</b>：重放 d-88 生成 <span class="mono">d-90</span>，d-88 原样留在账上</li><li><b>不参与去重</b>：幂等键照抄也不判 duplicate，重放就是「我知道我在重复」</li><li><b>签名失败（401）或仍在排队中的投递不可重放</b>——按钮灰显并给出原因</li></ul></div>
+            </div>
+
+            <h4 class="blk" id="fail">⑦ 失败治理：熔断 · 手动暂停 · 归档 <span class="desc">—— 三件事三种后果，界面各写一句</span></h4>
+            <table class="tbl compact"><thead><tr><th>触发方式</th><th>条件（演示口径）</th><th>停了什么</th><th>怎么恢复</th></tr></thead><tbody>
+              <tr><td><b>失败率熔断</b>（自动）</td><td class="tiny"><b>近 7 天 ≥50 次完结且失败率 ≥90%</b> → <b>自动暂停并通知创建者</b>（收件箱 <span class="mono">action_required</span> 同签名合并为 1 条）</td><td class="tiny">整条规则：schedule + webhook + Run now 全停</td><td class="tiny"><b>修复后人工恢复</b>——<b>止损非自愈</b>，界面不放「自动重试恢复」</td></tr>
+              <tr><td><b>手动暂停</b>（人）</td><td class="tiny">人点「暂停」；或负责人离线太久、人在收线箱升级后主动停</td><td class="tiny"><b>同上三件事一起停</b>（含 Run now，别留一个能跑的口子）；在途 run 跑完为止、不撤回</td><td class="tiny">人点恢复，立即重新接三个入口</td></tr>
+              <tr><td><b>删除 = 归档</b></td><td class="tiny">人点「归档」（破坏性动作，二次确认模态 + 原因随快照保留）</td><td class="tiny"><b>停未来全部触发</b>；<b>历史保留</b>（运行史与投递记录只读可查，可按 <span class="mono">af-auto-4</span> 在<a data-goto="audit.html">审计</a>过滤）</td><td class="tiny"><b>没有「恢复触发」</b>：要再跑得新建一条规则（新 id、新 v1 快照）</td></tr>
+              <tr><td class="dim">目标失效（附带）</td><td class="tiny dim">负责人（Squad / Agent）被归档</td><td class="tiny dim">规则自动转 <span class="mono">disabled</span>，<b>不静默删行</b>（与小队页逐字同）</td><td class="tiny dim">改指一个有效负责人后再启用</td></tr>
+            </tbody></table>
+
+            <h4 class="blk" id="perm">⑧ 权限 <span class="desc">—— 「谁能管这条」与「这条能不能真跑」是两本账</span></h4>
+            <div class="grid g2" style="align-items:start">
+              <div class="panel"><p class="h2p" style="margin:0 0 6px">建 / 改 / 管</p>
+                <table class="tbl compact" style="margin:0"><tbody>
+                <tr><td>新建</td><td class="tiny"><b>任何成员可建</b>（不是管理员专属；建完自己就是创建者）</td></tr>
+                <tr><td>编辑 / 启停 / 归档 / Rotate / Replay</td><td class="tiny"><b>创建者 + 所属团队 owner / admin</b></td></tr>
+                <tr><td>协作者</td><td class="tiny">可管理（改与停），<b>但不可转授权</b>——「加一个协作者」这一步只有创建者与 owner / admin 能做</td></tr>
+                <tr><td>Viewer</td><td class="tiny">运行史与投递记录<b>只读</b>；「详情」抽屉可看，任何写按钮不渲染</td></tr>
+                </tbody></table></div>
+              <div class="callout bad" style="margin:0"><p class="tiny" style="margin:0"><b>能管自动化 ≠ 能跑它的 Agent。</b>编辑权决定你能不能改这条规则；<b>能不能真跑</b>由每次触发时按<b>链顶人类</b>重过的 <b>Agent Access（可调用目标判定）</b>说了算。所以：把规则改对了仍然 <span class="mono">403 not_callable</span> 是<b>合法结果</b>，界面必须把这两种「不行」分开显示，并排给出拒因（<span class="mono">permission_denied_editor</span> ⟂ <span class="mono">not_callable</span>）。同理，<b>自动化不是后门</b>：triage 受理门、配额硬限、人批门（<a data-goto="approvals.html">审批中心</a>）一律照过。</p></div>
+            </div>
+
+            <h4 class="blk" id="diff">⑨ multica 文档基线 ⟂ agentflow 自扩展 <span class="desc">—— 借来的口径与自己的加件分行写，不混为一谈</span></h4>
+            <table class="tbl compact"><thead><tr><th>条款</th><th>multica 文档基线</th><th>本页做法</th><th>定性</th></tr></thead><tbody>
+              <tr><td><b>触发器类型</b></td><td class="tiny">只有 <span class="mono">schedule</span> 与 <span class="mono">webhook</span> 两类；API 路径 = <b>webhook URL / CLI</b>，不单列</td><td class="tiny">两类为基线，另保留 v14 的 <span class="mono">api</span> 型作第三类（<span class="mono">POST /squads/1/assign · PAT 计 owner</span>）</td><td><span class="chip info">agentflow 自扩展</span> 明写「multica 只有两类」，不假装是对方口径</td></tr>
+              <tr><td><b>单触发器启停</b></td><td class="tiny">整条规则可启停；单个触发器启停<b>只有 CLI</b>（<b>已知缺口</b>）</td><td class="tiny">触发器行直接给「开 / 关」开关，列表与抽屉各一处</td><td><span class="chip info">agentflow 自扩展</span></td></tr>
+              <tr><td><b><span class="mono">spec_version</span> 版本账本</b></td><td class="tiny"><b>无版本账本</b>；<b>Runbook 每次运行读当前值</b>，改完即生效</td><td class="tiny">照读当前值，<b>同时</b>每次运行记规则版本快照</td><td><span class="chip warn">agentflow 自证条款</span> 快照是为<b>回归熔断可指回触发时规则</b>（§6.0 ⑨ 留痕「表 + 界面」两步齐）；multica 无此物，别当成基线</td></tr>
+              <tr><td>手动 <b>Run now</b></td><td class="tiny">第三<b>入口</b>，不算触发器</td><td class="tiny">同：不进触发器摘要列、不计触发器数，走同一 Runbook 与执行模式</td><td><span class="chip ok">基线</span></td></tr>
+              <tr><td><b>执行模式两档</b></td><td class="tiny"><span class="mono">create_issue</span>（讨论/状态/运行挂任务）⟂ <span class="mono">run_only</span>（只进运行史；离线即 <span class="mono">skipped</span>、不留等待任务）</td><td class="tiny">同，并补「订阅者字段在 run_only 下灰显」的界面后果</td><td><span class="chip ok">基线</span></td></tr>
+              <tr><td><b>两级账本 + Replay</b></td><td class="tiny">运行史 + webhook 投递记录；Replay 永远新增不改旧、不参与去重</td><td class="tiny">同，抽屉两个 tab；401 / 排队中两类的不可重放分支照显</td><td><span class="chip ok">基线</span></td></tr>
+              <tr><td><b>失败率熔断</b></td><td class="tiny">近 7 天 ≥50 完结且失败率 ≥90% → 自动暂停并通知创建者，修复后人工恢复</td><td class="tiny">同（<span class="mono">af-auto-2</span> 即该行演示态）；与 v14 的「自动暂停是止损不是自愈」同句</td><td><span class="chip ok">基线</span>（阈值数值与小队页 <span class="mono">⑥</span> 注一致）</td></tr>
+              <tr><td>并发三态 · Quick Action · triage 门</td><td class="tiny dim">multica 文档基线未提</td><td class="tiny">沿用 v14 既有口径：<span class="mono">skip / queue / replace</span>、正文禁 mention、自动派生执行同受受理门约束</td><td><span class="chip purple">agentflow 侧纪律</span> 出自 §6.29 / §6.0，不挂到基线上</td></tr>
+            </tbody></table>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- ======== 浮层：新建自动化（模态） ======== -->
+<div class="modal" id="md-auto-new" style="width:min(700px,95vw)"><div style="padding:var(--s4)">
+  <b>新建自动化</b><p class="small dim" style="margin:6px 0 var(--s3)">Runbook ＋ 负责人（Agent 或 Squad 二轨）＋ N 个触发器。三件都在一张表单里，但<b>各存各的账</b>。</p>
+  <div class="fld"><label><b>名称</b> <span style="color:var(--red)">*</span></label><input placeholder="例：PR opened 自动审查"><div class="hint">工作区内唯一 · 显示在清单首列与运行史里 · 同工作区重名拒 <span class="mono">409</span></div></div>
+
+  <p class="h2p" style="margin:var(--s4) 0 6px">Runbook（四段 · 必填）<span class="chip warn" style="height:16px;padding:0 5px">每次运行读当前值</span></p>
+  <div class="fld"><label><b>目标</b>（做成什么 · 可判成败 · ≤120 字）</label><textarea style="min-height:38px" class="mono">工作日开始前把待审 PR 全过一遍，产出 REVIEW.md 并停在 in_review。</textarea></div>
+  <div class="fld"><label><b>背景</b>（为什么这么干 · 上下文指针）</label><textarea>每日 09:00 日会要过 PR 状态；AF-109 的 32 处 TS 报错审查靠人手工发起，常漏。仓库 agentflow，审查窗口 TASK.md §3。</textarea></div>
+  <div class="fld"><label><b>约束</b>（不许碰什么）</label><textarea>不改代码、不合并、不回复外部评论；产物写 REVIEW.md 需 project:write → 走审批门（AP 单）；结论一律停在 in_review，done 留给人工复核。</textarea></div>
+  <div class="fld"><label><b>步骤</b>（有序 · 负责人可偏离但须在结论里说明）</label><textarea>1) 拉出 opened 且未评审的 PR 清单；2) 同 HEAD 已出过结论的跳过（dedup）；3) 按 skills 分派成员；4) 汇总为一条 REVIEW.md；5) 通知订阅者。</textarea></div>
+
+  <div class="fld"><label><b>负责人</b>（二轨 · 单选 · 不可混指）</label>
+    <div style="display:flex;gap:6px;margin-bottom:6px"><span class="chip purple ok" data-click onclick="pickOwner(this,'squad')">Squad（给 leader 入队）</span><span class="chip" data-click onclick="pickOwner(this,'agent')">Agent（直接入队）</span></div>
+    <select id="an-owner"><option selected>代码审查小队 · sq-1（leader 汇总 Agent agent-5）</option><option>数据对账小队 · sq-2（leader 数据同步 Agent agent-4）</option><option disabled>旧运维值守队 · sq-9（已归档 → 不可选）</option></select>
+    <div class="hint" id="an-owner-hint">Squad 轨 = 平台给 leader <b>入队一条 leader 任务</b>（<span class="mono">is_leader_task</span>）· <b>无成员抢单</b>；成本沿 leader 归因链落 leader 所属团队。换 Agent 轨则落该 Agent 归属团队。<b>能管这条规则 ≠ 能跑它</b>：触发时照按链顶人类过可调用目标判定，不过即 <span class="mono">403 not_callable</span>。<span class="btn link" style="padding:0" data-click data-pop="pp-trig">触发器类型对照 ▾</span></div></div>
+
+  <div class="fld"><label><b>执行模式</b>（二选一 · 取舍句在选择器上）</label>
+    <div style="display:flex;gap:6px"><span class="chip info ok" data-click onclick="pickMode(this,'create_issue')">create_issue</span><span class="chip" data-click onclick="pickMode(this,'run_only')">run_only</span></div>
+    <div class="hint" id="an-mode-hint"><b>create_issue</b>：建任务后进派单池，<b>讨论 / 状态 / 运行都挂在任务上</b>——给<b>需要人看或跟</b>的工作；负责人离线也照建任务、<span class="mono">runtime_offline</span> 暂存不丢。<b>要人跟进度就选它。</b></div></div>
+
+  <div class="fld"><label><b>触发器</b>（可 0..N 个 · 动态增删 · schedule 可多条并存）</label>
+    <div id="an-trigs">
+      <div class="trow"><select onchange="trigKind(this)"><option value="schedule" selected>schedule</option><option value="webhook">webhook</option><option value="api">api · 自扩展</option></select><input class="mono" value="30 8 * * 1-5" oninput="nextRuns()"><select onchange="nextRuns()"><option>Asia/Shanghai</option><option>America/New_York</option><option>Europe/Berlin</option></select><span class="chip ok" style="height:22px" title="单触发器启停（agentflow UI 开关 · multica 侧仅 CLI）" data-click onclick="tgSwap(this)">开</span><span class="btn link" style="color:var(--red)" data-click onclick="trigDel(this)">✕</span></div>
+      <div class="trow"><select onchange="trigKind(this)"><option value="schedule">schedule</option><option value="webhook" selected>webhook</option><option value="api">api · 自扩展</option></select><input class="mono" value="POST /hooks/af/{auto_id}/pr · HMAC-SHA256"><span class="chip" style="height:22px">token 遮蔽 · 写-only</span><span class="chip ok" style="height:22px" title="单触发器启停（agentflow UI 开关 · multica 侧仅 CLI）" data-click onclick="tgSwap(this)">开</span><span class="btn link" style="color:var(--red)" data-click onclick="trigDel(this)">✕</span></div>
+    </div>
+    <p style="margin:0"><button class="btn sm" data-click onclick="trigAdd()">＋ 添加触发器</button> <span class="tiny dim">0 个触发器也可以建（只用 Run now）——界面明写「本规则不会被自动触发」</span></p>
+    <div class="hint">两类为 <b>multica 基线</b>；<span class="mono">api</span> 是 <b>agentflow 自扩展</b>（multica 的 API 路径就是 webhook URL / CLI）。每行各带独立启停开关（<b>multica 仅 CLI · 我们 UI 给开关 = 自扩展</b>）。</div></div>
+
+  <div class="fld"><label><b>cron 预览区</b>（服务端解析 · 5 段无秒位 · <b>Next runs 必显才能保存</b>）</label>
+    <div class="nrun"><input class="mono" id="ap-cron" value="30 8 * * 1-5" oninput="nextRuns()" style="width:180px"><select id="ap-tz" onchange="nextRuns()" style="width:150px"><option>Asia/Shanghai</option><option>America/New_York</option><option>Europe/Berlin</option></select><span class="tiny dim">← 改任一段，下面三行跟着变</span></div>
+    <div class="nrun" id="ap-next" style="margin-top:6px"></div>
+    <div class="hint" id="ap-cron-hint"></div></div>
+
+  <div class="fld"><label><b>订阅者</b>（create_issue 建单后通知谁）</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip purple ok" data-click onclick="sqPick(this)">李工 · user:1（复核人）</span><span class="chip ok" data-click onclick="sqPick(this)">王工 · user:2</span><span class="chip ok" data-click onclick="sqPick(this)">收件箱 · mentioned / task_failed / agent_blocked</span><span class="chip" data-click onclick="sqPick(this)">创建者</span></div>
+    <div class="hint">选 <span class="mono">run_only</span> 时整段<b>灰显并说明原因</b>：不留任务 = 无处通知。委派型订阅者对 <span class="mono">mentioned / task_failed / agent_blocked</span> 三类<b>无条件投递</b>（收件箱不漏）。</div></div>
+
+  <div class="fld"><label><b>标题模板</b>（仅 create_issue 用）</label><input class="mono" value="PR 初审 {{date}} · {{autopilot}} · {{trigger_id}}"><div class="hint">三个占位符 <span class="mono">{{date}} {{autopilot}} {{trigger_id}}</span> 由平台展开；cron <b>带时区</b>（默认 Asia/Shanghai，非默认显式标注）；webhook token <b>写-only 不回显</b>，改密=断开重连（同 §6.4 密钥原则）。</div></div>
+
+  <div class="fld"><label><b>并发策略</b>（三态互斥）</label><div class="tri"><span class="chip ok on">skip</span><span class="chip">queue</span><span class="chip">replace</span></div><div class="hint">replace 会<b>取消</b>同规则在途任务（取消 run 不计成功率分母）。三态语义与小队页逐字一致。</div></div>
+
+  <div class="callout warn" style="margin:0 0 var(--s3)"><p class="tiny" style="margin:0"><b>保存即存版本快照：</b>新建 = <span class="mono">v1</span>，每次改动 <span class="mono">v(n+1)</span>，可看 diff 与回滚；被引用中的旧快照<b>不删</b>。<span class="chip warn">自证注</span> multica 侧<b>没有版本账本</b>——Runbook 每次运行读当前值；我们做 <span class="mono">spec_version</span> 快照，是为了<b>回归与熔断时能指回触发当时那份规则</b>。自动派生执行仍受 <b>triage 受理门</b>与<b>配额硬限</b>约束——规则不是后门。</p></div>
+  <div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" id="an-save" data-click onclick="saveAuto()">保存（即 v1 快照）</button></div>
+</div></div>
+
+<!-- ======== 浮层：详情抽屉（运行史 / 投递记录） ======== -->
+<div class="drawer" id="dr-auto" style="width:min(820px,95vw)"><header><b>详情 · af-auto-2 发布冒烟</b><span class="chip warn">暂停 · 熔断待人工恢复</span><span class="chip mono">v4</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<p class="tiny dim" style="margin:0 0 var(--s3)"><b>抽屉演示口径：</b>清单四行的「详情」共用<b>这一份模板</b>，切换行<b>不切数据</b>（与 <a data-goto="teams.html">teams.html</a> 同一纪律）；此份按 <span class="mono">af-auto-2</span> 铺——它同时有 webhook 与 schedule 两个触发器，能覆盖全部字段形状。</p>
+<dl class="kv"><dt>负责人轨</dt><dd><span class="chip info">Agent · 汇总 Agent</span> <span class="mono tiny dim">agent-5</span> — 成本与配额落该 Agent 归属团队 <span class="mono">agentflow</span></dd>
+<dt>执行模式</dt><dd><span class="chip">run_only</span> <span class="tiny dim">本次不生成任务，只留运行账 · 订阅者字段无（不留任务=无处通知）</span></dd>
+<dt>并发</dt><dd><span class="chip">queue</span>（排队等前一条终态）</dd>
+<dt>触发器</dt><dd>2 个：t-21 webhook · 开 / t-22 schedule · 关（各带独立启停）</dd>
+<dt>版本</dt><dd><span class="chip mono">v4</span> <span class="tiny dim">每次运行记当时快照 · 可指回</span></dd>
+<dt>创建者</dt><dd>李工 · user:1 · <span class="tiny dim">协作者 2 人（可管理 · 不可转授权）</span></dd></dl>
+
+<p class="h2p" style="margin:var(--s4) 0 6px">Runbook（四段 · 每次运行读当前值）</p>
+<pre class="mono-blk">目标：部署到 test 域后自动跑冒烟集，产出 pass/fail 摘要。
+背景：v14 之后冒烟靠人手动点，夜间发布常漏；run_only 够用——没人要跟着这张卡。
+约束：只读环境 + 可写 smoke/report.md；禁改代码、禁碰 prod 域、禁重启运行时。
+步骤：1) 取最近一次部署回执；2) 跑 12 项冒烟；3) 失败项逐个附首条报错；4) 写摘要并结束（不建任务）。</pre>
+<p class="tiny dim" style="margin:4px 0 var(--s3)">改这段<b>立即</b>对此后触发生效、<b>不回溯</b>在途 run。<span class="chip warn">自证注</span> 下面的 v1…v4 diff 是我们加的账（multica 无版本账本），用途＝<b>回归熔断时能指回触发当时的规则</b>。<span class="btn link" style="padding:0" data-click data-toast="v4 相对 v3 的 diff：约束段新增「禁重启运行时」；被引用中的 v3 快照不删（时间线要能复盘当时的规则）（演示）">看 v3 → v4 diff ▸</span></p>
+
+<p class="h2p" style="margin:0 0 6px">触发器（N 个并存 · 单触发器启停 = agentflow 自扩展）</p>
+<table class="tbl compact"><thead><tr><th>触发器</th><th>形态</th><th>启停</th><th>Next runs / 端点</th></tr></thead><tbody>
+<tr><td class="mono tiny">t-21</td><td><span class="chip purple">webhook</span> <span class="mono tiny">POST /hooks/af/auto-2/deploy</span></td><td><span class="chip ok" style="height:16px;padding:0 5px" data-click onclick="tgSwap(this)">开</span></td><td class="tiny">token <span class="tok">af_wh_9f4c…e21</span> 遮蔽 · <span class="btn link" style="padding:0" data-click data-modal="md-rotate">Rotate URL</span></td></tr>
+<tr><td class="mono tiny">t-22</td><td><span class="chip warn">schedule</span> <span class="mono tiny">0 2 * * *</span> <span class="chip mono tiny">Asia/Shanghai</span></td><td><span class="chip" style="height:16px;padding:0 5px" data-click onclick="tgSwap(this)">关</span></td><td class="tiny dim">停用中 · 无未来触发（<b>不显示假想时刻</b>，避免看着像在跑）</td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:4px 0 var(--s3)">multica 侧单触发器启停<b>只有 CLI</b>（已知缺口），本页在行内给开关；<b>启停只影响该触发器</b>，整条规则的暂停见清单 §F。</p>
+
+<p class="h2p" style="margin:0 0 6px">事件过滤（t-21）<span class="chip info" style="height:16px;padding:0 5px">空规则 = 全收</span></p>
+<div id="flt-rows">
+  <div class="trow"><select><option selected>deployment</option><option>pull_request</option><option>push</option><option>workflow_run</option></select><input class="mono" placeholder="actions（可空 = 该 event 全收）" value="created, updated"><span class="tiny dim">任一行匹配即跑</span><span class="btn link" style="color:var(--red)" data-click onclick="trigDel(this)">✕</span></div>
+  <div class="trow"><select><option>deployment</option><option selected>workflow_run</option><option>pull_request</option></select><input class="mono" value=""><span class="tiny dim">actions 留空 → 该 event 全收</span><span class="btn link" style="color:var(--red)" data-click onclick="trigDel(this)">✕</span></div>
+</div>
+<p style="margin:0 0 var(--s3)"><button class="btn sm" data-click onclick="fltAdd()">＋ 添加一行</button> <span class="tiny dim"><b>删空所有行 = 全收</b>（不是全拒）；界面在空态明写这一句，别让人靠猜</span></p>
+
+<div class="tabs" id="dr-tabs">
+  <a class="tab active" data-pane="dp-runs" data-click onclick="dSwitch('dp-runs')">自动化运行史</a>
+  <a class="tab" data-pane="dp-dlv" data-click onclick="dSwitch('dp-dlv')">webhook 投递记录</a>
+  <span style="flex:1"></span><span class="tiny dim" style="align-self:center;padding-right:8px">两级账本分账：跑了什么 ⟂ 外面投了什么</span>
+</div>
+<div class="tview" id="dp-runs">
+  <table class="tbl compact"><thead><tr><th>时间</th><th>触发源</th><th>状态</th><th>关联任务 / run</th><th>失败原因</th></tr></thead><tbody>
+  <tr><td class="mono tiny">09-21 18:02</td><td><span class="chip purple">webhook</span> <span class="mono tiny">d-88</span></td><td><span class="chip bad">failed</span></td><td class="mono tiny">run r-141 <span class="btn link" style="padding:0" data-goto="replay.html">看 transcript →</span></td><td class="tiny"><span class="mono">exit 1 · seq 9</span>（业务失败 · 第 3 次连续 → 计熔断分母）</td></tr>
+  <tr><td class="mono tiny">09-21 09:14</td><td><span class="chip">Run now · 李工</span></td><td><span class="chip bad">failed</span></td><td class="mono tiny">run r-140</td><td class="tiny"><span class="mono">not_callable</span>（链顶人类对该 Agent 不可调用 · <b>门 ≠ 活</b>，与业务失败分开显示）</td></tr>
+  <tr><td class="mono tiny">09-20 18:03</td><td><span class="chip purple">webhook</span> <span class="mono tiny">d-86</span></td><td><span class="chip">cancelled</span></td><td class="mono tiny">—（被 replace 取消）</td><td class="tiny dim">取消的 run <b>不计成功率分母</b></td></tr>
+  <tr><td class="mono tiny">09-19 06:00</td><td><span class="chip warn">schedule t-22</span>（当时仍开）</td><td><span class="chip warn">skipped</span></td><td class="mono tiny dim">—</td><td class="tiny">触发时 runtime 离线 · run_only <b>不留等待任务</b>（与「人派活暂存不丢」不同）</td></tr>
+  <tr><td class="mono tiny">09-18 21:40</td><td><span class="chip purple">webhook</span> <span class="mono tiny">d-85</span></td><td><span class="chip ok">success</span></td><td class="mono tiny">run r-133</td><td class="dim">—</td></tr>
+  </tbody></table>
+  <p class="tiny dim" style="margin:6px 0 var(--s3)">规则在跑而这次不跑，也<b>照记一行</b>（skipped / cancelled / duplicate 都是账）；<b>没有结果就没有载体</b>：run_only 失败不建任务，失败原因只能回这张表看。<span class="btn link" style="padding:0" data-click data-toast="终态筛选：failed 47 · success 4 · 完结 51（全平台三条合计 63）· skipped 6 · cancelled 3 与 rejected 1（门）都不计分母（演示）">按终态筛 ▸</span> <span class="btn link" style="padding:0" data-click data-toast="导出 CSV：触发源 / 时间 / 状态 / 关联对象 / 失败原因 五列 · 演示">导出 ▸</span></p>
+</div>
+<div class="tview" id="dp-dlv" style="display:none">
+  <table class="tbl compact"><thead><tr><th>投递</th><th>时间</th><th>解析后事件</th><th>响应</th><th>去重信息</th><th>失败原因</th><th></th></tr></thead><tbody>
+  <tr><td class="mono tiny">d-88</td><td class="mono tiny">09-21 18:02</td><td class="tiny mono">deployment.created <span class="chip" style="height:16px;padding:0 5px">第 ⑤ 步：正文 type/action</span></td><td><span class="chip ok">200 accepted</span></td><td class="mono tiny">Idempotency-Key 未见 · 新建</td><td class="dim tiny">—</td><td class="nowrap"><span class="btn link" data-click data-toast="重放 d-88 → 新增投递 d-90，不覆盖 d-88 · 重放不参与去重（幂等键照抄也不判 duplicate）· 演示">Replay</span></td></tr>
+  <tr><td class="mono tiny">d-89</td><td class="mono tiny">09-21 18:02:04</td><td class="tiny mono">deployment.created</td><td><span class="chip info">200 duplicate</span></td><td class="tiny"><b>命中 d-88 的 Idempotency-Key</b>（同一次 CI 重投）</td><td class="dim tiny">—</td><td class="nowrap"><span class="btn link" data-click data-toast="重放 d-89 → 新增投递 d-91，不覆盖 d-89 · 重放不参与去重（判重是原投递的事）· 演示">Replay</span></td></tr>
+  <tr><td class="mono tiny">d-87</td><td class="mono tiny">09-21 11:20</td><td class="tiny dim">未解析（签名先不过）</td><td><span class="chip bad">401</span></td><td class="tiny dim">—</td><td class="tiny"><span class="mono">signature_mismatch</span>（HMAC 不符 · 门不是活）</td><td class="nowrap"><span class="chip bad" style="height:16px;padding:0 5px" title="签名失败的投递不可重放：重放等于绕过那道门">不可 Replay</span></td></tr>
+  <tr><td class="mono tiny">d-86</td><td class="mono tiny">09-20 18:03</td><td class="tiny mono">deployment.updated <span class="chip" style="height:16px;padding:0 5px">过滤未命中 → 200 ignored</span></td><td><span class="chip">200 ignored</span></td><td class="tiny dim">—</td><td class="dim tiny">—</td><td class="nowrap"><span class="btn link" data-click data-toast="重放 d-86 → 仍走事件过滤（当前 actions=created,updated 会命中，可能变 accepted）· 新增 d-92 不覆盖 d-86 · 演示">Replay</span></td></tr>
+  <tr><td class="mono tiny">d-85</td><td class="mono tiny">09-18 21:40</td><td class="tiny mono">workflow_run.completed <span class="chip" style="height:16px;padding:0 5px">第 ② 步：X-GitHub-Event+action</span></td><td><span class="chip ok">200 accepted</span></td><td class="tiny">X-GitHub-Delivery 未见</td><td class="dim tiny">—</td><td class="nowrap"><span class="btn link" data-click data-toast="重放 d-85 → 新增 d-93 不覆盖 d-85 · 不参与去重 · 演示">Replay</span></td></tr>
+  <tr><td class="mono tiny">d-84</td><td class="mono tiny">09-18 20:12</td><td class="tiny dim">排队中（负责人运行时忙 · queue 策略）</td><td><span class="chip warn">200 skipped</span></td><td class="tiny dim">—</td><td class="tiny dim">并发 queue 命中在途</td><td class="nowrap"><span class="chip" style="height:16px;padding:0 5px" title="仍在排队的投递不可重放：先等它自己跑完，否则两条并行">排队中 · 不可 Replay</span></td></tr>
+  <tr><td class="mono tiny">d-83</td><td class="mono tiny">09-17 09:30</td><td class="tiny dim">未解析（载荷 312KiB）</td><td><span class="chip bad">413</span></td><td class="tiny dim">—</td><td class="tiny"><span class="mono">payload_too_large</span> · JSON ≤256KiB（不截断后照跑）</td><td class="nowrap"><span class="btn link" data-click data-toast="重放会原样退回 413（同一载荷同一上限）；要跑请上游瘦身或改用 api 触发 · 演示">Replay（无意义）</span></td></tr>
+  </tbody></table>
+  <p class="tiny dim" style="margin:6px 0 6px"><b>空态口径：</b>换到 af-auto-1 / af-auto-3（无 webhook 触发器）时本 tab 显式写「<b>本规则无 webhook 触发器 · 0 条投递</b>」，不放假数据、也不与「有触发器但没人投过」共用一句话。</p><p class="tiny dim" style="margin:0 0 var(--s3)">投递记录<b>跑没跑都记</b>；Replay 三条铁律：<b>永远新增不改旧</b> · <b>不参与去重</b> · <b>签名失败或排队中不可重放</b>（上面两处灰 chip 即这两个分支）。</p>
+</div>
+
+<p class="h2p" style="margin:var(--s4) 0 6px">响应码表 <span class="desc">—— 200 四类都是「不重投」，非 200 都是「你自己改」</span></p>
+<div class="grid g2" style="align-items:start">
+  <table class="tbl compact" style="margin:0"><thead><tr><th>响应</th><th>一句人话</th></tr></thead><tbody>
+  <tr><td><span class="chip ok">200 accepted</span></td><td class="tiny">收到了，已经派生成一次运行——结果不在这一刻，去运行史看</td></tr>
+  <tr><td><span class="chip warn">200 skipped</span></td><td class="tiny">规则活着，这次不跑：并发命中在途、负责人离线（run_only）、门未放行</td></tr>
+  <tr><td><span class="chip">200 ignored</span></td><td class="tiny">看完决定不管：事件过滤未命中，一行投递记录到此为止</td></tr>
+  <tr><td><span class="chip info">200 duplicate</span></td><td class="tiny">同一件事你已经投过了（幂等键命中），跑的那次在账上</td></tr>
+  </tbody></table>
+  <table class="tbl compact" style="margin:0"><thead><tr><th>非 200</th><th>一句人话</th></tr></thead><tbody>
+  <tr><td class="mono">400</td><td class="tiny">载荷不是合法 JSON / 缺必填字段——上游自己修，别重投同一份</td></tr>
+  <tr><td class="mono">401</td><td class="tiny">签名或 token 不符（含 Rotate 后旧 URL）：<b>与业务失败分开显示</b></td></tr>
+  <tr><td class="mono">404</td><td class="tiny">端点不存在或规则已归档；<b>越权探测与不存在统一 404</b>（不用状态码探别人的规则）</td></tr>
+  <tr><td class="mono">413</td><td class="tiny">JSON 超 256KiB，原样拒，不截断后照跑</td></tr>
+  <tr><td class="mono">429</td><td class="tiny">该端点被限流（护栏在管控面）：按 <span class="mono">Retry-After</span> 退避，别硬怼</td></tr>
+  <tr><td class="mono">500</td><td class="tiny">我们这边炸了：投递记录留失败原因，上游<b>可以</b>重投</td></tr>
+  </tbody></table>
+</div>
+<p class="tiny dim" style="margin:6px 0 var(--s3)"><b>为什么把业务性不跑都回 200：防上游重试风暴。</b>上游只对非 2xx 重试——把「过滤掉了」回成 4xx，CI 会没完没了地重投同一件事。</p>
+<p style="margin:var(--s4) 0 0"><button class="btn sm primary" data-click data-toast="Run now（第三入口，不算触发器）：走同一 Runbook 与 run_only 模式；规则处于暂停态 → 直接拒并给原因「rule paused」，不留 pending（演示）">▶ Run now</button> <button class="btn sm" data-click data-toast="恢复（人工）：熔断不会自愈——先修，再点恢复；三个入口重新生效，历史运行与投递照旧只读（演示）">恢复</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-archive">归档…</button> <button class="btn sm" data-click data-goto="integration.html">端点与凭据</button></p>
+</div></div>
+
+<!-- ======== 浮层：Rotate webhook URL（模态 · 破坏性二次确认） ======== -->
+<div class="modal" id="md-rotate" style="width:min(560px,94vw)"><div style="padding:var(--s4)"><b>Rotate webhook URL · af-auto-2 / t-21？<span class="chip bad">旧 URL 立即失效</span></b>
+<p class="small dim" style="margin:8px 0 4px">当前端点：<span class="mono tiny">POST /hooks/af/auto-2/deploy?token=<span class="tok">af_wh_9f4c…e21</span></span> —— token <b>遮蔽显示 · 写-only 不回显</b>，改密 = 断开重连（同 §6.4 密钥三原则）。</p>
+<table class="tbl compact"><tbody>
+<tr><td>旧 URL</td><td class="tiny"><b>立即失效，没有宽限期</b>：Rotate 之后打旧 URL 一律 <span class="mono">401</span>（与业务失败分开记账）</td></tr>
+<tr><td>CI / 外部系统</td><td class="tiny">需<b>人工同步</b>更新端点；本页只给「复制新 URL」，不代你去改别人的流水线</td></tr>
+<tr><td>已排队的投递</td><td class="tiny"><b>不撤回</b>：到达时按新凭据校验 → 401 并留投递记录（可复盘谁还在打旧的）</td></tr>
+<tr><td>正在跑的 run</td><td class="tiny">不受影响：Rotate 换的是<b>入口</b>，不是执行</td></tr>
+<tr><td>历史</td><td class="tiny">运行史与投递记录<b>原样保留</b>，不追改；旧 token 明文<b>从不落库</b>，也就无从回显</td></tr>
+</tbody></table>
+<div class="hint" style="margin-top:8px">审计：<span class="mono">autopilot:token_rotated · actor=李工 · at=…</span>；协作者可管理，<b>Rotate 属可管理范围</b>，但<b>不可转授权</b>这条不变。</div>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-toast="已生成新 URL（复制后请立刻更新 CI）· 旧 URL 已立即失效 · 正在排队的投递到达即 401 · 审计 autopilot:token_rotated（演示）" data-close>确认 Rotate</button></div></div></div>
+
+<!-- ======== 浮层：归档自动化（模态 · 删除=归档） ======== -->
+<div class="modal" id="md-archive" style="width:min(560px,94vw)"><div style="padding:var(--s4)"><b>归档自动化「发布冒烟」？<span class="chip bad">删除 = 归档</span></b>
+<p class="small dim" style="margin:8px 0 4px">这个界面上<b>没有物理删除</b>：点「归档」= 停未来触发，历史一笔不减。要「彻底删账本」请走数据保留议题（R16），不在本页做。</p>
+<table class="tbl compact"><tbody>
+<tr><td>未来触发</td><td><span class="chip bad">全停</span></td><td class="tiny dim">t-21 webhook · t-22 schedule · <b>Run now 一并停</b>（手动暂停同口径，别留能跑的口子）</td></tr>
+<tr><td>新投递到达</td><td><span class="chip bad">404</span></td><td class="tiny dim">与「端点不存在」同一码（不给状态码探测别人的规则）；投递记录仍留痕</td></tr>
+<tr><td>历史</td><td><span class="chip ok">完整保留</span></td><td class="tiny dim">运行史 + 投递记录<b>转只读</b>，可按 <span class="mono">af-auto-2</span> 在<a data-goto="audit.html">审计</a>过滤</td></tr>
+<tr><td>在途 run</td><td><span class="chip warn">不撤回 · 跑完为止</span></td><td class="tiny dim">与「改设 leader 不动在途」「小队归档不撤回」同一原则；成本照记负责人归因链</td></tr>
+<tr><td>要再跑</td><td><span class="chip">新建一条规则</span></td><td class="tiny dim">归档规则<b>没有「恢复触发」位</b>：新 id、新 v1 快照，别把旧账本接回新规则</td></tr>
+</tbody></table>
+<div class="fld" style="margin-top:var(--s3)"><label><b>原因</b>（随快照永久保留 · 审计可查）</label><textarea style="min-height:52px" placeholder="例：冒烟并入 CI 阶段，不再需要平台侧定时重扫">熔断后确认根因在环境（构建机-B 离线），短期不恢复；改由发布流水线内跑。</textarea></div>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-toast="请输入原因后再提交（原因必填 · 前端校验）（演示）">不填原因直接确认</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-toast="已归档 af-auto-2 · 两个触发器与 Run now 全停 · 运行史 60 行与投递 62 条转只读保留 · 在途 run 跑完为止 · 审计 autopilot:archived（演示）" data-close>确认归档</button></div></div></div>
+
+<!-- ======== 浮层：pop（触发器类型对照 / 失败率口径） ======== -->
+<div class="pop" id="pp-trig" style="max-width:430px"><p class="tiny dim" style="margin:0 0 6px"><b>触发器类型：multica 两类 ⟂ agentflow 三类</b></p>
+<table class="tbl compact"><tbody>
+<tr><td><span class="chip warn">schedule</span></td><td class="tiny">基线</td><td class="tiny dim">cron + IANA 时区，可多条并存</td></tr>
+<tr><td><span class="chip purple">webhook</span></td><td class="tiny">基线</td><td class="tiny dim">HTTP 端点 + 事件过滤 + 投递记录</td></tr>
+<tr><td><span class="chip">api</span></td><td class="tiny"><b>自扩展</b></td><td class="tiny dim">multica 的「API 路径」= <b>webhook URL / CLI</b>，不单列一类；我们保留 v14 的 api 型（<span class="mono">POST /squads/1/assign · PAT 计 owner</span>）</td></tr>
+<tr><td>Run now</td><td class="tiny">第三入口</td><td class="tiny dim"><b>不算触发器</b>，不进触发器数</td></tr>
+</tbody></table><p class="tiny dim" style="margin:6px 0 0">对照全文见本页 §⑨；api 型同样<b>不因走 API 而绕过受理门与配额门</b>（与小队页同句）。</p></div>
+
+<div class="pop" id="pp-failrate" style="max-width:430px"><p class="tiny dim" style="margin:0 0 6px"><b>「近 7d 失败率」列的口径（与熔断线同一把尺）</b></p>
+<table class="tbl compact"><tbody>
+<tr><td>分母</td><td class="tiny">完结 = 完成 + 失败</td></tr>
+<tr><td>不计入</td><td class="tiny"><b>replace 取消的 run</b> 不计分母（取消是策略，不是失败）· 在途不算完结</td></tr>
+<tr><td>skipped</td><td class="tiny"><b>不算失败</b>：没结果就什么都不留，只占「触发次数」不占失败数</td></tr>
+<tr><td>401 / 413</td><td class="tiny">属<b>门</b>不属<b>活</b>：记在投递记录里，<b>不进运行失败率</b>（否则一个 CI 配错签名会把规则刷成熔断）</td></tr>
+<tr><td>熔断线</td><td class="tiny">近 7 天 <b>≥50 次完结</b> 且 <b>失败率 ≥90%</b> → 自动暂停并通知创建者（<b>止损非自愈</b>）</td></tr>
+<tr><td>与小队页对齐</td><td class="tiny"><a data-goto="squads__code-review.html#auto">小队页 ⑥</a> 那行写「<span class="mono">7d 内 ≥50 次运行且失败率 ≥90%</span>」——<b>同一把尺</b>：那里的「运行」= 此处的「完结」（取消与在途都不计），两页以本表口径为准</td></tr>
+</tbody></table><p class="tiny dim" style="margin:6px 0 0">小样本不熔断：af-auto-3 只有 7 次完结，即使全败也不触发门——阈值两个条件是「与」。</p></div>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<script>
+function tgSwap(el){var on=el.classList.toggle('ok');el.textContent=on?'开':'关';if(!on)el.classList.remove('ok');
+  toast((on?'已启用该触发器（只影响这一行 · agentflow UI 开关，multica 侧仅 CLI）':'已停用该触发器：Next runs 不再显示未来时刻；其余触发器与 Run now 不受影响')+'（演示）');}
+function pickOwner(el,k){var cs=el.parentNode.querySelectorAll('.chip');for(var i=0;i<cs.length;i++)cs[i].classList.remove('ok','purple','info');el.classList.add('ok','purple');
+  var s=document.getElementById('an-owner'),h=document.getElementById('an-owner-hint');
+  if(k==='agent'){s.innerHTML='<option selected>汇总 Agent · agent-5 · online · idle（归属团队 agentflow）</option><option>文档助手 Agent · agent-6 · online · idle</option><option>前端 Agent · agent-8 · online · queued</option><option disabled>审查 Agent · 旧版 · agent-3 · offline → 不可选</option><option disabled>运维哨兵 Agent · agent-9 · 已归档 → 不可选</option>';
+    h.innerHTML='<b>Agent 轨</b>：直接给该 Agent 入队，成本与配额落<b>它归属的团队</b>。候选口径 = <b>未归档 ∧ 当前调用者可调</b>，选不中的行灰显带<b>拒因</b>。<b>能管这条规则 ≠ 能跑它</b>：触发时照按链顶人类过可调用目标判定。';}
+  else{s.innerHTML='<option selected>代码审查小队 · sq-1（leader 汇总 Agent agent-5）</option><option>数据对账小队 · sq-2（leader 数据同步 Agent agent-4）</option><option disabled>旧运维值守队 · sq-9（已归档 → 不可选）</option>';
+    h.innerHTML='Squad 轨 = 平台给 leader <b>入队一条 leader 任务</b>（<span class="mono">is_leader_task</span>）· <b>无成员抢单</b>；成本沿 leader 归因链落 leader 所属团队。<b>能管这条规则 ≠ 能跑它</b>：触发时照按链顶人类过可调用目标判定，不过即 <span class="mono">403 not_callable</span>。<span class="btn link" style="padding:0" data-click data-pop="pp-trig">触发器类型对照 ▾</span>';}
+  toast('负责人轨切到 '+k+'（二轨单选 · 一条规则只认一个负责人）（演示）');}
+function pickMode(el,m){var cs=el.parentNode.querySelectorAll('.chip');for(var i=0;i<cs.length;i++)cs[i].classList.remove('ok','info');el.classList.add('ok','info');
+  var h=document.getElementById('an-mode-hint');
+  if(m==='create_issue')h.innerHTML='<b>create_issue</b>：建任务后进派单池，<b>讨论 / 状态 / 运行都挂在任务上</b>——给<b>需要人看或跟</b>的工作；负责人离线也照建任务、<span class="mono">runtime_offline</span> 暂存不丢。<b>要人跟进度就选它。</b>';
+  else h.innerHTML='<b>run_only</b>：<b>不建任务</b>，只进自动化运行史、<b>无协作记录</b>——界面明写「本次不生成任务」，不谎报。<b>触发时负责人运行时必须在线，否则 skipped、不留等待任务</b>；<b>没结果就什么都不留</b>。订阅者字段随之灰显（不留任务=无处通知）。';
+  toast('执行模式切到 '+m+'（两档唯一化 · 取舍句在选择器上）（演示）');}
+function trigKind(el){var r=el.closest('.trow'),inp=r.querySelector('input');
+  if(el.value==='webhook'){inp.value='POST /hooks/af/{auto_id}/{name} · HMAC-SHA256';toast('webhook：JSON ≤256KiB · Idempotency-Key 防重 · token 遮蔽（演示）');}
+  else if(el.value==='api'){inp.value='POST /automations/{auto_id}/run · PAT 计 owner';toast('api 型 = agentflow 自扩展（multica 的 API 路径就是 webhook URL / CLI）· 不因走 API 绕过受理门与配额门（演示）');}
+  else{inp.value='30 8 * * 1-5';nextRuns();toast('schedule：5 段 cron（无秒位）+ IANA 时区 · 可多条并存（演示）');}}
+function trigAdd(){var d=document.createElement('div');d.className='trow';
+  d.innerHTML='<select onchange="trigKind(this)"><option value="schedule" selected>schedule</option><option value="webhook">webhook</option><option value="api">api · 自扩展</option></select><input class="mono" value="0 16 * * 5" oninput="nextRuns()"><select onchange="nextRuns()"><option>Asia/Shanghai</option><option>America/New_York</option><option>Europe/Berlin</option></select><span class="chip ok" style="height:22px" data-click onclick="tgSwap(this)">开</span><span class="btn link" style="color:var(--red)" data-click onclick="trigDel(this)">✕</span>';
+  document.getElementById('an-trigs').appendChild(d);nextRuns();toast('已加一个 schedule 触发器（多 schedule 并存 · 互不覆盖 · 各自可启停）（演示）');}
+function trigDel(el){var d=el.closest('.trow'),inFlt=!!d.closest('#flt-rows');d.parentNode.removeChild(d);
+  if(inFlt){toast('已删一行事件过滤（删到全空 = <b>全收</b>，界面在空态明写，不是全拒）（演示）');return;}
+  if(!document.querySelector('#an-trigs .trow')){var t=document.getElementById('an-trigs'),e=document.createElement('div');e.className='trow';
+    e.innerHTML='<span class="tiny dim">0 个触发器：本规则<b>不会被自动触发</b>，只剩手动 Run now 入口（清单里会明写这句）</span>';t.appendChild(e);}
+  nextRuns();toast('已移除该触发器行（草稿态 · 已保存过的触发器请改用行内启停，别删历史投递的归属）（演示）');}
+function fltAdd(){var d=document.createElement('div');d.className='trow';
+  d.innerHTML='<select><option selected>pull_request</option><option>deployment</option><option>workflow_run</option><option>push</option></select><input class="mono" placeholder="actions（可空 = 该 event 全收）" value=""><span class="tiny dim">actions 留空 → 该 event 全收</span><span class="btn link" style="color:var(--red)" data-click onclick="trigDel(this)">✕</span>';
+  document.getElementById('flt-rows').appendChild(d);toast('已加一行事件过滤（任一行匹配即跑；空规则 = 全收）（演示）');}
+function nextRuns(){var c=document.getElementById('ap-cron'),t=document.getElementById('ap-tz'),out=document.getElementById('ap-next'),hint=document.getElementById('ap-cron-hint'),save=document.getElementById('an-save');
+  if(!c||!out)return;var v=c.value.trim(),segs=v.split(/\s+/);
+  var m={'30 8 * * 1-5':['09-24（四）08:30','09-25（五）08:30','09-28（一）08:30 · 跳过周末'],'0 22 * * *':['09-24（四）22:00','09-25（五）22:00','09-26（六）22:00'],'0 2 * * *':['09-24（四）02:00','09-25（五）02:00','09-26（六）02:00'],'0 16 * * 5':['09-25（五）16:00','10-02（五）16:00','10-09（五）16:00'],'0 0 1 1 *':['2027-01-01 00:00','2028-01-01 00:00','2029-01-01 00:00']};
+  if(segs.length!==5){c.style.borderColor='var(--red)';hint.innerHTML='必须 <b>5 段</b>（分 时 日 月 周）· <b>无秒位</b>，当前 '+segs.length+' 段 —— 服务端解析将返 <span class="mono">422</span>。<b>Next runs 未预览 → 保存按钮禁用</b>';out.innerHTML='<span class="chip bad">无法预览 · 表达式不合法</span>';save.setAttribute('disabled','');return;}
+  c.style.borderColor='var(--border)';var r=m[v];save.removeAttribute('disabled');
+  if(r){out.innerHTML=r.map(function(x){return '<span class="pill mono tiny">'+x+'</span>';}).join('')+'<span class="tiny dim">按 '+t.value+' 展开 · DST 跳变日按 IANA 规则</span>';
+    hint.innerHTML='Next runs <b>必显</b>：保存前必须看到接下来 3 次触发时刻（'+(t.value==='Asia/Shanghai'?'默认时区':'<b>非默认时区已显式标注</b>')+'）。';}
+  else{out.innerHTML='<span class="chip warn">原型内未预置该表达式的样例时刻</span> <span class="tiny dim">真实系统：服务端解析后展开三行</span>';hint.innerHTML='合法 5 段；解析在服务端完成，非法表达式 <span class="mono">422</span> 直给错因。';}}
+function saveAuto(){var c=document.getElementById('ap-cron'),save=document.getElementById('an-save');
+  if(save.hasAttribute('disabled')){toast('Next runs 未预览 → 不可保存（cron 必须 5 段且能展开未来三次）（演示）');return;}
+  toast('已建规则「PR opened 自动审查」· af-auto-new · v1 快照 · 负责人=Squad sq-1 · create_issue · 并发 skip · 触发器 2 个（t 开）· 订阅者 2 人 · 审计 autopilot:created（演示）');closeAll();}
+function sqPick(el){el.classList.toggle('ok');toast(el.classList.contains('ok')?'已加入订阅者（建单后通知）（演示）':'已移出订阅者（演示）');}
+function dSwitch(id){var vs=document.querySelectorAll('#dr-auto .tview');for(var i=0;i<vs.length;i++){vs[i].style.display=(vs[i].id===id)?'':'none';}
+  var ts=document.querySelectorAll('#dr-tabs .tab');for(var j=0;j<ts.length;j++){ts[j].classList.toggle('active',ts[j].dataset.pane===id);}
+  toast(id==='dp-runs'?'切到「自动化运行史」：跑了什么（含 skipped / cancelled / duplicate 造成的不跑）':'切到「webhook 投递记录」：外面投了什么（跑没跑都记 · Replay 永远新增）（演示）');}
+document.addEventListener('DOMContentLoaded',nextRuns);
+</script>
+<p class="tiny dim" style="padding:14px 18px"><b>演示数据说明（同一 mock 宇宙）：</b>本页所有值均为<b>演示编造</b>，不落库、不发真实请求。沿用宇宙既有值：<span class="mono">sq-1</span> 代码审查小队（leader <span class="mono">agent-5</span> 汇总 Agent）· <span class="mono">sq-2</span> 数据对账小队（<span class="mono">agent-4</span>）· <span class="mono">sq-9</span> 旧运维值守队（已归档）· <span class="mono">agent-6</span> 文档助手 · <span class="mono">agent-3</span> 旧版（offline）· <span class="mono">agent-9</span> 运维哨兵（已归档）· <span class="mono">AF-116 / AF-109</span> · <span class="mono">r-128 · r-131 · r-122（exit 1 · seq 9）</span> · <span class="mono">AP-31</span> · 李工 user:1 · 王工 user:2 · zhangsan user:3 · wangwu user:4 · <span class="mono">dsh · deepseek-official/deepseek-chat</span> · 探针窗 <span class="mono">09-23 14:31</span> · 与小队页逐字同的 <span class="mono">cron 30 8 * * 1-5</span> / <span class="mono">Asia/Shanghai</span> / 动作两档 / 并发三态 / <span class="mono">spec_version v1…v5</span> / 失败率门「7d ≥50 完结且 ≥90%」/「旧值守轮询」<span class="mono">*/5 * * * *</span> 与 <span class="mono">62 跑 · 58 败</span>。<b>本页新增（演示编造）：</b>四条规则 <span class="mono">af-auto-1</span> 日会前审查（= 小队页 ⑥ 第一行的全局视图）· <span class="mono">af-auto-2</span> 发布冒烟（v4 · 熔断暂停 · 92.2% = 47/51）· <span class="mono">af-auto-3</span> 日报归档（run_only · 末次 skipped · 0/6 失败）· <span class="mono">af-auto-4</span> 旧值守轮询（archived）；触发器 <span class="mono">t-11 / t-21 / t-22 / t-31 / t-41</span> 与端点 <span class="mono">/hooks/af/auto-2/deploy</span>、遮蔽 token <span class="mono">af_wh_9f4c…e21</span>；投递记录 <span class="mono">d-83…d-89</span> 与 Replay 产物 <span class="mono">d-90…d-93</span>、响应分布 <span class="mono">accepted 47 / skipped 5 / duplicate 4 / ignored 3</span>、<span class="mono">401×2 · 413×1</span>；运行 <span class="mono">r-133 / r-140 / r-141</span>；统计卡数字（规则 4 · 触发 73 · 完结 63 · 失败率 76.2% = 48/63 · 投递 62 · 各条分账见下表）；<span class="mono">not_callable / signature_mismatch / payload_too_large / rule_paused / assignee_archived / quick_action_mention_forbidden</span> 等拒码的<b>本页用法</b>；multica 基线 ⟂ agentflow 自扩展对照表（§⑨）与「Next runs 三行」示例时刻。<b>口径来源：</b>自动化 = Runbook（目标 / 背景 / 约束 / 步骤）＋ 负责人（Agent 或 Squad）＋ N 个触发器、触发器两类 + Run now 第三入口、执行模式两档语义、schedule 多并存 / 5 段无秒位 / IANA / Next runs 必显、webhook 256KiB / Idempotency-Key / 六步事件推断 / 200 四类响应语义、两级账本与 Replay 三律、失败治理三条、权限四条、订阅者字段、spec_version 自证条款——按 <b>multica 文档事实基线</b>书写；<b>api 触发型、单触发器 UI 启停开关、spec_version 版本账本、并发三态与 Quick Action、triage 受理门为 agentflow 侧自扩展 / 既有纪律</b>，均在正文与 §⑨ 明写，不冒充基线。后端 <span class="mono">grep autopilot|automation</span> 现状 0 命中（裁定⑧ 开发冻结），<span class="mono">v14</span> 设计表 <span class="mono">autopilot · autopilot_trigger · autopilot_run · quick_action</span> 未落库。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：<b>页头</b>——相关页六枚 pill（含 <span class="mono">squads__code-review.html</span> 局部视图互链）· 统计卡下的<b>四卡数字自洽注</b>（触发 = 完结 + skipped + 取消 + 门拒，逐项可加回）（小队详情 ⑥ / 看板 / 管控 / 审批 / 集成面 / 运行时）· 四张统计卡（第 3 张 hover 看分母口径）· 顶栏「失败率口径 ▾」→ pop ·「＋ 新建自动化」→ 模态。<b>①清单</b>——四行 × 七列；行 1 名称下「= 小队页 ⑥ 第一行 →」深链 <span class="mono">squads__code-review.html#auto</span>；spec_version chip → toast「每次改动存版本快照，可看 diff / 回滚」；负责人轨 chip（Squad 紫 / Agent 蓝两轨各一行演示 + 成本归属注）；触发器摘要列的<b>行内启停开关</b>（点一下变开/关，注「multica 仅 CLI · 我们 UI 给开关 = 自扩展」）、「Next runs 展开 ▸」→ toast 三行；操作列 <span class="btn link">详情 / ▶ Run now / 暂停 / 恢复 / 归档… / skipped 是什么意思 / 归档说明 / 历史运行</span>（行 4 为归档演示行 · 半透明 + <span class="mono">grp-row</span> 分组句「删除 = 归档」）。<b>②三段构成</b>——三张 panel（Runbook 四段 / 负责人二轨含拒因 / 触发器 N 个含 Run now 不算触发器）。<b>③schedule</b>——五条规则表 + Next runs 三行对照表（含「跳过周末」「非默认时区已标注」「一年一次」三种摊开）。<b>④webhook</b>——收（载荷上限 / 幂等两键 / 遮蔽与 Rotate / 签名 401 / 事件过滤「空=全收」）+ 六步推断有序表 + 响应语义四行；「Rotate URL →」直达确认模态。<b>⑤取舍表</b>——create_issue ⟂ run_only 七维对照（含「触发时离线 → skipped 不留等待任务」「没结果就什么都不留」「订阅者字段在 run_only 灰显」三句硬口径）+ 成功率分母行「取消不计」并挂 pp-failrate。<b>⑥两级账本 + Replay</b>——三张 panel（运行史字段 / 投递记录字段 / Replay 三律）+ 投递行上的 <span class="mono">413 → Replay（无意义）</span> 分支与两处灰 chip 的<b>不可重放</b>分支（401 签名失败 · 排队中）。<b>⑦失败治理</b>——四行表（自动熔断 / 手动暂停 / 删除=归档 / 目标失效附带态），每行都写「停了什么 · 怎么恢复」，明写<b>止损非自愈 · 恢复必须人点</b>。<b>⑧权限</b>——四行表 + 红框「能管自动化 ≠ 能跑它的 Agent」（两种「不行」分开显示）。<b>⑨对照表</b>——八行 multica 基线 ⟂ agentflow 自扩展，自扩展项各挂 <span class="chip info">自扩展</span> / <span class="chip warn">自证条款</span> chip。<b>浮层</b>——<span class="mono">md-auto-new</span>（Runbook 四段 textarea · 负责人二轨切换联动候选清单与注 · 执行模式二选一联动取舍句 · 触发器动态行「＋ 添加 / ✕」（kind 三选含 api 自扩展 · 每行带独立「开 / 关」启停 chip · 删空后明写「0 个触发器 = 不会被自动触发，只剩 Run now」）· cron 预览区实时展开 Next runs 三行（改段数即变红并禁用保存）· 订阅者 chips · 标题模板 · 并发三态 · 自证注 · 保存 toast）；<span class="mono">dr-auto</span>（基本盘 kv + Runbook 四段只读 + v3→v4 diff toast + 触发器两行含启停 + 事件过滤动态行含「空=全收」+ 两个 tab（运行史五行含 skipped / cancelled / not_callable · 投递记录七行含 Replay 与两类不可重放）+ 响应码两张小卡 + 底部 Run now / 恢复 / 归档… / 端点与凭据）；<span class="mono">md-rotate</span>（旧 URL <b>立即失效</b>五后果 + 二次确认）；<span class="mono">md-archive</span>（删除=归档五后果 + 原因必填拦截演示）；<span class="mono">pp-trig</span> / <span class="mono">pp-failrate</span> 两个 pop。<b>Esc</b> 关全部浮层；点浮层外区域关闭；URL 带 <span class="mono">#md-auto-new / #md-rotate / #md-archive / #dr-auto / #pp-trig / #pp-failrate</span> 可直达（原型示意），清单锚 <span class="mono">#list · #parts · #sched · #wh · #mode · #ledger · #fail · #perm · #diff</span>。</p>
+</body></html>

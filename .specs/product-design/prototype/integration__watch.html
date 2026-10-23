@@ -30,20 +30,29 @@ curl -N "http://127.0.0.1:8000/api/watch?cursor=1200"      # 早于保留窗口
 event: resync
 data: {"snapshot":"...","startingSeq":2010}   # ＝ 410 Gone 等价：别补洞，重取快照</pre>
 <p><span class="btn link" data-click data-toast="✓ 已复制重连 curl（演示）">⧉ 复制</span> <span class="btn link" data-click data-toast="已切长轮询备选（演示）：GET /api/changes?cursor=…（无 SSE 环境用）">长轮询备选</span></p>
+<h4 class="blk">④ 投递侧的已知限制（与外部渠道同一条账）</h4>
+<div class="callout warn"><p class="tiny" style="margin:0"><b>写在界面上，不藏在文档里（Multica 式坦白）：</b>watch 流与<b>外部 IM 渠道连接</b>都由<b>单一持有进程</b>路由（与调度队列、控制面限流、调和退避同属进程内状态）。<b>多副本部署下，非持有副本在重连窗口内的回复不送达，并计入丢弃计数</b>——当前承诺 = <b>单副本</b>；跨副本之前，本页与渠道面都<b>不承诺「消息必达」</b>。这条不是 bug 说明，是容量与投递语义的边界声明。</p></div>
+<table class="tbl compact"><thead><tr><th>情形</th><th>平台行为</th><th>记账</th></tr></thead><tbody>
+<tr><td class="tiny">持有副本在跑</td><td class="tiny">帧正常下发；渠道入站正常路由到会话</td><td class="tiny"><span class="chip ok">无丢弃</span></td></tr>
+<tr><td class="tiny">消费者（watch 客户端）断线</td><td class="tiny">带 <span class="mono">cursor</span> 重发即补上；过期则 <span class="mono">resync</span> 取快照</td><td class="tiny"><b>不丢</b>——账本与写同事务</td></tr>
+<tr><td class="tiny">副本切换 / 重连窗口内的<b>渠道回复</b></td><td class="tiny">该条回复<b>不送达</b>原平台原会话</td><td class="tiny"><span class="chip bad">计入丢弃计数</span> <span class="mono">channel_reply_dropped{reason="reconnect_window"}</span> <span class="chip">演示指标名</span></td></tr>
+<tr><td class="tiny">写回连续失败（非窗口，纯对端故障）</td><td class="tiny">重试 3 次后升收件箱并停下</td><td class="tiny"><span class="mono">channel_reply_dropped{reason="send_failed"}</span> · 演示值</td></tr>
+</tbody></table>
+<p class="tiny dim" style="margin:6px 0 0"><b>为什么恢复方式不同：</b>watch 侧是<b>拉取模型</b>——账本在库里，客户端随时能补；渠道侧是<b>推送模型</b>——对端不等你，错过就错过。所以<b>只有拉取的那一半</b>能承诺不丢。渠道全量语义见 <a href="integration.html" style="color:inherit">对外集成面 · 外部消息渠道段</a>；站内会话侧的「等待上线不丢」是第三种情形（消息落库排队，见<a href="chat.html" style="color:inherit">对话中心</a>）。</p>
 <h4 class="blk">游标语义与当前状态</h4>
-<dl class="kv"><dt>游标语义</dt><dd class="mono">seq 只增、可跳号（MySQL AUTOINCREMENT 缺口语义与 SQLite 同治）</dd><dt>保留窗口</dt><dd class="mono">建议 7 天 / 10 万条（策略项 · 可审计）</dd><dt>并发写法</dt><dd>配合 ETag 做乐观并发，watch 只通知不裁决</dd><dt>权限</dt><dd class="mono">按域可见性裁剪帧内容（不可见实体不产生帧）</dd><dt>当前状态</dt><dd><span class="chip">未启用</span> · change_log 表化是前置（P1-16 并表清障）</dd><dt>本页不提供</dt><dd>挂载该路由、改保留窗口、生成 SDK</dd></dl>
+<dl class="kv"><dt>游标语义</dt><dd class="mono">seq 只增、可跳号（MySQL AUTOINCREMENT 缺口语义与 SQLite 同治）</dd><dt>保留窗口</dt><dd class="mono">建议 7 天 / 10 万条（策略项 · 可审计）</dd><dt>并发写法</dt><dd>配合 ETag 做乐观并发，watch 只通知不裁决</dd><dt>权限</dt><dd class="mono">按域可见性裁剪帧内容（不可见实体不产生帧）</dd><dt>副本承诺</dt><dd><b>单副本</b>（路由与队列都在进程内 · 见 §1.6.5 纪律句）——多副本前不承诺任何投递侧「必达」</dd><dt>丢弃指标</dt><dd class="mono">channel_reply_dropped{reason}（重连窗口 / 发送失败两类 · 演示指标名 · 出口走 A 档 /metrics）</dd><dt>当前状态</dt><dd><span class="chip">未启用</span> · change_log 表化是前置（P1-16 并表清障）</dd><dt>本页不提供</dt><dd>挂载该路由、改保留窗口、生成 SDK</dd></dl>
 <h4 class="blk">事件 → 触发 → 消费方</h4>
 <table class="tbl compact"><thead><tr><th>事件</th><th>触发</th><th>消费方</th></tr></thead><tbody>
 <tr><td class="mono">spec</td><td class="tiny">spec/apply 写入</td><td class="tiny">外部同步器、CI</td></tr>
 <tr><td class="mono">status</td><td class="tiny">执行状态变化</td><td class="tiny">仪表盘、看板</td></tr>
 <tr><td class="mono">condition</td><td class="tiny">条件翻转（Ready/Progressing）</td><td class="tiny">声明式收敛循环</td></tr>
-<tr><td class="mono">approval</td><td class="tiny">人批事件</td><td class="tiny">收件箱、外部渠道（Slack/企微）</td></tr>
+<tr><td class="mono">approval</td><td class="tiny">人批事件</td><td class="tiny">收件箱、外部渠道（Slack / 企微 · 渠道侧「必须 @Bot 才处理」「一 Bot 一 Agent」见 <a href="integration.html" style="color:inherit">对外集成面 · 外部消息渠道段</a>）</td></tr>
 <tr><td class="mono">resync</td><td class="tiny">cursor 过期</td><td class="tiny">所有消费者（重取快照）</td></tr>
 </tbody></table>
 <h4 class="blk">操作</h4>
 <p><button class="btn sm" data-back="integration.html" data-click>返回集成面</button> <span class="btn link" data-click data-goto="integration__etag.html">看配套的 ETag/412</span></p>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为 watch 契约「curl + 断线恢复」升格详情页（规划原型 · 6.27 界面尚不存在）。change_log 同事务 + cursor 重发 + resync＝410 等价、⑧ 契约（推送只降延迟、形状与查询一致）、按域可见性裁剪均为 §6.27 / P2-5 原文实值；SSE 帧样例与 seq 数字为演示拼装，未发起任何请求。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：各段 ⧉ 复制 / 长轮询备选 → toast（零请求）· 「看配套的 ETag/412」跳 integration__etag.html · 顶部「← 返回」回 integration.html　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:0 18px"><b>演示数据说明：</b>本页为 watch 契约「curl + 断线恢复」升格详情页（规划原型 · 6.27 界面尚不存在）。change_log 同事务 + cursor 重发 + resync＝410 等价、⑧ 契约（推送只降延迟、形状与查询一致）、按域可见性裁剪均为 §6.27 / P2-5 原文实值；SSE 帧样例与 seq 数字为演示拼装，未发起任何请求。<b>④ 段新增：</b>「单一持有进程路由 + 重连窗口内渠道回复不送达、计入丢弃计数」为<b>口径句</b>（与 CLAUDE.md 事实「三处关键状态在进程内存 · 多副本会各自为政」同一条链，也写进 <a href="integration.html" style="color:inherit">对外集成面 · 渠道段</a>的已知限制）；指标名 <span class="mono">channel_reply_dropped{reason}</span> 与其两类标签、写回<b>重试 3 次</b>后升收件箱，均为<b>演示值 / 演示指标名</b>，尚未实现。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：各段 ⧉ 复制 / 长轮询备选 → toast（零请求）· <b>④ 已知限制表为只读呈现</b>（无开关＝不在这里改副本策略）· 「对外集成面 · 外部消息渠道段」两条链接 → integration.html 第四区 · 「对话中心」→ chat.html（站内「等待上线不丢」第三种情形）· 「看配套的 ETag/412」跳 integration__etag.html · 顶部「← 返回」回 integration.html　按 Esc 关闭浮层。</p>
 </body></html>

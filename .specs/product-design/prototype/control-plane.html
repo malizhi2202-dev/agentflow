@@ -5,7 +5,7 @@
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p3" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="isolation.html">执行隔离</span></div>
-<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>域 → 能力组 → Agent 实例三层树。注意 <span class="mono">Agent-A</span> 同时出现在 code-review 与 python 两个能力组中——这是「多层归属」的预期表现，不是重复渲染。根级另有「未分类」虚拟组（<span class="mono">domain_id=NULL</span>）：创建时不选域的 Agent 落此处。<b>本页另挂「自动化改进（RSI 开关）」卡组</b>：四类产物白名单 + 总闸，全部为演示态。</p>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>域 → 能力组 → Agent 实例三层树。注意 <span class="mono">Agent-A</span> 同时出现在 code-review 与 python 两个能力组中——这是「多层归属」的预期表现，不是重复渲染。根级另有「未分类」虚拟组（<span class="mono">domain_id=NULL</span>）：创建时不选域的 Agent 落此处。<b>本页另挂「自动化改进（RSI 开关）」卡组</b>：四类产物白名单 + 总闸，全部为演示态。<b>另挂「调度底座」卡组</b>（双通道坦白句 · 排队 run 过期双条件 · reclaim 与离线清理 · 重试政策 · 并发上限人话版）<b>与「维护作业」区</b>——维护作业与本页自动调和<b>并列成文</b>：调和只做状态回收 / 过期 / 清理，全库级批量写一律由人批。均为演示态。</p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/control-plane</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -26,6 +26,7 @@
           <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
           <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
           <a data-goto="memory.html"><svg class="icon"><use href="#i-book"/></svg>记忆中心</a>
+          <a data-goto="automations.html"><svg class="icon"><use href="#i-refresh"/></svg>自动化中心</a>
           <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
           <div class="nav-grp">管理</div>
           <a data-goto="users.html"><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
@@ -44,7 +45,7 @@
               <div class="stat"><div class="stat-label">Agent 总数</div><div class="stat-value">13</div><div class="stat-sub">9 healthy / 2 异常 · 2 未归类待归位</div></div>
             </div>
 
-            <div class="tabs"><span class="tab active" id="tab-tree" data-click onclick="showPv('tree')">域树视图</span><span class="tab" id="tab-agents" data-click onclick="showPv('agents')">Agent 列表</span><span class="tab" data-toast="已滚到调度队列区（本页五块内容同屏呈现 · 演示）">调度队列</span><span class="tab" data-toast="已滚到自动化改进（RSI 开关）区（演示）">自动化改进</span><span class="tab" data-toast="已滚到调和记录区（演示）">调和记录</span></div>
+            <div class="tabs"><span class="tab active" id="tab-tree" data-click onclick="showPv('tree')">域树视图</span><span class="tab" id="tab-agents" data-click onclick="showPv('agents')">Agent 列表</span><span class="tab" data-toast="已滚到调度队列区（含其下调度底座卡组 · 本页各块同屏呈现 · 演示）">调度队列</span><span class="tab" data-toast="已滚到调度底座卡组区：双通道坦白句 · 双条件过期 · reclaim · 重试政策 · 并发上限（演示）">调度底座</span><span class="tab" data-toast="已滚到自动化改进（RSI 开关）区（演示）">自动化改进</span><span class="tab" data-toast="已滚到调和记录区（演示）">调和记录</span><span class="tab" data-toast="已滚到维护作业区（operator-driven · 与自动调和并列成文 · 演示）">维护作业</span></div>
 
             <div class="panel tight" id="pv-tree" style="padding:0;overflow:hidden">
               <div class="tree">
@@ -97,6 +98,57 @@
               </tbody>
             </table>
 
+            <div class="callout" style="margin-top:var(--s2)"><p class="tiny" style="margin:0"><b>双通道坦白句（先说清楚，别让人信错东西）：</b>推送通道（WebSocket）只负责快，<b>数据库才是终态</b>——客户端重连后必须重新查询校准；每条推送通道都配<b>轮询兜底</b>，单次断线不会让排队任务卡死。<span class="dim">本页队列 / 探针 / 调和三区同此一条口径：断线期间以刷新后回读到的库值为准，不以推送顺序为准。</span></p></div>
+
+            <div class="grid g2" style="margin-top:var(--s2);align-items:start">
+              <div class="panel tight">
+                <p class="h2p" style="margin:0 0 6px">排队 run 的过期判定 · 双条件 <span class="chip info">机器忙 ≠ 机器没了</span></p>
+                <p class="tiny" style="margin:0 0 6px">runtime 静默<b>超过 reconnect 宽限期</b>，<b>且</b>该 run 自己<b>排队同样久</b> —— 两条同时成立才把排队 run 判失败。只看前一条会把「机器只是忙」误杀成「机器没了」；只看后一条会让刚醒过来的机器背上不该背的历史欠账。</p>
+                <table class="tbl compact" style="margin:0"><thead><tr><th>三例（演示）</th><th>runtime 静默</th><th>该 run 排队</th><th>判定</th></tr></thead><tbody>
+                  <tr><td>机器只是忙</td><td class="mono">12s &lt; 宽限</td><td class="mono">18m &gt; 宽限</td><td><span class="chip ok">继续等 · 不判失败</span></td></tr>
+                  <tr><td>刚睡着的机器上新派的任务</td><td class="mono">40s</td><td class="mono">40s</td><td><span class="chip ok">拿<b>完整宽限</b>重计 · 不继承上一任机器的累计时长</span></td></tr>
+                  <tr><td>机器真没了</td><td class="mono">4m20s &gt; 宽限</td><td class="mono">4m20s &gt; 宽限</td><td><span class="chip warn">两条同成立 → 置失败 · 人可直接重试</span></td></tr>
+                </tbody></table>
+                <p class="tiny dim" style="margin:6px 0 0">宽限期数值与机器侧心跳口径以 <a data-goto="runtimes.html">运行时页</a> 为准（同一条纪律，不在本页重复铺开机器列表）。<b>本页队列里任何一行都不会因单条件被摘掉。</b></p>
+              </div>
+              <div class="panel tight">
+                <p class="h2p" style="margin:0 0 6px">Runtime 回收与清理（reclaim） <span class="chip info">自动 · 属状态回收</span></p>
+                <table class="tbl compact" style="margin:0"><thead><tr><th>机制</th><th>事实</th></tr></thead><tbody>
+                  <tr><td>daemon 重启 → reclaim</td><td class="tiny">上次<b>未正常结束</b>的 run 由 daemon 重启时<b>自动回收</b>：记失败原因 <span class="mono">runtime_recovery</span>、<b>可直接重试</b>。run 不会「卡在运行中」等人去发现，也不会被静默抹掉。</td></tr>
+                  <tr><td>离线判定</td><td class="tiny">心跳 <span class="mono">15s</span>；异常退出<b>最迟约 3 分钟</b>转离线，不靠人工巡检</td></tr>
+                  <tr><td>自动清理</td><td class="tiny">离线 <span class="mono">&gt;7 天</span> <b>且</b>无任何 Agent 绑定（<b>含已归档 Agent 的绑定</b>）的 runtime 自动清理；只有一条成立则留着</td></tr>
+                </tbody></table>
+                <p class="tiny dim" style="margin:6px 0 0">reclaim / 离线判定 / 清理三件都是<b>状态收敛</b>级别的自动动作——不改写历史数据、不动 schema（边界见下方「维护作业」与定位对照句）。</p>
+                <p style="margin:6px 0 0"><button class="btn sm" data-toast="✗ 手动 reclaim 无需存在：daemon 重启即自动回收未正常结束的 run（失败原因 runtime_recovery）· 此处仅演示查询（演示）">查询 reclaim 记录</button> <button class="btn sm" data-toast="离线 40min 的构建机-B：排队 run 未判失败（该 run 排队时长尚未越过宽限期）· 见「三例」第 1 行（演示）">看离线机器上的排队 run</button></p>
+              </div>
+            </div>
+
+            <div class="grid g2" style="margin-top:var(--s2);align-items:start">
+              <div class="panel tight">
+                <p class="h2p" style="margin:0 0 6px">重试政策（自动只给环境抖动类） <span class="chip warn">规划 · 未实现</span></p>
+                <table class="tbl compact" style="margin:0"><thead><tr><th>失败类别</th><th>自动重试</th><th>政策</th></tr></thead><tbody>
+                  <tr><td><b>环境抖动类</b><br><span class="tiny dim">网络瞬断 · CLI 进程被杀 · runtime 失联后恢复</span></td><td><span class="chip ok">是</span></td><td class="tiny">默认<b>最多 2 次</b>；<b>工具网络中断最多 3 次</b>，其中<b>最后一次延迟约 5s</b> 再打（给下游冷却，不做紧循环 hammering）</td></tr>
+                  <tr><td><b>run_only 自动化</b><br><span class="tiny dim">无人盯的规则运行 · 不建任务</span></td><td><span class="chip bad">否</span></td><td class="tiny">它本就是「没人在看」的那一路，自动重跑等于把故障放大成循环；失败直接升收件箱等人（<span class="mono">action_required</span>）</td></tr>
+                  <tr><td><b>排队 run</b></td><td><span class="chip bad">否</span></td><td class="tiny">按双条件过期判失败后<b>由人重试</b>；队列不自作主张回炉重排（会掩盖根因，见 task-2 的「与漂移同源」句）</td></tr>
+                  <tr><td><b>配置 / 授权 / 额度 / 上下文溢出类</b></td><td><span class="chip bad">否 · 必人工</span></td><td class="tiny">改配置、换凭据、加额度、缩上下文都是<b>修复动作</b>——未修复前重试只是把同一份失败再烧一遍。修复后走失败三件套：<b>Retry with context / Edit as advanced form / 升级到人</b></td></tr>
+                </tbody></table>
+                <p class="tiny dim" style="margin:6px 0 0"><b>一句话边界：</b>自动重试的资格只跟「重一次有可能不一样」绑定，<b>不跟「失败次数少」绑定</b>；配额与授权类失败重一百万次结果也一样。</p>
+              </div>
+              <div class="panel tight">
+                <p class="h2p" style="margin:0 0 6px">并发上限（人话版） <span class="chip info">生效 = 两者取小</span></p>
+                <div class="grid g2" style="gap:var(--s2);margin-bottom:var(--s2)">
+                  <div class="stat"><div class="stat-label">单 daemon（一台机器）</div><div class="stat-value">20</div><div class="stat-sub">默认全机同时在跑的 run 上限</div></div>
+                  <div class="stat"><div class="stat-label">单 Agent</div><div class="stat-value">6</div><div class="stat-sub">同一 Agent 同时在跑上限（本页 agent-1 现 4/6）</div></div>
+                </div>
+                <p class="tiny" style="margin:0 0 6px">两条<b>同时生效、取较小值</b>：一台默认机器上跑同一个 Agent，实际并发 <span class="mono">min(20, 6) = 6</span>；该 Agent 已经吃了 6 个槽，机器余下的 <span class="mono">14</span> 个槽归别的 Agent 用，<b>不会互相挤占成隐性超卖</b>。改哪一条都只影响下一轮派单，不打断在途 run。</p>
+                <table class="tbl compact" style="margin:0"><thead><tr><th>本地目录互斥锁</th><th>事实</th></tr></thead><tbody>
+                  <tr><td>存在哪</td><td class="tiny"><b>活在 daemon 内存里</b>——<b>不落盘锁文件</b>，<b>daemon 重启即释放</b>。不会出现「上次崩了留个 lock 文件，之后谁都跑不了」这种死局，也不需要人上机器删文件</td></tr>
+                  <tr><td>代价（写清楚）</td><td class="tiny">这把锁的强度=一个进程内：跨机器、跨 daemon 不共享，同目录并发不靠它兜底，靠部署纪律（同一路径交给一台机器的一个 daemon）</td></tr>
+                </tbody></table>
+                <p style="margin:6px 0 0"><button class="btn sm" data-toast="并发上限改 6 → 8 已入草稿 · 生效值=min(20,8)=8 · 在途 6 个 run 不打断（演示）">改单 Agent 上限</button> <button class="btn sm" data-toast="单 daemon 上限 20 → 12 生效值取小：Agent 6 未变，本机总盘变小（演示）">改单 daemon 上限</button></p>
+              </div>
+            </div>
+
             <p class="h2p">域策略 · 决策用途绑定 <span class="chip warn">规划 · 未实现</span> <span class="chip info">开关可点 → toast 入审计</span></p>
             <table class="tbl compact">
               <thead><tr><th>用途</th><th>绑定</th><th>模型 / 阈值</th><th>今日决策记录</th></tr></thead>
@@ -135,11 +187,32 @@
               <div class="tl-item"><b>13:58</b> · <span class="chip ok">safe</span> 拓扑安全检查通过：修复 <span class="mono">agent-2</span> 不会阻断下游 <span class="mono">agent-5</span> <span class="btn link" data-toast="拓扑下游：agent-2 → agent-5（汇总）· 暂停将令 agent-5 无上游，故先补备援再修（演示）">下游链</span></div>
               <div class="tl-item fail" data-click data-drawer="dr-rec-danger"><b>13:41</b> · <span class="chip bad">dangerous</span> 异常数达 3 → 终止并替换 <span class="mono">agent-7</span> 转人工审批，未执行</div>
             </div>
+
+            <p class="h2p" style="margin-top:var(--s5)">维护作业（operator-driven 批量作业） <span class="chip warn">规划 · 未实现</span> <span class="chip info">与上方自动调和并列成文 · 永不自动发生</span></p>
+            <div class="panel tight">
+              <p class="tiny" style="margin:0 0 var(--s3)"><b>是什么：</b>由<b>人启动</b>、对<b>全库或大批量数据</b>动手的作业——schema 迁移、历史数据修复、批量回填、全量校验。<b>它和自动调和是并列的两条路</b>：调和管<b>状态收敛</b>（回收 / 过期 / 清理），维护作业管<b>数据改写</b>。本页只有它的界面位与纪律，<b>不执行任何真作业</b>。</p>
+              <table class="tbl compact" style="margin-bottom:0">
+                <thead><tr><th>纪律</th><th>事实</th><th>为什么这样定</th></tr></thead>
+                <tbody>
+                  <tr><td><b>入口</b>：独立本机监听口</td><td class="tiny">只听 <span class="mono">127.0.0.1</span>，<b>地址不可覆盖</b>、<b>不对外发布</b>；<b>无应用层鉴权</b>——挡人靠<b>容器权限</b>（能进容器 = 能跑作业）</td><td class="tiny">批量写是最难回滚的动作，不把它接到面向用户的鉴权面上；权限模型简单到「你在不在那台机器里」</td></tr>
+                  <tr><td><b>默认态</b>：dry-run</td><td class="tiny">默认只报告「会碰哪些表 / 哪些行、改完长什么样」，<b>不落任何写</b></td><td class="tiny">让人先读计划，而不是先信代码</td></tr>
+                  <tr><td><b>转 apply 的前置</b></td><td class="tiny">必须同时给：<b>新幂等键</b>（<b>不复用</b>旧键，重复提交即拒）+ <b>人工担保旗标</b>（我读完这份计划并担保它）</td><td class="tiny">缺任一项直接拒、<b>连事务都不开</b>；两样齐了才允许把这份计划真落写，而重放由幂等键挡住——「按两次得到两种结果」不可能发生</td></tr>
+                  <tr><td><b>事务与预算</b></td><td class="tiny"><b>每请求一个短事务</b>（不拿长事务锁全库）+ <b>批次预算</b>与<b>墙钟预算</b><b>双限</b>，任一触顶即停</td><td class="tiny">停得下来比跑得快重要；在线库不能被一次回填按住</td></tr>
+                  <tr><td><b>暂停语义</b></td><td class="tiny">暂停后<b>不自动 resume</b>——必须人再点</td><td class="tiny">与 RSI 总闸、自动化失败率门同一条纪律：<b>止损可以自动，恢复必须有人</b></td></tr>
+                  <tr><td><b>退出码</b></td><td class="tiny"><span class="mono">0</span> 完成　·　<span class="mono">2</span> 未竟（有剩余或校验未过，可续跑）　·　<span class="mono">1</span> 技术失败</td><td class="tiny">「没跑完」和「跑挂了」必须可区分，脚本与人都能按码分支</td></tr>
+                  <tr><td><b>完成定义</b></td><td class="tiny"><b>全量校验通过</b> <b>且</b> <span class="mono">remaining=0</span> 才算完成——<b>跑完 ≠ 完成</b></td><td class="tiny">完成是结论，不是进度条到头</td></tr>
+                </tbody>
+              </table>
+              <p style="margin:var(--s3) 0 0"><button class="btn sm" data-toast="dry-run 已跑：命中 issues 表 12,431 行 · 预计 3 批 · 墙钟预算 120s（未落写 · 演示）">跑一次 dry-run</button> <button class="btn sm primary" data-click data-modal="md-maint-apply">转 apply（需幂等键 + 担保）▸</button> <span class="btn link" data-toast="暂停中：resume 不自动发生，等人点（退出码 2 · remaining 413）（演示）">上次作业状态</span></p>
+              <p class="tiny dim" style="margin:6px 0 0"><b>界面位说明：</b>本页只给入口与纪律；作业列表 / 计划 diff / 断点续跑属 <span class="mono">audit.html</span> 与后台运维面，不在管控面铺开——管控面的职责是<b>看清运行态</b>，不是执行批量改写。</p>
+            </div>
+
+            <div class="callout warn" style="margin-top:var(--s3)"><p class="tiny" style="margin:0"><b>定位对照（与 multica 的差异要说准）：</b>multica 全文<b>无 reconcile</b>——它的最终一致靠 <b>8 个各自独立的小收敛机制 + 人驱动批量作业</b>拼出来，没有「控制器持续对齐期望态」这一层。<b>我们保留 K8s 式自动调和作为差异化</b>（本页上方那四条调和动作就是它），<b>但吸收它的纪律：全库级批量写不允许自动发生</b>——调和只做<b>状态回收 / 过期 / 清理</b>，<b>schema 与历史数据修复必须走维护作业、由人批</b>。两句话不冲突：自动的那一路永不写大批历史数据，写大批历史数据的那一路永不自动。</p></div>
           </div>
         </div>
       </div>
     </div>
-<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>三层树的展开状态、健康概要数值与队列内容为演示值；状态灯颜色对应真实 <span class="mono">--cp-status-*</span> 令牌。偏离处：真实系统在 <span class="mono">/probes</span> 限流被触发时会显示错误提示条，此处未画出。</p>
+<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>三层树的展开状态、健康概要数值与队列内容为演示值；状态灯颜色对应真实 <span class="mono">--cp-status-*</span> 令牌。偏离处：真实系统在 <span class="mono">/probes</span> 限流被触发时会显示错误提示条，此处未画出。<b>本轮新增卡组的数值口径：</b>双条件过期的「三例」时长、reclaim 的 <span class="mono">runtime_recovery</span> 失败原因、心跳 <span class="mono">15s</span> / 最迟约 3 分钟判离线 / 离线 <span class="mono">&gt;7 天</span> 清理、重试政策的 <span class="mono">2</span> 次与工具网络中断 <span class="mono">3</span> 次（末次延迟约 <span class="mono">5s</span>）、并发 <span class="mono">20</span>（单 daemon）/ <span class="mono">6</span>（单 Agent）取小、维护作业的行数与批次数（<span class="mono">12,431</span> / 3 批 / <span class="mono">remaining 413</span> / 墙钟 <span class="mono">120s</span>）<b>全部为演示编造</b>，真实系统当前既无这些政策也无该作业入口；「本地目录互斥锁活在 daemon 内存、重启即释放」与「双通道：WebSocket 只负责快、数据库才是终态」是<b>政策口径</b>（写成界面的目标是让实现照此办），非现状已实现行为。<b>未动项：</b>探针 / 队列深度 / 调和漂移 / 调和记录四组卡、RSI 开关卡组、三入口同底座句、Team ⟂ Domain 的 0..N 域句保持原样。</p>
 
 
 
@@ -278,6 +351,19 @@
 <tr><td>重评</td><td>下轮调和</td><td><span class="chip">作 deferred 调度行，不再发提醒</span></td></tr>
 </tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [先按替代方案补备援，再议替换    ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已驳回 AP-118 · 审计 appr:denied · 重评排入下轮（演示）" data-close>确认驳回</button></div></div></div>
 
+<div class="modal" id="md-maint-apply"><div style="padding:var(--s4)">
+<b style="color:var(--red)">转 apply · 维护作业「回填 issues.status_anchor」——这是全库级批量写</b>
+<p class="small dim" style="margin:8px 0 6px">来自 <span class="mono">127.0.0.1</span> 本机监听口的一次 dry-run 结果。<b>不落写与否，取决于下面两项是否齐</b>：任一项缺失，请求在参数校验阶段就被拒，作业连事务都不开。</p>
+<table class="tbl compact"><thead><tr><th>前置项</th><th>当前值</th><th>缺了会怎样</th></tr></thead><tbody>
+<tr><td>幂等键（<b>必须新建</b>，不复用）</td><td class="mono">mj-2026-09-24-01 <span class="chip ok">新键</span></td><td><span class="chip bad">复用旧键 → 拒 · 防同一份改写跑两遍</span></td></tr>
+<tr><td>人工担保旗标</td><td><span class="chip warn">☐ 我读完上面这份计划并担保它</span></td><td><span class="chip bad">未勾 → 拒（沉默 ≠ 同意）</span></td></tr>
+<tr><td>dry-run 计划</td><td class="mono tiny">命中 12,431 行 · 3 批 · 每请求一个短事务</td><td><span class="chip info">未附计划摘要 → 拒</span></td></tr>
+<tr><td>双预算</td><td class="mono tiny">批次 5,000 行/请求 · 墙钟 120s</td><td><span class="chip warn">任一触顶 → 停 · 退出码 2 · 不自动续</span></td></tr>
+</tbody></table>
+<p class="tiny" style="margin:var(--s2) 0 0"><b>退出码约定：</b><span class="mono">0</span> = 全量校验过且 <span class="mono">remaining=0</span>（这才叫完成）· <span class="mono">2</span> = 未竟，可带新键续跑 · <span class="mono">1</span> = 技术失败。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [历史 issues 缺 anchor 归类，调和无法判期望态    ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消（停在 dry-run）</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="✗ 已拒：担保旗标未勾 · 幂等键未消耗 · 未开事务（维护作业不因点得快而放行）（演示）" data-close>只给幂等键就 apply（演示被拒）</button> <button class="btn sm primary" data-toast="已按新幂等键 mj-2026-09-24-01 启动 apply · 第 1/3 批 · 墙钟 96s 触顶 → 暂停 · 退出码 2 · remaining 413 · 不自动 resume（演示）" data-close>确认 apply（键 + 担保齐）</button></div></div></div>
+
 <div class="pop" id="pop-newdomain"><p class="tiny dim" style="margin:0 0 6px"><b>新建域 · 选起步形态</b>（建域 = 逻辑分组，不建能力组表；能力组由成员标签自动派生）</p>
 <table class="tbl compact"><tbody>
 <tr><td class="mono">空域</td><td>只建域，Agent 后续迁入</td><td><span class="btn link" data-toast="已建「空域 · 域 4」（未分类组暂空）（演示）">建</span></td></tr>
@@ -303,7 +389,7 @@
 </tbody></table>
 <p class="tiny dim" style="margin:6px 0 0">域只是逻辑分组与共享记忆边界，<b>非安全边界</b>；删除域时其 Agent 自动回落未分类（外键 <span class="mono">SET NULL</span>），不级联删除。</p></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：「域树视图 / Agent 列表」两个 tab → 内联 onclick 切换两个容器 display（真表格，不跳页）· 其余 tab → 滚动提示 toast · Agent 列表表「详情」→ <span class="mono">agent-detail.html</span> · 顶栏「+ 新建 Agent」→ <span class="mono">agents__new.html</span> · 域树 l1 三行 → <b>域详情页</b>（control-plane__domain-*.html · Agent 列表 + 记忆时间线 + 编辑类操作，抽屉装不下）· l2 code-review 行 → <b>能力组详情页</b>（候选打分 + 排队根因）· 根级「未分类」l1 行 → toast（domain_id=NULL 虚拟组说明）· 其下 2 条 l2 Agent 行与平铺表「归入域 ▾」→ <b>归入域 pop</b>（选目标域 toast · 只改 domain_id 不动能力标签）· 调度队列 task-7 → <b>任务详情页</b>（可选路径带操作链）· l3 failed 行 → Agent 速览抽屉（kv + 1 张子表 · 保留）· 队列其余 4 行 → 任务详情抽屉（kv + 1 张子表 · 保留）· 决策用途「开 / 关」三行 → toast（写明入审计 + 两步制默认关）· <b>「自动化改进（RSI 开关）」卡组</b>：四类目开关（技能 / 知识记忆 / 编排配置 / 模型权重）与<b>总闸</b>可点 → <b>md-rsi-off</b> 危险动作确认（影响清单 + 必填原因 → 全局 toast「已暂停 · 存量在途不受影响」· 审计记「自动体已暂停」）· 编排配置行「去看 →」→ 深链 <span class="mono">canvas.html#dr-proposal</span> 提案抽屉 · 顶栏「暂停调和」与危险动作 → 影响清单 + 必填原因二次确认 · dangerous 调和行 → 审批抽屉 · 「+ 新建域」与队列筛选 → pop · 探针正常 chip → 探针概要　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：「域树视图 / Agent 列表」两个 tab → 内联 onclick 切换两个容器 display（真表格，不跳页）· 其余 tab → 滚动提示 toast · Agent 列表表「详情」→ <span class="mono">agent-detail.html</span> · 顶栏「+ 新建 Agent」→ <span class="mono">agents__new.html</span> · 域树 l1 三行 → <b>域详情页</b>（control-plane__domain-*.html · Agent 列表 + 记忆时间线 + 编辑类操作，抽屉装不下）· l2 code-review 行 → <b>能力组详情页</b>（候选打分 + 排队根因）· 根级「未分类」l1 行 → toast（domain_id=NULL 虚拟组说明）· 其下 2 条 l2 Agent 行与平铺表「归入域 ▾」→ <b>归入域 pop</b>（选目标域 toast · 只改 domain_id 不动能力标签）· 调度队列 task-7 → <b>任务详情页</b>（可选路径带操作链）· l3 failed 行 → Agent 速览抽屉（kv + 1 张子表 · 保留）· 队列其余 4 行 → 任务详情抽屉（kv + 1 张子表 · 保留）· 决策用途「开 / 关」三行 → toast（写明入审计 + 两步制默认关）· <b>「自动化改进（RSI 开关）」卡组</b>：四类目开关（技能 / 知识记忆 / 编排配置 / 模型权重）与<b>总闸</b>可点 → <b>md-rsi-off</b> 危险动作确认（影响清单 + 必填原因 → 全局 toast「已暂停 · 存量在途不受影响」· 审计记「自动体已暂停」）· 编排配置行「去看 →」→ 深链 <span class="mono">canvas.html#dr-proposal</span> 提案抽屉 · 顶栏「暂停调和」与危险动作 → 影响清单 + 必填原因二次确认 · dangerous 调和行 → 审批抽屉 · 「+ 新建域」与队列筛选 → pop · 探针正常 chip → 探针概要 · <b>队列区下方新增四张卡（只读为主，动作全走 toast）</b>：双通道坦白句（纯文）· <b>排队 run 过期双条件</b>卡（三例表 · 纯文）· <b>reclaim</b> 卡「查询 reclaim 记录」/「看离线机器上的排队 run」→ toast · <b>重试政策</b>卡（纯文表）· <b>并发上限</b>卡「改单 Agent 上限」/「改单 daemon 上限」→ toast（明写生效值取小）· <b>维护作业</b>区：「跑一次 dry-run」/「上次作业状态」→ toast，「转 apply」→ <b>md-maint-apply</b> 模态（幂等键 + 人工担保旗标两项前置 · 「只给幂等键就 apply」演示被拒 toast · 「确认 apply」→ 退出码 2 与 remaining 413 toast）· 其后<b>定位对照 callout</b>（纯文 · 与自动调和并列的差异化声明）· 新增两枚 tab「调度底座」「维护作业」→ 滚动提示 toast　按 Esc 关闭所有浮层。</p>
 <script>
 function showPv(k){
   var t=document.getElementById('pv-tree'), a=document.getElementById('pv-agents');

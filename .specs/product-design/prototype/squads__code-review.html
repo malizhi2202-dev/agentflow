@@ -35,7 +35,7 @@ h4.blk{scroll-margin-top:92px}tr[id]{scroll-margin-top:46px}
 .nowrap{white-space:nowrap}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p29" style="color:inherit">回文档</a></span>
 <div class="detail-top"><span class="pill" data-back="teams.html" data-click>← 返回 小队中心</span><span class="crumb"><span class="dim">小队中心 /</span> <b>代码审查小队</b></span><span class="chip ok">active</span><span class="chip mono">sq-1 · squad_id=1</span><span class="chip purple">leader 汇总 Agent · agent-5</span><span class="chip">成员池 4</span><span class="chip info">被指派中 1 · AF-116</span></div>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="teams.html">小队中心（两 Tab）</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="teams__agentflow.html">团队详情（组织层）</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="teams.html">小队中心（两 Tab）</span><span class="pill" data-goto="automations.html">自动化中心（全局横切 · ⑥ 段的全平台视图）</span><span class="pill" data-goto="board.html">任务看板</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="teams__agentflow.html">团队详情（组织层）</span></div>
 <div class="detail-body">
 <div class="callout" style="margin-top:0"><p class="tiny" style="margin:0"><b>本页 = 执行层。</b>协作小队<b>不拥有</b> Agent、工作流、工具、知识源或域——那五类资产全部归<a data-goto="teams__agentflow.html">团队 Team（组织层）</a>。<b>成本与执行一律归 leader Agent 记账</b>：成员被委派产生的 token / 成本，账单落在 leader 的 run 归因链上，不落到 squad，也不落到成员所属团队。指派给小队 = 平台给 leader <b>入队一条 leader 任务</b>（<span class="mono">is_leader_task</span>），<b>无成员抢单</b>。</p></div>
 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:var(--s4)">
@@ -118,7 +118,7 @@ h4.blk{scroll-margin-top:92px}tr[id]{scroll-margin-top:46px}
       <tr><td>同 (任务, Agent)</td><td class="tiny">活跃任务<b>合并去重</b>：leader 连发两次 mention 同一 Agent 同一任务 = 一条 run</td><td><span class="chip">coalesced</span></td></tr>
       <tr><td>自触发</td><td class="tiny"><b>角色感知</b>抑制：leader 自己写的委派评论不再叫醒 leader、成员也不回触发自己——<b>但人写的评论照样叫醒 leader</b>（人的追问必须进）。<b>全平台唯一一处自动抑制规则</b>，界面必须明写</td><td><span class="chip">防死循环</span></td></tr>
       <tr><td>轮次</td><td class="tiny"><b>无轮次上限</b>（不硬卡 N 轮），靠「每轮一条 + 去重 + 自触发抑制」三条防失控；异常成本走配额硬限与告警</td><td><span class="chip warn">刻意不设限</span></td></tr>
-      <tr><td>离线成员</td><td class="tiny"><span class="mono">runtime_offline</span>：委派<b>暂存不丢</b>，心跳恢复后续投，不静默失败；超 TTL 才判 <span class="mono">queued_expired</span> 并升收件箱</td><td><span class="chip ok">不丢</span></td></tr>
+      <tr><td>离线成员</td><td class="tiny"><span class="mono">runtime_offline</span>：委派<b>暂存不丢</b>，心跳恢复后续投，不静默失败；过期判失败走<b>双条件</b>——runtime 静默超宽限 <b>且</b> 该 run 排队同样久（机器忙≠机器没了），判后才升收件箱</td><td><span class="chip ok">不丢</span></td></tr>
     </tbody></table></div>
 </div>
 
@@ -192,7 +192,7 @@ h4.blk{scroll-margin-top:92px}tr[id]{scroll-margin-top:46px}
 <tr><td class="dim" style="opacity:.6"><b>旧值守轮询</b>（已停用）</td><td><span class="chip warn">cron</span></td><td class="mono dim tiny">*/5 * * * *</td><td><span class="chip dim">run_only</span></td><td class="tiny dim">旧运维值守队（archived）</td><td class="tiny dim">—</td><td class="mono tiny dim">09-11 09:40 末次<br>62 跑 / 58 败</td><td><span class="chip dim mono">v5</span></td><td class="nowrap"><span class="btn link" data-click data-toast="两种停用口径：① 失败率门（7d 内 ≥50 次运行且失败率 ≥90%）→ 自动暂停，恢复须人点（止损非自愈）；② 目标 squad 已归档 → 规则转 disabled（不静默删），再启用需换目标（演示）">为何停用</span></td></tr>
 </tbody></table></div>
 <p class="tiny dim" style="margin:4px 0 var(--s3)">三条规则并发语义唯一化：<span class="tri"><span class="chip ok on">skip</span></span>=在途则跳过本次（不新建）· <span class="tri"><span class="chip ok on">queue</span></span>=排队等前一条终态 · <span class="tri"><span class="chip ok on">replace</span></span>=取消在途再入队。<b>动作只有两档</b>：<span class="mono">create_issue</span>（建任务后走正常指派链路，<b>留痕在任务上</b>）与 <span class="mono">run_only</span>（<b>本次不生成任务</b>，直接入队跑，只留运行账——界面明写，不谎报）。<b>每次运行记规则版本快照 <span class="mono">spec_version</span></b>——「当时按哪份规则跑的」可回放可归因。<b>失败率门自动暂停是止损，不是自愈</b>：恢复必须人点。自动派生执行同受 <b>triage 受理门</b>约束。</p>
-<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:var(--s5)"><button class="btn sm primary" data-click data-modal="md-auto-new">＋ 新建自动化</button><span class="tiny dim">目标固定为本队（squad 页内建规则不改目标；跨队复用请去 <a data-goto="workflows.html">工作流</a> 或 <a data-goto="canvas.html">画布</a>）</span></div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:var(--s5)"><button class="btn sm primary" data-click data-modal="md-auto-new">＋ 新建自动化</button><span class="tiny dim">目标固定为本队（squad 页内建规则不改目标；跨队复用请去 <a data-goto="workflows.html">工作流</a> 或 <a data-goto="canvas.html">画布</a>）· <b>全平台视图与触发器细则（schedule / webhook 两类 + 投递记录与 Replay）→</b> <a data-goto="automations.html">自动化中心 · 全局横切</a>（两页措辞同一口径）</span></div>
 
 <p class="h2p">Quick Actions（命名 prompt · 点击即跑 · 单目标绑定）</p>
 <div class="grid g3">
@@ -221,7 +221,7 @@ h4.blk{scroll-margin-top:92px}tr[id]{scroll-margin-top:46px}
 <h4 class="blk" id="danger" style="color:var(--red)">⑧ 危险区</h4>
 <div class="callout bad"><p><b>归档协作小队 = 不可恢复。</b>与团队归档（可恢复）<b>不同</b>：squad 无资产可托管，留一个空壳只会让人误以为还能指派。归档后——</p>
 <ul class="tiny" style="margin:6px 0 0;padding-left:18px"><li><b>存量任务再指派给本队 → <span class="mono">403 squad_archived</span></b>（含自动化规则触发：目标失效，规则自动转 <span class="mono">disabled</span>，不静默删）；</li>
-<li>归档即<b>取消全部在跑 run</b>（leader 与成员都算），已花的成本仍归 leader 记账；</li>
+<li><b>停的是「未来指派」，不停「在跑 run」</b>：leader 与成员的在跑 run <b>不自动取消</b>——要停走各运行的<b>显式停运行动作</b>（如 r-131 的「停止」）；历史与时间线照旧保留、转只读可查。〔2026-2026-10-23 返修：本条原文误写「归档即取消全部在跑 run」，按 multica 事实改为「归档=停未来指派 · 在跑 run 不连带取消」；与团队归档的差别只剩「不可恢复 + 无资产托管」，<b>不再含</b>「谁取消 run」这一项〕</li>
 <li>时间线与 evaluated 留痕<b>转只读</b>，可按 <span class="mono">squad=sq-9</span> 在<a data-goto="audit.html">审计</a>查；</li>
 <li>成员<b>不受任何影响</b>（Agent 归团队、人归用户册，池位本来就是引用）；</li>
 <li><b>「再来一次」的唯一路径</b>：用 ⑦ 导出的模板<b>重新建队</b>（按名认领，不覆盖同名队）——所以导出前先想清楚要不要留这份底稿；</li>
@@ -314,12 +314,12 @@ h4.blk{scroll-margin-top:92px}tr[id]{scroll-margin-top:46px}
 <table class="tbl compact"><tbody>
 <tr><td>存量任务再指派本队</td><td><span class="chip bad">403 squad_archived</span></td><td class="tiny dim">看板与 API 同拒，错误原样给出不粉饰</td></tr>
 <tr><td>自动化规则</td><td><span class="chip warn">自动转 disabled</span></td><td class="tiny dim">不静默删，保留快照可改目标再启用</td></tr>
-<tr><td>在跑 run（r-131 与成员 run）</td><td><span class="chip bad">全部取消</span></td><td class="tiny dim">已消耗成本仍归 leader 记账，不追扣</td></tr>
+<tr><td>在跑 run（r-131 与成员 run）</td><td><span class="chip ok">不自动取消</span></td><td class="tiny dim">归档只停<b>未来指派</b>；要停走运行页「停止」显式动作 · 历史保留 · 已消耗成本仍归 leader 记账，不追扣（2026-10-23 对齐 multica 事实返修）</td></tr>
 <tr><td>成员</td><td><span class="chip ok">零影响</span></td><td class="tiny dim">池位是引用</td></tr>
 <tr><td><b>更轻的替代</b></td><td colspan="2"><span class="btn link" data-click data-toast="改为「暂停接受指派」：squad 仍可被看到、存量任务不改派、新指派拒 403 team_paused——比归档可逆（演示）">改为暂停接受指派 ▸</span></td></tr>
 </tbody></table>
 <div class="fld" style="margin-top:var(--s3)"><label><b>必填原因</b>（随快照永久保留）</label><textarea style="min-height:56px" placeholder="例：队职责已并入画布固定编排">队内委派链已连续 3 周固定不变，改走画布 wf-8 v3；动态协作本停用。</textarea></div>
-<div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-toast="请输入原因后才能提交（原因必填 · 前端校验）（演示）">不填原因直接确认</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-toast="已归档 sq-1 · 不可恢复 · 3 条规则转 disabled · 时间线转只读 · 审计 squad:archived（演示）" data-close>确认归档（不可恢复）</button></div></div></div>
+<div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-toast="请输入原因后才能提交（原因必填 · 前端校验）（演示）">不填原因直接确认</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-toast="已归档 sq-1 · 不可恢复 · 3 条规则转 disabled · 时间线转只读 · 在跑 run 未自动取消（要停走显式停运行动作）· 审计 squad:archived（演示）" data-close>确认归档（不可恢复）</button></div></div></div>
 
 <!-- ======== 浮层：briefing 预览（抽屉） ======== -->
 <div class="drawer" id="dr-briefing"><header><b>briefing 拼装预览 · 下一条 leader 任务将看到的完整尾部</b><span class="chip mono">不覆盖平台基础提示</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">

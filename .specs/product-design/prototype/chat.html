@@ -14,7 +14,7 @@
 .mockinp{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 9px;color:var(--text-secondary);font-size:12px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p8" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="board.html">任务（Issue）</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="approvals.html">审批</span><span class="pill" data-goto="knowledge.html">知识库</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="replay.html">执行回放</span></div>
-<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>聊天语义对齐 Multica chat：<b>我与某 Agent 的一对一会话 · 完全私密</b>（其他成员包括管理员都不可见）；起点<b>无 issue 上下文，绝不自动把任务化</b>；<b>一条消息 = 一个 run</b>；运行时离线时消息等待上线（queued）；Agent 归档或失去可运行权限后不能发新消息。</p>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>聊天语义对齐 Multica chat：<b>定位句一句话</b>——<b>一对一 · 完全私密</b>（管理员也看不到）· <b>不自动建任务</b>——但被明确要求时，Agent 会用<b>你的</b>工作区权限去查 / 动资源。起点<b>无 issue 上下文</b>；<b>一条消息 = 一个 run</b>；可「＋」挂 <b>Project context</b>（项目描述与仓库进上下文）；运行时离线时消息<b>等待</b>上线（queued，与小队侧「离线暂存不丢」同一口径）；多轮尽量<b>续接</b>原编码工具会话（续不上则新会话，两种情况消息历史都保留）；Agent 归档或失去可运行权限后不能发新消息；会话<b>归档 = 只读</b>。</p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/chat</span><span class="fake">演示数据</span></div>
       <div class="app" style="grid-template-columns:196px 216px minmax(0,1fr) 264px">
@@ -35,6 +35,7 @@
           <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
           <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
           <a data-goto="memory.html"><svg class="icon"><use href="#i-book"/></svg>记忆中心</a>
+          <a data-goto="automations.html"><svg class="icon"><use href="#i-refresh"/></svg>自动化中心</a>
           <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
           <div class="spacer"></div>
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
@@ -77,7 +78,7 @@
               <tr><td><b>Slack</b> <span class="chip ok">已绑</span></td><td class="mono tiny">#agentflow ↔ 本会话（chat-42）</td><td class="tiny dim"><span class="btn link" data-click data-toast="已解绑 Slack：本会话外部入站停用；重新绑定需再走渠道门禁校验（演示）">解绑</span><span class="btn link" data-toast="渠道凭据 AES-GCM 落库；Mock 模式不外发（演示）">设置</span></td></tr>
               <tr><td><b>企业微信</b> <span class="chip">未绑</span></td><td class="tiny dim">bot 属工作区级安装（仅 owner / admin 可管，见 Agent 详情页）</td><td class="tiny dim"><span class="btn link" data-toast="发起绑定：OAuth 扫码 → 选择可运行 Agent → 门禁按能力位（演示）">绑定 ▸</span></td></tr>
             </tbody></table>
-            <p class="tiny dim" style="margin:6px 0 0">归档会话会<b>自动解绑</b>其外部渠道；取消归档后需<b>重新绑定</b>才恢复渠道入站。</p></div>
+            <p class="tiny dim" style="margin:6px 0 0">归档会话会<b>自动解绑</b>其外部渠道；取消归档后需<b>重新绑定</b>才恢复渠道入站。<b>一个 Bot 只绑一个 Agent（死绑定）</b>——要多个 Agent 就接多个 Bot；<b>改密钥 = 断开重连</b>（新凭据验证通过即旧凭据失效，与 Agent 详情「能力·集成」六卡同口径）。群聊侧门禁：<b>必须 @Bot 才处理</b>，不 @ 的消息既不触发也<b>不进 Agent 上下文</b>——全量渠道语义见 <a href="integration.html" style="color:inherit">对外集成面 · 外部消息渠道段</a>。</p></div>
           <div id="pp-agent" class="pop" style="max-width:520px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ Agent 切换器 · 点击后的演示态（mock open）</b>　切换自下一条消息起生效，历史消息归属不变</p>
             <table class="tbl compact"><tbody>
               <tr><td><span class="dot running"></span> <b>审查 Agent · 标准</b> <span class="chip">当前</span></td><td class="mono tiny">dsh · deepseek-chat</td><td class="tiny dim">知识源：架构说明.md 等 3 · 工具：read/grep · healthy</td></tr>
@@ -86,20 +87,27 @@
               <tr><td><span class="dot dead"></span> 旧版审查 Agent <span class="mono dim">agent-7</span> <span class="chip bad">已归档</span></td><td class="mono tiny">claude · claude-sonnet-4.5</td><td class="tiny dim">灰置：归档 Agent 不可作为会话归属——不能发新消息（<span class="mono">chat:select-archived</span> 被状态转换层闸门拒绝）</td></tr>
               <tr><td><span class="dot running"></span> 审查 Agent · 备援 <span class="chip">冷备</span></td><td class="mono tiny">codex · gpt-5-codex</td><td class="tiny dim">切换=拉起冷备副本（首次调用 +8s，计费提示）</td></tr>
             </tbody></table>
-            <p class="tiny dim" style="margin:6px 0 0">＋ 新建会话先过同一选择器（<span class="mono">agent_id</span> 随每条消息落库，<a href="replay.html" style="color:inherit">p22 回放按条归属</a>）</p></div>
+            <p class="tiny muted" style="margin:8px 0 4px;text-transform:uppercase;letter-spacing:.05em">对话开场白 · conversation starters（每个 Agent ≤3 条 · 由人在 Agent 设置页配 · ≤3 条 · Agent 不自填（与详情页「能力·指令」行级编辑同一处））</p>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <span class="pill" data-click data-fill="列出 .specs/agent-domains 里仍缺验收证据的产物，只列不改。" data-toast="开场白已填入输入框（演示 · 不自动起跑）">「列出仍缺验收证据的产物」</span>
+              <span class="pill" data-click data-fill="这条改动会影响哪几个域的 Agent？给我影响面清单。" data-toast="开场白已填入输入框（演示 · 不自动起跑）">「给我这次变更的影响面清单」</span>
+              <span class="pill" data-click data-fill="按 REVIEW 门禁清单先过一遍，标出你判不通过的条目。" data-toast="开场白已填入输入框（演示 · 不自动起跑）">「按门禁清单先过一遍」</span>
+            </div>
+            <p class="tiny dim" style="margin:6px 0 0"><b>点了只填输入框，绝不自动起跑</b>（Multica 硬约束：开场白是建议不是命令，不允许一次点击就产生 run）。<br>＋ 新建会话先过同一选择器（<span class="mono">agent_id</span> 随每条消息落库，<a href="replay.html" style="color:inherit">p22 回放按条归属</a>）</p></div>
           <div id="pp-new" class="pop" style="max-width:470px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ 新建会话 · 两步（mock open）</b>　① 选 Agent（同上方切换器）→ ② 显<b>启动语建议（≤3 条）</b></p>
-            <p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">启动语建议 · 点击 = 复制进输入框，不直接发送</p>
+            <p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">启动语建议（= 对话开场白 · 点击只填输入框，绝不自动起跑）</p>
             <div class="panel tight" style="margin-bottom:6px" data-click data-fill="审查一下 .specs/&lt;change-id&gt; 里的产物，重点看验收条件有没有覆盖边界场景。" data-toast="启动语已复制进输入框（演示 · 不直接发送）"><p class="small" style="margin:0">「审查一下 <span class="mono">.specs/&lt;change-id&gt;</span> 里的产物，重点看验收条件有没有覆盖边界场景。」</p></div>
             <div class="panel tight" style="margin-bottom:6px" data-click data-fill="agent-domains 的产物现在各在什么阶段？AF-104 谁负责？" data-toast="启动语已复制进输入框（演示 · 不直接发送）"><p class="small" style="margin:0">「agent-domains 的产物现在各在什么阶段？AF-104 谁负责？」</p></div>
             <div class="panel tight" data-click data-fill="把未解决的发现项按既有流程汇总成周会待办清单。" data-toast="启动语已复制进输入框（演示 · 不直接发送）"><p class="small" style="margin:0">「把未解决的发现项按既有流程汇总成周会待办清单。」</p></div>
             <p class="tiny dim" style="margin:6px 0 0">起点无 issue 上下文：新会话不绑任务，也<b>绝不因聊天自动建任务</b>。</p></div>
-          <div id="pp-sess" class="pop" style="min-width:200px;padding:6px"><p class="tiny dim" style="margin:0 0 4px">会话操作（从列表行 ⋯ 打开 · mock open）</p>
+          <div id="pp-sess" class="pop" style="min-width:260px;padding:6px"><p class="tiny dim" style="margin:0 0 4px">会话操作（从列表行 ⋯ 打开 · mock open）</p>
             <div class="cap-row" style="border-bottom:1px solid var(--border)" data-click data-modal="md-rename"><b class="small">✎ 重命名</b><span class="tiny dim" style="margin-left:auto">仅自己可见的标题</span></div>
-            <div class="cap-row" style="border-bottom:1px solid var(--border)" data-click data-toast="已置顶：会话移入「置顶」分组，最多 5 条（演示）"><b class="small">📌 置顶 / 取消置顶</b></div>
+            <div class="cap-row" style="border-bottom:1px solid var(--border)" data-click data-toast="已置顶：会话移入「置顶」分组，最多 5 条（演示）"><b class="small">📌 置顶 / 取消置顶</b><span class="tiny dim" style="margin-left:auto">只影响我的列表序</span></div>
             <div class="cap-row" style="border-bottom:1px solid var(--border)" data-click data-modal="md-arch"><b class="small">🗄 归档（转只读）</b><span class="tiny dim" style="margin-left:auto">推荐替代删除</span></div>
-            <div class="cap-row" data-click data-modal="md-del"><b class="small" style="color:var(--red)">🗑 删除（不可恢复）</b></div></div>
+            <div class="cap-row" data-click data-modal="md-del"><b class="small" style="color:var(--red)">🗑 删除（不可恢复）</b><span class="tiny dim" style="margin-left:auto">历史销毁 + 停 run</span></div>
+            <p class="tiny dim" style="margin:6px 0 0"><b>归档 = 只读</b>：能读不能发；<b>若本会话绑了外部渠道，归档即断开绑定，取消归档不自动恢复——必须重绑</b>（渠道门禁重新校验后才再收信）。</p></div>
           <div class="msgs" style="flex:1;overflow-y:auto">
-            <div class="callout" style="margin:0"><p class="tiny" style="margin:0">🔒 <b>一对一会话 · 完全私密</b>（其他成员包括管理员都不可见）· 一条消息 = 一个 run · 无 issue 上下文起点，<b>绝不自动把任务化</b>——「把结论让团队看到」请写进 issue / 项目描述 / 技能（见右栏「chat vs issue」）。</p></div>
+            <div class="callout" style="margin:0"><p class="tiny" style="margin:0">🔒 <b>一对一会话 · 完全私密</b>（其他成员包括管理员都不可见）· 一条消息 = 一个 run · 无 issue 上下文起点，<b>绝不自动把任务化</b>——但<b>被明确要求</b>时，我会用<b>你的</b>工作区权限去查 / 动资源：权限不因「在聊天里」而降格，也不越格（越权统一按不存在处理 · 需人批的动作照旧挂审批，本会话的 AP-31 就是例子）。「把结论让团队看到」请写进 issue / 项目描述 / 技能（见右栏「chat vs issue」）。</p></div>
             <div class="msg-row me"><div class="avatar">李</div><div class="bubble me">agent-domains 的产物现在都到哪个阶段了？AF-104 是谁在做、谁复核？</div></div>
             <div class="msg-row"><div class="avatar ai">AI</div><div class="bubble" style="max-width:100%"><p class="tiny route"><span class="mono">路由: 直答 <b style="color:var(--green)">0.83</b> / 调工具 0.09 / 起工作流 0.04 / 转@ 0.04</span> → 选定 <b style="color:var(--blue)">直答</b> <span class="mono dim">· 汇总 Agent · qwen3-coder-plus</span> <span class="btn link" style="padding:0" data-toast="决策微模型：按能力标签 + 置信路由四动作，阈值 0.60（与管控面同源）；本条走直答——进度数据已在平台索引内，无需调工具">决策微模型 ⓘ</span></p>
               都在「审核中」，明细如下：<table class="tbl compact" style="margin:6px 0 0"><thead><tr><th>对象</th><th>阶段 / 状态</th><th>负责人</th><th>备注</th></tr></thead><tbody>
@@ -125,9 +133,9 @@
             <div class="msg-row me"><div class="avatar">李</div><div class="bubble me">把验收清单逐条对照 TASK 的 T1–T5 再核一遍。</div></div>
             <div class="msg-row"><div class="avatar ai">AI</div><div class="bubble"><p class="tiny route"><span class="mono">路由: 直答 0.09 / 调工具 <b style="color:var(--green)">0.79</b> / 起工作流 0.07 / 转@ 0.05</span> → 选定 <b style="color:var(--blue)">调工具</b> <span class="mono dim">· 审查 Agent · 标准 · run r-132</span></p>
               <span class="dot running"></span> 正在跑 · <b>当前阶段：工具调用</b> · 正在读 <span class="mono">TASK.md</span>（第 2/4 个工具）· 3.4s<span style="color:var(--blue)">▌</span><br><span class="btn link" style="padding:0" data-goto="replay.html">View details · 展开全部步骤 →</span></div></div>
-            <div class="callout warn" style="margin:0"><p class="tiny" style="margin:0"><b>离线等待演示：</b>另一会话「帮我把这批日志归档」的运行时（rt-1 · 数据同步 Agent）离线——该条消息已 <span class="chip warn" style="height:16px">queued</span>，<b>不丢</b>，等待运行时上线（≤3 分钟判定窗）后自动发送；上方运行中的这条则不受影响。</p></div>
+            <div class="callout warn" style="margin:0"><p class="tiny" style="margin:0"><b>离线等待演示：</b>另一会话「帮我把这批日志归档」的运行时（rt-1 · 数据同步 Agent）离线——该条消息已 <span class="chip warn" style="height:16px">queued</span>，<b>不丢、不算失败、不占 run</b>，等待运行时上线（≤3 分钟判定窗·演示值）后<b>自动发送</b>；上方运行中的这条则不受影响。<b>与小队侧「离线 = <span class="mono">runtime_offline</span> 暂存不丢」同一口径</b>（见<a href="squads__code-review.html" style="color:inherit">小队时间线</a>总注），两页不各说一套话。</p></div>
           </div>
-          <div class="run-strip"><span class="dot running"></span><b>r-132 运行中</b> · 阶段：工具调用 · <span class="mono">TASK.md</span> (2/4) <span style="flex:1"></span><span class="btn link" data-goto="replay.html">View details</span><button class="btn sm" data-click data-fill="把验收清单逐条对照 TASK 的 T1–T5 再核一遍。" data-toast="已请求停止：已产出内容保留在会话中；未处理输入已回填编辑框（演示）">⏹ 停止</button></div>
+          <div class="run-strip"><span class="dot running"></span><b>r-132 运行中</b> · 阶段：工具调用 · <span class="mono">TASK.md</span> (2/4) <span style="flex:1"></span><span class="btn link" data-goto="replay.html">View details</span><button class="btn sm" data-click data-fill="把验收清单逐条对照 TASK 的 T1–T5 再核一遍。" data-toast="已请求停止：已返回的内容保留在会话中；未处理的输入尽量回到编辑器（编辑器被你改过就不覆盖）（演示）">⏹ 停止</button></div>
           <div style="margin:0 14px 6px;border:1px solid var(--blue-border);background:var(--bg-card);border-radius:8px;padding:8px 11px;font-size:12px;line-height:1.7">
             <div class="tiny dim">输入 <b class="mono">/</b> 唤出命令 · 当前域：quant-research · 路由按能力标签 / 置信阈值 <b>0.60</b>（与管控面同源）</div>
             <b class="mono">/决策模型</b> <b style="color:var(--blue)">推荐</b> · 登记 · 微调 · 评测 · 状态 · <b style="color:var(--blue)">方案</b>　<span class="tiny dim">——命令仅对已开对应能力的域生效（AC-D1），未开的域不产生效果（AC-0）</span>
@@ -135,11 +143,20 @@
           </div>
           <div class="composer">
             <button class="btn sm" data-pop="pp-attach" data-click>＋ 挂背景 ▾</button>
+            <button class="btn sm" data-pop="pp-trigger" data-click title="发送前列全：将唤醒谁 / 来自哪一路 / 无权或不可用说明">⚡ 触发预览 ▸</button>
             <div class="input" id="chat-input"><b class="mono">/决策模型 状态</b>　<span class="dim">（继续输入…Enter 发送，Shift+Enter 换行）</span></div>
             <button class="btn sm primary" data-toast="发送：本条消息生成一个新 run（一条消息 = 一个 run）· 若运行时离线则转 queued 等待上线（演示）">发送</button>
           </div>
-          <div id="pp-attach" class="pop" style="max-width:440px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ ＋ 挂背景（mock open）</b>　两类：项目上下文 / 附件，只影响<b>下一条起</b>的运行入料</p>
-            <p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">附项目上下文（选中后 Agent 运行收到项目描述 / 仓库资源）</p>
+          <div id="pp-trigger" class="pop" style="max-width:470px"><p class="tiny muted" style="margin:2px 4px 6px"><b>触发预览（发送前列全：将唤醒谁 / 来自哪一路 / 无权或不可用说明）</b>· 取消勾选<b>仅跳过这一次</b>，不改任何权限与路由规则。</p>
+            <table class="tbl compact"><tbody>
+              <tr><td><span class="dot running"></span> <b>审查 Agent · 标准</b>（Agent）</td><td class="tiny dim">路径：会话归属 → 本条由当前 Agent 直接处理</td><td><span class="chip ok">将唤醒</span> <span class="btn link" data-toast="已取消勾选：仅本次不唤醒它——权限、路由规则、下次预览都不受影响（演示）">跳过</span></td></tr>
+              <tr><td><span class="dot running"></span> <b>汇总 Agent</b>（Agent）</td><td class="tiny dim">路径：真形 @mention（Markdown 链接，裸 @ 不算）· 可调用校验通过</td><td><span class="chip ok">将唤醒</span> <span class="btn link" data-toast="已取消勾选：仅本次不唤醒它（演示 · 下条消息照旧）">跳过</span></td></tr>
+              <tr><td class="dim">数据同步 Agent</td><td class="tiny dim">路径：小队 leader 兜底 → <b>不适用</b>（本条已有显式 @，不双触发）</td><td><span class="chip">不在名单</span></td></tr>
+              <tr><td class="dim">旧版审查 Agent <span class="mono">agent-7</span></td><td class="tiny" style="color:var(--red)">路径：显式 @ · <b>不可用：Agent 已归档</b>——状态转换层闸门当场拒因、不进队（不是提示词约定）</td><td><span class="chip bad">不唤醒</span></td></tr>
+            </tbody></table>
+            <p class="tiny dim" style="margin:4px 0 0">无权 / 不可用的目标<b>照列并写明原因</b>——静默消失才最贵。<b>一条消息 = 一个 run</b>：两个「将唤醒」= 两条队列行、各挂各的 <span class="mono">agent_id</span>。预览是<b>计划</b>不是<b>收据</b>：实际以入队时校验为准（运行时离线转 <span class="mono">runtime_offline</span> 暂存，不丢）。四组词与看板评论侧 <a href="board__af-109.html" style="color:inherit">「触发预览」</a><b>同文</b>，两页不各写一套。<span class="chip">演示值</span></p></div>
+          <div id="pp-attach" class="pop" style="max-width:440px"><p class="tiny dim" style="margin:0 0 6px"><b>▼ ＋ 挂背景（mock open）</b>　两类：Project context（项目上下文）/ 附件，只影响<b>下一条起</b>的运行入料</p>
+            <p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">挂 Project context（选中后 Agent 运行收到<b>项目描述 + 仓库资源</b>进上下文）</p>
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
               <span class="pill" data-click data-toast="已挂「AgentFlow 平台研发」：项目描述 + 2 个仓库资源将随本会话后续运行入料（计划并入 vs 实际投喂分开记账）（演示）">✓ AgentFlow 平台研发 · 描述 + 仓库 ×2</span>
               <span class="pill" data-click data-toast="已切换挂「goweb_log_collection」（演示）">goweb_log_collection · 描述 + 仓库 ×1</span>
@@ -149,7 +166,8 @@
             <div style="display:flex;gap:6px;flex-wrap:wrap">
               <span class="pill" data-click data-toast="附件演示：图片/文件单包 ≤10MB；文件名会净化（路径穿越被拦截）（演示）">🖼 截图 diff-2026-09.png</span>
               <span class="pill" data-click data-toast="附件演示：随下一条运行注入（演示）">📎 + 文件</span>
-            </div></div>
+            </div>
+            <p class="tiny dim" style="margin:6px 0 0">挂了项目<b>只是给上下文</b>：会话仍不因此绑任务、<b>不因此自动建任务</b>（要成为工作项请去<a href="board.html" style="color:inherit">看板</a>手动建）。取消挂载 = 下一条起只带本条消息与会话历史，已产出的 run 不改写。</p></div>
           <div id="pp-wrong" class="pop" style="min-width:300px;padding:6px"><p class="tiny dim" style="margin:0 0 4px"><b>▼ 把这条回复标为「不对」</b>　纠错即信号（S17）——<b>需人类角色发起</b>，Agent 不能自标；两动作都只产候选，不删消息、不改历史</p>
             <div class="cap-row" style="border-bottom:1px solid var(--border)" data-click data-autoclose data-toast="反思候选已生成并写入记忆层 L0 旁挂反思区（演示）：现象 = 本条回复 · 根因假设待人补 · 处置待人定——检索回流见 memory.html §3 失败反思区"><b class="small">✦ 生成反思候选（写入记忆层 L0 · 需人类角色发起）</b></div>
             <div class="cap-row" data-click data-autoclose data-toast="已转交决策样本队列（演示占位）：本条回复 + 路由分（调工具 0.90）成为「判对/判错」对照样本 · S19 决策模型微调管道见 decision-models.html"><b class="small">⚖ 转交决策样本队列（S19 · 见 decision-models）</b></div></div>
@@ -164,7 +182,7 @@
               <dt>知识源</dt><dd class="tiny">架构说明.md 等 3 · Notion·产品需求库 <span class="chip bad" style="height:16px">令牌过期 401 · 索引冻结</span> <span class="btn link" style="padding:0" data-goto="knowledge.html">更新凭据</span></dd>
               <dt>渠道</dt><dd class="tiny">Slack <span class="mono">#agentflow</span> 已绑 · 门禁=「允许经渠道发起」能力位</dd>
             </dl>
-            <p class="tiny dim" style="margin:6px 0 0"><b>状态行：</b>14:31 · 12 条 · session <span class="mono">chat-42</span> 续接正常——多轮=会话续跑（存 session id 续接）；<b>续不上则自动开新会话继续，消息历史保留</b>。</p>
+            <p class="tiny dim" style="margin:6px 0 0"><b>状态行：</b>14:31 · 12 条 · 编码工具 session <span class="mono">sess-9c2f</span> <b>续接正常</b>——多轮<b>尽量续接原编码工具会话</b>：平台存下 session id，路由回<b>能访问它的那个 runtime</b>（换 runtime 就读不到，等于续不上）。<b>session 过期 / 被清 · runtime 换机 → 自动开新会话继续</b>；<b>两种情况站内消息历史都完整保留</b>（会话历史与工具侧 session 是两回事，丢的只是工具侧上下文，不丢你的聊天记录）。<span class="btn link" style="padding:0" data-toast="演示：续接失败时会话里插一条灰字提示「本轮未续上原 session，已开新 session（历史仍在）」——不静默降级（multica 口径）">为什么续不上</span></p>
           </div>
           <div class="callout" style="margin:0"><p class="tiny" style="margin:0"><b>chat vs issue 对照：</b>快速提问 · 探索方案 · 私密草稿 → <b>Chat</b>；有负责人 · 有状态流转 · 有交付物 · 需交接 → <b>Issue</b>（去 <span class="btn link" style="padding:0" data-goto="board.html">看板</span> 建）。聊天永不自动任务化；要「让团队看到」请手动写进 issue / 项目描述 / 技能。</p></div>
           <p class="tiny muted" style="margin:var(--s2) 0 0;text-transform:uppercase;letter-spacing:.05em">平台级能力（该 Agent 可调用）</p>
@@ -178,10 +196,11 @@
           </div>
           <p class="tiny muted" style="margin:var(--s2) 0 0;text-transform:uppercase;letter-spacing:.05em">会话规则（门禁）</p>
           <div class="panel tight">
-            <p class="tiny" style="margin:0 0 4px">· <b>归档</b> = 转只读，解绑外部渠道（取消归档需重绑）；<b>删除</b> = 不可恢复并停未完成 run——优先选归档。</p>
+            <p class="tiny" style="margin:0 0 4px">· <b>归档</b> = <b>只读</b>（历史随便读，不能发新消息），并<b>断开外部渠道绑定</b>——<b>取消归档不恢复绑定，需重新绑定</b>才再收信；<b>删除</b> = 不可恢复并停未完成 run——优先选归档。</p>
             <p class="tiny" style="margin:0 0 4px">· Agent <b>归档或失去可运行权限</b> → 不能发新消息（读历史仍可用）。</p>
-            <p class="tiny" style="margin:0 0 4px">· 运行时<b>离线</b> → 消息 queued 等待上线，不丢。</p>
-            <p class="tiny" style="margin:0">· <b>停止</b> → 已产出内容保留，未处理输入尽量回填编辑框。</p>
+            <p class="tiny" style="margin:0 0 4px">· 运行时<b>离线</b> → 消息<b>等待</b>上线（queued，不丢、不算失败），与小队侧 <span class="mono">runtime_offline</span> 暂存同一口径。</p>
+            <p class="tiny" style="margin:0 0 4px">· <b>停止</b> → <b>已返回的内容保留</b>在会话里；<b>未处理的输入尽量回到编辑器</b>（「尽量」是硬话：编辑器已被你改过就不覆盖，改为在原处留一条可复制的提示）。</p>
+            <p class="tiny" style="margin:0">· 权限轴：聊天里的读写用<b>你的</b>工作区权限，<b>不借 Agent 身份提权</b>；需人批的动作照旧挂审批。</p>
           </div>
         </aside>
       </div>
@@ -196,8 +215,8 @@
   <p class="tiny dim" style="margin:0 0 6px">删除将同时：<br>· 停止本会话<b>未完成 run</b>（r-131 · r-132 → cancelled，已产出内容随会话一并销毁）；<br>· 消息历史立即销毁（仅审计留 <span class="mono">chat:delete</span> 事件）。</p>
   <div class="callout warn" style="margin:0 0 8px"><p class="tiny" style="margin:0"><b>推荐改归档：</b>转只读、可取消、历史与证据保留。90% 想删的场景（太长 / 太乱 / 敏感）归档就够了。</p></div>
   <p style="display:flex;gap:8px;justify-content:flex-end;margin:0"><button class="btn sm" data-close>取消</button><button class="btn sm" data-click data-autoclose data-toast="已改为归档：只读 + Slack 解绑（演示 · 推荐路径）">改为归档（推荐）</button><button class="btn sm" style="border-color:rgba(224,85,85,.4);color:var(--red)" data-click data-autoclose data-toast="已删除（演示态）：r-131/r-132 被取消 · 历史销毁 · 审计 chat:delete（真实系统需再输会话名确认）">仍要删除</button></p></div>
-<p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明：</b>会话「审查 agent-domains 的变更」（chat-42）与消息流对齐 Multica chat 语义：一对一会话完全私密（成员/管理员不可见）、无 issue 上下文起点、绝不自动任务化、一条消息=一个 run、运行时离线转 queued、Agent 归档/失权禁发新消息、停止保留已产出并回填输入、多轮按 session 续不上则新会话保历史。决策微模型路由 chip 行为 AgentFlow 增量演示：四种分支各出现一次（直答=表格 · 调工具=read REVIEW.md→ok · 起工作流=wf-42 · r-131 · 转@=0.71 转审查 Agent · 标准），阈值 0.60 与管控面同源；分数、阶段进度、r-132 均为演示值。r-128 / AF-104 / agent-7 / Notion 401 / wf-42 / 李工·王工沿用同一 mock 宇宙；「＋ 挂背景」「渠道绑定」交互为演示态；消息操作行（复制 / 转@ /「不对」两候选动作）为 S17 落地的演示新增，toast 均不产生真实写入。</p>
-<p class="tiny dim" style="padding:10px 18px 14px">可点区演示：「＋ 新建会话」→ <span class="mono">pp-new</span>（选 Agent + 启动语 ≤3 · 点击复制进输入框不直接发送）· 会话行「⋯」→ <span class="mono">pp-sess</span>：重命名 <span class="mono">md-rename</span> / 置顶 toast / 归档 <span class="mono">md-arch</span>（只读+解绑+重绑提示）/ 删除 <span class="mono">md-del</span>（不可恢复+停 r-131/r-132·推荐改归档）· 顶栏「渠道 ▾」→ <span class="mono">pp-chan</span>（Slack 绑定+门禁 · 企微未绑）·「审查 Agent ▾」→ <span class="mono">pp-agent</span> 切换器 · 每条 AI 回复头部路由 chip（ⓘ→toast）· 工作流卡→<span class="mono">workflows__review-pipeline.html</span> · View details / AP-31 / 控制面路由分→<span class="mono">replay.html / approvals.html / control-plane.html</span> · 「＋ 挂背景」→ <span class="mono">pp-attach</span>（项目上下文 + 附件）· 运行条「⏹ 停止」→ 输入回填 + toast · 已归档会话行→只读 toast · 工具块→toast · 右栏「平台级能力」第 6 行<b>小队协作：委派与自动续跑</b>「查看时间线 →」→ <span class="mono">squads__code-review.html</span>（ⓘ→toast 讲委派协议）· AI 回复尾部消息操作行（复制 → toast · 转@ → toast · <b>「不对 ▸」→ <span class="mono">pp-wrong</span></b>：生成反思候选=写入记忆层 L0 · 需人类角色发起 → toast · 转交决策样本队列（S19）→ toast 占位——反思区与四层管道见 <span class="mono">memory.html</span>）　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明：</b>会话「审查 agent-domains 的变更」（chat-42）与消息流对齐 Multica chat 语义：一对一会话完全私密（成员/管理员不可见）、<b>不自动建任务但被明确要求时用你的工作区权限查 / 动资源</b>、无 issue 上下文起点、可挂 Project context（描述 + 仓库进上下文）、一条消息=一个 run、运行时离线转 queued 等待上线、Agent 归档/失权禁发新消息、<b>归档=只读且断开渠道绑定（取消归档不恢复，需重绑）</b>、停止保留已返回内容并把未处理输入尽量送回编辑器、多轮按 session 续接（存 session id 路由回能访问它的 runtime；续不上则新会话，<b>两种情况消息历史都保留</b>）。决策微模型路由 chip 行为 AgentFlow 增量演示：四种分支各出现一次（直答=表格 · 调工具=read REVIEW.md→ok · 起工作流=wf-42 · r-131 · 转@=0.71 转审查 Agent · 标准），阈值 0.60 与管控面同源；分数、阶段进度、r-132 均为演示值。本轮新增的<b>演示值 / 演示口径</b>：编码工具 session <span class="mono">sess-9c2f</span>、三句对话开场白文案、<span class="mono">pp-trigger</span> 触发预览的四行名单（将唤醒 / 仅通知口径下：会话归属、真形 @mention、leader 兜底不适用、agent-7 归档不可用）、「≤3 条开场白」「编辑器已改则不覆盖」两处语义、离线判定窗 3 分钟——<b>均为演示口径，非已实现契约</b>；四组措辞（将唤醒谁 / 来自哪一路 / 无权或不可用说明 / 仅跳过这一次）与 <span class="mono">board__af-109.html</span> 评论侧触发预览<b>同文</b>。r-128 / AF-104 / agent-7 / Notion 401 / wf-42 / 李工·王工沿用同一 mock 宇宙；「＋ 挂背景」「渠道绑定」交互为演示态；消息操作行（复制 / 转@ /「不对」两候选动作）为 S17 落地的演示新增，toast 均不产生真实写入。</p>
+<p class="tiny dim" style="padding:10px 18px 14px">可点区演示：「＋ 新建会话」→ <span class="mono">pp-new</span>（选 Agent + 启动语 ≤3 · 点击复制进输入框不直接发送）· 会话行「⋯」→ <span class="mono">pp-sess</span>：重命名 <span class="mono">md-rename</span> / 置顶 toast / 归档 <span class="mono">md-arch</span>（只读+解绑+重绑提示）/ 删除 <span class="mono">md-del</span>（不可恢复+停 r-131/r-132·推荐改归档）· 顶栏「渠道 ▾」→ <span class="mono">pp-chan</span>（Slack 绑定+门禁 · 企微未绑）·「审查 Agent ▾」→ <span class="mono">pp-agent</span> 切换器 · 每条 AI 回复头部路由 chip（ⓘ→toast）· 工作流卡→<span class="mono">workflows__review-pipeline.html</span> · View details / AP-31 / 控制面路由分→<span class="mono">replay.html / approvals.html / control-plane.html</span> · 「＋ 挂背景」→ <span class="mono">pp-attach</span>（<b>挂 Project context</b>：项目描述 + 仓库进上下文 · 附件）· <b>「⚡ 触发预览 ▸」→ <span class="mono">pp-trigger</span></b>（发送前列全：将唤醒谁 / 来自哪一路 / 无权或不可用说明 · 取消勾选<b>仅跳过这一次</b>，与 <span class="mono">board__af-109.html</span> 同文）· <b>「审查 Agent ▾」→ <span class="mono">pp-agent</span> 切换器内含对话开场白 ≤3 条</b>（点击 → 只填进输入框，<b>绝不自动起跑</b>）· 运行条「⏹ 停止」→ 未处理输入尽量回编辑器 + toast · 已归档会话行→只读 toast · 工具块→toast · 右栏「平台级能力」第 6 行<b>小队协作：委派与自动续跑</b>「查看时间线 →」→ <span class="mono">squads__code-review.html</span>（ⓘ→toast 讲委派协议）· AI 回复尾部消息操作行（复制 → toast · 转@ → toast · <b>「不对 ▸」→ <span class="mono">pp-wrong</span></b>：生成反思候选=写入记忆层 L0 · 需人类角色发起 → toast · 转交决策样本队列（S19）→ toast 占位——反思区与四层管道见 <span class="mono">memory.html</span>）　按 Esc 关闭所有浮层。</p>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
 <script>/* 页内补强：data-fill 把文案转义后写进输入框（不发送）；data-autoclose 先收浮层再让 proto.js 弹 toast（data-close 会吞 toast，故不用它） */
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
