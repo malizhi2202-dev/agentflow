@@ -264,3 +264,5 @@
 2. memory.html：md-promote 三字段必填+confounded 默认词表+NO_ENTRY 合法句+因果前缀铁律行+防污染扫（检疫区 callout 第四件）
 3. control-plane.html：RSI 卡组塌缩行+「预算=恒等式断言」+NOISE FLOOR 句+surface 描述对象单真源注
 4. PRODUCT-DESIGN **v17**：§6.30 各节深化（R7-1..6 挂原节不新开）+§3.3 improvement_proposals 加 dimension/证据包/memo 三字段注+§8 术语 ≥10+Q29「竞品无人环路也涨分你们为何坚持人批」（引其自陈弱证据+无衰减库）
+
+> **R7 实施波完成（2026-10-23）**：清单 1-4 全落——canvas（两拍/INV⟂DOM/恒等式/校验集/盲评/塌缩/P-3 会签/P-4 灰置）、memory（防腐四件/三字段/confounded/NO_ENTRY/因果前缀/EXPERIENCE 版式/整树带走+先复验）、control-plane（SurfaceSpec 小表/第四熔断/.fp.mark/内容寻址缓存/恒等式措辞/噪声地板第三边界）、主档 v17（§6.30 深化+时序七+§3.3 列级+§8×16+Q29）；算法细节层（用户追加指令）同步入 CONCLUSION 附页与两界面。页脚两处不实句已正（骨架缺陷标已修、v17 状态改已过审）。

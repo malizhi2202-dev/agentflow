@@ -2,10 +2,18 @@
 <title>编排画布 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
 <script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
-.kbd{font-size:11px}</style></head><body>
+.kbd{font-size:11px}
+/* details.fold 复用 agent-detail__config.html 同一原语（零新浮层风格） */
+details.fold{border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg-main);margin:var(--s2) 0 0}
+details.fold>summary{cursor:pointer;list-style:none;display:flex;gap:6px;align-items:center;padding:8px 10px;font-size:12px;color:var(--text-secondary)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"▸";font-size:10px;color:var(--text-muted)}
+details.fold[open]>summary::before{content:"▾"}
+details.fold>summary b{color:var(--text);font-weight:600}
+.foldbody{padding:0 10px 10px;font-size:12px;color:var(--text-secondary)}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="workflows.html">工作流</span><span class="pill" data-goto="tools.html">工具市场</span><span class="pill" data-goto="stage-model.html">阶段模型</span></div>
-<p class="proto-note"><span class="chip warn">演示数据</span>左侧节点面板 + 中央画布 + 右侧边配置 + 底部 YAML。改画布 YAML 跟着变，改 YAML 画布跟着重绘。<b>新建/切换画布</b>：右上「＋ 新建画布」（空白/复制/粘 YAML 三来源 · draft 起步）与「⧉ 画布切换器」。<b>RSI 提案制（邻接挂载 · 本体不改）</b>：右上「改进提案 2 ▸」→ 提案抽屉，提案只 fork 草稿、只进人审，<b>发布仍走本页 Apply</b>。</p>
+<p class="proto-note"><span class="chip warn">演示数据</span>左侧节点面板 + 中央画布 + 右侧边配置 + 底部 YAML。改画布 YAML 跟着变，改 YAML 画布跟着重绘。<b>新建/切换画布</b>：右上「＋ 新建画布」（空白/复制/粘 YAML 三来源 · draft 起步）与「⧉ 画布切换器」。<b>RSI 提案制（邻接挂载 · 本体不改）</b>：右上「改进提案 2 ▸」→ 提案抽屉，提案只 fork 草稿、只进人审，<b>发布仍走本页 Apply</b>。本轮抽屉按 D-S21 升级为<b>两拍评估</b>（探针快筛 → 影子重放终身门 · 证据包三件套 + 盲评选择会话）+ 提案 <b>INV⟂DOM 维度</b>（领域类须域成员会签）+ <b>预算恒等式 / 结构校验集 / 提案塌缩熔断</b>。</p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/orchestration</span><span class="fake">演示数据</span></div>
       <div class="app" style="grid-template-columns:180px minmax(0,1fr)">
@@ -104,7 +112,7 @@ edges:
         </div>
       </div>
     </div>
-<p class="tiny dim"><b>演示数据说明：</b>画布坐标为演示布局；节点状态灯与边标签对应真实渲染规则。偏离处：真实画布支持拖拽、缩放与小地图，静态原型无法体现交互。</p>
+<p class="tiny dim"><b>演示数据说明：</b>画布坐标为演示布局；节点状态灯与边标签对应真实渲染规则。偏离处：真实画布支持拖拽、缩放与小地图，静态原型无法体现交互。<b>本轮 dr-proposal 新增演示值（全部编造）：</b>预算恒等式 k=3 · 12 执行 · 3 选择会话、塌缩阈值 Jaccard ≥0.9 与 09-20 触发事件、证据包三件套内容（r-122c / r-127 / r-127c / r-141 / r-141c / r-129 / r-129c 与各 seq 行）、盲评种子 <span class="mono">sha1(对象|k|mode)</span>、P-3 两次摄取失败与王工 09-22 会签、P-4 超时 120→90s、r-141「终身门 0/402」。INV/DOM、两拍、恒等式、fell_back 为 D-S21 已过审口径（非编造），数值与事件均演示。</p>
 
 
 
@@ -138,14 +146,29 @@ edges:
 <li><b>彻底删除</b>：清除全部版本快照与运行历史，<b>不可恢复</b>。</li>
 </ul>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [ 必填 · 例如：业务下线，保留快照备查                        ]</pre>
-<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--orange);border-color:var(--orange)" data-toast="已归档工作流 · 版本快照保留 · 可恢复（演示）" data-close>归档</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已彻底删除工作流 · 全部版本快照已清除 · 不可恢复（演示）" data-close>彻底删除</button></div></div></div><div class="drawer" id="dr-proposal"><header><b>改进提案 · 审查流水线 v3</b><span class="chip purple">配置态自优化</span><span class="chip mono">RSI · 提案制</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
-<div class="callout"><p class="tiny" style="margin:0"><b>界分（一句话）：</b><span class="mono">reconcile</span> = <b>运行态自愈</b>（副本 / 健康，管控面自动收敛）⟂ <span class="mono">提案制</span> = <b>配置态自优化</b>（拓扑 / 权重 / 阈值，本区）。提案<b>只进人审、不自动应用</b>——机器没有发布权，发布权始终在人（Apply 门不变）。</p></div>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--orange);border-color:var(--orange)" data-toast="已归档工作流 · 版本快照保留 · 可恢复（演示）" data-close>归档</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已彻底删除工作流 · 全部版本快照已清除 · 不可恢复（演示）" data-close>彻底删除</button></div></div></div><div class="drawer" id="dr-proposal"><header><b>改进提案 · 审查流水线 v3</b><span class="chip purple">配置态自优化</span><span class="chip mono">RSI · 提案制</span><span class="chip mono" data-toast="两拍串联：①探针快筛（无真值·只定有无正向差异）→ ②影子重放终身门（有真值·冻结金标+异厂系 judge）。Probe 永不是发布依据（演示）">两拍：快筛 → 终身门</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>界分（一句话）：</b><span class="mono">reconcile</span> = <b>运行态自愈</b>（副本 / 健康，管控面自动收敛）⟂ <span class="mono">提案制</span> = <b>配置态自优化</b>（拓扑 / 权重 / 阈值，本区）。提案<b>只进人审、不自动应用</b>——机器没有发布权，发布权始终在人（Apply 门不变）。</p>
+<p class="tiny" style="margin:6px 0 0"><b>提案维度（INV ⟂ DOM 正交分栏 · 判别式两句）：</b>「<b>换掉主题就不成立 → 领域类</b>」「<b>换行业仍有帮助 → 不变量类</b>」——例：「审计取证顺序：先 git log 后 blame」属不变量类（怎么工作）；「本仓库 specs 文件名禁中文空格」属领域类（绑定本仓库 specs 知识域）。<b>领域类提案需域成员会签后待人批</b>；dimension 是<b>落库标签</b>（<span class="mono">improvement_proposals.dimension</span>，比它只在提示层多一步校验——对方 INV⟂DOM 只在提示层、代码无校验器，我们补上）。双维正交切分搜索空间 = 归因清晰 + 并行不互污。</p></div>
 <p class="tiny" style="margin:8px 0 0"><span class="chip warn mono">提案 ≤3 / 对象 / 周</span> <span class="chip mono">相似已合并 2</span> <span class="dim">频控 + 合并由治理层给；超上限的提案排队到下周，不催办。超时 = 降级「待审不催办」，<b>沉默 ≠ 同意</b>。</span></p>
+<p class="tiny" style="margin:6px 0 0"><span class="chip warn mono">预算恒等式</span> 每批应花 = <span class="mono">k</span> base + <span class="mono">2k</span> 候选 + <span class="mono">k</span> 终身（<span class="mono">4k</span> 执行）· <b>执行数 / 会话数按恒等式事前写死断言，超支少支即失败</b>（停作业并告警）。<span class="dim">这是<b>事前契约，不是事后账单</b>；对方（Harness²）常数不抄为我方承诺值——k 由作业预算帽定（本演示批 <span class="mono">k=3</span> · 12 执行 · 3 选择会话，全编造）。「探针执行不计量」是它的自曝缺口，我们不抄。<b>校验失败 = 原文回喂 ≤2 次，仍败继承旧配置（<span class="mono">fell_back</span> 留账）</b>，不静默复用旧证据。</span></p>
+<p class="tiny" style="margin:6px 0 0"><b>结构校验集（声明式提案 =「路径→文本」树 · 门禁引擎逐条校，不靠措辞）：</b><span class="chip ok mono">体量上限 ✓</span> <span class="chip ok mono">空面拒 ✓</span> <span class="chip ok mono">未触发的技能判错 ✓</span> <span class="chip ok mono">被引用脚本必须随提案附带 ✓</span> <span class="chip ok mono">枚举白名单 ✓</span> <span class="dim">（chip 行示例 = P-1 过审态 · 任一败 = 走左注回喂路：<b>原文回喂 ≤2 次 → 仍败继承旧配置 · fell_back 留账</b>）</span></p>
+<p class="tiny dim" style="margin:6px 0 0"><b>自动补触发：</b>技能类提案缺触发行，由平台<b>机械补写而非打回</b>；<b>超体量上限则不补</b>。</p>
+<p class="tiny dim" style="margin:6px 0 0"><span class="chip bad mono">提案塌缩熔断 · 已触发</span> 算法：<b>两两行级 Jaccard 均值 ≥0.9 判塌缩</b>（阈值为演示编造，真值待校准）——本批 k=3 候选行级相似 <span class="mono">1.0</span> → <b>提案塌缩，已停该对象作业并告警</b>（09-20 · 演示行，与 <a data-click data-goto="control-plane.html">Agent 管控 · RSI 开关卡组</a>「提案塌缩熔断」行同一事件。提案器退化 = 熔断事件，不当计数事件洗白）</p>
 
-<p class="h2p" style="margin-top:var(--s4)">P-1 · 备援权重 30/70 → 20/80</p>
+<p class="h2p" style="margin-top:var(--s4)">P-1 · 备援权重 30/70 → 20/80 <span class="chip info mono">不变量类 INV · 怎么工作</span></p>
 <div class="card">
 <p class="tiny" style="margin:0 0 6px"><b>依据（指标 → 提案引擎）：</b>近 7d <span class="mono">r-122</span> <b>超时 3 次</b>——超时全落在标准轨（权重仅 <span class="mono">30</span> · 等槽后拖高 P95），落备援的样本无一超时 → 提案把备援 <span class="mono">70 → 80</span>。产出为<b>建议值 + 置信 + 理由</b>，人从不直接改现值。</p>
-<p class="tiny muted" style="margin:0 0 4px"><b>影子重放对比</b>（历史 402 run · 冻结金标 metric 集 · 离线隔离执行）：</p>
+<details class="fold"><summary><b>探针快筛 · 证据包三件套</b> <span class="chip ok">有正向差异 → 进终身门</span> <span class="dim">（第一拍 · 无真值 · 点开看版式）</span></summary><div class="foldbody">
+<dl class="kv" style="font-size:11.5px">
+<dt>① <span class="mono">harness.diff</span></dt><dd class="tiny">当前→候选的 unified diff：仅 <span class="mono">审查→前端</span> 边权重一行 <span class="mono">30/70→20/80</span>，其余文件零改动（演示）</dd>
+<dt>② <span class="mono">rollout.md</span></dt><dd class="tiny">关键轨迹两行（只片段不整跑）：base <span class="mono">r-122 · seq 6</span>「标准轨等槽 41s → 超时」；候选 <span class="mono">r-122c · seq 6</span>「备援轨等槽 2s → 通过」（演示）</dd>
+<dt>③ <span class="mono">produced.md</span></dt><dd class="tiny">交付物有无：双侧均出 REVIEW.md，候选侧快 27s 落一份（演示）。<b>交付物为空的候选自动出局；证据不足时回退轨迹为证并标 <span class="mono">evidence=trajectory</span></b></dd>
+</dl>
+<p class="tiny" style="margin:6px 0 0"><b>无打分器——把差异摆给评员读。</b>本卡为 <span class="mono">k=1</span> 批，<b>免选择会话</b>直入终身门（演示批合并计）。</p>
+<p class="tiny dim" style="margin:6px 0 0"><b>自动补触发回显：</b>技能类提案缺触发行由平台机械补写而非打回（超上限则不补）——本卡不涉及，见 P-3。</p>
+<p class="tiny dim" style="margin:6px 0 0"><b>口径三句（原文级）：</b>「单次运行=弱证据，只定有无正向差异、不定优劣」「方差即信号」「任一探针无产出必须显式写『无产出』」。本拍<b>只定有无正向差异、不定优劣</b>；<b>Probe 永不是发布依据</b>，两拍证据并成一份证据包，发布权仍在人（Apply）。</p>
+</div></details>
+<p class="tiny muted" style="margin:0 0 4px"><b>影子重放对比 · 终身门（第二拍 · 有真值）</b>（历史 402 run · 冻结金标 metric 集 · 离线隔离执行 · 仅快筛出正向差异者进入本拍）：</p>
 <table class="tbl compact" style="margin:0 0 6px">
 <thead><tr><th>指标</th><th class="c">现行 30/70</th><th class="c">提案 20/80</th><th class="c">Δ</th></tr></thead>
 <tbody>
@@ -153,15 +176,52 @@ edges:
 <tr><td>成本 / run</td><td class="c mono">¥0.21</td><td class="c mono">¥0.20</td><td class="c mono" style="color:var(--green)">-4%</td></tr>
 <tr><td>评审 judge</td><td class="c tiny dim" colspan="3">异源评审 <span class="chip purple mono">judge · 异厂系标</span> <span class="dim">自评偏袒已实证 → judge 必异厂系，不当放行依据、只当预筛</span></td></tr>
 </tbody></table>
+<p class="tiny dim" style="margin:0 0 4px"><b>judge 次序（硬编码，不可颠倒）：</b>「<b>先可复算核对</b>（source 附证据包 · 矛盾以 source 裁决 · <b>沉默奖励承认不确定、惩罚自信填空</b>）」——可复算核对全过，<b>再谈质量</b>。</p>
+<p class="tiny" style="margin:0 0 6px"><b>终身候选以 <span class="pill mono" data-click data-toast="选择会话按盲评序进行：候选以 sha1(对象|k|mode) 播种乱序为 A/B/C，提案人身份对评员遮蔽（演示 · 选择会话计入预算恒等式 k 终身一项）">A/B/C 乱序盲评 ▸</span></b>（种子 = <span class="mono">sha1(对象|k|mode)</span> · 提案人身份对评员遮蔽）；<b>base 故意不在池——结构上无从弃权</b>。</p>
 <p style="margin:0"><button class="btn sm primary" data-toast="✓ P-1 过审 → 已 fork 画布草稿（现行 v3 一字不动）· 发布仍走 Apply 必附原因，原因自动填提案 id（P-1）· 零新门（演示）">过审 → fork 草稿</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已驳回 P-1 · 不入草稿、不改现行；驳回理由并入相似合并依据，同对象重复提案将被合并（演示）">驳回</button> <span class="chip ok">离线评估已过</span> <span class="chip warn">待发布权在人</span></p>
 <p class="tiny dim" style="margin:6px 0 0"><b>零新门：</b>过审只生成 <span class="mono">draft</span> 草稿，<b>发布仍走 Apply 必附原因</b>（原因自动填提案 id <span class="mono">P-1</span>）→ 复用既有版本链 <span class="mono">v3 → v4</span>，无新端点、无新审批单类。</p>
 </div>
 
-<p class="h2p" style="margin-top:var(--s4)">P-2 · code-review 边加重试节点</p>
+<p class="h2p" style="margin-top:var(--s4)">P-2 · code-review 边加重试节点 <span class="chip info mono">不变量类 INV · 怎么工作</span>（换行业仍成立：边尾兜底与「怎么工作」有关，与主题无关）</p>
 <div class="card">
 <p class="tiny" style="margin:0 0 6px"><b>依据：</b>近 7d <span class="mono">审查 → 前端</span>（<span class="mono">code-review</span> 边）retry 3 用尽后 <b>4 次直落死信</b>，未走兜底 → 提案在边尾追加 <span class="chip mono">retry-fallback</span> 节点，兜底目标 = <span class="mono">旧版审查 Agent</span>。</p>
+<details class="fold"><summary><b>探针快筛 · 证据包三件套</b> <span class="chip ok">有正向差异 → 进终身门</span> <span class="dim">（第一拍 · 无真值）</span></summary><div class="foldbody">
+<dl class="kv" style="font-size:11.5px">
+<dt>① <span class="mono">harness.diff</span></dt><dd class="tiny">unified diff：边尾追加 <span class="mono">retry-fallback</span> 节点（节点 +1 / 边 +1），现行 retry 3 一字不动（演示）</dd>
+<dt>② <span class="mono">rollout.md</span></dt><dd class="tiny">关键轨迹两行：base <span class="mono">r-127 · seq 11</span>「retry 3 用尽 → 直落死信」；候选 <span class="mono">r-127c · seq 11</span>「第 4 次落兜底 → 产出降级审查」（演示）</dd>
+<dt>③ <span class="mono">produced.md</span></dt><dd class="tiny">候选侧交付物在（降级审查件）· base 侧无 —— <b>有产出方与无产出方不成对照 → 本批按「无产出显式声明」补跑一次，不据单次定优劣</b></dd>
+</dl>
+<p class="tiny dim" style="margin:6px 0 0"><b>口径三句（原文级）：</b>「单次运行=弱证据，只定有无正向差异、不定优劣」「方差即信号」「任一探针无产出必须显式写『无产出』」。<b>本卡快筛过，但终身门排队中</b>——前置（复活备援）不满足则重放第 4 次仍进死信，假阳性不算正向差异。</p>
+</div></details>
 <p class="tiny muted" style="margin:0 0 6px"><b>漂移 diff（若过审 fork 后）：</b>节点 <b>+1</b>（retry-fallback 兜底）· 边 <b>+1</b> · 现行 <span class="mono">retry: 3</span> 不变。<b>前置：</b>兜底目标现为 <span class="chip bad">dead</span> —— 提案含「先复活备援再挂边」两步，否则影子重放第 4 次失败仍进死信（重放 4 败 → 兜住 3）。</p>
 <p style="margin:0"><button class="btn sm primary" data-toast="✓ P-2 过审 → 已 fork 画布草稿（节点 +1 / 边 +1 · 现行 v3 未动）· 发布仍走 Apply 必附原因，原因自动填提案 id（P-2）· 零新门（演示）">过审 → fork 草稿</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已驳回 P-2 · 兜底边不建；死信仍按现状计数（演示）">驳回</button> <span class="chip warn">前置未满足 · 待复活备援</span></p>
+</div>
+
+<p class="h2p" style="margin-top:var(--s4)">P-3 · 注入「specs 文件名禁中文空格」领域回避约束 <span class="chip purple mono">领域类 DOM · 绑定本仓库 specs 知识域</span></p>
+<div class="card">
+<p class="tiny" style="margin:0 0 6px"><b>依据：</b>近 7d 两次摄取因 <span class="mono">.specs/</span> 文件名含中文空格失败、人工改名通过 → 候选领域规则「本仓库 specs 文件名禁中文空格」（<b>换掉主题就不成立 → 领域类</b>：它只对这一仓库的 specs 约定成立，绑知识域而非通用工作方式）。<b>会签：</b>领域类提案需域成员会签后待人批——王工（域成员）09-22 会签 ✓。</p>
+<details class="fold"><summary><b>探针快筛 · 证据包三件套</b> <span class="chip ok">有正向差异 → 进终身门</span> <span class="dim">（第一拍 · 无真值）</span></summary><div class="foldbody">
+<dl class="kv" style="font-size:11.5px">
+<dt>① <span class="mono">harness.diff</span></dt><dd class="tiny">unified diff：审查 Agent 领域知识文件追加一条回避约束（frontmatter 合法 · 体量在 cap 内 · 演示）</dd>
+<dt>② <span class="mono">rollout.md</span></dt><dd class="tiny">关键轨迹两行：base <span class="mono">r-141 · seq 2</span>「读 specs 清单 → 2 个含空格名摄取失败」；候选 <span class="mono">r-141c · seq 2</span>「约束注入 → 24 条摄取零违例」（演示）</dd>
+<dt>③ <span class="mono">produced.md</span></dt><dd class="tiny">双侧交付物均在，候选侧发现项 0（演示）· <b>结构校验集回显：体量上限 ✓ · 空面拒 ✓ · 未触发的技能判错 ✓（触发行平台机械补写 1 行，超上限则不补——自动补触发，不打回）· 被引用脚本附带 ✓（无脚本）· 枚举白名单 ✓</b></dd>
+</dl>
+<p class="tiny dim" style="margin:6px 0 0"><b>口径三句（原文级）：</b>「单次运行=弱证据，只定有无正向差异、不定优劣」「方差即信号」「任一探针无产出必须显式写『无产出』」。</p>
+</div></details>
+<p class="tiny" style="margin:6px 0 4px"><b>选择会话（盲评）：</b><span class="pill mono" data-click data-toast="已按盲评序选 C→P-3（演示：本批候选以种子 sha1(对象|k|mode) 乱序为 A/B/C，提案人身份对评员遮蔽；base 故意不在池——结构上无从弃权；选择会话计入预算恒等式 k 终身一项）">选 C→P-3 ▸</span> <span class="dim">盲评中选 → 已入终身门，影子重放进行中（0/402 · 演示）；<b>未到待人批阶段——顶栏「改进提案 2 ▸」计数不含本卡</b>。</span></p>
+<p class="tiny dim" style="margin:0"><span class="chip info mono">领域类 · 已会签 · 待重放出数</span> 重放出正向差异后凭「会签 + 人批」两步进 Apply（会签不等于人批，两枚章缺一不可）。</p>
+</div>
+
+<p class="h2p" style="margin-top:var(--s4)">P-4 · 汇总节点超时 120s → 90s <span class="chip info mono">不变量类 INV · 怎么工作</span> <span class="chip">快筛不过示例卡</span></p>
+<div class="card dim">
+<p class="tiny" style="margin:0 0 4px"><span class="chip warn mono">快筛不过 · 未进终身门</span> <b>卡片灰置即结论：</b>探针 3 无产出（显式声明，见下折叠区③）→ <b>交付物为空的候选自动出局</b>；且单跑 n=1 本就不定优劣（口径①）。<b>无「过审 → fork 草稿」按钮、不进人审、不占顶栏计数</b>——提案体留候选池，下批次可再筛（演示）。</p>
+<details class="fold"><summary><b>探针快筛 · 证据包三件套</b> <span class="chip bad">无产出 · 出局</span> <span class="dim">（第一拍 · 无真值）</span></summary><div class="foldbody">
+<dl class="kv" style="font-size:11.5px">
+<dt>① <span class="mono">harness.diff</span></dt><dd class="tiny">unified diff：merge 节点 timeout 一行 <span class="mono">120s→90s</span>（演示）</dd>
+<dt>② <span class="mono">rollout.md</span></dt><dd class="tiny">关键轨迹两行：base <span class="mono">r-129 · seq 4</span>「汇总 84s 完成」；候选 <span class="mono">r-129c · seq 4</span>「90s 处被杀 · 未竟」（演示）</dd>
+<dt>③ <span class="mono">produced.md</span></dt><dd class="tiny">候选侧：<b>无产出（必须显式写「无产出」——口径第三句，不装作「差异不显著」）→ 自动出局</b></dd>
+</dl>
+</div></details>
 </div>
 
 <p class="h2p" style="margin-top:var(--s4)">回归熔断记录（配置态的 reconcile）</p>
@@ -169,5 +229,5 @@ edges:
 <p class="tiny dim" style="margin:var(--s3) 0 0"><b>本区不做的三件事（写清楚防误解）：</b>① 不自动应用任何提案（无评估门即 Goodhart）；② 不碰平台代码与门禁本体——白名单只有四类产物，见 <a data-click data-goto="control-plane.html">Agent 管控 · 自动化改进（RSI 开关）</a>；③ 不接管运行期现场委派（那是小队 / reconcile 的运行态，见 <a data-click data-goto="squads__code-review.html">小队时间线</a>）。</p>
 </div></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：画布节点 → <b>节点配置详情页</b>（canvas__node-review / __node-legacy · 出边表 + 节点事件 + 移除钮）· 右侧「审查 → 前端」/前端节点 → <b>边配置详情页</b>（canvas__edge-review-frontend）· 「13 种策略 ▾」与左侧策略 pill → <b>策略与版本详情页</b>（canvas__strategies-versions · 13 项 > pop 上限 · 含回滚）· 「Apply 部署」→ <b>应用内 diff 摘要模态</b>（md-apply · 必填原因 → 「部署完成」跳转工作流详情 <span class="mono">workflows__review-pipeline.html</span>；完整漂移 diff 升格页 canvas__apply-diff 仍可达）· 「校验」/「保存」→ toast · 「草稿 draft」状态 chip → 版本态说明 toast（发布生成不可变快照并置 published）· 「历史版本」→ 策略与版本详情页（canvas__strategies-versions）· 「复制」→ toast · 「删除」→ 归档 / 彻底删除双选二次确认（md-del-wf · 都需理由）· 移除节点 / 删除边 / 回滚 → 二次确认随节点与边配置进入各自详情页（页内自带副本）　「＋ 新建画布」→ 三来源模态（md-new-canvas · 创建即 draft 并入工作流列表）· 「⧉ 画布切换器」→ pop-wfs（published 只读浏览、改前先生成新草稿 · archived 仅查看禁 Apply）　<b>顶栏「改进提案 2 ▸」→ 提案抽屉 dr-proposal</b>（RSI 提案制 · <b>邻接挂载：画布编排本体一字不动</b> —— P-1 备援权重 30/70→20/80（依据 近 7d r-122 超时 3 次 · 影子重放对比表 命中 96%→97% / 成本 -4% / judge 异厂系标 chip）· P-2 code-review 边加重试节点 · 每卡「过审 → fork 草稿」/「驳回」toast（发布仍走 Apply 必附原因 · 原因自动填提案 id · <b>零新门</b>）· 熔断记录 dim 行（09-21 v4 连劣 5 run → 自动回滚 v3 + 审批单 AP-3x）· 频控 chip「提案 ≤3/对象/周 · 相似已合并 2」· 界分 callout：reconcile = 运行态自愈 ⟂ 提案制 = 配置态自优化，提案只进人审不自动应用）· 跨页深链 <span class="mono">canvas.html#dr-proposal</span> 可直达该抽屉；提案生成就绪入口在 <a data-click data-goto="metrics.html">监控页</a> 指标行尾「生成提案 ▸」　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：画布节点 → <b>节点配置详情页</b>（canvas__node-review / __node-legacy · 出边表 + 节点事件 + 移除钮）· 右侧「审查 → 前端」/前端节点 → <b>边配置详情页</b>（canvas__edge-review-frontend）· 「13 种策略 ▾」与左侧策略 pill → <b>策略与版本详情页</b>（canvas__strategies-versions · 13 项 > pop 上限 · 含回滚）· 「Apply 部署」→ <b>应用内 diff 摘要模态</b>（md-apply · 必填原因 → 「部署完成」跳转工作流详情 <span class="mono">workflows__review-pipeline.html</span>；完整漂移 diff 升格页 canvas__apply-diff 仍可达）· 「校验」/「保存」→ toast · 「草稿 draft」状态 chip → 版本态说明 toast（发布生成不可变快照并置 published）· 「历史版本」→ 策略与版本详情页（canvas__strategies-versions）· 「复制」→ toast · 「删除」→ 归档 / 彻底删除双选二次确认（md-del-wf · 都需理由）· 移除节点 / 删除边 / 回滚 → 二次确认随节点与边配置进入各自详情页（页内自带副本）　「＋ 新建画布」→ 三来源模态（md-new-canvas · 创建即 draft 并入工作流列表）· 「⧉ 画布切换器」→ pop-wfs（published 只读浏览、改前先生成新草稿 · archived 仅查看禁 Apply）　<b>顶栏「改进提案 2 ▸」→ 提案抽屉 dr-proposal</b>（RSI 提案制 · <b>邻接挂载：画布编排本体一字不动</b> —— P-1 备援权重 30/70→20/80（依据 近 7d r-122 超时 3 次 · 影子重放对比表 命中 96%→97% / 成本 -4% / judge 异厂系标 chip）· P-2 code-review 边加重试节点 · 每卡「过审 → fork 草稿」/「驳回」toast（发布仍走 Apply 必附原因 · 原因自动填提案 id · <b>零新门</b>）· <b>D-S21 增件</b>：卡头维度 chip（P-1/P-2/P-4 = INV 不变量类蓝 · P-3 = DOM 领域类紫 · 判别式两句入抽屉顶 callout + 领域类会签注）· 每卡<b>探针快筛 <span class="mono">&lt;details class="fold"&gt;</span> 折叠区</b>（证据包三件套 harness.diff / rollout.md / produced.md · 口径三句原文级 · 无产出显式写）——P-1 另含<b>盲评句</b>（A/B/C 乱序 · seed=sha1(对象|k|mode) · base 不在池无从弃权 · 可点 pill → toast）；<b>P-3</b> 领域类卡（王工会签 ✓ · 选择会话 pill「选 C→P-3 ▸」toast · 终身门 0/402 未到待人批不占顶栏计数）；<b>P-4</b> 快筛不过灰置示例卡（<span class="mono">card dim</span> 既有原语 · 无产出出局 · 无 fork 按钮）· 频控 chip 下<b>预算恒等式行</b>（4k 断言 · 超支少支即失败 · 事前契约 · fell_back 回喂 ≤2 次小注）+ <b>结构校验集五 chip 行</b>（体量上限/空面拒/未触发判错/脚本附带/枚举白名单 · 示例=P-1）+ <b>自动补触发 dim 句</b> + <b>塌缩 chip dim 演示行</b>（两两行级 Jaccard 均值 ≥0.9 · 09-20 k=3 相似 1.0 → 停作业告警 · 与 control-plane 熔断行同事件）· P-1 影子重放区 judge 次序行（先可复算核对再谈质量）· 抽屉 header 加「两拍：快筛 → 终身门」chip（点击=两拍口径 toast）· 折叠区为原生 details 不劫持浮层体系（Esc 关浮层时开合状态保持 · 无 tab/过滤冲突）· 熔断记录 dim 行（09-21 v4 连劣 5 run → 自动回滚 v3 + 审批单 AP-3x）· 频控 chip「提案 ≤3/对象/周 · 相似已合并 2」· 界分 callout：reconcile = 运行态自愈 ⟂ 提案制 = 配置态自优化，提案只进人审不自动应用）· 跨页深链 <span class="mono">canvas.html#dr-proposal</span> 可直达该抽屉；提案生成就绪入口在 <a data-click data-goto="metrics.html">监控页</a> 指标行尾「生成提案 ▸」　按 Esc 关闭所有浮层。</p>
 </body></html>
