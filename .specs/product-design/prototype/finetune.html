@@ -72,7 +72,7 @@
 
 <div class="drawer" id="dr-tr-hw"><header><b>硬件不达标 · 用户轻薄本（统一内存 12GB）</b><span class="chip bad">微调不可用</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <div class="callout bad"><p class="tiny" style="margin:0"><b>灰显而不是报错，且缺因明写不藏 hover（AC-B3 / §6.0 ③）：</b>推理轨不受此限——Q4_K_M 仅 1.3GB，这台机器跑推理够；只有微调入口关闭。</p></div>
-<dl class="kv"><dt>画像</dt><dd class="mono">Windows 11 · 无独显 · 统一内存 12GB · 磁盘余 86GB</dd><dt>预检结论</dt><dd><span class="chip bad">统一内存 12GB &lt; 16GB</span> · 基线：2B 级 LoRA 需 显存 ≥8GB 或 Apple 统一内存 ≥16GB</dd><dt>引擎探测</dt><dd class="mono">LLaMA-Factory 未安装（PATH 与配置路径均未命中）</dd><dt>影响面</dt><dd>微调入口灰显 · 训练操作返回 <span class="mono">403 未达基线</span> · 推理与绑定不受影响</dd><dt>三条出路</dt><dd>①换机（本机只做推理）②升云 API 轨（数据出域需单独确认，§6.25 L3）③在达标的 M 系机上训完，产物再登记进目录</dd><dt>不做什么</dt><dd>平台不代装 LLaMA-Factory、不降门槛数值凑通过、不静默改推云轨</dd></dl>
+<dl class="kv"><dt>画像</dt><dd class="mono">Windows 11 · 无独显 · 统一内存 12GB · 磁盘余 86GB</dd><dt>预检结论</dt><dd><span class="chip bad">统一内存 12GB &lt; 16GB</span> · 基线：2B 级 LoRA 需 显存 ≥8GB 或 Apple 统一内存 ≥16GB</dd><dt>引擎探测</dt><dd class="mono">LLaMA-Factory 未安装（PATH 与配置路径均未命中）</dd><dt>影响面</dt><dd>微调入口灰显 · 训练操作返回 <span class="mono">403 未达基线</span> · 推理与绑定不受影响</dd><dt>三条出路</dt><dd>①换机（本机只做推理）②升云 API 轨（数据出域需单独确认，§6.25 D3）③在达标的 M 系机上训完，产物再登记进目录</dd><dt>不做什么</dt><dd>平台不代装 LLaMA-Factory、不降门槛数值凑通过、不静默改推云轨</dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">预检逐项</p>
 <table class="tbl compact"><thead><tr><th>项</th><th>要求</th><th>本机实测</th><th>判定</th></tr></thead><tbody>
 <tr><td>统一内存 / 显存</td><td class="mono">≥16GB / ≥8GB</td><td class="mono">12GB / 无独显</td><td><span class="chip bad">未达</span></td></tr>

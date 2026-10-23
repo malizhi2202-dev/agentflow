@@ -5,7 +5,7 @@
 .kbd{font-size:11px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p3" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="isolation.html">执行隔离</span></div>
-<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>域 → 能力组 → Agent 实例三层树。注意 <span class="mono">Agent-A</span> 同时出现在 code-review 与 python 两个能力组中——这是「多层归属」的预期表现，不是重复渲染。根级另有「未分类」虚拟组（<span class="mono">domain_id=NULL</span>）：创建时不选域的 Agent 落此处。</p>
+<p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>域 → 能力组 → Agent 实例三层树。注意 <span class="mono">Agent-A</span> 同时出现在 code-review 与 python 两个能力组中——这是「多层归属」的预期表现，不是重复渲染。根级另有「未分类」虚拟组（<span class="mono">domain_id=NULL</span>）：创建时不选域的 Agent 落此处。<b>本页另挂「自动化改进（RSI 开关）」卡组</b>：四类产物白名单 + 总闸，全部为演示态。</p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/control-plane</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -25,6 +25,7 @@
           <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
           <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
           <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
+          <a data-goto="memory.html"><svg class="icon"><use href="#i-book"/></svg>记忆中心</a>
           <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
           <div class="nav-grp">管理</div>
           <a data-goto="users.html"><svg class="icon"><use href="#i-users"/></svg>用户管理</a>
@@ -43,7 +44,7 @@
               <div class="stat"><div class="stat-label">Agent 总数</div><div class="stat-value">13</div><div class="stat-sub">9 healthy / 2 异常 · 2 未归类待归位</div></div>
             </div>
 
-            <div class="tabs"><span class="tab active" id="tab-tree" data-click onclick="showPv('tree')">域树视图</span><span class="tab" id="tab-agents" data-click onclick="showPv('agents')">Agent 列表</span><span class="tab" data-toast="已滚到调度队列区（本页四块内容同屏呈现 · 演示）">调度队列</span><span class="tab" data-toast="已滚到调和记录区（演示）">调和记录</span></div>
+            <div class="tabs"><span class="tab active" id="tab-tree" data-click onclick="showPv('tree')">域树视图</span><span class="tab" id="tab-agents" data-click onclick="showPv('agents')">Agent 列表</span><span class="tab" data-toast="已滚到调度队列区（本页五块内容同屏呈现 · 演示）">调度队列</span><span class="tab" data-toast="已滚到自动化改进（RSI 开关）区（演示）">自动化改进</span><span class="tab" data-toast="已滚到调和记录区（演示）">调和记录</span></div>
 
             <div class="panel tight" id="pv-tree" style="padding:0;overflow:hidden">
               <div class="tree">
@@ -107,6 +108,25 @@
             </table>
             <p class="small dim">三个开关彼此独立、默认全关；域 owner 变更后旧绑定失效需重绑（不可变 principal 纪律，§1.6.5 ⑤）。微调工厂入口见 §6.24（本域开关已由 @liang 显式开启，审计 AF-9K2）。</p>
             <p class="small dim"><b>三类入口共用同一权限与队列底座：</b>画布固定编排（wf 节点派单）· 对话决策微模型（0.60 阈值）· 小队 leader 语义委派（指派给小队 → leader 任务 → 真形 mention 委派，multica 方案）——三条入口都不绕四道门，最终都落同一条调度队列与同一份审计（小队时间线演示见 <span class="mono">squads__code-review.html</span>）。（Team ⟂ Domain：一个团队可拥有 0..N 个域，域仍是运行/路由轴，见 <a data-goto="teams__agentflow.html">团队详情④正交卡</a>）</p>
+
+            <p class="h2p" style="margin-top:var(--s5)">自动化改进（RSI 开关） <span class="chip warn">规划 · 未实现</span> <span class="chip info">开关可点 → 危险动作二次确认 · 入审计</span></p>
+            <div class="panel tight">
+              <div class="callout warn" style="margin:0 0 var(--s3)">
+                <p class="tiny" style="margin:0"><b>白名单制（禁改区成文）：</b>只有<b>四类产物</b>可被自动改进 —— 技能 / 知识记忆 / 编排配置（经提案制）/ 决策微模型权重（经双门）。四类产物之外的<b>一切改进</b>（含<b>平台代码</b>、<b>闸门规则与门禁本体</b>、<b>本条款自身</b>）<b>禁止自动化</b>，一律走 R16 议题 + 人批。用户裁定原话入档：<b>「不断改进代码这个不要了 线上就要维持代码稳定」</b> —— 不进该赛道非保守，是裁定；「RSI 的 RSI」（治理流程自我优化 = 改门禁本体）<b>永久出白名单</b>。</p>
+              </div>
+              <table class="tbl compact" style="margin-bottom:0">
+                <thead><tr><th>类目</th><th class="c">开关</th><th>门禁矩阵（生成 → 晋升必人批 → 回滚 → 预算）</th><th>最近动作</th></tr></thead>
+                <tbody>
+                  <tr><td><b>技能</b> <span class="chip info">Skill</span></td><td class="c"><span class="chip ok" data-click data-modal="md-rsi-off" data-toast="停用「技能」自动改进：危险动作，需必填原因（演示）">开 ▾</span></td><td class="tiny">生成 = 候选区归纳作业　·　晋升 = workspace / agent 层<b>人审</b>（runtime 层<b>永不</b>自动晋升）　·　回滚 = 软撤销留 lineage　·　预算 = 归纳作业周帽</td><td class="mono tiny">09-21 03:10 候选技能「grep 大文件」入检疫区 · 待审 3 · 自动体未落库<br>审计 rsi:skill_candidate ×1</td></tr>
+                  <tr><td><b>知识记忆</b></td><td class="c"><span class="chip ok" data-click data-modal="md-rsi-off" data-toast="停用「知识记忆」自动改进：危险动作，需必填原因（演示）">开 ▾</span></td><td class="tiny">生成 = 检疫 + 静置　·　晋升 = 既有<b>人审评审门</b>（复用现门，不加新门）　·　回滚 = 溯源成批降级　·　预算 = 反思日量帽</td><td class="mono tiny">09-21 09:40 反思作业产出 12 条 · 检疫 6 · <b>自动晋升 0</b><br>审计 rsi:memory_reflect ×1</td></tr>
+                  <tr><td><b>编排配置</b> <span class="chip purple">提案制</span></td><td class="c"><span class="chip ok" data-click data-modal="md-rsi-off" data-toast="停用「编排配置」自动改进（提案生成）：危险动作，需必填原因（演示）">开 ▾</span></td><td class="tiny">生成 = 影子重放 + 冻结金标 + <b>异厂系 judge</b>　·　晋升 = <b>Apply 人批</b>（既有门 · 零新门）　·　回滚 = <b>回归熔断</b>自动回滚 + 审批单　·　预算 = 提案 ≤3/对象/周</td><td class="mono tiny">09-21 22:10 v4 连劣 5 run → 自动回滚 v3 + 审批单 AP-3x<br>提案区待审 2 · <span class="btn link" data-goto="canvas.html#dr-proposal">去看 →</span></td></tr>
+                  <tr><td><b>模型权重</b> <span class="chip purple">决策微模型</span></td><td class="c"><span class="chip" data-click data-toast="开启「模型权重」自动改进：两步制 —— 先过自测门 + 人工抽检，再按用途灰度；默认关 · 开启入审计 rsi:weight_improve_on（演示）">关 ▾</span></td><td class="tiny">生成 = 自测门 + 人工抽检　·　晋升 = 两步制<b>灰度</b>（既有）　·　回滚 = 灰度熔断回滚　·　预算 = 回流 ≤N 轮 + 合成占比帽</td><td class="dim mono tiny">未启用 · 回流轮次 0/3 · 合成占比帽 20% 未生效（零调用）</td></tr>
+                  <tr class="grp-row"><td><b>总闸 · 一键全停</b> <span class="dim">（四类目同时停用）</span></td><td class="c"><span class="chip ok" data-click data-modal="md-rsi-off" data-toast="拉总闸 = 危险动作，需必填原因（演示）">运行中（三开一关）▾</span></td><td class="tiny">停用后<b>所有自动改进作业不再产生</b>（提案 / 归纳 / 反思 / 灰度回流同停）；<b>存量在途不受影响</b>；<b>回归熔断一并停用</b> → 回滚需手工；待审提案保留，<b>沉默 ≠ 同意</b>不自动采纳</td><td class="mono tiny">09-20 08:00 四类目全开（admin · 李工）<br>审计 rsi:master_on · 双入口校验通过</td></tr>
+                </tbody>
+              </table>
+              <p class="tiny dim" style="margin:var(--s3) 0 0"><b>开关本身 = 状态转换层动作</b>（动作者类型 × 目标状态，不只写进界面提示词）：入口 + 中间件<b>两处独立校验</b>，动作者须域 owner / Admin，越权按既有纪律返回 404；每次启停入审计，<b>停用态审计事件记「自动体已暂停」</b>（在审计里看得见，不是「没动作」）。预算帽与作业超限：token / 日量超限即停作业并告警。</p>
+              <p class="tiny dim" style="margin:6px 0 0"><b>两条诚实边界（写进界面防吹牛）：</b>① <b>模型审险 ≈ 随机</b>（R-Judge 类实证）—— judge 只当<b>预筛信号</b>，绝不当放行依据，<b>人批位不可让渡</b>（常设条款，不随解冻变化）；② <b>代理指标必有缺口</b>（reward 随优化压力上升而失真）→ <b>双指标门 + 评估集季度轮换</b>是<b>常设义务</b>，不是首期功能。若将来重议「代码层 RSI」，须另开 R16 议题并重读外部时长地平线与事故文献，本开关卡组不为此留后门。</p>
+            </div>
 
             <p class="h2p">最近调和动作 <span class="chip info">dangerous 行可点 → 审批详情</span></p>
             <div class="timeline">
@@ -223,6 +243,22 @@
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [正在做探针—调和联调，避免自愈干扰 ]</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="调和循环已暂停 · 顶栏转红态 · 审计 reconcile:paused（演示）" data-close>确认暂停</button></div></div></div>
 
+<div class="modal" id="md-rsi-off"><div style="padding:var(--s4)">
+<b style="color:var(--orange)">停用「自动化改进」（RSI）——危险动作确认</b>
+<p class="small dim" style="margin:8px 0 6px">范围二选一（共用本确认）：☐ 仅本类目（示例：<b>编排配置</b>）　☑ <b>总闸 · 四类目全停</b>。<b>必填原因</b>（§6.0 纪律：破坏性操作二次确认 + 理由入审计）。</p>
+<p class="tiny" style="margin:0 0 4px"><b>影响清单</b></p>
+<table class="tbl compact"><tbody>
+<tr><td>新作业</td><td class="mono">提案 / 归纳 / 反思 / 灰度回流</td><td><span class="chip bad">停止产生</span></td></tr>
+<tr><td>存量在途</td><td class="mono">2 个 run · 队列 4 条</td><td><span class="chip info">不受影响 · 跑完为止</span></td></tr>
+<tr><td>回归熔断</td><td class="mono">连劣 N run 自动回滚</td><td><span class="chip bad">一并停用 · 回滚转手工</span></td></tr>
+<tr><td>待审提案</td><td class="mono">画布提案区 2 条</td><td><span class="chip">保留 · 不自动采纳（沉默 ≠ 同意）</span></td></tr>
+<tr><td>运行态自愈</td><td class="mono">reconcile / 探针</td><td><span class="chip ok">不受影响（另一条轴）</span></td></tr>
+<tr><td>校验与留痕</td><td class="mono">入口 + 中间件两处独立校验 · 动作者须域 owner / Admin · 越权 404</td><td><span class="chip warn">审计记「自动体已暂停」</span></td></tr>
+</tbody></table>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [线上先稳，自动改进暂停一轮，人工盯复盘 ]</pre>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="✓ 自动化改进已暂停 · 存量在途不受影响 · 审计 rsi:paused（停用态审计事件记「自动体已暂停」· 双入口校验通过）（演示）" data-close>确认停用</button></div>
+<p class="tiny dim" style="margin-top:6px">开关操作本身 = <b>状态转换层动作</b>（动作者类型 × 目标状态），不是页面提示词里的约定；停用态在审计事件中以「自动体已暂停」可见，重启走同一确认。</p></div></div>
+
 <div class="modal" id="md-cancel-task"><div style="padding:var(--s4)">
 <b>取消队列任务 <span class="mono">task-3</span>？</b>
 <p class="small dim" style="margin:8px 0">该任务由人点名派发（李工），取消即丢弃其上下文投喂计划。必填原因。</p>
@@ -267,7 +303,7 @@
 </tbody></table>
 <p class="tiny dim" style="margin:6px 0 0">域只是逻辑分组与共享记忆边界，<b>非安全边界</b>；删除域时其 Agent 自动回落未分类（外键 <span class="mono">SET NULL</span>），不级联删除。</p></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：「域树视图 / Agent 列表」两个 tab → 内联 onclick 切换两个容器 display（真表格，不跳页）· Agent 列表表「详情」→ <span class="mono">agent-detail.html</span> · 顶栏「+ 新建 Agent」→ <span class="mono">agents__new.html</span> · 域树 l1 三行 → <b>域详情页</b>（control-plane__domain-*.html · Agent 列表 + 记忆时间线 + 编辑类操作，抽屉装不下）· l2 code-review 行 → <b>能力组详情页</b>（候选打分 + 排队根因）· 根级「未分类」l1 行 → toast（domain_id=NULL 虚拟组说明）· 其下 2 条 l2 Agent 行与平铺表「归入域 ▾」→ <b>归入域 pop</b>（选目标域 toast · 只改 domain_id 不动能力标签）· 调度队列 task-7 → <b>任务详情页</b>（可选路径带操作链）· l3 failed 行 → Agent 速览抽屉（kv + 1 张子表 · 保留）· 队列其余 4 行 → 任务详情抽屉（kv + 1 张子表 · 保留）· 决策用途「开 / 关」三行 → toast（写明入审计 + 两步制默认关）· 顶栏「暂停调和」与危险动作 → 影响清单 + 必填原因二次确认 · dangerous 调和行 → 审批抽屉 · 「+ 新建域」与队列筛选 → pop · 探针正常 chip → 探针概要　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：「域树视图 / Agent 列表」两个 tab → 内联 onclick 切换两个容器 display（真表格，不跳页）· 其余 tab → 滚动提示 toast · Agent 列表表「详情」→ <span class="mono">agent-detail.html</span> · 顶栏「+ 新建 Agent」→ <span class="mono">agents__new.html</span> · 域树 l1 三行 → <b>域详情页</b>（control-plane__domain-*.html · Agent 列表 + 记忆时间线 + 编辑类操作，抽屉装不下）· l2 code-review 行 → <b>能力组详情页</b>（候选打分 + 排队根因）· 根级「未分类」l1 行 → toast（domain_id=NULL 虚拟组说明）· 其下 2 条 l2 Agent 行与平铺表「归入域 ▾」→ <b>归入域 pop</b>（选目标域 toast · 只改 domain_id 不动能力标签）· 调度队列 task-7 → <b>任务详情页</b>（可选路径带操作链）· l3 failed 行 → Agent 速览抽屉（kv + 1 张子表 · 保留）· 队列其余 4 行 → 任务详情抽屉（kv + 1 张子表 · 保留）· 决策用途「开 / 关」三行 → toast（写明入审计 + 两步制默认关）· <b>「自动化改进（RSI 开关）」卡组</b>：四类目开关（技能 / 知识记忆 / 编排配置 / 模型权重）与<b>总闸</b>可点 → <b>md-rsi-off</b> 危险动作确认（影响清单 + 必填原因 → 全局 toast「已暂停 · 存量在途不受影响」· 审计记「自动体已暂停」）· 编排配置行「去看 →」→ 深链 <span class="mono">canvas.html#dr-proposal</span> 提案抽屉 · 顶栏「暂停调和」与危险动作 → 影响清单 + 必填原因二次确认 · dangerous 调和行 → 审批抽屉 · 「+ 新建域」与队列筛选 → pop · 探针正常 chip → 探针概要　按 Esc 关闭所有浮层。</p>
 <script>
 function showPv(k){
   var t=document.getElementById('pv-tree'), a=document.getElementById('pv-agents');

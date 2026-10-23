@@ -176,7 +176,7 @@ h4.blk .sub{font-size:11.5px;font-weight:400;color:var(--text-muted)}</style></h
 </div>
 
 <h4 class="blk" id="sec-ks">6 · 专属知识空间 <span class="sub">创建项目 = 同时自动创建其知识空间（1:1 · 读写 + 总结写入）</span></h4>
-<div class="callout ok"><p class="tiny" style="margin:0"><b>创建流程（一条链，无需二次操作）：</b>提交创建 → 建项目登记（路径 · 成员 · 关联）→ <b>自动创建同名专属知识空间</b>（成员 = 项目成员，含 Agent）→ 项目自身与成员获得<b>读写</b>权 → run / 会话产物按 <b>L0→L3</b> 自动总结写入<b>本空间</b>。空间不可单独创建、不可跨项目共享写。</p></div>
+<div class="callout ok"><p class="tiny" style="margin:0"><b>创建流程（一条链，无需二次操作）：</b>提交创建 → 建项目登记（路径 · 成员 · 关联）→ <b>自动创建同名专属知识空间</b>（成员 = 项目成员，含 Agent）→ 项目自身与成员获得<b>读写</b>权 → run / 会话产物按 <b>记忆四层 L0→L3</b> 自动总结写入<b>本空间</b>。空间不可单独创建、不可跨项目共享写。</p></div>
 <div class="panel">
   <div class="grid g2" style="align-items:start">
     <div>
@@ -206,7 +206,7 @@ h4.blk .sub{font-size:11.5px;font-weight:400;color:var(--text-muted)}</style></h
       <div class="step"><b class="mono">L2</b> 主题级聚合<br><span class="tiny dim">跨会话按主题合并 · 去重 · 置信更新 · 冲突人裁</span></div><span class="to">→</span>
       <div class="step hi"><b class="mono">L3</b> 画像与高价值沉淀<br><span class="tiny dim">长期稳定 · 进空间正式文档 · <b>过人工审核门</b></span></div>
     </div>
-    <p class="tiny" style="margin:var(--s3) 0 0"><b>两条边界：</b>① <b>写入只进本空间</b>——L0-L3 任何一层都写不到公共知识，也写不到别的项目空间；② <b>公共知识只接收 L3</b>，且必须经<b>平台管理员评审</b>通过后按新版本发布（申请入口见 <span class="mono">knowledge.html</span> 的「申请晋升」）。</p></div>
+    <p class="tiny" style="margin:var(--s3) 0 0"><b>两条边界：</b>① <b>写入只进本空间</b>——记忆四层任何一层（L0-L3）都写不到公共知识——入知识必过晋升评审门，也写不到别的项目空间；② <b>公共知识只接收 L3</b>，且必须经<b>平台管理员评审</b>通过后按新版本发布（申请入口见 <span class="mono">knowledge.html</span> 的「申请晋升」）。</p></div>
 </div>
 
 <h4 class="blk" id="sec-rel">7 · 关联对象（多选）<span class="sub">Agent / 工作流 / 知识库 / 会话 / 任务</span></h4>
@@ -219,5 +219,5 @@ h4.blk .sub{font-size:11.5px;font-weight:400;color:var(--text-muted)}</style></h
 <p class="tiny dim" style="margin:0"><b>字段裁撤说明（页脚）：</b>曾有「开始日期 / 目标日期」两项，现已删除——<b>项目无期限概念，节奏由里程碑 / 任务承载</b>（任务见 <span class="mono">board.html</span>）。状态与优先级保留为单选 chips；Leader 从「成员或 Agent 二选一」改为「仅 Agent（用户级 Agent 优先）」，人只出现在成员与审批里。</p>
 </div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示（独立表单页 · 纯静态）：名称 / 描述为两个独立输入框（描述 textarea）· 图标 = 9 个单选圆形 chip（跳过 + 8 emoji/字母 · 默认跳过）·「📁 选择目录…」→ toast + 路径 chip（✕ 可移除）· GitHub 输入框 +「⟱ 克隆并关联」→ 克隆 toast · 状态（未开始 / 进行中 / 已暂停 / 已完成）/ 优先级（低 / 中 / 高 / 紧急）/ 可见性 = 原生单选按钮组 chips（点 label 即切选中态 · 纯 CSS，chip 上不挂 toast 以免 preventDefault 吞掉选中）· <b>无开始 / 结束时间字段</b>（理由在页脚）· Leader 单选（用户级 Agent 组 + 其他 Agent 组 · 归档项置灰）→ 选人 toast · 成员 5 行「类型（用户级 Agent / Agent / 用户）/ 对象 / 角色」下拉 + 逐行移除，「＋ 加一行」→ toast（可继续添加；创建者 owner 行与 Leader 行不可移除）· 第 6 区为创建流程 callout（项目 1:1 专属空间 + 关联已有知识库只读多选）与 <b>L0-L3 总结写入</b>卡（演示口径 · 参考腾讯记忆分层）· 空间「进入」深链 → <span class="mono">knowledge.html#space-agentflow</span> ·「提交创建」→ toast（已创建项目「agentflow」· 专属知识空间同步创建 · Leader：李工的个人 Agent）· 取消 / 顶部「← 返回」→ 项目列表　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示（独立表单页 · 纯静态）：名称 / 描述为两个独立输入框（描述 textarea）· 图标 = 9 个单选圆形 chip（跳过 + 8 emoji/字母 · 默认跳过）·「📁 选择目录…」→ toast + 路径 chip（✕ 可移除）· GitHub 输入框 +「⟱ 克隆并关联」→ 克隆 toast · 状态（未开始 / 进行中 / 已暂停 / 已完成）/ 优先级（低 / 中 / 高 / 紧急）/ 可见性 = 原生单选按钮组 chips（点 label 即切选中态 · 纯 CSS，chip 上不挂 toast 以免 preventDefault 吞掉选中）· <b>无开始 / 结束时间字段</b>（理由在页脚）· Leader 单选（用户级 Agent 组 + 其他 Agent 组 · 归档项置灰）→ 选人 toast · 成员 5 行「类型（用户级 Agent / Agent / 用户）/ 对象 / 角色」下拉 + 逐行移除，「＋ 加一行」→ toast（可继续添加；创建者 owner 行与 Leader 行不可移除）· 第 6 区为创建流程 callout（项目 1:1 专属空间 + 关联已有知识库只读多选）与 <b>记忆四层总结写入</b>卡（演示口径 · 腾讯记忆口径 · 见 memory.html记忆分层）· 空间「进入」深链 → <span class="mono">knowledge.html#space-agentflow</span> ·「提交创建」→ toast（已创建项目「agentflow」· 专属知识空间同步创建 · Leader：李工的个人 Agent）· 取消 / 顶部「← 返回」→ 项目列表　按 Esc 关闭浮层。</p>
 </body></html>

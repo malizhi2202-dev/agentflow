@@ -379,8 +379,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
   <span class="sep">/</span>
   <h1>产品设计文档 &amp; 界面原型</h1>
   <div class="tools">
-    <span class="chip mono">v14 · 2026-10-23</span>
-    <span class="chip mono">状态: 呈审中（v14 = 小队与语义自动执行（multica 方案）；v8「通过」v9「好的」已过审，过审链 v4·v5·v7·v8·v9 均原话晋级；v10-v13 为同步轮次）</span>
+    <span class="chip mono">v15 · 2026-10-23</span>
+    <span class="chip mono">状态: 呈审中（v15 = RSI 自改进管道与治理（S17-S20 过审落地，合并案原话「这俩可以合并吧」）；v8「通过」v9「好的」已过审，过审链 v4·v5·v7·v8·v9 均原话晋级；v10-v14 为同步轮次）</span>
     <span class="chip warn">原型内所有数据均为演示假数据</span>
     <button class="btn sm" onclick="window.print()">打印 / 存 PDF</button>
   </div>
@@ -462,6 +462,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <a href="#p27" class="planned">6.27 对外集成面 ✱</a>
     <a href="#p28">6.28 运行时发现</a>
     <a href="#p29" class="planned">6.29 小队中心 ✱</a>
+    <a href="#p30" class="planned">6.30 自改进管道与治理 ✱</a>
     <p class="grp">附录</p>
     <a href="#s7">7 · 角色权限矩阵</a>
     <a href="#s8">8 · 术语表</a>
@@ -585,8 +586,10 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr class="grp-row"><td colspan="4">交互与知识</td></tr>
         <tr><td>交互</td><td>对话中心</td><td>我与某 Agent 的 1:1 私密会话（管理员亦不可见）；一条消息 = 一个 run；工具调用块；流式光标</td><td>§6.8</td></tr>
         <tr><td>交互</td><td>渠道中继</td><td>飞书 / 钉钉 / Slack / Telegram / SMTP 邮件；OAuth 扫码 + Mock 模式</td><td>§6.8</td></tr>
-        <tr><td>知识</td><td>知识库</td><td>公共知识（平台维护、全体只读）+ 知识空间（与项目 1:1，成员可读写）；文件上传（类型白名单 + 10MB 上限 + 文件名净化）→ 分块 → 嵌入 → indexed；语义检索；L0-L3 总结写入</td><td>§6.9</td></tr>
-        <tr><td>知识</td><td>记忆系统</td><td>域级共享记忆；同域 Agent 可加载前序上下文</td><td>§6.9</td></tr>
+        <tr><td>知识</td><td>记忆四层 · 唯一加工管道 <span class="chip warn">设计新表 · v15</span> <span class="chip ok">形态基线在建</span></td><td><b>记忆 L0 对话原文 → L1 原子记忆 → L2 场景记忆 → L3 核心记忆</b>（腾讯口径 · <b>层级≠权限 · 高层不保证更可信</b>；内容域 semantic / procedural / preference / instruction / rule 为<b>正交维度</b>非第四条阶梯）；失败反思区旁挂 L0；检疫＋静置期、来源链 lineage day-1 真外键、衰减重验队列三件防腐</td><td>§2.8 §6.30</td></tr>
+        <tr><td>知识</td><td>知识库（资产域）<span class="chip warn">v15 合并案</span></td><td>公共知识（平台维护、全体只读）+ 知识空间（与项目 1:1，成员可读写）；文件上传（类型白名单 + 10MB 上限 + 文件名净化）→ 分块 → 嵌入 → indexed；语义检索；<b>进入资产域的唯一通道 = 晋升评审门</b>（记忆 L3 →空间/公共知识，必人批；公共知识=平台管理员二审；原人审语义不变）</td><td>§6.9 §6.30</td></tr>
+        <tr><td>知识</td><td>记忆系统（现状）</td><td>域级共享记忆；同域 Agent 可加载前序上下文。〔v15 口径：其加工流水即上行为记忆四层，不再另设阶梯〕</td><td>§6.9</td></tr>
+        <tr><td>治理</td><td>自改进管道与 RSI 治理 <span class="chip warn">设计新表 · v15</span></td><td>三管道（失败反思收集器 / 技能归纳机 / 纠错即信号<b>限人类角色</b>）+ 三防腐（检疫区 / 来源链成批撤回 / 衰减重验）+ 编排提案制<b>三权分离</b>（生成自动限步限钱 · 影子重放+冻结金标+异厂系 judge · 发布=人走既有 Apply）+ 模型回流双门与预算；<b>禁改区白名单=四类产物</b>，其余含门禁本体一律人批（§6.30）</td><td>§6.30</td></tr>
         <tr><td>知识</td><td>工作流产物</td><td>按 change-id 组织 CHANGE/REQUIREMENT/DESIGN/TASK/TEST/REVIEW；门禁投票；只读文件查看（编辑在本地目录/代码仓，平台编辑入口已下线·2026-10-15）</td><td>§6.2 §6.13b</td></tr>
         <tr class="grp-row"><td colspan="4">可观测与治理</td></tr>
         <tr><td>观测</td><td>运行时监控</td><td>会话列表 + 状态过滤；SSE 实时推送；P50/P95/P99 延迟；Token 统计</td><td>§6.10</td></tr>
@@ -790,7 +793,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <tbody>
         <tr><td><b>multica</b></td><td>51,081★ · 9 月 6 个 release</td><td><b>头号威胁</b>：六件套全齐（Squads/Inbox/Review gates/逐调用回放/token 归因/26 种 CLI runtime + 5 IM 渠道）。但无编排画布、无产物谱系、域无沙箱——<b>我们的三块胜负手恰是它的三个洞</b>，比拼的是谁先把另一半长出来</td></tr>
         <tr><td><b>K8s 阵营打包盯</b></td><td>agent-sandbox 3,971★ · ax 6,634★ · kagent 3,798★ · agentgateway 4,954★</td><td>自愈+沙箱已成立标配且互相打通（gVisor/microVM/网络围栏、三云 marketplace 分发 08-27）。<b>谁先给这堆原语长出协作工作台，接缝空白即关死</b>；agentgateway 若下沉任务级路由，路由优势被抹平</td></tr>
-        <tr><td><b>AgentTeams</b></td><td>5,655★ · 月更 3 版</td><td>「K8s 式管控 × 人机协作」最接近的同思路竞品：任务状态机、干预审计快照、L2 团队权限已实装（v1.2.2-1.2.4）；其 workflow 渲染仍是只读 Mermaid——画布对账窗口还开着</td></tr>
+        <tr><td><b>AgentTeams</b></td><td>5,655★ · 月更 3 版</td><td>「K8s 式管控 × 人机协作」最接近的同思路竞品：任务状态机、干预审计快照、L2 团队权限已实装（v1.2.2-1.2.4；此 L2 为<b>其自家权限档位记号</b>，与我方记忆四层/出域分级无关）；其 workflow 渲染仍是只读 Mermaid——画布对账窗口还开着</td></tr>
         <tr><td><b>OpenHands</b></td><td>org 88.8K★</td><td>重心转「Agent Canvas」产品（v1.20 起附桌面安装包）+ Jira 组织级集成——<b>注意撞名：其 Canvas 是对话工作台不是编排画布</b>，对外表述须自带这句区分</td></tr>
         <tr><td><b>amux</b></td><td>491★ · 2026-02 立</td><td>per-card 证据链+预算的最小可行版（CAS 认领 / done 需证据 / peer 复核），协作层质量门禁的现成参照，船小掉头快</td></tr>
         <tr><td><b>dsh-agent-teams</b></td><td>1,766★ · 08-12 立</td><td>本月最速新星，「对话内嵌团队层」路线（一条 prompt 变 captain + 实时 Web UI）——对话中心 × 编排正在融合的外部验证，亦是 §5 对话中心的路线参照</td></tr>
@@ -978,7 +981,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <div class="grid g2">
       <div class="panel">
         <p class="h2p">一句话定义</p>
-        <p class="small muted" style="margin:0">知识库分两层：<strong>公共知识</strong>（平台维护，所有项目与 Agent 只读）与<strong>知识空间</strong>（与项目一一对应，项目成员——用户、Agent——与项目自身可读写）；摄入管道是文件 → 分块 → 嵌入 → 可检索。<strong>记忆</strong>是 Agent 可读写的上下文存储，按域共享。</p>
+        <p class="small muted" style="margin:0"><strong>知识库=资产域</strong>，分两层：<strong>公共知识</strong>（平台维护，所有项目与 Agent 只读）与<strong>知识空间</strong>（与项目一一对应，项目成员——用户、Agent——与项目自身可读写）；文件摄入管道是文件 → 分块 → 嵌入 → 可检索。<strong>记忆</strong>是 Agent 的上下文沉淀，按域共享，加工流水<b>只有一条</b>：记忆四层 L0→L3（v15 合并案）；两域之间唯一的桥是<b>晋升评审门</b>。</p>
       </div>
       <div class="panel">
         <p class="h2p">为什么重要</p>
@@ -1002,7 +1005,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <li><b>状态流转</b>：<span class="mono">uploading → processing → indexed</span>，无需人工干预。</li>
       <li><b>chunk 形态</b>：<span class="mono">key = {filename}_chunk_{N}</span>，<span class="mono">memory_type = "document"</span>，支持语义检索。</li>
       <li><b>跨空间引用</b>：空间之间经「关联」获得只读快照（源更新走增量同步），不直接互写；越权访问与「资源不存在」统一返回 <span class="mono">404</span>。</li>
-      <li><b>总结写入分层（演示口径 · 参考记忆分层实践）</b>：<span class="mono">L0</span> 原始记录自动落盘 → <span class="mono">L1</span> 会话级摘要 → <span class="mono">L2</span> 主题级跨会话聚合（去重、置信度、冲突交人裁决）→ <span class="mono">L3</span> 画像与高价值沉淀（人工审核门；晋升公共知识需平台管理员评审）。</li>
+      <li><b>记忆四层=唯一加工管道（〔v15 合并案〕2026-10-23 过审，用户原话「这俩可以合并吧」）</b>：<span class="mono">记忆 L0</span> 对话原文 → <span class="mono">L1</span> 原子记忆（对话抽取的原子事实 / 偏好 / 过程三类）→ <span class="mono">L2</span> 场景记忆（多原子聚合，冲突交人裁决、不自动裁）→ <span class="mono">L3</span> 核心记忆（高价值沉淀与画像，人工审核门）。腾讯口径两条铁律入档：<b>层级≠权限、高层不保证更可信</b>——权限只活在资产域；内容域（semantic / procedural / preference / instruction / rule）是与层级<b>正交</b>的内容类型维度，不是第四条阶梯。原知识库「总结写入分层」<b>不是第二条 L0-L3 阶梯</b>，自本版并入本管道：<b>知识库=资产域</b>，记忆 L3 经<b>晋升评审门</b>（必人批；公共知识=平台管理员二审）成为空间/公共知识资产，原人审语义不变。全文另两处同名记号同版消歧——数据出域分级自本版改号 <b>D0-D3</b>（§6.25）；正文禁用裸 <span class="mono">L0-L3</span> 记号、必带限定词（「记忆 L…」/「D…」），见 §6.30 E 命名卫生条款（S20）。</li>
     </ul>
 
     <h3 id="s2-9">2.9 审批与人工闸门</h3>
@@ -1177,7 +1180,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     </table>
 
     <h3 id="s3-3">3.3 数据模型</h3>
-    <p class="lead">现状 26 张表 + 目标态设计新表按域归组如下（现状表名取自模型 <span class="mono">__tablename__</span>）；标「设计新表」的行为目标态（v13 集成裁定 · v14 小队/团队/自动化裁定 · 一律裁定⑦ MySQL 权威档），现状代码尚无对应模型。<b>v14 新增：</b><span class="mono">teams · team_members · squad · squad_member · autopilot · autopilot_trigger · autopilot_run · quick_action</span> 八张 + 任务队列表扩列设计注（<span class="mono">is_leader_task / squad_id / trigger_comment_id / coalesced_comment_ids / handoff_note / priority / fire_at</span>）与 <span class="mono">assignee_type</span> 三轨枚举扩，详见 §2.11 与 §6.29。</p>
+    <p class="lead">现状 26 张表 + 目标态设计新表按域归组如下（现状表名取自模型 <span class="mono">__tablename__</span>）；标「设计新表」的行为目标态（v13 集成裁定 · v14 小队/团队/自动化裁定 · v15 RSI 自改进管道裁定 · 一律裁定⑦ MySQL 权威档），现状代码尚无对应模型。<b>v14 新增：</b><span class="mono">teams · team_members · squad · squad_member · autopilot · autopilot_trigger · autopilot_run · quick_action</span> 八张 + 任务队列表扩列设计注（<span class="mono">is_leader_task / squad_id / trigger_comment_id / coalesced_comment_ids / handoff_note / priority / fire_at</span>）与 <span class="mono">assignee_type</span> 三轨枚举扩，详见 §2.11 与 §6.29。<b>v15 新增：</b><span class="mono">memories · promotion_reviews · improvement_proposals · training_batches · batch_membership · rsi_switches</span> 六张（自改进管道与治理），详见 §6.30。</p>
     <table class="tbl">
       <thead><tr><th>域</th><th>表</th><th>关键字段 / 关系</th></tr></thead>
       <tbody>
@@ -1203,6 +1206,12 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>任务队列 <span class="chip warn">v14 设计注 · 扩列</span></td><td class="mono">任务队列表（并入 P1-16 并表后的运行枢纽）</td><td>本包新增列的设计注（<b>不新造第四张 queue</b>——「第三张 queue 不许进来」纪律沿用，队列面先由 P1-16 并表收口）：<span class="mono">is_leader_task BOOL</span>（leader 任务标记，驱动时间线与「evaluated 记账」审计归因）· <span class="mono">squad_id NULL → squad.id</span>（本次运行所属小队）· <span class="mono">trigger_comment_id NULL</span>（触发本次运行的评论，兜底唤醒与回放用）· <span class="mono">coalesced_comment_ids JSONB</span>（<b>计划并入</b>的评论 id 数组，与「实际投喂」收据分账，§6.0 ⑪）· <span class="mono">handoff_note TEXT</span>（交接说明，渲染进开场 prompt，<b>不伪造评论</b>）· <span class="mono">priority</span> · <span class="mono">fire_at</span>（延迟起跑 / 唤醒时点）。会话续用键为 <span class="mono">(agent_id, issue_id)</span> 对而非 task（沿用既有设计注）</td></tr>
         <tr><td>自动化 <span class="chip warn">设计新表 · v14</span></td><td class="mono">autopilot · autopilot_trigger · autopilot_run</td><td><span class="mono">autopilot(id, name, assignee_type ∈ {agent, squad}, assignee_id, execution_mode ∈ {create_issue, run_only}, issue_title_template, concurrency_policy ∈ {skip, queue, replace}, spec_version, status ∈ {enabled, disabled, paused}, created_by)</span>——<b>不挂 <span class="mono">team_id</span></b>：归属看目标（指向 squad 时成本与配额沿 leader 归因链落到 leader 所属团队，指向 Agent 时落该 Agent 归属），<b>不给规则本身造第二个归属主体</b>；<b>目标 squad 归档 → 规则自动转 <span class="mono">disabled</span>（不静默删行）</b>；<b>小队页内建规则目标固定为本队</b>，跨队复用走工作流 / 画布；<span class="mono">autopilot_trigger(autopilot_id → autopilot.id, kind ∈ {schedule, webhook, api}, cron_expression, timezone, webhook_token 写-only · HMAC 签名校验)</span>（三型落点：<span class="mono">cron 30 8 * * 1-5</span> · <span class="mono">POST /hooks/af/{squad}/pr</span> · <span class="mono">POST /squads/{id}/assign</span>，<b>api 触发按 PAT 计 owner</b>）；<span class="mono">autopilot_run(id, autopilot_id, spec_version, status, issue_id NULL, task_id NULL, failure_reason)</span>——<b><span class="mono">failure_reason</span> 区分「门」与「活」：签名不符 = <span class="mono">401</span> 与业务失败不同码</b>；<b><span class="mono">replace</span> 取消的在途 run 不计入成功率</b>——<b>每次运行记当时的规则版本快照</b>（§6.0 ⑨ 留痕「表 + 界面」两步齐）。配套 <span class="mono">quick_action(id, name, prompt 正文<b>禁 mention</b>（校验期直接拒 <span class="mono">quick_action_mention_forbidden</span>）, target_type ∈ {agent, squad}, target_id, visibility ∈ {public, private}, status, use_count, archived_at)</span>＝保存的提示词绑单个目标、点击即跑（§6.0 ⑤）</td></tr>
         <tr><td>指派枚举 <span class="chip warn">v14 扩枚举</span></td><td class="mono">任务.assignee_type / inbox.recipient_type</td><td><span class="mono">assignee_type</span> 由「人 / Agent」双轨扩为 <span class="mono">member | agent | <b>squad</b></span> 三轨（P1-4 / P1-16 的 assignee 双轨设计注的连带修订）；指到 squad 时行内同时存<b>解析出的 leader</b>（不可变），便于回放归因；收件箱 <span class="mono">recipient_type</span> 保持人 / Agent 两轨——<b>小队不收件箱</b>，通知永远落到具体人或 Agent（否则「小队里的谁」不可寻址）；<b>审批人解析按「归属团队 + Access」，不按小队</b></td></tr>
+        <tr class="grp-row"><td colspan="3">自改进管道与治理 <span class="chip warn">v15 设计新表 · 第 6 轮 R6-1..4 过审 · 全部按裁定⑦ MySQL 权威档书写 · 未实现</span></td></tr>
+        <tr><td>记忆 <span class="chip warn">设计新表 · v15</span></td><td class="mono">memories</td><td><span class="mono">id · agent_id / space_id · layer ∈ {L0, L1, L2, L3}</span>（<b>记忆四层</b>——查询与文案必带「记忆」限定词）<span class="mono"> · domain ∈ {semantic, procedural, preference, instruction, rule}</span>（内容域，与层级正交）<span class="mono"> · content · confidence · quarantine_until</span>（<b>NULL=免检</b>，站内自产；外部来源入队即非 NULL=检疫静置中）<span class="mono"> · status ∈ {active, revoked, stale-flagged}</span>（衰减重验不通过即 stale-flagged，不物理删）<span class="mono"> · 来源链外键 → 来源 run / 会话 id</span>——<b>day-1 真外键</b>（裁定⑦），支撑沿链成批撤回；无空间归属的反思落<b>未归类候选区</b>。详见 §6.30 A/B</td></tr>
+        <tr><td>晋升评审 <span class="chip warn">设计新表 · v15</span></td><td class="mono">promotion_reviews</td><td>源记忆 <span class="mono">→ memories.id</span> → 目标层（L1→L2→L3 晋升 / L3→空间知识 / L3→公共知识）<span class="mono"> · 评审人 · 结论 {approved, rejected} · reason</span>；<b>必人批，规则写在状态转换层</b>（动作者类型 × 目标状态），提示词契约不算门；公共知识晋升=<b>平台管理员二审</b>；<b>软撤销</b>（<span class="mono">status=revoked</span> 留审计，重申=新申请）；超时=降级待审，<b>沉默≠同意</b></td></tr>
+        <tr><td>改进提案 <span class="chip warn">设计新表 · v15</span></td><td class="mono">improvement_proposals</td><td><span class="mono">依据=指标快照 id 引用 · 影子重放对比结果（冻结金标集分数 + 异厂系 judge 结论） · 审批态 {pending, approved, rejected, expired-待审} · 过审 fork → 画布草稿 → Apply 关联（Apply 原因自动填提案 id） · frequency 注（对象, 周, ≤K，相似合并）</span>；连续劣化触发的<b>回归熔断回滚记录同表留账</b>（回滚=自动执行 + 事后审批单）。详见 §6.30 C</td></tr>
+        <tr><td>训练批次账 <span class="chip warn">设计新表 · v15</span></td><td class="mono">training_batches · batch_membership</td><td>批次（目标模型版本 · 数据时间范围 · <b>合成样本占比</b> · 回流轮次序号 X/≤N）＋成员连接表（样本 → 批次，多对多）；样本撤销 → 经连接表把所在批次标<b>「待重训」</b>；检疫中（<span class="mono">quarantine_until</span> 非空未到期）来源<b>不入训练集</b>；<b>无溯源样本=只能全量重删</b>（unlearning 综述实证，溯源是成本前置）。详见 §6.30 D</td></tr>
+        <tr><td>RSI 开关 <span class="chip warn">设计新表 · v15</span></td><td class="mono">rsi_switches</td><td><b>四类目（技能 / 知识记忆 / 编排配置 / 模型权重）+ 全局</b>一行一开关；操作=平台管理员专属的<b>状态转换动作</b>：<b>入口 + 中间件双处独立校验</b>、必填原因、审计事件（停用落 <b>「自动体已暂停」</b> 可见态，界面对外明示不只藏台账）；附作业预算帽（token / 日量超限自动停 + 告警）。详见 §6.30 E</td></tr>
         <tr class="grp-row"><td colspan="3">观测与治理</td></tr>
         <tr><td>指标</td><td class="mono">metrics_raw · <span class="mono">session_metrics</span> · <span class="mono">trace_spans</span></td><td>原始指标 / 会话级 Token 与时长 / 跨 Agent 调用链</td></tr>
         <tr><td>审批</td><td class="mono">human_approvals</td><td>待办审批请求与决策记录</td></tr>
@@ -1395,6 +1404,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>用户与权限</td><td>用户管理（管理区）</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono">user:manage</td></tr>
         <tr><td>审批中心</td><td>审批</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td><td class="mono">project:read (决策需 write)</td></tr>
         <tr><td>小队中心（组织团队 Team + 协作小队 Squad）<span class="chip warn">规划</span></td><td>小队中心（左侧导航双 tab）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（本团队内）</span></td><td class="c dot-eye">○<span class="tiny dim">（Viewer 档）</span></td><td class="c dot-eye">○<span class="tiny dim">（只读 + 审计）</span></td><td class="mono">project:read（建团 / 建队需 write；<b>指派给小队需 canInvoke(leader)</b>；<b>不按小队授权、审批人解析也不按小队</b>；两 tab <b>不共享筛选器</b>：Team 按 Owner、Squad 按 leader）</td></tr>
+        <tr><td>记忆中心 · 四层浏览 / 检疫列 / 来源链 / 晋升申请台 <span class="chip warn">规划 · v15</span></td><td>知识库 → 记忆 tab（<span class="mono">memory.html</span> · 形态基线在建）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（本空间内）</span></td><td class="c dot-eye">○<span class="tiny dim">（提交晋升申请）</span></td><td class="c dot-eye">○<span class="tiny dim">（只读 + 审计）</span></td><td class="mono">project:read（晋升批准=对象 RBAC 可编辑者；<b>公共知识晋升仅平台管理员二审</b>；§6.30 A）</td></tr>
+        <tr><td>自动化改进开关卡组 · 改进提案面板 <span class="chip warn">规划 · v15</span></td><td>Agent 管控 → 「自动化改进」卡组；画布 → 「改进提案」面板；监控 → 行尾「生成提案」</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（提案查看 / 过审需目标可编辑）</span></td><td class="c dot-no">—</td><td class="c dot-eye">○<span class="tiny dim">（只读 + 审计）</span></td><td class="mono">开关操作<b>仅平台管理员</b>（必填原因 + 双入口校验，§6.30 E）；提案发布走既有 Apply 权限，<b>零新门</b></td></tr>
         <tr><td>只读文件查看（原产物文档编辑·已下线）</td><td>项目 → 文件 / 变更详情 → 文档</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td><td class="mono">project:read（编辑入口已下线，无写形态）</td></tr>
       </tbody>
     </table>
@@ -1467,7 +1478,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <h3 id="s5-9">5.9 知识库（公共知识 + 知识空间）</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「知识库」→ 选「公共知识」或某个<strong>知识空间</strong>（与项目 1:1，随新建项目自动创建）</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 在空间内拖拽或点选上传文件 → 2. 等待状态从 uploading 走到 indexed → 3. 用检索面板验证命中（公共知识 + 我可写空间 + 已关联只读源）→ 4. 打标签 / 删除；跨空间经「关联」只读引用，总结写入按 L0-L3 分层推进（L3 需人工审核门，晋升公共知识走平台管理员评审）</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 在空间内拖拽或点选上传文件 → 2. 等待状态从 uploading 走到 indexed → 3. 用检索面板验证命中（公共知识 + 我可写空间 + 已关联只读源）→ 4. 打标签 / 删除；跨空间经「关联」只读引用；<b>本页只管资产域</b>——对话与 run 的沉淀走记忆四层唯一管道（记忆 L0→L3，§2.8），入知识库必经<b>晋升评审门</b>（必人批；晋升公共知识=平台管理员二审），不存在第二条「总结写入阶梯」</td></tr>
       <tr><td><b>反馈</b></td><td>状态列显示「已索引 / 处理失败」；来源类型标记为「本地文件」并显示路径；每源显示 chunk 数；公共知识行只有「查看 / 关联到空间」</td></tr>
       <tr><td><b>边界</b></td><td>类型白名单 <span class="mono">.docx .js .json .md .pdf .py .txt</span>；单文件上限 10MB（正好 10MB 通过）；超限返回 400 而非 413；文件名会被净化（路径穿越被拦截）；嵌入失败只影响该源；空间成员（用户与 Agent）与项目自身可读写，其余越权访问与「不存在」统一返回 <span class="mono">404</span></td></tr>
     </tbody></table>
@@ -1551,9 +1562,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <p><b>谁能用</b>：目录登记=平台管理员；用途绑定与阈值=域 owner/管理员；微调开关=域 owner（仅本域数据）；切生产=过自测门槛者。<b>操作路径</b>：①设置连接（本地 llama.cpp/LM Studio OpenAI 兼容口，或云 API+密钥）→ 目录健康态变绿；②到「域策略」把该模型绑到具体用途（三个开关独立）——<b>只做完①，一切流量仍走直通路由</b>；③低置信阈值与审计在决策页可查（每次决策记概率分布与耗时）。<b>微调</b>：开域开关 → 选对话/记忆切片 → 硬件预检（不过则灰显明说）→ 平台生成任务调用本机 LLaMA-Factory → 产物登记新版本 → 自测报告 → 过门槛一键切生产/回滚。<b>对话内入口</b>：<span class="mono">/决策模型 推荐|登记|微调|评测|状态</span>（未开对应能力的域，命令不产生效果）。<b>环境参谋</b>：<span class="mono">/决策模型 方案</span> 或 §6.25 页——画像→出方案（命令/脚本/路径），执行与否用户决定。详见 §2.7 与 §6.23-6.25。</p>
 
     <h2 class="sec"><span class="num">6</span>界面原型</h2>
-     <span class="chip info">⚡ <b>交互原型 v1 全量上线</b>：133 页全部可点（详情抽屉/二次确认/选择弹层/toast + <b>跨页深链</b>，同一 mock 数据宇宙：agent-7、r-128、Notion 401、wf-42 冲突）。入口：<a href="prototype/index.html" class="mono" style="color:inherit">prototype/index.html</a>，或 5173 前端左上角「文档资料 · 原型」（<a class="mono" href="http://127.0.0.1:5173/prototype/index.html">/prototype/</a>）</span>
+     <span class="chip info">⚡ <b>交互原型 v1 全量上线</b>：134 页全部可点（详情抽屉/二次确认/选择弹层/toast + <b>跨页深链</b>，同一 mock 数据宇宙：agent-7、r-128、Notion 401、wf-42 冲突；v15 实测计数，含新建记忆中心 <span class="mono">memory.html</span>）。入口：<a href="prototype/index.html" class="mono" style="color:inherit">prototype/index.html</a>，或 5173 前端左上角「文档资料 · 原型」（<a class="mono" href="http://127.0.0.1:5173/prototype/index.html">/prototype/</a>）</span>
     <h3 id="p0">6.0 全局交互纪律（12 条 · 所有页面的公共约束）</h3>
-    <p class="lead">2026-09-22 第 3 轮过审结论（S7）：以下 12 条来自对 multica 全量 UI 层（55 路由）与协作机制的深读，是本平台全部详情页/列表页/实时视图的<b>公共交互契约</b>——先立纪律，再画页面；下文 p1–p29 的每处设计以本表为准，冲突时本表优先。</p>
+    <p class="lead">2026-09-22 第 3 轮过审结论（S7）：以下 12 条来自对 multica 全量 UI 层（55 路由）与协作机制的深读，是本平台全部详情页/列表页/实时视图的<b>公共交互契约</b>——先立纪律，再画页面；下文 p1–p30 的每处设计以本表为准，冲突时本表优先。</p>
     <table class="tbl compact">
       <thead><tr><th>#</th><th>纪律</th><th>落点页</th></tr></thead>
       <tbody>
@@ -1572,7 +1583,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
               <tr><td>⑬</td><td><b>身份修复前不暴露任何对外写端点</b>：fail-open 身份存在期间，A2A M1+、webhook 回传等对外写面一律冻结——协议面第一块砖只能是只读 AgentCard（P0-1 是 P1-15 的硬前置）</td><td>P1-15 · <span class="mono">D-identity-and-security-2</span></td></tr>
       </tbody>
     </table>
-    <p class="q">本章回答：系统长什么样。133 页原型覆盖 §5/§6 的全部模块，布局与真实系统一致，数据全部为演示假数据。</p>
+    <p class="q">本章回答：系统长什么样。134 页原型覆盖 §5/§6 的全部模块（v15 实测计数），布局与真实系统一致，数据全部为演示假数据。</p>
 
     <div class="callout warn">
       <p><b>原型用途是「对齐形态与流程」，不是像素级设计交付。</b>真实页面中的按钮启用态、空态与错误态由角色与数据决定，请以 §5 的模块说明为准。每页底部均有「演示数据说明」。</p>
@@ -2141,7 +2152,7 @@ edges:
 
     <!-- ─────────── 6.9 知识库 ─────────── -->
     <h3 id="p9">6.9 知识库</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>两层分区：<strong>公共知识</strong>（平台维护，所有项目与 Agent 只读；行操作只有「查看 / 关联到空间」，改动走 L3 晋升评审）+ <strong>知识空间</strong>（与项目 1:1、随新建项目自动创建，不单独建空间；项目成员——用户与 Agent——和项目自身可读写，跨空间经「关联」得只读快照，越权与「资源不存在」统一 404）。空间内为拖拽上传区 + 知识源表格（含状态与 chunk 数），类型白名单 + 10MB 上限 + 文件名净化三重校验；总结写入分 <b>L0 原始记录 → L1 会话级摘要 → L2 主题级聚合（去重/置信/冲突人裁）→ L3 画像与高价值沉淀（人工审核门）</b>。<b>〔09-23 修正 · 本地/远端职责分离〕</b>本地上传<b>没有「测试连接」</b>——无远端可测，操作列=查看/重建索引/删除；仅<b>远端知识源</b>（Confluence/Notion/URL 爬取）有测试连接·立即同步·更新凭据，且连接失败→索引冻结+红态（Notion 行即此态）。右上角旧「测试连接」按钮改为「+ 添加源」。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>两层分区：<strong>公共知识</strong>（平台维护，所有项目与 Agent 只读；行操作只有「查看 / 关联到空间」，改动只能经<b>晋升评审门</b>——平台管理员二审）+ <strong>知识空间</strong>（与项目 1:1、随新建项目自动创建，不单独建空间；项目成员——用户与 Agent——和项目自身可读写，跨空间经「关联」得只读快照，越权与「资源不存在」统一 404）。空间内为拖拽上传区 + 知识源表格（含状态与 chunk 数），类型白名单 + 10MB 上限 + 文件名净化三重校验。<b>〔v15 合并案 · 2026-10-23 过审，用户原话「这俩可以合并吧」〕</b>本页<b>不再有「总结写入分层」这条独立阶梯</b>——加工流水只有一条：<b>记忆四层</b> <span class="mono">记忆 L0 对话原文 → L1 原子记忆 → L2 场景记忆 → L3 核心记忆</span>（腾讯口径 · <b>层级≠权限 · 高层不保证更可信</b>；内容域 semantic / procedural / preference / instruction / rule 为正交维度，见 §2.8）；<b>知识库=资产域</b>：L3 记忆经<b>晋升评审门</b>（必人批；公共知识=平台管理员二审）成为空间/公共知识资产，<b>原人审语义不变</b>；同名记号消歧——数据出域分级自本版改号 <b>D0-D3</b>（§6.25），裸 L0-L3 禁用、必带限定词（命名卫生条款，S20，§6.30 E）。四层的浏览 / 检疫 / 来源链 / 晋升申请形态落在新建的<b>记忆中心</b>（原型 <span class="mono">memory.html</span> · <b>形态基线在建</b>，本页旧「总结写入」措辞与本段一并并入该管道）。<b>〔09-23 修正 · 本地/远端职责分离〕</b>本地上传<b>没有「测试连接」</b>——无远端可测，操作列=查看/重建索引/删除；仅<b>远端知识源</b>（Confluence/Notion/URL 爬取）有测试连接·立即同步·更新凭据，且连接失败→索引冻结+红态（Notion 行即此态）。右上角旧「测试连接」按钮改为「+ 添加源」。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/knowledge</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -3029,13 +3040,13 @@ edges:
             <table class="tbl">
               <thead><tr><th>方案层</th><th>引擎</th><th>推荐模型 · 量化</th><th>能 / 不能</th><th>磁盘 · 延迟估算</th><th>缺失步骤（逐项确认）</th></tr></thead>
               <tbody>
-                <tr><td><b>L1 · 本机最优</b> <span class="chip ok">推荐</span></td><td>MLX（Apple 原生）</td><td>Jev-Style-Qwen3.5-2B · bf16<br><span class="tiny dim">复刻卡实测 77ms/决策</span></td><td>推理 ✓ 微调 ✓（MLX 后端）</td><td>7.8GB · ~80ms</td><td class="tiny">☐ <b class="mono">pip install mlx</b> <span class="dim">（指南 · 不代执行）</span>　☐ <button class="btn sm" style="padding:1px 7px">⧉ 复制下载命令</button> <span class="tiny dim">源 + sha256 ✓ · Apache-2.0</span>　☐ ⧉ 端点配置片段 + 校验命令</td></tr>
-                <tr><td>L2 · 跨平台稳妥</td><td>llama.cpp（Metal 后端）</td><td>同模型 · Q8_0（2.1GB）<br><span class="tiny dim">决策一致率 99.4% vs bf16</span></td><td>推理 ✓ 微调 ✗（走 LLaMA-Factory 另配）</td><td>2.1GB · ~110ms</td><td class="tiny">☐ <b class="mono">brew install llama.cpp</b> <span class="dim">⧉ 复制</span>　☐ ⧉ 模型下载命令</td></tr>
-                <tr><td>L3 · 兜底</td><td>云 API</td><td>intent-cls-mini（0.6B 类）</td><td>推理 ✓ 微调 ✗ 数据出域需单独确认</td><td>0GB · 网络往返</td><td class="tiny">☐ 登记 API Key（平台给操作路径，用户自填）</td></tr>
-                <tr><td class="dim">另一台 · Windows 轻薄本（画像不完整）</td><td class="dim">— 无独显</td><td class="dim">Q4_K_M 1.3GB（纯 CPU 勉强）</td><td><span class="chip err">微调不可用</span> <span class="tiny dim">内存 8GB &lt; 16GB</span></td><td class="dim">~1.4s/决策（CPU）</td><td class="tiny dim">参谋原话：CPU 档延迟超预算 4.7 倍，不推荐承担路由决策 → <b>只推 L3 云档</b>，缺因见画像</td></tr>
+                <tr><td><b>D1 · 本机最优</b> <span class="chip ok">推荐</span></td><td>MLX（Apple 原生）</td><td>Jev-Style-Qwen3.5-2B · bf16<br><span class="tiny dim">复刻卡实测 77ms/决策</span></td><td>推理 ✓ 微调 ✓（MLX 后端）</td><td>7.8GB · ~80ms</td><td class="tiny">☐ <b class="mono">pip install mlx</b> <span class="dim">（指南 · 不代执行）</span>　☐ <button class="btn sm" style="padding:1px 7px">⧉ 复制下载命令</button> <span class="tiny dim">源 + sha256 ✓ · Apache-2.0</span>　☐ ⧉ 端点配置片段 + 校验命令</td></tr>
+                <tr><td>D2 · 跨平台稳妥</td><td>llama.cpp（Metal 后端）</td><td>同模型 · Q8_0（2.1GB）<br><span class="tiny dim">决策一致率 99.4% vs bf16</span></td><td>推理 ✓ 微调 ✗（走 LLaMA-Factory 另配）</td><td>2.1GB · ~110ms</td><td class="tiny">☐ <b class="mono">brew install llama.cpp</b> <span class="dim">⧉ 复制</span>　☐ ⧉ 模型下载命令</td></tr>
+                <tr><td>D3 · 兜底</td><td>云 API</td><td>intent-cls-mini（0.6B 类）</td><td>推理 ✓ 微调 ✗ 数据出域需单独确认（<b>D3 红线</b>）</td><td>0GB · 网络往返</td><td class="tiny">☐ 登记 API Key（平台给操作路径，用户自填）</td></tr>
+                <tr><td class="dim">另一台 · Windows 轻薄本（画像不完整）</td><td class="dim">— 无独显</td><td class="dim">Q4_K_M 1.3GB（纯 CPU 勉强）</td><td><span class="chip err">微调不可用</span> <span class="tiny dim">内存 8GB &lt; 16GB</span></td><td class="dim">~1.4s/决策（CPU）</td><td class="tiny dim">参谋原话：CPU 档延迟超预算 4.7 倍，不推荐承担路由决策 → <b>只推 D3 云档</b>，缺因见画像</td></tr>
               </tbody>
             </table>
-            <p class="small dim">红线注记：本页<b>零执行</b>——「⧉ 复制」「脚本下载」「操作路径」都只是方案，装不装、什么时候装由用户决定（AC-E4，2026-09-22 原话「只给方案不执行」）；画像与再探测为只读动作。测不出配置的机器禁止凑方案（AC-E5 演示在末行）。</p>
+            <p class="small dim">红线注记：本页<b>零执行</b>——「⧉ 复制」「脚本下载」「操作路径」都只是方案，装不装、什么时候装由用户决定（AC-E4，2026-09-22 原话「只给方案不执行」）；画像与再探测为只读动作。测不出配置的机器禁止凑方案（AC-E5 演示在末行）。<b>〔v15 记号消歧〕</b>本表「方案层」=<b>数据出域分级，自本版起记 D0-D3</b>（原 L0-L3 改号，与记忆四层彻底分开；<b>D3 红线=数据出域需单独确认</b>，D0-D2 均不出域）；全文禁用裸 L0-L3 记号，记忆层级必写「记忆 L…」——命名卫生条款见 §6.30 E（S20）。</p>
           </div>
         </div>
       </div>
@@ -3417,6 +3428,69 @@ edges:
 
     <p class="tiny dim"><b>演示数据说明：</b>本页数字全部为<b>原型演示假数据</b>（团队 3 / 小队 3 / sq-1…sq-9 / AF-116 · AF-109 / r-122 · r-128 · r-130 · r-131 / AP-31 / 14 轮 0 抢单）。<b>原型三包已落地（形态基线），后端仍零实现</b>：现状 <span class="mono">grep team</span> 与 <span class="mono">grep -i squad</span> 后端均 <b>0 命中</b>，<b>零张表存在</b>；本节表名（<span class="mono">teams · team_members · team_quota · squad · squad_member · autopilot · autopilot_trigger · autopilot_run · quick_action</span>）与队列扩列<b>全是设计新表 / 设计注</b>（§3.3），按<b>裁定⑦ MySQL 权威档</b>书写。<b>两处待人工收口</b>：① 首批五类资产清单（原型「域提前入五组、编排实例与模板后移」vs D-S16 R2 原清单，见 A 段②）；② 导出导入措辞（待确认清单 vs 整包失败，见 ⑦）。<b>解冻依赖</b>（裁定⑧）：Team 判定改写须先完成身份三连 P0-1；队列扩列须与 P1-16「并表 + 告警落表」同批，<b>禁止先造第三张 queue</b>。<b>〔其余挂载缺口 · 待补三处〕</b>① <span class="mono">audit.html</span> 无 team 筛选器与锚点（见 A 段⑤）；② <span class="mono">control-plane.html</span>（域管控面）<b>未挂 <span class="mono">domains.team_id</span> 归属显示</b>，而 A 段②与 <span class="mono">teams__agentflow.html</span> 已按「域入五组」书写——两处须同批补齐，否则「域可归属」在界面上无处可验；③ <span class="mono">chat.html</span> 的 mention 兜底唤醒仅有 2 处轻挂，<b>缺「同刻双投递幂等」与 <span class="mono">coalesced</span> 计划/收据的可见呈现</b>（§6.0 ⑪ 要求两数组都可见）。三处均为<b>原型/挂载工作量，不是本档的已具备能力</b>。D-S16 包内「执行层落为编排实例 <span class="mono">pattern</span> 预设字段」的原裁定，已被 2026-10-23 裁定修订为「<b>Squad 一等实体 + leader 协议委派</b>」（组织层 R2/R3 与其余结论不变），详见 <span class="mono">.specs/platform-evolution/D-S16-team-entity/CONCLUSION.md</span> 页首裁定行。</p>
 
+    <!-- ─────────── 6.30 自改进管道与治理 ─────────── -->
+    <h3 id="p30">6.30 自改进管道与治理 <span class="chip warn">规划 · 未实现</span> <span class="chip ok">形态基线在建</span></h3>
+    <p class="proto-note"><span class="chip warn">设计口径</span>本节=平台演进第 6 轮 <b>R6-1..4 的落点</b>（D-S17 · S18 · S19 · S20 四包过审，2026-10-23；S17 合并案原话「这俩可以合并吧 感觉有点概念重复」）。全节为<b>设计新表 / 未实现</b>（现状后端 <span class="mono">grep memories|promotion_reviews|improvement_proposals|rsi_switches</span> 均 <b>0 命中</b>，裁定⑧ 开发冻结）；新页形态以 ROADMAP 描述为准并标<b>「形态基线在建」</b>。</p>
+    <div class="callout bad">
+      <p><b>前置裁定（用户原话入档）：</b>「harness 框架自己的 rsi 就是不断改进代码——<b>不要了，线上就要维持代码稳定</b>」。RSI 的合法面由此收窄为<b>四类产物白名单</b>（§E）：技能 / 知识记忆 / 编排配置 / 决策微模型权重；<b>平台代码、门禁规则、门禁本体、本治理条款自身禁止自动化</b>，一切改进走 R16 议题 + 人批。文献 44 条全部 fetch 核验（纠错/弃引记账在各包 RECON）。</p>
+    </div>
+
+    <p class="h2p">A. 三管道（原料怎么进记忆）</p>
+    <ul class="small">
+      <li><b>失败反思收集器</b>：run 失败 → 结构化反思条（现象 / 根因假设 / 处置）写进<b>记忆层 L0 对话原文旁挂的反思区</b>（不新造分层，层级仍=L0），可检索回流；原料已在手（<span class="mono">runtime.jsonl</span> 解析）。<b>无空间归属的反思落「未归类候选区」</b>，不静默丢弃。</li>
+      <li><b>负知识库</b>：「试过不行」以显式 <span class="mono">negative</span> 类型入记忆层；检索时作<b>回避约束</b>注入（ExpeL 实证经验指令库有效）；晋升同走 L3 人审门，不自成特权通道。</li>
+      <li><b>技能归纳机</b>：周期聚类<b>成功</b>轨迹 → 候选区草稿卡（AWM / Voyager 技能库线）→ 人审晋升 workspace / agent 技能层；<b>runtime 层不可动</b>（既有纪律不变）。配套 L1 原子记忆抽取作业（对话 → 原子事实 / 偏好 / 过程三类），L2 场景记忆=多原子聚合。</li>
+      <li><b>纠错即信号 · 限人类角色</b>：对话中心「不对」标记生成反思候选；<b>Agent 互纠不进集</b>——自动体的输出不构成标注权威（同句约束见 D 段回流样本）。</li>
+    </ul>
+
+    <p class="h2p">B. 三防腐（差异化正位在此）</p>
+    <ul class="small">
+      <li><b>检疫区 + 静置期</b>：外部来源（网页 / IM 入站 / 远端源同步）<b>入队即检疫</b>（<span class="mono">quarantine_until</span> 非空）并带静置期；站内自产<b>免检但必带溯源</b>。文献链（PoisonedRAG → Bounded Provisional Visibility → When Memory Becomes Authority → OEP 2026）已把「候选区 + 延迟晋升 + 来源权威链」坐实为 RAG 记忆标配——<b>但没有论文把「晋升必须人批」做进系统：这就是我方「人批在状态转换层」纪律的差异化正确位</b>（与 §E 文献锚句呼应）。</li>
+      <li><b>来源链 lineage day-1 真外键 + 沿链成批撤回</b>：每条知识 / 技能带来源 run / 对话 id（<span class="mono">memories</span> 表外键 day-1，裁定⑦，不重演无约束 String 的债）；反思错了 → <b>沿链降级、成批撤回</b>（unlearning 综述 2407.20516 实证：无溯源只能全量重删——溯源是<b>成本前置</b>）。撤回操作者=来源人 + 管理员，两处独立校验。</li>
+      <li><b>衰减重验队列</b>：命中率下降 → 重验 → 失效标记（<span class="mono">status=stale-flagged</span>）；<b>不衰减=错误知识永生</b>。</li>
+    </ul>
+
+    <p class="h2p">C. 编排改进 = 提案制 · 三权分离</p>
+    <p class="small">文献共识（APE / OPRO / AFlow：优化器与被优化物分离；Magentic-One：运行期动态规划与配置发布权正交）。<b>界分句：reconcile=运行态自愈 ⟂ 提案制=配置态自优化</b>——提案制<b>不碰</b>画布运行时，也不给画布新增动态模式（§6.5 维持原样）。</p>
+    <ul class="small">
+      <li><b>提案生成权（自动）</b>：指标（监控仪表盘 §6.12 / 告警 §6.11）→ 提案引擎产出<b>提案卡</b>（低成功节点 / 高成本边 / 备援不均 → 调参 / 换备援 / 加撤边；权重阈值给「建议值+置信+理由」，人从不直接改现值）；预算<b>显式限步限钱</b>；AFlow 式搜索为远期档，搜索空间裁剪到声明式 YAML、<b>禁触代码</b>。</li>
+      <li><b>离线评估权（自动但隔离）</b>：<b>影子重放</b>历史任务 + <b>冻结金标</b>评估集 + <b>异厂系 judge</b>——Panickssery 2404.13076（实题「LLM Evaluators Recognize and Favor Their Own Generations」fetch 核验）实证自评偏袒，<b>judge 必须异厂系</b>，同族模型互评不算独立。</li>
+      <li><b>发布权（人）</b>：<b>零新门</b>——提案过审 → fork 画布草稿 → diff 对账 → <b>Apply</b>（原因自动填提案 id，复用既有版本链与 §6.17 审批）。<b>提案过期自动采纳被否决：沉默≠同意，超时=降级待审</b>。</li>
+      <li><b>回归熔断</b>：新版连续 N run 指标劣化 → <b>自动回滚上一版 + 生成审批单</b>（回滚事务留账，恢复需人）；<b>频控：每对象每周 ≤K 条、相似合并</b>。</li>
+      <li><b>否决记录</b>：自动应用无评估门 = Goodhart（Gao 2210.10760 实证 reward overoptimization 随优化压力上升），拒绝。</li>
+    </ul>
+
+    <p class="h2p">D. 模型回流三根线（双门 + 轮次预算 + 合成占比帽 · 引 ROADMAP R6-3）</p>
+    <ul class="small">
+      <li>前提句：<b>两步制系我方强项——只接不重做</b>（§6.23/§6.24 与已过审 REQUIREMENT 原样，本段只接线）。①<b>纠错即标注（限人类角色，Agent 互纠不进集）</b>：人工纠正微模型决策的条目=天然高价值标签对，<b>过人工抽检门才进训练集</b>，不自流；②<b>溯源打标 + 训练集批次账</b>：对话入库即打用户级「纳入/撤销」标，撤销 → 批次记<b>「待重训」</b>，检疫来源不入集，无溯源=全量重删；③<b>双门</b>：冻结金标 holdout + 行为回归集（proxy-gold 背离即熔断）。全局帽：<b>回流轮次预算 ≤N 轮写死</b>（Self-Rewarding 仅 3 轮即漂移的文献事实）+ <b>合成样本占比帽</b>，外部可验证信号优先（执行日志 / probe 回放可机验，先于自产评对话，AZR 2505.03335 式）。界面把防线变数据：decision-models 模型卡两行「本模型第 X 轮回流 · 合成占比 Y%」。<b>SEAL 式自改监督定义列为边界不采纳</b>（改动「改自己东西的能力」不放开，与代码层禁改同理）。</li>
+    </ul>
+
+    <p class="h2p">E. 治理：禁改区白名单 · 四类×四道门矩阵 · 三熔断 · 两诚实边界</p>
+    <table class="tbl compact">
+      <thead><tr><th>四类产物（白名单）</th><th>生成门</th><th>晋升门（必人批）</th><th>回滚门</th><th>预算门</th></tr></thead>
+      <tbody>
+        <tr><td><b>技能</b></td><td>候选区（A 段归纳机）</td><td>workspace / agent 层人审晋升；<b>runtime 层永不</b></td><td>软撤销留账（沿 lineage）</td><td>归纳作业周预算</td></tr>
+        <tr><td><b>知识记忆</b></td><td>检疫 + 静置（B 段）</td><td>晋升评审门（复用既有<b>记忆 L3</b> 人审门；公共=平台管理员二审）</td><td>溯源成批降级</td><td>反思日量帽</td></tr>
+        <tr><td><b>编排配置</b></td><td>影子重放 + 冻结金标 + <b>异厂系 judge</b>（C 段）</td><td>Apply 人批（既有门，零新门）</td><td>回归熔断自动回滚 + 审批单</td><td>提案 ≤K / 对象 / 周</td></tr>
+        <tr><td><b>模型权重</b></td><td>自测门 + 人工抽检（既有 REQUIREMENT）</td><td>两步制灰度（既有）</td><td>灰度熔断回滚</td><td>回流 ≤N 轮 + 合成占比帽（D 段）</td></tr>
+      </tbody>
+    </table>
+    <ul class="small">
+      <li><b>矩阵四道门全部在状态转换层</b>（动作者类型 × 目标状态），入口 + 中间件两处独立校验——<b>不写进给 Agent 的提示词</b>（提示词契约不等于门禁，CLAUDE.md 纪律）。</li>
+      <li><b>三熔断</b>：①<b>类目开关</b>（<span class="mono">rsi_switches</span> · 四类目 + 全局）= 平台管理员专属的<b>状态转换动作</b>：必填原因、双入口校验、审计落<b>「自动体已暂停」</b>可见态（停用态界面对外明示，不藏台账）；②<b>作业预算帽</b>：token / 日量超限自动停 + 告警；③<b>解冻节奏条款</b>：每季度重读 METR 时长地平线（~7 个月翻倍曲线）定节奏——若未来重议「代码层 RSI」，须新 R16 议题并重读曲线 + DGM 类事故文献；<b>「人批位不可让渡」为常设条款，不随解冻变化</b>。</li>
+      <li><b>两诚实边界（写进文档防吹牛）</b>：①<b>模型审险只能当预筛信号</b>——R-Judge 实证 LLM 风险评估≈随机，禁止把模型审计当门；②<b>监控代理指标必有缺口</b>（Gao 过优化曲线）——双指标门 + <b>评估集季度轮换是常设义务，不是首期功能</b>。</li>
+      <li><b>命名卫生（S20）</b>：术语冲突即治理事故——新文档<b>禁用裸 L0-L3 记号，必带限定词</b>：记忆层级写「记忆 L0-L3」，数据出域写「D0-D3」（本版已全文改号）。</li>
+      <li><b>文献锚（一句入账）</b>：DGM（Darwin Gödel Machine）摘要亲笔 sandboxing + human oversight——<b>「晋升必人批」是行业底线、非我方创新；且无文献把这道门做进系统 = 我方差异化正位</b>。</li>
+    </ul>
+
+    <p class="h2p">F. 界面落点（形态基线在建 · 三包原型与本页叙述同步推进）</p>
+    <ul class="small">
+      <li><span class="mono">memory.html</span>（新建）记忆中心：四层浏览 + 内容域 chips + 检疫列 + 来源链抽屉 + 衰减重验队列 + 晋升申请台。</li>
+      <li><span class="mono">knowledge.html</span>：措辞合并——去「第二条 L0-L3 阶梯」语义，只留资产域 + 晋升门。<span class="mono">chat.html</span>：「不对 → 生成反思候选」+ 纠错打标（限人类角色）。</li>
+      <li><span class="mono">canvas.html</span>「改进提案」面板（提案卡 / 影子对比表 / 过审→fork 草稿 / 熔断记录）+ <span class="mono">metrics.html</span> 行尾「生成提案」入口 + <span class="mono">control-plane.html</span>「自动化改进」开关卡组（四类目 + 全局，含「自动体已暂停」审计态）+ <span class="mono">decision-models.html</span>「数据回流」区（候选样本队列 / 批次账 / 模型卡两行）。</li>
+    </ul>
+    <p class="tiny dim"><b>设计态声明：</b>本节所有表（<span class="mono">memories · promotion_reviews · improvement_proposals · training_batches + batch_membership · rsi_switches</span>，§3.3）均为<b>设计新表、未实现</b>；一切「必人批」规则承诺落在状态转换层而非提示词；文献引用与 44 条 fetch 核验账见 <span class="mono">.specs/platform-evolution/D-S17..S20/RECON.md</span>。</p>
+
     <h2 class="sec"><span class="num">7</span>角色权限矩阵</h2>
     <p class="q">本章回答：进去之后能做什么。矩阵必须与 §5.0 的模块可见性一致。</p>
 
@@ -3465,6 +3539,13 @@ edges:
         <tr><td><b>把任务指派给小队</b>（含 autopilot 指向小队）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（需 <span class="mono">canInvoke(leader)</span>）</span></td><td class="c dot-eye">○<span class="tiny dim">（可指派自己可调用者）</span></td><td class="c dot-no">—</td><td class="mono">两道校验：<b>小队未归档 + leader 可调用</b>，否则 <b>403</b>；<span class="mono">(issue, agent)</span> 待处理去重；<b>权限逐次判定，不按小队授权</b></td></tr>
         <tr><td>自动化 · Autopilot 建 / 改 / 启停 / Replay webhook</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（目标须自身可调用）</span></td><td class="c dot-no">—</td><td class="c dot-eye">○<span class="tiny dim">（运行历史只读）</span></td><td class="mono">token 写-only · <b>webhook 签名不符 = 401，与业务失败分开显示</b>；<b>小队页内建规则目标固定为本队</b>（跨队复用去工作流 / 画布）；每次运行记<b>规则版本快照 <span class="mono">spec_version</span>（v1…v5 可见 + 「为何停用」可查）</b>；自动暂停后<b>恢复需人</b>；<b>归档目标 → 自动 disabled</b></td></tr>
         <tr><td>Quick Action 建 / 归档（正文禁 mention）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（仅本目标 owner）</span></td><td class="c dot-eye">○<span class="tiny dim">（public 可点）</span></td><td class="c dot-no">—</td><td class="mono">正文含 mention 链接 = <b>校验期直接拒 <span class="mono">quick_action_mention_forbidden</span></b>（一次点击只唤醒绑定目标）；<b>沿用 §6.0 ⑤</b></td></tr>
+        <tr class="grp-row"><td colspan="5">自改进与治理 <span class="chip warn">v15 规划 · 设计态</span>（晋升必人批 · 发布零新门 · 开关双校验 · 全在状态转换层，§6.30）</td></tr>
+        <tr><td>记忆晋升 · <b>提交申请</b>（候选记忆 → 空间 / 公共知识） <span class="mono tiny">promotion_reviews</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（本空间成员）</span></td><td class="c dot-yes">●<span class="tiny dim">（本空间成员提案）</span></td><td class="c dot-eye">○<span class="tiny dim">（只读）</span></td><td class="mono">空间成员皆可提案（人 / Agent 均只产<b>候选</b>）；提交≠晋升，无任何入口可绕过评审门</td></tr>
+        <tr><td>记忆晋升 · <b>批准（必人批）</b></td><td class="c dot-yes">●<span class="tiny dim">（公共知识晋升=<b>仅本档二审</b>）</span></td><td class="c dot-yes">●<span class="tiny dim">（空间层=对象 RBAC 可编辑者）</span></td><td class="c dot-no">—</td><td class="c dot-eye">○<span class="tiny dim">（可见待审队列）</span></td><td class="mono">规则在状态转换层（动作者类型 × 目标状态），入口 + 中间件双校验；<b>Agent 动作者一律拒批</b>；超时=降级待审，<b>沉默≠同意</b>；批准后可<b>软撤销</b>留审计</td></tr>
+        <tr><td>编排改进提案 · <b>过审发布（走既有 Apply）</b> <span class="mono tiny">improvement_proposals</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（对象 RBAC 可编辑者）</span></td><td class="c dot-no">—</td><td class="c dot-eye">○<span class="tiny dim">（提案与影子对比只读）</span></td><td class="mono"><b>零新门</b>：过审=fork 草稿 → diff 对账 → Apply（原因自动填提案 id）；评估产物（金标分 + 异厂系 judge）随提案留账；频控 ≤K / 对象 / 周</td></tr>
+        <tr><td>RSI 自动化开关操作（四类目 + 全局） <span class="chip bad">危险</span> <span class="mono tiny">rsi_switches</span></td><td class="c dot-yes">●<span class="tiny dim">（仅此档）</span></td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="c dot-no">—</td><td class="mono"><b>必填原因 + 双入口独立校验</b>；停用落审计<b>「自动体已暂停」</b>界面可见；预算帽越线自动停同此门</td></tr>
+        <tr><td>来源链<b>沿链成批撤回</b>（撤销 → 待重训 / 降级）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（仅本来源 owner）</span></td><td class="c dot-eye">○<span class="tiny dim">（本人对话打标）</span></td><td class="c dot-no">—</td><td class="mono">操作者=<b>来源人 + 管理员</b>两处独立校验；软撤销不物理删；检疫来源不入训练集；无溯源=只能全量重删（§6.30 B/D）</td></tr>
+        <tr><td>纠错样本入集（纠错即标注 / 即信号）</td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（人工抽检门后）</span></td><td class="c dot-yes">●<span class="tiny dim">（本人对话「不对」标记）</span></td><td class="c dot-no">—</td><td class="mono"><b>限人类角色</b>：Agent 互纠不进集（状态转换层过滤，非提示词约定）；样本带用户级「纳入 / 撤销」标</td></tr>
         <tr class="grp-row"><td colspan="5">知识与观测</td></tr>
         <tr><td>知识库（查看 / 检索）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td></tr>
         <tr><td>知识库上传 / 删除</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-no">—</td></tr>
@@ -3528,10 +3609,10 @@ edges:
         <tr><td><b>软撤销</b></td><td>断开/删除类动作的保留审计形态：<b>只置 <span class="mono">status=revoked</span>、不物理删行</b>，且必填断开原因；IM 通道断开（§6.4）与 <span class="mono">integrations</span> 表（§3.3）同此语义，重连=新安装。</td><td>§6.4 · §3.3</td></tr>
         <tr><td><b>保留哨兵</b><br><span class="tiny dim">keep sentinel</span></td><td>写-only 字段（值永不回显）的行级编辑协议：提交时字段值等于字面 <span class="mono">****</span> 即表示「保留原值不变」，解决「不回显却要编辑该行其余内容」的矛盾；用于环境变量与 MCP token 等密钥类值。</td><td>§6.4</td></tr>
         <tr class="grp-row"><td colspan="3">知识与人机协作</td></tr>
-        <tr><td><b>知识库</b></td><td>两层：公共知识（平台维护、所有项目与 Agent 只读）+ 知识空间（与项目 1:1，成员与项目自身可读写；跨空间经关联只读，越权统一 404）。摄入管道：文件 → 三重校验 → 分块 → 嵌入 → 可检索。</td><td>§2.8 · §6.9</td></tr>
-        <tr><td><b>总结写入分层</b><br><span class="tiny dim">L0-L3</span></td><td>L0 原始记录 → L1 会话级摘要 → L2 主题级跨会话聚合（去重/置信/冲突人裁）→ L3 画像与高价值沉淀（人工审核门；晋升公共知识需平台管理员评审）。演示口径。</td><td>§2.8 · §6.9</td></tr>
+        <tr><td><b>知识库</b></td><td><b>资产域</b>（v15 合并案），两层：公共知识（平台维护、所有项目与 Agent 只读）+ 知识空间（与项目 1:1，成员与项目自身可读写；跨空间经关联只读，越权统一 404）。文件摄入管道：文件 → 三重校验 → 分块 → 嵌入 → 可检索。<b>进入资产域的唯一通道=晋升评审门</b>（加工流水只有记忆四层这一条）。</td><td>§2.8 · §6.9</td></tr>
+        <tr><td><b>数据出域分级</b><br><span class="tiny dim">D0-D3（v15 由 L0-L3 改号）</span></td><td>环境与数据是否离开本机的阶梯：<b>D3 红线=数据出域需单独确认</b>（云 API 档），D0-D2 不出域；原记号 L0-L3 与记忆四层撞名，自本版全文改号（§6.25）。裸 L0-L3 禁用、必带限定词（命名卫生，§6.30 E）。</td><td>§6.25 · §6.30</td></tr>
         <tr><td><b>分块</b><br><span class="tiny dim">Chunk</span></td><td>知识源的切片单位，形态 <span class="mono">{filename}_chunk_{N}</span>，<span class="mono">memory_type="document"</span>。</td><td>§2.8</td></tr>
-        <tr><td><b>记忆</b><br><span class="tiny dim">Memory</span></td><td>Agent 可读写的上下文存储，域级共享——新 Agent 可继承前序结论。</td><td>§2.8</td></tr>
+        <tr><td><b>记忆</b><br><span class="tiny dim">Memory</span></td><td>Agent 的上下文沉淀，域级共享、新 Agent 可继承前序结论；加工流水<b>只有一条</b>=记忆四层（v15 合并案，下行）。</td><td>§2.8 · §6.30</td></tr>
         <tr><td><b>人工闸门</b><br><span class="tiny dim">Human Gate</span></td><td>把不可逆或高不确定的决策点暴露给人：流程挂起等人放行，不超时自动通过。</td><td>§2.9</td></tr>
         <tr><td><b>审批中心</b></td><td>集中处理待办的模块；审批请求落 <span class="mono">human_approvals</span> 表。</td><td>§2.9 · §5.17</td></tr>
         <tr><td><b>工作流知识产物</b></td><td>项目 <span class="mono">.specs/&lt;change-id&gt;/</span> 下的 Markdown 产物集合：一份变更从提案到归档的书面证据。</td><td>§2.7</td></tr>
@@ -3566,6 +3647,21 @@ edges:
         <tr><td><b>Quick Action</b></td><td>把<b>保存的提示词绑定到单个目标</b>（一个 Agent 或一支小队）的命名动作：点击即跑、无输入框、public/private + 用量计数 + 可归档。<b>正文禁用 mention 链接</b>——一次点击只唤醒被绑目标，要多人协作请改指派小队走 leader 委派。</td><td>§6.29 B⑥ · §6.0 ⑤</td></tr>
         <tr><td><b>受审模板导出</b><br><span class="tiny dim">starterkit 式</span></td><td>把一支小队导出为<b>声明式模板 bundle</b>（<span class="mono">squad</span> 名 / 成员<b>名</b> + skills 标签 / 协作指令 / 自动化规则的声明部分），<b>协议本体以 <span class="mono">ref</span> 引用平台版本、不内嵌副本</b>，<b>不含 id · runtime 绑定 · 凭据 · env · MCP 配置</b>；进模板市场<b>走同一道评审门</b>；导入<b>按名称唯一认领、同名永不覆盖、引用不可解析=整包失败</b>。<b>无版本 / 更新 / 卸载路径 = 已知缺口</b>。<b>不生成画布 YAML。</b></td><td>§6.29 B⑦</td></tr>
         <tr><td><b>Autopilot</b><br><span class="tiny dim">autopilot · _trigger · _run</span></td><td>站内自动化规则：<b>触发</b> <span class="mono">schedule(cron+tz) / webhook / api</span> → <b>动作</b> <span class="mono">create_issue / run_only</span>（后者不建任务，界面明写「本次不生成任务」）+ 标题模板；<b>并发</b> <span class="mono">skip / queue / replace</span>；每次运行记<b>规则版本快照</b> <span class="mono">spec_version</span>；失败率门只做<b>止损暂停，恢复需人</b>。目标可为 Agent 或 Squad。</td><td>§6.29 B · §3.3</td></tr>
+      <tr class="grp-row"><td colspan="3">自改进与治理 <span class="chip warn">v15 新增 · 设计态 · 未实现</span></td></tr>
+        <tr><td><b>记忆四层</b><br><span class="tiny dim">唯一加工管道 · 腾讯口径</span></td><td><b>记忆 L0 对话原文 → L1 原子记忆 → L2 场景记忆 → L3 核心记忆</b>。两条铁律：<b>层级≠权限、高层不保证更可信</b>（权限只活在资产域）。全文引用必带「记忆」限定词（命名卫生）。原知识库「总结写入分层」自 v15 并入本管道，不再是第二条阶梯（§2.8 合并案）。</td><td>§2.8 · §6.30</td></tr>
+        <tr><td><b>原子 / 场景 / 核心记忆</b><br><span class="tiny dim">L1 / L2 / L3</span></td><td>L1 原子记忆=对话抽取的原子事实 / 偏好 / 过程条目；L2 场景记忆=多原子聚合（去重、置信更新，<b>冲突交人裁决、不自动裁</b>）；L3 核心记忆=高价值沉淀与画像，<b>人工审核门</b>后才谈晋升。</td><td>§2.8 · §6.30 A</td></tr>
+        <tr><td><b>内容域</b><br><span class="tiny dim">content domain</span></td><td>semantic / procedural / preference / instruction / rule 五类内容类型维度，与记忆四层<b>正交</b>——是「这条记忆是什么」，不是「它在第几层」。</td><td>§2.8</td></tr>
+        <tr><td><b>晋升评审门</b></td><td>记忆资产进入知识资产域的<b>唯一桥</b>：L3 记忆 → 空间 / 公共知识资产，<b>必人批</b>（规则在状态转换层，Agent 动作者一律拒批）；公共知识=平台管理员二审；原人审语义不变；批准后软撤销留审计、超时=降级待审（沉默≠同意）。</td><td>§6.9 · §6.30 · §7</td></tr>
+        <tr><td><b>检疫区 · 静置期</b><br><span class="tiny dim">quarantine_until</span></td><td>外部来源（网页 / IM 入站 / 远端源同步）<b>入队即检疫</b>+静置，期满前不可检索命中、不入训练集；站内自产<b>免检但必带溯源</b>。行业标配（PoisonedRAG 线），做进系统+人批门=我方差异化正位。</td><td>§6.30 B · §3.3</td></tr>
+        <tr><td><b>负知识库</b></td><td>「试过不行」的显式 <span class="mono">negative</span> 类型记忆；检索时作<b>回避约束</b>注入（ExpeL 实证），晋升同走人审门、不自成特权通道。</td><td>§6.30 A</td></tr>
+        <tr><td><b>来源链</b><br><span class="tiny dim">lineage</span></td><td>每条记忆 / 知识 / 技能带来源 run / 对话 id 的<b>day-1 真外键</b>；支撑<b>沿链成批撤回</b>与「撤销→待重训」标记；无溯源=遗忘只能全量重删（成本前置）。</td><td>§6.30 B/D</td></tr>
+        <tr><td><b>衰减重验队列</b></td><td>检索命中率下降 → 重验 → <span class="mono">stale-flagged</span> 失效标记（不物理删）；不衰减=错误知识永生。</td><td>§6.30 B</td></tr>
+        <tr><td><b>改进提案 · 三权分离</b><br><span class="tiny dim">提案制=配置态 ⟂ reconcile=运行态</span></td><td>编排配置自优化的分权形态：<b>提案生成权（自动，限步限钱、搜索限声明式 YAML 禁触代码）/ 离线评估权（影子重放+冻结金标+异厂系 judge）/ 发布权（人，走既有 Apply 零新门）</b>；频控 ≤K/对象/周，过期自动采纳被否决（沉默≠同意）。</td><td>§6.30 C</td></tr>
+        <tr><td><b>影子重放</b></td><td>提案发布前用历史任务离线重跑候选配置的评估动作——不进生产流量、结果随提案留账（与冻结金标集、异厂系 judge 共同构成评估门）。</td><td>§6.30 C</td></tr>
+        <tr><td><b>异厂系 judge</b></td><td>离线评估用的裁判模型<b>必须与提案生成模型异厂系</b>——Panickssery 2404.13076 实证「LLM Evaluators Recognize and Favor Their Own Generations」（自评偏袒），同族模型互评不算独立。</td><td>§6.30 C</td></tr>
+        <tr><td><b>回归熔断</b></td><td>新版配置连续 N run 指标劣化 → <b>自动回滚上一版 + 生成审批单</b>（回滚事务留账、恢复需人）；类目开关与作业预算帽另两道熔断同见 §6.30 E，开关停用态审计「自动体已暂停」。</td><td>§6.30 C/E</td></tr>
+        <tr><td><b>禁改区（白名单制）</b></td><td><b>只有四类产物可被自动改进</b>：技能 / 知识记忆 / 编排配置 / 决策微模型权重；<b>其余一切（含平台代码、门禁规则、门禁本体、本治理条款自身）禁止自动化</b>，一律 R16 议题+人批。用户原话：「不断改进代码这个不要了 线上就要维持代码稳定」（Q27）。</td><td>§6.30 E · Q27</td></tr>
+        <tr><td><b>自动体已暂停</b></td><td>RSI 类目 / 全局开关停用后的对外可见审计态：界面明示「自动化改进已停」，不只藏台账；开关操作=平台管理员专属状态转换动作（必填原因 + 双入口校验）。</td><td>§6.30 E · §3.3</td></tr>
       </tbody>
     </table>
   </section>
@@ -3643,12 +3739,14 @@ edges:
     <p><b>A：</b>能——Agent 详情「能力 → 集成」子栏就是 <b>IM 通道连接器</b>（§2.3 / §6.4）：六类通道＝飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM；Lark 扫码 device-flow、其余 BYO 密钥并保存前在线验证。权限两档：Lark/钉钉/自托管 IM 由 agent owner 自助连接，Slack/企业微信/Telegram 仅平台管理员，通道列表全员只读（§7）。密钥三原则：写-only 不回显、改密=断开重连、AES-256-GCM+全局 DEK 落库；断开=软撤销+必填原因、审计不丢（§3.3 <span class="mono">integrations</span>）。连上后的闭环＝IM 消息→会话→run→回复写回；平台侧未绑定的 IM 用户凭 redeem 链接双因子绑定才能触达。两句别混：这与 §6.8 对话中心「渠道」（平台级入口）不同层，更与 §6.28 运行时发现无关——后者注册执行环境、前者接消息通道。<b>〔v14 补第三句〕</b>也与 §6.29 小队中心无关：集成是<b>对外消息出口</b>，Squad 是<b>站内编组</b>。</p>
     <h3>Q26 · 把一个任务指派给「小队」，究竟发生了什么？</h3>
     <p><b>A：</b>一条链路，全程机械、不含抢单：<b>① 你选 <span class="mono">assignee=小队 code-review</span></b> → ② 平台校验小队未归档 + leader 当前可被调用（<span class="mono">canInvokeAgent</span>），任一不过当场 <span class="mono">403</span> 并给拒因 → ③ 按 <span class="mono">(issue, agent)</span> 待处理去重（leader 已有未开始的待处理任务就不再塞一行）→ ④ 入队<b>一条 leader 任务</b>（<span class="mono">is_leader_task=1 · squad_id</span>）→ ⑤ leader claim 时被注入 <b>briefing</b>（硬编码协作协议 + Roster 名册含成员 skills 与可直接粘贴的 mention 链接 + 小队指令，拼在指令尾部、不覆盖平台层、<b>不带上下文快照</b>）→ ⑥ leader 这一轮要么<b>写 <span class="mono">[@Name](mention://agent/&lt;uuid&gt;)</span></b>、要么<b>建子任务指派</b>（二选一，同用会双跑；<b>不写=不委派</b>），每轮一条委派评论 → ⑦ 被 @ 的成员<b>自己入队自己跑</b>，离线时 <span class="mono">runtime_offline</span> 暂存不丢 → ⑧ 子任务全过本阶段时<b>系统评论（stage barrier）唤醒父 leader</b> 收敛 → ⑨ leader <b>只推到 <span class="mono">in_review</span></b>，<span class="mono">done</span> 由人点（带证据）；<b>失败不产生新 leader 任务</b>，失败升收件箱 <span class="mono">action_required</span>、<b>仅人工重跑且保留原角色</b>。leader 每轮无论派没派活都落 <span class="mono">evaluated</span> 记账（<span class="mono">action|no_action|failed</span> + reason 稳定枚举，<b>「决定不派活」也留痕</b>）。<b>入队 ≠ 起跑</b>：leader 拿到的是<b>接收位</b>（须被 claim），<b>成员池此时不被通知</b>。<b>两件常被误当成有的东西：①没有成员抢单</b>——成员看不到别人的队列、界面上没有「认领」按钮，指派小队不会全员并发开跑，只有 leader 先醒（multica 实测口径：<i>assign 给 squad 不会同时跑所有 agent，先唤醒 leader 由它决定下一步</i>）；<b>②没有小队授权</b>——成员入队<b>不</b>产生任何可调用权，每一次实际运行仍按<b>委派链顶的人类 originator</b> 逐次过 <span class="mono">canInvokeAgent</span> 判定，同一成员在 A 小队不代表 B 用户的任务能调它。另注三条：<b>① 无轮次上限</b>（如实写），靠「每轮一条 + 去重 + 自触发抑制」三条防失控，异常成本走<b>配额硬限与告警</b>；<b>② 小队不是成本主体</b>——成员委派产生的 token / 成本记在 <b>leader 的 run 归因链</b>上，配额累加落在 <b>leader 所属团队</b>的账上；<b>③ 委派不绕过审批门</b>，人批节点的审批人解析按「归属团队 + Access」，<b>不按小队</b>。要拓扑与自动执行，走画布那一路（§6.5）——<b>固定编排维持原样，画布与 workflows 不新增动态模式，动态协作也不生成画布 YAML</b>，两路只共享路由 / 权限 / 队列底座（§2.11 · §6.29）。</p>
+    <h3>Q27 · 平台为什么不做代码自改进（让 RSI 进代码层）？</h3>
+    <p><b>A：</b>用户裁定原话入档：「<b>harness 框架自己的 rsi 就是不断改进代码——不要了，线上就要维持代码稳定</b>」。两条根据立住：①<b>学术前沿已自证需要人门</b>——DGM（Darwin Gödel Machine）摘要亲笔写 sandboxing + human oversight，SICA 的自改代码须带审计链，STOP 实证沙箱与监督定义可被改物自己绕过：「改代码的」与「监督改的」在系统内无法自我闭合；②线上稳定性诉求与「代码自改进」正交——我们<b>直接不进该赛道，这是裁定，不是保守</b>。治理形态=<b>白名单制一句话</b>：只有四类产物（技能 / 知识记忆 / 编排配置·经提案制 / 决策微模型权重·经双门）允许自动改进，<b>其余一切含门禁本体与本条款自身</b>一律走 R16 议题 + 人批（§6.30 E 矩阵与三熔断；「晋升必人批」是 DGM 线公认的行业底线而非创新，无文献把这道门做进系统=我方差异化正位）。若未来重议代码层 RSI：新 R16 议题 + 每季度重读 METR 时长地平线曲线与 DGM 类事故文献，且「人批位不可让渡」为常设条款不随解冻变化。</p>
 </section>
 
   <footer class="doc-foot">
-    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）· <b>v11 · 2026-10-15：运行时口径同步</b>（本轮对齐 10 月原型：运行时=成员机器上的外部 AI 编码 CLI，daemon 15s 心跳探测注册、新增 §6.28 运行时发现；Agent 配置面废除 Provider/Base URL/API Key；Agent 详情=四标签；对话中心=1:1 私密会话；知识库=公共知识+知识空间（L0-L3）；用户级 Agent 1:1；角色=CustomRole 14 字段；画布 Apply=应用内 diff 模态；新建项目无起止时间；全文清除 LangGraph/LangChain/AutoGen/CrewAI 作为运行时的表述）· <b>v12 · 2026-10-15 · 任务化收敛与产物编辑下线</b>（产物文档编辑 UI 整节裁撤（§5.18/§6.18）→ 只读文件查看 §5.13/§6.13b 新增，能力地图/§5.0 可见性/§7 权限矩阵同步撤编辑行；阶段模型非孤立实证句入 §6.19；看板详情一律右侧统一抽屉 + 三视角任务列表同一组件（§6.20）；收件箱升级=点开通知即完整上下文线程 + 三类入箱条件（§6.21）；执行回放=任务回放、无独立列表页、入口链与「任务 › run › 执行回放」面包屑（§6.22）；全站「工作项→任务」改名于本版落地并做语义连带统一）· <b>v13 · 2026-10-15 · 能力全可编辑与 IM 集成</b>（三条裁定落档：① 创建向导与详情页共用同一分区集合与字段——两种入口一份配置，工具库同源模式推广（§6.4/§5.4）；② 集成=IM 通道连接器——六类通道 / 卡片五态状态机 / Lark device-flow 与 BYO 密钥在线验证 / 密钥三原则（写-only、改密=断开重连、AES-256-GCM+全局 DEK）/ 断开软撤销 / owner 自助与仅平台管理员两档 / 通道列表全员只读（§2.3·§6.4·§7·§6.28），§3.3 新增 <span class="mono">integrations</span> 设计表（MySQL 权威档）；③ 能力区全量行级可编辑 + 「低敏即存 / 高敏草稿」保存分级总句（指令双层模型与开场白卡 · 技能行 CRUD · MCP 双 tab · 知识源关联/移除/更新凭据 · env 保留哨兵与 .env 双模 · CLI 参数行编辑器+launch 预览，§6.4/§5.4）；§8 术语四行：集成 / 通道安装 / 软撤销 / 保留哨兵；FAQ 新增 Q25）· <b>v14 · 2026-10-23 · 小队与语义自动执行（multica 方案）</b>（用户裁定三条落档：① <b>画布 / workflows 不新增动态模式，固定编排维持原样</b>；② <b>自动化编排执行采纳 multica 方案</b>——协作小队 Squad 升为<b>可指派的一等实体</b>（1 leader Agent + 人/Agent 混编成员 + 自由指令），指派=机械解析为「给 leader 入队 leader 任务」<b>无成员抢单</b>，协作靠 <b>briefing 注入（Operating Protocol + Roster + 指令拼尾部，不覆盖平台层、不带上下文快照）</b>+ mention 链接 / 子任务指派<b>二选一</b>，leader <b>只推到 in_review、done 留人</b>，<b>权限不按小队授权</b>（逐次按链顶人类 originator 过 <span class="mono">canInvokeAgent</span>）；③ <b>两层一词一义</b>：组织层 Team（资源容器，D-S16 R2/R3 原裁定不变）⟂ 执行层 Squad（可指派目标）。新增 §2.11 概念节 + §6.29「小队中心」（双 tab / 建团建队 / 组织详情四档+五类资产+配额 403 / squad 详情：协作协议面板、协作时间线含 <span class="mono">evaluated</span> 记账与 stage barrier、消息语义、防护三件与<b>无轮次上限如实写</b>、人批三门禁、autopilot + quick action、受审模板导出、归档不可恢复）；§3.3 新增 <span class="mono">teams · team_members · squad · squad_member · autopilot · autopilot_trigger · autopilot_run · quick_action</span> 八张设计表 + 任务队列扩列设计注（<span class="mono">is_leader_task / squad_id / trigger_comment_id / coalesced_comment_ids / handoff_note / priority / fire_at</span>）+ <span class="mono">assignee_type</span> 三轨枚举，全按裁定⑦ MySQL 档；§1.3 / §5.0 / §7 权限矩阵 / §8 术语十行 / FAQ Q26 同步注册；§6.4 加「IM 通道=对外出口 · Squad=站内编组」界分句；D-S16 CONCLUSION.md 页首落同款裁定修订行。<b>原型三包已落地为形态基线</b>（<span class="mono">teams.html · teams__agentflow.html · squads__code-review.html</span> + board / chat / replay / agent-detail / users 家族挂载），本节正文按<b>原型实测口径</b>书写并如实标注三处挂载缺口（audit 无 team 筛选、control-plane 未挂 <span class="mono">domains.team_id</span>、chat 缺双投递幂等与 coalesced 呈现）与两处<b>待人工收口的口径差</b>（首批五类清单含域 vs D-S16 R2、导出导入措辞））</p>
+    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）· <b>v11 · 2026-10-15：运行时口径同步</b>（本轮对齐 10 月原型：运行时=成员机器上的外部 AI 编码 CLI，daemon 15s 心跳探测注册、新增 §6.28 运行时发现；Agent 配置面废除 Provider/Base URL/API Key；Agent 详情=四标签；对话中心=1:1 私密会话；知识库=公共知识+知识空间（L0-L3 总结写入——〔v15 注：该句系当时第二条阶梯口径，已被合并案并入记忆四层唯一管道〕）；用户级 Agent 1:1；角色=CustomRole 14 字段；画布 Apply=应用内 diff 模态；新建项目无起止时间；全文清除 LangGraph/LangChain/AutoGen/CrewAI 作为运行时的表述）· <b>v12 · 2026-10-15 · 任务化收敛与产物编辑下线</b>（产物文档编辑 UI 整节裁撤（§5.18/§6.18）→ 只读文件查看 §5.13/§6.13b 新增，能力地图/§5.0 可见性/§7 权限矩阵同步撤编辑行；阶段模型非孤立实证句入 §6.19；看板详情一律右侧统一抽屉 + 三视角任务列表同一组件（§6.20）；收件箱升级=点开通知即完整上下文线程 + 三类入箱条件（§6.21）；执行回放=任务回放、无独立列表页、入口链与「任务 › run › 执行回放」面包屑（§6.22）；全站「工作项→任务」改名于本版落地并做语义连带统一）· <b>v13 · 2026-10-15 · 能力全可编辑与 IM 集成</b>（三条裁定落档：① 创建向导与详情页共用同一分区集合与字段——两种入口一份配置，工具库同源模式推广（§6.4/§5.4）；② 集成=IM 通道连接器——六类通道 / 卡片五态状态机 / Lark device-flow 与 BYO 密钥在线验证 / 密钥三原则（写-only、改密=断开重连、AES-256-GCM+全局 DEK）/ 断开软撤销 / owner 自助与仅平台管理员两档 / 通道列表全员只读（§2.3·§6.4·§7·§6.28），§3.3 新增 <span class="mono">integrations</span> 设计表（MySQL 权威档）；③ 能力区全量行级可编辑 + 「低敏即存 / 高敏草稿」保存分级总句（指令双层模型与开场白卡 · 技能行 CRUD · MCP 双 tab · 知识源关联/移除/更新凭据 · env 保留哨兵与 .env 双模 · CLI 参数行编辑器+launch 预览，§6.4/§5.4）；§8 术语四行：集成 / 通道安装 / 软撤销 / 保留哨兵；FAQ 新增 Q25）· <b>v14 · 2026-10-23 · 小队与语义自动执行（multica 方案）</b>（用户裁定三条落档：① <b>画布 / workflows 不新增动态模式，固定编排维持原样</b>；② <b>自动化编排执行采纳 multica 方案</b>——协作小队 Squad 升为<b>可指派的一等实体</b>（1 leader Agent + 人/Agent 混编成员 + 自由指令），指派=机械解析为「给 leader 入队 leader 任务」<b>无成员抢单</b>，协作靠 <b>briefing 注入（Operating Protocol + Roster + 指令拼尾部，不覆盖平台层、不带上下文快照）</b>+ mention 链接 / 子任务指派<b>二选一</b>，leader <b>只推到 in_review、done 留人</b>，<b>权限不按小队授权</b>（逐次按链顶人类 originator 过 <span class="mono">canInvokeAgent</span>）；③ <b>两层一词一义</b>：组织层 Team（资源容器，D-S16 R2/R3 原裁定不变）⟂ 执行层 Squad（可指派目标）。新增 §2.11 概念节 + §6.29「小队中心」（双 tab / 建团建队 / 组织详情四档+五类资产+配额 403 / squad 详情：协作协议面板、协作时间线含 <span class="mono">evaluated</span> 记账与 stage barrier、消息语义、防护三件与<b>无轮次上限如实写</b>、人批三门禁、autopilot + quick action、受审模板导出、归档不可恢复）；§3.3 新增 <span class="mono">teams · team_members · squad · squad_member · autopilot · autopilot_trigger · autopilot_run · quick_action</span> 八张设计表 + 任务队列扩列设计注（<span class="mono">is_leader_task / squad_id / trigger_comment_id / coalesced_comment_ids / handoff_note / priority / fire_at</span>）+ <span class="mono">assignee_type</span> 三轨枚举，全按裁定⑦ MySQL 档；§1.3 / §5.0 / §7 权限矩阵 / §8 术语十行 / FAQ Q26 同步注册；§6.4 加「IM 通道=对外出口 · Squad=站内编组」界分句；D-S16 CONCLUSION.md 页首落同款裁定修订行。<b>原型三包已落地为形态基线</b>（<span class="mono">teams.html · teams__agentflow.html · squads__code-review.html</span> + board / chat / replay / agent-detail / users 家族挂载），本节正文按<b>原型实测口径</b>书写并如实标注三处挂载缺口（audit 无 team 筛选、control-plane 未挂 <span class="mono">domains.team_id</span>、chat 缺双投递幂等与 coalesced 呈现）与两处<b>待人工收口的口径差</b>（首批五类清单含域 vs D-S16 R2、导出导入措辞））· <b>v15 · 2026-10-23 · RSI 自改进管道与治理（S17-S20 过审落地）</b>（第 6 轮过审原话「<b>我同意</b>」、S17 合并案原话「<b>这俩可以合并吧</b> 感觉有点概念重复」：① <b>§6.9/§2.8 合并案</b>——删「总结写入」第二条 L0-L3 阶梯语义，记忆四层=唯一加工管道（记忆 L0 对话原文→L1 原子→L2 场景→L3 核心 · 腾讯口径 · <b>层级≠权限 · 高层不保证更可信</b> · 内容域 semantic/procedural/preference/instruction/rule 正交）+ <b>知识库=资产域</b>（L3 记忆经<b>晋升评审门</b>——必人批、公共知识=平台管理员二审——成为空间/公共知识资产，原人审语义不变）；② <b>数据出域分级改号 L0-L3 → D0-D3</b>（§6.25 与全文替换）+ 命名卫生条款（裸 L0-L3 禁用、必带限定词，S20）；③ 新增 <b>§6.30「自改进管道与治理」</b>——三管道（失败反思收集器旁挂记忆 L0 反思区 · 负知识库 negative 检索回避 · 技能归纳机候选卡→晋升门 · 纠错即信号<b>限人类角色</b> Agent 互纠不进集）+ 三防腐（检疫区+静置期：外部来源入队即检疫、站内免检带溯源 · 来源链 lineage day-1 真外键+沿链成批撤回 · 衰减重验队列）+ 编排提案制三权分离（生成限步限钱禁触代码 / 影子重放+冻结金标+<b>异厂系 judge</b>（Panickssery 自评偏袒实证）/ 发布走既有 Apply 零新门；回归熔断自动回滚+审批单；频控 ≤K/对象/周；<b>reconcile=运行态 ⟂ 提案制=配置态</b>）+ 模型回流三根线+双门+轮次预算+合成占比帽（R6-3 · 两步制<b>只接不重做</b>）+ 治理白名单禁改区（<b>四类产物外一切——含门禁本体与本条款自身——禁止自动化</b>；用户原话「<b>不断改进代码这个不要了 线上就要维持代码稳定</b>」）+ 四类×四道门矩阵全在状态转换层 + 三熔断（类目开关=状态转换动作双入口校验+审计「<b>自动体已暂停</b>」/ 作业预算帽 / 每季度重读 METR 地平线定解冻节奏）+ 两诚实边界（R-Judge 模型审险≈随机只当预筛 / 代理指标必有缺口→评估集季度轮换常设义务）；文献锚句：DGM 摘要亲笔 sandboxing + human oversight——「晋升必人批」是行业底线非创新，<b>无文献把此门做进系统=我方差异化正位</b>；④ §3.3 新增 <span class="mono">memories · promotion_reviews · improvement_proposals · training_batches · batch_membership · rsi_switches</span> 六张设计新表（一律裁定⑦ MySQL 权威档 · <b>未实现</b>）；§1.3 能力地图 / §5.0 可见性 / §6.0 纪律（p1–p30）/ §7 权限六行 / §8 术语十四行 / FAQ <b>Q27「平台为什么不做代码自改进」</b>同步注册；原型三包（新建 <span class="mono">memory.html</span> 记忆中心 · <span class="mono">canvas</span> 提案区 · <span class="mono">metrics</span> 生成提案入口 · <span class="mono">control-plane</span> 自动化改进开关卡组 · <span class="mono">decision-models</span> 数据回流区+D 改号 · <span class="mono">knowledge/chat</span> 措辞合并）<b>形态基线在建</b>；工件：<span class="mono">.specs/platform-evolution/D-{S17-artifact-memory-rsi, S18-orchestration-rsi, S19-model-rsi, S20-rsi-governance}/CONCLUSION.md</span> + ROADMAP 第 6 轮节（44 条文献全 fetch 核验））</p>
     <p>第 4 轮证据链：<span class="mono">.specs/platform-evolution/D-{execution-isolation-2, declarative-api, otel-observability, a2a-protocol-surface, collaboration-layer-2, identity-and-security-2}</span> + <span class="mono">R4-CODEAUDIT.md</span>（2026-09-23，六路 agent 交叉验证）</p>
-    <p>单文件自包含 HTML，零外部依赖（无 CDN / 无外链字体 / 无外部图片）；设计令牌与产品源码 <span class="mono">frontend/src/styles/tokens.css</span> 同源；§6 全部数据为演示假数据，其中 6.19–6.22 为<b>明确标注的规划原型</b>。</p>
+    <p>单文件自包含 HTML，零外部依赖（无 CDN / 无外链字体 / 无外部图片）；设计令牌与产品源码 <span class="mono">frontend/src/styles/tokens.css</span> 同源；§6 全部数据为演示假数据，其中标注「规划原型 / 设计态」的页（6.19–6.27、6.29–6.30）为<b>明确标注的规划原型</b>。</p>
     <p>数量口径来自对当前代码库与 <span class="mono">.specs/</span> 产物的实测扫描（2026-09-21）：后端 117 个 <span class="mono">.py</span> 模块（含 8 个测试文件）/ 28 个路由模块 / 169 个端点 / 132 条路径 / 19 个 ORM 模型模块 → 26 张表 / 24 个服务 + 5 个渠道适配器 / 4 个引擎模块 / 4 个运行时适配器；前端 100 个 <span class="mono">ts/tsx</span> / 34 个页面 / 28 个组件 + 13 个 Edge 组件 / 12 个 Zustand store。凡属推测或未实现的内容已在正文标注「待确认」。</p>
     <p>上游输入：<span class="mono">.specs/CONTEXT.md</span>、<span class="mono">.specs/agent-domains/</span>、<span class="mono">.specs/capability-groups/</span>、<span class="mono">.specs/agent-control-plane/</span>、<span class="mono">.specs/knowledge-plus/</span>、<span class="mono">.specs/README-CONSISTENCY-REPORT.md</span>；竞品调研输入：<span class="mono">.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md</span>（67 个开源仓库一手实测，2026-09-21）+ 第 3 轮增量（2026-09-22 web 实抓 20+ 项目 + <span class="mono">~/project/multica</span> 全仓深读终版）。上游结论：<span class="mono">.specs/platform-evolution/ROADMAP.md</span>（第 1-3 轮 19+19 条过审结论；本版全部新增内容可指回 <span class="mono">D-harness-landscape-2026/</span> 与 <span class="mono">D-multica-borrow-wave2/</span> 证据链）；v4 决策层章上游：<span class="mono">.specs/small-model-decisions/CHANGE.md + REQUIREMENT.md</span>（需求门 4/4 通过 2026-09-22；<b>代码未实现，全部新增带「规划/未实现」标注</b>）；P-product ⑤ 人审门：<b>v4 已过审（用户原话「通过」2026-09-22）</b>。</p>
   </footer>

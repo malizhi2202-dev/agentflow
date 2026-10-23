@@ -1,0 +1,190 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>记忆中心 · AgentFlow 原型</title><link rel="stylesheet" href="assets/base.css">
+<script src="assets/sprite.js" defer></script><script src="assets/proto.js" defer></script>
+<style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
+.kbd{font-size:11px}
+/* 记忆四层管道图（横向） */
+.pipe{display:flex;align-items:stretch;flex-wrap:wrap;gap:0}
+.pcard{flex:1 1 132px;min-width:132px;border:1px solid var(--border);background:var(--bg-app);border-radius:var(--r-sm);padding:8px 10px;font-size:11.5px;color:var(--text-secondary)}
+.pcard b{display:block;color:var(--text);font-size:12.5px;margin-bottom:2px}
+.pcard .cnt{display:block;font-family:var(--font-mono);color:var(--blue);font-size:12px;margin-top:5px}
+.pcard.brand{border-color:var(--blue-border);background:var(--blue-bg)}
+.pcard.gate{border:1px solid rgba(224,85,85,.5);background:var(--red-bg);flex:1 1 168px;min-width:168px}
+.pcard.gate b{color:var(--red)}
+.pcard.asset{border-style:dashed;border-color:var(--border-strong);cursor:pointer}
+.pcard.asset:hover{border-color:var(--blue-border)}
+.parr{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:72px;color:var(--text-muted);font-size:16px;padding:0 2px;line-height:1.1}
+.parr small{font-size:10px;color:var(--text-secondary);white-space:nowrap;margin-top:2px}
+/* 内容域 chips（与层正交的另一维） */
+.cd{font-family:var(--font-mono);font-size:10.5px;height:18px;padding:0 6px;border-radius:999px;border:1px solid var(--border-strong);display:inline-flex;align-items:center;color:var(--text-secondary);white-space:nowrap}
+.cd-sem{color:var(--blue);border-color:var(--blue-border);background:var(--blue-bg)}
+.cd-proc{color:var(--green);border-color:rgba(92,184,120,.3);background:var(--green-bg)}
+.cd-pref{color:var(--purple);border-color:rgba(180,124,216,.3);background:var(--purple-bg)}
+.cd-ins{color:var(--orange);border-color:rgba(232,164,80,.3);background:var(--orange-bg)}
+.cd-rule{color:var(--red);border-color:rgba(224,85,85,.3);background:var(--red-bg)}
+.mid{font-family:var(--font-mono);font-size:10.5px;color:var(--text-muted);display:block;margin-top:2px}
+tr[id],div[id]{scroll-margin-top:46px}</style></head><body>
+<span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html" style="color:inherit">回文档</a></span>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="knowledge.html">知识库（资产域 · 晋升落点）</span><span class="pill" data-goto="agent-detail.html#view=cv-skill">Agent · 能力 · 技能（晋升落点）</span><span class="pill" data-goto="chat.html">对话中心（纠错 → 反思候选）</span><span class="pill" data-goto="board.html">任务看板（冲突裁决单）</span></div>
+<div class="proto">
+      <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/memory</span><span class="fake">演示数据</span></div>
+      <div class="app">
+        <aside class="app-side">
+          <div class="app-brand"><i>AF</i><span>AgentFlow</span></div>
+          <div class="nav-grp">工作区</div>
+          <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
+          <a data-goto="tools.html"><svg class="icon"><use href="#i-wrench"/></svg>工具库</a>
+          <a data-goto="workflows.html"><svg class="icon"><use href="#i-branch"/></svg>工作流</a>
+          <a data-goto="roles.html"><svg class="icon"><use href="#i-users"/></svg>角色</a>
+          <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
+          <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
+          <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
+          <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
+          <a data-goto="control-plane.html"><svg class="icon"><use href="#i-radio"/></svg>Agent 管控</a>
+          <a data-goto="canvas.html"><svg class="icon"><use href="#i-net"/></svg>编排</a>
+          <a data-goto="metrics.html"><svg class="icon"><use href="#i-chart"/></svg>监控</a>
+          <a data-goto="projects.html"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
+          <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
+          <a data-goto="memory.html" class="active"><svg class="icon"><use href="#i-inbox"/></svg>记忆中心</a>
+          <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
+          <div class="spacer"></div>
+          <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
+        </aside>
+        <div class="app-main">
+          <div class="app-top"><span class="crumb">记忆中心 <span class="dim">· 唯一四层管道 + 资产域晋升 · 本域 = AgentFlow 平台研发空间（项目 agentflow）</span></span><span class="right"><span class="chip mono">L0 892 · L1 214 · L2 13 · L3 9</span><span class="chip purple mono">晋升评审中 1 · p-17</span><span class="chip warn mono">检疫区 1 · 静置 3d</span><span class="chip mono">衰减重验队列 6</span><button class="btn sm primary" data-click data-toast="归纳作业已排队：run/会话结束抽取 L0→L1 · 每日跨会话聚合 L1→L2 · 每周沉淀 L2→L3 · 全部候选过人审门才跨域（演示）">▶ 立即跑一次归纳</button></span></div>
+          <div class="app-body">
+
+            <div class="callout" style="margin:0 0 var(--s2)"><p style="margin:0"><b>记忆是平台唯一加工管道（腾讯口径）：</b><span class="mono">L0 对话原文 → L1 原子记忆 → L2 场景记忆 → L3 核心记忆</span>。知识库<b>不是第二条阶梯，而是资产域</b>——L3 记忆过<b>「晋升评审门」</b>才成为知识资产；本页只讲层与流转，读/写权限请到 <span class="btn link" style="padding:0" data-goto="knowledge.html">知识库 §0 权限矩阵 →</span></p></div>
+            <div class="callout bad" style="margin:0 0 var(--s4)"><p class="tiny" style="margin:0"><b>两条铁律（腾讯口径原文）：</b>① <b>层级 ≠ 权限</b>——权限只活在资产域（公共 / 空间成员 / 跨空间只读关联 / 外部源快照四层判定，见 knowledge.html §0）；<b>处在 L3 不给你任何读写的多一格</b>。② <b>高层不保证更可信</b>——L2/L3 是归纳产物，归纳可以固化错误；置信度是<b>单条记忆</b>的属性，与层高低解耦（本页列表置信列与层无单调性；衰减重验不因「已在高层」豁免）。</p></div>
+
+            <h4 class="sec-h" id="pipe"><span class="n">§1</span> 四层管道 <span class="desc">—— 唯一加工流水：一条记忆的完整旅程，横着一眼看完</span></h4>
+            <div class="diagram" style="margin-bottom:var(--s4)">
+              <div class="pipe">
+                <div class="pcard"><b>L0 对话原文</b>对话 / run / 反思的完整原始记录，全量可溯 · 短期 TTL 30d<span class="cnt">892 条 · 检疫区 1</span></div>
+                <span class="parr">→<small>抽取 · run/会话结束</small></span>
+                <div class="pcard"><b>L1 原子记忆</b>单条事实 / 过程 / 偏好，最小可检索单元，各带来源链<span class="cnt">214 条</span></div>
+                <span class="parr">→<small>聚合 · 跨会话同场景</small></span>
+                <div class="pcard"><b>L2 场景记忆</b>同场景多原子合并 · 去重 · 置信更新<span class="chip warn" style="height:16px">冲突待裁 1 → 裁决单进收件箱</span><span class="cnt">13 条</span></div>
+                <span class="parr">→<small>沉淀 · 泛化验证</small></span>
+                <div class="pcard brand"><b>L3 核心记忆</b>跨场景高价值结论与画像——<b>层到这里为止</b>，还不是知识<span class="cnt">9 条</span></div>
+                <span class="parr">⇒<small>晋升申请</small></span>
+                <div class="pcard gate"><b>晋升评审门</b>跨域唯一入口 · <b>必人批</b>；<b>公共知识需平台管理员二审</b>。机器不代裁：驳回留在记忆域可再申请<span class="cnt" style="color:var(--red)">评审队列 · 演示 1 在批</span></div>
+                <span class="parr">→<small>通过后落点</small></span>
+                <div class="pcard asset" data-click data-goto="knowledge.html"><b>知识资产域</b>知识库（本空间 / 公共）：<b>权限只活在这里</b>；读写、检索、挂载 Agent 均为资产属性<span class="cnt" style="color:var(--text-muted)">knowledge.html →</span></div>
+              </div>
+              <p class="tiny dim" style="margin:var(--s3) 0 0"><b>内容域（与层正交的另一维）：</b><span class="cd cd-sem">semantic 事实</span> <span class="cd cd-proc">procedural 过程</span> <span class="cd cd-pref">preference 偏好</span> <span class="cd cd-ins">instruction 指令</span> <span class="cd cd-rule">rule 规则</span> ——每条记忆在四层任一层上都携带其一（见 §2 列表「内容域」列）；另有 <span class="cd cd-rule">negative 回避</span> 型不参与上行聚合，见 §3 负知识库。<b>来源权威：</b>外部入站（网页 / IM 入站 / 远端源同步）先入检疫区静置 3d 才参与抽取；站内自产免检但恒带溯源（§2 检疫态列）。</p>
+            </div>
+
+            <h4 class="sec-h" id="list"><span class="n">§2</span> 记忆列表 <span class="chip mono">9 条 · 本域演示</span><span class="desc">按层过滤 · 行操作「查看来源链」进抽屉，「✕ 降级」沿链逐层撤（unlearning：无溯源只能全量重删）</span></h4>
+            <div class="tabs" id="mem-tabs">
+              <a class="tab active" data-click onclick="layerFilter('ALL',this)">全部 9</a>
+              <a class="tab" data-click onclick="layerFilter('L0',this)">L0 对话原文 2</a>
+              <a class="tab" data-click onclick="layerFilter('L1',this)">L1 原子记忆 4</a>
+              <a class="tab" data-click onclick="layerFilter('L2',this)">L2 场景记忆 2</a>
+              <a class="tab" data-click onclick="layerFilter('L3',this)">L3 核心记忆 1</a>
+              <span style="flex:1"></span><span class="tiny dim" style="align-self:center">铁律②回显：置信列与层高低无单调性 · 外部来源才有检疫态</span>
+            </div>
+            <table class="tbl compact" style="margin-top:0">
+              <thead><tr><th>内容摘要</th><th>所属 Agent</th><th>内容域</th><th>来源</th><th>检疫态</th><th>置信</th><th>更新时间</th><th>操作</th></tr></thead>
+              <tbody id="mem-rows">
+                <tr data-l="L1"><td><b>删域后 Agent 必须回落「未分类」；验收清单须覆盖外键删除行为（ON DELETE SET NULL）</b><span class="mid">m-341 · 抽自对话纠错「不对——漏了 FK 删除行为」</span></td><td><span class="chip">审查 Agent · 标准</span> <span class="mono tiny dim">agent-7</span></td><td><span class="cd cd-sem">semantic</span></td><td class="tiny">对话 <span class="mono dim">c-92</span></td><td><span class="dim tiny">免检（站内自产）</span></td><td class="mono">0.92</td><td class="mono tiny">09-22 16:45</td><td class="nowrap"><span class="btn link" data-click data-drawer="dr-lineage">查看来源链</span><span class="btn link" style="color:var(--red)" data-toast="降级请求已记录：m-341 退出聚合输入 · L0 原文保留可溯源（演示 · unlearning 按链降级，见抽屉「沿链成批撤回」）">✕ 降级</span></td></tr>
+                <tr data-l="L2"><td><b>主题聚合「身份与认证」：fail-open 缓解保留之争等 8 条原子合并 · 冲突待裁 1</b><span class="mid">m-402 · 机器不自裁——冲突出裁决单进收件箱，人裁后置信回填</span></td><td><span class="chip">审查 Agent · 标准</span> <span class="mono tiny dim">agent-7</span></td><td><span class="cd cd-sem">semantic</span></td><td class="tiny">对话 · 反思</td><td><span class="dim tiny">免检</span></td><td class="mono">0.81 <span class="chip warn" style="height:16px">冲突 1</span></td><td class="mono tiny">09-23 09:15</td><td class="nowrap"><span class="btn link" data-click data-drawer="dr-lineage">查看来源链</span><span class="btn link" style="color:var(--red)" data-toast="m-402 整批降级 = 沿链撤回其 8 条上游原子 → 请走来源链抽屉的「沿链成批撤回」（演示）">✕ 降级</span></td></tr>
+                <tr data-l="L3"><td><b>破坏性操作必须二次确认 + 必填原因，规则加在状态转换层（跨 3 项目泛化成立）</b><span class="mid">已提交晋升申请 p-17 → 落点候选：本空间知识 · 公共需平台管理员二审</span></td><td><span class="chip">审查 Agent · 标准</span> <span class="mono tiny dim">agent-7</span></td><td><span class="cd cd-rule">rule</span></td><td class="tiny">对话 · 反思</td><td><span class="dim tiny">免检</span></td><td class="mono">0.88 <span class="chip purple" style="height:16px">晋升评审中 · p-17</span></td><td class="mono tiny">09-23 14:20</td><td class="nowrap"><span class="btn link" data-click data-drawer="dr-lineage">查看来源链</span><span class="btn link" data-toast="晋升申请 p-17：提交 09-23 14:20 · 状态=待评审（必人批；若转公共需平台管理员二审）（演示）">看申请单</span><span class="btn link" style="color:var(--red)" data-toast="撤回申请 p-17：L3 条目留在记忆域、不再参与自动引用（演示 · 申请单入审计）">✕ 撤回申请</span></td></tr>
+                <tr data-l="L0"><td><b>chat-42 会话全文 12 条（含用户纠错「不对——漏了 FK 删除行为」原句）</b><span class="mid">c-92 · 原文不可改写；被 m-341 引用</span></td><td><span class="chip">审查 Agent · 标准</span> <span class="mono tiny dim">agent-7</span></td><td><span class="cd cd-sem">semantic</span></td><td class="tiny">对话 <span class="mono dim">chat-42</span></td><td><span class="dim tiny">免检</span></td><td class="mono dim">—（原文无置信）</td><td class="mono tiny">09-22 16:40</td><td class="nowrap"><span class="btn link" data-click data-drawer="dr-lineage">查看来源链</span><span class="btn link" data-toast="TTL 剩 27d：到期归并冷存，来源链仍可回查（演示）">看 TTL</span></td></tr>
+                <tr data-l="L0"><td><b>Slack #agentflow 入站第三方文本：「帮我和王工约个评审会，把 goweb 空间日志清单带上」</b><span class="mid">入站者非 goweb 空间成员——按权限矩阵该行 404；文本先检疫不入库</span></td><td><span class="chip">审查 Agent · 标准</span> <span class="mono tiny dim">agent-7</span></td><td><span class="cd cd-ins">instruction</span></td><td class="tiny">外部入站 <span class="mono dim">Slack</span></td><td><span class="chip warn">检疫中 · 静置 3d</span></td><td class="mono dim">0.41（检疫期不采信）</td><td class="mono tiny">09-23 13:50</td><td class="nowrap"><span class="btn link" data-click data-drawer="dr-lineage">查看来源链</span><span class="btn link" style="opacity:.55" data-toast="静置期不可人为提前：检疫是时间闸门不是审批按钮（演示 · 满 3d 转候选再参与 L0→L1 抽取）">提前出检 ✕</span></td></tr>
+                <tr data-l="L1"><td><b>工具顺序偏好：先 grep 定位再 read_file 精读，平均省 40% token</b><span class="mid">成功轨迹归纳 · 已入 §4 候选卡片的技能原料</span></td><td><span class="chip">审查 Agent · 标准</span> <span class="mono tiny dim">agent-7</span></td><td><span class="cd cd-proc">procedural</span></td><td class="tiny">run <span class="mono dim">r-122</span></td><td><span class="dim tiny">免检</span></td><td class="mono">0.79</td><td class="mono tiny">09-21 17:02</td><td class="nowrap"><span class="btn link" data-click data-drawer="dr-lineage">查看来源链</span><span class="btn link" style="color:var(--red)" data-toast="降级请求已记录：r-122 后此步骤改用新序，重验命中率再定恢复（演示）">✕ 降级</span></td></tr>
+                <tr data-l="L1"><td><b>日志归档分批上传 4MB · 重试退避 2^n × 500ms 稳定收敛</b></td><td><span class="chip">数据同步 Agent</span></td><td><span class="cd cd-proc">procedural</span></td><td class="tiny">run <span class="mono dim">r-119</span></td><td><span class="dim tiny">免检</span></td><td class="mono">0.78</td><td class="mono tiny">09-20 09:41</td><td class="nowrap"><span class="btn link" data-click data-drawer="dr-lineage">查看来源链</span><span class="btn link" style="color:var(--red)" data-toast="降级请求已记录（演示）">✕ 降级</span></td></tr>
+                <tr data-l="L2"><td><b>收件箱聚合规则跨会话回流：wf-42 触发口径 = 描述命中即触发，不新建任务</b></td><td><span class="chip">审查 Agent · 标准</span> <span class="mono tiny dim">agent-7</span></td><td><span class="cd cd-sem">semantic</span></td><td class="tiny">对话 · run <span class="mono dim">r-131</span></td><td><span class="dim tiny">免检</span></td><td class="mono">0.90</td><td class="mono tiny">09-23 11:31</td><td class="nowrap"><span class="btn link" data-click data-drawer="dr-lineage">查看来源链</span><span class="btn link" style="color:var(--red)" data-toast="降级请求已记录（演示）">✕ 降级</span></td></tr>
+                <tr data-l="L1"><td><b>规则候选：渠道入站消息须复核目标空间成员资格（越权统一 404），仅「允许经渠道发起」不够</b><span class="mid">产自发 §3 反思 #3 · 高层≠可信：L1 也敢给 0.55 的低温差</span></td><td><span class="chip">审查 Agent · 标准</span> <span class="mono tiny dim">agent-7</span></td><td><span class="cd cd-rule">rule</span></td><td class="tiny">反思</td><td><span class="dim tiny">免检</span></td><td class="mono">0.55</td><td class="mono tiny">09-23 13:58</td><td class="nowrap"><span class="btn link" data-click data-drawer="dr-lineage">查看来源链</span><span class="btn link" style="color:var(--red)" data-toast="降级请求已记录（演示）">✕ 降级</span></td></tr>
+              </tbody>
+            </table>
+
+            <h4 class="sec-h" id="reflex"><span class="n">§3</span> 失败反思区 <span class="chip">L0 旁挂 · 不另占一层</span><span class="desc">run 失败 / 用户纠错 → 结构化反思条（现象 / 根因假设 / 处置）写 L0 旁挂区，可检索回流；纠错即信号（chat「不对」入口）</span></h4>
+            <div class="grid g3" style="margin-bottom:var(--s3)">
+              <div class="card"><p class="h2p">Notion 401 索引冻结 · 反思<span class="chip bad" style="margin-left:6px">来源链 · run 失败</span></p>
+                <dl class="kv" style="font-size:11.5px"><dt>现象</dt><dd class="tiny">Notion·产品需求库「测试连接」401，索引冻结，58 旧 chunks 只读（见 knowledge.html §3）</dd><dt>根因假设</dt><dd class="tiny">Internal Integration Token 过期且无刷新逻辑——401 非瞬态错误，重试无效</dd><dt>处置</dt><dd class="tiny">沉淀回避约束（下方负知识库 #2）· 凭据轮换提醒挂告警 · 修凭据走 knowledge__notion-source.html</dd></dl><p class="tiny dim" style="margin:0">内容域 <span class="cd cd-rule">rule</span> · 站内自产 · <span class="dim">免检</span></p></div>
+              <div class="card"><p class="h2p">r-128 步骤超时 · 反思<span class="chip bad" style="margin-left:6px">AF-104 链</span></p>
+                <dl class="kv" style="font-size:11.5px"><dt>现象</dt><dd class="tiny">run r-128 seq 8 read_file 整读 REQUIREMENT.md 超时 30s，步骤失败</dd><dt>根因假设</dt><dd class="tiny">大文件单次全读 + 无预筛——工具侧缺 grep 先行（同 §2 的 r-122 成功轨迹互证）</dd><dt>处置</dt><dd class="tiny">处置候选「先 grep 定位再精读」入 L1（§2 行 6）· 关联任务 <span class="btn link" style="padding:0" data-goto="board.html">AF-104</span> · 审批链 AP-31</dd></dl><p class="tiny dim" style="margin:0">内容域 <span class="cd cd-proc">procedural</span> · 站内自产 · <span class="dim">免检</span></p></div>
+              <div class="card"><p class="h2p">IM 入站消息越权尝试 · 反思<span class="chip warn" style="margin-left:6px">来源：外部入站 · 检疫中</span></p>
+                <dl class="kv" style="font-size:11.5px"><dt>现象</dt><dd class="tiny">Slack 入站请求读取 goweb_log_collection 空间日志——发起者非该空间成员，命中统一 404</dd><dt>根因假设</dt><dd class="tiny">渠道门禁只查「允许经渠道发起」能力位，未复核<b>目标资源</b>成员资格</dd><dt>处置</dt><dd class="tiny">规则候选入 L1（§2 末行 0.55）· 原始入站文本在检疫区静置（§2 行 5 琥珀 chip）</dd></dl><p class="tiny dim" style="margin:0">内容域 <span class="cd cd-rule">rule</span> · <b>本条反思引用的原料带检疫态</b>：出检前不聚合、不晋升</p></div>
+            </div>
+            <div class="panel tight" id="negative" style="margin-bottom:var(--s4)"><p class="tiny" style="margin:0 0 6px"><b>负知识库 <span class="chip bad">type = negative</span></b>——「试过不行」显式入账；不参与 L1→L2 聚合上行，<b>检索时作回避约束注入</b>（ExpeL 式「勿走此路」注记），晋升同走评审门</p>
+              <table class="tbl compact" style="margin:0">
+                <thead><tr><th>负条目</th><th>内容域</th><th>来源</th><th>最近回避命中</th><th>操作</th></tr></thead>
+                <tbody>
+                  <tr><td><b>直接全量轮询 Confluence 会触发 429 限流——只能走增量同步接口</b><span class="mid">违例 2 次后入账 · run 记录在案</span></td><td><span class="cd cd-proc">procedural</span></td><td class="tiny">run <span class="mono dim">r-101</span></td><td class="mono tiny">09-23 · 3 次检索注入</td><td class="nowrap"><span class="btn link" data-toast="回避约束预览：该查询命中时随结果附注「⚠ 勿全量轮询 Confluence（429 实证 2 次）→ 用增量同步接口」（演示）">看注入效果</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-revoke">沿链撤回</span></td></tr>
+                  <tr><td><b>无凭据刷新时对 Notion 重试无效——401 不是瞬态错误，先修凭据</b><span class="mid">产自本页反思 #1</span></td><td><span class="cd cd-rule">rule</span></td><td class="tiny">反思</td><td class="mono tiny">09-23 · 1 次检索注入</td><td class="nowrap"><span class="btn link" data-toast="回避约束已随 Notion 401 告警一起注入 Data 同步重试路径（演示）">看注入效果</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-revoke">沿链撤回</span></td></tr>
+                </tbody>
+              </table>
+              <p class="tiny dim" style="margin:6px 0 0"><b>为什么单独成库：</b>「别做什么」与「做什么」可信度逻辑相反——负条目越旧越可能失效（对方接口改版），所以同样吃 §5 衰减重验，且被撤回时走 <span class="mono">md-revoke</span> 沿链评估「曾被它挡住的正向方案」重新开放。</p>
+            </div>
+
+            <h4 class="sec-h" id="skills"><span class="n">§4</span> 技能候选 <span class="chip purple">成功轨迹归纳 · 候选区</span><span class="desc">周期聚类成功 run 轨迹 → 候选工作流草稿（AWM / Voyager 技能库线）→ 人审晋升 workspace / agent 技能层；runtime 托管层不可动（三层托管语义不变）</span></h4>
+            <div class="grid g2" style="margin-bottom:var(--s2)">
+              <div class="panel tight"><p class="h2p">候选工作流 · 产物审查-验收边界覆盖检查<span class="chip" style="margin-left:6px">候选区</span></p>
+                <p class="tiny mono" style="margin:0 0 4px">read REQUIREMENT → 验收清单逐条 ↔ TASK T1–T5 对照 → 差集出发现项（F 级）→ 人批后落 REVIEW.md</p>
+                <p class="tiny" style="margin:0 0 6px"><span class="cd cd-proc">procedural</span> 来源 lineage：<span class="pill mono" data-click data-toast="来源 run r-122 · 审查产物成功完成 · 4 步全绿（演示）">run r-122</span> <span class="pill mono" data-click data-toast="来源对话 c-92 · 用户确认「结论有用」= 成功信号（演示）">对话 c-92</span> · 聚类支持 run 数 3 · 与 §2 行 6 互为原料</p>
+                <p style="margin:0"><span class="btn sm" data-toast="草稿预览（演示）：参数 change-id；产物 REVIEW.md 发现项表；失败自动升级到人——三件套同 replay 口径">👁 看草稿</span> <span class="btn sm primary" data-click data-modal="md-promote">提交晋升评审</span></p></div>
+              <div class="panel tight"><p class="h2p">候选工作流 · 超时步骤-预筛重跑自救<span class="chip" style="margin-left:6px">候选区</span></p>
+                <p class="tiny mono" style="margin:0 0 4px">步骤超时 → grep 预筛目标区间 → 分段 read ≤64KB → 重试上限 2 次 → 仍失败升级到人（附 transcript 深链）</p>
+                <p class="tiny" style="margin:0 0 6px"><span class="cd cd-proc">procedural</span> 来源 lineage：<span class="pill mono" data-click data-toast="来源 run r-128 · 失败步骤自救回放成功（AF-104 链 · 演示）">run r-128</span> · 与本页 §3 反思 #2 同根（失败教训 + 自救经验合流成候选）</p>
+                <p style="margin:0"><span class="btn sm" data-toast="草稿预览（演示）">👁 看草稿</span> <span class="btn sm primary" data-click data-modal="md-promote">提交晋升评审</span></p></div>
+            </div>
+            <p class="tiny dim" style="margin:0 0 var(--s4)"><b>归纳机边界（纪律）：</b>用户纠错与失败反思只产<b>候选</b>——晋升门不变、必人批；自动写公共技能 = 否决项（L3 评审门不可让渡）。评审通过后注入生效见 <span class="btn link" style="padding:0" data-goto="agent-detail.html#view=cv-skill">Agent 详情 · 能力 · 技能 →</span></p>
+
+            <h4 class="sec-h" id="decay"><span class="n">§5</span> 衰减重验队列 <span class="chip warn">6 条到期</span><span class="desc">命中率下降 → 重验（近 20 次相似 run 回放）→ 失效标记（标记不删除，可沿链恢复）——不衰减 = 错误知识永生</span></h4>
+            <table class="tbl compact" style="margin-bottom:var(--s2)">
+              <thead><tr><th>记忆</th><th>最近命中</th><th>建议动作</th></tr></thead>
+              <tbody>
+                <tr><td><b>浏览器自动化等待选择器默认 500ms</b><span class="mid">L1 · agent-7 · procedural · 7 天命中率 98% → 41%</span></td><td class="mono tiny">7d 前 3 次 · 均失败改人工等待</td><td class="nowrap"><span class="btn sm primary" data-toast="重验任务已提交：近 20 次相似 run 回放选择器命中口径（演示）">重验</span> <span class="btn sm" style="color:var(--red)" data-toast="已标记失效：不再注入检索与编排 · L0 原文保留可沿链恢复（演示）">失效</span> <span class="btn sm" data-toast="保留窗口 +30d：下次命中率跌破 0.5 再入队（演示）">保留</span></td></tr>
+                <tr><td><b>Confluence 全文检索 API v2 字段映射</b><span class="mid">L2 · 数据同步 Agent · semantic · 上游源改版疑云（429 负条目同域）</span></td><td class="mono tiny">12d 前 1 次 · 结果被人工改写</td><td class="nowrap"><span class="btn sm" data-toast="重验任务已提交（演示）">重验</span> <span class="btn sm primary" style="color:var(--red)" data-toast="建议失效：与 §3 负知识库 #1 联动作废——重验前先挡路（演示）">失效（建议）</span> <span class="btn sm" data-toast="保留窗口 +30d（演示）">保留</span></td></tr>
+                <tr><td><b>李工周报格式偏好：表格化 + 只列 delta</b><span class="mid">L1 · preference · 命中稳定 0.96 · 入队仅因 90d 无冲突复核周期到</span></td><td class="mono tiny">今日 2 次 · 采纳未改</td><td class="nowrap"><span class="btn sm" data-toast="重验任务已提交（演示）">重验</span> <span class="btn sm" style="color:var(--red)" data-toast="已标记失效（演示）">失效</span> <span class="btn sm primary" data-toast="偏好类豁免建议已记录：例行复核节奏保留（演示）">保留（建议）</span></td></tr>
+              </tbody>
+            </table>
+            <p class="tiny dim" style="margin:0 0 var(--s6)">队列 6 条、列表展示前 3；入队条件 = 7 天窗口命中率环比降 &gt;30% 或 90d 未复核。<b>重验失败自动转「失效标记」但绝不物理删</b>——铁律②的执行面：任何层（包括已晋升成知识的）都吃衰减。</p>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="drawer" id="dr-lineage"><header><b>来源链 · 原子记忆 m-341</b><span class="chip ok">站内自产 · 免检</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
+<div class="callout"><p class="tiny" style="margin:0"><b>来源链 = 溯源契约：</b>每条记忆 / 知识 / 技能恒带对话 · run · 反思源 id（数据模型列 <span class="mono">lineage</span>）。降级按链逐层走——unlearning 综述实证：<b>无溯源只能全量重删</b>。</p></div>
+<dl class="kv"><dt>当前节点</dt><dd class="mono tiny">m-341 <span class="chip purple" style="height:16px">L1 原子记忆</span> · 内容域 <span class="cd cd-sem">semantic</span> · 置信 0.92 · 归属 <span class="mono">agent-7</span></dd><dt>下游引用</dt><dd class="mono tiny">场景记忆 m-402（并入）→ 晋升申请 p-17 →（若过门）本空间知识 2 篇</dd></dl>
+<p class="h2p" style="margin-top:var(--s4)">链路时间线（上溯 → 下行）</p>
+<div class="timeline">
+  <div class="tl-item"><b>对话 c-92</b> · <span class="mono tiny">chat-42 · 09-22 16:40</span><br>李工纠错原句：「不对——验收漏了删除域后 FK 回落行为」。<span class="btn link" style="padding:0" data-goto="chat.html">回对话中心看上下文 →</span></div>
+  <div class="tl-item"><b>原子记忆 m-341（本条）</b> · <span class="mono tiny">09-22 16:45 · 抽取作业</span><br>「删域后 Agent 必须回落『未分类』；验收须覆盖 ON DELETE SET NULL」——纠错即信号，反思触发的定向抽取。</div>
+  <div class="tl-item"><b>场景记忆 m-402</b> · <span class="mono tiny">09-23 09:15 · 主题聚合「身份与认证」8 条</span><br>冲突待裁 1 已出裁决单 → 收件箱（人裁，机器不自裁）。</div>
+  <div class="tl-item"><b>晋升申请 p-17</b> · <span class="mono tiny">09-23 14:20 · 状态：评审中</span><br>L3→本空间知识跨域申请 · <b>必人批</b>；若申请转公共知识 = 平台管理员二审。<span class="btn link" style="padding:0" data-goto="approvals.html">评审队列 →</span></div>
+</div>
+<div class="callout warn" style="margin-top:var(--s3)"><p class="tiny" style="margin:0">反向说明：单独降级 m-341 用列表行「✕ 降级」；<b>本抽屉的「沿链成批撤回」会把链上全部下游一起转重审</b>——用于「上游错了、下游不可信」的场景（如根因假设被新证据推翻）。</p></div>
+<p style="margin-top:var(--s4)"><button class="btn sm" style="border-color:rgba(224,85,85,.45);color:var(--red)" data-click data-modal="md-revoke">⚠ 沿链成批撤回（m-341 → p-17 全下游）</button></p>
+</div></div>
+
+<div class="modal" id="md-revoke"><div style="padding:var(--s4)"><b style="color:var(--red)">沿来源链成批撤回？（m-341 → 全下游）</b>
+<p class="small dim" style="margin:8px 0"><b>影响面：</b>下游<b>场景记忆 1 条</b>（m-402 · 含其并入的 8 条原子记忆）与<b>已发布知识 2 条</b>转重审——是「转重审」不是物理删：L0 原文保留、来源链可回查，重审通过后沿链恢复。</p>
+<pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [根因假设被新证据推翻            ]　←必填</pre>
+<div class="callout warn" style="margin:8px 0"><p class="tiny" style="margin:0">撤回也是状态转换：入<b>评审队列</b>由人执行（纪律：必须人批的动作加在状态转换层，不只在提示词）。§3 负知识库条目的「沿链撤回」复用本模态，影响面文案按所选节点重算。</p></div>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-autoclose data-toast="撤回已进入评审队列 · 下游场景记忆 m-402（含 8 条原子）与已发布知识 2 条转重审（演示）">确认撤回</button></div></div></div>
+
+<div class="modal" id="md-promote"><div style="padding:var(--s4)"><b>提交晋升评审？（候选 → 技能库 · 必人批）</b>
+<p class="small dim" style="margin:8px 0 10px">候选只产<b>申请单</b>，绝不自动生效——跨域门在人手上；runtime 托管层不可动（三层托管语义复用）。</p>
+<dl class="kv"><dt>候选</dt><dd class="tiny mono">产物审查-验收边界覆盖检查 <span class="cd cd-proc">procedural</span> · 来源 run r-122</dd><dt>目标层<span class="dim tiny">（二选一）</span></dt><dd><span class="chip info tg" id="tg-ws" data-click onclick="selTg(this)">workspace 技能库</span> <span class="chip tg" id="tg-ag" data-click onclick="selTg(this)">agent 技能库（agent-7）</span></dd><dt>评审人</dt><dd><span class="chip">平台管理员 · admin（李工）</span> <span class="dim tiny">或</span> <span class="chip">团队 Admin（王工）</span></dd></dl>
+<p class="tiny dim" style="margin:8px 0 0"><b>即存提示：</b>评审通过 = 即存即生效——技能自下一 run 起注入（低敏即存，无草稿态）；申请与结果入审计 <span class="mono">skill_promote_requested</span>。</p>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-click data-autoclose data-toast="晋升申请已提交 · 必人批（演示 · 申请单示例见上方列表「晋升评审中 p-17」行）">提交评审</button></div></div></div>
+
+<p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明：</b>本页为 S17 口径落地的新页；<b>新编造值：</b>记忆 <span class="mono">m-341</span> / 场景 <span class="mono">m-402</span> / 晋升申请 <span class="mono">p-17</span> / 对话原文 <span class="mono">c-92</span>、检疫静置 <span class="mono">3d</span>、衰减重验队列 <span class="mono">6 条</span>、层计数 892/214/13/9（沿用 knowledge.html dr-space 同一演示域口径）、run <span class="mono">r-122 / r-119 / r-131 / r-101</span> 与置信度、命中率均为演示值。沿用宇宙：agent-7（审查 Agent · 标准）· r-128 · AF-104 · AP-31 · chat-42 · wf-42 · Notion 401 · Slack #agentflow · 李工/王工。负知识库两行、技能候选两卡、§5 队列三行皆为演示编造。</p>
+<p class="tiny dim" style="padding:10px 18px 14px">可点区演示：<b>页头</b>——两条铁律红框 callout（层级≠权限 / 高层不保证更可信）·「立即跑一次归纳」→ toast（抽取/聚合/沉淀三作业节奏）。<b>§1 管道图</b>——L0→L1→L2→L3→晋升评审门（红边卡：必人批 · 公共知识需平台管理员二审）→知识资产域卡（点击 → <span class="mono">knowledge.html</span>）；内容域五 chips 正交注。<b>§2 列表</b>——tabs 真过滤 L0-L3（含全部）；行操作「查看来源链」→ 抽屉 <span class="mono">dr-lineage</span>（c-92→m-341→m-402→p-17 时间线 + 跨页深链）→「沿链成批撤回」→ 模态 <span class="mono">md-revoke</span>（必填原因 + 影响面「下游场景记忆 m-402 含 8 条原子与已发布知识 2 条转重审」→ 确认（data-autoclose）toast「撤回已进入评审队列·演示」）；「✕ 降级」按行 toast；外部入站行琥珀「检疫中 · 静置 3d」chip + 「提前出检 ✕」toast（时间闸门不可人为提前）。<b>§3</b>——三张反思卡（现象/根因假设/处置三分段；#3 带检疫来源标注）+ 负知识库两行（「看注入效果」toast；「沿链撤回」复用 <span class="mono">md-revoke</span>）。<b>§4</b>——技能候选卡×2（来源 run r-122 / r-128 lineage chips 点击 toast）+「提交晋升评审」→ 模态 <span class="mono">md-promote</span>（workspace/agent 二选一 + 评审人 chips + 即存提示 → toast）。<b>§5</b>——重验/失效/保留三动作均 toast（失效=标记非删除）。relbar：知识库 / Agent 技能子栏（<span class="mono">agent-detail.html#view=cv-skill</span> 深链）/ 对话中心 / 看板。　按 Esc 关闭所有浮层。</p>
+
+<div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
+<script>/* 页内交互：tab 按层过滤（真显隐）+ 模态内目标层二选一 + data-autoclose（先收浮层再弹 toast，同 chat 口径） */
+function layerFilter(t,btn){document.querySelectorAll('#mem-tabs .tab').forEach(function(x){x.classList.remove('active');});btn.classList.add('active');
+  document.querySelectorAll('#mem-rows tr').forEach(function(r){r.style.display=(t==='ALL'||r.dataset.l===t)?'':'none';});
+  toast('按层过滤：'+(t==='ALL'?'全部（唯一管道 L0→L3，层不是权限）':t)+' · 静态演示列表（演示）');}
+function selTg(el){document.querySelectorAll('.tg').forEach(function(x){x.classList.remove('info');});el.classList.add('info');
+  toast('目标层 = '+el.textContent+'（二选一 · 提交后由评审人确认，演示）');}
+document.addEventListener('click',function(e){var a=e.target.closest('[data-autoclose]');
+  if(a)document.querySelectorAll('.modal.on,.modal-mask.on,.drawer.on,.drawer-mask.on,.pop.on').forEach(function(x){x.classList.remove('on');});});
+</script>
+</body></html>

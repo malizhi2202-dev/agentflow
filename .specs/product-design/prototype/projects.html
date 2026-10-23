@@ -25,6 +25,7 @@
           <a data-goto="projects.html" class="active"><svg class="icon"><use href="#i-folder"/></svg>项目</a>
           <a data-goto="knowledge.html"><svg class="icon"><use href="#i-book"/></svg>知识库</a>
           <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
+          <a data-goto="memory.html"><svg class="icon"><use href="#i-book"/></svg>记忆中心</a>
           <a data-goto="approvals.html"><svg class="icon"><use href="#i-shield"/></svg>审批</a>
           <div class="spacer"></div>
           <a><svg class="icon"><use href="#i-gear"/></svg>admin · 李工</a>
@@ -48,7 +49,7 @@
               <div class="panel">
                 <p class="h2p" data-click data-goto="projects__agentflow.html" >当前项目 · agentflow</p>
                 <dl class="kv">
-                  <dt>专属知识空间</dt><dd><a data-click data-goto="knowledge.html#space-agentflow" style="color:var(--blue);cursor:pointer">AgentFlow 平台研发空间</a> <span class="chip ok">成员读写</span> <span class="chip info">1:1</span> <span class="mono tiny dim">128 篇 · L0→L3 自动总结写入本空间</span></dd>
+                  <dt>专属知识空间</dt><dd><a data-click data-goto="knowledge.html#space-agentflow" style="color:var(--blue);cursor:pointer">AgentFlow 平台研发空间</a> <span class="chip ok">成员读写</span> <span class="chip info">1:1</span> <span class="mono tiny dim">128 篇 · 记忆四层 L0→L3 自动总结写入本空间（晋升走评审门）</span></dd>
                   <dt>Leader</dt><dd class="mono tiny">李工的个人 Agent <span class="dim">（owner 李工 · 用户级 Agent 1:1）</span></dd>
                   <dt>产物目录</dt><dd class="mono tiny">/home/malizhi/project/agentflow/.specs</dd>
                   <dt>提示词目录</dt><dd class="mono tiny">/home/malizhi/project/agentflow/prompts</dd>
@@ -120,7 +121,7 @@
 <tr><td>盘上项目目录 / 产物文件</td><td><span class="chip ok">不改动</span></td></tr>
 <tr><td>该项目下的变更索引</td><td><span class="chip warn">平台内解除登记</span></td></tr>
 <tr><td>已挂载 Agent 的 <span class="mono">project_ids</span></td><td><span class="chip warn">同步移除该分配</span></td></tr>
-<tr><td><b>专属知识空间</b>（1:1）</td><td><span class="chip warn">同步解除登记 · 内容转归档快照</span> <span class="tiny dim">不删文档，保留 <span class="mono">90d</span> 后回收；L0-L3 自动总结同时停写</span></td></tr>
+<tr><td><b>专属知识空间</b>（1:1）</td><td><span class="chip warn">同步解除登记 · 内容转归档快照</span> <span class="tiny dim">不删文档，保留 <span class="mono">90d</span> 后回收；记忆四层（L0-L3）自动总结同时停写（晋升评审门照走人批）</span></td></tr>
 <tr><td>历史会话与审计</td><td><span class="chip ok">保留快照</span></td></tr>
 </tbody></table>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [沙盒已废弃，索引清理            ]</pre>
@@ -142,5 +143,5 @@
 <tr><td class="mono">newbie · 赵六</td><td class="tiny">0 个项目 → 空列表</td><td><span class="btn link" data-toast="已按 newbie 预览：空列表「你还没有被分配任何项目，请联系管理员」——不回退为全部（演示）" data-close>预览</span></td></tr>
 </tbody></table></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
 <p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明：</b>路径为真实机器路径。「提示词目录缺失」演示项目未初始化提示词资源时的标注（该字段对应 <span class="mono">has_prompts</span> 判定）。状态 / 优先级 / Leader / 成员数 / 知识空间 / 进度为演示列：状态取 <span class="mono">planned·in_progress·paused·completed·cancelled</span>（表单侧中文单选 = 未开始 / 进行中 / 已暂停 / 已完成），优先级取 <span class="mono">urgent·high·medium·low·none</span>（表单侧 = 紧急 / 高 / 中 / 低），<b>Leader 显示个人 Agent 名</b>（每个用户有一个 1:1 用户级 Agent，见 <span class="mono">users.html</span>），<b>知识空间与项目 1:1</b>（成员读写 · 非成员 404），进度 = 已完成任务 / 总任务（演示百分比）。<b>列表与表单均无开始 / 结束时间列</b>——项目无期限概念，节奏由里程碑 / 任务承载。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：agentflow 项目名 / 行内「详情」/ 当前项目面板标题 → 项目详情独立页（路径 · 扫描结果 11 行 · <b>关联资源与专属知识空间卡</b> · 成员 · 扫描历史 · 页内自带删除二次确认）· <b>行内「知识空间」列 → 深链锚点 <span class="mono">knowledge.html#space-〈项目〉</span></b>（空间页 §2 表内对应行）· 其余 4 行的「详情」→ 3 个精简详情抽屉（kv + 至多 1 子表 · 含 Leader / 知识空间行）· 顶栏「当前：agentflow ▾」与空态卡「以零权限用户预览 ▾」→ 弹层 · 「+ 新建项目」→ 新建项目表单独立页（标识 / 资源 / 状态与优先级 / Leader / 成员 / <b>专属知识空间 + L0-L3</b> / 关联对象 · 无日期字段）· 「切换」→ toast · 「删除」→ 二次确认（声明不删盘上文件 · 含空间转归档快照 · 必填原因）· 缺失态抽屉内「初始化 prompts/」→ 冻结说明 toast　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：agentflow 项目名 / 行内「详情」/ 当前项目面板标题 → 项目详情独立页（路径 · 扫描结果 11 行 · <b>关联资源与专属知识空间卡</b> · 成员 · 扫描历史 · 页内自带删除二次确认）· <b>行内「知识空间」列 → 深链锚点 <span class="mono">knowledge.html#space-〈项目〉</span></b>（空间页 §2 表内对应行）· 其余 4 行的「详情」→ 3 个精简详情抽屉（kv + 至多 1 子表 · 含 Leader / 知识空间行）· 顶栏「当前：agentflow ▾」与空态卡「以零权限用户预览 ▾」→ 弹层 · 「+ 新建项目」→ 新建项目表单独立页（标识 / 资源 / 状态与优先级 / Leader / 成员 / <b>专属知识空间 + 记忆四层 L0-L3</b> / 关联对象 · 无日期字段）· 「切换」→ toast · 「删除」→ 二次确认（声明不删盘上文件 · 含空间转归档快照 · 必填原因）· 缺失态抽屉内「初始化 prompts/」→ 冻结说明 toast　按 Esc 关闭所有浮层。</p>
 </body></html>

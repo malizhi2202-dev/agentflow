@@ -7,7 +7,7 @@
 .proto-note{padding:0 18px;margin-top:14px}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p23" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="finetune.html">微调工厂</span><span class="pill" data-goto="integration.html">对外集成</span></div>
-    <p class="proto-note"><span class="chip warn">规划原型</span>change <span class="mono">small-model-decisions</span>：决策模型的登记、双轨连接、健康态与<b>域用途绑定两步制</b>面板。核心形态是「未绑定 ⇒ 直通」的每一处显式表达。<b>此界面尚不存在</b>。演示数据。</p>
+    <p class="proto-note"><span class="chip warn">规划原型</span>change <span class="mono">small-model-decisions</span>：决策模型的登记、双轨连接、健康态与<b>域用途绑定两步制</b>面板。核心形态是「未绑定 ⇒ 直通」的每一处显式表达。<b>此界面尚不存在</b>。演示数据。页尾新增「数据回流（训练工厂）」区块 = RSI S19（已过审）三根线落地：纠错即标注限人类 / 溯源批次账 / 双门＋轮次预算；出域分级字样按 2026-10-23 命名消歧改号 <b>D0-D3</b>（与记忆四层 L0-L3 两词永不相混）。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/admin/decision-models</span><span class="fake">规划原型</span></div>
       <div class="app">
@@ -17,6 +17,7 @@
           <a data-goto="workbench.html"><svg class="icon"><use href="#i-grid"/></svg>工作台</a>
           <a data-goto="agents.html"><svg class="icon"><use href="#i-bot"/></svg>Agent</a>
           <a data-goto="teams.html"><svg class="icon"><use href="#i-users"/></svg>小队中心</a>
+          <a data-goto="memory.html"><svg class="icon"><use href="#i-book"/></svg>记忆中心</a>
           <a data-goto="runtimes.html"><svg class="icon"><use href="#i-layers"/></svg>运行时</a>
           <a data-goto="chat.html"><svg class="icon"><use href="#i-chat"/></svg>对话中心</a>
           <div class="nav-grp">管理</div>
@@ -42,6 +43,45 @@
               <div class="callout ok" style="margin:0"><p><b>两步制（AC-0b）：</b>①登记进目录（连通+健康态）②按用途逐个绑定（路由决策 / 对话分诊 / 简单任务派发 · 三个独立开关，默认全关）。<b>两步全过才生效</b>；未绑定 = 决策代码路径零调用，界面无「建议启用」骚扰。</p></div>
               <div class="callout warn" style="margin:0"><p><b>域 owner 变更后旧绑定失效需重绑</b>（不可变 principal 纪律 §1.6.5 ⑤）；训练数据不出本域（§6.24）。当前生产版本 = <span class="mono">Jev-Style-Qwen3.5-2B</span>（v4-ft 已过门槛待切）。</p></div>
             </div>
+
+            <!-- ══ 数据回流（训练工厂）· RSI S19（已过审）：接线三根线，不重做上方两步制管线 ══ -->
+            <p class="h2p" id="sec-reflow" style="margin-top:var(--s4)">数据回流（训练工厂）<span class="tiny dim"> · RSI S19 接线三根线：①纠错即标注（限人类）②溯源批次账 ③双门 + 轮次预算 —— 两步制 / 自测门 / 回滚均系既有裁定，只接不重做</span></p>
+            <div class="callout"><p class="tiny" style="margin:0"><b>层级≠权限同源的命名纪律：记忆层 L0-L3 与出域 D0-D3 与知识资产域晋升门三词分立</b>；回流的一切产物过自测＋人工抽检，无全自动上线。</p></div>
+
+            <p class="h2p" style="margin-top:var(--s3)">① 候选样本队列 <span class="tiny dim">对话 + 决策日志中「微模型决策被人工纠正」的条目 = 天然高价值标签对（假设反转：纠错即标注）；仍过人工抽检门才进训练集，不自流</span></p>
+            <table class="tbl compact">
+              <thead><tr><th>样本摘要</th><th>来源</th><th>纠正人角色</th><th>内容域</th><th>入集状态</th></tr></thead>
+              <tbody>
+                <tr><td>分诊误标「代码评审→前端缺陷」被人工改回 · 纠正标签对入库</td><td class="mono">对话 c-92 · t14</td><td><span class="chip info">人类 · 张三</span></td><td><span class="chip mono">front-end</span></td><td><span class="chip warn" data-click data-toast="人工抽检（演示）：通过→入下一批次；不通过→弃用并留痕。无自动入集路径">待抽检</span></td></tr>
+                <tr><td>路由决策 dept-7 应为 dept-3 · 人工纠正对</td><td class="mono">决策日志 dl-3f8a</td><td><span class="chip info">人类 · 李四</span></td><td><span class="chip mono">quant-research</span></td><td><span class="chip ok">已入 b-7 批次</span></td></tr>
+                <tr style="opacity:.5"><td>reviewer-bot 纠正 router-mini 的派发选择</td><td class="mono">决策日志 dl-9c01</td><td><span class="chip">Agent · reviewer-bot</span></td><td><span class="chip mono">code-review</span></td><td><span class="chip bad">已排除：Agent 互评不进集（防自我强化环）</span></td></tr>
+                <tr><td>用户对该纠正对打「不纳入」→ 入库即带用户级撤销标</td><td class="mono">对话 c-77 · t3 · dl-51b7</td><td><span class="chip info">人类 · 王五</span></td><td><span class="chip mono">quant-research</span></td><td><span class="chip bad">拒 · 已撤销</span> <span class="tiny dim">→ b-7 记「待重训」（见 ②）</span></td></tr>
+              </tbody>
+            </table>
+
+            <p class="h2p" style="margin-top:var(--s3)">② 训练集批次账 <span class="tiny dim">每版数据集 = 对话时间范围 + 来源清单 + 批次归属；检疫区样本永不入集（接 S17#6）</span></p>
+            <div class="panel" id="sec-batch">
+              <table class="tbl compact" style="margin:0">
+                <thead><tr><th>批次</th><th>对话时间范围</th><th>样本数</th><th>合成占比（帽 20%）</th><th>来源清单</th><th>S19 溯源（撤销→待重训）</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">b-6</td><td class="mono">2026-08-01 ~ 2026-08-31</td><td class="mono">1,204</td><td><span class="chip ok">11% ≤帽 20%</span></td><td class="tiny">人工纠正对话 897 · 决策日志纠正 216 · 执行日志/probe 机验 91 · <b>检疫区来源 0</b></td><td class="tiny mono">撤销样本 0</td></tr>
+                  <tr><td class="mono">b-7</td><td class="mono">2026-09-01 ~ 2026-09-30</td><td class="mono">1,486</td><td><span class="chip warn">18% ≤帽 20%</span></td><td class="tiny">人工纠正对话 1,138 · 决策日志纠正 296 · 执行日志/probe 机验 52 · <b>检疫区来源 0</b></td><td><span class="chip warn">撤销样本 2 条 → 待重训</span> <span class="tiny dim mono">dl-51b7 · c-77·t3 —— 下轮重训时剔除并记新批次，不即刻全量</span></td></tr>
+                </tbody>
+              </table>
+              <p class="small dim" style="margin:8px 0 0">无溯源＝遗忘只能全量重删（Machine Unlearning 综述 arXiv 2407.20516 · 文献已核验）——所以溯源与「纳入/撤销」标在对话<b>入库时</b>即打，成本前置。</p>
+            </div>
+
+            <p class="h2p" style="margin-top:var(--s3)">③ 双门自测结果 <span class="tiny dim">intent-cls-mini · 第 2 轮回流 · 每轮重训后先过双门再谈提交</span></p>
+            <table class="tbl compact">
+              <thead><tr><th>门 / 预算</th><th>本轮数</th><th>判定</th></tr></thead>
+              <tbody>
+                <tr><td>门 1 · 冻结金标 holdout</td><td class="mono">accuracy 84.1%（上轮 82.7% ↑） · ECE 0.041</td><td><span class="chip ok">accuracy ↑ 且 ECE ≤0.05 ✓</span></td></tr>
+                <tr><td>门 2 · 行为回归集</td><td class="mono">proxy-gold 背离 0.8% · 熔断线 3%</td><td><span class="chip ok">背离 &lt; 熔断线 ✓</span> <span class="tiny dim">背离即熔断；金标必留的定量依据 = reward 过优化曲线（arXiv 2210.10760 · 文献已核验）</span></td></tr>
+                <tr><td>回流轮次预算</td><td class="mono">2 / 3</td><td><span class="chip warn">余 1 轮即封顶</span> <span class="tiny dim">为据：Self-Rewarding LM（arXiv 2401.10020）实测仅 3 轮即漂移 → 轮次帽写死，不放开</span></td></tr>
+                <tr><td>合成样本占比</td><td class="mono">18% · 帽 20%</td><td><span class="chip ok">≤帽 ✓</span> <span class="tiny dim">且外部可验证信号优先（AZR 2505.03335 式：执行日志 / probe 回放可机验，先于自产评对话）</span></td></tr>
+              </tbody>
+            </table>
+            <div class="callout ok"><p class="tiny" style="margin:0"><b>与两步制的衔接（既有呈现不动）：</b>双门＋人工抽检全过才取得「提交」资格——提交＝进上方既有两步制（影子→灰度），回滚＝<b>批次冻结</b>（该批次封存、其样本退回候选队列）。本表是回流门，与 §6.24 门槛三指标各管一段：intent-cls-mini 未跑门槛评测，目录里评测行仍显示「未评测」，不借回流数字充数。</p></div>
           </div>
         </div>
       </div>
@@ -49,7 +89,7 @@
 
 <div class="drawer" id="dr-m-intent"><header><b>模型详情 · intent-cls-mini</b><span class="chip ok">healthy · 仅登记</span><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <div class="callout"><p class="tiny" style="margin:0"><b>登记 ≠ 评测 ≠ 绑定</b>——三步各自留痕；本模型停在第一步，故任何用途零调用（AC-0）。</p></div>
-<dl class="kv"><dt>模型 / 规模</dt><dd class="mono">intent-cls-mini · 0.6B</dd><dt>轨道</dt><dd>云 API（Key 已托管 · 平台不落明文）· 角色=<span class="mono">Jev-Style-Qwen3.5-2B</span> 的备轨（AC-A5）</dd><dt>类型 / 上限</dt><dd class="mono">Choice(12 类) · 选项集 ≤26</dd><dt>版本</dt><dd class="mono">v0.3 · 2026-09-21 登记 · 登记者 admin</dd><dt>健康态</dt><dd><span class="chip ok">healthy</span> · 最近校验 412ms（网络往返，无本地显存占用）</dd><dt>延迟</dt><dd class="mono">P95 89ms</dd><dt>评测：accuracy</dt><dd class="dim">未评测 —— 目录不显示猜测值（跑自测走 §6.24 评测任务）</dd><dt>评测：ECE</dt><dd class="dim">未评测</dd><dt>评测：决策一致率</dt><dd class="dim">未评测</dd><dt>已绑定用途</dt><dd>三项全关 <span class="tiny dim">（对话分诊 / 路由决策 / 简单任务均未绑定）</span></dd><dt>切换语义</dt><dd>本地轨不可达时自动切云并标 <span class="mono">source=cloud_api_fallback</span>；<b>数据出域需单独确认</b>（§6.25 L3 红线）</dd><dt>门槛</dt><dd class="mono">默认 accuracy ≥80% 且 ECE ≤0.05（服务端门禁）</dd><dt>审计</dt><dd class="mono">AF-2B8 登记 · 凭据写入 users/secret 表（裁定⑦）</dd></dl>
+<dl class="kv"><dt>模型 / 规模</dt><dd class="mono">intent-cls-mini · 0.6B</dd><dt>轨道</dt><dd>云 API（Key 已托管 · 平台不落明文）· 角色=<span class="mono">Jev-Style-Qwen3.5-2B</span> 的备轨（AC-A5）</dd><dt>类型 / 上限</dt><dd class="mono">Choice(12 类) · 选项集 ≤26</dd><dt>版本</dt><dd class="mono">v0.3 · 2026-09-21 登记 · 登记者 admin</dd><dt>健康态</dt><dd><span class="chip ok">healthy</span> · 最近校验 412ms（网络往返，无本地显存占用）</dd><dt>延迟</dt><dd class="mono">P95 89ms</dd><dt>评测：accuracy</dt><dd class="dim">未评测 —— 目录不显示猜测值（跑自测走 §6.24 评测任务）</dd><dt>评测：ECE</dt><dd class="dim">未评测</dd><dt>评测：决策一致率</dt><dd class="dim">未评测</dd><dt>已绑定用途</dt><dd>三项全关 <span class="tiny dim">（对话分诊 / 路由决策 / 简单任务均未绑定）</span></dd><dt>切换语义</dt><dd>本地轨不可达时自动切云并标 <span class="mono">source=cloud_api_fallback</span>；<b>D3 红线＝数据出域需单独确认</b>（§6.25 · 2026-10-23 命名消歧改号：出域 D0-D3 · 记忆四层 L0-L3 · 两词永不相混）</dd><dt>回流轮次</dt><dd>本模型第 2 轮回流 · 合成占比 <span class="mono">18%</span> <span class="tiny dim">（帽 20% · 双门自测见本页「数据回流」区 ③）</span></dd><dt>训练集</dt><dd class="mono">b-7（<a href="#sec-batch">来源账 →</a>）</dd><dt>门槛</dt><dd class="mono">默认 accuracy ≥80% 且 ECE ≤0.05（服务端门禁）</dd><dt>审计</dt><dd class="mono">AF-2B8 登记 · 凭据写入 users/secret 表（裁定⑦）</dd></dl>
 <p class="h2p" style="margin-top:var(--s4)">下一步（本页不代做）</p>
 <div class="timeline">
 <div class="tl-item"><b>①</b> 跑三指标自测 → §6.24 新建评测任务（内置公开基准子集 + 本域回放样例）</div>
@@ -86,7 +126,7 @@
 
 <div class="drawer" id="dr-recommend"><header><b>/决策模型 推荐 · 只给方案不代装</b><span style="flex:1"></span><button class="btn sm" data-close>关闭 ✕</button></header><div class="body">
 <div class="callout"><p class="tiny" style="margin:0">命令来自对话中心斜杠命令（AC-D1，仅对已开能力的域生效）；<b>本页零执行</b>——复制即可，装不装由你定（§6.25 AC-E4）。</p></div>
-<dl class="kv"><dt>机器画像</dt><dd class="mono">macOS 15 · Apple M1 Max · 32GB 统一内存 · Metal ✓</dd><dt>判定</dt><dd>本地推理 + 本地微调均可用（AC-B3 通过）</dd><dt>推荐 ①</dt><dd>先用已过的 <span class="mono">Jev-Style-Qwen3.5-2B</span> 做路由决策，阈值 0.60</dd><dt>推荐 ②</dt><dd>分诊任务族缺模型 → 用 §6.24 v4 配方微调，勿复用未过的 v3</dd><dt>不推荐</dt><dd>云轨承担 quant-research 分诊：数据出域需单独确认（L3 兜底）</dd></dl>
+<dl class="kv"><dt>机器画像</dt><dd class="mono">macOS 15 · Apple M1 Max · 32GB 统一内存 · Metal ✓</dd><dt>判定</dt><dd>本地推理 + 本地微调均可用（AC-B3 通过）</dd><dt>推荐 ①</dt><dd>先用已过的 <span class="mono">Jev-Style-Qwen3.5-2B</span> 做路由决策，阈值 0.60</dd><dt>推荐 ②</dt><dd>分诊任务族缺模型 → 用 §6.24 v4 配方微调，勿复用未过的 v3</dd><dt>不推荐</dt><dd>云轨承担 quant-research 分诊：数据出域需单独确认（D3 兜底 · §6.25 出域分级已改号 D0-D3，与记忆层 L0-L3 无关）</dd></dl>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:10px"># ① 起本地推理（示例 · 平台不代执行）
 llama-server -m ./Qwen3.5-2B-Q4_K_M.gguf --port 8080
 
@@ -97,7 +137,7 @@ curl -s http://127.0.0.1:8080/v1/models | head -c 200</pre>
 <div class="pop" id="pop-filter" style="max-width:420px"><p class="tiny dim" style="margin:0 0 6px"><b>筛选 · 轨道 / 健康态（演示态 mock open）</b></p>
 <table class="tbl compact"><thead><tr><th>轨道</th><th>命中</th></tr></thead><tbody>
 <tr data-click data-toast="筛选：本地（演示）· 3 个模型"><td>本地 · llama.cpp / LM Studio</td><td class="mono">3</td></tr>
-<tr data-click data-toast="筛选：云 API（演示）· 1 个模型 · 含数据出域标注"><td>云 API</td><td class="mono">1</td></tr>
+<tr data-click data-toast="筛选：云 API（演示）· 1 个模型 · 含 D3 数据出域标注"><td>云 API</td><td class="mono">1</td></tr>
 </tbody></table>
 <table class="tbl compact"><thead><tr><th>健康态</th><th>命中</th></tr></thead><tbody>
 <tr data-click data-toast="筛选：healthy（演示）· 2"><td><span class="chip ok">healthy</span></td><td class="mono">2</td></tr>
@@ -126,6 +166,6 @@ curl -s http://127.0.0.1:8080/v1/models | head -c 200</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已解绑 + 该用途决策调用计数归 0 · 审计 decision_model_unbound（演示）" data-close>确认解绑</button></div></div></div>
 
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:0 18px 6px"><b>演示数据说明：</b>模型名、量化、三指标数值、阈值与台账计数取自 §2.7 / §6.23–6.25 与 <span class="mono">.specs/small-model-decisions/REQUIREMENT.md</span> 的 AC 原文（accuracy ≥80% · ECE ≤0.05 · Q4 1.3GB · P95 112ms 均为文档实值）；决策样例时间线、域清单第 3 行与审计号为演示值。未评测处一律显示「—」不猜数。</p>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：Jev 模型行/名称 → 独立详情页 <span class="mono">decision-models__jev.html</span>（三指标+绑定域清单+决策时间线）· 「绑定到域」→ 独立详情页 <span class="mono">decision-models__bind.html</span>（两步开关 · 可编辑保存）· 「登记模型」→ 独立详情页 <span class="mono">decision-models__register.html</span>（轨道选择表单）· intent/v3ft/mbert 行 → 详情抽屉（只读 kv + 时间线）· 灰置行 → 原因 toast · 重探/回退 → toast · 下线/解绑 → 二次确认模态（原因必填+影响清单）· 顶栏「筛选」→ pop · Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:0 18px 6px"><b>演示数据说明：</b>模型名、量化、三指标数值、阈值与台账计数取自 §2.7 / §6.23–6.25 与 <span class="mono">.specs/small-model-decisions/REQUIREMENT.md</span> 的 AC 原文（accuracy ≥80% · ECE ≤0.05 · Q4 1.3GB · P95 112ms 均为文档实值）；决策样例时间线、域清单第 3 行与审计号为演示值。未评测处一律显示「—」不猜数。<b>「数据回流（训练工厂）」区为演示编造值</b>：样本来源号（<span class="mono">c-92 / c-77 / dl-3f8a / dl-9c01 / dl-51b7</span>）、批次号与样本数（<span class="mono">b-6 1,204 / b-7 1,486</span>）、自测与预算数（<span class="mono">84.1% / 82.7% / 0.041 / 0.8% / 18% / 11% / 帽 20% / 轮次 2/3</span>）均系虚构；机制本身（三根线、检疫区不入集、轮次帽、合成占比帽）出自已过审 <span class="mono">D-S19-model-rsi</span> 结论与已核验文献（arXiv 2407.20516 / 2401.10020 / 2210.10760 / 2505.03335）。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：Jev 模型行/名称 → 独立详情页 <span class="mono">decision-models__jev.html</span>（三指标+绑定域清单+决策时间线）· 「绑定到域」→ 独立详情页 <span class="mono">decision-models__bind.html</span>（两步开关 · 可编辑保存）· 「登记模型」→ 独立详情页 <span class="mono">decision-models__register.html</span>（轨道选择表单）· intent/v3ft/mbert 行 → 详情抽屉（只读 kv + 时间线）· 灰置行 → 原因 toast · 重探/回退 → toast · 下线/解绑 → 二次确认模态（原因必填+影响清单）· 顶栏「筛选」→ pop · 回流区「待抽检」chip → 抽检规则 toast（演示）· intent-cls-mini 详情抽屉「训练集 b-7（来源账 →）」→ 锚至本页「数据回流」区 ② 批次账（<span class="mono">#sec-batch</span>，仅滚动不弹层） · Esc 关闭所有浮层。</p>
 </body></html>
