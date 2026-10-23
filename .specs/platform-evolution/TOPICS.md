@@ -120,7 +120,7 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 
 | slug | 一句话 | 依据 | 轮次 | 状态 |
 |---|---|---|---|---|
-| S14-agent-creation | Agent 创建链路：入口×形态×生命周期×权限——补上原型缺失的创建向导 | 用户原话① + backend/routes/agents_api.py:42 已有 POST 创建口但原型无任何创建页（roles「实例化为 Agent」只是 toast） | 5 | 待审⑤ |
+| S14-agent-creation | Agent 创建链路：入口×形态×生命周期×权限——补上原型缺失的创建向导 | 用户原话① + backend/routes/agents_api.py:42 已有 POST 创建口但原型无任何创建页（roles「实例化为 Agent」只是 toast） | 5 | **通过·追认（10-23，原话「现在有team/小队的概念了」）** |
 | S15-agent-resource-model | Agent 资源关联模型：一个 Agent 应挂哪些资源（模型/工具/知识/记忆/工作流/配额/闸门/渠道…） | 用户原话「agent里边应关联那些资源」+ backend/models/agent.py 24 字段实态 + agent_knowledge/agent_memory/agent_probe/scheduled/human_approval/channel_config 六张关联表已在代码 | 5 | 待审⑤ |
 | S16-team-entity | Team 组织实体：team 管哪些资源哪些实体；语义辨析（组织团队 vs 多 Agent 协作组）与 Domain 3 字段壳的关系 | 用户原话②「team 可以管理由哪些资源 或者哪些实体」+ backend/models/domain.py 仅 name/owner_id/created_at + 全仓 grep 无 team + CLAUDE.md「Domain 不是安全边界」 | 5 | 待审⑤ |
 
