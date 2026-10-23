@@ -149,3 +149,16 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 > **前置裁定（用户 2026-10-23 原话，三条硬约束）**：①「糅合进我的 agentflow 的设计 如果有雏形或者相似的地方就在此基础上继续改」=深化既有件、**如无必要不要增加新的**（目标零新页）；②「修改相关对应的 md 文档和产品原型设计的 html 和 mock 界面」=允许动 `.specs` md + 原型 + PRODUCT-DESIGN；③「**不要改代码**」=裁定⑧继续生效，backend/frontend 零触碰。叠加既有边界：代码层禁自改进（第 6 轮前置裁定）与改进 harness 的边界必须在 CONCLUSION 显式对表——harness2 改的是 scaffold（prompt/工具/记忆/技能/编排=四类产物白名单内），不是平台代码；若其代码含「editor 可全量改 substrate」的危险默认，进《不该抄清单》。
 
 > **第 7 轮 ⑤ 完成（2026-10-23）**：S21 过审（用户「同意」）。R7-1..6 入 ROADMAP；不该抄 12 条随结论成文；实施波另 commit。
+
+---
+
+## 第 8 轮申报 · 二源「代码层」补扫（用户指示 2026-10-23）
+
+> 用户原话：「再次全面扫描mutical的各种设计文档和代码 / 扫描herness2的各种设计文档和代码 / 查看还有哪些可以合并融合到agentflow」。multica 此前只扫 46 篇文档（RECON-MULTICA-DOCS 在档），**代码 0 扫**；harness2 已全读但 ⑦映射表外仍有 internals 未映射（substrate/benchmarks/cli/tests）。硬约束沿用：糅合进既有件、无必要不加新页、零代码（裁定⑧）。
+
+| 子议题 | 题 | 事实依据 | 状态 |
+|---|---|---|---|
+| S22-multica-code | multica 服务器+客户端代码里「文档没写或写得不同」的机制，哪些可并入 agentflow 设计层 | server/ 1888 Go 文件 · packages/ 1673 · apps/ · CLI_AND_DAEMON.md · skills-lock.json · e2e/ | ② 深扫在途（三包并行） |
+| S23-harness2-internals | harness2 二遍：substrate/benchmarks/cli/tests 未映射件还能喂我们什么 | 前轮 RECON 已覆盖 ①-⑥ 面，本包只挖增量 | ② 深扫在途 |
+
+> 边界：S22/S23 均先出「增量清单+已覆盖不复述」，再由 ①③④ 收敛；⑤ 前禁进 ROADMAP。
