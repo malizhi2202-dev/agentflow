@@ -270,3 +270,5 @@
 ### 次批承诺（2026-10-23 · D-S16 口径收口附记）
 
 - **Team 编排资产次批**：`orchestration_instances / orchestration_templates` 加 `team_id+owner_kind` 两列（随 Team 实施波第二批，expand/contract 同法零回填）。此为收口投票中产品负责人备注的落账——**不得无限顺延**，解冻后排期须点名此项。
+
+- **〔第 8 轮补挂·实为第 5 轮收口〕Agent 资源模型字典（2026-10-23 过审）**：`DICT-agent-resource-model.md` 成文=四型档位/存储三裁定/验收五问/快照设计稿（两个读路径齐才立表）/S14 残余对账。解冻首批小手术=human_approval 补 FK + knowledge 挂载沿用连接表范式。
