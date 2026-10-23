@@ -158,7 +158,7 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 
 | 子议题 | 题 | 事实依据 | 状态 |
 |---|---|---|---|
-| S22-multica-code | multica 服务器+客户端代码里「文档没写或写得不同」的机制，哪些可并入 agentflow 设计层 | server/ 1888 Go 文件 · packages/ 1673 · apps/ · CLI_AND_DAEMON.md · skills-lock.json · e2e/ | ③ 已成文（R8-1…14）· ④ GD 在途 |
-| S23-harness2-internals | harness2 二遍：substrate/benchmarks/cli/tests 未映射件还能喂我们什么 | 前轮 RECON 已覆盖 ①-⑥ 面，本包只挖增量 | ③ 已成文 · ④ GD 在途 |
+| S22-multica-code | multica 服务器+客户端代码里「文档没写或写得不同」的机制，哪些可并入 agentflow 设计层 | server/ 1888 Go 文件 · packages/ 1673 · apps/ · CLI_AND_DAEMON.md · skills-lock.json · e2e/ | **通过（10-23「同意」·GD 8/6/0）** |
+| S23-harness2-internals | harness2 二遍：substrate/benchmarks/cli/tests 未映射件还能喂我们什么 | 前轮 RECON 已覆盖 ①-⑥ 面，本包只挖增量 | **通过（10-23）** |
 
 > 边界：S22/S23 均先出「增量清单+已覆盖不复述」，再由 ①③④ 收敛；⑤ 前禁进 ROADMAP。

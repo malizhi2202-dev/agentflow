@@ -272,3 +272,11 @@
 - **Team 编排资产次批**：`orchestration_instances / orchestration_templates` 加 `team_id+owner_kind` 两列（随 Team 实施波第二批，expand/contract 同法零回填）。此为收口投票中产品负责人备注的落账——**不得无限顺延**，解冻后排期须点名此项。
 
 - **〔第 8 轮补挂·实为第 5 轮收口〕Agent 资源模型字典（2026-10-23 过审）**：`DICT-agent-resource-model.md` 成文=四型档位/存储三裁定/验收五问/快照设计稿（两个读路径齐才立表）/S14 残余对账。解冻首批小手术=human_approval 补 FK + knowledge 挂载沿用连接表范式。
+
+## 第 8 轮（2026-10-23 · 用户「同意」）· 二源代码层并入 R8-1…14（GD 8/6/0）
+- **R8-1 基线翻转**：multica 代码实存 triage_state（483）与 rule_versions（186/189/449）——「无」清单①③改口径，待受理轴获同构实证；automations「queued 不可重放」翻正。
+- **R8-2…9 并入**（全落既有件）：归因瀑布四句/外部扩展同意契约（预留·非现状）七原则/凭据活性门/技能换内容保身份+四态冲突/kit-export 导出闭环/渠道投递三句/产物账本三件（13 键身份·内容指纹重算·kept 态）/提示词护栏三句+四层帽演示表+八条验收断言（§6.30 节内列表段）。
+- **R8-10 声明**：移动审批/推送=multica 实测零实现，我方如做即自研差异区。VISION 两句进 §1+诚实条款。
+- **观察登记（不进产品档）**：outbox 六态与表结构细节、planner 围栏/EXISTS 下推/facet 帽/浮点 409、`__op__`/`::numeric`/pg_bigm、WITH RECURSIVE/INTERVAL/墓碑递进、恒等式参数化/pin+checksum 双表/线性退避/两层重试/enum 三级降级/presence 两轴、desktop 崩溃恢复阶梯+通知主进程权威+zod API 兼容+乐观更新四前置（→解冻期客户端工程规约）、DemoAdapter 端到端优先于散点单测（→解冻期测试策略）。
+- 次批承诺不变：编排实例+模板列（第 7 轮②）仍挂账。
+
