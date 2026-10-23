@@ -57,6 +57,16 @@
               <span>共 9 条</span><span style="flex:1"></span>
               <span class="pill">上一页</span><span class="pill" style="border-color:var(--blue-border);color:var(--blue)">1</span><span class="pill">2</span><span class="pill">下一页</span>
             </div>
+            <div class="panel" style="margin-top:var(--s3)">
+              <p class="h2p">项目怎么用起来 <span class="chip info">2026-10-23 补 · 演示口径</span></p>
+              <table class="tbl compact"><thead><tr><th>步骤</th><th>在哪</th><th>怎么操作</th></tr></thead><tbody>
+                <tr><td><b>① 创建流程</b></td><td class="tiny">本页顶栏「+ 新建工作流」</td><td class="tiny">= 创建流程：空白画布 / 从模板 / 从 Markdown 三种起始（步骤链与交接对象进画布编辑）→ <span class="pill" data-click data-goto="workflows__new.html">workflows__new.html</span></td></tr>
+                <tr><td><b>② 绑定到项目</b></td><td class="tiny">新建项目表单 · 工作流字段</td><td class="tiny"><a data-click data-goto="projects__new.html#sec-wf" style="color:var(--blue);cursor:pointer">projects__new.html「工作流」字段 = 可多选</a>：一次勾中多条流程（如 ☑ 开发流水线 wf-12 · ☑ 审查流水线 v3 wf-42 · 演示值）；绑定的流程决定<b>看板有哪些列</b>与<b>任务进入每一步时交给谁</b></td></tr>
+                <tr><td><b>③ 给已有项目切换</b></td><td class="tiny">项目详情抽屉 / 详情页</td><td class="tiny">projects.html 行内「详情」→ 抽屉「工作流」行「切换 ▸」（projects__agentflow.html 概览「工作流」行同口径入口）；<b>切换只影响之后新任务挑流程的候选集，不改已建任务的既有列归属</b>（演示口径）</td></tr>
+              </tbody></table>
+              <p class="tiny" style="margin:var(--s2) 0 4px"><b>谁挑流程（agentflow 差异 · 自研）：</b>项目可绑多条流程；<b>任务创建时由负责人挑一条并定执行时机——平台不会替任务自动选流程</b>，没有任何自动挑流动作。例：开发交给一个智能体（code-fixer · 演示），审查交给另一个（小队 / 审查 Agent），最后交给成员验收。</p>
+              <p class="tiny" style="margin:0"><b>Default（兜底）现状一行：</b>没有选用其他工作流时使用 <b>Default：所有状态都可用，也不会自动交接</b>——它是系统内建兜底口径，不在上方 9 行模板/流程列表内单列一行（本页无 Default 卡，故以本句交代）。</p>
+            </div>
           </div>
         </div>
       </div>
@@ -64,5 +74,5 @@
 <p class="small dim" style="margin:8px 0"><b>运行中的工作流不可删除</b>；删除 = 软删入归档，版本快照与运行历史保留、可随时恢复。彻底清除快照请进入画布执行「彻底删除」。<b>必填原因</b>，动作入审计。</p>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px">原因: [ 必填 · 例如：业务下线，保留快照备查                        ]</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已归档工作流「审查流水线」· 版本快照保留（演示）" data-close>确认删除</button></div></div></div><div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：工作流名→详情页（workflows__review-pipeline.html） · 执行→入队反馈 · 停止→二次确认 · 「+ 新建工作流」→新建起始页（workflows__new.html）· 删除→二次确认（软删入归档 · 版本快照保留 · 可恢复 · 必填原因）　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：工作流名→详情页（workflows__review-pipeline.html） · 执行→入队反馈 · 停止→二次确认 · 「+ 新建工作流」→新建起始页（workflows__new.html）· 删除→二次确认（软删入归档 · 版本快照保留 · 可恢复 · 必填原因） · <b>「项目怎么用起来」小区（2026-10-23 补 · 全为演示口径）</b>：①行「workflows__new.html」pill → 新建起始页 · ②行「projects__new.html『工作流』字段 = 可多选」→ 深链 <span class="mono">projects__new.html#sec-wf</span> · ③行与「谁挑流程」「Default 现状」两句为文字说明（无动作，其中切换语义 = 只影响之后新任务的候选集、不改已建任务列归属；wf-12 / code-fixer 为演示值）　按 Esc 关闭所有浮层。</p>
 </body></html>
