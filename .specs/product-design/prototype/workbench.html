@@ -44,6 +44,7 @@
               <div class="stat" data-click data-drawer="dr-stat-week"><div class="stat-label">本周完成</div><div class="stat-value" style="color:var(--green)">5</div><div class="stat-sub">↑ 较上周 +2</div></div>
               <div class="stat" data-click data-drawer="dr-stat-agent"><div class="stat-label">Agent 在线</div><div class="stat-value">9<span class="dim" style="font-size:14px">/11</span></div><div class="stat-sub">2 个离线</div></div>
             </div>
+            <p class="tiny dim" style="margin:0 0 var(--s4)"><b>怎么组织一次智能体干活 · 五句主线</b>（导航一行 · 内容只在 <span class="pill" data-goto="relations.html#five-lines" data-click>实体关系全景 · 五句主线</span> 那一处写，本页不复述）：<span class="pill" data-goto="relations.html#fl-1" data-click>① 任务 · 项目组织</span> <span class="pill" data-goto="relations.html#fl-2" data-click>② 触发 · 产生一条运行</span> <span class="pill" data-goto="relations.html#fl-3" data-click>③ 运行 · 落在某台机器</span> <span class="pill" data-goto="relations.html#fl-4" data-click>④ 沉淀 · Skill 与小队</span> <span class="pill" data-goto="relations.html#fl-5" data-click>⑤ 通知 · 进收件箱</span></p>
             <p class="h2p">进行中的变更 <span class="chip info">卡片标题可点 → 变更详情页（已升格 · 非抽屉）</span> <span style="flex:1"></span><span class="pill" data-click data-pop="pop-filter">筛选：进行中 · 全部阶段 ▾</span></p>
             <div class="grid g3" style="margin-bottom:var(--s4)">
               <div class="panel">
@@ -88,7 +89,7 @@
         </div>
       </div>
     </div>
-<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>Change ID 取自项目真实 <span class="mono">.specs/</span> 目录名，标题与进度为演示值。空态样式见表格底部虚线框（真实系统在无任何变更时展示）。阶段推进 / 门禁票型 / 产物清单在变更详情页内为演示演绎；阶段与门禁名取后端 <span class="mono">DEFAULT_WORKFLOW</span> 实测值（9 阶段 · G1 / 需求门 / G2 / G2a / Task / G3 / 测试门 / G4）。</p>
+<p class="tiny dim" style="padding:10px 18px"><b>演示数据说明：</b>Change ID 取自项目真实 <span class="mono">.specs/</span> 目录名，标题与进度为演示值。空态样式见表格底部虚线框（真实系统在无任何变更时展示）。阶段推进 / 门禁票型 / 产物清单在变更详情页内为演示演绎；阶段与门禁名取后端 <span class="mono">DEFAULT_WORKFLOW</span> 实测值（9 阶段 · G1 / 需求门 / G2 / G2a / Task / G3 / 测试门 / G4）。<b>统计卡下方新增的「五句主线」一行＝纯导航 pill</b>（只跳 <span class="mono">relations.html</span> 的 <span class="mono">#fl-1…#fl-5</span> 锚，本页不重写内容、不含任何数据）。</p>
 
 
 
@@ -201,5 +202,5 @@
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [迁移到新机器 · 以导入包为准       ]</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已合并而非覆盖：按文件逐个确认后写入 · 审计 chg:imported（演示）" data-close>逐文件合并</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已覆盖 · 旧产物进 backup/ · 审计 chg:overwritten（演示）" data-close>确认覆盖</button></div></div></div>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：变更卡片标题 / 表格 6 行 → <b>变更详情页</b>（阶段进度 + 门禁票型 + 产物清单 + 操作钮全宽，共 6 页 workbench__change-*.html）· 4 张统计卡 → 指标下钻抽屉（kv + 1 张子表，抽屉可容 · 保留） · 顶栏项目 chip → 切换 pop · 进行中筛选 → pop · 「+ 新建变更」→ pop 选择器（3 项 · 合规）· 导入 → 覆盖二次确认 modal· 「进入下一阶段」→ toast（G2a / SPEC 缺失的灰置与被挡示例）· 「回退阶段」「删除变更」→ 影响清单 + 必填原因二次确认（modal 合规 · 变更详情页内自带副本）　按 Esc 关闭所有浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：<b>统计卡下方「五句主线」一行 → 全部是跨页 pill，跳 <span class="mono">relations.html#five-lines / #fl-1…#fl-5</span>（无浮层、无 toast）</b> · 变更卡片标题 / 表格 6 行 → <b>变更详情页</b>（阶段进度 + 门禁票型 + 产物清单 + 操作钮全宽，共 6 页 workbench__change-*.html）· 4 张统计卡 → 指标下钻抽屉（kv + 1 张子表，抽屉可容 · 保留） · 顶栏项目 chip → 切换 pop · 进行中筛选 → pop · 「+ 新建变更」→ pop 选择器（3 项 · 合规）· 导入 → 覆盖二次确认 modal· 「进入下一阶段」→ toast（G2a / SPEC 缺失的灰置与被挡示例）· 「回退阶段」「删除变更」→ 影响清单 + 必填原因二次确认（modal 合规 · 变更详情页内自带副本）　按 Esc 关闭所有浮层。</p>
 </body></html>

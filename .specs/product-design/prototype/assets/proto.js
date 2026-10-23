@@ -8,9 +8,9 @@ document.addEventListener('click',e=>{
     location.href=t;return;}
   const t=e.target.closest('[data-toast],[data-drawer],[data-modal],[data-pop],[data-close]');
   if(!t)return;
+  if(t.dataset.toast){toast(t.dataset.toast);}
   if(t.hasAttribute('data-close')){closeAll();return;}
   e.preventDefault();
-  if(t.dataset.toast){toast(t.dataset.toast);}
   if(t.dataset.drawer){document.getElementById('drawer-mask').classList.add('on');document.getElementById(t.dataset.drawer).classList.add('on');}
   if(t.dataset.modal){document.getElementById('modal-mask').classList.add('on');document.getElementById(t.dataset.modal).classList.add('on');}
   if(t.dataset.pop){closeAll();const p=document.getElementById(t.dataset.pop);const r=t.getBoundingClientRect();p.style.left=Math.min(r.left,innerWidth-320)+'px';p.style.top=(r.bottom+6)+'px';p.classList.add('on');}

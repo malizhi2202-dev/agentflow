@@ -10,7 +10,7 @@
 .fld input:focus,.fld select:focus{outline:1px solid var(--blue);border-color:var(--blue)}
 .fld .hint{font-size:11px;color:var(--text-muted);margin-top:3px;display:block}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p3" style="color:inherit">回文档</a></span>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agents.html">Agent 列表</span><span class="pill" data-goto="agents__new.html">新建 Agent</span><span class="pill" data-goto="control-plane.html">Agent 管控</span><span class="pill" data-goto="tools.html">工具库</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agents.html">Agent 列表</span><span class="pill" data-goto="agents__new.html">新建 Agent</span><span class="pill" data-goto="control-plane.html">Agent 管控</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="relations.html#five-lines">五句主线（实体关系全景）</span><span class="pill" data-goto="replay.html">执行回放</span></div>
 <p class="proto-note"><span class="chip warn">演示数据</span>运行时发现 · 参考 Multica daemon/runtimes 模型：机器上的 daemon 探测外部 AI 编码 CLI（<span class="mono">dsh / claude / codex / hermes…</span>）注册为运行时 · <b>平台不本地跑模型</b> · 模型目录由运行时暴露（<span class="mono">dsh --list-models</span> · 固定名单 · 账号动态 · 由运行时托管）。</p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/runtimes · 运行时发现</span><span class="fake">演示数据</span></div>
@@ -43,6 +43,27 @@
             <div class="callout" style="margin:0 0 var(--s3)">
               <p><b>daemon ≠ 运行时。</b>① <b>daemon</b> 是「一台计算机上」的一个后台进程：随机器常驻、每 15s 向平台心跳一次，负责扫描本机 PATH 上的外部 AI 编码 CLI。② <b>运行时</b> = 该机器上「一个被探测到的 CLI 实例」——一台机器 × 一个 CLI × 一个协议族 = 一个运行时；<b>重启 daemon 是更新既有运行时记录，不是重复新建</b>。③ Agent 的每一次 run 一律由对应机器上的 daemon 调用外部框架 CLI（<span class="mono">dsh / hermes / codex / claude…</span>）执行，<b>AgentFlow 不本地运行 / 加载模型</b>。</p>
               <p style="margin-top:6px"><b>执行位置与数据边界：</b>CLI 本体与其登录凭据（账号 / OAuth / API key）始终留在成员本机，登录归 CLI 自己，平台不接收；平台服务器保存的是 issue、Agent 配置与 run 上下文 —— 其中 <b>Agent 自定义环境变量与 MCP 配置存放在服务端</b>、由 daemon 执行时注入，页面显示受敏感值规则限制（掩码 <span class="mono">***</span>）。</p>
+            </div>
+            <div class="grid g2" style="margin:0 0 var(--s3);align-items:start" id="rt-three">
+              <div class="panel tight">
+                <p class="tiny" style="margin:0 0 6px"><b>三词解耦 · 机器侧读法</b> <span class="chip info">口径卡 · 不新增数据</span> <span class="pill" data-goto="relations.html#fl-3" data-click>总句在 relations ③ →</span></p>
+                <p class="tiny" style="margin:0"><b>Agent 是身份</b>（配置 · 技能 · 闸门 · 归属）· <b>Runtime 是干活的那台机器</b> · <b>Run 是执行档案</b>。本页只管中间那个词——它的定义权威在上面「daemon ≠ 运行时」callout（一台机器 × 一个 CLI × 一个协议族 = 一个运行时；自定义 profile 由各机 daemon 在 PATH 上解析，出来的仍是同一形态），此处不复述。<b>Agent 不是长驻进程</b>——它没有常驻在任何机器上，只在被触发时由该机的 daemon 拉起一次 CLI 执行。</p>
+                <p class="tiny dim" style="margin:6px 0 0">数值不在此重复：在线判定与清理政策见本页下方 <a href="#rt-offline" style="color:var(--blue)">离线语义卡</a>（心跳 <span class="mono">15s</span> · 最迟约 <b>3 分钟</b>判离线 · 离线 <b>&gt;7 天</b>且无绑定自动清理），平台侧队列读法见 <span class="pill" data-goto="control-plane.html" data-click>管控面 · 调度底座</span>——同一条纪律两处各写一份必然漂移，此处只给指路。</p>
+              </div>
+              <div class="panel tight" id="rt-runfile">
+                <p class="tiny" style="margin:0 0 6px"><b>Run 是执行档案，不是队列项</b></p>
+                <p class="tiny" style="margin:0"><b>Run 不是队列项，排队只是 Run 的一个状态</b>——一次触发即生成一条 run（<span class="mono">queued</span> → <span class="mono">dispatched</span> → <span class="mono">running</span> → 终态），队列里那一格只是它此刻停着的地方。<b>每次执行产新记录，从不覆盖旧的</b>：重试、重跑、改派后重跑都是新的一条，旧 run 的步序 / tokens / 失败原因保持原样可回放。</p>
+                <p class="tiny dim" style="margin:6px 0 0">同一份口径的三处视图：任务右栏 run 历史（<span class="pill" data-goto="board__af-109.html" data-click>AF-109 →</span>）· 状态时间线与逐转写（<span class="pill" data-goto="replay.html" data-click>执行回放 →</span>）· 排队与双条件过期（<span class="pill" data-goto="control-plane.html" data-click>管控面 · 调度底座 →</span>）。本页只声明「一次 run 归一台机器上的一次执行」，不重复铺开那三张表。</p>
+              </div>
+            </div>
+            <div class="panel tight" id="rt-boundary" style="margin:0 0 var(--s3)">
+                <p class="tiny" style="margin:0 0 6px"><b>数据 / 执行边界（两列各管什么）</b> <span class="chip info">上方「执行位置与数据边界」句的表格化，不另开口径</span></p>
+                <table class="tbl compact" style="margin:0"><thead><tr><th>平台记录与协调</th><th>连接的电脑（daemon 侧）</th></tr></thead><tbody>
+                  <tr><td class="tiny">任务 · 评论 · 状态与流转</td><td class="tiny">编码工具本体与其登录凭据</td></tr>
+                  <tr><td class="tiny">Agent 配置与技能绑定</td><td class="tiny">代码目录与本地文件</td></tr>
+                  <tr><td class="tiny">Run 状态与结果（档案 · 见 <a href="#rt-runfile" style="color:var(--blue)">右卡</a>）</td><td class="tiny">真实文件改动与命令执行</td></tr>
+                </tbody></table>
+                <p class="tiny" style="margin:6px 0 0"><b>这层边界在云与自托管是同一套</b>——换部署形态不换分账位置。两条例外如实写：<b>① Agent 自定义环境变量与 MCP 配置存在服务端，执行时下发给 runtime</b>（界面对外只给掩码 <span class="mono">***</span>，见 <span class="pill" data-goto="agent-detail__config.html#sec6" data-click>配置 · 6 区</span>）；<b>② Domain 不是安全边界</b>（只是分组与共享记忆边界，见 <span class="pill" data-goto="control-plane.html" data-click>管控面</span> 与 <span class="pill" data-goto="agent-detail__config.html#sec2" data-click>配置 · 2 区</span>）——本页说的「边界」指数据与执行各落在哪一侧，不是权限隔离声明。</p>
             </div>
             <div class="panel tight" style="margin:0 0 var(--s3)">
               <p class="tiny muted" style="margin:0 0 8px">本机适配器探测 · <span class="chip ok">现状已实现</span>（<span class="mono">backend/runtime/adapters/</span> · <span class="mono">get_adapters()</span>）— 目前仅供「运行时监控」消费（RuntimeEvent 观测）；<b>本模块的目标是把探测结果接进运行时注册表与模型目录</b>。探测方式 = <b>CLI 日志目录指纹</b>（非 PATH 探测），解析其 JSONL 会话得 模型 / tokens / 工具调用 / @引用，缓存 60s。数值为演示。</p>
@@ -80,14 +101,14 @@
                 <tr class="row-off"><td><b>Qwen Code</b><div class="tiny muted mono">qwen</div></td><td class="tiny mono">ACP 族</td><td><span class="chip bad mono">offline · 0.5.0</span></td><td class="tiny">固定名单</td><td class="c"><span class="dot-yes">✓</span></td><td class="c"><span class="dot-yes">✓</span></td><td><span class="mono tiny">.qwen/skills/</span></td><td><span class="chip info">private · 仅 owner</span></td><td class="c mono">0</td><td class="mono tiny">—</td><td class="nowrap"><span class="btn link" data-toast="daemon 离线 · 模型目录暂不可读（演示）">查看模型目录</span>·<span class="btn link" data-toast="该运行时当前无 Agent 绑定（演示）">绑定 Agent</span>·<span class="btn link" data-toast="已置为 public · 全工作区成员可选用 · 仅共享路由权，不共享该 CLI 的登录凭据（演示）">置为公开</span>·<span class="btn link" style="color:var(--red)" data-click data-modal="md-del">删除</span></td></tr>
               </tbody>
             </table>
-            <div class="callout warn" style="margin-top:var(--s4)">
+            <div class="callout warn" style="margin-top:var(--s4)" id="rt-offline">
               <p><b>离线语义（daemon 失联时）：</b>① 心跳 15s，异常退出最迟约 <b>3 分钟</b>转离线；② <b>排队的 run</b> 不立即失败 —— 「重连宽限期 + 入队时长」<b>双条件</b>都满足才置失败；③ <b>在途 run</b> 随失联失败，可按策略<b>自动重试</b>（原机重连或改派其他在线运行时）；④ 离线 <b>&gt;7 天</b>且无 Agent 绑定的运行时<b>自动清理</b>；⑤ daemon 重启会重新注册本机全部运行时（更新既有记录）并<b>回收未正常结束的 run</b>。</p>
             </div>
           </div>
         </div>
       </div>
     </div>
-<p class="tiny dim"><b>演示数据说明：</b>2 台计算机 / 10 个运行时实例 / CLI 版本 / 并发 14/20 / 绑定数均为演示值；运行时模型对齐 Multica daemon-runtimes：daemon 心跳 15s · 离线判定 ≤3 分钟 · 全机并发 ≤20 · 单 Agent 默认 ≤6（生效取较小）· 本地运行时默认 private（仅 owner 可建 Agent，管理员也不例外）· public 只共享路由权不共享 CLI 登录凭据 · 模型目录由运行时暴露（<span class="mono">dsh --list-models</span> 的 id 形如 <span class="mono">provider/model</span>）· 支持矩阵取 providers.mdx 摘录 8 行。</p>
+<p class="tiny dim"><b>演示数据说明：</b>2 台计算机 / 10 个运行时实例 / CLI 版本 / 并发 14/20 / 绑定数均为演示值；运行时模型对齐 Multica daemon-runtimes：daemon 心跳 15s · 离线判定 ≤3 分钟 · 全机并发 ≤20 · 单 Agent 默认 ≤6（生效取较小）· 本地运行时默认 private（仅 owner 可建 Agent，管理员也不例外）· public 只共享路由权不共享 CLI 登录凭据 · 模型目录由运行时暴露（<span class="mono">dsh --list-models</span> 的 id 形如 <span class="mono">provider/model</span>）· 支持矩阵取 providers.mdx 摘录 8 行。<b>本轮新增三张卡（<span class="mono">#rt-three / #rt-boundary / #rt-runfile</span>）为口径卡，不新增任何数据</b>：三词解耦与「Run 是档案不是队列项」的总句在 <span class="mono">relations.html#fl-3</span>，数值与政策仍只在各自权威处写一次（离线语义卡 + 管控面调度底座 + 回放页）；边界两列 = 本页上方「执行位置与数据边界」句的表格化，例外两条（env/MCP 存服务端下发 · Domain 非安全边界）为既有事实。</p>
 
 <div class="pop" id="pp-models"><p class="tiny muted" style="margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em">claude · 账号动态目录（登录工作区账号 llm-team · 演示）</p>
 <table class="tbl compact"><tbody>
@@ -112,6 +133,6 @@
 <tr><td>排队 / 在途 run</td><td class="mono">0 / 0</td><td><span class="chip ok">无副作用</span></td></tr>
 </tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [该 CLI 已从此机卸载 · 清理陈旧实例   ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-close data-toast="运行时实例已删除 · profile 保留 · daemon 若仍在跑会重新注册（演示）">确认删除</button></div></div></div>
 
-<p class="tiny dim" style="padding:14px 18px">可点区演示：「⟳ 重新检测」→ toast · 「+ 添加自定义运行时」→ <span class="mono">md-custom</span> 模态（exec 数组约束 / 参数顺序 / 保留 flag 丢弃说明）· 每行「查看模型目录」→ toast（dsh 用 <span class="mono">dsh --list-models</span> 文案）或弹层（claude 行 → <span class="mono">pp-models</span> 账号动态目录）· 「绑定 Agent」→ toast 列出绑定 · 「置为公开 / 私有」→ toast · 「删除」→ <span class="mono">md-del</span> 二次确认（绑定 &gt;0 的行已置灰）· 概念与离线语义 callout 内 chip → 悬停 title　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：<b>新增三张口径卡为纯文本 + 跨页 pill</b>——<span class="mono">#rt-three</span> 内「relations ③ →」→ <span class="mono">relations.html#fl-3</span>、「离线语义卡」→ 本页 <span class="mono">#rt-offline</span> 就地滚动、「管控面 · 调度底座」→ <span class="mono">control-plane.html</span>；<span class="mono">#rt-boundary</span> 两条例外各指向 <span class="mono">agent-detail__config.html#sec6 / #sec2</span> 与管控面；<span class="mono">#rt-runfile</span> 三处视图 → <span class="mono">board__af-109.html</span> / <span class="mono">replay.html</span> / <span class="mono">control-plane.html</span>（三卡内无按钮动作、不产生写入）。<b>原有交互：</b>「⟳ 重新检测」→ toast · 「+ 添加自定义运行时」→ <span class="mono">md-custom</span> 模态（exec 数组约束 / 参数顺序 / 保留 flag 丢弃说明）· 每行「查看模型目录」→ toast（dsh 用 <span class="mono">dsh --list-models</span> 文案）或弹层（claude 行 → <span class="mono">pp-models</span> 账号动态目录）· 「绑定 Agent」→ toast 列出绑定 · 「置为公开 / 私有」→ toast · 「删除」→ <span class="mono">md-del</span> 二次确认（绑定 &gt;0 的行已置灰）· 概念与离线语义 callout 内 chip → 悬停 title　按 Esc 关闭浮层。</p>
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
 </body></html>
