@@ -123,3 +123,17 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 | S14-agent-creation | Agent 创建链路：入口×形态×生命周期×权限——补上原型缺失的创建向导 | 用户原话① + backend/routes/agents_api.py:42 已有 POST 创建口但原型无任何创建页（roles「实例化为 Agent」只是 toast） | 5 | 待审⑤ |
 | S15-agent-resource-model | Agent 资源关联模型：一个 Agent 应挂哪些资源（模型/工具/知识/记忆/工作流/配额/闸门/渠道…） | 用户原话「agent里边应关联那些资源」+ backend/models/agent.py 24 字段实态 + agent_knowledge/agent_memory/agent_probe/scheduled/human_approval/channel_config 六张关联表已在代码 | 5 | 待审⑤ |
 | S16-team-entity | Team 组织实体：team 管哪些资源哪些实体；语义辨析（组织团队 vs 多 Agent 协作组）与 Domain 3 字段壳的关系 | 用户原话②「team 可以管理由哪些资源 或者哪些实体」+ backend/models/domain.py 仅 name/owner_id/created_at + 全仓 grep 无 team + CLAUDE.md「Domain 不是安全边界」 | 5 | 待审⑤ |
+
+## 第 6 轮申报（2026-10-23 · 用户点名开轮：RSI 递归自我改进）
+
+> 用户原话：「一个是harnes框架自己的rsi **就是不断改进代码这个不要了 线上就要维持代码稳定**」「还有记忆和产物的rsi 比如总结的skill和沉淀的执行/调用失败反思 比如记忆分l0-l3的沉淀的不断改进」「还有就是模型自身的rsi 比如我把对话和能力为微调进入决策模型」「结合现有的大量论文和rsi架构设计给出方案」
+> **前置裁定（本轮第 0 步内即生效）**：代码层自改（平台自 patch / 自动重构 / 运行时改写 harness）**禁止**，线上稳定性优先，与裁定⑧同向；RSI 只作用于「产物」：技能库 / 知识空间记忆 / 编排配置模板 / 决策微模型权重。web_search 401 不可用，各子议题 ② 竞品节按 R11.1 降级为「未联网验证」。
+
+| slug | 一句话 | 依据 | 轮次 | 状态 |
+|---|---|---|---|---|
+| {slug} | 记忆与产物自进化：失败反思→候选技能/知识条→晋升门禁（L0-L3 接现有设计），运行时数据如何变成资产 | 用户原话「skill和沉淀的执行/调用失败反思」「记忆分l0-l3的沉淀」（〔2026-10-23 用户澄清〕此 L0-L3=腾讯记忆口径 L0对话原文/L1原子/L2场景/L3核心，非知识库总结写入分层）+ PRODUCT-DESIGN §6.9 既有两套 L0-L3 与 §6.25 数据出域第三套——三名冲突为本议题核心风险 + prototype/agent-detail.html 技能子栏（托管三层 workspace/agent/runtime） + backend/runtime/scanner.py 已在解析 JSONL 失败事件 | 6 | 待审⑤ |
+| {slug} | 编排与模板的自优化（配置层非代码层）：画布/路由/备援权重/阈值由执行数据驱动生成改进提案，人批后发布新版本 | 用户 RSI 需求范围裁定后余项 + 画布「Apply 必附原因·版本 v3→v4」既有纪律 + control-plane 备援权重可调 + wf-8 mock 真实迭代链 | 6 | 待审⑤ |
+| {slug} | 决策微模型自进化：对话与能力数据→微调→自测门→两步制上线（衔接已过审的 small-model-decisions，不重炒只接线） | 用户原话「把对话和能力为微调进入决策模型」+ .specs/small-model-decisions/（REQUIREMENT 4/4·P-product v7 过审·铁律两步制）+ prototype/decision-models.html | 6 | 待审⑤ |
+| {slug} | RSI 总治理：四类产物各自的门禁/回滚/防投毒/防失控循环；代码禁改边界成文；评估集防过拟合（Goodhart） | 用户原话「不要了 线上就要维持代码稳定」+ 项目纪律「必须人批在状态转换层」「两入口独立校验」「越权 404」+ squad「无轮次上限靠队列合并」既有事实 | 6 | 待审⑤ |
+
+> **第 6 轮 ⑤ 完成（2026-10-23）**：四子议题全部过审（用户「我同意」；S17 附「这俩可以合并吧」→ 合并方案定稿：记忆四层唯一管道+知识库=资产域+出域改号 D0-D3）。约束四条随结论进 ROADMAP。
