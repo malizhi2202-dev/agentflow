@@ -868,7 +868,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>能力标签</td><td><span class="mono">model_config_json.capabilities[]</span></td><td>能力分组的派生源，也是路由标签的来源</td></tr>
         <tr><td>并发上限</td><td><span class="mono">max_concurrency</span></td><td>负载率 = 当前并发 / 上限；为 0 时按 1 处理；生效并发取「daemon 全机 ≤20 与单 Agent ≤6」的较小值（§6.28）</td></tr>
         <tr><td>可见性</td><td><span class="mono">private</span> / <span class="mono">public</span></td><td>运行时默认 private、仅 owner 可置 public——public 只共享路由权，不共享该 CLI 的登录凭据（§6.28）</td></tr>
-        <tr><td>能力集</td><td>CLI 自定义参数 / 环境变量 / 集成 / 会话续跑</td><td>CLI 参数=<span class="mono">exec</span> 数组、无 shell 展开、禁放凭据；环境变量=服务端存、值不回读、owner/admin 解锁入审计、保留变量不可覆盖、专用端点整包保存；集成=外部服务授权连接；会话续跑=存会话 id（mcode 等不支持）。「复制到新运行时」：模型类字段清空重选，env 值与 MCP 配置从不复制（§6.4）</td></tr>
+        <tr><td>能力集</td><td>CLI 自定义参数 / 环境变量 / 集成 / 会话续跑</td><td>CLI 参数=<span class="mono">exec</span> 数组、无 shell 展开、禁放凭据；环境变量=服务端存、值不回读、owner/admin 解锁入审计、保留变量不可覆盖、专用端点整包保存；<b>集成=IM 通道连接器</b>——六类通道（飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM），卡片状态机＝未启用（平台 configured 门）/ 不可用预览 / 未连接 / 已连接（bot 身份回显）/ 无权限只读降级，Lark 扫码 device-flow、其余 BYO 密钥（保存前在线验证，400=无效、409=归属冲突），密钥三原则＝写-only 不回显 · 改密=断开重连 · AES-256-GCM+全局 DEK 落库（§3.3 <span class="mono">integrations</span> 表），断开=软撤销+必填原因，连接后闭环＝IM 消息→会话→run→回复写回，权限两档＝owner 自助（Lark/钉钉/自托管）vs 仅平台管理员（Slack/企微/Telegram）（§6.4·§7）；会话续跑=存会话 id（mcode 等不支持）。「复制到新运行时」：模型类字段清空重选，env 值与 MCP 配置从不复制（§6.4）</td></tr>
       </tbody>
     </table>
 
@@ -1134,7 +1134,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     </table>
 
     <h3 id="s3-3">3.3 数据模型</h3>
-    <p class="lead">26 张表按域归组如下（表名取自模型 <span class="mono">__tablename__</span>）。</p>
+    <p class="lead">26 张表按域归组如下（表名取自模型 <span class="mono">__tablename__</span>）；标「设计新表」的行为目标态（v13 裁定 · 裁定⑦ MySQL 权威档），现状代码尚无对应模型。</p>
     <table class="tbl">
       <thead><tr><th>域</th><th>表</th><th>关键字段 / 关系</th></tr></thead>
       <tbody>
@@ -1153,6 +1153,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
         <tr><td>知识源</td><td class="mono">knowledge_sources · <span class="mono">knowledge_tags</span> · <span class="mono">knowledge_source_tags</span></td><td>上传文件元数据、状态、标签多对多</td></tr>
         <tr><td>对话</td><td class="mono">conversations · <span class="mono">messages</span></td><td>会话与消息（含工具调用块）</td></tr>
         <tr><td>渠道</td><td class="mono">channel_configs</td><td>飞书 / 钉钉 / Slack / Telegram / 邮件配置与凭据</td></tr>
+        <tr><td>集成 <span class="chip warn">设计新表 · v13</span></td><td class="mono">integrations</td><td>Agent 级 IM 通道连接（与平台渠道不同层）：<span class="mono">channel_type</span> ∈ {lark, slack, dingtalk, wecom, telegram, self_hosted_im} 六类 · <span class="mono">config</span> JSONB <b>密文</b>（AES-256-GCM + 全局 DEK）· <span class="mono">status</span> ∈ {active, revoked}（<b>软撤销保留审计</b>）· <span class="mono">UNIQUE(workspace, agent, channel_type)</span>；配套入站去重、审计流水、绑定令牌 TTL 三表（裁定⑦ MySQL 权威档）。详见 §2.3 / §6.4 集成子栏</td></tr>
         <tr class="grp-row"><td colspan="3">观测与治理</td></tr>
         <tr><td>指标</td><td class="mono">metrics_raw · <span class="mono">session_metrics</span> · <span class="mono">trace_spans</span></td><td>原始指标 / 会话级 Token 与时长 / 跨 Agent 调用链</td></tr>
         <tr><td>审批</td><td class="mono">human_approvals</td><td>待办审批请求与决策记录</td></tr>
@@ -1376,9 +1377,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <h3 id="s5-4">5.4 Agent 详情（四标签）</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>Agent 列表 → 点击某行；或管控面三层树中的实例行</td></tr>
-      <tr><td><b>步骤</b></td><td>1. 概览（只读工作台：Now / 近 30 天 / 最近工作 + 右列只读卡）→ 2. 「工作」看运行 → 3. 「能力」子栏（指令 / 技能 / MCP / 集成 / 知识源与编排）逐项编辑 → 4. 「设置」子栏（通用 / Access / 环境 / CLI 参数 / 闸门 / 探活 / 危险区）→ 5. 归档 / 彻底删除 / 复制均在危险区，二次确认</td></tr>
-      <tr><td><b>反馈</b></td><td>四标签 + 二级子栏均走 <span class="mono">#view=</span> 深链；有未保存改动时切页会被 dirty 拦截；探活时间线逐条显示通过 / 失败；保存失败页内显示具体错误而非静默；头部只显 Updated 不显 Created</td></tr>
-      <tr><td><b>边界</b></td><td>三条横幅位：未绑定 runtime → 顶栏「Bind runtime」；无编辑权 → 页内 Lock read-only（不改 URL 不跳走）；归档态 → 只读 + Restore；env 值不回读、MCP 配置不回显；「环境」子栏仅 canEdit 时渲染入口；编辑不会自动重启实例</td></tr>
+      <tr><td><b>步骤</b></td><td>1. 概览（只读工作台：Now / 近 30 天 / 最近工作 + 右列只读卡）→ 2. 「工作」看运行 → 3. 「能力」子栏（指令 / 技能 / MCP / 集成 / 知识源）逐行编辑——分区集合与创建向导同源、两种入口一份配置 → 4. 「设置」子栏（访问 / 环境变量 / CLI 参数 / 执行设置 / 闸门；探活与危险区仅创建后出现）→ 5. 归档 / 彻底删除 / 复制均在危险区，二次确认</td></tr>
+      <tr><td><b>反馈</b></td><td>四标签 + 二级子栏均走 <span class="mono">#view=</span> 深链；有未保存改动时切页会被 dirty 拦截；保存分两套语义——低敏即存（技能开关 / MCP 行操作 / 知识源关联·移除）、高敏草稿（指令 / 环境变量 / CLI 参数）；探活时间线逐条显示通过 / 失败；保存失败页内显示具体错误而非静默；头部只显 Updated 不显 Created</td></tr>
+      <tr><td><b>边界</b></td><td>三条横幅位：未绑定 runtime → 顶栏「Bind runtime」；无编辑权 → 页内 Lock read-only（不改 URL 不跳走）；归档态 → 只读 + Restore；env 值不回读、MCP 配置不回显；IM 通道密钥写-only 不回显、改密=断开重连，连接权限两档（owner 自助 vs 仅平台管理员，§7）、通道列表全员只读；「环境」子栏仅 canEdit 时渲染入口；编辑不会自动重启实例</td></tr>
     </tbody></table>
 
     <h3 id="s5-5">5.5 编排画布</h3>
@@ -1726,7 +1727,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
 
     <!-- ─────────── 6.4 Agent 详情 ─────────── -->
     <h3 id="p4">6.4 Agent 详情 · 四标签</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span><strong>概览 / 工作 / 能力 / 设置</strong>四个一级标签，下设二级子栏，两级均走 <span class="mono">#view=</span> 深链、有未保存改动时切页被 dirty 拦截。概览是<strong>只读工作台</strong>（Now / 近 30 天 / 最近工作 + 右列只读卡），编辑动作全部收进「能力」与「设置」。头部只显示 Updated、刻意不显示 Created（创建时间归审计事件查）。三条横幅位：未绑定 runtime → 顶栏「Bind runtime」；无编辑权 → 页内 Lock read-only（不改 URL 不跳走）；归档态 → 只读 + Restore。全字段编辑另有升格落地页 <span class="mono">agent-detail__config.html</span>（16 分区，与详情页同源草稿槽、字段同源）。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span><strong>概览 / 工作 / 能力 / 设置</strong>四个一级标签，下设二级子栏，两级均走 <span class="mono">#view=</span> 深链、有未保存改动时切页被 dirty 拦截。概览是<strong>只读工作台</strong>（Now / 近 30 天 / 最近工作 + 右列只读卡），编辑动作全部收进「能力」与「设置」。头部只显示 Updated、刻意不显示 Created（创建时间归审计事件查）。三条横幅位：未绑定 runtime → 顶栏「Bind runtime」；无编辑权 → 页内 Lock read-only（不改 URL 不跳走）；归档态 → 只读 + Restore。全字段编辑另有升格落地页 <span class="mono">agent-detail__config.html</span>（16 分区，与详情页同源草稿槽、字段同源）。<b>创建向导（<span class="mono">agents__new</span>）与详情页共用同一分区集合与字段——两种入口一份配置，这是工具库「注册表单与详情字段同源」模式（§6.7）的推广。</b>规范分区集合＝身份 / 归属 / 运行时+模型 / 能力（指令 · 技能 · MCP · 集成 · 知识源）/ 设置（访问 Access · 环境变量 · CLI 参数 · 执行设置 · 闸门）；危险区与探活仅创建后配置、不进向导。</p>
     <p class="tiny dim">〔第 4 轮规划注〕P1-15 落地后，本页新增<b>「A2A 卡片」页签</b>（与四标签并列）：同一 Agent 对象的对外只读视图 + ⧉复制 + 未启用 capabilities 灰态——卡片是视图不是新实体。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/agents/1#view=v-overview</span><span class="fake">演示数据</span></div>
@@ -1789,7 +1790,9 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
                   </dl>
                 </div>
                 <div class="callout" style="margin-top:var(--s3)">
-                  <p class="tiny" style="margin:0"><b>二级子栏一览：</b>能力＝指令 / 技能（三层开关 + 版本 + 注入路径随运行时：<span class="mono">.dsh/skills/ · $CODEX_HOME/skills/ · per-run HERMES_HOME</span>）/ MCP（三态：字段省略=不变 · <span class="mono">null</span>=清空 · 对象=整体替换；含 token 不回显）/ 集成（外部服务授权连接）/ 知识源与编排；设置＝通用 / Access / 环境（canEdit 才渲染入口；值不回读、owner/admin 解锁入审计、保留变量不可覆盖、专用端点整包保存）/ CLI 参数（自定义参数 exec 数组 · 无 shell 展开 · 禁放凭据）/ 闸门 / 探活（可选平台侧服务健康 + daemon 15s 心跳）/ 危险区（归档软删 + Restore · 彻底删除 · 复制）。</p>
+                  <p class="tiny" style="margin:0"><b>二级子栏一览（分区集合与创建向导同源 · 两入口一份配置）：</b>能力＝指令 / 技能 / MCP / 集成 / 知识源；设置＝访问 Access / 环境变量 / CLI 参数 / 执行设置 / 闸门 / 探活（可选平台侧服务健康 + daemon 15s 心跳 · 仅创建后配置）/ 危险区（归档软删 + Restore · 彻底删除 · 复制 · 仅创建后配置）。</p>
+                  <p class="tiny" style="margin:8px 0 0"><b>能力区全量行级可编辑：</b>指令＝单条 Markdown 编辑器 + 双层模型——平台维护只读层随部署更新、不落库，用户层永不覆盖，claim 时两层合成注入运行时系统提示的 <span class="mono">## Agent Identity</span> 节；会话开场白＝≤3 行卡片（label≤80 / prompt≤4000 校验）。技能＝开关 + 新建 / 删除 / 改名（名称正则 + 查重；运行时注入层技能不可删除、只可停用；三层开关 + 注入路径随运行时 <span class="mono">.dsh/skills/ · $CODEX_HOME/skills/ · per-run HERMES_HOME</span>）。MCP＝行级增删改（表单 | JSON 双 tab，不可表单表达的类型禁用表单 tab、防静默改写；三态沿用：字段省略=不变 · <span class="mono">null</span>=清空 · 对象=整体替换；含 token 写-only redacted 不回显）。集成＝IM 通道连接器：六类通道（飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM）；卡片状态机＝未启用（平台 configured 门）/ 不可用预览 / 未连接 / 已连接（bot 身份回显）/ 无权限只读降级；连接流程＝Lark 扫码 device-flow、其余 BYO 密钥（password 遮蔽输入，保存前在线验证 auth.test/getMe/probe——400=密钥无效、409=归属冲突专属文案）；密钥三原则＝写-only 不回显、改密=断开重连、落库 AES-256-GCM+全局 DEK（§3.3）；断开＝软撤销 + 必填原因；连接后闭环＝IM 消息→会话→run→回复写回，未绑定用户经 redeem 链接双因子绑定；自托管 IM 含入站白名单；权限两档＝agent owner 自助（Lark/钉钉/自托管 IM）vs 仅平台管理员（Slack/企微/Telegram），通道列表全员只读（§7）。知识源＝关联 / 移除（移除仅解除引用、保留已摄入快照）/ 外部源「更新凭据」（写-only）。</p>
+                  <p class="tiny" style="margin:8px 0 0"><b>设置区编辑形态：</b>环境变量＝行 CRUD + <span class="mono">****</span> 保留哨兵 + 批量 .env 导入/导出双模（canEdit 才渲染入口、值不回读、owner/admin 解锁入审计、保留变量不可覆盖、专用端点整包保存等既有口径不变）。CLI 参数＝行级编辑器 + launch 预览（exec 数组 · 无 shell 展开 · 禁放凭据；参数顺序句见 §6.28）。<b>保存语义分级总句：</b>低敏即存（技能开关 / MCP 行操作 / 知识源关联·移除）与高敏草稿（指令 / 环境变量 / CLI 参数——入草稿槽、dirty 切栏拦截，与切页拦截同一机制）两套并存，分工线标注在栏头，用户无需猜测某栏保存形态。</p>
                 </div>
                 <div class="callout bad" style="margin-top:var(--s3)">
                   <p class="tiny" style="margin:0"><b>边界态示例：</b>未配置可选探活时时间线区显示「未配置服务健康探活，仅按 daemon 心跳判活」而非空列表报错；「复制到新运行时」= 模型类字段清空重选，env 值与 MCP 配置<strong>从不复制</strong>；归档后本页转只读、退出调度与探活、随时 Restore。</p>
@@ -3088,7 +3091,7 @@ edges:
     </div>
 
     <h3 id="p28">6.28 运行时发现</h3>
-    <p class="proto-note"><span class="chip warn">演示数据</span>执行环境的注册与探测（参考 Multica daemon/runtimes 模型）：机器上的 daemon 每 <b>15s 心跳</b>一次，扫描本机 PATH 探测外部 AI 编码 CLI（<span class="mono">dsh / Hermes / Codex CLI / Claude Code / Cursor Agent / Qwen Code / MiniMax mcode / Copilot…</span>）并注册为运行时——<strong>一台机器 × 一个 CLI × 一个协议族 = 一个运行时</strong>，daemon 重启更新既有记录而非重复新建。<b>平台不本地运行/加载模型</b>；CLI 登录凭据（账号 / OAuth / API Key）始终留成员本机，平台不接收。职责区分：本页=执行环境注册与探测；「运行时监控」（§6.10）=机器与会话观测。</p>
+    <p class="proto-note"><span class="chip warn">演示数据</span>执行环境的注册与探测（参考 Multica daemon/runtimes 模型）：机器上的 daemon 每 <b>15s 心跳</b>一次，扫描本机 PATH 探测外部 AI 编码 CLI（<span class="mono">dsh / Hermes / Codex CLI / Claude Code / Cursor Agent / Qwen Code / MiniMax mcode / Copilot…</span>）并注册为运行时——<strong>一台机器 × 一个 CLI × 一个协议族 = 一个运行时</strong>，daemon 重启更新既有记录而非重复新建。<b>平台不本地运行/加载模型</b>；CLI 登录凭据（账号 / OAuth / API Key）始终留成员本机，平台不接收。职责区分：本页=执行环境注册与探测；「运行时监控」（§6.10）=机器与会话观测。<b>与「集成」子栏互不混淆：</b>本页注册的是<strong>执行环境</strong>（CLI 凭据留本机、平台不接收）；§6.4「集成」接的是<strong>IM 消息通道</strong>（通道密钥 AES-256-GCM+全局 DEK 加密落平台库，§3.3）——两本账、两条链路，界面与文档不得互相指代。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/runtimes</span><span class="fake">演示数据</span></div>
       <div class="app">
@@ -3177,6 +3180,8 @@ edges:
         <tr><td>运行时监控</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td></tr>
         <tr><td>运行时发现（查看 / 探测）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-yes">●</td></tr>
         <tr><td>运行时置 public / 删改 <span class="chip bad">危险</span></td><td class="c dot-yes">●<span class="tiny dim">（仅 owner 可置 public）</span></td><td class="c dot-yes">●<span class="tiny dim">（仅本 runtime owner）</span></td><td class="c dot-no">—</td><td class="c dot-no">—</td></tr>
+        <tr><td>IM 通道连接 / 断开（飞书/Lark · 钉钉 · 自托管 IM）<span class="chip bad">危险</span></td><td class="c dot-yes">●</td><td class="c dot-yes">●<span class="tiny dim">（仅本 Agent owner 自助）</span></td><td class="c dot-eye">○<span class="tiny dim">（通道列表只读）</span></td><td class="c dot-eye">○<span class="tiny dim">（通道列表只读）</span></td></tr>
+        <tr><td>IM 通道连接 / 断开（Slack · 企业微信 · Telegram）<span class="chip bad">危险</span></td><td class="c dot-yes">●<span class="tiny dim">（仅此档）</span></td><td class="c dot-eye">○<span class="tiny dim">（通道列表只读，不可连接）</span></td><td class="c dot-eye">○<span class="tiny dim">（通道列表只读）</span></td><td class="c dot-eye">○<span class="tiny dim">（通道列表只读）</span></td></tr>
         <tr><td>监控仪表盘 / 调用链</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-eye">○</td><td class="c dot-eye">○</td></tr>
         <tr><td>告警中心（查看 / 确认）</td><td class="c dot-yes">●</td><td class="c dot-yes">●</td><td class="c dot-no">—</td><td class="c dot-yes">●</td></tr>
         <tr class="grp-row"><td colspan="5">治理（admin 与审查角色）</td></tr>
@@ -3227,6 +3232,10 @@ edges:
         <tr><td><b>凭据脱敏</b></td><td>平台侧界面与日志中的 API Key / 令牌一律显示为 <span class="mono">sk-***</span>（覆盖 sk- 与 sk-ant- 前缀）；运行时 CLI 凭据留本机、平台不接收。</td><td>§2.6</td></tr>
         <tr><td><b>Provider</b></td><td>旧代码 LLM 接入抽象（7 种：<span class="mono">openai / ollama / anthropic / hermes / deepseek / gemini / codex</span>），已退出 Agent 配置面——模型目录由运行时暴露（<span class="mono">provider/model</span> id），仅余平台侧服务沿用。</td><td>§2.3 · §3.4</td></tr>
         <tr><td><b>运行时</b></td><td>成员机器上的外部 AI 编码 CLI（dsh / Hermes / Codex CLI / Claude Code / Cursor Agent / Qwen Code / MiniMax mcode / Copilot…），由 daemon 扫 PATH 探测注册；一台机器 × 一个 CLI × 一个协议族 = 一个运行时。旧「运行时适配器」（claude_code / codex / hermes / xiaolongxia）是现状代码形态。</td><td>§2.3 · §6.28</td></tr>
+        <tr><td><b>集成</b><br><span class="tiny dim">integrations</span></td><td>Agent 能力子栏之一：<strong>IM 通道连接器</strong>（不是泛义的「外部服务授权」）。六类通道=飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM（含入站白名单）；卡片五态=未启用（平台 configured 门）/ 不可用预览 / 未连接 / 已连接（bot 身份回显）/ 无权限只读降级；连接后闭环=IM 消息→会话→run→回复写回。与运行时发现互不混淆（§6.28）。</td><td>§2.3 · §6.4 · §6.28</td></tr>
+        <tr><td><b>通道安装</b></td><td>把某类 IM 通道接到某 Agent 的连接单位：<span class="mono">integrations</span> 行按 <span class="mono">UNIQUE(workspace, agent, channel_type)</span> 一通道一安装；保存前在线验证（auth.test / getMe / probe；400=密钥无效、409=归属冲突专属文案）；Lark 走扫码 device-flow，其余 BYO 密钥。</td><td>§6.4 · §3.3</td></tr>
+        <tr><td><b>软撤销</b></td><td>断开/删除类动作的保留审计形态：<b>只置 <span class="mono">status=revoked</span>、不物理删行</b>，且必填断开原因；IM 通道断开（§6.4）与 <span class="mono">integrations</span> 表（§3.3）同此语义，重连=新安装。</td><td>§6.4 · §3.3</td></tr>
+        <tr><td><b>保留哨兵</b><br><span class="tiny dim">keep sentinel</span></td><td>写-only 字段（值永不回显）的行级编辑协议：提交时字段值等于字面 <span class="mono">****</span> 即表示「保留原值不变」，解决「不回显却要编辑该行其余内容」的矛盾；用于环境变量与 MCP token 等密钥类值。</td><td>§6.4</td></tr>
         <tr class="grp-row"><td colspan="3">知识与人机协作</td></tr>
         <tr><td><b>知识库</b></td><td>两层：公共知识（平台维护、所有项目与 Agent 只读）+ 知识空间（与项目 1:1，成员与项目自身可读写；跨空间经关联只读，越权统一 404）。摄入管道：文件 → 三重校验 → 分块 → 嵌入 → 可检索。</td><td>§2.8 · §6.9</td></tr>
         <tr><td><b>总结写入分层</b><br><span class="tiny dim">L0-L3</span></td><td>L0 原始记录 → L1 会话级摘要 → L2 主题级跨会话聚合（去重/置信/冲突人裁）→ L3 画像与高价值沉淀（人工审核门；晋升公共知识需平台管理员评审）。演示口径。</td><td>§2.8 · §6.9</td></tr>
@@ -3328,10 +3337,12 @@ edges:
     <p><b>A：</b>不撕——裁定⑦是<b>两档并存</b>：本地档 SQLite 默认 clone 即跑（六件套门票保住了）；<b>可计量追踪数据在真实部署一律 MySQL 权威库</b>——用户账号（users.json 退役）、会话与 PAT、口令哈希、错误与告警（进程内环形 500 条重启即丢的账一次清偿）、审计（audit.jsonl 表化）、变更账本 change_log、metrics_raw/trace_spans。判据一句话：<b>需要被计量、被追踪、被重启后还在的，进 MySQL；知识产物仍是一等公民走 .specs/ 文件；SQLite 只是本地体验档不是权威形态</b>。连带红利：metrics/trace 直读与 /metrics 导出都变成 MySQL 上的普通查询，AUTO_INCREMENT 缺口语义与 SQLite 同治（cursor 只增 + resync，两库通用纪律）。同日的凭据扫描另落一个工程项：encryption_service 短密钥零填充无 KDF 属代码缺陷（历史无凭据泄露，56 rev 全扫，见 ROADMAP 裁定附注）。</p>
     <h3>Q24 · 仓库是公开的，历史里到底有没有东西漏出去？</h3>
     <p><b>A：</b>查清了——<b>没有</b>。56 个 commit（main 5 + 已推送的 agent/* 分支 50+）100% 全量扫描非抽样，node_modules 排除后 588 唯一路径全过模式集（sk-/ghp_/xoxb/AKIA/webhook/私钥块/赋值式 key）：全部命中都是测试占位符或压缩产物误匹配；users.json、.env、*.pem/id_rsa 类文件<b>从未以对象形式出现在任何历史中</b>。所以无需紧急轮换任何东西。剩下的不是「泄露」而是三件「强度与卫生」（已入 P0-10）。漏区如实声明：二进制 blob 未逐字节扫、悬空对象不可证伪、远端分支枚举受 API 限流——若你记得某次手工测试真用过线上 key，给厂商标记可按 blob 精查补录。</p>
+    <h3>Q25 · Agent 能连外部 IM（飞书/Lark、Slack、钉钉…）直接收发消息吗？</h3>
+    <p><b>A：</b>能——Agent 详情「能力 → 集成」子栏就是 <b>IM 通道连接器</b>（§2.3 / §6.4）：六类通道＝飞书/Lark、Slack、钉钉、企业微信、Telegram、自托管 IM；Lark 扫码 device-flow、其余 BYO 密钥并保存前在线验证。权限两档：Lark/钉钉/自托管 IM 由 agent owner 自助连接，Slack/企业微信/Telegram 仅平台管理员，通道列表全员只读（§7）。密钥三原则：写-only 不回显、改密=断开重连、AES-256-GCM+全局 DEK 落库；断开=软撤销+必填原因、审计不丢（§3.3 <span class="mono">integrations</span>）。连上后的闭环＝IM 消息→会话→run→回复写回；平台侧未绑定的 IM 用户凭 redeem 链接双因子绑定才能触达。两句别混：这与 §6.8 对话中心「渠道」（平台级入口）不同层，更与 §6.28 运行时发现无关——后者注册执行环境、前者接消息通道。</p>
 </section>
 
   <footer class="doc-foot">
-    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）· <b>v11 · 2026-10-15：运行时口径同步</b>（本轮对齐 10 月原型：运行时=成员机器上的外部 AI 编码 CLI，daemon 15s 心跳探测注册、新增 §6.28 运行时发现；Agent 配置面废除 Provider/Base URL/API Key；Agent 详情=四标签；对话中心=1:1 私密会话；知识库=公共知识+知识空间（L0-L3）；用户级 Agent 1:1；角色=CustomRole 14 字段；画布 Apply=应用内 diff 模态；新建项目无起止时间；全文清除 LangGraph/LangChain/AutoGen/CrewAI 作为运行时的表述）· <b>v12 · 2026-10-15 · 任务化收敛与产物编辑下线</b>（产物文档编辑 UI 整节裁撤（§5.18/§6.18）→ 只读文件查看 §5.13/§6.13b 新增，能力地图/§5.0 可见性/§7 权限矩阵同步撤编辑行；阶段模型非孤立实证句入 §6.19；看板详情一律右侧统一抽屉 + 三视角任务列表同一组件（§6.20）；收件箱升级=点开通知即完整上下文线程 + 三类入箱条件（§6.21）；执行回放=任务回放、无独立列表页、入口链与「任务 › run › 执行回放」面包屑（§6.22）；全站「工作项→任务」改名于本版落地并做语义连带统一）</p>
+    <p><b>AgentFlow · 产品设计文档与界面原型</b> · v7 · 2026-09-22（v4「通过」v5「好的」已过审；v6→v7 按用户修订改参谋为零执行，v7 过审原话「通过」——均 2026-09-22）· <b>v8 · 2026-09-23：已过审 ✅（用户原话「通过」）</b>（第 4 轮 8 项补查：五差距+身份三连 → 六包结论 + p26/p27 新原型 + P1-14/15/16 建议条；ROADMAP 已回写第 4 轮节）· <b>v9 · 2026-09-23：已过审 ✅（原话「好的」）</b>（裁定⑦ MySQL 全文同步）· <b>v10 · 2026-09-23：呈审中</b>（P0-10 扫描三件 + Q24 + 存储两档收口）· <b>v11 · 2026-10-15：运行时口径同步</b>（本轮对齐 10 月原型：运行时=成员机器上的外部 AI 编码 CLI，daemon 15s 心跳探测注册、新增 §6.28 运行时发现；Agent 配置面废除 Provider/Base URL/API Key；Agent 详情=四标签；对话中心=1:1 私密会话；知识库=公共知识+知识空间（L0-L3）；用户级 Agent 1:1；角色=CustomRole 14 字段；画布 Apply=应用内 diff 模态；新建项目无起止时间；全文清除 LangGraph/LangChain/AutoGen/CrewAI 作为运行时的表述）· <b>v12 · 2026-10-15 · 任务化收敛与产物编辑下线</b>（产物文档编辑 UI 整节裁撤（§5.18/§6.18）→ 只读文件查看 §5.13/§6.13b 新增，能力地图/§5.0 可见性/§7 权限矩阵同步撤编辑行；阶段模型非孤立实证句入 §6.19；看板详情一律右侧统一抽屉 + 三视角任务列表同一组件（§6.20）；收件箱升级=点开通知即完整上下文线程 + 三类入箱条件（§6.21）；执行回放=任务回放、无独立列表页、入口链与「任务 › run › 执行回放」面包屑（§6.22）；全站「工作项→任务」改名于本版落地并做语义连带统一）· <b>v13 · 2026-10-15 · 能力全可编辑与 IM 集成</b>（三条裁定落档：① 创建向导与详情页共用同一分区集合与字段——两种入口一份配置，工具库同源模式推广（§6.4/§5.4）；② 集成=IM 通道连接器——六类通道 / 卡片五态状态机 / Lark device-flow 与 BYO 密钥在线验证 / 密钥三原则（写-only、改密=断开重连、AES-256-GCM+全局 DEK）/ 断开软撤销 / owner 自助与仅平台管理员两档 / 通道列表全员只读（§2.3·§6.4·§7·§6.28），§3.3 新增 <span class="mono">integrations</span> 设计表（MySQL 权威档）；③ 能力区全量行级可编辑 + 「低敏即存 / 高敏草稿」保存分级总句（指令双层模型与开场白卡 · 技能行 CRUD · MCP 双 tab · 知识源关联/移除/更新凭据 · env 保留哨兵与 .env 双模 · CLI 参数行编辑器+launch 预览，§6.4/§5.4）；§8 术语四行：集成 / 通道安装 / 软撤销 / 保留哨兵；FAQ 新增 Q25）</p>
     <p>第 4 轮证据链：<span class="mono">.specs/platform-evolution/D-{execution-isolation-2, declarative-api, otel-observability, a2a-protocol-surface, collaboration-layer-2, identity-and-security-2}</span> + <span class="mono">R4-CODEAUDIT.md</span>（2026-09-23，六路 agent 交叉验证）</p>
     <p>单文件自包含 HTML，零外部依赖（无 CDN / 无外链字体 / 无外部图片）；设计令牌与产品源码 <span class="mono">frontend/src/styles/tokens.css</span> 同源；§6 全部数据为演示假数据，其中 6.19–6.22 为<b>明确标注的规划原型</b>。</p>
     <p>数量口径来自对当前代码库与 <span class="mono">.specs/</span> 产物的实测扫描（2026-09-21）：后端 117 个 <span class="mono">.py</span> 模块（含 8 个测试文件）/ 28 个路由模块 / 169 个端点 / 132 条路径 / 19 个 ORM 模型模块 → 26 张表 / 24 个服务 + 5 个渠道适配器 / 4 个引擎模块 / 4 个运行时适配器；前端 100 个 <span class="mono">ts/tsx</span> / 34 个页面 / 28 个组件 + 13 个 Edge 组件 / 12 个 Zustand store。凡属推测或未实现的内容已在正文标注「待确认」。</p>

@@ -4,20 +4,48 @@
 <style>html,body{background:var(--bg-main)}.proto{margin:0;border:0;box-shadow:none}.demo-badge{position:fixed;top:10px;right:14px;z-index:80}
 .kbd{font-size:11px}
 .fld{margin-bottom:var(--s3)}
+.fld:last-child{margin-bottom:0}
 .fld label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px}
 .fld label b{color:var(--text)}
 .fld input,.fld select,.fld textarea{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:7px 9px;font:12.5px var(--font);width:100%}
 .fld input:focus,.fld select:focus,.fld textarea:focus{outline:1px solid var(--blue);border-color:var(--blue)}
 .fld .hint{font-size:11px;color:var(--text-muted);margin-top:3px}
 .fld textarea{min-height:88px;resize:vertical;font-family:var(--font-mono);font-size:11.5px}
+.fld input.mono,.fld input[type=password]{font-family:var(--font-mono);font-size:11.5px}
 .kvrow{display:grid;grid-template-columns:1fr 1fr auto;gap:var(--s2);align-items:center;margin-bottom:var(--s2)}
+.tbl input{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:6px 8px;font:12px var(--font);width:100%}
+.tbl input:focus{outline:1px solid var(--blue);border-color:var(--blue)}
 .cardpick{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s4);cursor:pointer}
 .cardpick.sel{border-color:var(--blue-border);background:var(--blue-bg)}
 .chip-toggle{cursor:pointer;border-color:var(--blue-border);color:var(--blue);background:var(--blue-bg)}
-.need{color:var(--red)}</style></head><body>
+.need{color:var(--red)}
+/* 两轴单选（互斥 radio · 纯 CSS 高亮，无 JS；radio 上绝不挂 data-toast） */
+.tri{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tri input[type=radio]{width:0;height:0;margin:0;padding:0;border:0;opacity:0}
+.tri label{border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg-main);padding:4px 10px;font-size:12px;color:var(--text-secondary);cursor:pointer}
+.tri label:hover{border-color:var(--blue-border);color:var(--text)}
+.tri input[type=radio]:checked+label{border-color:var(--blue-border);background:var(--blue-bg);color:var(--blue);font-weight:600}
+.tri input[type=radio]:focus-visible+label{outline:2px solid var(--blue);outline-offset:2px}
+/* 集成 = IM 通道连接器卡片 */
+.imgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
+@media (max-width:900px){.imgrid{grid-template-columns:minmax(0,1fr)}}
+.imcard{display:flex;flex-direction:column;gap:6px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s3) var(--s4)}
+.imcard.off{opacity:.6}
+.imhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.imlogo{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;font:700 12.5px var(--font-mono);background:var(--bg-input);border:1px solid var(--border-strong);color:var(--text-secondary)}
+.imlogo.on{background:var(--green-bg);border-color:rgba(92,184,120,.35);color:var(--green)}
+.imlogo.purple{background:var(--purple-bg);border-color:rgba(180,124,216,.32);color:var(--purple)}
+.imname{font-size:13px;font-weight:650;color:var(--text)}
+.imid{font:11px var(--font-mono);color:var(--text-muted);overflow-wrap:anywhere}
+.imact{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:2px}
+.detail-body h4.blk{scroll-margin-top:92px}
+a.pill{cursor:pointer;text-decoration:none}
+a.pill:hover{border-color:var(--blue-border);color:var(--blue)}
+.xchip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--blue-border);background:var(--blue-bg);color:var(--blue);border-radius:999px;padding:1px 8px;font:11.5px var(--font-mono);cursor:pointer}
+.xchip i{font-style:normal;opacity:.75}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">回文档</a></span>
 <div class="detail-top"><span class="pill" data-back="agents.html" data-click>← 返回 Agent</span><span class="crumb"><b>新建 Agent</b></span><span class="chip warn">演示 · 未保存</span></div>
-<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agents.html">Agent 列表</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="agent-detail.html">Agent 详情</span></div>
+<div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agents.html">Agent 列表</span><span class="pill" data-goto="agent-detail.html">Agent 详情</span><span class="pill" data-goto="agent-detail__config.html">完整配置（编辑）</span><span class="pill" data-goto="runtimes.html">运行时发现</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="knowledge.html">知识库</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="integration.html">对外集成</span><span class="pill" data-goto="audit.html">审计日志</span></div>
 <div class="detail-body">
 
 <p class="h2p">起始点 <span class="chip info">二选一 · 默认「空白创建」</span></p>
@@ -32,39 +60,57 @@
   </div>
 </div>
 
-<h4 class="blk">1 · 标识</h4>
-<div class="panel">
-  <div class="fld"><label>名称 <b class="need">*</b> <span class="dim">（工作区内唯一）</span></label><input placeholder="例如：审查 Agent · 标准"></div>
-  <div class="fld"><label>描述 <span class="dim">（仅展示、不进执行 prompt）</span></label><input placeholder="一句话说明该 Agent 做什么"></div>
+<div class="callout"><p class="tiny" style="margin:0"><b>本页 = 创建页平铺，节名与 Agent 详情页「能力 / 设置」子栏 1:1</b>（两种入口一份配置 · 字段同源，§6.4 裁定①）：详情页里叫「能力 · 指令」，这里就叫「能力 · 指令」；同一字段两份入口写同一草稿槽。<b>两处例外：</b>① <b>探活与危险区（归档 / 彻底删除）不在创建页</b>——见第 13 节后的说明条；② 本页第 7 节「能力 · 集成」渲染的<b>与详情页同一套卡片状态机组件</b>，卡上「已连接 / 未启用 / 不可用」等<b>全是演示态</b>（新建中的 Agent 真实态一律六卡皆「未连接」，凭据需 Agent 先落库才能建 <span class="mono">integrations</span> 行）。</p></div>
+<p class="tiny dim" style="margin:var(--s3) 0 6px">13 分区直达（与详情页子栏同名）：</p>
+<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:var(--s3)">
+  <a class="pill" href="#sec-id">1 身份</a><a class="pill" href="#sec-own">2 归属</a><a class="pill" href="#sec-rt">3 运行时 + 模型</a><a class="pill" href="#sec-instr">4 能力 · 指令</a><a class="pill" href="#sec-skill">5 能力 · 技能</a><a class="pill" href="#sec-mcp">6 能力 · MCP</a><a class="pill" href="#sec-int">7 能力 · 集成</a><a class="pill" href="#sec-know">8 能力 · 知识源</a><a class="pill" href="#sec-acc">9 设置 · 访问</a><a class="pill" href="#sec-env">10 设置 · 环境变量</a><a class="pill" href="#sec-cli">11 设置 · CLI 参数</a><a class="pill" href="#sec-exec">12 执行设置</a><a class="pill" href="#sec-gate">13 设置 · 闸门</a>
 </div>
 
-<h4 class="blk">2 · 指令 Instructions</h4>
+<h4 class="blk" id="sec-id">1 · 身份 <span class="chip info">= 详情页「设置 · 通用」标识</span></h4>
 <div class="panel">
-  <div class="fld"><label>Instructions <span class="dim">（职责 / 边界 / 交付要求，进入执行 prompt）</span></label><textarea placeholder="你审查前端 PR。只读 diff 和相关测试，不得直接改代码。按严重度排序列出发现，先列阻断项再列建议。产出 REVIEW.md。"></textarea></div>
-</div>
-
-<h4 class="blk">3 · 技能 <span class="chip info">多选 · 来自工具库</span></h4>
-<div class="panel">
-  <div style="display:flex;gap:6px;flex-wrap:wrap">
-    <span class="pill chip-toggle" data-click data-toast="已勾选技能：代码审查（演示）">代码审查 ✓</span>
-    <span class="pill chip-toggle" data-click data-toast="已勾选技能：需求拆解（演示）">需求拆解 ✓</span>
-    <span class="pill" data-click data-toast="已勾选技能：浏览器自动化（演示）">浏览器自动化</span>
-    <span class="pill" data-click data-toast="已勾选技能：Shell 执行（演示）">Shell 执行</span>
-    <span class="pill" data-click data-toast="已勾选技能：Git 操作（演示）">Git 操作</span>
-    <span class="pill" data-click data-toast="已勾选 MCP：filesystem（演示）">filesystem</span>
-    <span class="pill" data-click data-toast="已勾选 MCP：fetch（演示）">fetch</span>
+  <div class="grid g2">
+    <div class="fld"><label>名称 <b class="need">*</b> <span class="dim">（工作区内唯一）</span></label><input placeholder="例如：审查 Agent · 标准"><p class="hint">与详情页同一字段 · 改名不影响已引用的编排快照（快照按 Agent ID 绑定）。</p></div>
+    <div class="fld"><label>描述 <span class="dim">（仅展示、不进执行 prompt）</span></label><input placeholder="一句话说明该 Agent 做什么"><p class="hint">列表一行截断，详情页可展开全文。</p></div>
   </div>
-  <p class="hint" style="margin:6px 0 0">技能决定能力组派生（code-review / python / frontend）；禁用态技能仍可绑定但标注「禁用绑定」。注入路径随运行时而异（dsh → <span class="mono">.dsh/skills/</span>，codex → <span class="mono">$CODEX_HOME/skills/</span>，hermes → per-run HERMES_HOME）。</p>
+  <div class="fld" style="margin:0"><label>图标 <span class="dim">（单字 / 字母 · 列表与 @提及同源）</span></label>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <span class="imlogo" title="当前图标（绿色圈仅用于集成卡「已连接」）">审</span>
+      <span class="pill chip-toggle" data-click data-toast="图标已设为「审」（演示）">审 ✓</span>
+      <span class="pill" data-click data-toast="图标已设为「R」（演示）">R</span>
+      <span class="pill" data-click data-toast="图标已设为默认（取名称首字，演示）">跟随名称首字</span>
+    </div>
+    <p class="hint" style="margin-top:6px">不放图片上传：零依赖口径，图标只存一个字符，渲染由前端完成。</p>
+  </div>
 </div>
 
-<h4 class="blk">4 · 对话启动语 <span class="chip info">≤ 3 条 · 每条 label + prompt</span></h4>
+<h4 class="blk" id="sec-own">2 · 归属 <span class="chip info">域可空 · 项目 N:N</span> <span class="chip">= 详情页「设置 · 通用」归属域</span></h4>
 <div class="panel">
-  <div class="fld"><label>启动语 1</label><div class="kvrow"><input placeholder="label（如：帮我审查这个 PR）"><input placeholder="prompt（如：对当前 diff 执行标准审查并产出 REVIEW.md）"><span class="btn sm" data-click data-toast="已删除该启动语（演示）">删除</span></div></div>
-  <div class="fld"><label>启动语 2</label><div class="kvrow"><input placeholder="label"><input placeholder="prompt"><span class="btn sm" data-click data-toast="已删除该启动语（演示）">删除</span></div></div>
-  <p class="hint" style="margin:0">已填 1 / 3 条 · 最多 3 条。</p>
+  <div class="grid g2">
+    <div class="fld"><label>所属域 <span class="dim">（可选 · 不选=未分类 · 事后可在管控面指定）</span></label>
+      <select>
+        <option>默认域</option>
+        <option>生产域</option>
+        <option>测试域</option>
+        <option selected>未分类（默认 · 暂不归属）</option>
+      </select>
+      <p class="hint">不选即 <span class="mono">domain_id=NULL</span>（外键 SET NULL）。</p>
+    </div>
+    <div class="fld"><label>所属项目 <span class="dim">（可多选 · 与 Agent 为 N:N）</span></label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="pill chip-toggle" data-click data-toast="已关联项目：AgentFlow 主项目（演示）">AgentFlow 主项目 ✓</span>
+        <span class="pill" data-click data-toast="已关联项目：前端重构（演示）">前端重构</span>
+        <span class="pill" data-click data-toast="已关联项目：知识库运营（演示）">知识库运营</span>
+        <span class="pill" data-click data-toast="不选=不属于任何项目 · 详情页「工作」标签显示为空（演示）">不关联</span>
+      </div>
+      <p class="hint">一 Agent 可属多项目、一项目可绑多 Agent（N:N 连接表）；知识空间与项目 1:1，随项目自动创建。</p>
+    </div>
+  </div>
+  <div class="callout" style="margin:var(--s2) 0 0">
+    <p class="tiny" style="margin:0">① 创建时域是<b>可选</b>字段：不选即 <span class="mono">domain_id=NULL</span>（外键 SET NULL），Agent 不隶属任何域。<br>② 管控面把无域 Agent 收进「未分类」虚拟分组，随时可「归入域」事后指定。<br>③ 域只是分组与共享记忆边界，<b>非安全边界</b>；自动路由按能力标签；删除域时其 Agent 回落未分类。</p>
+  </div>
 </div>
 
-<h4 class="blk">5 · 模型与运行时 <span class="chip warn">平台不本地运行模型</span></h4>
+<h4 class="blk" id="sec-rt">3 · 运行时 + 模型 <span class="chip warn">平台不本地运行模型</span></h4>
 <div class="panel">
   <div class="callout" style="margin:0 0 var(--s3)">
     <p class="tiny" style="margin:0"><b>运行时 = 外部 AI 编码 CLI 框架</b>（DeepSeek Harness <span class="mono">dsh</span> / Codex CLI <span class="mono">codex</span> / Claude Code <span class="mono">claude</span> / Hermes <span class="mono">hermes</span> / Qwen Code <span class="mono">qwen</span>…），由机器上的 daemon 经「运行时发现」探测注册，run 一律调用这些 CLI。<b>模型目录由所选运行时暴露</b>（如 <span class="mono">dsh --list-models</span> 广告 · id 形如 <span class="mono">provider/model</span>），非平台内置。</p>
@@ -101,83 +147,233 @@
       <dt>Skill 注入路径</dt><dd class="mono">.dsh/skills/</dd>
     </dl>
   </div>
-  <p class="hint" style="margin:8px 0 0">能力随运行时而异，下方「执行设置」区联动显隐：选 <span class="mono">copilot</span> 时 MCP 绑定区隐藏（不支持平台托管 MCP）；选 <span class="mono">mcode</span> 时无会话续跑（每次新会话）、模型显示「由运行时托管」（选择器失效）。</p>
+  <p class="hint" style="margin:8px 0 0">能力随运行时而异，下方「12 · 执行设置」与「6 · 能力 · MCP」区联动显隐：选 <span class="mono">copilot</span> 时 MCP 绑定区隐藏（不支持平台托管 MCP）；选 <span class="mono">mcode</span> 时无会话续跑（每次新会话）、模型显示「由运行时托管」（选择器失效）。</p>
 </div>
 
-<h4 class="blk">6 · Access</h4>
+<h4 class="blk" id="sec-instr">4 · 能力 · 指令 <span class="chip info">= 详情页「能力 · 指令」同一字段</span></h4>
+<div class="panel">
+  <p class="h2p" style="margin-top:0">Instructions（System Prompt）<span class="chip">高敏草稿 · 切区前需落库</span></p>
+  <div class="fld"><label>指令正文 <span class="dim">（职责 / 边界 / 交付要求，进入执行 prompt）</span></label><textarea placeholder="你审查前端 PR。只读 diff 和相关测试，不得直接改代码。按严重度排序列出发现，先列阻断项再列建议。产出 REVIEW.md。"></textarea>
+    <p class="hint">与详情页「能力 · 指令」<b>同一字段</b>（一份配置两种入口）；指令拼在 run 的 system 段最前。<b>双层模型：</b>平台维护只读层随部署更新、不落库，用户层永不覆盖，claim 时两层合成注入运行时系统提示的 <span class="mono">## Agent Identity</span> 节。</p>
+  </div>
+  <p class="h2p">对话启动语（开场白）<span class="chip info">≤ 3 行卡片 · 每条 label + prompt</span></p>
+  <table class="tbl compact" style="margin-bottom:0"><thead><tr><th style="width:26%">label（≤80 字）</th><th>prompt（≤4000 字）</th><th style="width:96px">操作</th></tr></thead><tbody>
+    <tr><td>帮我审查这个 PR</td><td class="tiny muted">对当前 diff 执行标准审查并产出 REVIEW.md</td><td><span class="btn link" data-toast="已置为第 1 条（演示）">置顶</span><span class="btn link" style="color:var(--red)" data-toast="已删除该启动语（剩 1 条 · 演示）">删</span></td></tr>
+    <tr><td>列出高优先级发现</td><td class="tiny muted">按 severity 降序列出阻断项，先列阻断再列建议</td><td><span class="btn link" data-toast="已置为第 1 条（演示）">置顶</span><span class="btn link" style="color:var(--red)" data-toast="已删除该启动语（剩 1 条 · 演示）">删</span></td></tr>
+    <tr class="grp-row"><td colspan="3">第 3 条编辑中（新建态直接给输入位 · 详情页为行卡展开）</td></tr>
+    <tr><td><input placeholder="label（如：总结本次审查）"></td><td><input placeholder="prompt（如：输出一句话结论与建议）"></td><td><span class="btn link" style="color:var(--red)" data-toast="已清空第 3 条编辑位（演示）">清空</span></td></tr>
+  </tbody></table>
+  <p style="margin-top:var(--s2)"><button class="btn sm" data-toast="已达 3 条上限——刻意限 3，避免 DM 首屏变菜单（演示）">＋ 加一条</button> <span class="tiny dim" style="margin-left:8px">已填 2 / 3 条 · 点击启动语=复制进输入框，不自动发送 · 私密会话首屏按钮。</span></p>
+</div>
+
+<h4 class="blk" id="sec-skill">5 · 能力 · 技能 <span class="chip info">多选 · 来自工具库 · 低敏即存</span></h4>
 <div class="panel">
   <div style="display:flex;gap:6px;flex-wrap:wrap">
-    <span class="pill chip-toggle" data-click data-toast="已设 Access=仅我（默认 · 仅创建者可运行）（演示）">仅我 ✓</span>
-    <span class="pill" data-click data-toast="已设 Access=全工作区（演示）">全工作区</span>
-    <span class="pill" data-click data-toast="已设 Access=指定成员（需选成员）（演示）">指定成员</span>
+    <span class="pill chip-toggle" data-click data-toast="已勾选技能：代码审查（演示）">代码审查 ✓</span>
+    <span class="pill chip-toggle" data-click data-toast="已勾选技能：需求拆解（演示）">需求拆解 ✓</span>
+    <span class="pill" data-click data-toast="已勾选技能：浏览器自动化（该条目在工具库已禁用 → 绑上即「禁用绑定」态）（演示）">浏览器自动化</span>
+    <span class="pill" data-click data-toast="已勾选技能：Shell 执行（演示）">Shell 执行</span>
+    <span class="pill" data-click data-toast="已勾选技能：Git 操作（演示）">Git 操作</span>
+    <span class="pill" data-click data-toast="打开工具库技能选择器（演示 · 技能行 CRUD 在工具库）">＋ 加工具库技能</span>
   </div>
-  <p class="hint" style="margin:6px 0 0">默认「仅我」：仅创建者可运行。</p>
+  <p class="hint" style="margin:6px 0 0">技能决定能力组派生（code-review / python / frontend）；禁用态技能仍可绑定但标注「禁用绑定」。<b>三层开关逐层短路：</b>库条目全局启停 → 绑定关系本身 → 绑定级开关；注入路径随运行时而异（dsh → <span class="mono">.dsh/skills/</span>，codex → <span class="mono">$CODEX_HOME/skills/</span>，hermes → per-run HERMES_HOME），版本钉在 major 不自动跳。条目见 <span class="pill" data-goto="tools__code-review-skill.html" data-click>tools__code-review-skill.html</span>。</p>
 </div>
 
-<h4 class="blk">7 · 域归属 <span class="chip info">可空 · 不选=未分类</span></h4>
+<h4 class="blk" id="sec-mcp">6 · 能力 · MCP <span class="chip info">仅支持平台托管 MCP 的运行时显示</span></h4>
 <div class="panel">
-  <div class="fld" style="max-width:420px"><label>所属域 <span class="dim">（可选 · 事后可在管控面指定）</span></label>
-    <select>
-      <option>默认域</option>
-      <option>生产域</option>
-      <option>测试域</option>
-      <option selected>未分类（默认 · 暂不归属）</option>
-    </select>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <span class="pill chip-toggle" data-click data-toast="已绑定 MCP：filesystem（演示）">filesystem ✓</span>
+    <span class="pill chip-toggle" data-click data-toast="已绑定 MCP：fetch（演示）">fetch ✓</span>
+    <span class="pill" data-click data-toast="已绑定 MCP：postgres（演示）">postgres</span>
+    <span class="pill" data-click data-toast="打开工具库 MCP 选择器（演示 · 表单 | JSON 双 tab 在详情页）">＋ 加 MCP</span>
   </div>
-  <div class="callout" style="margin:var(--s2) 0 0">
-    <p class="tiny" style="margin:0">① 创建时域是<b>可选</b>字段：不选即 <span class="mono">domain_id=NULL</span>（外键 SET NULL），Agent 不隶属任何域。<br>② 管控面把无域 Agent 收进「未分类」虚拟分组，随时可「归入域」事后指定。<br>③ 域只是分组与共享记忆边界，<b>非安全边界</b>；自动路由按能力标签；删除域时其 Agent 回落未分类。</p>
+  <p class="hint" style="margin:6px 0 0">所选 dsh 支持托管 MCP；换成 copilot 时本区隐藏并注记「该运行时不支持平台托管 MCP」。MCP 配置含 token，<b>写-only 不回显</b>，存储与显示规则同环境变量（保留哨兵 <span class="mono">****</span> = 保持原值）。<b>三态规则：</b>请求体里字段省略=保持不变 · 显式 <span class="mono">null</span>=清空全部 · 传对象=整体替换。条目见 <span class="pill" data-goto="tools__mcp-filesystem.html" data-click>tools__mcp-filesystem.html</span>。</p>
+</div>
+
+<h4 class="blk" id="sec-int">7 · 能力 · 集成 <span class="chip info">IM 通道连接器 · 6 类通道</span></h4>
+<div class="callout"><p class="tiny" style="margin:0 0 4px"><b>连接后闭环：</b>IM 消息 → 平台会话 → Agent run → 回复写回原聊天。<b>一通道 × 一 Agent 仅一 bot</b>（<span class="mono">UNIQUE(workspace, agent, channel_type)</span>），同 Agent 可并挂多平台。集成不是泛义「外部服务授权」：GitHub / CI 那类属 MCP 与工具库，IM 通道才是本区。</p>
+  <p class="tiny" style="margin:0"><b>卡片五态：</b>未启用（平台 <span class="mono">configured</span> 门）/ 不可用预览 / 未连接 / 已连接（bot 身份回显）/ 无权限只读降级。<b>密钥三原则：</b>写-only 不回显 · 改密钥=断开重连 · AES-256-GCM + 全局 DEK 落库。<b>断开=软撤销</b>（<span class="mono">status=revoked</span> 不物理删行）+ 必填原因。</p></div>
+<div class="imgrid">
+
+  <div class="imcard">
+    <div class="imhead"><span class="imlogo on">飞</span><span class="imname">飞书 / Lark</span><span class="chip ok"><span class="dot idle"></span> 已连接</span></div>
+    <p class="imid">tenant_brand:lark · bot「AF-草稿演示号」 · app_id cli_a97f2b… · app_secret 写-only 不回显</p>
+    <p class="tiny muted" style="margin:0">device-flow 扫码授权（本平台唯一走扫码的通道）· 已绑定 3 名 IM 成员 · 未绑定用户走 redeem 链接双因子绑定 · 入站去重生效。</p>
+    <div class="imact"><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-im-disc">断开连接</button><button class="btn sm" data-click data-toast="查看入站会话：跳对话中心并按渠道过滤 lark（演示 · 本页不建会话）">查看入站会话</button></div>
+    <p class="tiny dim" style="margin:0"><span class="chip">权限档 · owner 自助连断</span> 飞书 / 钉钉 / 自托管 IM 由 <b>Agent owner</b> 自助连接与断开，无需管理员介入（本页演示用户=李工=owner）。</p>
+  </div>
+
+  <div class="imcard">
+    <div class="imhead"><span class="imlogo">S</span><span class="imname">Slack</span><span class="chip">未连接</span></div>
+    <p class="imid">tenant_brand:slack · bot —（未安装） · BYO 双 token</p>
+    <p class="tiny muted" style="margin:0">自带 App：填 Bot Token + App Token，保存前在线验证；平台不代建 App、不代开 Socket Mode。</p>
+    <div class="imact"><button class="btn sm primary" data-click data-modal="md-im-slack">⟴ 连接</button></div>
+    <p class="tiny dim" style="margin:0"><span class="chip warn">权限档 · 仅平台管理员</span> Slack / 企业微信 / Telegram 仅<b>平台管理员</b>可连断；通道列表对全员<b>只读可见</b>（非管理员打开本页 = 第五态「无权限只读降级」：连接钮不渲染）。</p>
+  </div>
+
+  <div class="imcard">
+    <div class="imhead"><span class="imlogo">钉</span><span class="imname">钉钉</span><span class="chip">未连接</span></div>
+    <p class="imid">tenant_brand:dingtalk · bot —（未安装） · client_id / client_secret</p>
+    <p class="tiny muted" style="margin:0">Stream 模式（长连接，无需公网回调地址）· 凭据为开放平台应用的 AppKey / AppSecret。</p>
+    <div class="imact"><button class="btn sm" data-click data-modal="md-im-ding">⟴ 连接</button></div>
+    <p class="tiny dim" style="margin:0">owner 自助档（同飞书）· 断开同样走软撤销 + 必填原因，与 <span class="mono">md-im-disc</span> 同一模态形态。</p>
+  </div>
+
+  <div class="imcard off">
+    <div class="imhead"><span class="imlogo">企</span><span class="imname">企业微信</span><span class="chip bad">未启用</span></div>
+    <p class="imid">tenant_brand:wecom · configured=false · bot —</p>
+    <div class="callout warn" style="margin:0;padding:8px 10px"><p class="tiny" style="margin:0"><b>平台未配置该通道凭证 → 卡不可点（<span class="mono">configured</span> 门）。</b>这是<b>平台级</b>开关（管理员在渠道配置里填企微 CorpID / Secret），与「本 Agent 是否连接」是两层：门没开时卡片灰、无连接入口，也不报错。</p></div>
+    <p class="tiny dim" style="margin:0">同属「仅平台管理员」档（见 Slack 卡）· 门开后本卡才出现 ⟴ 连接。</p>
+  </div>
+
+  <div class="imcard off">
+    <div class="imhead"><span class="imlogo">T</span><span class="imname">Telegram</span><span class="chip warn">不可用 · 预览</span></div>
+    <p class="imid">tenant_brand:telegram · bot_token —（传输未实现）</p>
+    <p class="tiny muted" style="margin:0"><b>传输实现未上线</b>：卡片按设计渲染，连接入口不显示（不是灰态可点，也不是未配置）。口径如实：<b>承诺小于实现</b>。</p>
+    <div class="imact"><span class="pill" data-click data-toast="Telegram 传输适配器尚未实现（§6.4 标注为预览位），不提供连接入口（演示）">为什么点不动</span></div>
+    <p class="tiny dim" style="margin:0">上线后将落在「仅平台管理员」档。</p>
+  </div>
+
+  <div class="imcard">
+    <div class="imhead"><span class="imlogo purple">托</span><span class="imname">自托管 IM <span class="tiny dim">（本站演示位：Tuitui）</span></span><span class="chip">未连接</span></div>
+    <p class="imid">tenant_brand:self_hosted_im · site「Tuitui」· base_url —</p>
+    <p class="tiny muted" style="margin:0">自建 IM 服务：三字段凭据 + <b>入站白名单</b>（<span class="mono">allow_from</span> 成员清单，只有列出的成员能唤起本 Agent）。</p>
+    <div class="imact"><button class="btn sm" data-click data-modal="md-im-self">⟴ 连接</button></div>
+    <p class="tiny dim" style="margin:0">owner 自助档（同飞书 / 钉钉）· 白名单改动即时生效并落审计 <span class="mono">im:allowlist_updated</span>。</p>
+  </div>
+
+</div>
+<p class="hint" style="margin:var(--s2) 0 0"><b>凭据边界：</b>IM 通道凭据由平台 AES-256-GCM + 全局 DEK 代管、界面永不回显；与「运行时 CLI 登录凭据留在运行时机器、平台不接收」是<b>两条通道</b>，互不上收。与 <span class="mono">§6.8</span> 对话中心「渠道」（平台级入口）不同层，也与 <span class="mono">§6.28</span> 运行时发现无关——后者注册执行环境，前者接消息通道。</p>
+
+<h4 class="blk" id="sec-know">8 · 能力 · 知识源 <span class="chip info">= 详情页「能力 · 知识源」</span></h4>
+<div class="panel">
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <span class="pill chip-toggle" data-click data-toast="已挂载知识空间文档：架构说明.md（已索引 1 chunk）（演示）">架构说明.md ✓</span>
+    <span class="pill chip-toggle" data-click data-toast="已挂载知识空间文档：规范.pdf（已索引 100 chunks）（演示）">规范.pdf ✓</span>
+    <span class="pill" data-click data-toast="外部源 Notion · 产品需求库：令牌过期 401 · 索引冻结，挂载后只读旧快照（演示）">Notion · 产品需求库（401 冻结）</span>
+    <span class="pill" data-click data-toast="打开知识库选择器：公共知识（只读）+ 本空间文档（演示 · 越权与不存在统一 404）">＋ 加挂知识源</span>
+  </div>
+  <p class="hint" style="margin:6px 0 0">两级模型：<b>公共知识</b>（平台维护 · 全体只读）+ <b>知识空间</b>（与项目 1:1 · 成员与项目自身可读写）；跨空间只有「关联知识库」这一条只读路径。<b>移除仅解除引用</b>，已摄入快照与历史 run 引用不变；外部源「更新凭据」为写-only。见 <span class="pill" data-goto="knowledge.html" data-click>knowledge.html</span>。</p>
+</div>
+
+<h4 class="blk" id="sec-acc">9 · 设置 · 访问 <span class="chip info">两轴分离 · 能看见 ≠ 能运行</span></h4>
+<div class="panel">
+  <div class="fld"><label>轴一 · 可见（谁能发现与读详情）</label>
+    <div class="tri"><input type="radio" name="vis" id="vis-priv"><label for="vis-priv">私有（仅我 + 共享成员）</label><input type="radio" name="vis" id="vis-ws" checked><label for="vis-ws">全工作区可见（默认）</label></div>
+    <p class="hint" style="margin-top:6px">默认＝<b>工作区可见 · 仅我可运行</b>（沿用旧 Access「仅我：仅创建者可运行」口径，只是拆成两轴表达）。<span class="pill" data-click data-toast="读当前选择：可见=全工作区 · 可运行=仅我（创建者） · 触发许可=cron+经渠道发起（原型不真发请求 · 演示）">读当前选择 ▸</span> 为演示取值钮（radio 本身不挂 toast——proto.js 会 preventDefault 掉 label 激活）。</p>
+  </div>
+  <div class="fld" style="margin-top:var(--s3)"><label>轴二 · 可运行（谁能起 run）</label>
+    <div class="tri"><input type="radio" name="run" id="run-me" checked><label for="run-me">仅我（默认 · 仅创建者可运行）</label><input type="radio" name="run" id="run-some"><label for="run-some">指定成员</label><input type="radio" name="run" id="run-all"><label for="run-all">全工作区（Everyone）</label></div>
+    <p class="hint" style="margin-top:6px">可运行成员（选「指定成员」时启用）：<span class="pill chip-toggle" data-click data-toast="已移出可运行成员：王五（演示）">王五 ✓</span><span class="pill" data-click data-toast="已加为可运行成员：张工（演示）">张工</span><span class="pill" data-click data-toast="已加为可运行成员：CI 机器人（服务账号）（演示）">CI 机器人</span> · 两轴独立评估、服务端双闸门：只放开可见<b>不会</b>获得运行权。</p>
+  </div>
+  <div class="fld" style="margin-top:var(--s3)"><label>机器触发许可 <span class="dim">（挂在动作者类型上，与人可运行两两取与）</span></label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="pill chip-toggle" data-click data-toast="已允许定时 / cron 触发本 Agent（演示）">定时 cron ✓</span>
+      <span class="pill" data-click data-toast="已允许 Autopilot 自动派发（演示）">Autopilot 派发</span>
+      <span class="pill" data-click data-toast="已允许 API / Webhook 触发（演示）">Webhook</span>
+      <span class="pill chip-toggle" data-click data-toast="已开启「允许经渠道发起」：IM 通道连上后才会被渠道唤起（演示）">允许经渠道发起 ✓</span>
+    </div>
+    <p class="hint" style="margin-top:6px"><b>「允许经渠道发起」是第 7 节「能力 · 集成」的前置能力位</b>：未开的 Agent 即使连了 IM 也不收渠道唤起。收紧许可不中断在途任务，下一轮派发才生效；运行权变更落审计 <span class="mono">agent:access_updated</span>。越权与「资源不存在」统一 404，不用状态码探测他人 Agent。</p>
   </div>
 </div>
 
-<h4 class="blk">8 · 执行设置</h4>
+<h4 class="blk" id="sec-env">10 · 设置 · 环境变量 <span class="chip info">值写-only · 保存后不回显</span></h4>
 <div class="panel">
-  <div class="fld"><label>并发上限</label><input value="6" style="width:120px"><span class="hint" style="display:inline;margin-left:8px">默认 6 · 实际与机器 daemon 的全机上限（20）取小</span></div>
   <div class="fld"><label>环境变量 <span class="dim">（键值 · 保存后仅回不透明计数）</span></label>
-    <div class="kvrow"><input placeholder="KEY（如 DEEPSEEK_API_KEY）"><input placeholder="值（仅写入 · 保存后不可读回）"><span class="btn sm" data-click data-toast="已删除该环境变量（演示）">删除</span></div>
-    <p class="hint" style="margin:0">已填 1 项 · 值仅 owner/admin 可解锁修改，读写均留审计；<span class="mono">PATH</span> / <span class="mono">HOME</span> 与平台保留变量不可覆盖；凭据一律放环境变量而非 CLI 参数。</p>
+    <div class="kvrow"><input class="mono" placeholder="KEY（如 DEEPSEEK_API_KEY）"><input type="password" placeholder="值（仅写入 · 保存后不可读回）"><span class="btn sm" data-click data-toast="已删除该环境变量（演示）">删除</span></div>
+    <p class="hint" style="margin:0">已填 1 项 · 值仅 owner/admin 可解锁修改，读写均留审计（<span class="mono">env:read</span> 记账）；<span class="mono">PATH</span> / <span class="mono">HOME</span> 与平台保留变量不可覆盖；凭据一律放环境变量而非 CLI 参数。行级编辑用保留哨兵 <span class="mono">****</span> 表示「保持原值不变」；env 只走专用端点整包保存（带 rev 乐观锁），常规更新请求体里带 env 一律 400。</p>
   </div>
+</div>
+
+<h4 class="blk" id="sec-cli">11 · 设置 · CLI 参数 <span class="chip info">exec 数组 · 无 shell 展开</span></h4>
+<div class="panel">
   <div class="fld"><label>CLI 自定义参数 <span class="dim">（逐项追加到运行时 CLI 调用）</span></label>
     <input value="--sandbox read-only" style="font-family:var(--font-mono)">
-    <p class="hint" style="margin:0">exec 数组逐项追加进 argv，<b>无 shell 展开</b>（<span class="mono">$VAR</span> / 引号 / 管道不解析）；<b>禁放凭据</b>——argv 可被同机进程 <span class="mono">ps</span> 看到，凭据走环境变量。</p>
-  </div>
-  <div class="fld"><label>MCP 服务绑定 <span class="dim">（来自工具库 MCP 条目 · 仅支持平台托管 MCP 的运行时显示）</span></label>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <span class="pill chip-toggle" data-click data-toast="已绑定 MCP：filesystem（演示）">filesystem ✓</span>
-      <span class="pill" data-click data-toast="已绑定 MCP：fetch（演示）">fetch</span>
-      <span class="pill" data-click data-toast="已绑定 MCP：postgres（演示）">postgres</span>
-    </div>
-    <p class="hint" style="margin:6px 0 0">所选 dsh 支持托管 MCP；换成 copilot 时本区隐藏并注记「该运行时不支持平台托管 MCP」。MCP 配置含 token，存储/显示规则同环境变量。</p>
-  </div>
-  <div class="fld"><label>集成 <span class="chip info">Integrations · 外部服务的授权连接</span></label>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <span class="pill chip-toggle" data-click data-toast="已连接集成：GitHub（issue 跟踪 · 凭据由平台代管）（演示）">GitHub · issue 跟踪 ✓</span>
-      <span class="pill chip-toggle" data-click data-toast="已连接集成：CI（演示）">CI ✓</span>
-      <span class="pill" data-click data-toast="已勾选集成：Notion（授权后运行时可读写）（演示）">Notion</span>
-      <span class="pill" data-click data-toast="已勾选集成：Slack（演示）">Slack</span>
-    </div>
-    <p class="hint" style="margin:6px 0 0">集成 = 外部服务（issue 跟踪 / GitHub、CI、Notion、Slack）的授权连接，凭据由平台代管、run 中供工具调用；与 MCP 的区别：MCP 是协议服务，集成是服务账号。</p>
-  </div>
-  <div class="fld"><label>会话续跑</label>
-    <p style="margin:0"><span class="chip ok">✓ 由运行时决定</span> <span class="tiny dim">所选 dsh 支持：平台存会话 id，下次 run 续跑；运行时够不到该会话时新建会话继续。（mcode 不支持，每次新会话）</span></p>
+    <p class="hint" style="margin:0">exec 数组逐项追加进 argv，<b>无 shell 展开</b>（<span class="mono">$VAR</span> / 引号 / 管道不解析）；<b>禁放凭据</b>——argv 可被同机进程 <span class="mono">ps</span> 看到，凭据走环境变量。详情页另有 launch 预览（拼好的 argv 原样可见）。</p>
   </div>
 </div>
 
-<h4 class="blk">9 · 安全闸门</h4>
+<h4 class="blk" id="sec-exec">12 · 执行设置 <span class="chip info">并发 + 会话续跑 · 随运行时联动</span></h4>
+<div class="panel">
+  <div class="grid g2">
+    <div class="fld"><label>并发上限</label><input value="6" style="width:120px"><p class="hint">默认 6 · 实际与机器 daemon 的全机上限（20）取小；负载率 = 当前并发 / 上限。</p></div>
+    <div class="fld"><label>会话续跑</label><p style="margin:0"><span class="chip ok">✓ 由运行时决定</span> <span class="tiny dim">所选 dsh 支持：平台存会话 id，下次 run 续跑；运行时够不到该会话时新建会话继续。（mcode 不支持，每次新会话）</span></p></div>
+  </div>
+  <p class="hint" style="margin:var(--s2) 0 0">本区两项随第 3 节运行时选择联动显隐；「续跑会话累计轮数超限后新建会话继续」的阈值在详情页「设置 · 通用」里调，创建页不给。</p>
+</div>
+
+<h4 class="blk" id="sec-gate">13 · 设置 · 闸门 <span class="chip info">= 详情页「设置 · 闸门」同一字段</span></h4>
 <div class="panel">
   <div class="grid g2">
     <div class="fld"><label>前置校验 gate_pre</label><select><option>开</option><option>关</option></select></div>
     <div class="fld"><label>后置校验 gate_post</label><select><option>开</option><option>关</option></select></div>
     <div class="fld"><label>IO 过滤 io_filter</label><select><option>none</option><option>sanitize</option><option>strict</option></select></div>
   </div>
-  <p class="hint" style="margin:0">闸门规则加在状态转换层（动作者 × 目标状态），不只写进提示词。</p>
+  <p class="hint" style="margin:0">闸门规则加在状态转换层（动作者 × 目标状态），不只写进提示词。收紧即时生效，放宽需 admin 复核。</p>
 </div>
+
+<div class="callout warn"><p class="tiny" style="margin:0"><b>归档 / 彻底删除、探活配置在创建完成后的详情页设置中</b>（对应详情页「设置 · 危险区」「设置 · 探活」两子栏）：新建对象没有「在途任务 / 编排引用 / 能力组漂移」可查，删除前置检查与探活只有在 Agent 真实存在后才有意义，故创建页<b>不设这两节</b>。创建完成后入口：<span class="pill" data-goto="agent-detail.html#view=sv-probe" data-click>设置 · 探活</span><span class="pill" data-goto="agent-detail__delete-agent.html" data-click>删除前置检查（独立页）</span></p></div>
 
 <div style="display:flex;gap:var(--s2);margin-top:var(--s5)">
   <button class="btn" data-back="agents.html">取消</button>
-  <button class="btn primary" data-toast="已创建 Agent「审查 Agent · 标准」· 未归属域（未分类）· 绑定运行时 DeepSeek Harness · 模型 deepseek-official/deepseek-chat（演示）">创建 Agent</button>
+  <button class="btn primary" data-toast="已创建 Agent「审查 Agent · 标准」· 未归属域（未分类）· 关联项目 AgentFlow 主项目 · 运行时 DeepSeek Harness · 模型 deepseek-official/deepseek-chat · 创建后 IM 六通道均为未连接，到详情页「能力 · 集成」再连（演示）">创建 Agent</button>
 </div>
-<p class="hint" style="margin:8px 0 0">复制语义：拷贝到新运行时时「模型 / thinking 档 / 服务档」清空需重选；环境变量值与 MCP 配置从不复制。</p>
+<p class="hint" style="margin:8px 0 0">复制语义：拷贝到新运行时时「模型 / thinking 档 / 服务档」清空需重选；环境变量值、MCP 配置与 IM 通道凭据从不复制（换实例=重新连接、重新在线验证）。</p>
 </div>
+
+<!-- ======== 浮层：IM 通道连接 / 断开模态 ======== -->
+<div class="modal" id="md-im-disc" style="width:min(520px,92vw)"><div style="padding:var(--s4)">
+  <b>断开「飞书 / Lark」连接？</b>
+  <p class="small dim" style="margin:8px 0 4px">软撤销：只把 <span class="mono">integrations.status</span> 置 <span class="mono">revoked</span>，<b>不物理删行</b>——<b>记录保留供审计 · 重连即重新授权</b>（新安装、新凭据）。当前 bot「AF-草稿演示号」停止收信，回复写回同时关闭。</p>
+  <table class="tbl compact" style="margin:0 0 var(--s3)"><tbody>
+    <tr><td>入站会话</td><td class="mono tiny">3 条活跃 · 历史 41 条</td><td><span class="chip warn">新消息不再唤起 run</span></td></tr>
+    <tr><td>未绑定用户 redeem 链接</td><td class="mono tiny">2 条（TTL 24h）</td><td><span class="chip bad">随连接一并失效</span></td></tr>
+    <tr><td>凭据本身</td><td class="mono tiny">app_id / app_secret 密文</td><td><span class="chip info">不删 · 也不回显</span></td></tr>
+  </tbody></table>
+  <div class="fld"><label>断开原因 <b class="need">*</b> <span class="dim">（必填 · 入审计 im:disconnect）</span></label><textarea placeholder="例：审查入口迁到自建 IM，飞书侧只保留人工对话…"></textarea><p class="hint">写-only · 改密钥=断开重连</p></div>
+  <div style="text-align:right;margin-top:var(--s2)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已软撤销飞书连接（status=revoked · 记录保留供审计）· 卡片回到「未连接」，⟴ 连接即重新授权（演示）" onclick="closeAll()">确认断开</button></div>
+</div></div>
+
+<div class="modal" id="md-im-slack" style="width:min(520px,92vw)"><div style="padding:var(--s4)">
+  <b>连接 Slack · 自带 App（BYO 双 token）</b>
+  <p class="small dim" style="margin:8px 0 4px">Bot Token 负责收发消息，App Token 负责 Socket Mode 长连接：<b>两个都是凭据</b>，缺一不可。仅平台管理员可提交（本演示用户具备平台管理员角色）。</p>
+  <div class="fld"><label>Bot Token <b class="need">*</b></label><input type="password" placeholder="xoxb-…" autocomplete="off"><p class="hint">输入即遮蔽 · 保存后不回显 · 写-only · 改密钥=断开重连</p></div>
+  <div class="fld"><label>App Token <b class="need">*</b></label><input type="password" placeholder="xapp-…" autocomplete="off"><p class="hint">输入即遮蔽 · 保存后不回显 · 写-only · 改密钥=断开重连</p></div>
+  <div class="callout" style="margin:0 0 var(--s2)"><p class="tiny" style="margin:0"><b>保存前平台在线验证：</b><span class="mono">auth.test</span> + <b>同 app 交叉校验</b>（两个 token 必须出自同一个 App）；不通过 <span class="mono">400</span> 原样回显拒因、<b>不落库</b>。</p>
+    <p class="tiny" style="margin:6px 0 0"><b>归属冲突：</b>该 app 已被别的 Agent 占用 → <span class="mono">409</span>，专属文案「此 Slack App（xapp-…4v7）已绑定 Agent「部署 Agent」，一通道一 Agent 仅一 bot；请先在原 Agent 断开，或换一个新 App」——<b>不自动抢占</b>。</p></div>
+  <p class="tiny dim" style="margin:0 0 var(--s2)">通过后：连接写入 <span class="mono">integrations</span>（AES-256-GCM + 全局 DEK）· 卡片转「已连接」并回显 bot 身份（<span class="mono">tenant_brand:slack · bot @AF-草稿演示号</span>）。</p>
+  <div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="验证通过（auth.test + 同 app 交叉校验）· 已连接（演示）· 未真实外发任何 Slack 请求" onclick="closeAll()">验证并连接</button></div>
+</div></div>
+
+<div class="modal" id="md-im-ding" style="width:min(520px,92vw)"><div style="padding:var(--s4)">
+  <b>连接钉钉 · Stream 模式（BYO 应用凭据）</b>
+  <p class="small dim" style="margin:8px 0 4px">填开放平台应用的 AppKey / AppSecret，平台<b>铸造 access_token 实测验证后落库</b>——拿不到有效 token 就不保存。owner 可自助提交，无需管理员。</p>
+  <div class="fld"><label>client_id（AppKey）<b class="need">*</b></label><input type="password" placeholder="dingx9k…" autocomplete="off"><p class="hint">输入即遮蔽 · 保存后不回显（AppKey 也是可枚举标识，一并遮蔽）· 写-only · 改密钥=断开重连</p></div>
+  <div class="fld"><label>client_secret（AppSecret）<b class="need">*</b></label><input type="password" placeholder="••••••••••••" autocomplete="off"><p class="hint">输入即遮蔽 · 保存后不回显 · 写-only · 改密钥=断开重连</p></div>
+  <div class="callout" style="margin:0 0 var(--s2)"><p class="tiny" style="margin:0"><b>验证链：</b>用这对凭据换一次 access_token 并探一次机器人身份 → 无效 <span class="mono">400</span>；该应用已绑别的 Agent → <span class="mono">409</span>（同「一通道一 Agent」口径）。长连接断线由 daemon 重连，平台不代持会话。</p></div>
+  <div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="access_token 实测通过 · 已连接（演示）· 卡片将回显 bot「AF-草稿演示号（钉钉）」" onclick="closeAll()">验证并连接</button></div>
+</div></div>
+
+<div class="modal" id="md-im-self" style="width:min(560px,92vw)"><div style="padding:var(--s4)">
+  <b>连接自托管 IM <span class="tiny dim">（本站演示位：Tuitui）</span></b>
+  <p class="small dim" style="margin:8px 0 4px">自建服务三字段：地址 + 应用凭据；连上后再探一次 <span class="mono">/whoami</span> 回显 bot 身份。owner 可自助连断。</p>
+  <div class="fld"><label>base_url <b class="need">*</b></label><input class="mono" placeholder="https://im.internal.example/tuitui"><p class="hint">仅 <span class="mono">https</span> · 出站走平台代理白名单，禁裸 IP、不跟随重定向 · 写-only · 改密钥=断开重连</p></div>
+  <div class="fld"><label>app_id <b class="need">*</b></label><input type="password" placeholder="tt_app_7c1…" autocomplete="off"><p class="hint">输入即遮蔽 · 保存后不回显 —— <b>app_id 在本通道按凭据处理</b>（自建服务用它认应用，泄露即可冒充），故同样遮蔽 · 写-only · 改密钥=断开重连</p></div>
+  <div class="fld"><label>app_secret <b class="need">*</b></label><input type="password" placeholder="••••••••••••" autocomplete="off"><p class="hint">输入即遮蔽 · 保存后不回显 · 写-only · 改密钥=断开重连</p></div>
+  <div class="fld" style="margin-bottom:var(--s2)"><label>入站白名单 <span class="mono tiny">allow_from</span> <span class="dim">（只有列出的成员 / 群能唤起本 Agent）</span></label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span class="xchip">li.gong<i data-click data-toast="已从 allow_from 移除 li.gong（演示 · 改动即时生效并落审计）">✕</i></span>
+      <span class="xchip">wang.wu<i data-click data-toast="已从 allow_from 移除 wang.wu（演示 · 改动即时生效并落审计）">✕</i></span>
+      <span class="xchip">grp:code-review<i data-click data-toast="已从 allow_from 移除群组 grp:code-review（演示 · 群内所有人失去唤起权）">✕</i></span>
+      <span class="pill" data-click data-toast="打开成员 / 群组选择器加入 allow_from（演示）">＋ 加成员</span>
+    </div>
+    <p class="hint">当前 3 项 · 空名单 = <b>全拒</b>（不是全放）；未绑定平台的 IM 成员仍需经 redeem 链接双因子绑定才可触达 · 写-only · 改密钥=断开重连</p>
+  </div>
+  <div class="callout" style="margin:0 0 var(--s2)"><p class="tiny" style="margin:0">验证：连 <span class="mono">base_url</span> + 用 app_id / app_secret 换 token + <span class="mono">/whoami</span> 三步合一，任一步失败 <span class="mono">400</span> 不落库；该 app_id 已被别的 Agent 连接 → <span class="mono">409</span>。</p></div>
+  <div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm primary" data-toast="probe 通过 · 已连接自托管 IM（Tuitui 演示位）· 回显 bot「AF-草稿演示号」· allow_from 3 项已生效" onclick="closeAll()">验证并连接</button></div>
+</div></div>
+
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">可点区演示：起始点二选一（默认「空白创建」）· 技能 / MCP / 集成 / Access 多选 chips（可点 → toast）· 运行时下拉仅列在线项（copilot 离线置灰）·「去运行时发现添加 →」→ <span class="mono">runtimes.html</span>（并行在建）·「⟳ 刷新模型列表」→ toast ·「所选运行时能力」小面板注记联动（copilot → 隐藏 MCP 区 · mcode → 无会话续跑、模型由运行时托管）· 域归属下拉默认「未分类」（domain_id=NULL）· 「取消」返回 <span class="mono">agents.html</span> · 「创建 Agent」→ toast（未分类 · dsh · deepseek-official/deepseek-chat）· 底部一行复制语义　按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px 0"><b>演示数据说明（同一 mock 宇宙）：</b>本页所有值均为演示编造，<b>不落库、不发真实请求</b>。新增宇宙值：<b>飞书通道已连接 · bot「AF-草稿演示号」（app_id cli_a97f…）</b>，与 <span class="mono">agent-detail.html</span> / <span class="mono">chat.html</span> 引用同一 bot 名；本页 <b>Slack 保持「未连接」</b>——它修正的是早先「Slack 已绑」的口径冲突：那条属<b>对话中心平台级渠道</b>（§6.8 · 工作区级安装），不等于本 Agent 的 IM 通道连接，两层不同主体、不同表（<span class="mono">channel_configs</span> vs <span class="mono">integrations</span>）。企业微信 <span class="mono">configured=false</span>（平台级门未开）、Telegram 传输未实现，均为如实标注而非遗漏。运行时 dsh 在线、模型 2 个、并发 6 / 全机 20、技能 2、MCP 2、知识源 2 + 1 冻结、启动语 2/3 条，沿用全站既有 mock 口径。</p>
+<p class="tiny dim" style="padding:14px 18px">可点区演示：起始点二选一（默认「空白创建」）· 顶部 13 个 <span class="mono">#sec-*</span> 分区锚点（节名与详情页「能力 / 设置」子栏 1:1）· 图标与项目 / 域 / 访问两轴 radio（可见 = <span class="mono">#vis-priv</span> <span class="mono">#vis-ws</span> · 可运行 = <span class="mono">#run-me</span> <span class="mono">#run-some</span> <span class="mono">#run-all</span> · radio 不挂 toast，取值走「读当前选择 ▸」）· 运行时下拉仅列在线项（copilot 置灰）·「去运行时发现添加 →」→ <span class="mono">runtimes.html</span> ·「⟳ 刷新模型列表」→ toast · 技能 / MCP / 知识源 / 触发许可 chips → toast · <b>能力 · 集成</b> 六卡：飞书「断开连接」→ <span class="mono">md-im-disc</span>（软撤销 + 必填原因）、「查看入站会话」→ toast；Slack「⟴ 连接」→ <span class="mono">md-im-slack</span>（BYO 双 token · 400 / 409 文案）；钉钉 → <span class="mono">md-im-ding</span>；自托管 IM（Tuitui 位）→ <span class="mono">md-im-self</span>（三字段 + <span class="mono">allow_from</span> 白名单 chips 可删可加）；企微灰卡（configured 门不可点）、Telegram「为什么点不动」→ toast · 深链 <span class="mono">#md-im-disc</span> 等可直达模态 · 探活 / 危险区位置 → 一条说明 callout · 「取消」返回 <span class="mono">agents.html</span> · 「创建 Agent」→ toast（提示创建后到详情页连 IM）· 底部两行分别为复制语义与演示数据说明　按 Esc 关闭浮层。</p>
 </body></html>

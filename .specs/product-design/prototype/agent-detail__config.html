@@ -38,20 +38,41 @@
 .detail-body h4.blk{scroll-margin-top:92px}
 a.pill{cursor:pointer;text-decoration:none}
 a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:none}
-.lockline{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text-muted)}</style></head><body>
+.lockline{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text-muted)}
+/* 折叠卡（只读层 · 原生 details，无 JS） */
+details.fold{border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg-main);margin:var(--s2) 0 0}
+details.fold>summary{cursor:pointer;list-style:none;display:flex;gap:6px;align-items:center;padding:8px 10px;font-size:12px;color:var(--text-secondary)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"▸";font-size:10px;color:var(--text-muted)}
+details.fold[open]>summary::before{content:"▾"}
+details.fold>summary b{color:var(--text);font-weight:600}
+.foldbody{padding:0 10px 10px;font-size:12px;color:var(--text-secondary)}
+/* 密钥行 / 开场白行卡 / 白名单 chip */
+.keyline{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.keyline input{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text);padding:6px 8px;font:11.5px var(--font-mono);min-width:180px}
+.keyline input[readonly]{color:var(--text-muted)}
+.keyline .lbl{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.tbl tr.subrow>td{background:var(--bg-main);border-top:0;padding-top:9px;padding-bottom:9px}
+.tbl tr.grey>td{color:var(--text-muted)}
+.xchip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--blue-border);background:var(--blue-bg);color:var(--blue);border-radius:999px;padding:1px 8px;font:11.5px var(--font-mono);cursor:pointer}
+.xchip i{font-style:normal;opacity:.8}
+.launch{background:var(--bg-input);border:1px solid var(--border);border-radius:var(--r-sm);padding:7px 9px;font:11.5px var(--font-mono);color:var(--text-secondary);overflow-wrap:anywhere}
+.launch em{font-style:normal;color:var(--purple)}
+.launch s{text-decoration:none;color:var(--text-muted)}</style></head><body>
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p4" style="color:inherit">回文档</a></span>
-<div class="detail-top"><span class="pill" data-back="agent-detail.html" data-click>← 返回 Agent 详情</span><span class="crumb"><span class="dim">Agent / 审查 Agent · 标准 /</span> <b>完整配置（编辑）</b></span><span class="chip ok">running</span><span class="chip warn">演示草稿 · 3 处改动</span></div>
+<div class="detail-top"><span class="pill" data-back="agent-detail.html" data-click>← 返回 Agent 详情</span><span class="crumb"><span class="dim">Agent / 审查 Agent · 标准 /</span> <b>完整配置（编辑）</b></span><span class="chip ok">running</span><span class="chip warn">演示草稿 · 4 处改动</span></div>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="agent-detail.html">Agent 详情</span><span class="pill" data-goto="agents.html">Agent 列表</span><span class="pill" data-goto="runtimes.html">运行时发现</span><span class="pill" data-goto="control-plane.html">管控面</span><span class="pill" data-goto="chat.html">对话中心</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="runtime.html">运行时</span><span class="pill" data-goto="tools.html">工具库</span><span class="pill" data-goto="knowledge.html">知识库</span><span class="pill" data-goto="audit.html">审计日志</span></div>
 <div class="detail-body">
-<p class="proto-note"><span class="chip warn">演示数据</span>本页为该 Agent 的<b>全字段编辑落地页</b>（16 分区 · 编辑态）。现值全为 mock：名称 <span class="mono">审查 Agent · 标准</span> · 运行时 <span class="mono">dsh · stdio · 在线</span> · 模型 <span class="mono">deepseek-official/deepseek-chat</span> · thinking <span class="mono">medium</span> · 并发 <span class="mono">6</span> · 域 <span class="mono">未分类</span> · 技能 3 · MCP 2 · 集成 2 · env 1 项 <span class="mono">***</span> · CLI <span class="mono">--sandbox read-only</span> · 闸门 4 行。</p>
+<p class="proto-note"><span class="chip warn">演示数据</span>本页为该 Agent 的<b>全字段编辑落地页</b>（17 分区 · 编辑态 · 9A 为新增「集成（IM 通道）」）。现值全为 mock：名称 <span class="mono">审查 Agent · 标准</span> · 运行时 <span class="mono">dsh · stdio · 在线</span> · 模型 <span class="mono">deepseek-official/deepseek-chat</span> · thinking <span class="mono">medium</span> · 并发 <span class="mono">6</span> · 域 <span class="mono">未分类</span> · 技能 3 · MCP 2 · 对外集成 2 · <b>IM 通道 6 平台 = 2 已连（飞书 · Slack）+ 2 未连接（钉钉 · 自托管 IM · 密钥行已解锁示例）+ 2 灰置（企微未启用 · Telegram 预览）</b> · env 1 项 <span class="mono">***</span> · CLI <span class="mono">--sandbox read-only</span> · 闸门 4 行。</p>
 
 <div class="callout">
   <p class="tiny" style="margin:0"><b>本页 = Agent 全字段编辑落地页</b>（对齐 Multica 详情页 Settings / Capabilities 字段全集，编辑态）。详情内各子区的「编辑」与本表单<b>字段同源、写同一草稿槽</b>：任一处改动，另一处读到的是同一份未提交草稿；<span class="btn link" style="padding:0" data-click data-drawer="dr-draft">看草稿槽与同源映射</span>。</p>
+  <p class="tiny" style="margin:6px 0 0"><b>两个「集成」不是一回事：</b>9 区 = <b>对外集成</b>（Agent 主动出站打 GitHub / CI / Notion，凭据属<b>连接</b>所有权）；<b>9A 区 = IM 通道</b>（消息<b>入站</b>唤起本 Agent 跑 run 并把回复写回原会话，密钥<b>写-only</b>、通道 × Agent <b>唯一 bot</b>）。两区的「断开」都只是<b>解除本 Agent 的引用 / 停用本 Agent 的通道</b>，撤销平台级凭据要去 <span class="mono">integration.html</span>。</p>
   <p class="tiny" style="margin:6px 0 0"><b>实例未重启需显式重启 · §5.4 边界：</b>保存只改期望态，<b>不会自动重启实例</b>——运行中的实例仍跑旧配置，需显式「重启」或等下一轮调和收敛。页内所有数值 / 凭据形态均为<b>演示</b>。</p>
 </div>
-<p class="tiny dim" style="margin:var(--s3) 0 6px">16 分区直达（页内锚点 · 各分区字段与本表单同源）：</p>
+<p class="tiny dim" style="margin:var(--s3) 0 6px">17 分区直达（页内锚点 · 各分区字段与本表单同源 · 9A = 集成（IM 通道））：</p>
 <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:var(--s3)">
-  <a class="pill" href="#sec1">1 标识</a><a class="pill" href="#sec2">2 域归属</a><a class="pill" href="#sec3">3 指令与启动语</a><a class="pill" href="#sec4">4 运行时与模型</a><a class="pill" href="#sec5">5 执行设置</a><a class="pill" href="#sec6">6 环境变量</a><a class="pill" href="#sec7">7 CLI 参数</a><a class="pill" href="#sec8">8 MCP</a><a class="pill" href="#sec9">9 集成</a><a class="pill" href="#sec10">10 技能</a><a class="pill" href="#sec11">11 知识源</a><a class="pill" href="#sec12">12 编排引用</a><a class="pill" href="#sec13">13 Access</a><a class="pill" href="#sec14">14 闸门</a><a class="pill" href="#sec15">15 探活</a><a class="pill" href="#sec16">16 危险区</a>
+  <a class="pill" href="#sec1">1 标识</a><a class="pill" href="#sec2">2 域归属</a><a class="pill" href="#sec3">3 指令与开场白</a><a class="pill" href="#sec4">4 运行时与模型</a><a class="pill" href="#sec5">5 执行设置</a><a class="pill" href="#sec6">6 环境变量</a><a class="pill" href="#sec7">7 CLI 参数</a><a class="pill" href="#sec8">8 MCP</a><a class="pill" href="#sec9">9 对外集成</a><a class="pill" href="#sec-im" style="border-color:var(--blue-border);color:var(--blue)">9A IM 通道</a><a class="pill" href="#sec10">10 技能</a><a class="pill" href="#sec11">11 知识源</a><a class="pill" href="#sec12">12 编排引用</a><a class="pill" href="#sec13">13 Access</a><a class="pill" href="#sec14">14 闸门</a><a class="pill" href="#sec15">15 探活</a><a class="pill" href="#sec16">16 危险区</a>
 </div>
 
 <h4 class="blk" id="sec1">1 · 标识</h4>
@@ -75,20 +96,33 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
   </div>
 </div>
 
-<h4 class="blk" id="sec3">3 · 指令与对话启动语</h4>
+<h4 class="blk" id="sec3">3 · 指令与开场白 <span class="chip info">用户层可编辑 · 平台层只读</span></h4>
 <div class="panel">
   <div class="fld"><label>指令 Instructions <b class="need">*</b> <span class="dim">（职责 / 边界 / 交付要求 · 进入执行 prompt）</span></label>
     <textarea>你审查前端 PR。只读 diff 与相关测试，不得直接改代码。
 职责：按严重度排序输出发现，先列阻断项再列建议。
 边界：不改代码、不合并、不回复外部评论。
 交付：产出 REVIEW.md（含逐条位置 / severity / 建议）。</textarea>
-    <p class="hint">现值 4 段 · 约 180 字（演示）。凭据不写进指令，仅由运行时与环境变量提供。</p>
-  </div>
-  <p class="tiny muted" style="margin:var(--s3) 0 6px;text-transform:uppercase;letter-spacing:.05em">对话启动语（≤ 3 条 · 每条 label + prompt）</p>
-  <div class="kvrow"><input value="帮我审查这个 PR"><input value="对当前 diff 执行标准审查并产出 REVIEW.md"><span class="btn sm" data-click data-toast="已删除该启动语（3 → 2 条 · 演示）">删除</span></div>
-  <div class="kvrow"><input value="列出高优先级发现"><input value="按 severity 降序列出阻断项，只给结论"><span class="btn sm" data-click data-toast="已删除该启动语（演示）">删除</span></div>
-  <div class="kvrow"><input value="总结本次审查"><input value="输出一句话结论 + 是否可合并建议"><span class="btn sm" data-click data-toast="已删除该启动语（演示）">删除</span></div>
-  <p class="hint" style="margin:6px 0 0">已填 3 / 3 条 · 达上限后「+ 添加启动语」置灰。<span class="pill" data-click data-toast="已达 3 条上限，需先删除一条（演示）">+ 添加启动语</span> <span class="pill" data-toast="已删除启动语，剩 2 条（演示）">示例：删第 3 条后加回</span></p>
+    <p class="hint">现值 4 段 · 约 180 字（演示）。凭据不写进指令，仅由运行时与环境变量提供。<b>本字段是「用户层」</b>——运行时实际收到的 prompt = 下方「平台维护层」+ 本字段，两层<b>不互相覆盖</b>。</p></div>
+  <details class="fold">
+    <summary><b>平台维护层</b> <span class="chip">只读 · 随部署更新</span> <span class="dim">（拼接在用户指令之前 · 不进草稿槽 · 不可编辑）</span></summary>
+    <div class="foldbody">
+      <pre class="launch" style="white-space:pre-wrap;margin:0">[平台层 · rev 2026.10.3]
+1) 交付物一律落 .specs/&lt;change-id&gt;/，路径经 config.get_specs_dir()，不硬编码目录。
+2) 输出须含 severity 分级与逐条位置；无证据的结论不得交付。
+3) 「必须人批」的动作由状态转换层闸门拦截，提示词不充当门禁。
+4) 凭据、令牌、内部主机名不得出现在输出与日志中（mask 规则见 14 区）。</pre>
+      <p class="hint" style="margin:6px 0 0"><b>为什么只读：</b>该层随平台版本发布（<span class="mono">deployment_id = d-118</span> · 演示），Agent 所有者与协作者<b>都改不动</b>——避免把平台级纪律写进各 Agent 指令后各自漂移。升级后本页重开即读到新 rev；<b>历史 run 存的是当时快照</b>，不追溯生效。此处<b>无编辑入口、不入草稿槽、不参与「保存全部」</b>。</p>
+    </div>
+  </details>
+  <p class="tiny muted" style="margin:var(--s3) 0 6px;text-transform:uppercase;letter-spacing:.05em">会话开场白（≤ 3 条 · 每条 label + prompt · 两项均必填）</p>
+  <div class="kvrow"><input value="帮我审查这个 PR"><input value="对当前 diff 执行标准审查并产出 REVIEW.md"><span class="btn sm" data-click data-toast="已删除该开场白（3 → 2 条 · 草稿转 dirty · 演示）">✕</span></div>
+  <div class="kvrow"><input value="列出高优先级发现"><input value="按 severity 降序列出阻断项，只给结论"><span class="btn sm" data-click data-toast="已删除该开场白（演示）">✕</span></div>
+  <div class="kvrow"><input value="总结本次审查"><input value="输出一句话结论 + 是否可合并建议"><span class="btn sm" data-click data-toast="已删除该开场白（演示）">✕</span></div>
+  <div class="kvrow"><input class="bad" value="" placeholder="label（必填 · 会话「＋ 新建」里显示的那句短文案）"><input class="mono" value="打开 PR 后先说阻断项数量"><span class="btn sm" data-click data-toast="已删除这一行未填完的开场白（演示）">✕</span></div>
+  <p class="err" style="margin:2px 0 0">校验未过：第 4 行 label 为空 —— 开场白的 <span class="mono">label</span> 与 <span class="mono">prompt</span> <b>两项都必填</b>（半填的行不落库）。<b>本页已置 dirty</b>，底条自动保存转「失败」态并在字段旁显错（不弹全局 toast）。</p>
+  <p class="hint" style="margin:6px 0 0">已填 3 条 + 1 行未填（校验未过）· <b>上限 3 条</b>：达上限后「＋ 添加开场白」置灰，需先 <span class="mono">✕</span> 删一条。 <span class="pill" data-click data-toast="已达 3 条上限，需先删除一条（演示）">＋ 添加开场白</span> <span class="pill" data-toast="已把该行标为默认开场白 · 新会话首屏置顶展示（演示）">设为默认</span> <span class="dim">口径同 <span class="mono">chat.html</span>「＋ 新建会话」的选择器与 <span class="mono">agents__new.html</span> 第 2 步：三处读同一份 <span class="mono">prompts[]</span>，点击 = 复制进输入框、<b>不直接发送</b>。</span></p>
+  <p class="hint" style="margin:4px 0 0"><b>与草稿保存条打通：</b>指令 textarea 与开场白的<b>增 / 删 / 改任一即 dirty</b>，立刻写 <span class="mono">draft:agent/1/config</span> 并把底条推成「保存中 → 失败 / 已存」（校验未过 → <b>失败态拦截保存全部</b>）；<span class="mono">✕</span> 删除会进「放弃」弹窗的待丢弃清单（<span class="mono">md-discard</span>）。<b>只读的平台维护层不入槽</b>。</p>
 </div>
 
 <h4 class="blk" id="sec4">4 · 运行时与模型 <span class="chip warn">平台不本地运行模型</span></h4>
@@ -128,7 +162,7 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
       <dt>协议族</dt><dd class="mono">stdio</dd>
     </dl>
   </div>
-  <p class="hint" style="margin:8px 0 0">能力随运行时而异，本区下方字段<b>联动显隐</b>：选 <span class="mono">copilot</span> → 8 区「MCP 服务绑定」隐藏（不支持平台托管 MCP）· 选 <span class="mono">mcode</span> → 无会话续跑（每次新会话）、模型显示「由运行时托管」且选择器失效 · 换运行时后 9 区集成不受影响（凭据属连接所有权）。</p>
+  <p class="hint" style="margin:8px 0 0">能力随运行时而异，本区下方字段<b>联动显隐</b>：选 <span class="mono">copilot</span> → 8 区「MCP 服务绑定」隐藏（不支持平台托管 MCP）· 选 <span class="mono">mcode</span> → 无会话续跑（每次新会话）、模型显示「由运行时托管」且选择器失效 · 换运行时后 9 区对外集成与 <b>9A 区 IM 通道</b>均不受影响（凭据分别属<b>连接</b>与<b>通道</b>所有权，不随运行时搬迁）。</p>
 </div>
 
 <h4 class="blk" id="sec5">5 · 执行设置 <span class="chip info">数值全为演示</span></h4>
@@ -146,17 +180,27 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
 
 <h4 class="blk" id="sec6">6 · 环境变量 <span class="chip warn">1 项 · 值恒掩码</span></h4>
 <div class="panel">
-  <div class="kvrow"><input class="mono" value="DEEPSEEK_API_KEY"><input class="mono" value="sk-ant-***" readonly><span style="display:flex;gap:6px"><span class="btn sm" data-click data-toast="解锁需二次确认 · env:read 入审计 · 60s 后回掩码（演示）">👁 解锁</span><span class="btn sm" data-click data-toast="已删除该环境变量（演示 · 保存后计数 1 → 0）">删除</span></span></div>
+  <div class="kvrow"><input class="mono" value="DEEPSEEK_API_KEY"><input class="mono" value="sk-ant-***" readonly><span style="display:flex;gap:6px"><span class="btn sm" data-click data-toast="解锁需二次确认 · env:read 入审计 · 30s 后自动遮回 ****（哨兵重新生效 · 演示）">👁 解锁</span><span class="btn sm" data-click data-toast="已删除该环境变量（演示 · 保存后计数 1 → 0）">删除</span></span></div>
   <div class="kvrow"><input class="mono" placeholder="KEY（如 REVIEW_TARGET）" value=""><input class="mono" placeholder="值（仅写入 · 保存后不可读回）" value=""><span class="btn sm" data-click data-toast="已新增一行（演示）">＋ 加一项</span></div>
-  <p class="hint" style="margin:6px 0 0">现值 <b>1 项</b> · 保存后界面仅回<b>不透明计数</b>，值不回显。<b>👁 解锁</b>：解锁需二次确认 · <span class="mono">env:read</span> 入审计 · <b>60s 后自动回掩码</b>。</p>
-  <p class="hint" style="margin:4px 0 0">① 本分区仅 <span class="mono">canEdit</span> 者可打开；无权限时整区转为<b>行内只读锁</b>（不改 URL、不跳走）。② 环境变量走<b>专用端点</b>保存（<span class="mono">PUT /api/agents/1/env</span>），不随全字段草稿一起提交，避免误覆盖。③ <span class="mono">PATH</span> / <span class="mono">HOME</span> 与平台保留变量<b>不可覆盖</b>（提交即 422）。</p>
-  <p class="lockline" style="margin:8px 0 0">无 env:read 时的只读形态：<span class="chip">🔒 Lock read-only · 仅知「1 项」</span><span class="dim">（页面不跳走 · §6.0 ①）</span></p>
+  <p class="hint" style="margin:6px 0 0">现值 <b>1 项</b> · 保存后界面仅回<b>不透明计数</b>，值不回显。<b>👁 解锁</b>：解锁需二次确认 · <span class="mono">env:read</span> 入审计（谁在何时看了哪个变量明文可查）· <b>30s 后自动遮回 <span class="mono">****</span></b>（哨兵重新生效），也可手动 <span class="mono">🔒 遮回</span>。</p>
+  <p class="hint" style="margin:4px 0 0">① 本分区仅 <span class="mono">canEdit</span> 者可打开；无权限时整区转为<b>行内只读锁</b>（不改 URL、不跳走）。② 环境变量<b>只走专用端点</b>（<span class="mono">PUT /api/agents/1/env</span> · 带 <span class="mono">rev</span> 乐观锁）——常规全字段更新请求体里<b>带 env 即被拒 400</b>，防「顺手改 env」；复制 Agent 时 env 值<b>从不复制</b>。③ <span class="mono">DSH_*</span> / <span class="mono">CODEX_*</span> / <span class="mono">HOME</span> / <span class="mono">PATH</span> 等<b>保留变量由运行时 daemon 注入，不可覆盖</b>（服务端拒写 · <span class="mono">400</span>）；新增键重名同样服务端拒绝。他人先提交（<span class="mono">rev</span> 已变）→ <b>412</b> 走重载 / 合并 / 强制覆盖三选一。</p>
+  <p class="hint" style="margin:4px 0 0"><b>④ 保留哨兵 <span class="mono">****</span> = 未改保留：</b>提交时该键的值仍是 <span class="mono">****</span> → 视为「不动原值」，服务端整键跳过（不是把星号存进库）；<b>要改值就往同一行直接粘新值</b>（整值覆盖）· <b>清空必须显式</b>——解锁后<b>删整行</b>、或<b>改值保存</b>，绝不让「留空」被当成清空（防<b>顺手清空</b>）。8 区 MCP 的 <span class="mono">env</span> 与 9A 区 IM 密钥<b>同用这一颗哨兵</b>（口径全站唯一）。</p>
+  <p class="hint" style="margin:4px 0 0"><b>⑤ 批量录入 <span class="mono">⤓ .env</span>（双模）：</b>粘贴 <span class="mono">KEY=VALUE</span> 多行 → <b>解析后落成本区行、入草稿</b>（<b>不直接落库</b>，仍由本区<b>专用端点</b>一次性提交），一次确认、可逐行回退。<span class="pill" data-click data-toast=".env 批量（模式 A）：解析 12 行 → 覆盖同名 3 / 新增 9 / 保留哨兵 0 · 已入草稿待提交（演示）">模式 A · 覆盖同名键</span> <span class="pill" data-click data-toast=".env 批量（模式 B）：解析 12 行 → 仅新增 9 · 同名 3 个跳过不动（演示）">模式 B · 仅新增不覆盖</span> <span class="dim">两模都先出 <b>diff 预览</b>点名改了哪几项，同名键数与结果计数进审计；<span class="mono">DSH_*</span> 等保留键在解析阶段就被剔除并列「拒写」。默认 <b>模式 B</b>（A 需二次确认）。</span></p>
+  <p class="lockline" style="margin:8px 0 0">无 env:read 时的只读形态：<span class="chip">🔒 Lock read-only · 仅知「1 项」</span><span class="dim">（页面不跳走 · §6.0 ①）</span> <span class="dim">· 只读态下「删除整行 / 改值」入口同样不渲染——清空与改写都是写操作。</span></p>
 </div>
 
 <h4 class="blk" id="sec7">7 · CLI 自定义参数 <span class="chip info">exec argv 追加</span></h4>
 <div class="panel">
-  <div class="kvrow" style="grid-template-columns:1fr auto auto"><input class="mono" value="--sandbox read-only"><span class="btn sm" data-toast="已追加一行空参数（演示）">＋ 加一项</span><span class="btn sm" data-click data-toast="已删除该参数行（演示）">删除</span></div>
-  <p class="hint" style="margin:6px 0 0">现值 <span class="mono">--sandbox read-only</span>（1 行 · 演示）。① 按 <b>exec 数组逐项追加</b>进 CLI argv，<b>无 shell 展开</b>：<span class="mono">$VAR</span>、引号、管道、重定向都不解析，写进去就是字面量。② <b>禁放凭据</b>——argv 可被同机进程 <span class="mono">ps</span> / <span class="mono">/proc/&lt;pid&gt;/cmdline</span> 读到，凭据一律走 6 区环境变量。</p>
+  <div class="kvrow" style="grid-template-columns:1.2fr 1fr auto auto;align-items:center"><span class="lbl" style="font:11px var(--font-mono);color:var(--text-muted)">#1</span><input class="mono" value="--sandbox read-only"><span style="display:flex;gap:6px"><span class="btn sm" data-click data-toast="✎ 编辑本行 · 一次只放开一行，其它行置灰（演示）">✎</span><span class="btn sm" data-click data-toast="已删除该参数行（演示）">✕</span></span><span class="btn sm" data-click data-toast="已追加一行空参数（演示 · 一次一行）">＋ 加一项</span></div>
+  <div class="kvrow" style="grid-template-columns:1.2fr 1fr auto auto;align-items:center"><span class="lbl" style="font:11px var(--font-mono);color:var(--text-muted)">#2</span><input class="mono bad" value="--max-turns 40" placeholder="一行一个参数"><span style="display:flex;gap:6px"><span class="btn sm" data-click data-toast="✎ 本行处于编辑态（置灰其它行 · 演示）">✎</span><span class="btn sm" data-click data-toast="已删除该参数行（演示）">✕</span></span><span class="pill" data-click data-toast="一次一行：一行 = 一个 argv 项，含空格的值也不拆（演示）">一次一行</span></div>
+  <p class="err" style="margin:2px 0 0">校验未过（<span class="mono">#2</span>）：<span class="mono">--max-turns 40</span> 两个 argv 项挤在一行——<b>一次一行</b>，一行 = 一项（值含空格也不拆、不做引号配对，写成一行会被 CLI 当成<b>单个字面量</b> <span class="mono">"--max-turns 40"</span>）。正确写法：拆成 <span class="mono">#2 --max-turns</span> + <span class="mono">#3 40</span> 两行。</p>
+  <p class="hint" style="margin:6px 0 0"><b>编辑器口径：一次一行</b>——<span class="mono">＋ 加一项</span> 追加空行、<span class="mono">✕</span> 删该行，顺序即数组顺序，<b>不提供拖拽排序</b>（防「看似重排、实则漂移」）。<b>已存现值 1 行</b> <span class="mono">--sandbox read-only</span>；<span class="mono">#2</span> 是本页新加、未过校验的行（不落库）。① 按 <b>exec 数组逐项追加</b>进 CLI argv，<b>无 shell 展开</b>：<span class="mono">$VAR</span>、引号、管道、重定向都不解析，写进去就是字面量。② <b>禁放凭据</b>——argv 可被同机进程 <span class="mono">ps</span> / <span class="mono">/proc/&lt;pid&gt;/cmdline</span> 读到，凭据一律走 6 区环境变量。</p>
+  <p class="tiny muted" style="margin:var(--s3) 0 4px;text-transform:uppercase;letter-spacing:.05em">launch 预览（保存前逐次重算 · 只读）</p>
+  <pre class="launch" style="margin:0">dsh run <s>— 固定段（平台注入 · 不可编辑、不可覆盖）</s>
+  <em>--session 42 --model deepseek-official/deepseek-chat --thinking medium</em>   <s># 固定：会话 / 模型 / 档位</s>
+  <em>--transport stdio</em>                                              <s># 平台协议段：随所选运行时协议族</s>
+  <b>--sandbox read-only</b>                                            <s># 自定义段：本区逐行追加（顺序 = 行序）</s></pre>
+  <p class="hint" style="margin:6px 0 0"><b>参数序恒定 = 固定 → 平台协议 → 自定义</b>：自定义段<b>永远排最后</b>，「同键后置不生效也不报错」这类坑由预览替你看见；预览<b>只渲染已过校验的行</b>（如 <span class="mono">#2</span> 未过校验则不入预览）、<b>不落库、自身不参与草稿</b>，行增删即时重算。凭据类值在预览里<b>恒显 <span class="mono">****</span></b>（与 6 区同一哨兵），即便 argv 禁放凭据，预览也照脱敏口径处理。</p>
 </div>
 
 <h4 class="blk" id="sec8">8 · MCP 服务绑定 <span class="chip info">三态 · 已保存不回显</span></h4>
@@ -177,9 +221,10 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
     <p class="tiny" style="margin:0"><b>transport：</b><span class="mono">stdio</span> = 平台随 run 拉起子进程（配置含 command / args / env）· <span class="mono">http</span> = 连远端服务（配置含 url / header，header 里可能带 token）。两者配置体都按<b>敏感值</b>规则处理：存储加密、界面 <span class="mono">***</span>、日志脱敏、专用端点写入。</p>
     <p class="tiny" style="margin:6px 0 0"><b>运行时联动：</b>所选 <span class="mono">dsh</span> 支持平台托管 MCP，故本区可见；换成 <span class="mono">copilot</span>（不支持）时<b>本区整体隐藏</b>并注记「该运行时不支持平台托管 MCP」，已存配置保留不动。</p>
   </div>
+  <p class="hint" style="margin:8px 0 0"><b>行尾口径：</b>每条 MCP 行支持<b>「表单 | JSON」双 tab 编辑</b>——表单填 <span class="mono">command / args / env</span> 或 <span class="mono">url / header</span>，JSON tab 看全量原文，两 tab <b>同源互写</b>；改动<b>即存</b>（走专用端点 <span class="mono">PUT /api/agents/1/mcp</span>，<b>不等</b>页底「保存全部」、也不进全字段草稿槽）· <span class="mono">sse</span> / <span class="mono">streamable_http</span> <b>类禁表单</b>（url + header 的键值组合无法用固定字段表达，只给 JSON tab 并注「该 transport 仅支持 JSON 编辑」）。<span class="pill" data-click data-toast="filesystem（stdio）：表单 tab 可用 · 双 tab 同步（演示）">示例 · stdio 可表单</span> <span class="pill" data-click data-toast="fetch（streamable_http）：表单 tab 置灰，只能改 JSON（演示）">示例 · sse 类禁表单</span></p>
 </div>
 
-<h4 class="blk" id="sec9">9 · 集成 Integrations <span class="chip info">2 已连 · 凭据属连接所有权</span></h4>
+<h4 class="blk" id="sec9">9 · 对外集成 Integrations <span class="chip info">出站到 GitHub / CI · 凭据属连接所有权</span></h4>
 <div class="panel">
   <div style="display:flex;gap:6px;flex-wrap:wrap">
     <span class="pill chip-toggle" data-click data-toast="已保持连接：GitHub（演示）">GitHub · issue 跟踪 ✓</span>
@@ -192,6 +237,46 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
     <tr><td class="mono">CI</td><td>token · 由 <span class="mono">af-bot</span> 代管</td><td class="tiny">取构建状态与日志链接</td><td><span class="btn link" style="color:var(--red)" data-click data-modal="md-unlink-int">断开</span></td></tr>
   </tbody></table>
   <p class="hint" style="margin:6px 0 0">现值 <b>GitHub · CI</b>（2 项）。<b>凭据属「连接」所有权</b>，不属本 Agent：断开只解除本 Agent 与该连接的引用，凭据本身与被它共享的其它 Agent 不受影响；撤销凭据要去 <span class="mono">integration.html</span>。<span class="pill" data-goto="integration.html" data-click>对外集成 · 连接管理 →</span></p>
+</div>
+
+
+<h4 class="blk" id="sec-im">9A · 集成（IM 通道） <span class="chip info">入站 · 6 平台 = 2 已连/已绑 + 2 未连接 + 2 灰置</span> <span class="chip warn">密钥写-only</span></h4>
+<div class="panel">
+  <div class="callout">
+    <p class="tiny" style="margin:0"><b>密钥写-only · 保存前在线验证（400 / 409 分支）· 改密 = 断开重连：</b>通道密钥与 6 区 env 同一颗<b>保留哨兵</b> <span class="mono">****</span>——界面<b>只写不读</b>，永不回显明文。提交前平台拿这条密钥<b>真打一次对端</b>再落库：<span class="mono">400</span> = 对端拒绝（凭据无效 / 机器人权限未开 / 回调地址不匹配），行内显错且<b>不落库</b>；<span class="mono">409</span> = <b>「通道 × Agent 唯一 bot」</b>冲突——<b>同一通道本 Agent 只能挂一个 bot</b>（同渠道重复连接，或换端点未先断开旧连接），须先断开旧连接再连。两分支<b>都不落库、旧配置原样不变</b>。<b>改密没有「原地更新」</b>：界面读不到旧值，服务端也拒绝原地替换活动凭据——只有 <b>断开 → 重连</b> 两步，中间该通道<b>停止入站</b>（在途 run 不受打断）。</p>
+    <p class="tiny" style="margin:6px 0 0"><b>入站链路：</b><span class="mono">IM 消息 → 会话 → run → 回复写回原会话 / 线程</span>。外部渠道只是<b>另一张嘴</b>：跑的还是同一个 Agent、同一套「可运行 / 自动触发许可」门禁与同一套闸门（13 · 14 区）。<b>通道 × Agent = 唯一 bot</b>（一个 bot 只服务一个 Agent，杜绝路由歧义）；<b>一个 Agent 可多平台并挂</b>（如同时挂飞书 + Slack），入站<b>按渠道路由回同一 Agent 的队列与并发槽</b>，不额外起实例；会话与通道的绑定形如 <span class="mono">#agentflow ↔ chat-42</span>，<b>归档会话自动解绑、取消归档需重绑</b>（口径见 <span class="pill" data-click data-goto="chat.html">对话中心 · 渠道 ▾</span>）。</p>
+  </div>
+  <table class="tbl compact" style="margin-bottom:0"><thead><tr><th>平台</th><th>状态</th><th>对端身份</th><th>管理权</th><th>操作</th></tr></thead><tbody>
+    <tr><td class="mono">飞书 / Lark</td><td><span class="chip ok">● 已连接</span></td><td class="tiny">bot <span class="mono">AF-审查号</span> · app_id <span class="mono">cli_a9****</span>（遮蔽 · 写-only）· 单聊 + 群聊 @</td><td class="tiny"><span class="chip ok">owner 自助</span> owner / admin 可连可断</td><td><span class="btn link" data-click data-toast="⟳ 重验：拿库中密文再打一次对端 → 200 · 不改变连接状态（演示）">⟳ 重验</span><span class="btn link" data-click data-toast="近 7d 该通道入站 214 条 → 建会话 208 / 拒收 6（白名单外）· 演示">看入站</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-im-disconnect">断开…</span></td></tr>
+    <tr class="subrow"><td colspan="5"><div class="keyline"><span class="lbl">AppSecret</span><input type="password" value="****" readonly aria-label="飞书 AppSecret 掩码"><span class="btn sm" data-click data-toast="改密 = 断开重连：需先断开该通道，再填新 Secret 重新在线验证（演示 · 无原地更新）">改密…</span><span class="dim tiny">写-only · 上次在线验证 <span class="mono">14:22 ✓</span> · 密文 AES-GCM 落库 · 界面永不回显</span></div></td></tr>
+    <tr><td class="mono">Slack</td><td><span class="chip ok">● 已绑</span></td><td class="tiny">工作区 <span class="mono">af-hq</span> · bot <span class="mono">AF-Review</span> · <span class="mono">#agentflow ↔ chat-42</span></td><td class="tiny"><span class="chip warn">仅管理员</span> bot 由工作区统一安装 · 仅 admin 可解绑</td><td><span class="btn link" data-click data-toast="与对话中心渠道条「Slack ● 已绑 #agentflow ↔ chat-42」同一状态 · 两层同源（演示）">看绑定</span><span class="btn link" style="color:var(--red)" data-click data-modal="md-im-disconnect">断开…</span></td></tr>
+    <tr class="subrow"><td colspan="5"><div class="keyline"><span class="lbl">Bot Token</span><input type="password" value="xoxb-****" readonly aria-label="Slack bot token 掩码"><span class="lbl">User Token</span><input type="password" value="" placeholder="未配置 · 以 bot 身份发消息" readonly><span class="dim tiny">保存前在线验证 <span class="mono">auth.test</span> 通过才落库 · 断开后对话中心渠道 chip <b>同步转「○ 未绑」</b>（两层同源 · 演示）</span></div></td></tr>
+    <tr><td class="mono">钉钉</td><td><span class="chip">○ 未连接</span></td><td class="tiny dim">—（点「连接」后填）</td><td class="tiny"><span class="chip ok">owner 自助</span> 企业内自建应用凭据由 owner 代管</td><td><span class="btn sm" data-click data-toast="已解锁本行密钥输入（password 型 · 遮蔽 · 写-only · 不入全字段草稿槽）：三项填齐点「验证后落库」（演示）">连接 ▸</span></td></tr>
+    <tr class="subrow"><td colspan="5"><div class="keyline"><span class="lbl">AppKey</span><input class="mono" placeholder="dingxxxxxx" value=""><span class="lbl">RobotCode</span><input class="mono" placeholder="dingRobotCode" value=""><span class="lbl">AppSecret</span><input type="password" placeholder="仅写入 · 保存后恒显 ****" value=""><span class="btn sm primary" data-click data-toast="验证后落库：AES-GCM 加密 · 通道 × Agent 唯一 bot 校验通过 → 转「已连接」（演示）">验证后落库</span><span class="btn sm" data-click data-toast="400 参数不完整 / 权限不足 → 不落库、旧配置不变，密钥输入不清空（演示）">模拟 400</span><span class="btn sm" data-click data-toast="409 连接冲突：本 Agent 已在钉钉挂有 bot（通道 × Agent 唯一）→ 需先断开旧连接；本次未落库（演示）">模拟 409</span><span class="btn sm" data-click data-toast="已收起密钥行 · 未写入任何值（演示）">取消</span></div><p class="hint" style="margin:6px 0 0">这一行是<b>点「连接」后解锁的形态</b>（演示常驻，方便看字段）。<b>400 分支长这样：</b>三项齐了才放开「验证后落库」；返回 <span class="mono">400</span>（参数不完整 / 机器人权限未开 / 回调不匹配）时在行下方<b>就地</b>显错并<b>保留你输入的密钥不清空</b>，不落库、不转「已连接」。</p></td></tr>
+    <tr class="grey"><td class="mono">企业微信</td><td><span class="chip bad">未启用</span></td><td class="tiny dim">—（本工作区未装企微 bot）</td><td class="tiny"><span class="chip warn">仅管理员</span> 安装申请只在 admin 全局设置渲染</td><td><span class="btn sm" disabled data-click data-toast="平台门：channel_providers.wecom.configured = false → 整卡预览态、不给连接入口（演示 · 不是本 Agent 缺权限）">不可连接 · 等平台 configured</span></td></tr>
+    <tr class="grey"><td class="mono">Telegram</td><td><span class="chip warn">预览 · 不可用</span></td><td class="tiny dim">—（传输层尚未实现）</td><td class="tiny"><span class="chip warn">仅管理员</span> 本行不可点</td><td><span class="btn sm" disabled data-click data-toast="预览态：Telegram 传输未实现，只渲状态不给连接入口（演示 · 如实标注，不是漏配）">连接（灰）</span></td></tr>
+    <tr><td class="mono">自托管 IM<br><span class="tiny dim">IM-Bridge · Matrix 兼容</span></td><td><span class="chip">○ 未连接</span></td><td class="tiny">homeserver <span class="mono">im.internal.af</span> · room <span class="mono">!af-review:internal</span></td><td class="tiny"><span class="chip ok">owner 自助</span> 通道由本工作区自行部署</td><td><span class="btn sm" data-click data-toast="已解锁本行输入（homeserver + bot 令牌 · 遮蔽 · 写-only）：填完点「验证后落库」（演示）">连接 ▸</span></td></tr>
+    <tr class="subrow"><td colspan="5">
+            <div class="keyline" style="margin-bottom:6px"><span class="lbl">homeserver</span><input class="mono" value="https://im.internal.af"><span class="lbl">bot 令牌</span><input type="password" placeholder="仅写入 · 保存后恒显 ****" value=""><span class="btn sm primary" data-click data-toast="验证后落库：端点可达 + 令牌有效 → 转「已连接」，白名单同时生效（演示）">验证后落库</span><span class="btn sm" data-click data-toast="409 连接冲突：通道 × Agent 唯一 bot · 该 Agent 已连自托管实例 → 先断开再换端点；本次未落库（演示）">模拟 409</span></div>
+      <p class="tiny muted" style="margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em">入站白名单 allow_from（仅自托管 IM · 命中才建会话 · 未连接时改动不生效）</p>
+      <div class="keyline" style="margin-bottom:6px">
+        <span class="xchip" data-click data-toast="✕ 移除需二次确认：移除后该用户发的消息不再入站（演示）">@li.gong <i>✕</i></span>
+        <span class="xchip" data-click data-toast="✕ 移除需二次确认：整房间停收（演示）">:room=!af-review:internal <i>✕</i></span>
+        <span class="xchip" data-click data-toast="✕ 移除需二次确认：整个 homeserver 域停收（演示）">:domain=corp.example.com <i>✕</i></span>
+        <span class="pill" data-click data-toast="新增 allow_from：支持 @user / :room= / :domain= 三种粒度 · 空列表 = 全部拒收（演示）">＋ 加一条</span>
+      </div>
+      <table class="tbl compact" style="margin-bottom:0"><thead><tr><th>主体</th><th>粒度</th><th>命中数（7d）</th><th>操作</th></tr></thead><tbody>
+        <tr><td class="mono">@li.gong</td><td class="tiny">单用户</td><td class="mono">38</td><td><span class="btn link" style="color:var(--red)" data-click data-toast="已移出白名单（二次确认后 · 演示）">✕ 移除</span></td></tr>
+        <tr><td class="mono">:room=!af-review:internal</td><td class="tiny">整房间</td><td class="mono">214</td><td><span class="btn link" style="color:var(--red)" data-click data-toast="已移出白名单（演示）">✕ 移除</span></td></tr>
+        <tr><td class="mono">:domain=corp.example.com</td><td class="tiny">整域 · 最宽</td><td class="tiny dim">0</td><td><span class="btn link" style="color:var(--red)" data-click data-toast="整域放行需管理员确认（演示 · 提示风险）">✕ 移除</span></td></tr>
+      </tbody></table>
+      <p class="hint" style="margin:6px 0 0"><b>白名单是入站门禁，不是可见性</b>：未命中的消息<b>不建会话、不入队</b>（静默丢弃 + 计数），命中才走「可运行 / 自动触发许可」那一层判定；整域粒度会二次确认。空列表 = <b>全部拒收</b>（默认闭合，不是默认放开）。</p>
+    </td></tr>
+  </tbody></table>
+    <p class="hint" style="margin:8px 0 0"><b>管理权两档（列内 chip 即结论）：</b><span class="chip ok">owner 自助</span> = 飞书 / Lark · 钉钉 · 自托管 IM——通道凭据由本工作区自配，Agent 所有者与协作者可在本页<b>自行连接与断开</b>；<span class="chip warn">仅管理员</span> = Slack · 企业微信 · Telegram——bot 属<b>工作区级安装</b>（一处安装、多 Agent 复用），owner <b>不能</b>在此解绑，只能看到状态与「看绑定」入口。无 <span class="mono">agent:edit</span> 时整区转<b>行内只读锁</b>，与 6 区同规则。</p>
+  <p class="hint" style="margin:4px 0 0"><b>灰置两态（都不可点、但含义不同 · 行尾均注门）：</b><span class="chip bad">未启用</span> = 平台级<b>配置门</b> <span class="mono">channel_providers.&lt;id&gt;.configured = false</span>（本工作区没装这个 bot，如企业微信）——整卡预览态、<b>不给连接入口</b>，安装申请只在 admin 全局设置渲染，<b>不是本 Agent 缺权限</b>；<span class="chip warn">预览</span> = 平台<b>能力门</b>（如 Telegram 传输层尚未实现）——如实标注而非漏配，只渲状态不给入口。两态<b>都不落库、不影响已连通道</b>；<span class="mono">configured</span> 转 true 后本行自动放开「连接 ▸」。</p>
+  <p class="hint" style="margin:4px 0 0"><b>断开 = 必填原因 + 软撤销保留审计：</b>断开<b>不是物删</b>——通道行转 <span class="mono">unbound</span>，<b>原因与操作者入审计</b>（<span class="mono">im:unbound</span>）；<b>凭据留平台加密态</b>（写-only，界面永不回显）、<b>入站会话历史与快照保留</b>、<b>「通道 × Agent 唯一 bot」槽释放 → 重连免 409</b>；重连走同一套遮蔽输入 + 在线验证，历史会话<b>延续</b>不另起。<b>在途 run 不打断</b>，只是不再接收该通道的新入站；<b>本 Agent 侧断开不改平台级安装</b>（撤销凭据、卸载 bot 去 <span class="mono">integration.html</span>）。</p>
+  <p class="hint" style="margin:4px 0 0"><b>不进全字段草稿槽：</b>本区每个动作都是<b>一次独立请求</b>（<span class="mono">PUT /api/agents/1/channels</span> · 带在线验证）——连接 / 断开 / 改密 / 白名单增删<b>当场校验当场生效</b>，不随页底「保存全部」提交，也不被「放弃」清掉；与 6 区 env（专用端点 + <span class="mono">rev</span> 乐观锁）、8 区 MCP（即存）同属<b>例外口径</b>（见 <span class="btn link" style="padding:0" data-click data-drawer="dr-draft">草稿槽与同源映射</span>）。</p>
 </div>
 
 <h4 class="blk" id="sec10">10 · 技能绑定 <span class="chip info">3 条 · 来自工具库</span></h4>
@@ -275,7 +360,7 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
     <div class="fld"><label>连续失败阈值</label><input class="mono" value="3"><p class="hint">现值 <b>3</b> · 达阈值判 <span class="mono">caution</span> → 自动重启（非 dangerous 故不转人工）。</p></div>
     <div class="fld"><label>退避序列</label><input class="mono" value="1,2,4,8s" readonly><p class="hint">平台内置、不可编辑 · 超阈值暂停本轮调和。<span class="mono">daemon</span> 心跳 15s / 离线判定 ≤3 分钟属运行时侧，不在此配。</p></div>
   </div>
-  <div class="callout" style="margin:var(--s2) 0 0"><p class="tiny" style="margin:0"><b>凭据口径（新）：</b>CLI 的<b>登录凭据（账号 / OAuth / API key）留在运行时所在机器</b>，登录由 CLI 自己完成，<b>平台不接收、不代管</b>。此区探的是 <b>AgentFlow 侧对该 Agent 服务健康</b>（HTTP 探活 + 上报心跳），与 CLI 是否已登录是两件事：CLI 掉线只能在 <span class="pill" data-click data-goto="runtimes.html">运行时发现</span> 看到「未登录 / 离线」。</p></div>
+  <div class="callout" style="margin:var(--s2) 0 0"><p class="tiny" style="margin:0"><b>凭据口径（新）：</b>CLI 的<b>登录凭据（账号 / OAuth / API key）留在运行时所在机器</b>，登录由 CLI 自己完成，<b>平台不接收、不代管</b>——与 <b>9A 区 IM 通道</b>那套<b>平台代管凭据</b>（AES-GCM · 写-only · 保存前在线验证）是<b>两条通道，互不上收</b>。此区探的是 <b>AgentFlow 侧对该 Agent 服务健康</b>（HTTP 探活 + 上报心跳），与 CLI 是否已登录是两件事：CLI 掉线只能在 <span class="pill" data-click data-goto="runtimes.html">运行时发现</span> 看到「未登录 / 离线」。</p></div>
   <p class="hint" style="margin:6px 0 0">近 1h 通过率 <span class="mono">83%</span>（50/60 · 演示）· P50/P95 <span class="mono">41ms / 55ms</span> · 最近 3 败见 <span class="pill" data-click data-goto="agent-detail__probe-timeout.html">探针失败详情</span>。</p>
 </div>
 
@@ -293,10 +378,10 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
 <div class="savebar">
   <span class="chip" data-click data-pop="pp-autosave" style="cursor:pointer">自动保存：保存中…</span>
   <span class="chip ok">已存 · 14:38:12</span>
-  <span class="chip bad">失败 · 1 处校验未过（见 5 区「会话轮次上限」）</span>
-  <span class="dim tiny">三态：保存中 → 已存 / 失败（失败在<b>字段旁</b>页内显错，不弹全局 toast、不落库）·「放弃」只清本表单草稿槽，<b>不覆盖其它入口草稿</b></span>
+  <span class="chip bad">失败 · 2 处校验未过（见 3 区「开场白必填」· 5 区「会话轮次上限」）</span>
+  <span class="chip warn">dirty · 4 处未提交</span><span class="dim tiny">三态：保存中 → 已存 / 失败（失败在<b>字段旁</b>页内显错，不弹全局 toast、不落库）· 任一字段 dirty 即触发拦截（含 3 区开场白行卡）·「放弃」只清本表单草稿槽，<b>不覆盖其它入口草稿</b> · 8 / 9A 区<b>即时落库</b>不在此条；6 区行改动在草稿内、提交时<b>另走专用端点</b></span>
   <span style="flex:1"></span>
-  <button class="btn sm primary" data-toast="已保存 3 处改动 · 实例未重启（需显式重启）（演示）">保存全部</button>
+  <button class="btn sm primary" data-click data-toast="被拦截：2 处校验未过（3 区开场白 label 必填 · 5 区会话轮次上限须 ≤ 200）—— 校验全过才放开提交，未落库任何字段（演示 · dirty 即拦）">保存全部</button>
   <button class="btn sm" data-click data-modal="md-discard">放弃</button>
   <button class="btn sm" data-toast="已按当前配置重新登记快照（演示 · snap-1210）">存快照</button>
   <button class="btn sm" data-toast="重启指令已下发 · 状态灯不即时改，等下一轮复探通过才转 healthy（演示 · §5.4）">显式重启</button>
@@ -310,27 +395,28 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
   <table class="tbl compact"><thead><tr><th>详情页子区</th><th>本表单分区</th><th>字段</th></tr></thead><tbody>
     <tr><td class="tiny">基础信息面板</td><td class="mono">1 · 标识</td><td class="tiny">名称 / 别名 / 头像 / 描述</td></tr>
     <tr><td class="tiny">归属与能力组</td><td class="mono">2 · 域归属</td><td class="tiny">domain_id（可 NULL）· 能力标签派生</td></tr>
-    <tr><td class="tiny">指令 / 启动语</td><td class="mono">3 · 指令与启动语</td><td class="tiny">instructions · prompts[≤3]</td></tr>
+    <tr><td class="tiny">指令 / 开场白</td><td class="mono">3 · 指令与开场白</td><td class="tiny">instructions · prompts[≤3]（label + prompt 必填）· 平台维护层只读不入槽</td></tr>
     <tr><td class="tiny">执行配置面板</td><td class="mono">4 · 运行时与模型 / 5 · 执行设置</td><td class="tiny">runtime · model · thinking · 并发 · 超时 · 重试 · 预算</td></tr>
-    <tr><td class="tiny">MCP / 集成 / 技能</td><td class="mono">8 / 9 / 10</td><td class="tiny">mcp_config（三态）· 连接引用 · 技能版本锁定</td></tr>
+    <tr><td class="tiny">MCP / 对外集成 / 技能</td><td class="mono">8 / 9 / 10</td><td class="tiny">mcp_config（三态 · 表单|JSON 双 tab）· 连接引用 · 技能版本锁定</td></tr>
+    <tr><td class="tiny">IM 通道子区（<span class="mono">dr-im</span>）</td><td class="mono">9A · 集成（IM 通道）</td><td class="tiny">channel_configs · 密钥写-only · 唯一 bot · allow_from 白名单 <span class="chip warn">专用端点 · 不入草稿</span></td></tr>
     <tr><td class="tiny">探针抽屉（dr-health）</td><td class="mono">15 · 健康与探活</td><td class="tiny">health_url · 周期 · 阈值</td></tr>
     <tr><td class="tiny">编辑 pop「并发与容量」</td><td class="mono">5 · 执行设置</td><td class="tiny">同一字段的局部入口（改后此处同步）</td></tr>
   </tbody></table>
-  <p class="tiny" style="margin:var(--s3) 0 0"><b>例外（不同源）：</b>环境变量（6 区）与 MCP 配置（8 区）走<b>专用端点</b>、保存后不回显；知识源与编排引用是<b>关系表</b>，不进配置草稿。</p>
+  <p class="tiny" style="margin:var(--s3) 0 0"><b>三种写路径（都不同于普通字段）：</b>① <b>6 区 env</b>——行改动<b>在</b>本草稿内，但提交时<b>单独走专用端点</b> <span class="mono">PUT /agents/1/env</span>（带 <span class="mono">rev</span>），<b>不进全字段请求体</b>，保存后不回显；② <b>8 区 MCP</b>——<b>行尾即存</b>，不等「保存全部」；③ <b>9A 区 IM 通道</b>——连接 / 断开 / 改密 / 白名单<b>每步一次即时请求 + 在线验证</b>，<b>不被「放弃」清掉</b>。三者<b>共写-only 与 <span class="mono">****</span> 保留哨兵</b>口径。知识源与编排引用是<b>关系表</b>，不进配置草稿；<b>平台维护层指令</b>只读、亦不入槽。</p>
   <p class="tiny dim" style="margin:var(--s2) 0 0">草稿是一等状态（§6.0 ⑦）：换页、重载、被他人提交都不清你的草稿；「放弃」只清本槽，不覆盖其它入口草稿。</p>
 </div></div>
 
 <div class="pop" id="pp-autosave"><p class="tiny dim" style="margin:0 0 6px"><b>自动保存三态</b></p>
 <table class="tbl compact"><tbody>
 <tr><td><span class="chip">保存中</span></td><td class="tiny">失焦即写草稿槽 · 提交期望态时置灰输入框</td></tr>
-<tr><td><span class="chip ok">已存</span></td><td class="tiny">回读版本号 · 页头「演示草稿 · 3 处改动」随之清零</td></tr>
-<tr><td><span class="chip bad">失败</span></td><td class="tiny">页内<b>字段旁</b>显错 + 保留你的输入；412 走重载 / 合并 / 强制覆盖三选一</td></tr>
+<tr><td><span class="chip ok">已存</span></td><td class="tiny">回读版本号 · 页头「演示草稿 · 4 处改动」随之清零</td></tr>
+<tr><td><span class="chip bad">失败</span></td><td class="tiny">页内<b>字段旁</b>显错 + 保留你的输入 · <b>dirty 即拦「保存全部」</b>（本页演示态即卡在此：3 区开场白必填 + 5 区轮次上限）；412 走重载 / 合并 / 强制覆盖三选一</td></tr>
 </tbody></table>
-<p class="tiny dim" style="margin:6px 0 0">保存的是<b>期望态</b>；实例仍跑旧配置，需显式重启（§5.4）。</p></div>
+<p class="tiny dim" style="margin:6px 0 0">保存的是<b>期望态</b>；实例仍跑旧配置，需显式重启（§5.4）。<b>写路径分工</b>：6 区 env 行改动<b>入草稿</b>、提交时<b>另走专用端点</b>（带 rev）；8 区 MCP 与 9A 区 IM 通道<b>即时落库</b>，不等「保存全部」。三处都<b>不回显明文</b>。</p></div>
 
 <div class="modal" id="md-discard"><div style="padding:var(--s4)"><b style="color:var(--red)">放弃本表单的全部未保存改动？</b>
-<p class="small dim" style="margin:8px 0 4px">将丢弃 3 处改动（域归属 → 默认域 · 会话轮次上限 500 · 启动语删 1 条）并回到最近一次已存版本 <span class="mono">cfg-1198</span>。</p>
-<div class="callout" style="margin:0 0 var(--s3)"><p class="tiny" style="margin:0"><b>草稿槽独立：</b>「放弃」只清 <span class="mono">draft:agent/1/config</span>（本表单槽），<b>不覆盖也不清除</b>详情子区编辑弹出的草稿视图与其它 Agent 的草稿；环境变量 / MCP 走专用端点，<b>不在本草稿内</b>，放弃不影响它们。</p></div>
+<p class="small dim" style="margin:8px 0 4px">将丢弃 <b>4 处</b>改动（① 域归属 → 默认域 ② 会话轮次上限 500 ③ 开场白删第 1 条 ④ 开场白新增行的 label 未填·校验未过）并回到最近一次已存版本 <span class="mono">cfg-1198</span>。</p>
+<div class="callout" style="margin:0 0 var(--s3)"><p class="tiny" style="margin:0"><b>草稿槽独立：</b>「放弃」只清 <span class="mono">draft:agent/1/config</span>（本表单槽），<b>不覆盖也不清除</b>详情子区编辑弹出的草稿视图与其它 Agent 的草稿；MCP 与 <b>IM 通道</b>是即时请求，<b>不在本草稿内</b>——已连的飞书 / Slack、<b>已落库</b>的通道改动、白名单删改<b>都不受放弃影响</b>；<b>6 区 env 的行改动在草稿内</b>（放弃只丢未提交的行，库里已存的密文读不回、也不会被顺手清掉）。</p></div>
 <div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="已丢弃未保存改动（草稿槽独立，不覆盖其它入口草稿）（演示）" data-close>确认放弃</button></div></div></div>
 
 <div class="modal" id="md-unlink-kb"><div style="padding:var(--s4)"><b>断开本 Agent 与该知识源的挂载？</b><p class="small dim" style="margin:8px 0 4px">知识源本身不删（它还被另 2 个 Agent 挂载）。断开即从本 Agent 检索范围移除，历史会话引用保持快照。</p><table class="tbl compact"><tbody>
@@ -345,6 +431,18 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
 <tr><td>在途 run</td><td class="mono">task-9 正在用该连接</td><td><span class="chip info">本轮结束后生效</span></td></tr>
 </tbody></table><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已断开连接引用 · 审计 integration:detached（演示）" data-close>确认断开</button></div></div></div>
 
+<div class="modal" id="md-im-disconnect"><div style="padding:var(--s4)"><b style="color:var(--red)">断开该 IM 通道与本 Agent 的绑定？</b>
+<p class="small dim" style="margin:8px 0 4px">断开 = <b>软撤销</b>：通道行转 <span class="mono">unbound</span>（不物删），<b>必填原因</b>，操作者与原因入审计 <span class="mono">im:unbound</span>；<b>凭据留平台加密态 · 入站会话历史快照保留 · 重新填单即可重连</b>。</p>
+<table class="tbl compact"><tbody>
+<tr><td>入站消息</td><td class="mono">立即停止建会话</td><td><span class="chip warn">该 bot 不再应答</span></td></tr>
+<tr><td>在途 run</td><td class="mono">r-131 · r-132 继续跑完</td><td><span class="chip info">不打断 · 回复写不回渠道</span></td></tr>
+<tr><td>会话绑定</td><td class="mono">#agentflow ↔ chat-42</td><td><span class="chip warn">解绑 · 重连需重绑</span></td></tr>
+<tr><td>对端凭据</td><td class="mono">AppSecret · 平台加密态留存</td><td><span class="chip ok">不撤销 · 重连需重新填单</span></td></tr>
+<tr><td>bot 占位</td><td class="mono">释放「通道 × Agent 唯一」槽</td><td><span class="chip info">重连免 409</span></td></tr>
+</tbody></table>
+<div class="fld" style="margin-top:var(--s3)"><label>断开原因 <b class="need">*</b> <span class="dim">（必填 · ≤ 200 字 · 入审计，不给默认值）</span></label><input class="mono" value="通道迁至独立部署的 IM-Bridge，本实例改用自托管入口"><p class="hint">留空则确认钮拒因真实不可点（演示态已填示例值）。<b>改密不走本弹窗</b>——改密 = 先断开再重连并填新密钥。</p></div>
+<div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-toast="已断开（软撤销 · 必填原因已落库 im:unbound）· 历史快照保留 · 通道 × Agent 唯一 bot 槽已释放，重连免 409（演示）" data-close>确认断开</button></div></div></div>
+
 <div class="modal" id="md-archive"><div style="padding:var(--s4)"><b>归档 Agent「审查 Agent · 标准」？</b><p class="small dim" style="margin:8px 0 4px">软删除：写 <span class="mono">archived_at</span> + <span class="mono">archived_by = @li.gong</span>。转只读、退出调度与探活、不再接收新任务。必填原因。</p><table class="tbl compact"><tbody>
 <tr><td>在途任务</td><td class="mono">2（task-1 · task-9）</td><td><span class="chip warn">归档前需先终止或改派</span></td></tr>
 <tr><td>编排引用</td><td class="mono">3 条工作流</td><td><span class="chip warn">引用转只读</span></td></tr>
@@ -352,5 +450,5 @@ a.pill:hover{border-color:var(--blue-border);color:var(--blue);text-decoration:n
 </tbody></table><pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因: [已由备援接管 · 本实例退役保留      ]</pre><div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" data-toast="仍有 2 个在途任务：请先终止或改派（演示 · 确认钮拒因真实）" data-close>确认归档</button></div></div></div>
 
 <div class="drawer-mask" id="drawer-mask"></div><div class="modal-mask" id="modal-mask"></div><div id="toast"></div>
-<p class="tiny dim" style="padding:14px 18px">本页 = 详情页「完整配置 ▸」升格的<b>全字段编辑落地页</b>（16 分区 · 对齐 Multica Settings / Capabilities 字段全集）。可点区演示：面包屑「← 返回」与底条「回详情」→ <span class="mono">agent-detail.html</span>（并行重构中，仅链接不改动）·「去运行时发现添加 →」/「凭据口径」注内链 → <span class="mono">runtimes.html</span> · 运行时下拉仅在线项可选（copilot 离线置灰）·「⟳ 刷新模型列表」→ toast · 8 区三态单选为<b>纯 CSS 联动</b>（点「清空」出拒因面板，点「整体替换」出 JSON 编辑框）· 6 区「👁 解锁」→ 二次确认口径 toast · 各「删除 / 断开 / 解绑」→ toast 或二次确认 modal · 底条三态 chip → pop、放弃 → modal（草稿槽独立注）、保存全部 → toast（含「实例未重启」口径）· 危险区：归档 → 带在途检查的确认 modal、彻底删除 → <span class="mono">agent-detail__delete-agent.html</span>、复制 → toast（模型类清空 / env 与 MCP 从不复制）　页内数值全为演示 · 按 Esc 关闭浮层。</p>
+<p class="tiny dim" style="padding:14px 18px">本页 = 详情页「完整配置 ▸」升格的<b>全字段编辑落地页</b>（17 分区 · 对齐 Multica Settings / Capabilities 字段全集；<b>9A 集成（IM 通道）</b>为新增分区，锚点 <span class="mono">#sec-im</span> 独立编号，<b>不改动既有 <span class="mono">#sec1..16</span> 锚点</b>，旧深链不破）。可点区演示：面包屑「← 返回」与底条「回详情」→ <span class="mono">agent-detail.html</span>（并行重构中，仅链接不改动）·「去运行时发现添加 →」/「凭据口径」注内链 → <span class="mono">runtimes.html</span> · 运行时下拉仅在线项可选（copilot 离线置灰）·「⟳ 刷新模型列表」→ toast · 8 区三态单选为<b>纯 CSS 联动</b>（点「清空」出拒因面板，点「整体替换」出 JSON 编辑框）· 3 区「平台维护层」→ 原生 <span class="mono">&lt;details&gt;</span> 折叠卡（只读 · 不入草稿）· 3 区开场白行卡「✕ / ＋ 添加开场白 / 设为默认」→ toast（未填 label 的行<b>就地红注</b>并把底条推成失败态）· 6 区「⤓ .env」两枚模式 chip → 覆盖同名 / 仅新增 toast · 6 区「👁 解锁」→ 二次确认 + <b>30s 遮回 <span class="mono">****</span></b> toast · <b>清空无「留空即清空」按钮</b>——只能删整行或改值（说明句给口径），<span class="mono">****</span> = 未改保留哨兵 · 7 区「＋ 加一项」一行一项校验红注 + <b>launch 预览</b>（只读、随增删重算）· 8 区「行尾」双 tab 两枚 chip → 表单可用 / sse 禁表单 toast · <b>9A 区（IM 通道 · 6 平台行表）</b>：飞书 / Slack 已连行「⟳ 重验 / 看入站 / 看绑定 / 改密…」→ 写-only 与两层同源口径 toast、「断开…」→ <span class="mono">md-im-disconnect</span>（<b>必填原因 · 软撤销保留审计 im:unbound · 释放唯一 bot 槽 → 重连免 409</b>）· 钉钉 / 自托管 IM「连接 ▸」→ 解锁 <span class="mono">password</span> 密钥行，行内「验证后落库 / 模拟 400 / 模拟 409」三分支各出对应 toast（400 保留输入不落库、409 通道 × Agent 唯一冲突需先断旧连接）· 自托管 IM 子区 <b>allow_from 入站白名单</b>：chip「＋ 加一条 / ✕」与子表「✕ 移除」→ 二次确认口径 toast · 企业微信（未启用 · configured 门）/ Telegram（预览 · 传输未实现）灰置行的 disabled 按钮 → 注门 toast · 管理权 chip（owner 自助 / 仅管理员）→ 权限位说明 toast · 各「删除 / 断开 / 解绑」→ toast 或二次确认 modal · 底条三态 chip → pop、放弃 → modal（草稿槽独立注 + 三种写路径分工）、<b>保存全部 → 本页演示态被校验拦截</b>（2 处未过 → toast 点名并停在字段旁；清掉拦截后才含「实例未重启」口径）· 危险区：归档 → 带在途检查的确认 modal、彻底删除 → <span class="mono">agent-detail__delete-agent.html</span>、复制 → toast（模型类清空 / env 与 MCP 从不复制）　页内数值全为演示 · 浮层闭环：<span class="mono">dr-draft</span> / <span class="mono">pp-autosave</span> / <span class="mono">md-discard</span> / <span class="mono">md-unlink-kb</span> / <span class="mono">md-unlink-int</span> / <span class="mono">md-im-disconnect</span> / <span class="mono">md-archive</span> 均有触发器且可 Esc 关。按 Esc 关闭浮层。</p>
 </body></html>
