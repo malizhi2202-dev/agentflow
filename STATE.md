@@ -5,9 +5,9 @@
 
 ## 会话状态（GO.md 第一步四字段 · 2026-10-24 起必填）
 
-- **活跃 Change**：`v21-completion`（T-01…T-04 ✅；T-05…T-08 pending）
-- **当前阶段**：4-dev（v21 收口程序：T-01 人设三件 / T-02 真实运行时 / T-03 修基线红 / T-04 测试基建 全部完成）
-- **当前 Task**：T-05（前端四页：automations/runtimes/replay/board）为下一个；T-06/T-07/T-08 pending
+- **活跃 Change**：`v21-completion`（T-01…T-05 ✅；T-06…T-08 pending）
+- **当前阶段**：4-dev（v21 收口程序：T-01 人设三件 / T-02 真实运行时 / T-03 修基线红 / T-04 测试基建 / T-05 前端页 全部完成）
+- **当前 Task**：T-06（a11y axe / 多用户 E2E / 多副本租约 / 迁移 down）为下一个；T-07/T-08 pending
 - **中断任务**：（空）
 - **ai_context_doc**：`CLAUDE.md`（2026-10-24 用户选定；`.specs/CONTEXT.md` 已作废不用）
 - **last_intel_scan**：（未跑；按用户选择跳过）

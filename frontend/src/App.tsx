@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Activity, GitBranch, Users, ChevronLeft, PanelLeft, Shield, FileSearch, User as UserIcon, AlertCircle, Wrench, Bot, Network, FolderKanban, BarChart3, Link2, MessageSquare, Radio, Bell, BookOpen, ListTodo, Inbox as InboxIcon, Brain } from 'lucide-react';
+import { Activity, GitBranch, Users, ChevronLeft, PanelLeft, Shield, FileSearch, User as UserIcon, AlertCircle, Wrench, Bot, Network, FolderKanban, BarChart3, Link2, MessageSquare, Radio, Bell, BookOpen, ListTodo, Inbox as InboxIcon, Brain, Timer, Boxes, RotateCcw } from 'lucide-react';
 import Home from './pages/Home';
 import Detail from './pages/Detail';
 import Roles from './pages/Roles';
@@ -36,6 +36,9 @@ import Tasks from './pages/Tasks';
 import Inbox from './pages/Inbox';
 import Teams from './pages/Teams';
 import Memory from './pages/Memory';
+import Automations from './pages/Automations';
+import Runtimes from './pages/Runtimes';
+import Replay from './pages/Replay';
 import UserArea from './components/UserSelect';
 import ForcePasswordChange from './components/ForcePasswordChange';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -66,6 +69,9 @@ const NAV: NavItem[] = [
   { id: 'projects', label: '项目', icon: <FolderKanban size={16} /> },
   { id: 'tasks', label: '任务', icon: <ListTodo size={16} /> },
   { id: 'inbox', label: '收件箱', icon: <InboxIcon size={16} /> },
+  { id: 'automations', label: '自动化', icon: <Timer size={16} /> },
+  { id: 'runtimes', label: '运行时', icon: <Boxes size={16} /> },
+  { id: 'replay', label: '回放', icon: <RotateCcw size={16} /> },
   { id: 'teams', label: '团队与小隊', icon: <Users size={16} /> },
   { id: 'memory', label: '记忆中心', icon: <Brain size={16} /> },
   { id: 'knowledge', label: '知识库', icon: <BookOpen size={16} /> },
@@ -281,6 +287,9 @@ export default function App() {
       case 'approvals': return perm('project:read') ? <ApprovalPage /> : <EmptyPerm />;
       case 'tasks': return perm('project:read') ? <Tasks /> : <EmptyPerm />;
       case 'inbox': return <Inbox />;
+      case 'automations': return perm('project:read') ? <Automations /> : <EmptyPerm />;
+      case 'runtimes': return perm('project:read') ? <Runtimes /> : <EmptyPerm />;
+      case 'replay': return perm('project:read') ? <Replay /> : <EmptyPerm />;
       case 'teams': return perm('project:read') ? <Teams /> : <EmptyPerm />;
       case 'memory': return perm('project:read') ? <Memory /> : <EmptyPerm />;
       default: return <ProjectManager onSelect={(id) => setProjectDetailId(id)} />;

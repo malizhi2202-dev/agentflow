@@ -15,6 +15,7 @@
 | 2026-10-24 | `v20-wave7` | 波 7 遗留项收口：A2A M0 静态卡 · 因果前缀 + 晋升评审账 + 防污染双扫 · 四类开关 · 归因双列 + 瀑布 fail-closed | `13faefbe` | L-001 |
 | 2026-10-24 | `doc-align-v20` | 文档归并：RULINGS/INDEX 建档、门面改齐、删 8 张孤儿原型页（135→127） | `fcc00645` | — |
 | 2026-10-24 | `v20-rsi-adapters` | 真实 judge 适配器（显式配置 + 预算帽 + 可注入）+ L0 定时抽取作业（默认关闭）；三类业务错由 500 改正 400 | 见「feat(rsi-adapters)」提交 | — |
+| 2026-10-24 | `v21-completion` T-05 | 前端三页补齐：自动化中心（新聚合口 `GET /api/automations` + 启停/删除）· 运行时（summary/stats/sessions + 重试）· 回放（任务运行时间线）；看板核实为已有（Tasks.tsx 四列）；E2E 13→**16/16** | 见「feat(v21-t05)」提交 | — |
 | 2026-10-24 | `v21-completion` T-04 | 测试基建：本地 CI 四道门 + GH workflow + 前后端覆盖率 + E2E 入脚本（`npm run e2e`）；hermes 通道纳入 E2E（13/13）；修**写后读竞态**（缓存代际）、抽取器真实 CLI 形状容错、抽取 prompt 逃生口、seed 假阴性 | 见「test(v21-t04)」提交 | L-007 L-008 |
 | 2026-10-24 | `v21-completion` T-03 | 基线红 29F/12E → **0 失败**（477 用例 OK）：旧身份/urllib mock/旧文案逐条对齐；修「埋点异常打挂聊天回复」；修 dependency_overrides 生命周期缺陷 | 见「fix(v21-t03)」提交 | — |
 | 2026-10-24 | `v21-completion` T-02 | Agent 真实运行时执行通道（hermes/dsh/codex，默认关闭、fail-closed、不经 shell、不降级）；真 CLI 冒烟 hermes/dsh 均回 '1' | 见「feat(v21-t02)」提交 | — |

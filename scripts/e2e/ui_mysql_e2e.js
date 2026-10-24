@@ -84,6 +84,34 @@ const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' 
   await page.screenshot({ path: `${SHOTS}/teams.png` });
   log('团队：建团 + 加成员 + 暂停', true);
 
+  // ---- 自动化 / 运行时 / 回放：三页可达 + 至少一条真交互 ----
+  await page.getByRole('button', { name: '自动化' }).click();
+  await page.getByRole('heading', { name: /自动化中心/ }).waitFor({ timeout: 20000 });
+  await page.getByRole('button', { name: /新建定时任务/ }).click();
+  const agentSel = page.locator('#auto-agent');
+  const agentVals = await agentSel.locator('option').evaluateAll((os) => os.map((o) => o.value).filter(Boolean));
+  if (!agentVals.length) throw new Error('自动化：没有可选 Agent（种子未建 Agent？）');
+  await agentSel.selectOption(agentVals[0]);
+  const autoName = `E2E 巡检 ${stamp}`;
+  await page.getByLabel('定时任务名称').fill(autoName);
+  await page.getByLabel('cron 表达式').fill('0 9 * * 1');
+  await page.getByLabel('capability').fill('daily-report');
+  await page.getByRole('button', { name: '创建' }).click();
+  await page.getByText(autoName).waitFor({ timeout: 20000 });
+  await page.screenshot({ path: `${SHOTS}/automations.png` });
+  log('自动化：新建定时任务（真落库）', true);
+
+  await page.getByRole('button', { name: '运行时' }).click();
+  await page.getByRole('heading', { name: '运行时' }).waitFor({ timeout: 20000 });
+  log('运行时：页面可达（summary/sessions）', (await page.getByRole('region', { name: '运行时会话' }).count()) > 0);
+
+  await page.getByRole('button', { name: '回放' }).click();
+  await page.getByRole('heading', { name: '回放' }).waitFor({ timeout: 20000 });
+  await page.getByLabel(/^回放任务/).first().click();
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: `${SHOTS}/replay.png` });
+  log('回放：选任务看运行时间线', (await page.getByText(/run #\d+|还没有运行记录/).count()) > 0);
+
   // ---- 记忆：列表（应含 L0 抽取结果）+ 写入 + 评审 ----
   await page.getByRole('button', { name: '记忆中心' }).click();
   await page.getByRole('heading', { name: /记忆中心/ }).waitFor();

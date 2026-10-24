@@ -247,7 +247,18 @@ $ cd frontend && npm run build
 | D7-7 | 外部输入容错 | L3 | `services/l0_llm_extractor.py` | 真实 CLI 输出容器键/字段别名/单字符串 evidence 未兼容；prompt 逃生口导致稳定 0 候选 | **已修**：`parse_reply` 兼容 + prompt 正面界定；3 条新用例 |
 | D4-12 | 执行留痕 | L5 | `.specs/v21-completion/T-04-SUMMARY.md` + `TEST.md §T-04` | 证据齐（CI 真实输出 / 双通道 13/13 / 覆盖率数字） | 已闭环 |
 
-## 15. 下一轮基线
+## 15. 第 11 轮增量（2026-10-24 · v21 T-05 前端三页）
+
+**覆盖**：`v21-completion` T-05（自动化中心 / 运行时 / 回放 + 新后端聚合口）
+
+| 编号 | 类型 | 层 | 证据 | 处理 |
+|---|---|---|---|---|
+| D1-12 | 代码变文档未变 | L3 | `routes/automations_api.py`（新） | 新增 `GET /api/automations`、`POST /{id}/toggle`、`DELETE /{id}` | **已合并**：README 未列端点清单（端点以路由为源），T-05-SUMMARY 记口径 |
+| D2-3 | 页面缺失 | L3 | `frontend/src/pages/{Automations,Runtimes,Replay}.tsx` | 原型三页此前 0 实现 | **已补**：各页有用例 + E2E 可达 |
+| D2-4 | 口径核实 | L2 | `pages/Tasks.tsx` `COLUMNS` | 「看板缺页」不成立——任务页即四列看板 | 已在 T-05-SUMMARY 更正，不重复造页 |
+| D7-8 | 测试选择器脆弱 | L5 | `scripts/e2e/ui_mysql_e2e.js` | `getByLabel('Agent')` 命中导航同名项 → strict mode 报错 | **已修**：按 id 定位；并修一条「下拉无选项导致断言落空」的假绿用例 |
+
+## 16. 下一轮基线
 
 `v20-ui-polish` 提交（见 `git log`）—— 下次 S-align 从此开始扫描。
 

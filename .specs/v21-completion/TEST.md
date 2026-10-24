@@ -54,3 +54,28 @@ SUMMARY 13/13 passed
 - E2E 双通道：同一个脚本换 `E2E_CLI=dsh|hermes`，后端 provider/judge 都换成对应 CLI，均 13/13
 - L0 循环：`l0_job.tick` 三态（拿到租约抽一次 / 备用实例 standby 返回 None / 无租约不抽）
 - 顺带回归：`requestDedup` 写后读（4 例，含在途读被失效的顺序）、抽取器解析（容器键/字段别名/单字符串 evidence）
+
+## T-05 前端三页（2026-10-24）
+
+```text
+$ backend: unittest discover -s tests
+Ran 488 tests in 123.862s
+OK (skipped=6)                     （新增 tests/test_automations_api.py 6 例）
+
+$ frontend: npx tsc --noEmit && npx vitest run
+Test Files 11 passed (11)
+Tests 104 passed (104)             （新增 automations-runtimes-replay.test.tsx 11 例）
+
+$ E2E_CLI=dsh bash scripts/e2e/run_e2e.sh
+SUMMARY 16/16 passed
+PASS 自动化：新建定时任务（真落库）
+PASS 运行时：页面可达（summary/sessions）
+PASS 回放：选任务看运行时间线
+```
+
+覆盖点：
+- 自动化中心：owner 可见性（他人任务 404 而非 403）· admin 全见 · 启停幂等落库 · 删除 · 未登录 401；
+  前端空态、缺 cron 前端先拦不发请求（mock 下拉必须有真实选项，否则假绿）、暂停/删除打对端点
+- 运行时：summary/stats/sessions 三读渲染 · 失败会话重试打对端点 · 无数据空态
+- 回放：任务列表 → 运行时间线（有记录/无记录两态）· 只读（不触发重跑）
+- 板：`pages/Tasks.tsx` 四列看板已存在（本轮核实，不重复造页）
