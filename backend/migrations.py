@@ -228,6 +228,73 @@ def m007_cluster_state(conn, dialect: str) -> None:
 
 
 
+def m008_alerts_and_queue_merge(conn, dialect: str) -> None:
+    """P1-16：告警落表 + 双队列并表。
+
+    - `alerts`：告警从进程内环形 500 条改为落库（重启不丢、可审计、多副本同源）。
+    - 并表：`scheduling_queue`（编排实例队列）的存量行搬进 `scheduler_queue`，
+      用 `kind='orchestration_instance'` 区分，然后删掉旧表——只保留一张队列。
+      旧表在函数里先判存在，重复执行无副作用。
+    """
+    pk = _pk_clause(dialect)
+    create_table_if_missing(conn, dialect, "alerts",
+        f"id VARCHAR(80) PRIMARY KEY, alert_type VARCHAR(32) NOT NULL, "
+        "severity VARCHAR(16) NOT NULL, title VARCHAR(255) NOT NULL, message TEXT NOT NULL, "
+        "entity_type VARCHAR(32) DEFAULT '', entity_id INTEGER DEFAULT 0, metadata_json TEXT, "
+        "timestamp DATETIME, acknowledged INTEGER DEFAULT 0, acknowledged_at DATETIME, "
+        "acknowledged_by VARCHAR(64)")
+    create_index_if_missing(conn, dialect, "ix_alerts_alert_type", "alerts", "alert_type")
+    create_index_if_missing(conn, dialect, "ix_alerts_severity", "alerts", "severity")
+    create_index_if_missing(conn, dialect, "ix_alerts_timestamp", "alerts", "timestamp")
+    create_index_if_missing(conn, dialect, "ix_alerts_acknowledged", "alerts", "acknowledged")
+    create_index_if_missing(conn, dialect, "ix_alerts_entity", "alerts", "entity_type, entity_id")
+
+    # 并表：目标表可能还没建（极老库/裸库先建出来），再补列
+    create_table_if_missing(conn, dialect, "scheduler_queue",
+        f"id {pk}, task_id VARCHAR(128) NOT NULL, label VARCHAR(64), domain_id INTEGER, "
+        "agent_id INTEGER, kind VARCHAR(24) DEFAULT 'agent_task', instance_id INTEGER, "
+        "priority INTEGER DEFAULT 50, score FLOAT DEFAULT 0, "
+        "status VARCHAR(16) DEFAULT 'queued', enqueued_at DATETIME, started_at DATETIME, "
+        "attempts INTEGER DEFAULT 0, lease_owner VARCHAR(128), lease_expires_at DATETIME, "
+        "heartbeat_at DATETIME, finished_at DATETIME")
+    add_column_if_missing(conn, dialect, "scheduler_queue", "kind", "VARCHAR(24) DEFAULT 'agent_task'")
+    add_column_if_missing(conn, dialect, "scheduler_queue", "instance_id", "INTEGER")
+
+    if not _table_exists(conn, dialect, "scheduling_queue"):
+        return
+
+    ph = "%s" if dialect == "mysql" else "?"
+    status_map = {
+        "queued": "queued",
+        "scheduled": "queued",
+        "executing": "leased",
+        "evicted": "failed",
+        "completed": "done",
+        "failed": "failed",
+    }
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, instance_id, priority, status, enqueued_at FROM scheduling_queue"
+    )
+    rows = cur.fetchall()
+    for row in rows:
+        _id, instance_id, priority, status, enqueued_at = row
+        cur.execute(
+            f"INSERT INTO scheduler_queue (task_id, kind, instance_id, priority, status, "
+            f"enqueued_at) VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph})",
+            (
+                f"instance-{instance_id}-{_id}",
+                "orchestration_instance",
+                instance_id,
+                priority,
+                status_map.get(status, "queued"),
+                enqueued_at,
+            ),
+        )
+    cur.execute("DROP TABLE scheduling_queue")
+
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -236,6 +303,7 @@ MIGRATIONS: list[Migration] = [
     ("005_scheduled_tasks", "新建 scheduled_tasks 定时任务表", m005_scheduled_tasks),
     ("006_auth_sessions", "新建 sessions/PAT 令牌表（P0-1 服务端会话）", m006_auth_sessions),
     ("007_cluster_state", "队列落库+租约/心跳，限流/退避/租约/监控偏移四表（P1-7）", m007_cluster_state),
+    ("008_alerts_and_queue_merge", "告警落表 + 双队列并表（P1-16）", m008_alerts_and_queue_merge),
 ]
 
 

@@ -658,10 +658,12 @@ def api_trace_span_detail(instance_id: int, span_id: int, request: Request = Non
 @router.get("/orchestration/queue/depth")
 def api_queue_depth(request: Request = None, db: Session = Depends(get_db)):
     """调度队列深度 + 等待时间."""
-    from models.orchestration import SchedulingQueue as SQ
+    from models.scheduler_queue import SchedulerQueue as SQ
     from datetime import datetime
     now = datetime.utcnow()
-    entries = db.query(SQ).filter(SQ.status.in_(["queued", "scheduled"])).all()
+    entries = db.query(SQ).filter(
+        SQ.kind == "orchestration_instance", SQ.status == "queued",
+    ).all()
     wait_times = [(now - e.enqueued_at).total_seconds() for e in entries if e.enqueued_at]
     return {
         "depth": len(entries),

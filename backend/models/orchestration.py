@@ -62,24 +62,6 @@ class OrchestrationTemplate(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
 
-class SchedulingQueue(Base):
-    """调度队列 — 待执行的编排任务，按优先级排序."""
-
-    __tablename__ = "scheduling_queue"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    instance_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("orchestration_instances.id"), nullable=False, index=True
-    )
-    priority: Mapped[int] = mapped_column(Integer, default=50)
-    status: Mapped[str] = mapped_column(
-        String(16), default="queued", index=True
-    )  # queued|scheduled|executing|evicted|completed|failed
-    enqueued_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
-    scheduled_at: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
-    max_wait_until: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
-
-
 class TraceSpan(Base):
     """调用链追踪 span — 一次 Agent 调用的耗时和 token 记录."""
 

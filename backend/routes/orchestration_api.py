@@ -9,7 +9,6 @@ from models.orchestration import (
     OrchestrationInstance,
     TopologySnapshot,
     OrchestrationTemplate,
-    SchedulingQueue,
 )
 import datetime
 import yaml
@@ -150,12 +149,16 @@ def api_apply(payload: dict, request: Request, db: Session = Depends(get_db)):
     )
     db.add(snapshot)
 
-    # 入调度队列
-    queue_entry = SchedulingQueue(
+    # 入统一调度队列（P1-16：agent 任务与编排实例同一张表，kind 区分）
+    from models.scheduler_queue import SchedulerQueue
+
+    queue_entry = SchedulerQueue(
+        task_id=f"instance-{instance.id}",
+        kind="orchestration_instance",
         instance_id=instance.id,
         priority=strategy.get("priority", 50),
         status="queued",
-        max_wait_until=datetime.datetime.utcnow() + datetime.timedelta(minutes=5),
+        enqueued_at=datetime.datetime.utcnow(),
     )
     db.add(queue_entry)
     db.commit()
@@ -201,14 +204,17 @@ def api_list(request: Request, db: Session = Depends(get_db)):
 @router.get("/queue/list")
 def api_queue(request: Request, db: Session = Depends(get_db)):
     """调度队列状态."""
-    entries = db.query(SchedulingQueue).filter(
-        SchedulingQueue.status.in_(["queued", "scheduled", "executing"])
-    ).order_by(SchedulingQueue.priority.desc(), SchedulingQueue.enqueued_at).all()
+    from models.scheduler_queue import SchedulerQueue
+
+    entries = db.query(SchedulerQueue).filter(
+        SchedulerQueue.kind == "orchestration_instance",
+        SchedulerQueue.status.in_(["queued", "leased"]),
+    ).order_by(SchedulerQueue.priority.desc(), SchedulerQueue.enqueued_at).all()
     return [
         {
             "id": e.id, "instance_id": e.instance_id,
             "priority": e.priority, "status": e.status,
-            "enqueued_at": e.enqueued_at.isoformat(),
+            "enqueued_at": e.enqueued_at.isoformat() if e.enqueued_at else None,
         }
         for e in entries
     ]

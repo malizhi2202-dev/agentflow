@@ -26,18 +26,20 @@ async def list_alerts(
 
 
 @router.post("/{alert_id}/acknowledge")
-async def acknowledge_alert(alert_id: str):
-    """确认单个告警."""
-    success = alert_service.acknowledge(alert_id)
+async def acknowledge_alert(alert_id: str, request: Request):
+    """确认单个告警（记录确认人；落库后重启不丢）."""
+    user = getattr(request.state, "user", None) or {}
+    success = alert_service.acknowledge(alert_id, by=user.get("id"))
     if not success:
         return {"error": "alert not found", "alert_id": alert_id}
     return {"status": "acknowledged", "alert_id": alert_id}
 
 
 @router.post("/acknowledge-all")
-async def acknowledge_all():
+async def acknowledge_all(request: Request):
     """确认所有告警."""
-    count = alert_service.acknowledge_all()
+    user = getattr(request.state, "user", None) or {}
+    count = alert_service.acknowledge_all(by=user.get("id"))
     return {"status": "ok", "acknowledged_count": count}
 
 

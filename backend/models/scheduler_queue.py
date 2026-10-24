@@ -6,6 +6,10 @@
 
 现在：一行一个待调度任务，带 `lease_owner / lease_expires_at / heartbeat_at`。
 租约到期未心跳 = 持有者已死，任务自动重新可被 claim（至少一次语义）。
+
+P1-16 并表：原先还有一张 `scheduling_queue`（编排实例队列）与这张并存，
+两套状态机、两处深度统计。现在统一到本表，用 `kind` 区分：
+`agent_task`（能力标签路由）与 `orchestration_instance`（`instance_id` 指向编排实例）。
 """
 
 import datetime
@@ -28,6 +32,9 @@ class SchedulerQueue(Base):
     agent_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("agents.id"), nullable=True, index=True
     )
+    # P1-16 并表：一条队列同时承载 agent 任务与编排实例
+    kind: Mapped[str] = mapped_column(String(24), default="agent_task", index=True)
+    instance_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
     priority: Mapped[int] = mapped_column(Integer, default=50)
     score: Mapped[float] = mapped_column(Float, default=0.0)
     status: Mapped[str] = mapped_column(String(16), default="queued", index=True)
@@ -46,6 +53,8 @@ class SchedulerQueue(Base):
         return {
             "id": self.id,
             "task_id": self.task_id,
+            "kind": self.kind,
+            "instance_id": self.instance_id,
             "label": self.label,
             "domain_id": self.domain_id,
             "agent_id": self.agent_id,
