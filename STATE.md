@@ -44,7 +44,8 @@
   - ⚠ **工作树基线**：10-23 遗留的 11 文件未提交改动已固化为 safety commit `5a21e597`（已推 origin/main），**禁止 reset/clean 覆盖**。
 - ✅ **波 0 已收口（change `v20-wave0`）**：P0-4 构建（32→0，build 绿）· P0-8 迁移账本（6 单测）· P0-6/P0-7 阶段表单点（后端 10 单测 + 前端 5 单测、57 用例、build 绿）；P0-5 按用户定「只记账不做」。
 - ✅ **change `v20-wave1`（波 1 身份三连）已收口（10-24）**：P0-2 口令（argon2id + 废出厂口令 + 渐进升级）/ P0-1 服务端会话（`sessions`+`pat_tokens` 迁移 006、`__Host-session` HttpOnly、cookie>PAT>401、三处 fail-open 清零、节流 5 败/15min→429、must_change 服务端 403、PAT 90 天不可永不过期、cron 改直调 service）/ P0-3 部署闸门（DEPLOY_MODE 三值 + 可信代理 XFF 纪律 + 非法配置启动即失败 + CORS 最外层 + `/api/auth/deploy-info`）。验证：24+14+9 新用例全绿，全仓 241 用例 29F/12E（0 新增红），build 绿、vitest 57/57。提交 `129c33ec`；工件 `.specs/v20-wave1/`。**遗留（已记账）**：登录节流为进程内存（波 2 P1-7 外置）；`users.json`→MySQL 表化（裁定⑦，波 2 一并）。
-- ✅ **change `v20-wave2`（波 2 单副本事实固化）已收口（10-24）**：P1-7 队列/限流/退避/监控偏移四类状态落库（迁移 007）· 任务租约+心跳（claim/heartbeat/requeue_expired）· 单例循环（cron/watcher/reconcile）数据库租约选主 · 删死代码 `engine/scheduler.py` 与进程内队列 · P0-9 事实写进 README + `/api/control-plane/cluster` + 管控页集群条。验证：test_cluster_store 23 绿、全仓 264 用例 29F/12E（0 新增红）、build 绿、vitest 57/57。**下一步 波 3（协作层最小集 P1-4 + P1-16）。**
+- ✅ **change `v20-wave3`（波 3 协作层最小集）已收口（10-24）**：**P1-16** 告警落 `alerts` 表（去重查库、确认记人、不再环形裁剪）+ 双队列并表（`scheduling_queue` 六状态映射搬入 `scheduler_queue`，`kind='orchestration_instance'`，旧表删除）；**P1-4** `work_items`（status 四类+blocked × triage 正交 / assignee 三轨 / done 证据建议层）+ `work_item_runs` + 订阅（只增不减、@ 穿透）+ 收件箱三规则（action_required 分组 / 读失败上抛 / 交还给人自愈归档，blocked 例外，合并键=任务）。API：`/api/tasks` 8 个端点 + `/api/inbox` 6 个端点，越权统一 404。验证：test_alerts_and_queue 6 绿 + test_collab 23 绿，全仓 293 用例 29F/12E（0 新增红）。提交 `57945f50` + `67420190`。**未做**：任务评论正文落表、看板/收件箱前端页面（按「先表与校验，再上界面」）。
+- ✅ **change `v20-wave2`（波 2 单副本事实固化）已收口（10-24）**：P1-7 队列/限流/退避/监控偏移四类状态落库（迁移 007）· 任务租约+心跳（claim/heartbeat/requeue_expired）· 单例循环（cron/watcher/reconcile）数据库租约选主 · 删死代码 `engine/scheduler.py` 与进程内队列 · P0-9 事实写进 README + `/api/control-plane/cluster` + 管控页集群条。验证：test_cluster_store 23 绿、全仓 264 用例 29F/12E（0 新增红）、build 绿、vitest 57/57。**下一步 波 4（团队与小队）。**
 - 🧾 **change `v20-wave0`（历史段 · 波 0 首项）**：用户 10-24「按照最新的设计文档实现代码」→ 裁定⑧ 解除（`backend/` `frontend/` 恢复可改）。**已交付 P0-4**：32 个 TS 错误清零，`npm run build` 首次通过（18.46s）、`vitest` 52/52 绿。**已完成 P0-4 + P0-8 + P0-6/7**（P0-6/7：`backend/stage_config.py` 单一事实源 + 两份 scanner 合一 + admin PUT 校验/热更新 + 前端 `stores/stageConfig.ts` 接 6 个消费者；后端 10 用例 / 前端 57 用例 / build 全绿）（P0-8：`backend/migrations.py` 版本化迁移账本 + 6 个单测全绿，替换 init_db 里 5 段内联静默迁移）。**遗留**：T-05 `system_prompt/role_def/sop` 后端不落库（数据丢失，登记待修）；P0-5 仓库卫生（用户 10-24 定「暂不做只记账」）、P0-6/7 阶段表单点仍待做。工件：`.specs/v20-wave0/{CHANGE,TASK,TEST,REVIEW}.md`
 - 🔒 **裁定⑧ 开发冻结中**（**已于 2026-10-24 由用户「实现代码吧」解除**，保留原文作历史）：`backend/` `frontend/` 零代码改动；一切动作限于 `.specs/` 文档、`PRODUCT-DESIGN.html` 与 `prototype/`。
 - ✅ **八轮 discovery 全部闭合**：第 1 轮 S1-S5 · 第 3 轮 S6/S7 · 第 4 轮 S8-S13 · 第 5 轮 S14/S15/S16（10-23 追认 + 首批五类收口）· 第 6 轮 S17-S20 · 第 7 轮 S21 · 第 8 轮 S22/S23。议题状态账本：`.specs/platform-evolution/TOPICS.md`；结论账本：同目录 `ROADMAP.md`（第 3/4/5/6/7/8 轮正节已齐）。
@@ -79,10 +80,13 @@
 0e. 🧩 **change `small-model-decisions`**：P-product v7 已过审（用户「通过」2026-09-22）、**2-design 未动**——等指令。
 0f. ⚠ **两条硬纪律（沿用）**：① 已被推翻的正文**不删**，一律「原文保留 + 行内 ⛔ 标记 + 指向上位裁定」（写法见 `D-S16/CONCLUSION.md` 页首）；② **并行 agent 一律禁写共享台账文件**（09-23 曾发生 STATE 被 agent 回滚成旧快照，丢 0b/0c 段）。
 
-1. **修复 32 个 TS 错误**，恢复 `npm run build`（当前必然失败）
-2. **`git rm --cached node_modules`**（35,517 / 35,847 个跟踪文件是依赖）
-3. **消除 fail-open 身份回退**（`backend/auth.py:181-186` 缺身份回退 admin）
-4. 写明「当前必须单副本部署」与「`Domain` 不是安全边界」
+1. ~~修复 32 个 TS 错误~~（波 0 已完成，`npm run build` 绿）
+2. **`git rm --cached node_modules`**（P0-5：用户 10-24 定「只记账不做」，未做）
+3. ~~消除 fail-open 身份回退~~（波 1 已完成：cookie > PAT > 401）
+4. ~~写明单副本边界~~（波 2 已完成：README + `/api/control-plane/cluster` + 管控页集群条）
+5. **波 4（团队与小队）**：`teams` / `team_members`（四档角色）+ 五类资产 `team_id/owner_kind`（域进首批、编排次批）+ `squad`（1 leader + 混编，可指派）；口径：非成员一律 404、归档只停未来指派、Team⟂Squad 无外键
+6. **波 5（差距能力）**：P2-3 执行隔离 tier 阶梯（契约先行、fail-closed）· P2-4 可观测（先修产生端：trace_spans/metrics_raw 零写入）· P2-5 声明式 API 四件组（ETag→412 / conditions / change_log 同事务 / `/api/watch` SSE）
+7. **波 6（RSI）**：记忆四层唯一管道 L0→L1→L2→L3 · 编排提案制三权分离 · 四熔断 + NOISE FLOOR · 晋升三字段缺一不入库 · 代码层禁自改
 
 完整路线图见 `.specs/platform-evolution/ROADMAP.md`（议题状态账本：同目录 `TOPICS.md`）。
 
@@ -92,8 +96,10 @@
 - 前端：`frontend/`，React 18 + TS 5.5 + Vite 5.4 + Zustand
 - 虚拟环境：`/home/malizhi/.venv`（Python 3.14.4）
 - 启动：后端 `uvicorn main:app --port 8000`；前端 `npm run dev`（5173，代理 `/api` → 8000）
+- 后端依赖环境：`/tmp/afvenv2`（venv + requirements，含 argon2-cffi）；测试命令 `cd backend && /tmp/afvenv2/bin/python -m unittest discover -s tests`
+- 多副本：`INSTANCE_ID` + 共享 `DATABASE_URL`；单例循环租约 90s（见 README「副本与单例循环」）
 - 默认管理员：`admin` / `123456`（**硬编码，属待修项**）
-- 已知缺陷：`npm run build` 失败（32 个 TS 错误）；`node_modules` 被 git 跟踪
+- 已知缺陷：`node_modules` 被 git 跟踪（P0-5 按用户决定只记账）；全仓后端回归 293 用例 29F/12E/6S 为**基线既有债**（mock 断言/文案漂移），改动时以「0 新增红」为判据
 
 ## 已知约束
 
