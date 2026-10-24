@@ -10,6 +10,7 @@ from auth import (
     PERMISSION_DEFS, ROLE_PERMISSIONS,
     hash_password, verify_password,
 )
+from passwords import needs_rehash, generate_password, is_weak
 from config import discover_projects
 
 router = APIRouter()
@@ -68,7 +69,14 @@ async def create_user(request: Request):
     if any(u["id"] == new_id for u in data.get("users", [])):
         raise HTTPException(status_code=400, detail=f"用户 ID '{new_id}' 已存在")
 
-    password = body.get("password", "123456")
+    # P0-2：出厂口令已废——不传口令则随机生成并只回显一次，且强制首登修改
+    generated = None
+    password = body.get("password") or ""
+    if not password:
+        password = generate_password()
+        generated = password
+    if is_weak(password):
+        raise HTTPException(status_code=400, detail="口令太弱：至少 12 位且不要重复字符")
     new_user = {
         "id": new_id,
         "name": body.get("name", new_id),
@@ -110,7 +118,10 @@ async def update_user(user_id: str, request: Request):
                     u[field] = body[field]
             # 密码单独处理
             if body.get("password"):
+                if is_weak(body["password"]):
+                    raise HTTPException(status_code=400, detail="口令太弱：至少 12 位且不要重复字符")
                 u["password_hash"] = hash_password(body["password"])
+                u["must_change_password"] = False
             if "project_ids" in body:
                 u["project_ids"] = body["project_ids"]
 
@@ -202,7 +213,23 @@ async def login(request: Request):
     # 验证密码
     stored_hash = user.get("password_hash", "")
     if not verify_password(password, stored_hash):
+        write_audit(user, "auth:login_failed", user["id"], "login", "口令错误", request=request)
         raise HTTPException(status_code=401, detail="密码错误")
+
+    # P0-2：标记 must_change_password 的账号禁止口令登录（先改口令）
+    if user.get("must_change_password"):
+        write_audit(user, "auth:login_blocked", user["id"], "login", "must_change_password", request=request)
+        raise HTTPException(status_code=403, detail="该账号必须先重置口令（must_change_password）")
+
+    # P0-2：存量哈希（sha256 / 旧 scrypt 参数）登录时静默升级
+    if needs_rehash(stored_hash):
+        data = load_users()
+        for i, u in enumerate(data.get("users", [])):
+            if u["id"] == user["id"]:
+                data["users"][i]["password_hash"] = hash_password(password)
+                _save_users(data)
+                write_audit(user, "auth:password_rehashed", user["id"], "login", "哈希算法升级", request=request)
+                break
 
     return {"ok": True, "user": {"id": user["id"], "name": user["name"], "role": user["role"]}}
 

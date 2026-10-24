@@ -7,7 +7,6 @@ users.json 和 audit.jsonl 独立于项目切换。
 import os
 import json
 import time
-import hashlib
 import fcntl
 import tempfile
 from datetime import datetime
@@ -16,14 +15,22 @@ from fastapi import Request, HTTPException
 
 # ── 密码工具 ─────────────────────────────────────────────
 
-def hash_password(password: str) -> str:
-    """SHA-256 密码哈希（localhost 工具，够用）。"""
-    return hashlib.sha256(password.encode()).hexdigest()
+# 口令算法统一走 passwords（argon2id 优先 / scrypt 兜底 / 兼容历史 sha256）
+from passwords import hash_password, verify_password, needs_rehash, generate_password  # noqa: E402,F401
 
 
-def verify_password(password: str, password_hash: str) -> bool:
-    """验证密码。"""
-    return hash_password(password) == password_hash
+def _bootstrap_admin_password() -> str:
+    """首启口令：优先 env；否则随机生成并在启动日志打印一次（Jupyter/Gitea 式）。"""
+    env_pw = os.environ.get("AGENTFLOW_ADMIN_PASSWORD", "")
+    if env_pw:
+        return env_pw
+    pw = generate_password()
+    print("\n" + "=" * 64)
+    print("[首次启动] 已生成管理员初始口令（只显示这一次，请立即修改）：")
+    print(f"    admin / {pw}")
+    print("    （可用 env AGENTFLOW_ADMIN_PASSWORD 指定，避免随机口令只出现在日志里）")
+    print("=" * 64 + "\n")
+    return pw
 
 # ── 数据根目录（跨项目共享，独立于 CURRENT_PROJECT）─────────
 
@@ -105,7 +112,8 @@ def _default_admin() -> dict:
         "id": "admin",
         "name": "管理员",
         "role": "admin",
-        "password_hash": hash_password("123456"),  # 默认密码
+        "password_hash": hash_password(_bootstrap_admin_password()),  # P0-2：不再有出厂口令
+        "must_change_password": True,  # 首启/重置后必须先改口令
         "project_ids": [],
         "custom_permissions": [],
         "created_at": datetime.now().isoformat(),
@@ -123,11 +131,13 @@ def load_users() -> dict:
             content = _locked_read(path)
             if content:
                 data = json.loads(content)
-                # 自愈：修复缺少 password_hash 的旧数据（默认密码 123456）
+                # P0-2：**不再**把缺失口令修成 123456——置 must_change_password，
+                # 该账号口令登录一律被拒（由管理员重置或 env 引导）。
                 repaired = False
                 for u in data.get("users", []):
-                    if "password_hash" not in u:
-                        u["password_hash"] = hash_password("123456")
+                    if not u.get("password_hash"):
+                        u["password_hash"] = ""
+                        u["must_change_password"] = True
                         repaired = True
                     if "custom_permissions" not in u:
                         u["custom_permissions"] = []

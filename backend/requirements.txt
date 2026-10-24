@@ -11,3 +11,4 @@ PyPDF2>=3.0.0
 python-docx>=1.0.0
 cryptography>=42.0.0
 python-multipart>=0.0.9
+argon2-cffi>=23.1.0  # P0-2 口令 argon2id（缺库时 passwords.py 退 scrypt）
