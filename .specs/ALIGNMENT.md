@@ -134,9 +134,30 @@ $ cd frontend && npm run build
 | 10-24 16:20 | D1-3 | README「界面未挂载」→「界面已挂载」 | 本轮 docs 提交 |
 | 10-24 16:20 | D4-3 | 补 `.specs/v20-ui-collab/SUMMARY.md` | 本轮 docs 提交 |
 
-## 7. 下一轮基线
+## 7. 第 3 轮增量（2026-10-24 · 团队与小隊页）
 
-`fce0aea4` —— 下次 S-align 从此开始扫描（含本轮 docs 提交后顺延）。
+> 触发：首个**按 GO.md 走完整链**的 change（`v20-ui-teams`）落地。
+
+**覆盖提交**：`5ed535b5`（feat ui-teams）+ 本轮 docs 提交
+
+| 编号 | 类型 | 层 | 证据 | 描述 | 处理 |
+|---|---|---|---|---|---|
+| D1-5 | 代码变文档未变 | L3 | `5ed535b5` + `README.md` §功能模块 | 「团队与小隊」上线前只写"已落地"未写界面入口 | **已合并**：补侧栏入口与四项能力 |
+| D4-4 | 执行留痕缺口（已改善） | L5 | `.specs/v20-ui-teams/` | 本 change 补齐了 REQUIREMENT / DESIGN / UI-DESIGN / T01–T04-SUMMARY / TEST / REVIEW / UAT + 四道门票 | **已闭环**（单 change 维度） |
+| D4-5 | 执行留痕缺口（历史债） | L5 | `.specs/v20-wave0…7`、`v20-ui-collab` | 这 9 个 change 仍无 REQUIREMENT / DESIGN / UI-DESIGN / 门禁记录（当时走压缩路径） | **不动历史**：不伪造补档；作为流程债登记，后续新 change 一律走完整链 |
+| D3-3 | 原型漂移（已登记） | L2 | `prototype/teams.html` vs `pages/Teams.tsx` | 原型是双 tab + 组织八区；实现是双 tab + 列表/抽屉（组织八区未做） | 已登记（CHANGE「范围排除」） |
+| D5-1 | 需求失配（无） | L3 | `REQUIREMENT.md` AC-2 | AC 写"列表显示我的角色"，实现后发现后端不返回该字段 → **回写 AC-2**（角色移入抽屉） | 已按"改需求不改后端"处理，避免顺手扩契约 |
+
+**已对齐记录**：
+
+| 时间 | 漂移 | 合并动作 | 提交 |
+|---|---|---|---|
+| 10-24 17:10 | D1-5 | README 团队与小隊节补界面入口与能力 | 本轮 docs 提交 |
+| 10-24 17:10 | D4-4 | 单 change 维度产物补齐（SUMMARY×4 + 门票） | `5ed535b5` |
+
+## 8. 下一轮基线
+
+`5ed535b5`（+ 本轮 docs 提交）—— 下次 S-align 从此开始扫描。
 
 ---
 
