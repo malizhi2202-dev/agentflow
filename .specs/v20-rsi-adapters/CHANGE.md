@@ -1,6 +1,6 @@
 # CHANGE: RSI 适配器（真实 judge + L0 定时作业）
 
-- **Change ID**: v20-rsi-adapters · 2026-10-24 · 后端（非 UI，跳 2a）· 规模 small（~220 行）
+- **Change ID**: v20-rsi-adapters · 2026-10-24 · 后端（非 UI，跳 2a）· 规模 small（~260 行）
 
 ## Why
 `v20-residual` 只做到"确定性 runner / 手动 L0 / 默认 dry_run"。用户 10-24「同意你开始吧」批准接真实适配器，
@@ -22,6 +22,13 @@
 - `shadow_runner.run_shadow(..., scorer=None, judge_kind=...)`：不复制门禁，只替换打分器。
 - `main.py`：`_l0_extract_loop`（照 cron 的单例租约模式），interval=0 不创建任务。
 - `routes/rsi_api._map`：runner/judge/抽取三类错统一 400（原来会 500）。
+
+## 本地试运行（用户 10-24「使用本地的 hermes 和 dsh 都可以」）
+
+`hermes proxy` 两个上游未登录 → 改用本机 **Ollama qwen2.5:3b** 做真实调用试运行，产出见 `LOCAL-TRIAL.md`：
+L0 抽取 1 条入库（confounded）、judge 2 例判 1/0 → pass_rate 0.5 → 提案 `awaiting_approval`。
+试运行中修掉两处：judge prompt 加 few-shot；抽取器输出形状容错（数组三元组也接受）。
+**ollama 免 key**（`PROVIDERS_WITHOUT_KEY`），远程厂商仍需 key。
 
 ## 范围排除
 - 不设默认 judge 模型/厂商（需用户给预算与厂商口径）。

@@ -35,6 +35,20 @@ class TestJudge(unittest.TestCase):
                 judge_adapter.judge_cases(CASES)
             self.assertIn("judge 未配置", str(ctx.exception))
 
+    def test_ollama_needs_no_api_key(self):
+        with patch.object(config, "RSI_JUDGE_PROVIDER", "ollama"), \
+             patch.object(config, "RSI_JUDGE_MODEL", "qwen2.5:3b"), \
+             patch.object(config, "RSI_JUDGE_API_KEY", ""), \
+             patch.object(config, "RSI_JUDGE_MAX_CALLS", 3):
+            self.assertTrue(judge_adapter.configured())
+
+    def test_remote_provider_still_requires_key(self):
+        with patch.object(config, "RSI_JUDGE_PROVIDER", "deepseek"), \
+             patch.object(config, "RSI_JUDGE_MODEL", "x"), \
+             patch.object(config, "RSI_JUDGE_API_KEY", ""), \
+             patch.object(config, "RSI_JUDGE_MAX_CALLS", 3):
+            self.assertFalse(judge_adapter.configured())
+
     def test_fake_provider_scoring_and_call_count(self):
         provider = _FakeProvider(["1", "0"])
         rate = judge_adapter.judge_cases(CASES, provider=provider, max_calls=5)

@@ -117,3 +117,32 @@ class TestRoute(AuthHarness, unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestLlmExtractorShape(unittest.TestCase):
+    """LLM 输出是不可信外部输入：对象与 [cue, lesson, evidence] 三元组都要能接。"""
+
+    class _Fake:
+        def __init__(self, reply):
+            self.reply = reply
+
+        def chat(self, messages, api_key, model_name):
+            return self.reply, {}
+
+    def _extract(self, reply):
+        from services import l0_llm_extractor as llm
+        return llm.build_extractor(provider=self._Fake(reply))(["一段对话"])
+
+    def test_object_shape(self):
+        got = self._extract('[{"cue":"c","lesson":"l","evidence":["r"]}]')
+        self.assertEqual(got, [{"cue": "c", "lesson": "l", "evidence": ["r"]}])
+
+    def test_triple_shape_is_tolerated(self):
+        got = self._extract('[["c","l",["r"]]]')
+        self.assertEqual(got, [{"cue": "c", "lesson": "l", "evidence": ["r"]}])
+
+    def test_garbage_is_dropped_not_guessed(self):
+        self.assertEqual(self._extract('不是 JSON'), [])
+        # 缺字段的对象保留为空字段（下游三字段门会判 no_entry）；非对象/非三元组的项丢弃
+        self.assertEqual(self._extract('[{"foo":1}, 42]'),
+                         [{"cue": "", "lesson": "", "evidence": []}])

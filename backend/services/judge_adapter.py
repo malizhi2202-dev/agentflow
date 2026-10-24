@@ -11,8 +11,10 @@ import config
 from services.llm_providers import get_provider
 
 PROMPT = (
-    "你是独立的评测者。下面给出【期望】与【实际输出】，请判断两者是否等价。"
-    "只回一个字符：1（等价）或 0（不等价）。不要解释。"
+    "你是独立的评测者。判断【实际】是否**完成了【期望】所要求的内容**（意思等价即可，措辞不同也算等价）。\n"
+    "只回一个字符：1（等价/完成）或 0（不等价/未完成）。不要解释。\n\n"
+    "示例一：\n【期望】先看第一个错误\n【实际】先看第一个错误，其它的多半是级联\n1\n\n"
+    "示例二：\n【期望】不该改配置\n【实际】先改配置再说\n0"
 )
 
 
@@ -24,9 +26,17 @@ class BudgetExceeded(JudgeError):
     """超出调用预算（不重试、不降级）。"""
 
 
+PROVIDERS_WITHOUT_KEY = ("ollama",)   # 本地模型不需要 key
+
+
 def configured() -> bool:
-    return bool(config.RSI_JUDGE_PROVIDER and config.RSI_JUDGE_MODEL
-                and config.RSI_JUDGE_API_KEY and config.RSI_JUDGE_MAX_CALLS > 0)
+    """四件齐（本地 ollama 可免 key）。默认全空 → 未配置 → fail-closed。"""
+    if not (config.RSI_JUDGE_PROVIDER and config.RSI_JUDGE_MODEL
+            and config.RSI_JUDGE_MAX_CALLS > 0):
+        return False
+    if config.RSI_JUDGE_PROVIDER in PROVIDERS_WITHOUT_KEY:
+        return True
+    return bool(config.RSI_JUDGE_API_KEY)
 
 
 def judge_cases(cases: list[dict], *, provider=None, max_calls: int | None = None) -> float:
@@ -40,7 +50,7 @@ def judge_cases(cases: list[dict], *, provider=None, max_calls: int | None = Non
     if provider is None and not configured():
         raise JudgeError(
             "judge 未配置：需要 RSI_JUDGE_PROVIDER / RSI_JUDGE_MODEL / "
-            "RSI_JUDGE_API_KEY / RSI_JUDGE_MAX_CALLS>0（不默认回退、不偷偷花钱）"
+            "RSI_JUDGE_MAX_CALLS>0（远程厂商还需 RSI_JUDGE_API_KEY；ollama 免 key）"
         )
     if budget <= 0:
         raise JudgeError("judge 预算帽 RSI_JUDGE_MAX_CALLS 必须 >0")

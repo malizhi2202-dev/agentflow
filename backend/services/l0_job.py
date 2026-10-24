@@ -8,13 +8,16 @@ from __future__ import annotations
 import config
 from models.conversation import Conversation
 from models.message import Message
-from services import l0_extractor
+from services import l0_extractor, l0_llm_extractor
 
 DEFAULT_MAX_CONVERSATIONS = 5
 
 
 def run_once(db, *, extractor=None, max_conversations: int | None = None,
              limit_per_conversation: int = l0_extractor.DEFAULT_LIMIT) -> dict:
+    # 未显式注入抽取器时：配置了模型就用它，否则保持 dry-run（只统计）
+    if extractor is None:
+        extractor = l0_llm_extractor.build_extractor()
     cap = int(config.L0_EXTRACT_MAX_CONVERSATIONS if max_conversations is None
               else max_conversations) or DEFAULT_MAX_CONVERSATIONS
     # 只挑**有消息**的会话（按最近更新倒序），不做全库扫描
