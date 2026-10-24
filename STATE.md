@@ -6,9 +6,9 @@
 ## 会话状态（GO.md 第一步四字段 · 2026-10-24 起必填）
 
 - **活跃 Change**：`v21-completion`（T-01…T-08 **全部 ✅**）
-- **当前阶段**：7-integration（v21 收口程序 8 项任务全部完成，进入最终门禁与留证）
-- **当前 Task**：（无；最终 CI + 收口台账）
-- **中断任务**：（空）
+- **当前阶段**：7-integration **已收口**（v21 收口程序 8 项全部完成；最终 CI 全绿，见 `.specs/v21-completion/CLOSEOUT.md`）
+- **当前 Task**：（无；下一步见 CLOSEOUT 第五节：UAT / a11y 换 axe / 真实 MySQL 双实例复跑）
+- **中断任务**：（空；dsh CLI 本轮外部报 NO_ADAPTER，已用 hermes 通道留证）
 - **ai_context_doc**：`CLAUDE.md`（2026-10-24 用户选定；`.specs/CONTEXT.md` 已作废不用）
 - **last_intel_scan**：（未跑；按用户选择跳过）
 
@@ -20,6 +20,7 @@
 
 | 时间 | 事项 | 产物 |
 |---|---|---|
+| 2026-10-24 | v21 T-07 用户与审计表化（裁定⑦收尾）+ 全程序收口：迁移 018 · `app_users`/`audit_log` · 导入脚本（dry-run/--apply 幂等）· 审计单一写入器 + 历史文件行合并；**删掉 `users.json` 后真实 MySQL + hermes E2E 仍 23/23**；最终 `ci.sh --with-coverage` 全绿（后端 523 OK / services+routes 覆盖 50%；前端 109 例 / 语句 18.22% / 分支 67.74%；build ✓） | `.specs/v21-completion/{T-07-SUMMARY.md,CLOSEOUT.md,TEST.md}` |
 | 2026-10-24 | v21 T-04 测试基建：本地 CI 四道门 + GH workflow + 覆盖率 + E2E 入脚本（`npm run e2e`）；E2E 在 **dsh / hermes 双通道各 13/13**（真实 MySQL + 真实 CLI + 真实浏览器）；顺带修 3 个真缺陷（requestDedup 写后读竞态→缓存代际 · 抽取器真实 CLI 形状容错 · 抽取 prompt 逃生口）与 seed 假阴性 | `scripts/ci.sh` `/tmp` 证据 `.specs/v21-completion/{T-04-SUMMARY.md,TEST.md}` · L-007 L-008 |
 | 2026-09-21 | 剥离 code-kit 耦合、目录扁平化 | 全仓 `code-kit\|codekit\|code_kit\|code-kit-monitor` grep = 0 命中 |
 | 2026-09-21 | 竞品调研（67 个开源仓库一手实测） | `.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md`（997 行） |
