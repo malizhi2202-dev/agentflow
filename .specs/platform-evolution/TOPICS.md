@@ -181,6 +181,6 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 
 | 子议题 | 题 | 事实依据 | 状态 |
 |---|---|---|---|
-| S24-prototype-mount-gaps | 原型三处挂载缺口：① `audit.html` 无 team 筛选器与锚点 ② `control-plane.html` 未显示 `domains.team_id` 归属 ③ `chat.html` 缺「同刻双投递幂等 + coalesced」可见呈现 | `grep -c team_id prototype/control-plane.html` = 0；其余两页需逐页核（`audit.html` 仅 2 处 team 词面、`chat.html` 仅 1 处 coalesced） | **待审⑤**（未开轮，未进 ROADMAP） |
+| S24-prototype-mount-gaps | 原型三处挂载缺口：① `audit.html` 无 team 筛选器与锚点 ② `control-plane.html` 未显示 `domains.team_id` 归属 ③ `chat.html` 缺「同刻双投递幂等 + coalesced」可见呈现 | ① 审计筛选条新增「全部团队 ▾」弹层（按 `audit.team_id` 聚合，含 NULL 未归属项；锚点 `#team-agentflow` 已在）② 域树三行显示 `team_id=1 / team_id=NULL` + 归属说明句 ③ chat 顶部「投递纪律」句 + 一条消息带「同刻合并 2 条」徽章（`coalesced_comment_ids`） | **通过（2026-10-24 用户「同意你开始吧」）· 已实施** |
 
 > 关联：波 4 已把 `domains.team_id` 落到数据层（迁移 010），故 ② 现在只是「界面没显示」，不是「数据没有」。

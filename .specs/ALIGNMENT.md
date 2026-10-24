@@ -207,7 +207,16 @@ $ cd frontend && npm run build
 |---|---|---|---|
 | 10-24 18:50 | D1-8 | README 补域策略 / shadow run / l0 extract 三行 | 本轮 docs |
 
-## 11. 下一轮基线
+## 11. 第 7 轮增量（2026-10-24 · S24 原型三缺口）
+
+**覆盖**：`prototype/{audit,control-plane,chat}.html`（3 处挂载缺口）+ TOPICS/STATE
+
+| 编号 | 类型 | 层 | 证据 | 处理 |
+|---|---|---|---|---|
+| D3-4 | 原型漂移（已闭合） | L2 | `grep -c team_id control-plane.html`：修复前 0 → 修复后 4；`pp-team` 弹层 2 处；`同刻合并 2 条` 2 处 | **已闭合**（S24 实施） |
+| D3-5 | 原型漂移 | L2 | `audit.html` 团队筛选 | 已闭合（筛选条 + 弹层 + NULL 项） |
+
+## 12. 下一轮基线
 
 `v20-ui-polish` 提交（见 `git log`）—— 下次 S-align 从此开始扫描。
 

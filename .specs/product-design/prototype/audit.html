@@ -6,7 +6,7 @@
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p15" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="users.html">用户与权限</span><span class="pill" data-goto="alerts.html">告警中心</span><span class="pill" data-goto="integration.html">对外集成</span></div>
 <p class="proto-note" style="padding:14px 18px 0"><span class="chip warn">演示数据</span>高级筛选 + 操作类型徽章 + 行展开 diff + 敏感操作标红。日志为追加写，超过 1 万行轮转归档（仅留 5 份）。</p>
-<p class="tiny" style="padding:0 18px" id="team-agentflow"><span class="chip info">团队 · AgentFlow 平台团队</span><button class="btn link" data-click data-toast="已清除团队筛选（演示）" data-close>× </button><span class="tiny dim">—— teams/squads 页深链落点；团队维度审计=v14 规划态（审计资源表加 team_id 列后可按域/团队聚合，裁定⑦ MySQL 档）</span></p>
+<p class="tiny" style="padding:0 18px" id="team-agentflow"><span class="chip info">团队 · AgentFlow 平台团队</span><button class="btn link" data-click data-toast="已清除团队筛选（演示）" data-close>× </button><span class="tiny dim">—— teams/squads 页深链落点；<b>团队筛选已接入</b>（筛选条「全部团队 ▾」按 <span class="mono">audit.team_id</span> 聚合，裁定⑦ MySQL 档）</span></p>
 
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/audit</span><span class="fake">演示数据</span></div>
@@ -40,7 +40,7 @@
           <div class="app-top"><span class="crumb">审计日志</span><span class="right"><span class="chip mono">audit.jsonl</span><button class="btn sm" data-toast="已导出 CSV（演示）：8 行 · 敏感字段（env / MCP / PAT）恒掩码 · password_hash 整列剔除">导出 CSV</button><button class="btn sm" style="color:var(--red)" data-click data-modal="md-rotate">手动轮转归档</button></span></div>
           <div class="app-body">
             <div class="panel tight" style="display:flex;gap:var(--s2);align-items:center;margin-bottom:var(--s3);flex-wrap:wrap">
-              <span class="pill mono" data-click data-pop="pp-range">近 7 天 ▾</span><span class="pill mono" data-click data-pop="pp-actor">全部用户 ▾</span><span class="pill mono" data-click data-pop="pp-action">全部操作类型 ▾</span>
+              <span class="pill mono" data-click data-pop="pp-range">近 7 天 ▾</span><span class="pill mono" data-click data-pop="pp-team">全部团队 ▾</span><span class="pill mono" data-click data-pop="pp-actor">全部用户 ▾</span><span class="pill mono" data-click data-pop="pp-action">全部操作类型 ▾</span>
               <span class="pill mono">🔍 搜索目标…</span><span style="flex:1"></span>
               <span class="pill" data-toast="敏感操作标红已开启（删除 / 权限变更整行红底）（演示）">敏感操作标红</span>
             </div>
@@ -133,6 +133,12 @@
 </tbody></table>
 <pre class="mono tiny" style="background:var(--bg-main);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:var(--s3)">原因（必填）: [容量演练，已先导出 5 份全量 CSV            ]</pre>
 <div style="text-align:right;margin-top:var(--s3)"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="已轮转 · audit.jsonl.5 已丢弃 · 本动作自身写入审计 audit:rotated（演示）" data-close>确认轮转</button></div></div></div>
+<div class="pop" id="pp-team"><p class="tiny dim" style="margin:0 0 6px"><b>▼ 团队筛选</b>　按 <span class="mono">audit.team_id</span> 聚合（裁定⑦ MySQL 档）</p>
+<table class="tbl compact"><tbody>
+<tr><td>全部团队</td><td><span class="chip info">当前</span></td><td class="mono tiny">8 行（本页）</td></tr>
+<tr><td><a href="#team-agentflow" class="mono">AgentFlow 平台团队</a></td><td><span class="chip mono">team_id=1</span></td><td><span class="btn link" data-toast="筛选：team_id=1 → 6 行（演示）· 同时定位到 #team-agentflow 锚点" data-close>选</span></td></tr>
+<tr><td>未归属团队</td><td><span class="chip mono">team_id=NULL</span></td><td><span class="btn link" data-toast="筛选：team_id=NULL → 2 行（历史个人资产操作）（演示）" data-close>选</span></td></tr>
+</tbody></table></div>
 <div class="pop" id="pp-range"><p class="tiny dim" style="margin:0 0 6px"><b>▼ 时间范围</b>　视图可存为 <span class="mono">?view=</span> 分享链接（§6.0 纪律②）</p>
 <table class="tbl compact"><tbody>
 <tr><td>近 24 小时</td><td class="mono tiny">312 条</td><td><span class="btn link" data-toast="筛选：近 24 小时 → 312 条（演示）" data-close>选</span></td></tr>
