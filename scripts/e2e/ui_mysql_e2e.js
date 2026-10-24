@@ -146,19 +146,30 @@ async function auditA11y(page, label) {
   // ---- 自动化 / 运行时 / 回放：三页可达 + 至少一条真交互 ----
   await page.getByRole('button', { name: '自动化', exact: true }).click();
   await waitCrumb(page, '自动化');
-  await page.getByRole('button', { name: /新建定时任务/ }).click();
-  const agentSel = page.locator('#auto-agent');
-  const agentVals = await agentSel.locator('option').evaluateAll((os) => os.map((o) => o.value).filter(Boolean));
-  if (!agentVals.length) throw new Error('自动化：没有可选 Agent（种子未建 Agent？）');
-  await agentSel.selectOption(agentVals[0]);
-  const autoName = `E2E 巡检 ${stamp}`;
-  await page.getByLabel('定时任务名称').fill(autoName);
-  await page.getByLabel('cron 表达式').fill('0 9 * * 1');
-  await page.getByLabel('capability').fill('daily-report');
-  await page.getByRole('button', { name: '创建' }).click();
-  await page.getByText(autoName).waitFor({ timeout: 20000 });
+  // ① 清单始终在；②-⑨ 需要选中一条自动化（新建后自动选中）
+  await page.getByText(/① 自动化清单/).first().waitFor({ timeout: 20000 });
+  const autoName = `E2E 自动化 ${stamp}`;
+  await page.getByRole('button', { name: /新建自动化/ }).click();
+  await page.getByLabel('自动化名称').fill(autoName);
+  // 三段各自必填：负责人（Agent id 取库里第一只）+ Runbook 目标
+  const agentId = await page.evaluate(async () => {
+    const list = await fetch('/api/agents').then((r) => r.json());
+    return (list.agents || [])[0]?.id ?? null;
+  });
+  if (agentId === null) throw new Error('自动化用例需要至少一只 Agent');
+  await page.getByLabel('负责人引用').fill(String(agentId));
+  await page.getByLabel(/新建 Runbook 目标|新建 Runbook .*目标/).fill('每日巡检并汇报失败');
+  await page.getByRole('button', { name: /保存（即 v1 快照）/ }).click();
+  await page.getByText(autoName).first().waitFor({ timeout: 20000 });
+  for (const [label, marker] of [
+    ['②', /② 三段构成/], ['③', /③ schedule 触发器/], ['④', /④ webhook 触发器/],
+    ['⑤', /⑤ 执行模式/], ['⑥', /⑥ 两级账本/], ['⑦', /⑦ 失败治理/],
+    ['⑧', /⑧ 权限/], ['⑨', /⑨ multica/],
+  ]) {
+    await page.getByText(marker).first().waitFor({ timeout: 20000 });
+  }
   await page.screenshot({ path: `${SHOTS}/automations.png` });
-  log('自动化：新建定时任务（真落库）', true);
+  log('自动化：9 节可见 + 新建自动化真落库（v1 快照）', true);
 
   await page.getByRole('button', { name: '运行时', exact: true }).click();
   await waitCrumb(page, '运行时');

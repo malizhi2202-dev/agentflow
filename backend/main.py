@@ -342,6 +342,12 @@ async def auth_middleware(request: Request, call_next):
         request.state.user = None
         return await call_next(request)
 
+    # 2.7) 自动化 webhook 入口：外部系统没有会话，**token 即凭据**（路由里按 sha256 反查触发器，
+    #      未知/已轮换一律 404）。来源闸门（上一档）仍然生效，不放行跨网段投递。
+    if path.startswith("/api/webhooks/automations/"):
+        request.state.user = None
+        return await call_next(request)
+
     # 3) 匿名入口（登录/用户列表/权限表）：不需要身份，来源闸门仍然生效
     if path in _ANON_AUTH_PATHS:
         request.state.user = None

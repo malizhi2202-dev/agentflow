@@ -80,3 +80,23 @@ SUMMARY 39/39 passed                                  （三页已从「规划�
 - **不假装健康**：健康态只有探测能改；无探测适配器时重探返回 `unprobed` + 明确 detail（fail-closed）。
 - **门禁在服务端**：硬件 → 准确率 → ECE 三段判定，前端只展示 verdict 与原因。
 - **环境参谋零执行**：只读本机画像（默认不上传），方案给 `why` + 可复制步骤，不代装/不代跑。
+
+## P3 第一批（2026-10-25）：自动化 9 节 + Agent 详情十六分区
+
+```text
+$ backend: unittest discover -s tests
+Ran 649 tests in 235.394s · OK (skipped=6)      （含新 test_automations_v2 26 例；删除已被取代的旧文件 6 例）
+
+$ frontend: vitest run
+Test Files 21 passed · Tests 199 passed           （automations-nine-sections 18 + agent-config-sections 9）
+
+$ E2E（hermes）
+SUMMARY 39/39 passed —— 自动化页：9 节可见 + 新建自动化真落库；Agent 详情页：十六分区编辑器可用
+
+$ 迁移 020（真 MySQL）：automations / automation_triggers / automation_runs / automation_deliveries，pending=0
+```
+
+并行执行方式（本轮实践）：两条互不重叠的 P3 任务分给两个 subagent（文件所有权写进 prompt），
+结果：Agent 详情十六分区一次通过（9 例自测）；自动化 9 节后端 26 例中 2 条断言与实现语义冲突、
+前端 1 处 TS 错误、旧 automations 用例与 E2E 断言漂移 —— 由父会话逐项修正后合并。
+教训：**子 agent 的自测断言也要当代码 review**（它不是验收）。

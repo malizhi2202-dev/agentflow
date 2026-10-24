@@ -6,10 +6,8 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Automations from '../pages/Automations';
 import Runtimes from '../pages/Runtimes';
 import Replay from '../pages/Replay';
-import { useAutomations } from '../stores/automations';
 import { useRuntimes } from '../stores/runtimes';
 import { useReplay } from '../stores/replay';
 import { useAgents } from '../stores/agents';
@@ -55,76 +53,14 @@ beforeEach(() => {
   invalidateCache();
   vi.clearAllMocks();
   useAuth.setState({ currentUser: { id: 'alice', name: 'alice', role: 'admin' } as any });
-  useAutomations.setState({ items: [], error: null, loading: false });
   useRuntimes.setState({ summary: null, stats: null, sessions: [], error: null, loading: false });
   useReplay.setState({ taskId: null, runs: [], error: null, loading: false });
   useAgents.setState({ agents: [{ id: 7, name: '巡检助手' } as any], loading: false });
   useCollab.setState({ tasks: [], tasksError: null, tasksLoading: false });
 });
 
-describe('自动化中心', () => {
-  it('渲染名称/Agent/cron/启停状态；空态有引导', async () => {
-    mockApi({
-      'GET /api/automations': { body: { automations: [AUTOMATION()] } },
-      'GET /api/agents': { body: { agents: [] } },
-    });
-    render(<Automations />);
-    await waitFor(() => expect(screen.getByText('每日巡检')).toBeInTheDocument());
-    expect(screen.getByText('巡检助手')).toBeInTheDocument();
-    expect(screen.getByText('0 9 * * 1')).toBeInTheDocument();
-    expect(screen.getByText('启用')).toBeInTheDocument();
-    expect(screen.getByText(/共 1 条 · 启用 1/)).toBeInTheDocument();
-  });
-
-  it('空列表显示引导文案', async () => {
-    mockApi({
-      'GET /api/automations': { body: { automations: [] } },
-      'GET /api/agents': { body: { agents: [] } },
-    });
-    render(<Automations />);
-    await waitFor(() => expect(screen.getByText(/还没有定时任务/)).toBeInTheDocument());
-  });
-
-  it('新建缺 cron 时前端先拦，不发写请求', async () => {
-    const calls = mockApi({
-      'GET /api/automations': { body: { automations: [] } },
-      // 下拉必须有真实选项，否则 change 落不到 '7'（假绿）
-      'GET /api/agents': { body: { agents: [{ id: 7, name: '巡检助手' }] } },
-    });
-    render(<Automations />);
-    await waitFor(() => expect(screen.getByText(/还没有定时任务/)).toBeInTheDocument());
-    fireEvent.click(screen.getByText('新建定时任务'));
-    fireEvent.change(screen.getByLabelText('Agent'), { target: { value: '7' } });
-    fireEvent.change(screen.getByLabelText('capability'), { target: { value: 'daily-report' } });
-    fireEvent.click(screen.getByText('创建'));
-    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent(/cron 表达式不能为空/));
-    expect(calls.filter((c) => c.method === 'POST').length).toBe(0);
-  });
-
-  it('暂停打 toggle 端点并刷新列表', async () => {
-    const calls = mockApi({
-      'GET /api/automations': { body: { automations: [AUTOMATION()] } },
-      'POST /api/automations/1/toggle': { body: { ok: true } },
-      'GET /api/agents': { body: { agents: [] } },
-    });
-    render(<Automations />);
-    await waitFor(() => expect(screen.getByText('每日巡检')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('暂停'));
-    await waitFor(() => expect(calls.some((c) => c.url === '/api/automations/1/toggle')).toBe(true));
-  });
-
-  it('删除打 DELETE 端点', async () => {
-    const calls = mockApi({
-      'GET /api/automations': { body: { automations: [AUTOMATION()] } },
-      'DELETE /api/automations/1': { body: { ok: true } },
-      'GET /api/agents': { body: { agents: [] } },
-    });
-    render(<Automations />);
-    await waitFor(() => expect(screen.getByText('每日巡检')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('删除'));
-    await waitFor(() => expect(calls.some((c) => c.method === 'DELETE' && c.url === '/api/automations/1')).toBe(true));
-  });
-});
+// 自动化中心已由 automations-nine-sections.test.tsx 覆盖（页面在 P3 重写为 9 节形态），
+// 本文件只保留 运行时 / 回放 两族用例，避免两份断言互相打架。
 
 describe('运行时', () => {
   it('渲染 summary 指标与会话行', async () => {

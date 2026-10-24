@@ -730,6 +730,53 @@ def m019_decision_and_finetune(conn, dialect: str) -> None:
     create_index_if_missing(conn, dialect, "ix_finetune_batches_owner", "finetune_batches", "owner_id")
 
 
+def m025_automations_center(conn, dialect: str) -> None:
+    """自动化中心四表（P3-1，原型 automations.html 九节）。
+
+    为什么是 025 而不是 020：020/021…024 已被 v23 multica 迁移占用，账本按 version 字符串
+    判重，重号会静默顶掉已有迁移（pending 判的是集合成员），所以取下一个空号。
+
+    为什么拆四张表：⑨ 的「一个自动化 = 三段构成」要求 Runbook / 负责人 / 触发器分开存
+    （改一段不覆盖另两段），⑥ 的「两级账本」要求运行史与投递记录分开记
+    （跑了什么 ⟂ 外面投了什么），混一张表就没法分账。
+    `runbook` / `event_filter` 用 TEXT 存 JSON：方言无关（SQLite 与 MySQL 都不需要 JSON 类型）。
+    """
+    create_table_if_missing(conn, dialect, "automations",
+        f"id {_pk_clause(dialect)}, owner_id VARCHAR(64) NOT NULL, name VARCHAR(128) NOT NULL, "
+        "runbook TEXT, owner_track VARCHAR(16) DEFAULT 'agent', owner_id_ref VARCHAR(64) DEFAULT '', "
+        "exec_mode VARCHAR(16) DEFAULT 'run_only', status VARCHAR(16) DEFAULT 'enabled', "
+        "enabled BOOLEAN DEFAULT 1, breaker_open BOOLEAN DEFAULT 0, breaker_reason TEXT, "
+        "paused_reason TEXT, spec_version INTEGER DEFAULT 1, "
+        "created_at DATETIME, updated_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_automations_owner", "automations", "owner_id")
+
+    create_table_if_missing(conn, dialect, "automation_triggers",
+        f"id {_pk_clause(dialect)}, automation_id INT NOT NULL, kind VARCHAR(16) DEFAULT 'schedule', "
+        "cron VARCHAR(64), timezone VARCHAR(64) DEFAULT 'Asia/Shanghai', "
+        "secret VARCHAR(128), secret_preview VARCHAR(64), event_filter TEXT, "
+        "payload_limit INTEGER DEFAULT 65536, enabled BOOLEAN DEFAULT 1, created_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_automation_triggers_auto",
+                            "automation_triggers", "automation_id")
+    # webhook 投递要按 token 反查触发器：唯一索引把「一个 token 两行」挡在建表这层
+    create_index_if_missing(conn, dialect, "ix_automation_triggers_secret",
+                            "automation_triggers", "secret", unique=True)
+
+    create_table_if_missing(conn, dialect, "automation_runs",
+        f"id {_pk_clause(dialect)}, automation_id INT NOT NULL, trigger_id INT, "
+        "status VARCHAR(16) DEFAULT 'queued', summary TEXT, error TEXT, error_kind VARCHAR(16), "
+        "spec_version INTEGER DEFAULT 1, started_at DATETIME, finished_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_automation_runs_auto",
+                            "automation_runs", "automation_id")
+
+    create_table_if_missing(conn, dialect, "automation_deliveries",
+        f"id {_pk_clause(dialect)}, automation_id INT NOT NULL, trigger_id INT, "
+        "external_id VARCHAR(128), event VARCHAR(128), payload_bytes INTEGER DEFAULT 0, "
+        "status VARCHAR(16) DEFAULT 'accepted', response_code INTEGER DEFAULT 200, "
+        "dedup_key VARCHAR(128), error TEXT, replayed_from INT, received_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_automation_deliveries_auto",
+                            "automation_deliveries", "automation_id")
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -756,6 +803,7 @@ MIGRATIONS: list[Migration] = [
     ("022_tool_config_and_squad_role", "工具通用 config + 小队成员 role（v23 multica 迁移）", m022_tool_config_and_squad_role),
     ("023_agent_extra_fields", "Agent 迁移补齐字段（avatar/custom_env/自定义参数/mcp/thinking/服务档/工具白名单）", m023_agent_extra_fields),
     ("024_agent_tools", "Agent ↔ 工具/技能 关联表（multica agent_skill 落点）", m024_agent_tools),
+    ("025_automations_center", "自动化中心四表（Runbook/负责人/触发器 + 两级账本，P3-1）", m025_automations_center),
 ]
 
 
