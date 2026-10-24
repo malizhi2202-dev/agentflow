@@ -216,7 +216,16 @@ $ cd frontend && npm run build
 | D3-4 | 原型漂移（已闭合） | L2 | `grep -c team_id control-plane.html`：修复前 0 → 修复后 4；`pp-team` 弹层 2 处；`同刻合并 2 条` 2 处 | **已闭合**（S24 实施） |
 | D3-5 | 原型漂移 | L2 | `audit.html` 团队筛选 | 已闭合（筛选条 + 弹层 + NULL 项） |
 
-## 12. 下一轮基线
+## 12. 第 8 轮增量（2026-10-24 · RSI 适配器）
+
+**覆盖提交**：`06ea9150`（feat rsi-adapters）+ 本轮 docs
+
+| 编号 | 类型 | 层 | 证据 | 处理 |
+|---|---|---|---|---|
+| D1-9 | 代码变文档未变 | L3 | `06ea9150` + `README.md §配置` | 新增 5 个 env（judge 四件 + L0 两件） | **已合并**：配置表补 3 行（judge 合并一行） |
+| D4-10 | 执行留痕 | L5 | `.specs/v20-rsi-adapters/` | 产物齐（CHANGE/REQUIREMENT/DESIGN/TASK/TEST/REVIEW + 门票） | 已闭环 |
+
+## 13. 下一轮基线
 
 `v20-ui-polish` 提交（见 `git log`）—— 下次 S-align 从此开始扫描。
 
