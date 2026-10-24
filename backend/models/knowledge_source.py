@@ -14,6 +14,9 @@ class KnowledgeSource(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     agent_id: Mapped[int] = mapped_column(Integer, ForeignKey("agents.id"), nullable=False, index=True)
     owner_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    # R5-3：归属（personal|team|platform）。存量行默认 personal，team_id 为空——零回填
+    team_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    owner_kind: Mapped[str] = mapped_column(String(16), default="personal", index=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     source_type: Mapped[str] = mapped_column(String(32), nullable=False, default="http_api")  # rag_api/mysql/postgres/redis/http_api/url_crawl
     url: Mapped[str] = mapped_column(String(1024), nullable=False)

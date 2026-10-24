@@ -32,6 +32,12 @@ from models.knowledge_tag import KnowledgeTag, KnowledgeSourceTag  # noqa: E402,
 from models.scheduled_task import ScheduledTask  # noqa: E402, F401
 from models.session import SessionToken, PatToken  # noqa: E402, F401
 from models.alert import Alert  # noqa: E402, F401
+from models.teams import (  # noqa: E402, F401
+    Squad,
+    SquadMember,
+    Team,
+    TeamMember,
+)
 from models.collab import (  # noqa: E402, F401
     InboxItem,
     WorkItem,

@@ -38,6 +38,7 @@ from routes.alerts_api import router as alerts_router
 from routes.human_approval_api import router as human_approval_router
 from routes.tasks_api import router as tasks_router
 from routes.inbox_api import router as inbox_router
+from routes.teams_api import router as teams_router
 
 
 async def _cron_scheduler_loop():
@@ -387,6 +388,7 @@ app.include_router(alerts_router)
 app.include_router(human_approval_router)
 app.include_router(tasks_router)
 app.include_router(inbox_router)
+app.include_router(teams_router)
 
 # CORS 必须**最后**加（Starlette 的 add_middleware 头插 → 最后注册 = 最外层）：
 # 这样来源闸门/认证返回的 403/401 与预检响应都带 CORS 头（P0-3 AC-3.3）。

@@ -90,6 +90,11 @@ def create_table_if_missing(conn, dialect: str, table: str, body: str) -> bool:
 
 def create_index_if_missing(conn, dialect: str, index: str, table: str, columns: str,
                             unique: bool = False) -> bool:
+    if not _table_exists(conn, dialect, table):
+        return False  # 表不在（裸库/尚未建表）→ 跳过，与 add_column_if_missing 一致
+    existing = set(_columns(conn, dialect, table))
+    if any(c.strip() not in existing for c in columns.split(",")):
+        return False  # 列不齐（半截 schema）→ 留给后续迁移，不在此处炸
     if _index_exists(conn, dialect, index, table):
         return False
     kind = "UNIQUE INDEX" if unique else "INDEX"
@@ -356,6 +361,57 @@ def m009_collab_layer(conn, dialect: str) -> None:
 
 
 
+def m010_teams_and_squads(conn, dialect: str) -> None:
+    """R5-3/R5-4：Team 与 Squad 两实体 + 五类资产归属列 + leader 任务列。"""
+    pk = _pk_clause(dialect)
+
+    create_table_if_missing(conn, dialect, "teams",
+        f"id {pk}, slug VARCHAR(32) NOT NULL, name VARCHAR(64) NOT NULL, description TEXT, "
+        "owner_user_id VARCHAR(64) NOT NULL, status VARCHAR(16) DEFAULT 'active', "
+        "token_soft_limit INTEGER DEFAULT 80000, token_hard_limit INTEGER DEFAULT 100000, "
+        "max_agents INTEGER DEFAULT 10, max_workflows INTEGER DEFAULT 5, "
+        "max_members INTEGER DEFAULT 20, created_at DATETIME, updated_at DATETIME, "
+        "UNIQUE(slug)")
+    create_index_if_missing(conn, dialect, "ix_teams_owner_user_id", "teams", "owner_user_id")
+    create_index_if_missing(conn, dialect, "ix_teams_status", "teams", "status")
+
+    create_table_if_missing(conn, dialect, "team_members",
+        f"id {pk}, team_id INTEGER NOT NULL, user_id VARCHAR(64) NOT NULL, "
+        "role VARCHAR(16) DEFAULT 'member', created_at DATETIME, "
+        "UNIQUE(team_id, user_id)")
+    create_index_if_missing(conn, dialect, "ix_team_members_team_id", "team_members", "team_id")
+    create_index_if_missing(conn, dialect, "ix_team_members_user_id", "team_members", "user_id")
+    create_index_if_missing(conn, dialect, "ix_team_members_role", "team_members", "role")
+
+    create_table_if_missing(conn, dialect, "squads",
+        f"id {pk}, slug VARCHAR(32) NOT NULL, name VARCHAR(64) NOT NULL, "
+        "leader_agent_id INTEGER NOT NULL, instructions TEXT, "
+        "status VARCHAR(16) DEFAULT 'active', last_evaluated_at DATETIME, "
+        "created_at DATETIME, updated_at DATETIME, UNIQUE(slug)")
+    create_index_if_missing(conn, dialect, "ix_squads_leader_agent_id", "squads", "leader_agent_id")
+    create_index_if_missing(conn, dialect, "ix_squads_status", "squads", "status")
+
+    create_table_if_missing(conn, dialect, "squad_members",
+        f"id {pk}, squad_id INTEGER NOT NULL, member_kind VARCHAR(16) DEFAULT 'agent', "
+        "member_id VARCHAR(64) NOT NULL, created_at DATETIME, "
+        "UNIQUE(squad_id, member_kind, member_id)")
+    create_index_if_missing(conn, dialect, "ix_squad_members_squad_id", "squad_members", "squad_id")
+    create_index_if_missing(conn, dialect, "ix_squad_members_member_id", "squad_members", "member_id")
+
+    # 首批五类资产：加归属两列（存量默认 personal、team_id 为空 → 零回填）
+    for table in ("agents", "workflows", "tools", "knowledge_sources", "domains"):
+        add_column_if_missing(conn, dialect, table, "team_id", "INTEGER")
+        add_column_if_missing(conn, dialect, table, "owner_kind", "VARCHAR(16) DEFAULT 'personal'")
+        create_index_if_missing(conn, dialect, f"ix_{table}_team_id", table, "team_id")
+
+    # 指派小队 → leader 任务标记
+    add_column_if_missing(conn, dialect, "work_items", "squad_id", "INTEGER")
+    add_column_if_missing(conn, dialect, "work_items", "is_leader_task", "INTEGER DEFAULT 0")
+    create_index_if_missing(conn, dialect, "ix_work_items_squad_id", "work_items", "squad_id")
+    create_index_if_missing(conn, dialect, "ix_work_items_is_leader_task", "work_items", "is_leader_task")
+
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -366,6 +422,7 @@ MIGRATIONS: list[Migration] = [
     ("007_cluster_state", "队列落库+租约/心跳，限流/退避/租约/监控偏移四表（P1-7）", m007_cluster_state),
     ("008_alerts_and_queue_merge", "告警落表 + 双队列并表（P1-16）", m008_alerts_and_queue_merge),
     ("009_collab_layer", "任务/运行连接/订阅/收件箱四表（P1-4）", m009_collab_layer),
+    ("010_teams_and_squads", "Team/Squad 两实体 + 五类资产归属列（R5）", m010_teams_and_squads),
 ]
 
 

@@ -49,6 +49,9 @@ class WorkItem(Base):
     priority: Mapped[int] = mapped_column(Integer, default=50)
     due_date: Mapped[str | None] = mapped_column(String(32), nullable=True)
     parent_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    # 指派给小队 = 给 leader 入队一条 leader 任务（同 (任务, Agent) 活跃去重）
+    squad_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    is_leader_task: Mapped[int] = mapped_column(Integer, default=0, index=True)
     # done 证据（[{label, ref}]）；缺失不阻断（R0-2：硬门不拦，留建议层），但会记 warned
     evidence_json: Mapped[str] = mapped_column(Text, default="[]")
     evidence_warned: Mapped[int] = mapped_column(Integer, default=0)
@@ -81,6 +84,8 @@ class WorkItem(Base):
             "priority": self.priority,
             "due_date": self.due_date,
             "parent_id": self.parent_id,
+            "squad_id": self.squad_id,
+            "is_leader_task": bool(self.is_leader_task),
             "evidence": json.loads(self.evidence_json or "[]"),
             "evidence_warned": bool(self.evidence_warned),
             "archived_at": self.archived_at.isoformat() if self.archived_at else None,
