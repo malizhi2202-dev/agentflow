@@ -38,6 +38,9 @@
 
 ## 进行中
 
+- 🧹 **文档归整 change `doc-align-v20`（10-24 用户点名 · Multica issue MALI-3）**：现行口径 = 主档 **v20**（2026-10-23）+ `prototype/` **135 页**。目标：把产品设计类文档统一收敛到 `.specs/product-design/` 一处并按 v20 改齐——① 新增 `.specs/product-design/INDEX.md`（版本谱系 + 产物清单 + 改动规范 + 单一事实源判定顺序）② 每份旧件给明确处置（更新／加页首历史注／归档／不动）③ 门面文档改齐（`README.md` `README.en.md` `CLAUDE.md` `.specs/CONTEXT.md`）④ 新增 `.specs/platform-evolution/RULINGS.md`（现行有效口径六列账，落地本文件「下一步 0b」的挂账）。**零代码（裁定⑧ 持续）· 不重写历史五步包正文**。状态：0-change 进行中。
+  - ⚠ **台账归属**：`STATE.md` / `TOPICS.md` / `ROADMAP.md` 由 leader（交付总调度）独占写，子 agent 一律禁写这三个文件（09-23 曾发生 STATE 被回滚成旧快照）。
+  - ⚠ **工作树基线**：10-23 遗留的 11 文件未提交改动已固化为 safety commit `5a21e597`（已推 origin/main），**禁止 reset/clean 覆盖**。
 - 🔒 **裁定⑧ 开发冻结中**：`backend/` `frontend/` 零代码改动；一切动作限于 `.specs/` 文档、`PRODUCT-DESIGN.html` 与 `prototype/`。代码动作（身份三连 P0-1、迁移账本、32 个 TS 错误）等解冻词。
 - ✅ **八轮 discovery 全部闭合**：第 1 轮 S1-S5 · 第 3 轮 S6/S7 · 第 4 轮 S8-S13 · 第 5 轮 S14/S15/S16（10-23 追认 + 首批五类收口）· 第 6 轮 S17-S20 · 第 7 轮 S21 · 第 8 轮 S22/S23。议题状态账本：`.specs/platform-evolution/TOPICS.md`；结论账本：同目录 `ROADMAP.md`（第 3/4/5/6/7/8 轮正节已齐）。
 - 🧾 **口径治理（本轮动因）**：主档与 `.specs` 的「已被推翻 / 已收口 / 已落后」残留已回填为 v20（详见上表 2026-10-23 行）。**遗留风险**：现行有效口径仍无单一事实源——需读「包页首注 + 尾注 + ROADMAP + TOPICS + STATE」五处拼合。建议建 `.specs/platform-evolution/RULINGS.md`（见下一步 0b）。
