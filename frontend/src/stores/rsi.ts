@@ -43,10 +43,10 @@ export interface Surface { id: number; name: string; allow_edit: string[]; immut
 
 type WriteResult = { ok: boolean; data?: any; error?: string };
 
-async function writeJson(url: string, body?: unknown): Promise<WriteResult> {
+async function writeJson(url: string, body?: unknown, method: 'POST' | 'PUT' | 'DELETE' = 'POST'): Promise<WriteResult> {
   try {
     const res = await dedupedFetch(url, {
-      method: 'POST',
+      method,
       headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
@@ -79,6 +79,8 @@ interface RsiState {
   fetchProposals: (status?: string) => Promise<void>;
   fetchSurfaces: () => Promise<void>;
   createSurface: (name: string, allowEdit: string[]) => Promise<WriteResult>;
+  updateSurface: (id: number, allowEdit: string[]) => Promise<WriteResult>;
+  deleteSurface: (id: number) => Promise<WriteResult>;
   createProposal: (payload: Record<string, unknown>) => Promise<WriteResult>;
   recordProbe: (id: number, steps: number, tokens: number) => Promise<WriteResult>;
   recordShadow: (id: number, payload: Record<string, unknown>) => Promise<WriteResult>;
@@ -107,6 +109,18 @@ export const useRsi = create<RsiState>((set, get) => ({
 
   createSurface: async (name, allowEdit) => {
     const out = await writeJson('/api/rsi/surfaces', { name, allow_edit: allowEdit });
+    if (out.ok) await get().fetchSurfaces();
+    return out;
+  },
+
+  updateSurface: async (id, allowEdit) => {
+    const out = await writeJson(`/api/rsi/surfaces/${id}`, { allow_edit: allowEdit }, 'PUT');
+    if (out.ok) await get().fetchSurfaces();
+    return out;
+  },
+
+  deleteSurface: async (id) => {
+    const out = await writeJson(`/api/rsi/surfaces/${id}`, undefined, 'DELETE');
     if (out.ok) await get().fetchSurfaces();
     return out;
   },

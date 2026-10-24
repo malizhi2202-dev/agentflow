@@ -59,6 +59,25 @@ beforeEach(() => {
   });
 });
 
+describe('tab 键盘可达', () => {
+  it('←/→/Home/End 切 tab，且只有当前 tab 可 tab 到（roving tabindex）', async () => {
+    mockApi({
+      'GET /api/teams': { body: { teams: [] } },
+      'GET /api/squads': { body: { squads: [] } },
+    });
+    render(<Teams />);
+    const teamsTab = screen.getByRole('tab', { name: '团队' });
+    const squadsTab = screen.getByRole('tab', { name: '小队' });
+    expect(teamsTab).toHaveAttribute('tabindex', '0');
+    expect(squadsTab).toHaveAttribute('tabindex', '-1');
+    fireEvent.keyDown(teamsTab, { key: 'ArrowRight' });
+    await waitFor(() => expect(screen.getByRole('tab', { name: '小队' })).toHaveAttribute('aria-selected', 'true'));
+    expect(screen.getByRole('tab', { name: '小队' })).toHaveAttribute('tabindex', '0');
+    fireEvent.keyDown(screen.getByRole('tab', { name: '小队' }), { key: 'Home' });
+    await waitFor(() => expect(screen.getByRole('tab', { name: '团队' })).toHaveAttribute('aria-selected', 'true'));
+  });
+});
+
 describe('团队 tab', () => {
   it('列表渲染字段；空态有引导文案', async () => {
     mockApi({

@@ -258,7 +258,19 @@ $ cd frontend && npm run build
 | D2-4 | 口径核实 | L2 | `pages/Tasks.tsx` `COLUMNS` | 「看板缺页」不成立——任务页即四列看板 | 已在 T-05-SUMMARY 更正，不重复造页 |
 | D7-8 | 测试选择器脆弱 | L5 | `scripts/e2e/ui_mysql_e2e.js` | `getByLabel('Agent')` 命中导航同名项 → strict mode 报错 | **已修**：按 id 定位；并修一条「下拉无选项导致断言落空」的假绿用例 |
 
-## 16. 下一轮基线
+## 16. 第 12 轮增量（2026-10-24 · v21 T-08 五条小项）
+
+**覆盖**：`v21-completion` T-08
+
+| 编号 | 类型 | 层 | 证据 | 处理 |
+|---|---|---|---|---|
+| D3-2 | 权限/行为缺口 | L3 | `routes/tasks_api.py` assign | `assignee_kind=squad` 只写字段、不建 leader 任务（任务落到小队无人接） | **已修**：走 `assign_task_to_squad`；5 例回归 |
+| D3-3 | 可观测缺口 | L3 | `routes/rsi_api.py` trip/reset | 手动熔断/复位无审计 | **已修**：落审计；2 例 |
+| D5-4 | 落盘路径重复 | L3 | `services/audit_service.py` | 与 `auth._audit_file()` 各算一遍路径 | **已修**：单一来源 |
+| D2-5 | 页面缺口 | L3 | `components/DomainPolicyCard.tsx` · `pages/Memory.tsx` | 域策略无界面；可改面不能改/删 | **已补**：前后端各有用例 |
+| D6-5 | a11y 一致性 | L3 | `pages/Teams.tsx` | 团队页 Tabs 无键盘导航（记忆中心已有） | **已补**：roving tabindex + 方向键 |
+
+## 17. 下一轮基线
 
 `v20-ui-polish` 提交（见 `git log`）—— 下次 S-align 从此开始扫描。
 

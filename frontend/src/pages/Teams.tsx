@@ -400,6 +400,8 @@ function SquadCard({ squad }: { squad: Squad }) {
 
 /* ────────────────────────── 页面 ────────────────────────── */
 
+const TABS = ['teams', 'squads'] as const;
+
 export default function Teams() {
   const {
     teams, teamsLoading, teamsError, fetchTeams,
@@ -476,11 +478,25 @@ export default function Teams() {
           <Users size={16} />团队与小隊
         </h2>
         <div role="tablist" aria-label="团队或小队" style={{ display: 'flex', gap: 4 }}>
-          {(['teams', 'squads'] as const).map((k) => (
-            <button key={k} role="tab" aria-selected={tab === k}
+          {TABS.map((k, idx) => (
+            <button key={k} role="tab" id={`teams-tab-${k}`} aria-selected={tab === k}
+                    tabIndex={tab === k ? 0 : -1}
                     className="btn btn-ghost btn-sm"
                     style={{ color: tab === k ? 'var(--blue)' : 'var(--text-secondary)', fontWeight: tab === k ? 600 : 400 }}
-                    onClick={() => setTab(k)}>
+                    onClick={() => setTab(k)}
+                    onKeyDown={(e) => {
+                      // ←/→/Home/End 切 tab（roving tabindex：只有当前 tab 可 tab 到）
+                      const last = TABS.length - 1;
+                      let next: number | null = null;
+                      if (e.key === 'ArrowRight') next = idx === last ? 0 : idx + 1;
+                      else if (e.key === 'ArrowLeft') next = idx === 0 ? last : idx - 1;
+                      else if (e.key === 'Home') next = 0;
+                      else if (e.key === 'End') next = last;
+                      if (next === null) return;
+                      e.preventDefault();
+                      setTab(TABS[next]);
+                      document.getElementById(`teams-tab-${TABS[next]}`)?.focus();
+                    }}>
               {k === 'teams' ? '团队' : '小队'}
             </button>
           ))}

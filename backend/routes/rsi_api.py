@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from auth import is_admin, write_audit
+from services.audit_service import log_audit
 from database import get_db
 from models.rsi import RSI_CATEGORIES, Proposal, SurfaceManifest
 from services import judge_adapter, l0_extractor, rsi_service as rsi, shadow_runner
@@ -21,6 +22,16 @@ def _user(request: Request) -> dict:
     if not user:
         raise HTTPException(status_code=401, detail="未认证")
     return user
+
+
+def _audit(user: dict, request: Request, action: str, target: str, detail: str) -> None:
+    """手动熔断/复位是有后果的动作：落审计（失败不阻断业务，但会打印）。"""
+    try:
+        log_audit(user["id"], user.get("name", user["id"]), action, target,
+                  "rsi_breaker", detail,
+                  request.client.host if request and request.client else "127.0.0.1")
+    except Exception as e:  # noqa: BLE001 — 可观测性不参与业务成败
+        print(f"[rsi] 审计写入失败（{action} {target}）: {e}")
 
 
 def _map(exc: Exception):
@@ -110,6 +121,37 @@ def create_surface(payload: dict, request: Request, db: Session = Depends(get_db
     except Exception as e:  # noqa: BLE001
         _map(e)
     return {"ok": True, "surface": row.to_dict()}
+
+
+@router.put("/surfaces/{surface_id}")
+def update_surface(surface_id: int, payload: dict, request: Request,
+                   db: Session = Depends(get_db)):
+    """改白名单路径（管理员）。声明式口径：白名单可以扩/缩，但禁改前缀永远不可写。"""
+    user = _user(request)
+    if not is_admin(user):
+        raise HTTPException(status_code=403, detail="只有管理员可以修改可改面")
+    if db.query(SurfaceManifest).filter(SurfaceManifest.id == surface_id).first() is None:
+        raise HTTPException(status_code=404, detail="surface 不存在")
+    try:
+        row = rsi.update_surface(db, surface_id, payload.get("allow_edit"), user["id"])
+    except Exception as e:  # noqa: BLE001
+        _map(e)
+    return {"ok": True, "surface": row.to_dict()}
+
+
+@router.delete("/surfaces/{surface_id}")
+def delete_surface(surface_id: int, request: Request, db: Session = Depends(get_db)):
+    """撤掉一个可改面（管理员）。已有提案仍各自留档，不级联删除。"""
+    user = _user(request)
+    if not is_admin(user):
+        raise HTTPException(status_code=403, detail="只有管理员可以删除可改面")
+    if db.query(SurfaceManifest).filter(SurfaceManifest.id == surface_id).first() is None:
+        raise HTTPException(status_code=404, detail="surface 不存在")
+    try:
+        rsi.delete_surface(db, surface_id)
+    except Exception as e:  # noqa: BLE001
+        _map(e)
+    return {"ok": True}
 
 
 # ── 自动化类目开关（R6-4）────────────────────────────────
@@ -294,6 +336,7 @@ def trip_breaker(name: str, payload: dict, request: Request, db: Session = Depen
         row = rsi.trip(db, name, payload.get("reason", "manual"))
     except Exception as e:  # noqa: BLE001
         _map(e)
+    _audit(user, request, "rsi.breaker.trip", name, payload.get("reason", "manual"))
     return {"ok": True, "breaker": row.to_dict()}
 
 
@@ -306,4 +349,5 @@ def reset_breaker(name: str, request: Request, db: Session = Depends(get_db)):
         row = rsi.reset_breaker(db, name)
     except Exception as e:  # noqa: BLE001
         _map(e)
+    _audit(user, request, "rsi.breaker.reset", name, "reset")
     return {"ok": True, "breaker": row.to_dict()}

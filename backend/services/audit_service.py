@@ -5,8 +5,9 @@ import time
 
 
 def _audit_file() -> str:
-    from config import PROJECT_ROOT
-    return os.path.join(os.path.dirname(PROJECT_ROOT), "audit.jsonl")
+    """审计落盘路径**单一来源**在 auth（轮转/写入也在那边）；这里不再自己算一遍。"""
+    import auth
+    return auth._audit_file()
 
 
 def log_audit(user_id: str, user_name: str, action: str, target: str, target_type: str, detail: str, ip: str, result: str = "success"):

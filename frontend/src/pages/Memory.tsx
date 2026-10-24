@@ -462,11 +462,13 @@ function ProposalActions({ p }: { p: Proposal }) {
 
 function ProposalTab() {
   const { proposals, proposalsLoading, proposalsError, fetchProposals, surfaces, createProposal,
-    fetchSurfaces, createSurface } = useRsi();
+    fetchSurfaces, createSurface, updateSurface, deleteSurface } = useRsi();
   const isAdmin = useAuth((s) => s.isAdmin);
   const [showSurface, setShowSurface] = useState(false);
   const [surfaceNameNew, setSurfaceNameNew] = useState('');
   const [surfacePaths, setSurfacePaths] = useState('prompts/');
+  const [editingSurface, setEditingSurface] = useState<number | null>(null);
+  const [editSurfacePaths, setEditSurfacePaths] = useState('');
   const { err, run } = useWrite();
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState('');
@@ -521,6 +523,51 @@ function ProposalTab() {
             scripts/ plugins/ hooks/ 永久禁改；代码层（backend/、frontend/src/）提案一律拒绝。
           </p>
           {err && <div role="alert" style={{ color: 'var(--red)', fontSize: 11.5 }}>{err}</div>}
+        </section>
+      )}
+
+      {isAdmin && surfaces.length > 0 && (
+        <section aria-label="已有可改面" style={{ ...panel, marginBottom: 10 }}>
+          <div style={{ fontSize: 11.5, color: 'var(--text-secondary)', marginBottom: 4 }}>已有可改面</div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <tbody>
+              {surfaces.map((sf) => (
+                <tr key={sf.id} style={{ borderTop: '1px solid var(--border)' }}>
+                  <td style={{ padding: '4px 6px', fontFamily: 'var(--font-mono)', fontSize: 11 }}>{sf.name}</td>
+                  <td style={{ padding: '4px 6px', color: 'var(--text-muted)' }}>
+                    {editingSurface === sf.id ? (
+                      <input aria-label="白名单路径（编辑）" style={inputStyle} value={editSurfacePaths}
+                             onChange={(e) => setEditSurfacePaths(e.target.value)} />
+                    ) : (
+                      sf.allow_edit.join(', ') || '（空）'
+                    )}
+                  </td>
+                  <td style={{ padding: '4px 6px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    {editingSurface === sf.id ? (
+                      <>
+                        <button className="btn btn-primary btn-sm"
+                                onClick={() => run(async () => {
+                                  const out = await updateSurface(sf.id, editSurfacePaths.split(',').map((x) => x.trim()).filter(Boolean));
+                                  if (out.ok) setEditingSurface(null);
+                                  return out;
+                                }, '可改面已更新')}>保存</button>
+                        <button className="btn btn-ghost btn-sm" onClick={() => setEditingSurface(null)}>取消</button>
+                      </>
+                    ) : (
+                      <>
+                        <button className="btn btn-ghost btn-sm" aria-label={`编辑可改面 ${sf.name}`}
+                                onClick={() => { setEditingSurface(sf.id); setEditSurfacePaths(sf.allow_edit.join(', ')); }}>
+                          编辑
+                        </button>
+                        <button className="btn btn-ghost btn-sm" aria-label={`删除可改面 ${sf.name}`}
+                                onClick={() => run(() => deleteSurface(sf.id), '可改面已删除')}>删除</button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </section>
       )}
 

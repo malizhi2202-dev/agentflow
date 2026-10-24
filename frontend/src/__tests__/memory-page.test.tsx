@@ -216,6 +216,33 @@ describe('遗留小项', () => {
     await waitFor(() => expect(screen.getByRole('tab', { name: '提案' })).toHaveAttribute('aria-selected', 'true'));
   });
 
+  it('可改面可编辑（PUT）与删除（DELETE），仅管理员可见列表', async () => {
+    const calls = mockApi({
+      'GET /api/rsi/memories': { body: { memories: [] } },
+      'GET /api/rsi/memories/decay': { body: { candidates: [] } },
+      'GET /api/rsi/proposals': { body: { proposals: [] } },
+      'GET /api/rsi/surfaces': {
+        body: { surfaces: [{ id: 3, name: 'agent-config', allow_edit: ['prompts/'], immutable: [] }],
+                immutable_prefixes: ['scripts/'] },
+      },
+      'PUT /api/rsi/surfaces/3': { body: { ok: true } },
+      'DELETE /api/rsi/surfaces/3': { body: { ok: true } },
+      ...GOV,
+    });
+    render(<Memory />);
+    fireEvent.click(screen.getByRole('tab', { name: '提案' }));
+    await waitFor(() => expect(screen.getByText('已有可改面')).toBeInTheDocument());
+    fireEvent.click(screen.getByLabelText('编辑可改面 agent-config'));
+    fireEvent.change(screen.getByLabelText('白名单路径（编辑）'), { target: { value: 'prompts/, docs/' } });
+    fireEvent.click(screen.getByText('保存'));
+    await waitFor(() => {
+      const put = calls.find((c) => c.method === 'PUT' && c.url === '/api/rsi/surfaces/3');
+      expect(put?.body).toEqual({ allow_edit: ['prompts/', 'docs/'] });
+    });
+    fireEvent.click(screen.getByLabelText('删除可改面 agent-config'));
+    await waitFor(() => expect(calls.some((c) => c.method === 'DELETE' && c.url === '/api/rsi/surfaces/3')).toBe(true));
+  });
+
   it('管理员新建可改面 → POST /api/rsi/surfaces', async () => {
     const calls = mockApi({
       'GET /api/rsi/memories': { body: { memories: [] } },

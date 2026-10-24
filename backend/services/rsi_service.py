@@ -258,6 +258,29 @@ def create_surface(db: Session, name: str, allow_edit: list[str],
     return row
 
 
+def update_surface(db: Session, surface_id: int, allow_edit, owner_id: str = "") -> SurfaceManifest:
+    """改可改面的白名单。禁改前缀即使写进白名单也不生效（assert_editable 先判前缀）。"""
+    row = db.query(SurfaceManifest).filter(SurfaceManifest.id == int(surface_id)).first()
+    if row is None:
+        raise RsiError("surface 不存在")
+    if allow_edit is not None:
+        if not isinstance(allow_edit, list) or not all(isinstance(p, str) for p in allow_edit):
+            raise RsiError("allow_edit 必须是字符串数组")
+        row.allow_edit_json = json.dumps(allow_edit, ensure_ascii=False)
+    row.owner_id = owner_id or row.owner_id
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def delete_surface(db: Session, surface_id: int) -> None:
+    row = db.query(SurfaceManifest).filter(SurfaceManifest.id == int(surface_id)).first()
+    if row is None:
+        raise RsiError("surface 不存在")
+    db.delete(row)
+    db.commit()
+
+
 def assert_editable(db: Session, surface_name: str, target: str) -> SurfaceManifest:
     """可改面判定：永久禁改前缀 > 代码层禁自改 > 白名单。任一条不成立即拒。"""
     if not target:

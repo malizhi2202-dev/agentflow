@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useControlPlane, AgentStatus, QueueItem, ReconcileEntry, ClusterStatus } from '../stores/controlPlane';
 import { useDomains, Domain, RouteResult, ScaleResult } from '../stores/domains';
+import DomainPolicyCard from '../components/DomainPolicyCard';
 import { useAgents, Agent } from '../stores/agents';
 
 // ── 常量 ──
@@ -671,6 +672,7 @@ function DomainAccordionRow({
       {/* 展开的能力组列表 */}
       {isExpanded && (
         <div style={{ padding: '8px 16px 12px' }}>
+          {domainId !== null && <DomainPolicyCard domainId={domainId} />}
           {agentsLoading ? (
             <div style={{ textAlign: 'center', padding: 16, color: 'var(--text-muted)', fontSize: 12 }}>
               加载中...

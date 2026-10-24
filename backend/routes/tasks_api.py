@@ -155,11 +155,24 @@ def assign_task(task_id: int, payload: dict, request: Request,
                 db: Session = Depends(get_db)):
     user = _user(request)
     item = _visible(db, user, task_id)
+    kind = (payload.get("assignee_kind") or "").strip()
+    assignee_id = str(payload.get("assignee_id") or "").strip()
+    if kind == "squad":
+        # 指派小队不是「把负责人字段写成 squad」：必须给 leader 入队一条 leader 任务
+        # （成员不抢单，见 team_service），否则任务落到小队就没人接。
+        from services import team_service as ts
+        try:
+            squad = ts._squad(db, assignee_id)
+            result = ts.assign_task_to_squad(db, squad, user["id"], item.id)
+        except ts.TeamError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except ts.NotFound as e:
+            raise HTTPException(status_code=404, detail=str(e))
+        db.refresh(item)
+        return {"ok": True, "task": item.to_dict(), **result}
     try:
         item = collab_service.assign(
-            db, item, user["id"],
-            kind=payload.get("assignee_kind", ""),
-            assignee_id=payload.get("assignee_id", ""),
+            db, item, user["id"], kind=kind, assignee_id=assignee_id,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

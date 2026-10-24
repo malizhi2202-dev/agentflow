@@ -79,3 +79,21 @@ PASS 回放：选任务看运行时间线
 - 运行时：summary/stats/sessions 三读渲染 · 失败会话重试打对端点 · 无数据空态
 - 回放：任务列表 → 运行时间线（有记录/无记录两态）· 只读（不触发重跑）
 - 板：`pages/Tasks.tsx` 四列看板已存在（本轮核实，不重复造页）
+
+## T-08 五条小项（2026-10-24）
+
+```text
+$ backend: unittest discover -s tests
+Ran 499 tests in 134.848s
+OK (skipped=6)                     （新增 tests/test_t08_items.py 11 例）
+
+$ frontend: npx tsc --noEmit && npx vitest run
+Test Files 12 passed (12) · Tests 109 passed (109)   （新增 domain-policy 3 例 + 团队 tab 1 例 + 可改面编辑删除 1 例）
+```
+
+覆盖点：
+- 域归因策略：读回显 / 三档 PUT 打对值 / 后端 400 detail 原样展示（不谎报成功）
+- 可改面：非管理员 403 · 更新白名单成功 · 非数组 400 · 删除后 404（不再混进 400）
+- 熔断审计：trip/reset 均落审计；非管理员 403 且不留痕（`audit_service` 复用 `auth` 的落盘路径）
+- squad 指派：生成 leader 任务（assignee=leader agent, parent=任务）· 重复指派去重 · 归档小队 400 · 不存在 404 · member 指派不产生 leader 任务
+- 团队页 Tabs：roving tabindex + ←/→/Home/End
