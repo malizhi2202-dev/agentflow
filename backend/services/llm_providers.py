@@ -321,6 +321,10 @@ SUPPORTED_PROVIDERS = frozenset(provider_registry.keys())
 
 
 def get_provider(name: str) -> BaseProvider:
+    if (name or "").strip().lower() == "cli":
+        # 本地已部署的 hermes / dsh CLI（试运行/无 key 通道）
+        from services.cli_provider import CliProvider
+        return CliProvider()
     """根据名称获取提供者实例.
 
     Raises:

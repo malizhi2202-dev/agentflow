@@ -15,6 +15,7 @@
 | 2026-10-24 | `v20-wave7` | 波 7 遗留项收口：A2A M0 静态卡 · 因果前缀 + 晋升评审账 + 防污染双扫 · 四类开关 · 归因双列 + 瀑布 fail-closed | `13faefbe` | L-001 |
 | 2026-10-24 | `doc-align-v20` | 文档归并：RULINGS/INDEX 建档、门面改齐、删 8 张孤儿原型页（135→127） | `fcc00645` | — |
 | 2026-10-24 | `v20-rsi-adapters` | 真实 judge 适配器（显式配置 + 预算帽 + 可注入）+ L0 定时抽取作业（默认关闭）；三类业务错由 500 改正 400 | 见「feat(rsi-adapters)」提交 | — |
+| 2026-10-24 | `v20-rsi-adapters`（本地 CLI 通道） | 新增 `cli` provider：直接用本地 **dsh headless / hermes -z** 当模型（免 key、不走 shell、超时/非零退出响亮失败）；dsh 试跑 L0 2 条 + judge 0.5、hermes 1 条 + 0.5 均 → awaiting_approval | 见「feat(cli-provider)」提交 | L-006 |
 | 2026-10-24 | `v20-rsi-adapters`（本地试运行） | Ollama qwen2.5:3b 真实跑通 judge（1/0 → pass_rate 0.5 → awaiting_approval）与 L0 抽取（1 条 confounded 入库）；修 judge few-shot 与抽取器形状容错；ollama 免 key | 见「feat(rsi-adapters-local)」提交 | L-006 |
 | 2026-10-24 | `v20-ui-polish` | 遗留小项：熔断手动 trip · Tabs 方向键+roving tabindex · 管理员新建可改面 · 小队 `created_by` 回填脚本（默认 dry-run） | 见「feat(ui-polish)」提交 | — |
 | 2026-10-24 | `v20-residual` | 后端遗留三项：域级 accountable 策略（迁移 016，fail-closed）+ 影子重放 runner（exact_match 自证，沿用影子门）+ L0 抽取器（默认 dry_run） | 见「feat(residual)」提交 | — |

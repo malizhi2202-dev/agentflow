@@ -26,7 +26,7 @@ class BudgetExceeded(JudgeError):
     """超出调用预算（不重试、不降级）。"""
 
 
-PROVIDERS_WITHOUT_KEY = ("ollama",)   # 本地模型不需要 key
+PROVIDERS_WITHOUT_KEY = ("ollama", "cli")   # 本地模型 / 本地 CLI 不需要 key
 
 
 def configured() -> bool:
@@ -72,6 +72,9 @@ def judge_cases(cases: list[dict], *, provider=None, max_calls: int | None = Non
             reply, _usage = provider.chat(messages, config.RSI_JUDGE_API_KEY, config.RSI_JUDGE_MODEL)
         except Exception as e:  # noqa: BLE001 — 外部调用失败要响亮
             raise JudgeError(f"judge 调用失败: {e}") from e
-        if str(reply).strip().startswith("1"):
+        # CLI/小模型可能先打印日志：判分只看**最后一条非空行**
+        from services.cli_provider import last_line
+        answer = last_line(str(reply))
+        if answer.startswith("1"):
             hit += 1
     return round(hit / len(cases), 4)

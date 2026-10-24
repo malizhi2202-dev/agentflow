@@ -43,3 +43,39 @@ uvicorn main:app --port 8000
 
 - 3B 模型的判断质量不足以上生产（仅证管道通；生产建议 ≥ 30B 或异厂 API）。
 - 未测多轮并发/超时；真厂商限流未覆盖。
+
+---
+
+# 追加：本地 **CLI** 通道（dsh / hermes，用户 10-24 明确「用本地部署的 hermes 和 dsh 的 CLI」）
+
+- 实现：`services/cli_provider.py` → `get_provider("cli")`；**不经过 shell**（argv 列表、prompt 单参数）、超时可配、只允许 `dsh|hermes` 白名单。
+- 配置：`RSI_JUDGE_PROVIDER=cli` / `RSI_EXTRACTOR_PROVIDER=cli` + `RSI_CLI_PROVIDER=dsh|hermes`（两通道均免 key）。
+- 命令形态：`node <dsh bin> --profile headless "<prompt>"` · `<hermes bin> -z "<prompt>"`。
+
+## 真实跑通（同一套脚本 `/tmp/cli_trial.py`）
+
+```text
+$ RSI_CLI_PROVIDER=dsh … python /tmp/cli_trial.py dsh
+== provider = dsh · judge configured = True
+== L0 抽取 == {"dry_run": false, "candidates": 2, "created": 2} (4.8s)
+   memory: confounded | cue: 前端构建失败、tsc 报出一堆类型错误时 | lesson: 按报错顺序先看第一个类型错误…
+   memory: confounded | cue: 因类型错误导致构建失败、想动构建配置时 | lesson: 别急着改配置文件…
+== 影子重放 == {"pass_rate": 0.5, "cases": 2, "judge_kind": "llm_judge", "dry_run": false} (7.8s)
+   proposal.status = awaiting_approval
+
+$ RSI_CLI_PROVIDER=hermes … python /tmp/cli_trial.py hermes
+== provider = hermes · judge configured = True
+== L0 抽取 == {"dry_run": false, "candidates": 1, "created": 1} (7.3s)
+== 影子重放 == {"pass_rate": 0.5, "cases": 2, "judge_kind": "llm_judge", "dry_run": false} (14.0s)
+   proposal.status = awaiting_approval
+```
+
+判读：两条 CLI 通道都能**真抽取 + 真评审**；dsh headless 更快（4.8/7.8s）且抽取质量更好（2 条 vs 1 条）；
+hermes 慢约 2 倍。judge 对「等价 / 不等价」两例给出正确的 1/0。
+
+## 稳定性与安全
+
+- 判分只看**最后一条非空行**（CLI 会先打印加载日志）；抽取仍靠 JSON 括号扫描。
+- 非零退出码 → `RuntimeError`（带 stderr 尾 300 字）；超时 → 明确报错，不重试、不降级。
+- prompt 永不进 shell；二进制路径由 env 指定且仅两种白名单。
+- 单测 9 条（argv/白名单/ANSI/最后一行/非零退出/超时/免 key/最后一行判分）走注入 runner，不真起 agent。

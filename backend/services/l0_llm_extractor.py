@@ -9,7 +9,7 @@ import json
 import config
 from services.llm_providers import get_provider
 
-PROVIDERS_WITHOUT_KEY = ("ollama",)
+PROVIDERS_WITHOUT_KEY = ("ollama", "cli")
 
 PROMPT = (
     "你是记忆抽取器。从下面这段对话里抽取 1-3 条**可复用**的原子经验。\n"

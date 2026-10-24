@@ -63,6 +63,20 @@ RSI_JUDGE_MODEL: str = os.environ.get("RSI_JUDGE_MODEL", "").strip()
 RSI_JUDGE_API_KEY: str = os.environ.get("RSI_JUDGE_API_KEY", "").strip()
 # 每次作业最多调用次数（预算帽）；0 = 禁用
 RSI_JUDGE_MAX_CALLS: int = int(os.environ.get("RSI_JUDGE_MAX_CALLS", "0") or 0)
+# ── CLI 模型通道（用本地已部署的 hermes / dsh CLI 当 provider）──────────
+# 用途：试运行/本地无 API key 时，直接把 CLI 当模型（judge / L0 抽取都能用）。
+# 安全：**不经过 shell**（argv 列表 + shlex 解析），prompt 作为单个参数传入；超时可配。
+RSI_CLI_PROVIDER: str = os.environ.get("RSI_CLI_PROVIDER", "dsh").strip().lower()  # dsh | hermes
+RSI_CLI_TIMEOUT_SECONDS: int = int(os.environ.get("RSI_CLI_TIMEOUT_SECONDS", "180") or 180)
+RSI_CLI_NODE: str = os.environ.get("RSI_CLI_NODE", "node").strip()
+RSI_CLI_DSH_BIN: str = os.environ.get(
+    "RSI_CLI_DSH_BIN", "/home/malizhi/ai/deepseek-harness/apps/cli/lib/bin.js"
+).strip()
+RSI_CLI_DSH_PROFILE: str = os.environ.get("RSI_CLI_DSH_PROFILE", "headless").strip()
+RSI_CLI_HERMES_BIN: str = os.environ.get(
+    "RSI_CLI_HERMES_BIN", "/home/malizhi/.hermes/hermes-agent/venv/bin/hermes"
+).strip()
+
 # L0 抽取器用的本地/远端模型（默认空 = 不抽取，只 dry-run 统计）
 RSI_EXTRACTOR_PROVIDER: str = os.environ.get("RSI_EXTRACTOR_PROVIDER", "").strip()
 RSI_EXTRACTOR_MODEL: str = os.environ.get("RSI_EXTRACTOR_MODEL", "").strip()
