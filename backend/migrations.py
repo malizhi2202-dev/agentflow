@@ -488,6 +488,53 @@ def m012_declarative_api(conn, dialect: str) -> None:
 
 
 
+def m013_rsi_governance(conn, dialect: str) -> None:
+    """R6/R7：记忆四层 / 提案 / 可改面 / 熔断四表。"""
+    pk = _pk_clause(dialect)
+
+    create_table_if_missing(conn, dialect, "memories",
+        f"id {pk}, layer VARCHAR(4) DEFAULT 'L1', kind VARCHAR(8) DEFAULT 'positive', "
+        "scope VARCHAR(16) DEFAULT 'agent', owner_id VARCHAR(64), cue TEXT, lesson TEXT, "
+        "evidence_json TEXT, source_ref VARCHAR(256), status VARCHAR(16) DEFAULT 'no_entry', "
+        "confounded INTEGER DEFAULT 0, decay_score INTEGER DEFAULT 100, "
+        "last_used_at DATETIME, created_at DATETIME")
+    for index, col in (
+        ("ix_memories_layer", "layer"),
+        ("ix_memories_kind", "kind"),
+        ("ix_memories_scope", "scope"),
+        ("ix_memories_owner_id", "owner_id"),
+        ("ix_memories_source_ref", "source_ref"),
+        ("ix_memories_status", "status"),
+    ):
+        create_index_if_missing(conn, dialect, index, "memories", col)
+
+    create_table_if_missing(conn, dialect, "orchestration_proposals",
+        f"id {pk}, title VARCHAR(255), dimension VARCHAR(16) DEFAULT 'invariant', "
+        "surface_name VARCHAR(64), target VARCHAR(256), status VARCHAR(24) DEFAULT 'generated', "
+        "budget_steps INTEGER DEFAULT 10, used_steps INTEGER DEFAULT 0, "
+        "budget_tokens INTEGER DEFAULT 20000, used_tokens INTEGER DEFAULT 0, "
+        "probe_json TEXT, shadow_json TEXT, judge_model VARCHAR(128), "
+        "domain_signoff_json TEXT, approved_by VARCHAR(64), approved_at DATETIME, "
+        "created_at DATETIME, updated_at DATETIME")
+    for index, col in (
+        ("ix_orchestration_proposals_dimension", "dimension"),
+        ("ix_orchestration_proposals_surface_name", "surface_name"),
+        ("ix_orchestration_proposals_status", "status"),
+    ):
+        create_index_if_missing(conn, dialect, index, "orchestration_proposals", col)
+
+    create_table_if_missing(conn, dialect, "surface_manifests",
+        f"id {pk}, name VARCHAR(64) NOT NULL, allow_edit_json TEXT, owner_id VARCHAR(64), "
+        "created_at DATETIME, UNIQUE(name)")
+    create_index_if_missing(conn, dialect, "ix_surface_manifests_name",
+                            "surface_manifests", "name")
+
+    create_table_if_missing(conn, dialect, "breaker_states",
+        "name VARCHAR(32) PRIMARY KEY, status VARCHAR(16) DEFAULT 'closed', "
+        "reason VARCHAR(255), counter INTEGER DEFAULT 0, opened_at DATETIME, updated_at DATETIME")
+
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -501,6 +548,7 @@ MIGRATIONS: list[Migration] = [
     ("010_teams_and_squads", "Team/Squad 两实体 + 五类资产归属列（R5）", m010_teams_and_squads),
     ("011_trace_spans_observability", "trace_spans 父子链与产端字段（P2-4）", m011_trace_spans_observability),
     ("012_declarative_api", "change_log 单账本 + resource_conditions（P2-5）", m012_declarative_api),
+    ("013_rsi_governance", "记忆四层/提案/可改面/熔断四表（R6/R7）", m013_rsi_governance),
 ]
 
 

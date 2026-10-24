@@ -15,7 +15,7 @@
 | **这句话现在还作数吗**（现行口径总表） | `.specs/platform-evolution/RULINGS.md` |
 | **文档总索引 / 审核台账** | `.specs/product-design/INDEX.md` |
 | 过审结论台账 / 议题状态 | `.specs/platform-evolution/ROADMAP.md` · `TOPICS.md` |
-| 代码现状 / 待办 / 冻结状态 | `STATE.md`（裁定⑧：开发冻结中，只改文档与原型） |
+| 代码现状 / 待办 / 实施进度 | `STATE.md`（开发冻结已解除：波 0–5 已收口，波 6 在途） |
 | 竞品证据 | `.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md` · `.specs/product-design/RECON-MULTICA-DOCS.md` |
 
 > ⚠ 下文「功能模块」描述的是**代码现状**（老版本），不是设计目标；两者差异与升级波次见 `PRODUCT-DESIGN.html` §1.6.0。
@@ -43,7 +43,7 @@ npm run dev
 >
 > **存储定位（2026-09-23 裁定⑦）**：SQLite = 本地体验档（保住「零外部依赖可跑」门票）；**真实部署档中，可计量追踪数据（用户/会话/错误告警/审计/变更账本/指标）一律以 MySQL 为权威库**（设 `DATABASE_URL`）。知识产物（`.specs/`）仍是文件一等公民。账号现存 `users.json`——将随裁定表化进 MySQL `users` 表。
 >
-> ⚠ **安全现状（开发冻结未修，部署前必读）**：当前身份取自 `X-User-Id` 请求头且缺省为 admin、默认口令 `123456`、口令为无盐 SHA-256——**请勿把未修复形态暴露公网或置于未配置可信代理的反代之后**。修复方案 P0-1/2/3 已过审（v8），解冻指令后实施。git 历史已通过凭据扫描：**无凭据泄露**（56 rev 全量，报告 `.specs/credential-scan/SCAN-REPORT.md`）；建议顺手开启 GitHub Secret Scanning。
+> ⚠ **身份与部署闸门（波 1 已实施，部署前必读）**：身份来自**服务端会话**（`__Host-session` HttpOnly cookie）或 Bearer PAT，缺凭证一律 401（不再回退 admin）；口令为 **argon2id**（scrypt 兜底），出厂口令已废除（首启强制改密）；`DEPLOY_MODE` 三值 + 可信代理 XFF 纪律，非法配置启动即失败。git 历史已通过凭据扫描：**无凭据泄露**（56 rev 全量，报告 `.specs/credential-scan/SCAN-REPORT.md`）；建议顺手开启 GitHub Secret Scanning。
 
 ---
 
@@ -411,6 +411,23 @@ INSTANCE_ID=node-2 uvicorn main:app --port 8001
 - 每次变更加 `change_log`（全局单账本，同事务）与 `generation`；
   `status.observedGeneration` 区分「没处理」与「处理了结果未变」。
 - `GET /api/watch?since=<id>`：SSE 推 `change_log` 事件；游标被裁剪 → 先发 `event: resync`（410 等价）。
+
+### RSI 产物治理（波 6 · R6/R7）
+
+治理对象是**四类产物**（技能 / 记忆 / 编排配置 / 模型权重），**代码层 RSI 禁止**（线上稳定优先）：
+
+- **记忆四层唯一管道** `L0 原文 → L1 原子 → L2 场景 → L3 核心`（层级≠权限）。
+  晋升门在状态转换层：`cue / lesson / evidence` **三字段缺一 → `no_entry`**（合法结论），
+  拿不准默认 `confounded`；负知识合法；来源链可撤回（检疫）；长期不用进衰减队列。
+- **提案制三权分离**：生成（限步限钱，超限即熔断并 `blocked`）→ 评估（探针快筛，**永不作发布依据**；
+  影子重放要求**冻结金标 + 异厂系 judge**，提升低于 `NOISE_FLOOR=0.01` 判 `collapsed`）→ 发布（**人类管理员批准**）。
+  领域类提案（`dimension=domain`）还需域成员会签（INV⟂DOM 双维）。
+- **禁改面**是声明对象 `surface_manifests`：`scripts/` `plugins/` `hooks/` **永久禁改**，
+  代码路径（`backend/`、`frontend/src/`）禁止由提案修改；其余必须落在白名单内。
+- **四熔断**：budget / steps / collapse / error_rate；任一 `open` 即拒绝新建提案；
+  人工复位进 `half_open`（不直接 closed）。
+
+接口：`/api/rsi/memories`、`/api/rsi/proposals`、`/api/rsi/surfaces`、`/api/rsi/breakers`。
 
 ### 数据库切换
 

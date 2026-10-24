@@ -33,6 +33,12 @@ from models.scheduled_task import ScheduledTask  # noqa: E402, F401
 from models.session import SessionToken, PatToken  # noqa: E402, F401
 from models.alert import Alert  # noqa: E402, F401
 from models.declarative import ChangeLog, ResourceCondition  # noqa: E402, F401
+from models.rsi import (  # noqa: E402, F401
+    BreakerState,
+    Memory,
+    Proposal,
+    SurfaceManifest,
+)
 from models.teams import (  # noqa: E402, F401
     Squad,
     SquadMember,
