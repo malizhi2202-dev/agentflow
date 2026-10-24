@@ -178,6 +178,67 @@ describe('记忆 tab', () => {
   });
 });
 
+describe('遗留小项', () => {
+  it('手动熔断：需填原因，提交到 trip 端点', async () => {
+    const calls = mockApi({
+      'GET /api/rsi/memories': { body: { memories: [] } },
+      'GET /api/rsi/memories/decay': { body: { candidates: [] } },
+      'POST /api/rsi/breakers/budget/trip': { body: { ok: true, breaker: { name: 'budget', status: 'open' } } },
+      ...GOV,
+    });
+    render(<Memory />);
+    await waitFor(() => expect(screen.getByText(/自动化治理/)).toBeInTheDocument());
+    fireEvent.click(screen.getByText(/自动化治理/));
+    await waitFor(() => expect(screen.getByLabelText('熔断原因')).toBeInTheDocument());
+    expect(screen.getByText('手动熔断')).toBeDisabled();
+    fireEvent.change(screen.getByLabelText('熔断原因'), { target: { value: '预算异常' } });
+    fireEvent.click(screen.getByText('手动熔断'));
+    await waitFor(() => {
+      const post = calls.find((c) => c.method === 'POST' && c.url === '/api/rsi/breakers/budget/trip');
+      expect(post?.body).toMatchObject({ reason: '预算异常' });
+    });
+  });
+
+  it('Tabs 支持方向键切换且 roving tabindex', async () => {
+    mockApi({
+      'GET /api/rsi/memories': { body: { memories: [] } },
+      'GET /api/rsi/memories/decay': { body: { candidates: [] } },
+      'GET /api/rsi/proposals': { body: { proposals: [] } },
+      'GET /api/rsi/surfaces': { body: { surfaces: [], immutable_prefixes: [] } },
+      ...GOV,
+    });
+    render(<Memory />);
+    const memTab = screen.getByRole('tab', { name: '记忆' });
+    const propTab = screen.getByRole('tab', { name: '提案' });
+    expect(memTab).toHaveAttribute('tabindex', '0');
+    expect(propTab).toHaveAttribute('tabindex', '-1');
+    fireEvent.keyDown(memTab, { key: 'ArrowRight' });
+    await waitFor(() => expect(screen.getByRole('tab', { name: '提案' })).toHaveAttribute('aria-selected', 'true'));
+  });
+
+  it('管理员新建可改面 → POST /api/rsi/surfaces', async () => {
+    const calls = mockApi({
+      'GET /api/rsi/memories': { body: { memories: [] } },
+      'GET /api/rsi/memories/decay': { body: { candidates: [] } },
+      'GET /api/rsi/proposals': { body: { proposals: [] } },
+      'GET /api/rsi/surfaces': { body: { surfaces: [], immutable_prefixes: ['scripts/'] } },
+      'POST /api/rsi/surfaces': { body: { ok: true, surface: { id: 1, name: 'agent-config' } } },
+      ...GOV,
+    });
+    render(<Memory />);
+    fireEvent.click(screen.getByRole('tab', { name: '提案' }));
+    await waitFor(() => expect(screen.getByText('新建可改面')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('新建可改面'));
+    fireEvent.change(screen.getByLabelText('surface 名称'), { target: { value: 'agent-config' } });
+    fireEvent.change(screen.getByLabelText('白名单路径'), { target: { value: 'prompts/, skills/' } });
+    fireEvent.click(screen.getByText('创建'));
+    await waitFor(() => {
+      const post = calls.find((c) => c.method === 'POST' && c.url === '/api/rsi/surfaces');
+      expect(post?.body).toMatchObject({ name: 'agent-config', allow_edit: ['prompts/', 'skills/'] });
+    });
+  });
+});
+
 describe('提案 tab', () => {
   const openProposals = async () => {
     render(<Memory />);

@@ -192,9 +192,24 @@ $ cd frontend && npm run build
 |---|---|---|---|
 | 10-24 18:20 | D1-7 | README RSI 节标题补界面挂载 | 本轮 docs 提交 |
 
-## 10. 下一轮基线
+## 10. 第 6 轮增量（2026-10-24 · 后端遗留三项 + 遗留小项 + E2E 留证）
 
-`8c3f1906`（+ 本轮 docs 提交）—— 下次 S-align 从此开始扫描。
+**覆盖提交**：`cc14e6f8`（E2E 留证）· `7d698e18`（residual）· 本轮 `v20-ui-polish` 提交
+
+| 编号 | 类型 | 层 | 证据 | 处理 |
+|---|---|---|---|---|
+| D1-8 | 代码变文档未变 | L3 | `7d698e18` | README API 速查尚无域策略/runner/L0 端点 → **已合并**（补三行） |
+| D4-9 | 执行留痕 | L5 | `.specs/v20-residual/`、`v20-ui-polish/` | 两 change 产物齐（含 SUMMARY/TEST/REVIEW + 门票） |
+| D6-3 | 孤儿/噪声 | L5 | `git status` | 构建产物已 ignore，工作区干净 |
+
+**已对齐记录**：
+| 时间 | 漂移 | 动作 | 提交 |
+|---|---|---|---|
+| 10-24 18:50 | D1-8 | README 补域策略 / shadow run / l0 extract 三行 | 本轮 docs |
+
+## 11. 下一轮基线
+
+`v20-ui-polish` 提交（见 `git log`）—— 下次 S-align 从此开始扫描。
 
 ---
 

@@ -78,6 +78,7 @@ interface RsiState {
   tripBreaker: (name: string, reason: string) => Promise<WriteResult>;
   fetchProposals: (status?: string) => Promise<void>;
   fetchSurfaces: () => Promise<void>;
+  createSurface: (name: string, allowEdit: string[]) => Promise<WriteResult>;
   createProposal: (payload: Record<string, unknown>) => Promise<WriteResult>;
   recordProbe: (id: number, steps: number, tokens: number) => Promise<WriteResult>;
   recordShadow: (id: number, payload: Record<string, unknown>) => Promise<WriteResult>;
@@ -102,6 +103,12 @@ export const useRsi = create<RsiState>((set, get) => ({
     const result = await safeFetch(`/api/rsi/memories${suffix}`);
     if (!result.ok) { set({ memoriesLoading: false, memoriesError: result.error || '记忆读取失败' }); return; }
     set({ memories: result.data?.memories || [], memoriesLoading: false });
+  },
+
+  createSurface: async (name, allowEdit) => {
+    const out = await writeJson('/api/rsi/surfaces', { name, allow_edit: allowEdit });
+    if (out.ok) await get().fetchSurfaces();
+    return out;
   },
 
   proposeMemory: async (payload) => {

@@ -14,6 +14,7 @@
 | 2026-10-24 | `v20-wave6` | 波 6 RSI 治理：记忆四层晋升门 · 提案三权分离（探针不作发布依据）· 可改面 · 四熔断 + NOISE FLOOR | `64e44de6` | — |
 | 2026-10-24 | `v20-wave7` | 波 7 遗留项收口：A2A M0 静态卡 · 因果前缀 + 晋升评审账 + 防污染双扫 · 四类开关 · 归因双列 + 瀑布 fail-closed | `13faefbe` | L-001 |
 | 2026-10-24 | `doc-align-v20` | 文档归并：RULINGS/INDEX 建档、门面改齐、删 8 张孤儿原型页（135→127） | `fcc00645` | — |
+| 2026-10-24 | `v20-ui-polish` | 遗留小项：熔断手动 trip · Tabs 方向键+roving tabindex · 管理员新建可改面 · 小队 `created_by` 回填脚本（默认 dry-run） | 见「feat(ui-polish)」提交 | — |
 | 2026-10-24 | `v20-residual` | 后端遗留三项：域级 accountable 策略（迁移 016，fail-closed）+ 影子重放 runner（exact_match 自证，沿用影子门）+ L0 抽取器（默认 dry_run） | 见「feat(residual)」提交 | — |
 | 2026-10-24 | `v20-ui-rsi` | 记忆中心 + 提案抽屉（双 tab）：记忆四层列表/写入/晋升评审账/检疫/衰减 + 治理折叠（四开关/四熔断）+ 提案状态机/探针/影子/会签/人批发布；实现中修 surfaces 未拉取与写入结论被覆盖两个 bug | 见「feat(ui-rsi)」提交 | — |
 | 2026-10-24 | `v20-squad-authz` | 小队写操作授权：creator 或平台管理员（4 个写端点接门 + 建队落 `created_by`）；修 `v20-ui-teams` 发现的权限缺口 | 见「fix(squad-authz)」提交 | — |

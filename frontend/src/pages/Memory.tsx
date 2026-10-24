@@ -45,9 +45,12 @@ function useWrite() {
 /* ───────────────── 治理折叠区（开关 + 熔断）───────────────── */
 
 function GovernanceFold({ open, onToggle }: { open: boolean; onToggle: () => void }) {
-  const { switches, breakers, noiseFloor, govError, fetchGovernance, setSwitch, resetBreaker } = useRsi();
+  const { switches, breakers, noiseFloor, govError, fetchGovernance, setSwitch, resetBreaker,
+    tripBreaker } = useRsi();
   const { err, run } = useWrite();
   const [confirmReset, setConfirmReset] = useState<string | null>(null);
+  const [tripName, setTripName] = useState('budget');
+  const [tripReason, setTripReason] = useState('');
 
   useEffect(() => { fetchGovernance(); }, [fetchGovernance]);
 
@@ -103,6 +106,24 @@ function GovernanceFold({ open, onToggle }: { open: boolean; onToggle: () => voi
                 </span>
               ))}
             </div>
+          </div>
+          <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div style={{ width: 130 }}>
+              <label htmlFor="trip-name" style={labelStyle}>手动熔断器</label>
+              <select id="trip-name" aria-label="熔断器" style={inputStyle} value={tripName}
+                      onChange={(e) => setTripName(e.target.value)}>
+                {breakers.map((b) => <option key={b.name} value={b.name}>{b.name}</option>)}
+              </select>
+            </div>
+            <div style={{ flex: 1, minWidth: 140 }}>
+              <label htmlFor="trip-reason" style={labelStyle}>原因（必填）</label>
+              <input id="trip-reason" aria-label="熔断原因" style={inputStyle} value={tripReason}
+                     onChange={(e) => setTripReason(e.target.value)} />
+            </div>
+            <button className="btn btn-ghost btn-sm" disabled={!tripReason.trim()}
+                    onClick={() => run(() => tripBreaker(tripName, tripReason.trim()), '已手动熔断')}>
+              手动熔断
+            </button>
           </div>
           {err && <div role="alert" style={{ color: 'var(--red)', fontSize: 11.5, marginTop: 6 }}>{err}</div>}
         </div>
@@ -441,7 +462,11 @@ function ProposalActions({ p }: { p: Proposal }) {
 
 function ProposalTab() {
   const { proposals, proposalsLoading, proposalsError, fetchProposals, surfaces, createProposal,
-    fetchSurfaces } = useRsi();
+    fetchSurfaces, createSurface } = useRsi();
+  const isAdmin = useAuth((s) => s.isAdmin);
+  const [showSurface, setShowSurface] = useState(false);
+  const [surfaceNameNew, setSurfaceNameNew] = useState('');
+  const [surfacePaths, setSurfacePaths] = useState('prompts/');
   const { err, run } = useWrite();
   const [showCreate, setShowCreate] = useState(false);
   const [title, setTitle] = useState('');
@@ -463,10 +488,41 @@ function ProposalTab() {
         <button className="btn btn-ghost btn-sm" onClick={() => fetchProposals()}>
           <RefreshCw size={13} style={{ marginRight: 4 }} />刷新
         </button>
+        {isAdmin && (
+          <button className="btn btn-ghost btn-sm" onClick={() => setShowSurface((v) => !v)} aria-expanded={showSurface}>
+            新建可改面
+          </button>
+        )}
         <button className="btn btn-primary btn-sm" onClick={() => setShowCreate((v) => !v)} aria-expanded={showCreate}>
           <Plus size={13} style={{ marginRight: 4 }} />新建提案
         </button>
       </header>
+
+      {showSurface && isAdmin && (
+        <section aria-label="新建可改面" style={{ ...panel, marginBottom: 10 }}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div style={{ width: 160 }}>
+              <label htmlFor="sf-name" style={labelStyle}>surface 名称</label>
+              <input id="sf-name" aria-label="surface 名称" style={inputStyle} value={surfaceNameNew}
+                     onChange={(e) => setSurfaceNameNew(e.target.value)} />
+            </div>
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <label htmlFor="sf-paths" style={labelStyle}>白名单路径前缀（逗号分隔）</label>
+              <input id="sf-paths" aria-label="白名单路径" style={inputStyle} value={surfacePaths}
+                     onChange={(e) => setSurfacePaths(e.target.value)} />
+            </div>
+            <button className="btn btn-ghost btn-sm" disabled={!surfaceNameNew.trim()}
+                    onClick={() => run(
+                      () => createSurface(surfaceNameNew.trim(),
+                        surfacePaths.split(',').map((x) => x.trim()).filter(Boolean)),
+                      '可改面已创建')}>创建</button>
+          </div>
+          <p style={{ fontSize: 10.5, color: 'var(--text-muted)', margin: '4px 0 0' }}>
+            scripts/ plugins/ hooks/ 永久禁改；代码层（backend/、frontend/src/）提案一律拒绝。
+          </p>
+          {err && <div role="alert" style={{ color: 'var(--red)', fontSize: 11.5 }}>{err}</div>}
+        </section>
+      )}
 
       {showCreate && (
         <section aria-label="新建提案" style={{ ...panel, marginBottom: 10 }}>
@@ -554,8 +610,13 @@ export default function Memory() {
         </h2>
         <div role="tablist" aria-label="记忆或提案" style={{ display: 'flex', gap: 4 }}>
           {(['memories', 'proposals'] as const).map((k) => (
-            <button key={k} role="tab" aria-selected={tab === k} className="btn btn-ghost btn-sm"
+            <button key={k} role="tab" aria-selected={tab === k} tabIndex={tab === k ? 0 : -1}
+                    className="btn btn-ghost btn-sm"
                     style={{ color: tab === k ? 'var(--blue)' : 'var(--text-secondary)', fontWeight: tab === k ? 600 : 400 }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowRight') { e.preventDefault(); setTab('proposals'); }
+                      if (e.key === 'ArrowLeft') { e.preventDefault(); setTab('memories'); }
+                    }}
                     onClick={() => setTab(k)}>
               {k === 'memories' ? '记忆' : '提案'}
             </button>

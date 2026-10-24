@@ -194,6 +194,9 @@ Backend (FastAPI + SQLAlchemy + SQLite/MySQL + Redis)
 | `/api/watch?since=<id>` | GET | 声明式变更 SSE（应用层游标；过期先发 `event: resync`） |
 | `/api/rsi/{memories,proposals,surfaces,switches,breakers,reviews}` | GET/POST | 记忆四层晋升门 · 提案三权分离 · 可改面 · 四类开关 · 熔断 · 晋升评审账 |
 | `/metrics` | GET | Prometheus 文本（需 `METRICS_ENDPOINT_ENABLED=1`，且仍需身份；未开启一律 404） |
+| `/api/domains/:id/attribution-policy` | GET/PUT | 域级 accountable 策略（无策略=originator；不可解析即 fail-closed；PUT 限管理员/域 owner） |
+| `/api/rsi/proposals/:id/shadow/run` | POST | 影子重放 runner（确定性 exact_match 打分 → 走既有影子门；响应自证 dry_run） |
+| `/api/rsi/l0/extract` | POST | L0→L1 抽取（端点强制 dry_run；真实抽取需服务层注入适配器） |
 | `/api/control-plane/cluster` | GET | 副本/租约/单例循环现状（单副本承诺如实呈现） |
 
 ---
