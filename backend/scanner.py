@@ -49,8 +49,12 @@ class ChangeInfo:
 
 
 def _phase_order(phase: str) -> int:
-    try: return STAGES.index(phase)
-    except ValueError: return -1
+    # P0-6/P0-7：阶段表唯一真源是 stage_config.STAGES（取属性，admin 改配置后立即生效）。
+    # 曾经这里写裸 STAGES → NameError（/api/health 500），T-FIX-01 修复并补回归用例。
+    try:
+        return list(stage_config.STAGES).index(phase)
+    except ValueError:
+        return -1
 
 
 def _detect_phase(change_dir: str) -> str:

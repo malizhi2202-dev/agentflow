@@ -29,13 +29,6 @@ def _resolve_owner(entity_type: str, entity_id: int, db: Session) -> str | None:
     return None
 
 
-def _owner_filter(query, owner_id: str | None):
-    """统一加 owner 过滤。None 表示不加（全局/admin）。"""
-    if owner_id:
-        return query.filter(SessionMetric.owner_id == owner_id)
-    return query
-
-
 def _calc_success_rate(sessions) -> float:
     total = len(sessions)
     if total == 0:
