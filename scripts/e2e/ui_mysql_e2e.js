@@ -13,6 +13,41 @@ const stamp = Date.now().toString().slice(-6);
 const results = [];
 const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' — ' + d : ''}`); };
 
+/**
+ * 轻量 a11y 审计（v21 T-06）：不引 axe（离线环境 + 避免 devDependency 漂移），
+ * 只查「可回归、可解释」的硬项：按钮可达名 / 表单控件标签 / img alt / 标题层级 / 负 tabindex 之外的正 tabindex / tab 角色 aria。
+ */
+async function auditA11y(page, label) {
+  const issues = await page.evaluate(() => {
+    const out = [];
+    const txt = (el) => (el.getAttribute('aria-label') || el.getAttribute('title') || el.textContent || '').trim();
+    document.querySelectorAll('button').forEach((b) => {
+      if (!txt(b)) out.push('button 无可达名: ' + b.outerHTML.slice(0, 70));
+    });
+    document.querySelectorAll('input,select,textarea').forEach((el) => {
+      if (el.type === 'hidden') return;
+      const byFor = el.id && document.querySelector(`label[for="${el.id}"]`);
+      const wrapped = el.closest('label');   // 包裹式 label 也是合法标签，别误报
+      if (!byFor && !wrapped && !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby') && !el.title) {
+        out.push('表单控件无标签: ' + el.outerHTML.slice(0, 70));
+      }
+    });
+    document.querySelectorAll('img').forEach((i) => {
+      if (!i.hasAttribute('alt')) out.push('img 缺 alt: ' + (i.src || '').slice(0, 50));
+    });
+    if (!document.querySelector('h1,h2')) out.push('页面无标题（h1/h2）');
+    document.querySelectorAll('[tabindex]').forEach((el) => {
+      if (Number(el.getAttribute('tabindex')) > 0) out.push('正 tabindex（破坏焦点顺序）: ' + el.outerHTML.slice(0, 60));
+    });
+    document.querySelectorAll('[role="tab"]').forEach((t) => {
+      if (!t.hasAttribute('aria-selected')) out.push('tab 缺 aria-selected: ' + (t.textContent || '').trim());
+    });
+    return out;
+  });
+  log(`a11y：${label}（0 违规）`, issues.length === 0, issues.length ? issues.slice(0, 3).join(' | ') : '');
+  return issues;
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true, executablePath: SHELL });
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -24,11 +59,11 @@ const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' 
   if ((await page.getByPlaceholder('密码').count()) === 0) await page.getByRole('button', { name: new RegExp(USER) }).first().click();
   await page.getByPlaceholder('密码').fill(PASS);
   await page.getByRole('button', { name: /^登录$/ }).click();
-  await page.getByRole('button', { name: '任务' }).waitFor({ timeout: 20000 });
+  await page.getByRole('button', { name: '任务', exact: true }).waitFor({ timeout: 20000 });
   log('登录（MySQL + 服务端会话）', true);
 
   // ---- 任务：建单 + 状态推进 ----
-  await page.getByRole('button', { name: '任务' }).click();
+  await page.getByRole('button', { name: '任务', exact: true }).click();
   const t1 = `MYSQL 任务 ${stamp}`;
   await page.getByRole('button', { name: /新建任务/ }).click();
   await page.getByLabel('任务标题').fill(t1);
@@ -59,7 +94,7 @@ const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' 
   log('收件箱：指派进箱 + 标读', true, unreadBefore);
 
   // ---- 团队：建团 + 成员 + 暂停 ----
-  await page.getByRole('button', { name: '团队与小隊' }).click();
+  await page.getByRole('button', { name: '团队与小隊', exact: true }).click();
   const team = `MySQL 团队 ${stamp}`;
   await page.getByRole('button', { name: /新建团队/ }).click();
   await page.getByLabel('团队 slug').fill(`mysql-${stamp}`);
@@ -85,7 +120,7 @@ const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' 
   log('团队：建团 + 加成员 + 暂停', true);
 
   // ---- 自动化 / 运行时 / 回放：三页可达 + 至少一条真交互 ----
-  await page.getByRole('button', { name: '自动化' }).click();
+  await page.getByRole('button', { name: '自动化', exact: true }).click();
   await page.getByRole('heading', { name: /自动化中心/ }).waitFor({ timeout: 20000 });
   await page.getByRole('button', { name: /新建定时任务/ }).click();
   const agentSel = page.locator('#auto-agent');
@@ -101,19 +136,65 @@ const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' 
   await page.screenshot({ path: `${SHOTS}/automations.png` });
   log('自动化：新建定时任务（真落库）', true);
 
-  await page.getByRole('button', { name: '运行时' }).click();
+  await page.getByRole('button', { name: '运行时', exact: true }).click();
   await page.getByRole('heading', { name: '运行时' }).waitFor({ timeout: 20000 });
   log('运行时：页面可达（summary/sessions）', (await page.getByRole('region', { name: '运行时会话' }).count()) > 0);
 
-  await page.getByRole('button', { name: '回放' }).click();
+  await page.getByRole('button', { name: '回放', exact: true }).click();
   await page.getByRole('heading', { name: '回放' }).waitFor({ timeout: 20000 });
   await page.getByLabel(/^回放任务/).first().click();
   await page.waitForTimeout(1200);
   await page.screenshot({ path: `${SHOTS}/replay.png` });
   log('回放：选任务看运行时间线', (await page.getByText(/run #\d+|还没有运行记录/).count()) > 0);
 
+  // ---- a11y：四个主页面各审一次（0 违规才算过）----
+  await auditA11y(page, '回放');
+  await page.getByRole('button', { name: '任务', exact: true }).click();
+  await page.getByRole('heading', { name: /^任务/ }).waitFor({ timeout: 20000 });
+  await auditA11y(page, '任务看板');
+  await page.getByRole('button', { name: '团队与小隊', exact: true }).click();
+  await page.getByRole('heading', { name: /团队与小隊/ }).waitFor({ timeout: 20000 });
+  await auditA11y(page, '团队与小隊');
+  await page.getByRole('button', { name: '记忆中心', exact: true }).click();
+  await page.getByRole('heading', { name: '记忆中心' }).waitFor({ timeout: 20000 });
+  await auditA11y(page, '记忆中心');
+  await page.getByRole('button', { name: '自动化', exact: true }).click();
+  await page.getByRole('heading', { name: /自动化中心/ }).waitFor({ timeout: 20000 });
+  await auditA11y(page, '自动化中心');
+
+  // ---- 多用户：bob 的视角（不可见与越权都走 404，不泄漏存在性）----
+  const adminTaskId = await page.evaluate(async (title) => {
+    const list = await fetch('/api/tasks').then((r) => r.json());
+    const hit = (list.tasks || []).find((t) => t.title === title);
+    return hit ? hit.id : null;
+  }, t1);
+  if (adminTaskId === null) throw new Error('找不到 admin 刚建的任务，多用户用例无法判定');
+
+  const bobCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const bobPage = await bobCtx.newPage();
+  await bobPage.goto(BASE, { waitUntil: 'networkidle' });
+  const bobId = bobPage.getByPlaceholder('用户 ID（如 admin）');
+  if (await bobId.count()) { await bobId.fill('bob'); await bobPage.getByRole('button', { name: /继续/ }).click(); }
+  if ((await bobPage.getByPlaceholder('密码').count()) === 0) await bobPage.getByRole('button', { name: /bob/ }).first().click();
+  await bobPage.getByPlaceholder('密码').fill(PASS);
+  await bobPage.getByRole('button', { name: /^登录$/ }).click();
+  await bobPage.getByRole('button', { name: '任务', exact: true }).waitFor({ timeout: 20000 });
+  const bobView = await bobPage.evaluate(async ({ title, taskId }) => {
+    const list = await fetch('/api/tasks').then((r) => r.json());
+    const titles = (list.tasks || []).map((t) => t.title);
+    const detail = await fetch(`/api/tasks/${taskId}`);
+    return {
+      total: titles.length,
+      seesAdminTask: titles.includes(title),
+      detailStatus: detail.status,
+    };
+  }, { title: t1, taskId: adminTaskId });
+  log('多用户：bob 的任务列表不含 admin 的任务', !bobView.seesAdminTask, `bob 可见 ${bobView.total} 条`);
+  log('多用户：bob 直取 admin 任务详情 = 404', bobView.detailStatus === 404, `status=${bobView.detailStatus}`);
+  await bobCtx.close();
+
   // ---- 记忆：列表（应含 L0 抽取结果）+ 写入 + 评审 ----
-  await page.getByRole('button', { name: '记忆中心' }).click();
+  await page.getByRole('button', { name: '记忆中心', exact: true }).click();
   await page.getByRole('heading', { name: /记忆中心/ }).waitFor();
   await page.getByText(/自动化治理/).waitFor({ timeout: 15000 });
   // L0 抽取由 dsh CLI 生成，cue 措辞可能不同：用关键词 + 行数双重判定

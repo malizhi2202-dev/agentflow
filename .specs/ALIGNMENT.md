@@ -270,7 +270,19 @@ $ cd frontend && npm run build
 | D2-5 | 页面缺口 | L3 | `components/DomainPolicyCard.tsx` · `pages/Memory.tsx` | 域策略无界面；可改面不能改/删 | **已补**：前后端各有用例 |
 | D6-5 | a11y 一致性 | L3 | `pages/Teams.tsx` | 团队页 Tabs 无键盘导航（记忆中心已有） | **已补**：roving tabindex + 方向键 |
 
-## 17. 下一轮基线
+## 17. 第 13 轮增量（2026-10-24 · v21 T-06 a11y/多用户/多副本/迁移）
+
+**覆盖**：`v21-completion` T-06
+
+| 编号 | 类型 | 层 | 证据 | 处理 |
+|---|---|---|---|---|
+| D6-6 | a11y 无基线 | L5 | `scripts/e2e/ui_mysql_e2e.js` `auditA11y` | 此前无任何 a11y 检查 | **已建**：5 页审计纳入 E2E；明确「非 axe」的覆盖边界 |
+| D7-9 | 测试器自身错判 | L5 | 同上（包裹 label 被误报） | 审计器误报会把合规写法判违规，整组结论不可信 | **已修**：加 `closest('label')` |
+| D7-10 | 多用户无验证 | L5 | E2E 多用户段 | 只有 admin 单视角 | **已补**：bob 列表不可见 + 详情 404 |
+| D7-11 | 多副本无验证 | L5 | `tests/test_cluster_lease.py` | 租约逻辑只有注入式假 store | **已补**：文件库双会话真并发语义 + tick 待命 |
+| D7-12 | 迁移无纪律守卫 | L5 | `tests/test_migrations_discipline.py` | 无 down 也无「禁止加破坏性迁移」的守卫 | **已补**：禁破坏性 SQL + 幂等 + 失败不入账 |
+
+## 18. 下一轮基线
 
 `v20-ui-polish` 提交（见 `git log`）—— 下次 S-align 从此开始扫描。
 

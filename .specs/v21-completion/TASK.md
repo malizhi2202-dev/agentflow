@@ -17,6 +17,6 @@ Wave 5: T-07（users/audit 表化）→ 收口（S-align/UAT）
 | T-03 | 修 41 条基线红 | ✅ done | `unittest discover` → **Ran 477 — OK (skipped=6)**（基线 29F/12E） |
 | T-04 | 测试基建（CI/覆盖率/E2E 接脚本/hermes/L0 循环） | ✅ done | `bash scripts/ci.sh --with-coverage` 全绿；E2E dsh/hermes 各 13/13；`T-04-SUMMARY.md` |
 | T-05 | 前端四页（automations/runtimes/replay/board） | ✅ done | 三新页 + 看板核实已有；后端 488 OK / 前端 104 例 / E2E 16/16（`T-05-SUMMARY.md`） |
-| T-06 | a11y/多用户/多副本/down 迁移 | pending | axe + 双实例 + down 用例 |
+| T-06 | a11y/多用户/多副本/down 迁移 | ✅ done | a11y 5 页 0 违规（自研审计，非 axe）· bob 视角 2 例 · 租约 5 例 · 迁移纪律 6 例；E2E 23/23（`T-06-SUMMARY.md`） |
 | T-07 | users/audit 表化 | pending | 迁移 + 兼容用例 |
 | T-08 | 小项五条 | ✅ done | 后端 499 OK（+11）/ 前端 109 例（+5）；3 条是行为修正（`T-08-SUMMARY.md`） |

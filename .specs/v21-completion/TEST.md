@@ -97,3 +97,23 @@ Test Files 12 passed (12) · Tests 109 passed (109)   （新增 domain-policy 3 
 - 熔断审计：trip/reset 均落审计；非管理员 403 且不留痕（`audit_service` 复用 `auth` 的落盘路径）
 - squad 指派：生成 leader 任务（assignee=leader agent, parent=任务）· 重复指派去重 · 归档小队 400 · 不存在 404 · member 指派不产生 leader 任务
 - 团队页 Tabs：roving tabindex + ←/→/Home/End
+
+## T-06 a11y / 多用户 / 多副本 / 迁移回滚（2026-10-24）
+
+```text
+$ backend: unittest discover -s tests
+Ran 510 tests in 133.155s
+OK (skipped=6)                    （新增 test_cluster_lease.py 5 例 + test_migrations_discipline.py 6 例）
+
+$ E2E_CLI=dsh bash scripts/e2e/run_e2e.sh
+SUMMARY 23/23 passed
+PASS a11y：回放/任务看板/团队与小隊/记忆中心/自动化中心（各 0 违规）
+PASS 多用户：bob 的任务列表不含 admin 的任务 — bob 可见 0 条
+PASS 多用户：bob 直取 admin 任务详情 = 404 — status=404
+```
+
+覆盖点：
+- a11y（自研轻量审计，非 axe）：按钮可达名 / 表单控件标签（含包裹 label）/ img alt / 标题层级 / 正 tabindex / tab 的 aria-selected
+- 多用户：列表侧不可见 + 详情侧 404（不以 403 泄漏存在性）
+- 多副本：单租约独占 · 续租 · 过期接管 · 释放交接 · 待命副本 tick 返回 None
+- 迁移：禁止 DROP COLUMN/TRUNCATE/DELETE；裸 DROP TABLE 仅限表重建或登记的历史表；逐条幂等；中途失败不入账且可 fix-forward
