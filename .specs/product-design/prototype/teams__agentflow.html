@@ -30,7 +30,7 @@ h4.blk{scroll-margin-top:92px}
 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:var(--s3)">
 <a class="pill" href="#members" style="border-color:var(--blue-border);color:var(--blue)">成员 (4)</a><a class="pill" href="#assets">拥有资源 (12)</a><a class="pill" href="#quota">配额与用量</a><a class="pill" href="#ortho">Team ⟂ Domain</a><a class="pill" href="#audit">审计边界</a><a class="pill" href="#matrix">权限矩阵</a><a class="pill" href="#danger" style="border-color:rgba(224,85,85,.4);color:var(--red)">危险区</a></div>
 
-<div class="callout"><p class="tiny" style="margin:0"><b>本页只讲组织层。</b>「这次协作由谁干」在<a data-goto="squads__code-review.html">协作小队</a>——<b>本队不派单、不认领、不当 leader</b>；squad 也不拥有本页任何一项资产，成本与执行一律归 leader Agent 记账。两词一义，互不替换。</p></div>
+<div class="callout"><p class="tiny" style="margin:0"><b>本页只讲组织层。</b>「这次协作由谁干」在<a data-goto="squads__code-review.html">协作小队</a>——<b>本队不派单、不认领、不当 leader</b>；squad 也不拥有本页任何一项资产，成本与执行一律归 leader Agent 记账。<b>两词两义（一词一义），互不替换</b>。</p></div>
 
 <h4 class="blk" id="members">① 成员与角色（四档 · <span class="mono">team_members</span> 表承载团队内角色）</h4>
 <p class="tiny dim" style="margin:0 0 var(--s2)"><b>三词分家（防术语漂移）：</b><span class="mono">user.role</span>=平台级（admin/user，见 <a data-goto="users.html">用户与权限</a>）｜<span class="mono">team_members.role</span>=团队内四档（本页）｜<span class="mono">CustomRole</span>=<b>Agent 人设</b>（<a data-goto="roles.html">角色市场</a>），与权限无关。</p>
@@ -138,13 +138,13 @@ h4.blk{scroll-margin-top:92px}
 </tbody></table>
 <p class="tiny dim" style="margin:6px 0 0">实现口径：判定收敛到<b>单点函数</b>（service 层）+ 查询中间件<b>各校验一次</b>（同一不变量两处独立校验，不假设前一处覆盖所有入口）。配额 enforcement <b>不写在进程内存</b>。</p>
 
-<div class="callout bad" id="danger" style="margin-top:var(--s6)"><p><b>⑦ 危险区 · 归档团队：</b>Team 归档<b>不删资产</b>——本队 12 项资产 <span class="mono">owner_kind</span> 转 <span class="mono">platform</span>（全员只读、可再被别的队改挂），成员册转只读快照，配额账本继续留档；<b>在途运行不中断</b>（Team 归档是软停，与 Squad 归档取消在跑 run 相反），仅拒绝新指派（403 <span class="mono">team_archived</span>）。归档<b>必填原因</b>且入审计。Team 归档<b>可恢复</b>（与 Squad 归档不可恢复<b>相反</b>）。</p>
+<div class="callout bad" id="danger" style="margin-top:var(--s6)"><p><b>⑦ 危险区 · 归档团队：</b>Team 归档<b>不删资产</b>——本队 12 项资产 <span class="mono">owner_kind</span> 转 <span class="mono">platform</span>（全员只读、可再被别的队改挂），成员册转只读快照，配额账本继续留档；<b>在途运行不中断</b>（Team 归档是软停，<b>只停未来指派</b>——与小队归档同一原则：<b>在跑 run 不连带取消</b>，要停走显式「停止运行」〔2026-10-23 返修：本页此前误写「Squad 归档取消在跑 run」，按 multica 事实与 v16 纠偏② 改正；两者差别只剩「可恢复 + 资产有托管」〕），仅拒绝新指派（403 <span class="mono">team_archived</span>）。归档<b>必填原因</b>且入审计。Team 归档<b>可恢复</b>（与 Squad 归档不可恢复<b>相反</b>）。</p>
 <p style="margin:6px 0 0"><button class="btn sm" style="color:var(--red);border-color:var(--red)" data-click data-modal="md-archive">归档团队…</button> <span class="tiny dim">前置检查：拥有资产 12 · 在途 run r-128 · 引用本队的模板 1 · 小队 2（不受影响，squad 不依赖 team）</span></p></div>
 
 <h4 class="blk" id="matrix2">⑧ 与相邻概念的分工（防串页）</h4>
 <table class="tbl compact"><thead><tr><th>概念</th><th>回答</th><th>数据落点</th><th>页面</th></tr></thead><tbody>
 <tr><td><span class="chip info">Team 团队</span></td><td>谁的（成员 / 角色 / 配额 / 审计）</td><td class="mono tiny">teams · team_members · team_quota</td><td class="tiny">本页 + <a data-goto="teams.html">小队中心 Tab A</a></td></tr>
-<tr><td><span class="chip purple">Squad 协作小队</span></td><td>这次谁一起干（leader + 池 + 指令）</td><td class="mono tiny">squads · squad_members · squad_autopilots</td><td class="tiny"><a data-goto="squads__code-review.html">代码审查小队</a> + <a data-goto="teams.html">Tab B</a></td></tr>
+<tr><td><span class="chip purple">Squad 协作小队</span></td><td>这次谁一起干（leader + 池 + 指令）</td><td class="mono tiny">squad · squad_member · automations</td><td class="tiny"><a data-goto="squads__code-review.html">代码审查小队</a> + <a data-goto="teams.html">Tab B</a></td></tr>
 <tr><td><span class="chip">Domain 域</span></td><td>在哪跑 · 怎么路由 / 扩容 / 自愈</td><td class="mono tiny">domains（+ team_id）</td><td class="tiny"><a data-goto="control-plane.html">管控面</a></td></tr>
 <tr><td><span class="chip">Project 项目</span></td><td>那次工作的<b>装配快照</b></td><td class="mono tiny">projects · project_agents</td><td class="tiny"><a data-goto="projects.html">项目管理</a></td></tr>
 <tr><td><span class="chip">CustomRole 角色</span></td><td>Agent <b>人设</b>（与权限无关）</td><td class="mono tiny">role_custom</td><td class="tiny"><a data-goto="roles.html">角色市场</a></td></tr>
@@ -188,7 +188,7 @@ h4.blk{scroll-margin-top:92px}
 <table class="tbl compact"><tbody>
 <tr><td>拥有资产 12 项</td><td><span class="chip warn">owner_kind → platform</span></td><td class="tiny dim">Agent 4 · 工作流 2 · 工具 3 · 知识源 2 · 域 2</td></tr>
 <tr><td>默认域 / 测试域</td><td><span class="chip warn">team_id 置 NULL → 未分类虚拟组</span></td><td class="tiny dim">域本身不删，路由与扩缩策略不动</td></tr>
-<tr><td>在途运行 r-128</td><td><span class="chip ok">继续跑完并记账</span></td><td class="tiny dim">成本归 leader（agent-5）归属，不因归档而丢账；对比：<a data-goto="squads__code-review.html">小队归档</a>会取消在跑 run</td></tr>
+<tr><td>在途运行 r-128</td><td><span class="chip ok">继续跑完并记账</span></td><td class="tiny dim">成本归 leader（agent-5）归属，不因归档而丢账；对比：<a data-goto="squads__code-review.html">小队归档</a><b>同样不取消在跑 run</b>（只停未来指派；差别在「不可恢复 + 无资产可托管」）</td></tr>
 <tr><td>恢复窗口</td><td><span class="chip info">可恢复（区别于 Squad 归档）</span></td><td class="tiny dim">恢复 = owner_kind 从 platform 改回 team 需<b>逐项确认</b>，不自动回挂</td></tr>
 </tbody></table>
 <div class="fld" style="margin-top:var(--s3)"><label><b>输入团队名确认</b>（<span class="mono">agentflow</span> · 与 12 项受影响资产数一并列出）</label><input class="mono" placeholder="agentflow"><div class="hint">名称不匹配 → 提交按钮保持禁用（破坏性动作统一口径，§6.0 纪律）。</div></div>

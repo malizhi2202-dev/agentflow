@@ -44,7 +44,7 @@
 <p style="margin-top:var(--s4)"><button class="btn sm" data-toast="负责人已改为 Agent · planner（在跑的运行不受影响）（演示）">改派负责人</button> <button class="btn sm" data-pop="pp-assignee" data-click>指派给… ▾</button> <button class="btn sm primary" data-click data-goto="board__mark-done.html">完成（需证据）</button></p>
 </div>
 <div class="modal" id="md-stop-run"><div style="padding:var(--s4)"><b>停止 run-8839？</b><p class="small dim" style="margin:8px 0">只中断<b>运行</b>，不改任务状态（状态与行为解耦）。已发出的外部副作用（1 次 commit、2 次文件写）<b>不回滚</b>；取消人将署名进回放时间线。</p><div style="text-align:right"><button class="btn sm" data-close>取消</button> <button class="btn sm" style="color:var(--red);border-color:var(--red)" data-toast="run-8839 已取消 · 取消人 李工 · 回放记 wait_reason:cancelled（演示）" data-close>确认停止</button></div></div></div>
-<div class="pop" id="pp-assignee"><p class="tiny muted" style="margin:2px 4px 6px">负责人：人 / Agent 双轨（同一列，两种轨）· <b>选 Agent = 移交所有权 + 弹「即将开跑谁」确认框</b>（层本体只做一份 → <span class="mono">board.html#md-assign-confirm</span>）；选完不点「开始」= 只登记、不建 run</p>
+<div class="pop" id="pp-assignee"><p class="tiny muted" style="margin:2px 4px 6px">负责人：<b>人 / Agent / 小队 三轨</b>（同一列，三种轨 · 〔2026-10-23 v14 扩三轨〕）· <b>选 Agent = 移交所有权 + 弹「即将开跑谁」确认框</b>（层本体只做一份 → <span class="mono">board.html#md-assign-confirm</span>）；选完不点「开始」= 只登记、不建 run</p>
 <table class="tbl compact"><tbody>
 <tr><td><b>李工</b> user:1</td><td class="tiny dim">人轨 · 不消耗 token 预算</td><td><span class="btn link" data-toast="已派给 李工（人轨）· 人轨不弹确认框、也不产生 run（演示）">指派</span></td></tr>
 <tr><td><b>王工</b> user:2</td><td class="tiny dim">人轨 · 可作 done 复核人</td><td><span class="btn link" data-toast="已派给 王工（演示）">指派</span></td></tr>

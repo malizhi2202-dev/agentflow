@@ -107,7 +107,7 @@
             <div class="cap-row" data-click data-modal="md-del"><b class="small" style="color:var(--red)">🗑 删除（不可恢复）</b><span class="tiny dim" style="margin-left:auto">历史销毁 + 停 run</span></div>
             <p class="tiny dim" style="margin:6px 0 0"><b>归档 = 只读</b>：能读不能发；<b>若本会话绑了外部渠道，归档即断开绑定，取消归档不自动恢复——必须重绑</b>（渠道门禁重新校验后才再收信）。</p></div>
           <div class="msgs" style="flex:1;overflow-y:auto">
-            <div class="callout" style="margin:0"><p class="tiny" style="margin:0">🔒 <b>一对一会话 · 完全私密</b>（其他成员包括管理员都不可见）· 一条消息 = 一个 run · 无 issue 上下文起点，<b>绝不自动把任务化</b>——<b>结果与进度只回流到本对话窗口，任务时间线不留痕</b>（不建工作项、也不回填任何工作项；要留痕请去看板手动建 / 挂靠）——但<b>被明确要求</b>时，我会用<b>你的</b>工作区权限去查 / 动资源：权限不因「在聊天里」而降格，也不越格（越权统一按不存在处理 · 需人批的动作照旧挂审批，本会话的 AP-31 就是例子）。「把结论让团队看到」请写进 issue / 项目描述 / 技能（见右栏「chat vs issue」）。</p></div>
+            <div class="callout" style="margin:0"><p class="tiny" style="margin:0">🔒 <b>一对一会话 · 完全私密</b>（其他成员包括管理员都不可见）· 一条消息 = 一个 run · 无 issue 上下文起点，<b>绝不自动把任务化</b>——<b>结果与进度只回流到本对话窗口，任务时间线不留痕</b>（不建任务、也不回填任何任务；要留痕请去看板手动建 / 挂靠）——但<b>被明确要求</b>时，我会用<b>你的</b>工作区权限去查 / 动资源：权限不因「在聊天里」而降格，也不越格（越权统一按不存在处理 · 需人批的动作照旧挂审批，本会话的 AP-31 就是例子）。「把结论让团队看到」请写进 issue / 项目描述 / 技能（见右栏「chat vs issue」）。</p></div>
             <div class="msg-row me"><div class="avatar">李</div><div class="bubble me">agent-domains 的产物现在都到哪个阶段了？AF-104 是谁在做、谁复核？</div></div>
             <div class="msg-row"><div class="avatar ai">AI</div><div class="bubble" style="max-width:100%"><p class="tiny route"><span class="mono">路由: 直答 <b style="color:var(--green)">0.83</b> / 调工具 0.09 / 起工作流 0.04 / 转@ 0.04</span> → 选定 <b style="color:var(--blue)">直答</b> <span class="mono dim">· 汇总 Agent · qwen3-coder-plus</span> <span class="btn link" style="padding:0" data-toast="决策微模型：按能力标签 + 置信路由四动作，阈值 0.60（与管控面同源）；本条走直答——进度数据已在平台索引内，无需调工具">决策微模型 ⓘ</span></p>
               都在「审核中」，明细如下：<table class="tbl compact" style="margin:6px 0 0"><thead><tr><th>对象</th><th>阶段 / 状态</th><th>负责人</th><th>备注</th></tr></thead><tbody>
@@ -167,7 +167,7 @@
               <span class="pill" data-click data-toast="附件演示：图片/文件单包 ≤10MB；文件名会净化（路径穿越被拦截）（演示）">🖼 截图 diff-2026-09.png</span>
               <span class="pill" data-click data-toast="附件演示：随下一条运行注入（演示）">📎 + 文件</span>
             </div>
-            <p class="tiny dim" style="margin:6px 0 0">挂了项目<b>只是给上下文</b>：会话仍不因此绑任务、<b>不因此自动建任务</b>（要成为工作项请去<a href="board.html" style="color:inherit">看板</a>手动建）。取消挂载 = 下一条起只带本条消息与会话历史，已产出的 run 不改写。</p></div>
+            <p class="tiny dim" style="margin:6px 0 0">挂了项目<b>只是给上下文</b>：会话仍不因此绑任务、<b>不因此自动建任务</b>（要成为任务请去<a href="board.html" style="color:inherit">看板</a>手动建）。取消挂载 = 下一条起只带本条消息与会话历史，已产出的 run 不改写。</p></div>
           <div id="pp-wrong" class="pop" style="min-width:300px;padding:6px"><p class="tiny dim" style="margin:0 0 4px"><b>▼ 把这条回复标为「不对」</b>　纠错即信号（S17）——<b>需人类角色发起</b>，Agent 不能自标；两动作都只产候选，不删消息、不改历史</p>
             <div class="cap-row" style="border-bottom:1px solid var(--border)" data-click data-autoclose data-toast="反思候选已生成并写入记忆层 L0 旁挂反思区（演示）：现象 = 本条回复 · 根因假设待人补 · 处置待人定——检索回流见 memory.html §3 失败反思区"><b class="small">✦ 生成反思候选（写入记忆层 L0 · 需人类角色发起）</b></div>
             <div class="cap-row" data-click data-autoclose data-toast="已转交决策样本队列（演示占位）：本条回复 + 路由分（调工具 0.90）成为「判对/判错」对照样本 · S19 决策模型微调管道见 decision-models.html"><b class="small">⚖ 转交决策样本队列（S19 · 见 decision-models）</b></div></div>

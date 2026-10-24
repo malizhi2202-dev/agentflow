@@ -7,7 +7,7 @@
 <span class="chip warn demo-badge">原型演示态 · 点击可交互 · 非真实系统行为 · <a href="../PRODUCT-DESIGN.html#p20" style="color:inherit">回文档</a></span>
 <div class="relbar"><span>相关页（同一 mock 宇宙）：</span><span class="pill" data-goto="inbox.html">收件箱</span><span class="pill" data-goto="replay.html">执行回放</span><span class="pill" data-goto="approvals.html">审批中心</span><span class="pill" data-goto="workbench.html">工作台</span></div>
 <p class="proto-note"><span class="chip warn">规划原型</span>对应 §1.6 <b>P1-4</b>：补齐协作层最小集。<b>负责人可以是人或 Agent</b>，这是与 Multica 对齐的关键一列；状态采用四类生命周期（未开始 / 进行中 / 完成 / 关闭），并遵守「<b>状态标签不授予行为</b>」——进入「进行中」不等于自动启动 Agent。<b>2026-09-22 补（S7）：状态与「待受理」为两根正交轴——前者答「到哪一步」、后者答「这算不算活」，受理门只拦自动推导执行者的运行、不拦人点名派发（multica 483 迁移的显式反悔教训）；完成态建议按 §1.6.5 ③ 加「需证据 + 同伴复核」。</b><b>此界面尚不存在</b>。</p><p class="tiny dim" style="padding:0 4px">〔09-23 裁定⑦注〕告警属可计量追踪数据——P1-16 落表的表建在 <b>MySQL</b>（告警表+去重键+保留策略列），与 work_item 族同库；进程内环形 500 条形态退役。</p>
-<p class="tiny dim" style="padding:0 4px">〔第 4 轮 schema 注〕目标两组表+一次并表（P1-16 前置）：work_item 单表含 status×triage 双轴、assignee 人/Agent 双轨（owner_id 保持归属语义不动）、done 附证据；运行经 work_item_runs 连接表挂多上下文。</p>
+<p class="tiny dim" style="padding:0 4px">〔第 4 轮 schema 注〕目标两组表+一次并表（P1-16 前置）：work_item 单表含 status×triage 双轴、assignee 人/Agent 双轨（owner_id 保持归属语义不动）<b>〔v14 扩为三轨 <span class="mono">member | agent | squad</span>：指派小队=给 leader 入队 leader 任务，成员不抢单〕</b>、done 附证据；运行经 work_item_runs 连接表挂多上下文。</p>
 <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/work-items</span><span class="fake">规划原型</span></div>
       <div class="app">

@@ -18,7 +18,7 @@
 | 竞品证据 | Dify workspace（E1）/ Langfuse org→project（E2）/ n8n projects（E3）/ K8s namespace（E4） | AutoGen team 预设（E5）/ CrewAI Crew+Process（E6）/ MAF 不用 team 一词（E7） |
 | 关键判读 | 四家全都**建了成员表**，无一家用视图代替（反 K11） | 没有一家把执行期协作组当**资产实体**：它是预设/策略，有状态、可 reset（E5） |
 
-**裁定 R1（一词一义）**：组织层叫 **Team（团队）**；执行层的「谁和谁协作」落为**编排实例上的协作预设字段**，词表钉死为 `pattern ∈ {single, sequential, concurrent, supervisor, group-chat, swarm}`（E5/E6/E7 三家的并集，且 MAF 明确不用 team 命名）。
+**裁定 R1（一词一义）** ⛔**〔已被 2026-10-23 用户裁定推翻：执行层不再落为 `pattern` 预设字段，Squad 升为可指派一等实体；「一词一义」本身仍成立——Team 与 Squad 仍是两个词两个实体，见页首修订行〕**：组织层叫 **Team（团队）**；执行层的「谁和谁协作」落为**编排实例上的协作预设字段**，词表钉死为 `pattern ∈ {single, sequential, concurrent, supervisor, group-chat, swarm}`（E5/E6/E7 三家的并集，且 MAF 明确不用 team 命名）。
 → 编排实例、画布、YAML、模板**不改名、不新建实体、不复用 Team 词**；文档与 UI 里凡「多 Agent 团队」一律改写为「协作预设 / Crew 拓扑」并在术语表加注。**这条是零成本裁定，可直接进文档层（解冻无关）。**
 
 以下 R2/R3 只谈 (a)。
@@ -31,7 +31,7 @@
 
 | 归类 | 实体 | 依据（file:line） | 团队化理由 / 不团队化理由 |
 |---|---|---|---|
-| ✅ 核心必进（R2 首批 5 类） | `agents` / `orchestration_instances` + `orchestration_templates` / `workflows`(+snapshots) / `tools` / `knowledge_sources`(+tags) | `agent.py:14`、`orchestration.py:14,54`、`workflow.py:12`、`tool.py:12`、`knowledge_source.py:16` | 全是 `owner_id` 单值 + `visibility='private'` 默认（`agent.py:33` 等 5 处）——用户「用哪些资源」的字面对象 |
+| ✅ 核心必进（R2 首批 5 类）⛔**〔清单已于 2026-10-23 专家团 3/3 收口：域进首批、编排实例与模板列次批；本行为历史清单，现行口径见页末尾注〕** | `agents` / `orchestration_instances` + `orchestration_templates` / `workflows`(+snapshots) / `tools` / `knowledge_sources`(+tags) | `agent.py:14`、`orchestration.py:14,54`、`workflow.py:12`、`tool.py:12`、`knowledge_source.py:16` | 全是 `owner_id` 单值 + `visibility='private'` 默认（`agent.py:33` 等 5 处）——用户「用哪些资源」的字面对象 |
 | ✅ 次批 | `domains` / `projects` / `custom_roles` / `scheduled_tasks` / `channel_configs` | `domain.py:13`、`project.py:12`、`role_custom.py:12`、`scheduled_task.py:18`、`channel_config.py:17` | Domain 需先重述语义（§2）；`custom_roles` 是 Agent 人设不是权限（§2 术语冲突）；渠道=对外出口，归属不清=冒名发言风险 |
 | ✅ 团队级配置（新建） | 模型凭据池（Provider Key）〔2026-10-15 裁撤：由运行时发现（外部 CLI）取代〕、`team_quota` + 用量账本、审批人解析规则 | 现状 Key 逐 Agent 存密文（`agent.py:21`）、token 限在 Agent 与实例两级（`agent.py:25-26`、`orchestration.py:24-25`）、审批人=单值 `owner_id`（`human_approval.py:14`） | Dify「App 继承 workspace 模型配置」+ n8n「凭据建在项目里」+ K8s「聚合配额 + 对象计数」（E1/E3/E4） |
 | ⛔ 归属不动、按 Team 汇聚 | `conversations` / `messages` / `agent_memories` / `agent_probes(_latest)` / `trace_spans` / `metrics_raw` | `conversation.py:14`、`metrics.py:15,41`、`orchestration.py:88-100` | 派生/观测数据：随父资源作用域自动可见，**加 team_id 只会造成双写不一致**；成本汇总走查询侧 |
