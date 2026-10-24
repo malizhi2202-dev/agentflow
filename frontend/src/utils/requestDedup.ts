@@ -75,10 +75,14 @@ function evictIfNeeded(): void {
  * 去重 fetch：同一 URL 的并发请求共享结果，5s 内重复请求返回缓存。
  */
 export function dedupedFetch(url: string, options?: RequestInit): Promise<Response> {
-  const key = canonicalUrl(url);
+  // 缓存键必须带 method：GET /api/tasks 与 POST /api/tasks 是两件事。
+  // 只用 URL 做键会让「写」命中「读」的缓存 → 写请求根本没发出去却返回成功（v20-ui-collab 用例抓到）。
+  const method = (options?.method || 'GET').toUpperCase();
+  const key = `${method} ${canonicalUrl(url)}`;
+  const cacheable = method === 'GET';
 
-  // 1. 查缓存（未过期）
-  const cached = cache.get(key);
+  // 1. 查缓存（未过期；只对 GET 生效）
+  const cached = cacheable ? cache.get(key) : undefined;
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     if (IS_DEV) console.debug(`[requestDedup] cache hit: ${key}`);
     return cached.promise.then(r => r.clone());
@@ -104,8 +108,10 @@ export function dedupedFetch(url: string, options?: RequestInit): Promise<Respon
   promise
     .then(() => {
       inFlight.delete(key);
-      cache.set(key, { promise, timestamp: Date.now() });
-      evictIfNeeded();
+      if (cacheable) {
+        cache.set(key, { promise, timestamp: Date.now() });
+        evictIfNeeded();
+      }
     })
     .catch(() => {
       inFlight.delete(key);
@@ -157,8 +163,10 @@ export async function safeFetch(
  */
 export function invalidateCache(url?: string): void {
   if (url) {
+    // 同一 URL 的读缓存与写条目一起失效（键已带 method 前缀）
     const key = canonicalUrl(url);
     cache.delete(key);
+    cache.delete(`GET ${key}`);
     if (IS_DEV) console.debug(`[requestDedup] cache invalidated: ${key}`);
   } else {
     cache.clear();

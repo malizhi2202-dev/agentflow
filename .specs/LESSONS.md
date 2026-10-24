@@ -113,3 +113,30 @@
 
 **何时可重新评估**
 环境变量集中到 `tests/__init__.py`（或 conftest）统一设置之后。
+
+---
+
+### L-005 · [tool] 请求去重的缓存键必须带 method，否则写请求命中读缓存
+
+- **首发**: `v20-ui-collab` · T-01/T-02 · 2026-10-24
+- **上次复核**: 2026-10-24
+- **适用栈**: frontend `src/utils/requestDedup.ts`（`dedupedFetch` / `safeFetch` / `invalidateCache`）
+- **状态**: active
+- **关键词**: 去重 缓存 GET POST 写请求静默失效 requestDedup clone
+
+**问题场景**
+页面「读列表 → 用户新建/改状态」是同一个 URL 的 GET 与 POST；两者相隔 5s 内（缓存 TTL）。
+
+**当时尝试的方案**
+`dedupedFetch` 用 `canonicalUrl(url)` 做 cache/in-flight 键，并且不分 method 一律进缓存。
+
+**为什么不行**
+`POST /api/tasks` 命中 `GET /api/tasks` 的缓存条目，**请求根本没发出**，却拿到一份列表响应并报告成功（`createTask` 认为建好了）。
+用例里表现为 `POST` 调用列表为空（`expected undefined to match object`）——这只有在「同 URL 的读写」时才炸，所以很容易漏到线上。
+
+**当前推荐做法**
+键 = `${method} ${canonicalUrl(url)}`；**只有 GET 进缓存**（写不缓存、也不复用 in-flight）；`invalidateCache(url)` 同时清 `url` 与 `GET url` 两种键。
+判据：任何「写接口与读接口同路径」的页面，都写一条「写入后 GET 次数增加」的用例。
+
+**何时可重新评估**
+换成 TanStack Query / SWR 等有 mutation 语义的库之后。

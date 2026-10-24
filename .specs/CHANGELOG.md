@@ -14,6 +14,7 @@
 | 2026-10-24 | `v20-wave6` | 波 6 RSI 治理：记忆四层晋升门 · 提案三权分离（探针不作发布依据）· 可改面 · 四熔断 + NOISE FLOOR | `64e44de6` | — |
 | 2026-10-24 | `v20-wave7` | 波 7 遗留项收口：A2A M0 静态卡 · 因果前缀 + 晋升评审账 + 防污染双扫 · 四类开关 · 归因双列 + 瀑布 fail-closed | `13faefbe` | L-001 |
 | 2026-10-24 | `doc-align-v20` | 文档归并：RULINGS/INDEX 建档、门面改齐、删 8 张孤儿原型页（135→127） | `fcc00645` | — |
+| 2026-10-24 | `v20-ui-collab` | 任务看板 + 收件箱接入界面（波 3 的表第一次上界面）；顺带修 `requestDedup` 缓存键缺 method 的写静默失效（L-005） | 见「feat(ui-collab)」提交 | L-005 |
 | 2026-10-24 | `v20-release` | **7-integration 收口**：S-align 首次对齐（`ALIGNMENT.md`）+ 8 份 SUMMARY + 程序级 UAT（8 条全绿）+ LESSONS L-001…L-004 + 本表；UAT 暴露并修掉 2 个已上线 bug（`/api/health` 500 · metrics_api 死代码）；README 端点/能力同步；P0-5 停止跟踪 node_modules/dist | 见「docs(closeout)」「chore(repo)」提交 | L-001…L-004 |
 
 ## 说明
