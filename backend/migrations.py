@@ -708,6 +708,28 @@ def m024_agent_tools(conn, dialect: str) -> None:
     create_index_if_missing(conn, dialect, "ix_agent_tools_tool", "agent_tools", "tool_id")
 
 
+def m019_decision_and_finetune(conn, dialect: str) -> None:
+    """决策模型登记 + 微调批次表（P4：小模型决策面）。
+
+    只加不删；bindings 用 TEXT 存 JSON 数组（方言无关）；健康态默认 `unprobed`——没探测过不写 healthy。
+    """
+    create_table_if_missing(conn, dialect, "decision_models",
+        f"id {_pk_clause(dialect)}, owner_id VARCHAR(64) NOT NULL, name VARCHAR(128) NOT NULL, "
+        "track VARCHAR(16) DEFAULT 'local', kind VARCHAR(64), health VARCHAR(16) DEFAULT 'unprobed', "
+        "latency_p95_ms INTEGER, threshold FLOAT DEFAULT 0.6, escalated INTEGER DEFAULT 0, "
+        "fallback INTEGER DEFAULT 0, bindings TEXT, enabled BOOLEAN DEFAULT 1, "
+        "created_at DATETIME, updated_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_decision_models_owner", "decision_models", "owner_id")
+
+    create_table_if_missing(conn, dialect, "finetune_batches",
+        f"id {_pk_clause(dialect)}, owner_id VARCHAR(64) NOT NULL, task_name VARCHAR(128) NOT NULL, "
+        "base_model VARCHAR(128), data_sessions INTEGER DEFAULT 0, data_memories INTEGER DEFAULT 0, "
+        "fingerprint VARCHAR(64), engine VARCHAR(128), hw_ok BOOLEAN DEFAULT 0, "
+        "status VARCHAR(24) DEFAULT 'draft', acc FLOAT, ece FLOAT, agree FLOAT, "
+        "gate_verdict VARCHAR(16) DEFAULT 'blocked', gate_reason TEXT, created_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_finetune_batches_owner", "finetune_batches", "owner_id")
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -727,6 +749,7 @@ MIGRATIONS: list[Migration] = [
     ("016_domain_attribution_policy", "域级 accountable 策略表（R8-2 剩余面）", m016_domain_attribution_policy),
     ("017_agent_prompt_fields", "Agent 人设三件落库（T-05）", m017_agent_prompt_fields),
     ("018_users_and_audit_tables", "用户档案与审计日志表化（裁定⑦收尾，T-07）", m018_users_and_audit_tables),
+    ("019_decision_and_finetune", "决策模型登记 + 微调批次（P4 小模型决策面）", m019_decision_and_finetune),
     ("019_runtime_registry", "运行时发现注册表（§6.28，daemon 上报机器×CLI×协议族）", m019_runtime_registry),
     ("020_tool_skill_files", "工具库多文件技能包（files_json，v23 multica 迁移）", m020_tool_skill_files),
     ("021_tool_skill_files_longtext", "技能文件包拓宽到 MEDIUMTEXT（>64KB 技能包，MySQL）", m021_tool_skill_files_longtext),

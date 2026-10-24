@@ -55,6 +55,7 @@ from models.collab import (  # noqa: E402, F401
     WorkItemSubscription,
 )
 from models.user import AppUser, AuditLog  # noqa: E402, F401
+from models.decision import DecisionModel, FinetuneBatch  # noqa: E402, F401
 from models.cluster import (  # noqa: E402, F401
     ClusterLease,
     RateLimitWindow,

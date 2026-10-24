@@ -57,3 +57,26 @@ SUMMARY 39/39 passed
 - v22 把页名移到壳层 crumb → 原 `getByRole('heading')` 断言改为 crumb 断言；
 - 登录页用户列表默认不公开 → 登录抽成 `login()` 并兼容「用户卡片 / 手填 ID」两形态；
 - E2E 默认解释器/库名指向旧 `/tmp` venv 与 `agentflow_e2e` → 改为持久 venv 与 `agentflow`。
+
+## P4 落地（2026-10-25）
+
+```text
+迁移 019（真 MySQL 已应用）：
+  decision_models：id/owner_id/name/track/kind/health/latency_p95_ms/threshold/escalated/fallback/bindings/enabled/...
+  finetune_batches：id/owner_id/task_name/base_model/data_sessions/data_memories/fingerprint/engine/hw_ok/status/acc/ece/agree/gate_verdict/gate_reason
+
+$ backend: unittest discover -s tests
+Ran 629 tests in 202.676s · OK (skipped=6)          （+12：决策模型 6 / 门禁 5 / 画像 1）
+
+$ frontend: npx vitest run
+Test Files 19 passed · Tests 177 passed                （+3 换成真后端断言）
+
+$ E2E_CLI=hermes bash scripts/e2e/run_e2e.sh
+SUMMARY 39/39 passed                                  （三页已从「规划原型」变真数据）
+```
+
+口径要点（都写进了代码注释与用例）：
+- **登记 ≠ 在用**：绑定默认全关（未绑定 ⇒ 直通）；`bindings` 落库。
+- **不假装健康**：健康态只有探测能改；无探测适配器时重探返回 `unprobed` + 明确 detail（fail-closed）。
+- **门禁在服务端**：硬件 → 准确率 → ECE 三段判定，前端只展示 verdict 与原因。
+- **环境参谋零执行**：只读本机画像（默认不上传），方案给 `why` + 可复制步骤，不代装/不代跑。

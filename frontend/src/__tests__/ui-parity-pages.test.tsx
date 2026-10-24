@@ -143,28 +143,119 @@ describe('对外集成（真数据）', () => {
   });
 });
 
-describe('规划原型页（必须显式声明未接入）', () => {
-  it.each([
-    ['决策模型目录', DecisionModels],
-    ['微调工厂', Finetune],
-    ['环境参谋', EnvAdvisor],
-  ])('%s 显示「后端未接入 + 示例数据」且不伪装真实态', (_label, Page) => {
-    render(<Page />);
-    expect(screen.getAllByText(/规划原型 · 后端未接入/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/示例数据（非真实运行状态）/)).toBeInTheDocument();
-  });
+describe('决策模型目录（P4 真后端）', () => {
+  const MODEL = {
+    id: 1, name: 'Jev-Style-Qwen3.5-2B', track: 'local', kind: 'Q4_K_M · 1.3GB',
+    health: 'unprobed', latency_p95_ms: null, threshold: 0.6, escalated: 0, fallback: 0,
+    bindings: [], enabled: true,
+  };
 
-  it('决策模型目录渲染用途绑定开关（默认关）与阈值信息', () => {
+  it('渲染模型并显示「未探测」；绑定默认全关', async () => {
+    mockApi({ 'GET /api/decision-models': { body: { models: [MODEL] } } });
     render(<DecisionModels />);
-    expect(screen.getByText('Jev-Style-Qwen3.5-2B')).toBeInTheDocument();
-    expect(screen.getByLabelText('Jev-Style-Qwen3.5-2B 路由决策')).toBeInTheDocument();
-    expect(screen.getByText(/阈值 0.60/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Jev-Style-Qwen3.5-2B')).toBeInTheDocument());
+    expect(screen.getByText('未探测')).toBeInTheDocument();
+    const box = screen.getByLabelText('Jev-Style-Qwen3.5-2B 路由决策') as HTMLInputElement;
+    expect(box.checked).toBe(false);
+    expect(screen.getByText(/阈值 0.6/)).toBeInTheDocument();
   });
 
-  it('微调工厂区分「过门槛」与「禁止切产」两态', () => {
+  it('打开绑定开关 → POST /bindings（真实端点）', async () => {
+    const calls = mockApi({
+      'GET /api/decision-models': { body: { models: [MODEL] } },
+      'POST /api/decision-models/1/bindings': { body: { ok: true, model: MODEL } },
+    });
+    render(<DecisionModels />);
+    await waitFor(() => expect(screen.getByLabelText('Jev-Style-Qwen3.5-2B 路由决策')).toBeInTheDocument());
+    fireEvent.click(screen.getByLabelText('Jev-Style-Qwen3.5-2B 路由决策'));
+    await waitFor(() => {
+      const post = calls.find((c) => c.url === '/api/decision-models/1/bindings');
+      expect(post?.body).toEqual({ binding: 'route', enabled: true });
+    });
+  });
+
+  it('重探返回 unprobed 时把「未配置探测适配器」原样告诉用户', async () => {
+    mockApi({
+      'GET /api/decision-models': { body: { models: [MODEL] } },
+      'POST /api/decision-models/1/reprobe': {
+        body: { ok: true, model: MODEL, health: 'unprobed', detail: '未配置探测适配器：健康态保持 unprobed' },
+      },
+    });
+    render(<DecisionModels />);
+    await waitFor(() => expect(screen.getByText('重探')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('重探'));
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent(/未配置探测适配器/));
+  });
+
+  it('空列表给出「登记 ≠ 在用」的引导', async () => {
+    mockApi({ 'GET /api/decision-models': { body: { models: [] } } });
+    render(<DecisionModels />);
+    await waitFor(() => expect(screen.getByText(/还没有登记模型/)).toBeInTheDocument());
+    expect(screen.getByText(/绑定开关决定它是否真的参与路由/)).toBeInTheDocument();
+  });
+});
+
+describe('微调工厂（P4 真后端 · 门禁由服务端判定）', () => {
+  const BATCH = (over: any = {}) => ({
+    id: 1, task_name: 'dept-router-v3-ft', base_model: 'Qwen3.5-2B · LoRA r16',
+    data_sessions: 412, data_memories: 88, fingerprint: 'a91f', engine: 'llama-factory',
+    hw_ok: true, status: 'done', acc: 79.4, ece: 0.061, agree: 91,
+    gate_verdict: 'blocked', gate_reason: 'ECE 0.061 > 门槛 0.050 · 服务端拒绝（AC-C2）', ...over,
+  });
+
+  it('如实展示「禁止切产」与原因', async () => {
+    mockApi({ 'GET /api/decision-models/finetune/batches': { body: { batches: [BATCH()] } } });
     render(<Finetune />);
-    expect(screen.getByText('切生产')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('dept-router-v3-ft')).toBeInTheDocument());
     expect(screen.getByText('禁止切产')).toBeInTheDocument();
-    expect(screen.getByText(/ECE 0.061 > 门槛 0.05/)).toBeInTheDocument();
+    expect(screen.getByText(/ECE 0.061 > 门槛 0.050/)).toBeInTheDocument();
+  });
+
+  it('过门槛显示「切生产」', async () => {
+    mockApi({ 'GET /api/decision-models/finetune/batches': { body: { batches: [BATCH({ id: 2, task_name: 'v4', acc: 83.1, ece: 0.023, gate_verdict: 'promote', gate_reason: '过门槛 · 血缘可回滚' })] } } });
+    render(<Finetune />);
+    await waitFor(() => expect(screen.getByText('切生产')).toBeInTheDocument());
+    expect(screen.getByText(/过门槛/)).toBeInTheDocument();
+  });
+
+  it('登记批次 POST 到真端点（指标留空 → 交给服务端判定）', async () => {
+    const calls = mockApi({
+      'GET /api/decision-models/finetune/batches': { body: { batches: [] } },
+      'POST /api/decision-models/finetune/batches': { body: { ok: true, batch: BATCH({ acc: null, ece: null, gate_reason: '缺三指标自测' }) } },
+    });
+    render(<Finetune />);
+    await waitFor(() => expect(screen.getByLabelText('任务名')).toBeInTheDocument());
+    fireEvent.change(screen.getByLabelText('任务名'), { target: { value: 'new-ft' } });
+    fireEvent.click(screen.getByText('登记批次'));
+    await waitFor(() => {
+      const post = calls.find((c) => c.method === 'POST');
+      expect(post?.body?.task_name).toBe('new-ft');
+      expect(post?.body?.hw_ok).toBe(true);
+    });
+  });
+});
+
+describe('环境参谋（P4 真后端）', () => {
+  const ADVISOR = {
+    profile: {
+      platform: 'Linux 6.8', arch: 'x86_64', cpu_count: 8, mem_total_gb: 31.2, disk_free_gb: 120.5,
+      accelerator: { cuda: false, metal: false, vulkan: false },
+      note: '画像只读本机信息，默认不上传；平台零执行（命令可复制，不代跑）',
+    },
+    plans: [{
+      layer: 'L2 · 跨平台稳妥', engine: 'llama.cpp', model: 'Qwen3.5-2B · Q8_0',
+      ability: { inference: true, finetune: false }, disk_gb: 2.1,
+      latency_hint: '~110ms', why: 'CPU 也能跑', steps: ['安装 llama.cpp'],
+    }],
+  };
+
+  it('渲染画像与方案；「为什么」与「不代执行」都可见', async () => {
+    mockApi({ 'GET /api/decision-models/advisor': { body: ADVISOR } });
+    render(<EnvAdvisor />);
+    await waitFor(() => expect(screen.getByText(/Linux 6.8/)).toBeInTheDocument());
+    expect(screen.getAllByText(/默认不上传/).length).toBeGreaterThan(0);
+    expect(screen.getByText('L2 · 跨平台稳妥')).toBeInTheDocument();
+    expect(screen.getByText('CPU 也能跑')).toBeInTheDocument();
+    expect(screen.getByLabelText('已确认 安装 llama.cpp')).toBeInTheDocument();
   });
 });

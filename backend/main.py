@@ -47,6 +47,7 @@ from routes.execution_api import router as execution_router
 from routes.rsi_api import router as rsi_router
 from routes.a2a_api import router as a2a_router
 from routes.automations_api import router as automations_router
+from routes.decision_api import router as decision_router
 
 
 async def _l0_extract_loop():
@@ -461,6 +462,7 @@ app.include_router(execution_router)
 app.include_router(rsi_router)
 app.include_router(a2a_router)
 app.include_router(automations_router)
+app.include_router(decision_router)
 
 # CORS 必须**最后**加（Starlette 的 add_middleware 头插 → 最后注册 = 最外层）：
 # 这样来源闸门/认证返回的 403/401 与预检响应都带 CORS 头（P0-3 AC-3.3）。

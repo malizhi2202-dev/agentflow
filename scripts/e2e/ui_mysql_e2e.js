@@ -189,7 +189,7 @@ async function auditA11y(page, label) {
   // ---- ui-parity 新页族：8 页可达 + 各自 a11y（用户要求「全量对齐」后的回归入口）----
   const NEW_PAGES = [
     ['阶段模型配置', /阶段表（唯一事实源）/],
-    ['决策模型目录', /规划原型 · 后端未接入/],
+    ['决策模型目录', /未绑定 ⇒ 直通/],
     ['微调工厂', /训练批次/],
     ['执行隔离', /档位清单/],
     ['对外集成', /消息渠道（六通道）/],
@@ -301,7 +301,16 @@ async function auditA11y(page, label) {
   await page.locator('#p-surface').selectOption(`agent-config-${stamp}`);
   await page.getByLabel('目标路径').fill('prompts/persona.md');
   await page.getByRole('button', { name: '创建提案' }).click();
-  await page.getByText(`MySQL 提案 ${stamp}`).waitFor({ timeout: 20000 });
+  try {
+    await page.getByText(`MySQL 提案 ${stamp}`).waitFor({ timeout: 20000 });
+  } catch (e) {
+    const alerts = await page.getByRole('alert').allTextContents().catch(() => []);
+    const disabled = await page.getByRole('button', { name: '创建提案' }).isDisabled().catch(() => null);
+    const surfaces = await page.locator('#p-surface option').allTextContents().catch(() => []);
+    console.error('DIAG 提案创建失败 alerts=', JSON.stringify(alerts), 'btnDisabled=', disabled,
+                  'surfaceOptions=', JSON.stringify(surfaces).slice(0, 200));
+    throw e;
+  }
 
   // 库里可能残留历史提案卡片 → 一律限定在本次提案的 article 内，避免 strict mode 撞车
   const pcard = page.getByRole('article', { name: `提案 MySQL 提案 ${stamp}` });
