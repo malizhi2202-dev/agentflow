@@ -28,3 +28,17 @@
 ## 四、裁决
 
 **功能轮通过**（构建 + 回归双绿、diff 未越界、遗留项已登记）。可提交。
+
+---
+
+## 五、P0-8 追加复审（T-06）
+
+| 维度 | 结论 | 依据 |
+|---|---|---|
+| 失败语义翻转 | ✅ 旧「静默跳过」→ 新「失败即抛 + 不落账」 | `test_failure_is_not_recorded` |
+| 幂等 | ✅ 重跑 `[]`、账本行数不变 | `test_idempotent_second_run` |
+| 新库/老库同路径 | ✅ 幂等基元「先查后改」，不写分支 | `test_fresh_db_applies_all` + `test_legacy_db_expands` |
+| 方言正确性 | ✅ 显式传 `dialect`，不按连接类名猜 | `test_works_through_proxy_connection`（代理对象） |
+| 依赖 | ✅ 纯标准库；未引入 Alembic | `requirements.txt` diff 空 |
+| 只增不减 | ✅ 5 个迁移全为 expand（加列/建表/建索引） | `MIGRATIONS` 清单 |
+| 遗留 | ⚠ MySQL 端到端未验（本机无依赖）；MySQL 建表未写外键约束（SQLite 的 inline REFERENCES 在 MySQL 无效），靠应用层 | 已在 REVIEW 明写 |

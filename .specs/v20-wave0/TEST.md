@@ -47,3 +47,24 @@ $ npm test
 - **后端未改动** → 未跑 `pytest`。理由：本次 diff 零 `backend/` 文件（`git diff --name-only` 已比对）。
 - **未新增前端用例**：本次是编译期修复，行为等价；既有 52 用例即回归网。若日后补 `role_def/system_prompt` 落库（T-05），那一波必须补「保存→刷新→仍在」的用例。
 - **构建产物未入库**：`frontend/dist/` 与 `node_modules/.vite/` 的改动已 `git checkout --` 还原（生成物不入提交；`dist` 被 git 跟踪本身属 P0-5 仓库卫生待办）。
+
+---
+
+## 四、P0-8 迁移账本（T-06 · 追加）
+
+```
+$ cd backend && python3 -m unittest tests.test_migrations -v
+test_failure_is_not_recorded ... ok       # 抛错不高账（旧实现是静默跳过）
+test_fresh_db_applies_all ... ok          # 新库：5 个迁移全应用 + 账本 5 行 + 表真存在
+test_idempotent_second_run ... ok         # 重跑返回 []，账本行数不变
+test_legacy_db_expands ... ok             # 老库：domain_id/status/file_path 三列被补
+test_pending_then_empty ... ok
+test_works_through_proxy_connection ... ok  # 代理连接（模拟 engine.raw_connection）也走通
+Ran 6 tests in 0.09s — OK
+```
+
+`python3 -m py_compile backend/database.py backend/migrations.py` → 通过。
+
+**未覆盖（诚实）**：`database.init_db()` 的真实调用需要 SQLAlchemy，本机装不上（PyPI 超时、仓库无 venv），
+故 `create_all → apply_migrations` 的端到端链路未实跑；已用「代理连接」用例把最容易错的方言判定钉死。
+依赖可用时补一条 `init_db()` 冒烟即可。

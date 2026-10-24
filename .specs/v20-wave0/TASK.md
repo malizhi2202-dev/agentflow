@@ -36,3 +36,13 @@
   - 但 `frontend/src/pages/AgentDetail.tsx:19,262,266` 在编辑并提交这三个字段 → **用户改了会静默丢失**
 - **处置**：本 change 只把类型标注为可选（`T-01`），**不落库、不迁移**；缺陷进 `TASK.md` 待下一波（Agent 能力/指令轮）按 `expand/contract` 补列 + 白名单 + 序列化 + 迁移。
 - **理由**：改 schema 需 model+migration+API+UI 同批验证，属独立 task；混进「构建修复」会让波 0 无法一小时验收。
+
+---
+
+## T-06 / P0-8 版本化迁移账本（2026-10-24 续）
+
+- **问题**：`init_db()` 里 5 段内联迁移——无版本账本、无回滚、**失败静默**（`except Exception: print(跳过)`）、仅 SQLite 生效。
+- **files**：`backend/migrations.py`（新）、`backend/database.py`、`backend/tests/test_migrations.py`（新）
+- **do**：账本表 `schema_migrations(version PK, description, applied_at)`；迁移为**幂等函数**（先查后改），新库/老库同一路径；只做 expand；**失败即抛**；方言**显式传入**（不按连接类名猜——SQLAlchemy `raw_connection()` 是代理对象）。
+- **verify**：`python3 -m unittest tests.test_migrations -v` → 6 用例全绿；`py_compile database.py migrations.py` 通过。
+- **不做**：不引 Alembic、不加依赖、不做 down 迁移（本仓只增不减）；真正的 MySQL 端到端验证等依赖可用时补。
