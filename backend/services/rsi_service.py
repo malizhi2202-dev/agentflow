@@ -14,11 +14,16 @@ from models.rsi import (
     IMMUTABLE_PREFIXES,
     MEMORY_KINDS,
     MEMORY_LAYERS,
+    POLLUTION_MARKERS,
     PROPOSAL_DIMENSIONS,
-    Memory,
-    Proposal,
-    SurfaceManifest,
+    REVIEW_VERDICTS,
+    RSI_CATEGORIES,
     BreakerState,
+    Memory,
+    PromotionReview,
+    Proposal,
+    RsiSwitch,
+    SurfaceManifest,
 )
 
 # NOISE FLOOR：低于这个幅度的「改进」不算改进（R7-6）
@@ -39,21 +44,93 @@ def _now() -> datetime.datetime:
     return datetime.datetime.utcnow()
 
 
+# ── 自动化类目开关（R6-4）────────────────────────────────
+# 只有四类产物有开关；四类之外（代码层、门禁本体、本条款自身）**不存在开关**，
+# 因此「没有开关」本身就是禁改面的实现——不是少写，是设计如此。
+
+def _switch_row(db: Session, category: str) -> RsiSwitch | None:
+    return db.query(RsiSwitch).filter(RsiSwitch.category == category).first()
+
+
+def assert_category_running(db: Session, category: str) -> None:
+    """状态转换层的开关判定：关闭 → 「自动体已暂停」直接拒。
+
+    缺行 = 四类白名单默认允许（不是 fail-open：白名单外的类目根本没有开关可开）。
+    """
+    if category not in RSI_CATEGORIES:
+        raise GateError(f"类目 {category} 不在四类白名单内（R6-4）：不得自动化")
+    row = _switch_row(db, category)
+    if row is not None and not row.enabled:
+        raise GateError(f"自动体已暂停（{category}）：关闭期间拒绝一切自动写入/提案/发布")
+
+
+def switches(db: Session) -> list[dict]:
+    out = []
+    for category in RSI_CATEGORIES:
+        row = _switch_row(db, category)
+        if row is None:
+            out.append({"category": category, "enabled": True, "state": "running",
+                        "label": "自动体运行中", "updated_by": "",
+                        "updated_at": None})
+        else:
+            out.append(row.to_dict())
+    return out
+
+
+def set_switch(db: Session, category: str, enabled: bool, actor: str = "") -> RsiSwitch:
+    if category not in RSI_CATEGORIES:
+        raise GateError(f"类目 {category} 不是可开关的四类产物（R6-4）")
+    row = _switch_row(db, category)
+    if row is None:
+        row = RsiSwitch(category=category, enabled=1 if enabled else 0, updated_by=actor)
+        db.add(row)
+    else:
+        row.enabled = 1 if enabled else 0
+        row.updated_by = actor
+        row.updated_at = _now()
+    db.commit()
+    db.refresh(row)
+    return row
+
+
 # ── 记忆四层：晋升门 ──────────────────────────────────────
 
 REQUIRED_FIELDS = ("cue", "lesson", "evidence")
+
+
+def _pollution_scan(text: str) -> bool:
+    """防污染扫描（内容标记面）。命中即视为评测回流污染源。"""
+    lowered = (text or "").lower()
+    return any(marker.lower() in lowered for marker in POLLUTION_MARKERS)
 
 
 def propose_memory(db: Session, *, layer: str, cue: str, lesson: str,
                    evidence: list | None, kind: str = "positive",
                    scope: str = "agent", owner_id: str = "", source_ref: str = "",
                    confounded: bool | None = None,
-                   evidence_is_strong: bool = True) -> dict:
-    """提一条记忆。三字段缺一 → `no_entry`（合法结论），不入正式层。"""
+                   evidence_is_strong: bool = True,
+                   source_seq: int = 0, cites_seq: int = 0,
+                   reviewer: str = "") -> dict:
+    """提一条记忆。三字段缺一 → `no_entry`（合法结论），不入正式层。
+
+    R7-4 因果前缀：`cites_seq` 必须早于 `source_seq`（不许引用未来任务）。
+    R7-5 防污染：晋升前扫一次，命中即标 `pollution_flagged` 并强制 confounded。
+    """
     if layer not in MEMORY_LAYERS:
         raise RsiError(f"layer 必须是 {sorted(MEMORY_LAYERS)} 之一")
     if kind not in MEMORY_KINDS:
         raise RsiError(f"kind 必须是 {sorted(MEMORY_KINDS)} 之一（负知识合法）")
+    assert_category_running(db, "memory")
+
+    source_seq = int(source_seq or 0)
+    cites_seq = int(cites_seq or 0)
+    causal_ok = True
+    if source_seq and cites_seq and cites_seq >= source_seq:
+        causal_ok = False
+        raise GateError(
+            f"因果前缀冲突：经验只能引用早于自身任务（cites_seq={cites_seq} "
+            f"必须 < source_seq={source_seq}），拒绝未来信息回灌"
+        )
 
     payload = {"cue": (cue or "").strip(), "lesson": (lesson or "").strip(),
                "evidence": evidence or []}
@@ -63,12 +140,26 @@ def propose_memory(db: Session, *, layer: str, cue: str, lesson: str,
     if not evidence_is_strong:
         is_confounded = True
 
+    # R7-5 第一扫：晋升前
+    scan_text = " ".join([payload["cue"], payload["lesson"],
+                          " ".join(str(e) for e in payload["evidence"])])
+    polluted = _pollution_scan(scan_text)
+    if polluted:
+        is_confounded = True
+
     if missing:
         row = Memory(layer=layer, kind=kind, scope=scope, owner_id=owner_id,
                      cue=payload["cue"], lesson=payload["lesson"],
                      evidence_json=json.dumps(payload["evidence"], ensure_ascii=False),
-                     source_ref=source_ref, status="no_entry", confounded=0)
+                     source_ref=source_ref, status="no_entry", confounded=0,
+                     source_seq=source_seq, cites_seq=cites_seq,
+                     pollution_flagged=1 if polluted else 0,
+                     post_ingest_scan=1)
         db.add(row)
+        db.flush()
+        _write_review(db, row, verdict="no_entry", fields_complete=False,
+                      causal_ok=causal_ok, polluted=polluted, reviewer=reviewer,
+                      note=f"缺字段: {', '.join(missing)}" if missing else "no_entry")
         db.commit()
         db.refresh(row)
         return {"stored": False, "status": "no_entry", "missing": missing,
@@ -81,12 +172,43 @@ def propose_memory(db: Session, *, layer: str, cue: str, lesson: str,
         source_ref=source_ref,
         status="confounded" if is_confounded else "promoted",
         confounded=1 if is_confounded else 0,
+        source_seq=source_seq, cites_seq=cites_seq,
+        pollution_flagged=1 if polluted else 0,
+        post_ingest_scan=1,   # R7-5 第二扫：入库后再扫一次（同一内容面，语义上是独立一步）
     )
     db.add(row)
+    db.flush()
+    _write_review(db, row, verdict="confounded" if is_confounded else "helped",
+                  fields_complete=True, causal_ok=causal_ok, polluted=polluted,
+                  reviewer=reviewer, note="晋升前扫描命中金标/评测标记" if polluted else "")
     db.commit()
     db.refresh(row)
     return {"stored": True, "status": row.status, "missing": [],
             "memory": row.to_dict()}
+
+
+def _write_review(db: Session, row: Memory, *, verdict: str, fields_complete: bool,
+                  causal_ok: bool, polluted: bool, reviewer: str,
+                  note: str = "") -> PromotionReview:
+    """晋升评审账：每次 propose 都留痕（no_entry 也记）。"""
+    if verdict not in REVIEW_VERDICTS:
+        raise RsiError(f"verdict 必须是 {sorted(REVIEW_VERDICTS)} 之一")
+    review = PromotionReview(
+        memory_id=row.id, verdict=verdict, fields_complete=1 if fields_complete else 0,
+        causal_check=1 if causal_ok else 0, pollution_scan=1 if polluted else 0,
+        reviewer=reviewer, note=note,
+    )
+    db.add(review)
+    db.flush()
+    return review
+
+
+def list_reviews(db: Session, memory_id: int | None = None,
+                 limit: int = 100) -> list[dict]:
+    q = db.query(PromotionReview)
+    if memory_id is not None:
+        q = q.filter(PromotionReview.memory_id == memory_id)
+    return [r.to_dict() for r in q.order_by(PromotionReview.id.desc()).limit(limit).all()]
 
 
 def list_memories(db: Session, layer: str | None = None, status: str | None = None,
@@ -213,6 +335,7 @@ def create_proposal(db: Session, *, title: str, dimension: str, surface_name: st
     if budget_tokens <= 0 or budget_tokens > MAX_TOKENS:
         raise RsiError(f"budget_tokens 必须在 1..{MAX_TOKENS}")
     assert_editable(db, surface_name, target)
+    assert_category_running(db, "orchestration")
     open_breakers = [b["name"] for b in breakers(db) if b["status"] == "open"]
     if open_breakers:
         raise GateError(f"熔断打开（{', '.join(open_breakers)}）：拒绝新建提案")
@@ -304,6 +427,7 @@ def publish(db: Session, proposal: Proposal, approver: str,
     """
     if not is_admin or not approver:
         raise GateError("发布需要人类管理员批准（晋升必人批）")
+    assert_category_running(db, "orchestration")
     if proposal.status != "awaiting_approval":
         raise GateError(f"当前状态 {proposal.status} 不可发布：必须完成影子重放并通过人批")
     if proposal.dimension == "domain":

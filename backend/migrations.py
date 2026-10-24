@@ -488,6 +488,46 @@ def m012_declarative_api(conn, dialect: str) -> None:
 
 
 
+def m015_attribution_columns(conn, dialect: str) -> None:
+    """R8-2：任务与运行各加归因双列（originator 只鉴权 / accountable 只审计成本）。
+
+    存量**零回填**：老行两列为空串，表示「历史数据未归因」——不猜、不拿 creator 顶替。
+    """
+    for table in ("work_items", "work_item_runs"):
+        add_column_if_missing(conn, dialect, table, "originator_id", "VARCHAR(64) DEFAULT ''")
+        add_column_if_missing(conn, dialect, table, "accountable_id", "VARCHAR(64) DEFAULT ''")
+        create_index_if_missing(conn, dialect, f"ix_{table}_originator_id",
+                                table, "originator_id")
+        create_index_if_missing(conn, dialect, f"ix_{table}_accountable_id",
+                                table, "accountable_id")
+
+
+def m014_rsi_review_and_switches(conn, dialect: str) -> None:
+    """R7-4/R7-5/R6-4：记忆补四列（因果前缀 + 防污染）+ 晋升评审账 + 类目开关。"""
+    pk = _pk_clause(dialect)
+    for column, ddl in (
+        ("source_seq", "INTEGER DEFAULT 0"),
+        ("cites_seq", "INTEGER DEFAULT 0"),
+        ("pollution_flagged", "INTEGER DEFAULT 0"),
+        ("post_ingest_scan", "INTEGER DEFAULT 0"),
+    ):
+        add_column_if_missing(conn, dialect, "memories", column, ddl)
+
+    create_table_if_missing(conn, dialect, "promotion_reviews",
+        f"id {pk}, memory_id INTEGER NOT NULL, verdict VARCHAR(16) DEFAULT 'no_entry', "
+        "fields_complete INTEGER DEFAULT 0, causal_check INTEGER DEFAULT 1, "
+        "pollution_scan INTEGER DEFAULT 0, reviewer VARCHAR(64), note TEXT, "
+        "created_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_promotion_reviews_memory_id",
+                            "promotion_reviews", "memory_id")
+    create_index_if_missing(conn, dialect, "ix_promotion_reviews_verdict",
+                            "promotion_reviews", "verdict")
+
+    create_table_if_missing(conn, dialect, "rsi_switches",
+        "category VARCHAR(16) PRIMARY KEY, enabled INTEGER DEFAULT 1, "
+        "updated_by VARCHAR(64), updated_at DATETIME")
+
+
 def m013_rsi_governance(conn, dialect: str) -> None:
     """R6/R7：记忆四层 / 提案 / 可改面 / 熔断四表。"""
     pk = _pk_clause(dialect)
@@ -549,6 +589,8 @@ MIGRATIONS: list[Migration] = [
     ("011_trace_spans_observability", "trace_spans 父子链与产端字段（P2-4）", m011_trace_spans_observability),
     ("012_declarative_api", "change_log 单账本 + resource_conditions（P2-5）", m012_declarative_api),
     ("013_rsi_governance", "记忆四层/提案/可改面/熔断四表（R6/R7）", m013_rsi_governance),
+    ("014_rsi_review_and_switches", "记忆因果前缀/防污染 + 晋升评审账 + 类目开关（R6-4/R7-4/R7-5）", m014_rsi_review_and_switches),
+    ("015_attribution_columns", "任务/运行归因双列 originator⟂accountable（R8-2）", m015_attribution_columns),
 ]
 
 

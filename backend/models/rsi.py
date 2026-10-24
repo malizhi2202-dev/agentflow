@@ -23,6 +23,16 @@ MEMORY_KINDS: frozenset[str] = frozenset({"positive", "negative"})   # 负知识
 MEMORY_STATUSES: frozenset[str] = frozenset(
     {"promoted", "confounded", "quarantined", "no_entry"}
 )
+# R7-4 verdict 词表封闭（helped / hurt / no-effect / confounded 默认 / no_entry 合法）
+REVIEW_VERDICTS: frozenset[str] = frozenset(
+    {"helped", "hurt", "no_effect", "confounded", "no_entry"}
+)
+# R6-4：只有这四类产物允许自动化；四类之外（含代码层与门禁本体）没有开关
+RSI_CATEGORIES: tuple[str, ...] = ("memory", "skill", "orchestration", "model")
+# R7-5 防污染标记：评测回流内容的词面绊线（内容标记 + 路径双扫的第一道）
+POLLUTION_MARKERS: tuple[str, ...] = (
+    "golden", "golden_set", "金标", "benchmark", "eval_set", "评测集", "test_case_expected",
+)
 PROPOSAL_DIMENSIONS: frozenset[str] = frozenset({"invariant", "domain"})
 PROPOSAL_STATUSES: frozenset[str] = frozenset(
     {"generated", "probed", "shadowing", "awaiting_approval", "published",
@@ -49,6 +59,13 @@ class Memory(Base):
     source_ref: Mapped[str] = mapped_column(String(256), default="", index=True)
     status: Mapped[str] = mapped_column(String(16), default="no_entry", index=True)
     confounded: Mapped[int] = mapped_column(Integer, default=0)
+    # R7-4 因果前缀：source_seq=本条经验所属任务序号；cites_seq=它引用到的最大任务序号
+    # 规则：cites_seq 必须早于 source_seq（不许引用未来任务，防未来信息回灌）
+    source_seq: Mapped[int] = mapped_column(Integer, default=0)
+    cites_seq: Mapped[int] = mapped_column(Integer, default=0)
+    # R7-5 防污染：晋升前扫命中 → 标记并强制 confounded；入库后再扫一次记 post_ingest_scan
+    pollution_flagged: Mapped[int] = mapped_column(Integer, default=0)
+    post_ingest_scan: Mapped[int] = mapped_column(Integer, default=0)
     decay_score: Mapped[float] = mapped_column(Integer, default=100)
     last_used_at: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -63,7 +80,11 @@ class Memory(Base):
             "owner_id": self.owner_id, "cue": self.cue, "lesson": self.lesson,
             "evidence": json.loads(self.evidence_json or "[]"),
             "source_ref": self.source_ref, "status": self.status,
-            "confounded": bool(self.confounded), "decay_score": self.decay_score,
+            "confounded": bool(self.confounded),
+            "source_seq": self.source_seq, "cites_seq": self.cites_seq,
+            "pollution_flagged": bool(self.pollution_flagged),
+            "post_ingest_scan": bool(self.post_ingest_scan),
+            "decay_score": self.decay_score,
             "last_used_at": self.last_used_at.isoformat() if self.last_used_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
@@ -137,6 +158,56 @@ class SurfaceManifest(Base):
             "immutable": list(IMMUTABLE_PREFIXES),
             "owner_id": self.owner_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class PromotionReview(Base):
+    """晋升评审账（R7-4/R7-5）：每次 propose 都落一行，`no_entry` 也记（记统计不记失败）。"""
+
+    __tablename__ = "promotion_reviews"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    memory_id: Mapped[int] = mapped_column(Integer, index=True)
+    verdict: Mapped[str] = mapped_column(String(16), default="no_entry", index=True)
+    fields_complete: Mapped[int] = mapped_column(Integer, default=0)
+    causal_check: Mapped[int] = mapped_column(Integer, default=1)
+    pollution_scan: Mapped[int] = mapped_column(Integer, default=0)
+    reviewer: Mapped[str] = mapped_column(String(64), default="")
+    note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.utcnow
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id, "memory_id": self.memory_id, "verdict": self.verdict,
+            "fields_complete": bool(self.fields_complete),
+            "causal_check": bool(self.causal_check),
+            "pollution_scan": bool(self.pollution_scan),
+            "reviewer": self.reviewer, "note": self.note,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class RsiSwitch(Base):
+    """自动化类目开关（R6-4）。**关闭 = 自动体已暂停**；四类之外不存在开关。"""
+
+    __tablename__ = "rsi_switches"
+
+    category: Mapped[str] = mapped_column(String(16), primary_key=True)
+    enabled: Mapped[int] = mapped_column(Integer, default=1)
+    updated_by: Mapped[str] = mapped_column(String(64), default="")
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.utcnow
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            "category": self.category, "enabled": bool(self.enabled),
+            "state": "running" if self.enabled else "paused",
+            "label": "自动体已暂停" if not self.enabled else "自动体运行中",
+            "updated_by": self.updated_by,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
 
 

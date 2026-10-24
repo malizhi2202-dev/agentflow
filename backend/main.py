@@ -43,6 +43,7 @@ from routes.prom_metrics import router as prom_metrics_router
 from routes.watch_api import router as watch_router
 from routes.execution_api import router as execution_router
 from routes.rsi_api import router as rsi_router
+from routes.a2a_api import router as a2a_router
 
 
 async def _cron_scheduler_loop():
@@ -404,6 +405,7 @@ app.include_router(prom_metrics_router)
 app.include_router(watch_router)
 app.include_router(execution_router)
 app.include_router(rsi_router)
+app.include_router(a2a_router)
 
 # CORS 必须**最后**加（Starlette 的 add_middleware 头插 → 最后注册 = 最外层）：
 # 这样来源闸门/认证返回的 403/401 与预检响应都带 CORS 头（P0-3 AC-3.3）。

@@ -8,9 +8,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from auth import is_admin
+from auth import is_admin, write_audit
 from database import get_db
-from models.rsi import Proposal, SurfaceManifest
+from models.rsi import RSI_CATEGORIES, Proposal, SurfaceManifest
 from services import rsi_service as rsi
 
 router = APIRouter(prefix="/api/rsi", tags=["rsi"])
@@ -59,6 +59,9 @@ def propose_memory(payload: dict, request: Request, db: Session = Depends(get_db
             owner_id=user["id"], source_ref=payload.get("source_ref", ""),
             confounded=payload.get("confounded"),
             evidence_is_strong=bool(payload.get("evidence_is_strong", True)),
+            source_seq=int(payload.get("source_seq", 0) or 0),
+            cites_seq=int(payload.get("cites_seq", 0) or 0),
+            reviewer=user["id"],
         )
     except Exception as e:  # noqa: BLE001
         _map(e)
@@ -101,6 +104,43 @@ def create_surface(payload: dict, request: Request, db: Session = Depends(get_db
     except Exception as e:  # noqa: BLE001
         _map(e)
     return {"ok": True, "surface": row.to_dict()}
+
+
+# ── 自动化类目开关（R6-4）────────────────────────────────
+
+@router.get("/switches")
+def list_switches(request: Request, db: Session = Depends(get_db)):
+    _user(request)
+    return {"switches": rsi.switches(db), "categories": list(RSI_CATEGORIES)}
+
+
+@router.post("/switches/{category}")
+def set_switch(category: str, payload: dict, request: Request,
+               db: Session = Depends(get_db)):
+    user = _user(request)
+    if not is_admin(user):
+        raise HTTPException(status_code=403, detail="只有管理员可以暂停/恢复自动体")
+    enabled = bool(payload.get("enabled", False))
+    try:
+        row = rsi.set_switch(db, category, enabled, user["id"])
+    except Exception as e:  # noqa: BLE001
+        _map(e)
+    # 双入口校验：服务层已判一次类目合法性，这里再按白名单判一次（不假设前一处覆盖）
+    if category not in RSI_CATEGORIES:
+        raise HTTPException(status_code=400, detail="不是可开关的四类产物")
+    write_audit(user, "rsi:switch", category, "rsi_switch",
+                "自动体已暂停" if not row.enabled else "自动体已恢复",
+                request=request)
+    return {"ok": True, "switch": row.to_dict()}
+
+
+# ── 晋升评审账（R7-4/R7-5）───────────────────────────────
+
+@router.get("/reviews")
+def list_reviews(memory_id: int | None = Query(default=None),
+                 request: Request = None, db: Session = Depends(get_db)):
+    _user(request)
+    return {"reviews": rsi.list_reviews(db, memory_id=memory_id)}
 
 
 # ── 提案（三权分离）───────────────────────────────────────

@@ -5,7 +5,7 @@
 
 ## 当前阶段
 
-**实施阶段：波 0–6 全部落地（2026-10-24）**——PRODUCT-DESIGN v20 §1.6.0 的六个升级波次按顺序实现并提交；裁定⑦（MySQL 权威档）仍为设计口径（SQLite 为本地体验档），裁定⑧ 开发冻结已解除。
+**实施阶段：波 0–7 全部落地（2026-10-24）**——PRODUCT-DESIGN v20 §1.6.0 的六个升级波次 + 设计遗留项收口（波 7）按顺序实现并提交；裁定⑦（MySQL 权威档）仍为设计口径（SQLite 为本地体验档），裁定⑧ 开发冻结已解除。
 
 ## 最近完成
 
@@ -47,10 +47,11 @@
 - ✅ **change `v20-wave4`（波 4 团队与小队）已收口（10-24）**：`teams`/`team_members`（四档角色，owner 只能转让且需 confirm）+ `squads`/`squad_members`（leader 必须未归档 Agent）+ 五类资产 `team_id/owner_kind`（存量零回填）+ 迁 010；非成员 404、成员非 owner/admin 403；指派小队 = 给 leader 入队 leader 任务（去重）；Team⟂Squad 无外键。验证：test_teams 19 绿。提交 `ac839aa0`。
 - ✅ **change `v20-wave5`（波 5 差距能力）已收口（10-24）**：**P2-4** trace_spans 产生端（根/子 span + 合成 trace_id）+ `/metrics`（Prometheus 文本、直读现表、env 门 + 身份）· **P2-5** ETag/If-Match→412 + apiVersion/kind + generation/conditions + change_log 单账本同事务 + `/api/watch` SSE（游标过期 resync） · **P2-3** 执行隔离契约（tier 阶梯、ttl/retain、egress 默认拒、fail-closed，未实现档位选即拒绝）。迁移 011/012；测试 24 条。提交 `943b7e5e`。
 - ✅ **change `v20-wave6`（波 6 RSI 治理）已收口（10-24）**：记忆四层 + 晋升三字段缺一即 `no_entry` + confounded 默认 + 检疫/衰减 · 提案三权分离（生成限额 → 探针不作发布依据 → 影子重放冻结金标+异厂 judge → 人批发布，领域类需会签）· 可改面声明对象（scripts/plugins/hooks 永久禁改、代码层 RSI 禁止、路径穿越拒绝）· 四熔断 + NOISE FLOOR。迁移 013；test_rsi 18 绿。提交 `64e44de6`。
+- ✅ **change `v20-wave7`（波 7 设计遗留项收口）已收口（10-24）**：**P1-15/R4-2** A2A **M0 静态 AgentCard**（`GET /api/a2a/agents/{id}/card`；白名单字段、capabilities 三项 false=M2 冻结、越权=404）· **R7-4** `memories` 补 `source_seq/cites_seq` 因果前缀（引用未来即拒）+ `promotion_reviews` 晋升评审账（`no_entry` 也记）· **R7-5** 防污染双扫（晋升前命中金标/评测标记 → 强制 confounded + `pollution_flagged`，入库后 `post_ingest_scan`）· **R6-4** `rsi_switches` 四类类目开关（关闭=「自动体已暂停」，三处状态转换层独立判定 + 审计；四类之外没有开关）· **R8-2** 归因双列 `originator⟂accountable`（任务/运行各两列 + 归属瀑布沿任务链找链顶人类，读不出即 fail-closed；代记账需管理员）。迁移 014/015；新增 37 用例全绿（a2a 6 / rsi 治理 16 / 归因 15），全仓 391 用例 **29F/12E/6S 与基线逐条同名（0 新增红）**；顺带修掉 `test_auth_sessions` 对「环境里恰好有已迁移库」的隐式依赖（该用例 DB 也覆盖到内存库）。工件 `.specs/v20-wave7/`。
 - ✅ **change `v20-wave3`（波 3 协作层最小集）已收口（10-24）**：**P1-16** 告警落 `alerts` 表（去重查库、确认记人、不再环形裁剪）+ 双队列并表（`scheduling_queue` 六状态映射搬入 `scheduler_queue`，`kind='orchestration_instance'`，旧表删除）；**P1-4** `work_items`（status 四类+blocked × triage 正交 / assignee 三轨 / done 证据建议层）+ `work_item_runs` + 订阅（只增不减、@ 穿透）+ 收件箱三规则（action_required 分组 / 读失败上抛 / 交还给人自愈归档，blocked 例外，合并键=任务）。API：`/api/tasks` 8 个端点 + `/api/inbox` 6 个端点，越权统一 404。验证：test_alerts_and_queue 6 绿 + test_collab 23 绿，全仓 293 用例 29F/12E（0 新增红）。提交 `57945f50` + `67420190`。**未做**：任务评论正文落表、看板/收件箱前端页面（按「先表与校验，再上界面」）。
 - ✅ **change `v20-wave2`（波 2 单副本事实固化）已收口（10-24）**：P1-7 队列/限流/退避/监控偏移四类状态落库（迁移 007）· 任务租约+心跳（claim/heartbeat/requeue_expired）· 单例循环（cron/watcher/reconcile）数据库租约选主 · 删死代码 `engine/scheduler.py` 与进程内队列 · P0-9 事实写进 README + `/api/control-plane/cluster` + 管控页集群条。验证：test_cluster_store 23 绿、全仓 264 用例 29F/12E（0 新增红）、build 绿、vitest 57/57。**下一步 波 4（团队与小队）。**
 - 🧾 **change `v20-wave0`（历史段 · 波 0 首项）**：用户 10-24「按照最新的设计文档实现代码」→ 裁定⑧ 解除（`backend/` `frontend/` 恢复可改）。**已交付 P0-4**：32 个 TS 错误清零，`npm run build` 首次通过（18.46s）、`vitest` 52/52 绿。**已完成 P0-4 + P0-8 + P0-6/7**（P0-6/7：`backend/stage_config.py` 单一事实源 + 两份 scanner 合一 + admin PUT 校验/热更新 + 前端 `stores/stageConfig.ts` 接 6 个消费者；后端 10 用例 / 前端 57 用例 / build 全绿）（P0-8：`backend/migrations.py` 版本化迁移账本 + 6 个单测全绿，替换 init_db 里 5 段内联静默迁移）。**遗留**：T-05 `system_prompt/role_def/sop` 后端不落库（数据丢失，登记待修）；P0-5 仓库卫生（用户 10-24 定「暂不做只记账」）、P0-6/7 阶段表单点仍待做。工件：`.specs/v20-wave0/{CHANGE,TASK,TEST,REVIEW}.md`
-- ✅ **裁定⑧ 开发冻结已解除（10-24 用户令「把开发冻结那个去掉」）**：`backend/` `frontend/` 可改；实施按主档 §1.6.0 波次推进（波 0–6 已收口，波 7 在途）。原文口径已从本文件与 `RULINGS.md` 现行表移除（历史保留在 `RULINGS.md` 该行的 ⛔ 标记里）。
+- ✅ **裁定⑧ 开发冻结已解除（10-24 用户令「把开发冻结那个去掉」）**：`backend/` `frontend/` 可改；实施按主档 §1.6.0 波次推进（波 0–7 已收口）。原文口径已从本文件与 `RULINGS.md` 现行表移除（历史保留在 `RULINGS.md` 该行的 ⛔ 标记里）。
 - ✅ **八轮 discovery 全部闭合**：第 1 轮 S1-S5 · 第 3 轮 S6/S7 · 第 4 轮 S8-S13 · 第 5 轮 S14/S15/S16（10-23 追认 + 首批五类收口）· 第 6 轮 S17-S20 · 第 7 轮 S21 · 第 8 轮 S22/S23。议题状态账本：`.specs/platform-evolution/TOPICS.md`；结论账本：同目录 `ROADMAP.md`（第 3/4/5/6/7/8 轮正节已齐）。
 - 🧾 **口径治理（本轮动因）**：主档与 `.specs` 的「已被推翻 / 已收口 / 已落后」残留已回填为 v20（详见上表 2026-10-23 行）。**遗留风险**：现行有效口径仍无单一事实源——需读「包页首注 + 尾注 + ROADMAP + TOPICS + STATE」五处拼合。建议建 `.specs/platform-evolution/RULINGS.md`（见下一步 0b）。
 - 🩹 **原型三处挂载缺口（如实挂账，非已具备能力）**：① `audit.html` 无 team 筛选器与锚点；② `control-plane.html` 未显示 `domains.team_id` 归属（与 teams__agentflow 的「域入五组」须同批补）；③ `chat.html` 缺「同刻双投递幂等」与 `coalesced` 的可见呈现。
@@ -90,6 +91,9 @@
 5. ~~波 4（团队与小队）~~（`ac839aa0` 已收口）：`teams` / `team_members`（四档角色）+ 五类资产 `team_id/owner_kind`（域进首批、编排次批）+ `squad`（1 leader + 混编，可指派）；口径：非成员一律 404、归档只停未来指派、Team⟂Squad 无外键
 6. ~~波 5（差距能力）~~（`943b7e5e` 已收口；OTLP/语义版本化与真实容器执行面按设计延后）：P2-3 执行隔离 tier 阶梯（契约先行、fail-closed）· P2-4 可观测（先修产生端：trace_spans/metrics_raw 零写入）· P2-5 声明式 API 四件组（ETag→412 / conditions / change_log 同事务 / `/api/watch` SSE）
 7. ~~波 6（RSI）~~（`64e44de6` 治理契约与门禁已落地；影子重放执行器/金标本体/前端页面未做）：记忆四层唯一管道 L0→L1→L2→L3 · 编排提案制三权分离 · 四熔断 + NOISE FLOOR · 晋升三字段缺一不入库 · 代码层禁自改
+
+8. ~~波 7（设计遗留项收口）~~（已收口）：A2A M0 静态卡（M2 冻结）· 因果前缀 `source_seq` + 晋升评审账 + 防污染双扫 · `rsi_switches` 四类开关 · 归因双列 originator⟂accountable + 瀑布 fail-closed
+9. **下一步（按设计剩余面，不假装已具备）**：① 前端界面挂载（记忆中心 / 提案抽屉 / 看板 / 收件箱 / 团队与小队页——波 3-7 一律「先表与校验，再上界面」）② RSI 执行器（影子重放跑批 / 金标本体 / 异厂 judge 调用）③ 域策略表（归因的域侧读取 fail-closed 目前只有「读不出即拒」）④ L0 自动抽取器（记忆四层里 L0 仍由会话表承载）⑤ P0-5 仓库卫生 `git rm --cached node_modules`（仍按用户「只记账不做」）
 
 完整路线图见 `.specs/platform-evolution/ROADMAP.md`（议题状态账本：同目录 `TOPICS.md`）。
 

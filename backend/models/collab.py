@@ -55,6 +55,9 @@ class WorkItem(Base):
     # done 证据（[{label, ref}]）；缺失不阻断（R0-2：硬门不拦，留建议层），但会记 warned
     evidence_json: Mapped[str] = mapped_column(Text, default="[]")
     evidence_warned: Mapped[int] = mapped_column(Integer, default=0)
+    # R8-2 归因双列：originator 只鉴权 / accountable 只审计与成本（不许一列兼两职）
+    originator_id: Mapped[str] = mapped_column(String(64), default="", index=True)
+    accountable_id: Mapped[str] = mapped_column(String(64), default="", index=True)
     archived_at: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime, default=datetime.datetime.utcnow, index=True
@@ -88,6 +91,8 @@ class WorkItem(Base):
             "is_leader_task": bool(self.is_leader_task),
             "evidence": json.loads(self.evidence_json or "[]"),
             "evidence_warned": bool(self.evidence_warned),
+            "originator_id": self.originator_id or "",
+            "accountable_id": self.accountable_id or "",
             "archived_at": self.archived_at.isoformat() if self.archived_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
@@ -107,6 +112,9 @@ class WorkItemRun(Base):
     # queued | running | succeeded | failed
     summary: Mapped[str] = mapped_column(Text, default="")
     evidence_json: Mapped[str] = mapped_column(Text, default="[]")
+    # R8-2：运行侧同样双列（谁鉴权 / 谁记账分开）
+    originator_id: Mapped[str] = mapped_column(String(64), default="", index=True)
+    accountable_id: Mapped[str] = mapped_column(String(64), default="", index=True)
     started_at: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
     finished_at: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -124,6 +132,8 @@ class WorkItemRun(Base):
             "status": self.status,
             "summary": self.summary,
             "evidence": json.loads(self.evidence_json or "[]"),
+            "originator_id": self.originator_id or "",
+            "accountable_id": self.accountable_id or "",
             "started_at": self.started_at.isoformat() if self.started_at else None,
             "finished_at": self.finished_at.isoformat() if self.finished_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,

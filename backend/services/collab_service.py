@@ -63,9 +63,13 @@ def _now() -> datetime.datetime:
 def create_item(db: Session, creator: str, title: str, description: str = "",
                 assignee_kind: str | None = None, assignee_id: str | None = None,
                 priority: int = 50, due_date: str | None = None,
-                parent_id: int | None = None, team_id: str | None = None) -> WorkItem:
+                parent_id: int | None = None, team_id: str | None = None,
+                accountable_id: str | None = None) -> WorkItem:
     if not title.strip():
         raise ValueError("title 不能为空")
+    if not (creator or "").strip():
+        # R8-2 fail-closed：算不出链顶人类就不建任务，不猜、不回退 admin
+        raise ValueError("缺创建者：归因无法确定，拒绝创建")
     if assignee_kind is not None and assignee_kind not in ASSIGNEE_KINDS:
         raise ValueError(f"assignee_kind 必须是 {sorted(ASSIGNEE_KINDS)} 之一")
     if assignee_kind is None and assignee_id is not None:
@@ -74,6 +78,8 @@ def create_item(db: Session, creator: str, title: str, description: str = "",
         title=title.strip(), description=description or "", creator_id=creator,
         assignee_kind=assignee_kind, assignee_id=assignee_id,
         priority=priority, due_date=due_date, parent_id=parent_id, team_id=team_id,
+        # R8-2：创建者（人类）即 originator；accountable 缺省同源
+        originator_id=creator, accountable_id=accountable_id or creator,
     )
     db.add(item)
     db.commit()
@@ -194,6 +200,9 @@ def record_run(db: Session, item: WorkItem, run_id: str, status: str = "queued",
     run = WorkItemRun(
         work_item_id=item.id, run_id=run_id, agent_id=agent_id, status=status,
         summary=summary, evidence_json=json.dumps(evidence or [], ensure_ascii=False),
+        # R8-2：运行的归因继承任务（谁鉴权/谁记账两列分开传，不合并）
+        originator_id=item.originator_id or item.creator_id,
+        accountable_id=item.accountable_id or item.originator_id or item.creator_id,
         started_at=now if status in ("running", "succeeded", "failed") else None,
         finished_at=now if status in ("succeeded", "failed") else None,
     )

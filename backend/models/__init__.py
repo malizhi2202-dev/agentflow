@@ -36,7 +36,9 @@ from models.declarative import ChangeLog, ResourceCondition  # noqa: E402, F401
 from models.rsi import (  # noqa: E402, F401
     BreakerState,
     Memory,
+    PromotionReview,
     Proposal,
+    RsiSwitch,
     SurfaceManifest,
 )
 from models.teams import (  # noqa: E402, F401

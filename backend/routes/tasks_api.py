@@ -82,6 +82,10 @@ def list_tasks(
 @router.post("")
 def create_task(payload: dict, request: Request, db: Session = Depends(get_db)):
     user = _user(request)
+    accountable_id = payload.get("accountable_id") or None
+    # R8-2：accountable 是审计/成本主体，代他人记账需要管理员权限
+    if accountable_id and accountable_id != user["id"] and not is_admin(user):
+        raise HTTPException(status_code=403, detail="代他人记 accountability 需要管理员权限")
     try:
         item = collab_service.create_item(
             db, creator=user["id"],
@@ -93,6 +97,7 @@ def create_task(payload: dict, request: Request, db: Session = Depends(get_db)):
             due_date=payload.get("due_date"),
             parent_id=payload.get("parent_id"),
             team_id=payload.get("team_id"),
+            accountable_id=accountable_id,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

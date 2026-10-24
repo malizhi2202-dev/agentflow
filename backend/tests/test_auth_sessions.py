@@ -17,6 +17,7 @@ from sqlalchemy.pool import StaticPool
 
 import auth
 import config
+import database
 from models import Base
 from models.session import PatToken, SessionToken
 from passwords import hash_password
@@ -47,6 +48,9 @@ class _AuthTestBase(unittest.TestCase):
             patch.object(auth, "_audit_file", return_value=self.audit_file),
             patch.object(session_service, "SessionLocal", self.Session),
             patch.object(cluster_store, "SessionLocal", self.Session),
+            # 隔离数据库：身份链用例不该依赖「仓库里恰好有一份已迁移的库」。
+            # /api/admin/workflow 会读 change_log（波 5 声明式账本），不接这份内存库就会 500。
+            patch.object(database, "SessionLocal", self.Session),
             patch.object(config, "DEPLOY_MODE", "localhost"),
             patch.object(config, "TRUSTED_PROXY_IPS", []),
             patch.object(config, "ALLOW_CIDRS", []),
@@ -56,11 +60,26 @@ class _AuthTestBase(unittest.TestCase):
         ]
         for p in self._patchers:
             p.start()
+        # 路由层统一走 get_db：显式覆盖到本用例的内存库（与 users.json / audit.jsonl 同一隔离强度）
+        from database import get_db
+        from main import app as _app
+
+        def _override_db():
+            db = self.Session()
+            try:
+                yield db
+            finally:
+                db.close()
+
+        self._app = _app
+        self._get_db = get_db
+        _app.dependency_overrides[get_db] = _override_db
         cluster_store.truncate_rate_limits()
         self._write_users([self._user("admin")])
 
     def tearDown(self):
         # 先清库再撤 patch：清场必须打在本用例的内存库上
+        self._app.dependency_overrides.pop(self._get_db, None)
         cluster_store.truncate_rate_limits()
         for p in reversed(self._patchers):
             p.stop()
