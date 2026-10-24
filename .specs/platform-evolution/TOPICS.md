@@ -171,3 +171,16 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 
 
 
+
+---
+
+## 附录 · 代码实施期落下的议题（2026-10-24）
+
+> 来源：S-align 首次对齐（`.specs/ALIGNMENT.md` 漂移 D3-1）· 用户裁决 **V2=②转议题**。
+> 纪律：原型是设计基线，改它要走 ⑤ 人审；不与代码波混做。
+
+| 子议题 | 题 | 事实依据 | 状态 |
+|---|---|---|---|
+| S24-prototype-mount-gaps | 原型三处挂载缺口：① `audit.html` 无 team 筛选器与锚点 ② `control-plane.html` 未显示 `domains.team_id` 归属 ③ `chat.html` 缺「同刻双投递幂等 + coalesced」可见呈现 | `grep -c team_id prototype/control-plane.html` = 0；其余两页需逐页核（`audit.html` 仅 2 处 team 词面、`chat.html` 仅 1 处 coalesced） | **待审⑤**（未开轮，未进 ROADMAP） |
+
+> 关联：波 4 已把 `domains.team_id` 落到数据层（迁移 010），故 ② 现在只是「界面没显示」，不是「数据没有」。
