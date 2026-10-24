@@ -64,7 +64,7 @@ export default function WorkflowCreate({ onBack, onCreated }: { onBack: () => vo
       spec_json: { nodes: nodes, edges: edges },
       token_soft_limit: token.soft, token_hard_limit: token.hard,
     });
-    if (wf) { setSaved(true); setTimeout(function() { onCreated(wf.id); }, 800); }
+    if (wf) { const wfId = wf.id; setSaved(true); setTimeout(function() { onCreated(wfId); }, 800); }
   };
 
   var addToolToNode = function(tool: any) {

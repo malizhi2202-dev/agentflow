@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ChannelConfigComponent from '../components/ChannelConfig';
 
-global.fetch = vi.fn();
-const mockFetch = global.fetch as any;
+globalThis.fetch = vi.fn();
+const mockFetch = globalThis.fetch as any;
 
 describe('ChannelConfig', () => {
   beforeEach(() => {

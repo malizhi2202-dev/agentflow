@@ -21,6 +21,8 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
   // 衍生：项目 + 绑定 Agent（提前计算，供 useEffect 使用）
   const project = projects.find(p => p.id === projectId);
   const boundAgent = project ? agents.find(a => a.id === project.agent_id) : undefined;
+  const orchId = project?.orchestration_id ?? null;          // 闭包内重新收窄用
+  const modelTotals = metrics?.model_totals ?? {};           // 嵌套可选 → 一次收口
 
   // Agent tab: 消耗数据 + 会话
   const [breakdown, setBreakdown] = useState<any>(null);
@@ -37,10 +39,10 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
       fetch('/api/metrics/project/' + projectId + '/breakdown?minutes=60', { headers: { 'X-User-Id': uid } })
         .then(r => r.json()).then(d => setBreakdown(d)).catch(() => setBreakdown(null));
       // 编排组信息
-      if (project?.orchestration_id) {
+      if (orchId) {
         fetch('/api/orchestration', { headers: { 'X-User-Id': uid } })
           .then(r => r.json()).then(d => {
-            const orch = (Array.isArray(d) ? d : (d.instances || [])).find((o: any) => o.id === project.orchestration_id);
+            const orch = (Array.isArray(d) ? d : (d.instances || [])).find((o: any) => o.id === orchId);
             setOrchInfo(orch || null);
           }).catch(() => setOrchInfo(null));
       }
@@ -422,7 +424,7 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
 
       {tab === 'orchestration' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 700 }}>
-          {project?.orchestration_id ? (
+          {orchId ? (
             <>
               {orchInfo && (
                 <div style={panel}>
@@ -431,7 +433,7 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
                       <Network size={14} color="#a855f7" style={{ marginRight: 6 }} />
                       {orchInfo.name}
                     </h3>
-                    <a href={`/orchestration/${project.orchestration_id}/edit`} style={{ padding: '6px 14px', fontSize: 11, background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <a href={`/orchestration/${orchId}/edit`} style={{ padding: '6px 14px', fontSize: 11, background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <ExternalLink size={12} /> 查看详情
                     </a>
                   </div>
@@ -440,7 +442,7 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
                   </div>
                 </div>
               )}
-              <EntityBreakdownPanel entityType="orchestration" entityId={project.orchestration_id} entityName={orchInfo?.name || '编排组'} />
+              <EntityBreakdownPanel entityType="orchestration" entityId={orchId} entityName={orchInfo?.name || '编排组'} />
             </>
           ) : (
             <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-dim)' }}>
@@ -466,14 +468,14 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
             <div style={card}><span style={cardVal}>{((metrics?.total_time_ms || 0) / 1000).toFixed(1)}s</span><span style={cardLbl}>执行时间</span></div>
             <div style={card}><span style={cardVal}>{Object.keys(metrics?.model_totals || {}).length}</span><span style={cardLbl}>使用模型</span></div>
           </div>
-          {metrics?.model_totals && Object.keys(metrics.model_totals).length > 0 && (
+          {Object.keys(modelTotals).length > 0 && (
             <div style={{ background: 'var(--bg-card, #181a1f)', borderRadius: 8, padding: 16, border: '1px solid var(--border-normal, #2a2d35)' }}>
               <h3 style={{ fontSize: 13, fontWeight: 600, margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: 6 }}><BarChart3 size={14} /> 模型 Token 分布</h3>
-              {Object.entries(metrics.model_totals).map(([name, val], i) => (
+              {Object.entries(modelTotals).map(([name, val], i) => (
                 <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-text)', width: 130 }}>{name}</span>
                   <div style={{ flex: 1, height: 6, background: 'var(--bg-input)', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.round((val as number) / (metrics.total_tokens || 1) * 100)}%`, background: 'var(--color-primary)', borderRadius: 3 }} />
+                    <div style={{ height: '100%', width: `${Math.round((val as number) / (metrics?.total_tokens || 1) * 100)}%`, background: 'var(--color-primary)', borderRadius: 3 }} />
                   </div>
                   <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--color-text-dim)', width: 80, textAlign: 'right' }}>{(val as number).toLocaleString()}</span>
                 </div>

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, RefreshCw, AlertCircle } from 'lucide-react';
 
-interface Message {
+export interface Message {
   id: number;
   role: 'user' | 'agent' | 'system';
   content: string;

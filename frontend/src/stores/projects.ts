@@ -6,6 +6,7 @@ export interface Project {
   requirement_raw: string; requirement_type: string;
   parsed_summary: string; agent_id: number | null;
   workflow_id: number | null; status: string;
+  orchestration_id?: number | null;  // 后端 project.py:19 已有；类型此前漏列
   created_at: string; updated_at: string;
 }
 

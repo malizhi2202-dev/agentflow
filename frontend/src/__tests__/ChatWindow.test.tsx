@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import ChatWindow from '../components/ChatWindow';
+import ChatWindow, { type Message } from '../components/ChatWindow';
 
 const defaultProps = {
   agentId: 1,
@@ -32,7 +32,7 @@ describe('ChatWindow', () => {
 
   // FT-03: 消息列表渲染（user + agent 消息）
   it('renders user and agent messages', () => {
-    const messages = [
+    const messages: Message[] = [
       { id: 1, role: 'user', content: '你好', status: 'done', created_at: new Date().toISOString() },
       { id: 2, role: 'agent', content: '你好！有什么可以帮你的？', status: 'done', created_at: new Date().toISOString() },
     ];
@@ -97,7 +97,7 @@ describe('ChatWindow', () => {
 
   // FT-10: error 消息状态
   it('shows error badge on failed messages', () => {
-    const messages = [
+    const messages: Message[] = [
       { id: 1, role: 'agent', content: '回复失败', status: 'error', created_at: new Date().toISOString() },
     ];
     render(<ChatWindow {...defaultProps} messages={messages} />);

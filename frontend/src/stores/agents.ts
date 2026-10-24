@@ -7,6 +7,10 @@ export interface Agent {
   model_config_json: any; api_key: string;
   domain_id: number | null;
   workflow_id: number | null; workflow_summary?: any;
+  workflow_ids?: number[];   // 后端 agent.py:24 已有（多工作流绑定）
+  role_def?: string;         // UI 在用（AgentDetail 人设）；后端暂未落库 → T-03 待修
+  system_prompt?: string;    // 同上
+  sop?: string;              // 同上
   token_soft_limit: number; token_hard_limit: number;
   total_tokens_used: number; status: string; visibility: string;
   project_count: number; created_at: string; updated_at: string;

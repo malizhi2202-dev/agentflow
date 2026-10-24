@@ -104,7 +104,7 @@ export default function AgentBuilder({ onSelect }: Props) {
           {agents.length === 0 && <p style={{ color: 'var(--text-dim)', gridColumn: '1/-1', textAlign: 'center', padding: 40 }}>暂无 Agent，点击「创建 Agent」开始</p>}
         </div>
       )}
-      {deleteId && <ConfirmDialog open={true} title="确认删除" message="确定删除此 Agent？" onConfirm={async function() { await deleteAgent(deleteId); setDeleteId(null); }} onCancel={function() { setDeleteId(null); }} />}
+      {deleteId && <ConfirmDialog open={true} title="确认删除" message="确定删除此 Agent？" onConfirm={async function() { if (deleteId !== null) await deleteAgent(deleteId); setDeleteId(null); }} onCancel={function() { setDeleteId(null); }} />}
     </div>
   );
 }

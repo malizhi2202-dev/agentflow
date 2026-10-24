@@ -4,12 +4,12 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import ChatWindow from '../components/ChatWindow';
+import ChatWindow, { type Message } from '../components/ChatWindow';
 import ChannelConfigComponent from '../components/ChannelConfig';
 import { useChat } from '../stores/chat';
 
-global.fetch = vi.fn();
-const mockFetch = global.fetch as any;
+globalThis.fetch = vi.fn();
+const mockFetch = globalThis.fetch as any;
 
 // ═══════════════════════════════════════════
 // FT-26~31: ChatWindow 异常操作
@@ -44,7 +44,7 @@ describe('ChatWindow — 异常操作', () => {
 
   // FT-28: 100 条消息渲染不崩溃
   it('renders 100 messages without crash', () => {
-    const messages = Array.from({ length: 100 }, (_, i) => ({
+    const messages: Message[] = Array.from({ length: 100 }, (_, i) => ({
       id: i + 1,
       role: i % 2 === 0 ? 'user' : 'agent',
       content: `消息 #${i + 1}: 这是一条测试消息内容`,
@@ -68,7 +68,7 @@ describe('ChatWindow — 异常操作', () => {
 
   // FT-30: 消息含 XSS payload → 以文本形式渲染（不执行）
   it('renders XSS payload as text, not HTML', () => {
-    const messages = [{
+    const messages: Message[] = [{
       id: 1, role: 'user', content: '<script>alert("xss")</script><img src=x onerror=alert(1)>', status: 'done',
       created_at: new Date().toISOString(),
     }];

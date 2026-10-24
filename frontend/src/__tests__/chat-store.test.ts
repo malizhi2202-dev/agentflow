@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { useChat } from '../stores/chat';
 
 // Mock fetch
-global.fetch = vi.fn();
-const mockFetch = global.fetch as any;
+globalThis.fetch = vi.fn();
+const mockFetch = globalThis.fetch as any;
 
 describe('chat store', () => {
   beforeEach(() => {

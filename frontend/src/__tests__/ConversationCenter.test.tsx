@@ -4,8 +4,8 @@ import ConversationCenter from '../pages/ConversationCenter';
 import { useChat } from '../stores/chat';
 
 // Mock fetch
-global.fetch = vi.fn();
-const mockFetch = global.fetch as any;
+globalThis.fetch = vi.fn();
+const mockFetch = globalThis.fetch as any;
 
 // Mock ChatWindow to simplify testing
 vi.mock('../components/ChatWindow', () => ({

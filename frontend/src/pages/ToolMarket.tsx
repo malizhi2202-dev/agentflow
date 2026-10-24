@@ -38,7 +38,7 @@ export default function ToolMarket({ onSelect }: Props) {
         <div style={{ display: 'flex', gap: 8 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
             <Upload size={13} /> 上传 MD
-            <input type="file" accept=".md,.markdown" onChange={function(e) { var f = e.target.files?.[0]; if (f) { var r = new FileReader(); r.onload = function() { if (onSelect) onSelect({ name: f.name.replace('.md',''), type: 'plugin', description: '', content_md: r.result as string, token_soft_limit: 80000, token_hard_limit: 100000, permissions: ['read'], gate_pre: '', gate_post: '', io_filter: 'none' }); }; r.readAsText(f); } }} style={{ display: 'none' }} />
+            <input type="file" accept=".md,.markdown" onChange={function(e) { var f = e.target.files?.[0]; if (f) { var fileName = f.name; var r = new FileReader(); r.onload = function() { if (onSelect) onSelect({ name: fileName.replace('.md',''), type: 'plugin', description: '', content_md: r.result as string, token_soft_limit: 80000, token_hard_limit: 100000, permissions: ['read'], gate_pre: '', gate_post: '', io_filter: 'none' }); }; r.readAsText(f); } }} style={{ display: 'none' }} />
           </label>
 <button onClick={function() { if (onSelect) onSelect({ name: '', type: 'plugin', description: '', content_md: '', token_soft_limit: 80000, token_hard_limit: 100000, permissions: ['read'], gate_pre: '', gate_post: '', io_filter: 'none' }); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}>
             <Plus size={14} /> 创建工具
@@ -104,7 +104,7 @@ export default function ToolMarket({ onSelect }: Props) {
           {filtered.length === 0 && <p style={{ color: 'var(--text-dim)', gridColumn: '1/-1', textAlign: 'center', padding: 40 }}>暂无工具，点击「创建工具」开始</p>}
         </div>
       )}
-{deleteId && <ConfirmDialog open={true} title="确认删除" message="确定删除此工具？" onConfirm={async function() { await deleteTool(deleteId); setDeleteId(null); }} onCancel={function() { setDeleteId(null); }} />}
+{deleteId && <ConfirmDialog open={true} title="确认删除" message="确定删除此工具？" onConfirm={async function() { if (deleteId !== null) await deleteTool(deleteId); setDeleteId(null); }} onCancel={function() { setDeleteId(null); }} />}
       {monitorTool && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: 'var(--bg-card)', borderRadius: 12, padding: 24, width: '90vw', maxWidth: 800, maxHeight: '85vh', overflow: 'auto', border: '1px solid var(--border)' }}>
