@@ -1,16 +1,25 @@
-"""runtime.jsonl 文件监控器 — 增量捕捉 Agent 运行时数据."""
+"""runtime.jsonl 文件监控器 — 增量捕捉 Agent 运行时数据.
+
+P1-7：已读行数与「谁在扫」都搬进了库：
+- 行数存 `runtime_watcher_offsets`（原进程内 `_watched`）——副本切换或重启
+  不会把同一批记录再导一遍；
+- 扫描本身受 `runtime-watcher` 租约保护——多副本只有一个在扫，其余待命。
+"""
 
 import os
 import json
 import time
 import threading
 import datetime
+
 from database import SessionLocal
 from models.metrics import SessionMetric, MetricRaw
-from config import get_specs_dir
+from config import CLUSTER_LEASE_TTL_SECONDS, get_specs_dir
+from services import cluster_store
 
-_watched: dict[str, int] = {}  # file_path → last_line_count
+LEASE_NAME = "runtime-watcher"
 _running = False
+_standby_logged = False
 
 
 def start_watcher(specs_dir: str | None = None):
@@ -26,11 +35,23 @@ def start_watcher(specs_dir: str | None = None):
 
 
 def _watch_loop(specs_dir: str):
+    global _standby_logged
     while _running:
+        # 只有持租约的副本才扫描（租约到期自动可被其他副本接管）
         try:
-            _scan(specs_dir)
+            active = cluster_store.acquire_lease(LEASE_NAME, CLUSTER_LEASE_TTL_SECONDS)
         except Exception as e:
-            print(f"[runtime-watcher] 错误: {e}")
+            print(f"[runtime-watcher] 租约失败，跳过本轮: {e}")
+            active = False
+        if active:
+            _standby_logged = False
+            try:
+                _scan(specs_dir)
+            except Exception as e:
+                print(f"[runtime-watcher] 错误: {e}")
+        elif not _standby_logged:
+            print(f"[runtime-watcher] 待命（租约被 {cluster_store.instance_id()} 之外的副本持有）")
+            _standby_logged = True
         time.sleep(30)  # 每 30 秒扫描一次
 
 
@@ -44,15 +65,15 @@ def _scan(specs_dir: str):
         rt_file = os.path.join(change_dir, "runtime.jsonl")
         if not os.path.exists(rt_file):
             continue
-        # 读取增量行
-        prev_count = _watched.get(rt_file, 0)
+        # 读取增量行（偏移量在库里，重启/换副本都不重放）
+        prev_count = cluster_store.watcher_offset(rt_file)
         with open(rt_file) as f:
             lines = f.readlines()
         current_count = len(lines)
         if current_count > prev_count:
             new_lines = lines[prev_count:]
             _import_lines(rt_file, new_lines, entry)
-            _watched[rt_file] = current_count
+            cluster_store.set_watcher_offset(rt_file, current_count)
 
 
 def _import_lines(rt_file: str, lines: list[str], change_id: str):

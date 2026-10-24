@@ -360,6 +360,36 @@ agentflow/
 | `LOGIN_MAX_FAILURES` / `LOGIN_FAILURE_WINDOW_MINUTES` | `5` / `15` | 登录节流（超限 429）；当前为进程内存，多副本各自计数（P1-7） |
 | `AGENTFLOW_AUTH_DEBUG_HEADER` | `false` | `X-User-Id` 调试通道开关；需同时满足 localhost 与 `AGENTFLOW_AUTH_DEBUG_ADMIT` 白名单，开启即启动红条 + 逐请求审计 |
 | `AGENTFLOW_AUTH_DEBUG_ADMIT` | (空) | 调试通道允许自述的用户 id 列表（逗号分隔） |
+| `INSTANCE_ID` | `host:pid:随机` | 副本标识（租约持有者/队列租约都用它） |
+| `CLUSTER_LEASE_TTL_SECONDS` | `90` | 单例循环租约 TTL；到期未续即被其他副本接管 |
+| `QUEUE_LEASE_SECONDS` | `60` | 队列任务租约；心跳停止超时后任务回队 |
+
+### 副本与单例循环（P0-9 / P1-7）
+
+**以前**：调度队列、控制面限流、调和退避、runtime 监控已读行数全在进程内存里——
+重启即清零，多开一个副本就各算各的（「自动路由 / 渐进扩容 / 自愈」只在单副本下成立）。
+**现在**：这四类状态落库（`scheduler_queue` / `rate_limit_windows` /
+`reconcile_states` / `runtime_watcher_offsets`），单例后台循环（cron 调度、
+runtime 监控、reconcile）靠 `cluster_leases` 里的**数据库租约**选主。
+
+| 事实 | 现在的口径 |
+|---|---|
+| 任务队列 | 一行一条，带 `lease_owner / lease_expires_at / heartbeat_at`；租约到期未心跳 = 持有者失联，任务自动可被其他副本领取（至少一次） |
+| 控制面限流 | 10 次/分钟（restart / reschedule / pause），固定窗口计数在库里，多副本共享 |
+| 登录节流 | 5 败/15 分钟，同上（不再各进程各算） |
+| 调和退避 | 1s→2s→4s→8s，连续失败超过 3 次置暂停，需人工恢复；状态在库，副本切换不丢 |
+| runtime 增量导入 | 已读行数在库，副本切换不重放同一批记录 |
+| 后台循环 | 每类只有一个副本在跑（租约 TTL 默认 90s，过期自动接管）；`GET /api/control-plane/cluster` 可看当前持有者 |
+| 仍是进程内的 | OAuth 授权 state 与非重放缓存——多副本下回调请求需落在同一副本（已在 `/api/control-plane/cluster` 的 `process_local` 字段如实列出） |
+
+```bash
+# 多副本部署：每个副本给一个稳定标识（默认 host:pid:随机），并共用同一个 DATABASE_URL
+INSTANCE_ID=node-1 uvicorn main:app --port 8000
+INSTANCE_ID=node-2 uvicorn main:app --port 8001
+```
+
+> 注意：SQLite 单文件在 NFS/多机共享上不可靠；要真正多副本请用 MySQL（裁定⑦ 权威库）。
+> 前端「Agent 管控」页顶部的集群条读 `GET /api/control-plane/cluster`：当前副本、部署模式、租约持有者、队列深度一并呈现。
 
 ### 数据库切换
 

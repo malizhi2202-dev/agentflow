@@ -81,12 +81,14 @@ export default function SchedulerConfig() {
   useEffect(() => {
     const agentMap = new Map<number, AgentTagRow>();
     for (const item of queue) {
+      // 队列行现在可能还没有目标 Agent（入队时只知能力标签），跳过
+      if (item.agent_id == null) continue;
       if (!agentMap.has(item.agent_id)) {
         agentMap.set(item.agent_id, {
           agent_id: item.agent_id,
-          agent_name: item.agent_name,
-          tags: '',
-          priority: item.priority >= 7 ? 'high' : item.priority >= 4 ? 'medium' : 'low',
+          agent_name: 'Agent #' + item.agent_id,
+          tags: item.label || '',
+          priority: item.priority >= 70 ? 'high' : item.priority >= 40 ? 'medium' : 'low',
           concurrency: 1,
           enabled: item.status !== 'disabled',
         });
@@ -609,9 +611,10 @@ export default function SchedulerConfig() {
                           : '#dc2626',
                     }}
                   />
-                  <span style={{ color: 'var(--color-text)' }}>{item.orchestration_name}</span>
+                  <span style={{ color: 'var(--color-text)' }}>{item.task_id}</span>
                   <span style={{ color: 'var(--text-dim)' }}>
-                    → {item.agent_name}
+                    → {item.label || '未指定能力'}
+                    {item.agent_id != null ? ' · Agent #' + item.agent_id : ''}
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -625,7 +628,7 @@ export default function SchedulerConfig() {
                       color: 'var(--text-dim)',
                     }}
                   >
-                    {item.created_at || '-'}
+                    {item.enqueued_at || '-'}
                   </span>
                 </div>
               </div>

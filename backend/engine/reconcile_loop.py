@@ -16,9 +16,18 @@ async def reconcile_loop(sleep_seconds: int = 5):
         asyncio.create_task(reconcile_loop())
     """
     logger.info("reconcile loop started (interval=%ds)", sleep_seconds)
+    from config import CLUSTER_LEASE_TTL_SECONDS
+    from services import cluster_store
+
+    standby_logged = False
     while True:
         try:
-            await _reconcile_all()
+            if cluster_store.acquire_lease("reconcile-loop", CLUSTER_LEASE_TTL_SECONDS):
+                standby_logged = False
+                await _reconcile_all()
+            elif not standby_logged:
+                logger.info("reconcile loop 待命：租约由其他副本持有")
+                standby_logged = True
         except Exception:
             logger.exception("reconcile loop iteration failed — continuing")
         await asyncio.sleep(sleep_seconds)
@@ -285,63 +294,43 @@ def _classify_action(drift: dict) -> str:
 # ── 退避机制 ────────────────────────────────────────────────────
 
 # 模块级退避状态：{instance_id: {"failures": int, "next_retry_at": datetime, "paused": bool}}
-_backoff_state: dict[int, dict] = {}
-_BACKOFF_SECONDS = [1, 2, 4, 8]
-_MAX_CONSECUTIVE_FAILURES = 3
-
-
 def _should_backoff(instance_id: int) -> bool:
-    """检查实例是否应跳过本轮 reconcile（退避或暂停中）。"""
-    state = _backoff_state.get(instance_id)
-    if state is None:
-        return False
-    if state.get("paused"):
-        return True
-    next_retry = state.get("next_retry_at")
-    if next_retry is not None and datetime.utcnow() < next_retry:
-        return True
-    return False
+    """检查实例是否应跳过本轮 reconcile（退避或暂停中）— 状态在库。"""
+    from services import cluster_store
+
+    return cluster_store.should_backoff(instance_id)
 
 
 def _record_reconcile_failure(instance_id: int) -> None:
-    """记录一次 reconcile 失败，执行指数退避。
+    """记一次失败并指数退避（1s→2s→4s→8s，超过 3 次暂停等待人工恢复）。"""
+    from services import cluster_store
 
-    退避策略：1s → 2s → 4s → 8s，超过 _MAX_CONSECUTIVE_FAILURES 次后暂停。
-    """
-    state = _backoff_state.setdefault(instance_id, {"failures": 0, "next_retry_at": None, "paused": False})
-    state["failures"] += 1
-
-    failures = state["failures"]
-    if failures > _MAX_CONSECUTIVE_FAILURES:
-        state["paused"] = True
-        logger.warning("实例 %d 连续失败 %d 次（超过阈值 %d）→ 暂停 reconcile，需手动恢复",
-                       instance_id, failures, _MAX_CONSECUTIVE_FAILURES)
-    elif failures <= len(_BACKOFF_SECONDS):
-        delay = _BACKOFF_SECONDS[failures - 1]
-        state["next_retry_at"] = datetime.utcnow() + timedelta(seconds=delay)
-        logger.info("实例 %d reconcile 失败，指数退避 %ds（第 %d/%d 次）",
-                    instance_id, delay, failures, _MAX_CONSECUTIVE_FAILURES)
+    state = cluster_store.record_reconcile_failure(instance_id)
+    if state["paused"]:
+        logger.warning(
+            "实例 %d 连续失败 %d 次（超过阈值）→ 暂停 reconcile，需手动恢复",
+            instance_id, state["failures"],
+        )
     else:
-        delay = _BACKOFF_SECONDS[-1]
-        state["next_retry_at"] = datetime.utcnow() + timedelta(seconds=delay)
-        logger.info("实例 %d reconcile 失败，退避 %ds（第 %d 次）", instance_id, delay, failures)
+        logger.info(
+            "实例 %d reconcile 失败，下一次重试=%s（第 %d 次）",
+            instance_id, state["next_retry_at"], state["failures"],
+        )
 
 
 def _record_reconcile_success(instance_id: int) -> None:
     """reconcile 成功时重置退避状态。"""
-    if instance_id in _backoff_state:
-        _backoff_state.pop(instance_id, None)
-        logger.debug("实例 %d reconcile 成功，退避状态已重置", instance_id)
+    from services import cluster_store
+
+    cluster_store.record_reconcile_success(instance_id)
 
 
 def _resume_paused(instance_id: int) -> None:
-    """手动恢复暂停的实例 reconcile。"""
-    state = _backoff_state.get(instance_id)
-    if state:
-        state["failures"] = 0
-        state["next_retry_at"] = None
-        state["paused"] = False
-        logger.info("实例 %d 已手动恢复 reconcile", instance_id)
+    """手动恢复暂停的实例 reconcile（供运维入口调用）。"""
+    from services import cluster_store
+
+    cluster_store.resume_reconcile(instance_id)
+    logger.info("实例 %d 已手动恢复 reconcile", instance_id)
 
 
 # ── 拓扑感知 ────────────────────────────────────────────────────

@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from database import get_db
 from engine.yaml_schema import validate_yaml
-from engine.scheduler import scheduler
 from services.template_service import render_template, validate_params
 from services.audit_service import log_audit
 from models.orchestration import (

@@ -154,6 +154,80 @@ def m006_auth_sessions(conn, dialect: str) -> None:
     create_index_if_missing(conn, dialect, "ix_pat_tokens_user_id", "pat_tokens", "user_id")
 
 
+def _rebuild_scheduler_queue(conn, dialect: str) -> None:
+    """把旧 scheduler_queue（agent_id 必填、无租约列）整表重建为新形态。
+
+    旧表在生产路径从未写入过（队列此前只在进程内存里），因此这里只需保住
+    可能存在的历史行：老列原样搬过去，新列给默认值。
+    """
+    cols = _columns(conn, dialect, "scheduler_queue")
+    new = "scheduler_queue__p1_7"
+    has_created_at = "created_at" in cols
+    ph = "%s" if dialect == "mysql" else "?"
+    pk = _pk_clause(dialect)
+    cur = conn.cursor()
+    cur.execute(f"DROP TABLE IF EXISTS {new}")
+    cur.execute(
+        f"CREATE TABLE {new} (id {pk}, task_id VARCHAR(128) NOT NULL, label VARCHAR(64), "
+        "domain_id INTEGER, agent_id INTEGER, priority INTEGER DEFAULT 50, score FLOAT DEFAULT 0, "
+        "status VARCHAR(16) DEFAULT 'queued', enqueued_at DATETIME, started_at DATETIME, "
+        "attempts INTEGER DEFAULT 0, lease_owner VARCHAR(128), lease_expires_at DATETIME, "
+        "heartbeat_at DATETIME, finished_at DATETIME)"
+    )
+    cur.execute(
+        "SELECT id, task_id, agent_id, priority, score, status, "
+        + ("created_at" if has_created_at else "NULL")
+        + ", started_at FROM scheduler_queue"
+    )
+    rows = cur.fetchall()
+    for row in rows:
+        cur.execute(
+            f"INSERT INTO {new} (id, task_id, agent_id, priority, score, status, "
+            f"enqueued_at, started_at, attempts) VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, 0)",
+            row,
+        )
+    cur.execute("DROP TABLE scheduler_queue")
+    cur.execute(f"ALTER TABLE {new} RENAME TO scheduler_queue")
+    for index, column in (
+        ("ix_scheduler_queue_task_id", "task_id"),
+        ("ix_scheduler_queue_label", "label"),
+        ("ix_scheduler_queue_domain_id", "domain_id"),
+        ("ix_scheduler_queue_agent_id", "agent_id"),
+        ("ix_scheduler_queue_status", "status"),
+        ("ix_scheduler_queue_enqueued_at", "enqueued_at"),
+    ):
+        create_index_if_missing(conn, dialect, index, "scheduler_queue", column)
+
+
+def m007_cluster_state(conn, dialect: str) -> None:
+    """P1-7：队列落库（含租约/心跳）+ 限流/退避/租约/监控偏移四表。"""
+    # 1) 队列：老库整表重建（agent_id 必填 → 可空 + 租约列）；新库已由 create_all 建好
+    cols = _columns(conn, dialect, "scheduler_queue")
+    if cols and "label" not in cols:
+        _rebuild_scheduler_queue(conn, dialect)
+
+    # 2) 固定窗口限流
+    create_table_if_missing(conn, dialect, "rate_limit_windows",
+        "scope VARCHAR(160) PRIMARY KEY, window_start INTEGER NOT NULL DEFAULT 0, "
+        "count INTEGER NOT NULL DEFAULT 0, updated_at DATETIME")
+
+    # 3) 调和退避（原进程内 _backoff_state）
+    create_table_if_missing(conn, dialect, "reconcile_states",
+        "instance_id INTEGER PRIMARY KEY, failures INTEGER NOT NULL DEFAULT 0, "
+        "next_retry_at DATETIME, paused INTEGER NOT NULL DEFAULT 0, updated_at DATETIME")
+
+    # 4) 单例循环租约（cron / reconcile / runtime watcher 谁在跑）
+    create_table_if_missing(conn, dialect, "cluster_leases",
+        "name VARCHAR(64) PRIMARY KEY, owner VARCHAR(128) NOT NULL, "
+        "expires_at DATETIME NOT NULL, heartbeat_at DATETIME")
+
+    # 5) runtime.jsonl 已读行数（原进程内 _watched，副本切换不重放）
+    create_table_if_missing(conn, dialect, "runtime_watcher_offsets",
+        "file_path VARCHAR(512) PRIMARY KEY, line_count INTEGER NOT NULL DEFAULT 0, "
+        "updated_at DATETIME")
+
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -161,6 +235,7 @@ MIGRATIONS: list[Migration] = [
     ("004_knowledge_source_tags", "新建 knowledge_source_tags 连接表", m004_knowledge_source_tags),
     ("005_scheduled_tasks", "新建 scheduled_tasks 定时任务表", m005_scheduled_tasks),
     ("006_auth_sessions", "新建 sessions/PAT 令牌表（P0-1 服务端会话）", m006_auth_sessions),
+    ("007_cluster_state", "队列落库+租约/心跳，限流/退避/租约/监控偏移四表（P1-7）", m007_cluster_state),
 ]
 
 

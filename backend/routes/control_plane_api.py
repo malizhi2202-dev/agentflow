@@ -1,16 +1,18 @@
 """控制面 API — Agent 探针状态、调度队列、审计调和、Agent 重启、调度配置."""
 
-import time
-import threading
+import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from database import get_db
 from models.agent_probe_latest import AgentProbeLatest
-from models.scheduler_queue import SchedulerQueue
 from models.agent import Agent
 from auth import is_admin, read_audit
+from models.cluster import ReconcileState
+from services import cluster_store
 from services.audit_service import log_audit
+import config
 
 router = APIRouter(prefix="/api/control-plane", tags=["control-plane"])
 
@@ -37,32 +39,27 @@ def _admin_check(request: Request):
     return user
 
 
-# ── 内存限流器 ────────────────────────────────────────────
-# {user_id: [(timestamp, count)]}
-_rate_limit_store: dict[str, list[tuple[float, int]]] = {}
-_rate_limit_lock = threading.Lock()
+# ── 限流（落库 · P1-7）─────────────────────────────────────
+# 原实现是模块级 `_rate_limit_store` + 锁：重启清零、多副本各算各的。现在固定窗口
+# 计数写在 rate_limit_windows 表里，控制面三件写操作（restart/reschedule/pause）
+# 统一 10 次/分钟，超限 429。
+
+_RATE_LIMIT_MAX = 10
+_RATE_LIMIT_WINDOW = 60
 
 
-def _check_rate_limit(user_id: str, max_requests: int = 10, window_seconds: int = 60) -> bool:
-    """检查用户是否超过限流阈值。返回 True 表示通过，False 表示限流。"""
-    now = time.time()
-    with _rate_limit_lock:
-        if user_id not in _rate_limit_store:
-            _rate_limit_store[user_id] = [(now, 1)]
-            return True
-        # 清理窗口外的记录
-        window_start = now - window_seconds
-        _rate_limit_store[user_id] = [
-            (ts, count) for ts, count in _rate_limit_store[user_id]
-            if ts > window_start
-        ]
-        # 计算窗口内请求总数
-        total = sum(count for _, count in _rate_limit_store[user_id])
-        if total >= max_requests:
-            return False
-        # 追加当前请求
-        _rate_limit_store[user_id].append((now, 1))
-        return True
+def _check_rate_limit(user_id: str, max_requests: int = _RATE_LIMIT_MAX,
+                      window_seconds: int = _RATE_LIMIT_WINDOW) -> bool:
+    """记一次控制面写操作；返回 True = 放行，False = 超限。"""
+    _, allowed = cluster_store.consume(
+        f"control-plane:{user_id}", window_seconds, max_requests,
+    )
+    return allowed
+
+
+def _enforce_rate_limit(request: Request) -> None:
+    if not _check_rate_limit(_uid(request)):
+        raise HTTPException(status_code=429, detail="操作过于频繁（10 次/分钟），请稍后重试")
 
 
 # ── GET /probes ──────────────────────────────────────────
@@ -107,26 +104,40 @@ def list_probes(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/queue")
 def list_queue(request: Request, db: Session = Depends(get_db)):
-    """查询调度队列状态"""
+    """调度队列状态（落库的活跃任务，含租约/心跳）"""
+    from models.scheduler_queue import SchedulerQueue
+
     items = (
         db.query(SchedulerQueue)
-        .order_by(SchedulerQueue.priority.desc(), SchedulerQueue.created_at.asc())
+        .filter(SchedulerQueue.status.in_(("queued", "leased")))
+        .order_by(SchedulerQueue.priority.desc(), SchedulerQueue.enqueued_at.asc())
         .limit(200)
         .all()
     )
-    return [
-        {
-            "id": q.id,
-            "task_id": q.task_id,
-            "agent_id": q.agent_id,
-            "priority": q.priority,
-            "score": q.score,
-            "status": q.status,
-            "created_at": q.created_at.isoformat() if q.created_at else None,
-            "started_at": q.started_at.isoformat() if q.started_at else None,
-        }
-        for q in items
-    ]
+    return [q.to_dict() for q in items]
+
+
+# ── GET /cluster ─────────────────────────────────────────
+
+@router.get("/cluster")
+def cluster_status(request: Request, db: Session = Depends(get_db)):
+    """副本与单例循环的真相（P0-9 + P1-7）：谁在跑、队列多深、还剩哪些单进程语义。"""
+    _user(request)
+    leases = {row["name"]: row for row in cluster_store.list_leases(db=db)}
+    now = datetime.datetime.utcnow()
+    return {
+        "instance_id": config.INSTANCE_ID,
+        "deploy_mode": config.DEPLOY_MODE,
+        "lease_ttl_seconds": config.CLUSTER_LEASE_TTL_SECONDS,
+        "leases": leases,
+        "queue": cluster_store.queue_stats(db=db),
+        "reconcile_backoff_rows": db.query(ReconcileState).count(),
+        "process_local": [
+            "OAuth 授权 state 与非重放缓存（channel_api._oauth_states / nonce_cache）"
+            "——单副本内有效，多副本下回调需落在同一副本",
+        ],
+        "checked_at": now.isoformat(),
+    }
 
 
 # ── GET /reconcile ───────────────────────────────────────
@@ -143,6 +154,7 @@ def list_reconcile_events(request: Request):
 @router.post("/agent/{agent_id}/restart")
 def restart_agent(agent_id: int, request: Request, db: Session = Depends(get_db)):
     """触发 Agent 重启 — 调用探针服务重新探测"""
+    _enforce_rate_limit(request)
     agent = db.query(Agent).filter(Agent.id == agent_id).first()
     if not agent:
         raise HTTPException(status_code=404, detail=f"Agent {agent_id} 不存在")
@@ -183,6 +195,7 @@ def restart_agent(agent_id: int, request: Request, db: Session = Depends(get_db)
 @router.post("/agent/{agent_id}/reschedule")
 def reschedule_agent(agent_id: int, request: Request, db: Session = Depends(get_db)):
     """重新调度 Agent 上的等待任务到其他空闲 Agent"""
+    _enforce_rate_limit(request)
     agent = db.query(Agent).filter(Agent.id == agent_id).first()
     if not agent:
         raise HTTPException(status_code=404, detail=f"Agent {agent_id} 不存在")
@@ -212,6 +225,7 @@ def reschedule_agent(agent_id: int, request: Request, db: Session = Depends(get_
 @router.post("/agent/{agent_id}/pause")
 def pause_agent(agent_id: int, request: Request, db: Session = Depends(get_db)):
     """暂停 Agent 接收新任务"""
+    _enforce_rate_limit(request)
     agent = db.query(Agent).filter(Agent.id == agent_id).first()
     if not agent:
         raise HTTPException(status_code=404, detail=f"Agent {agent_id} 不存在")

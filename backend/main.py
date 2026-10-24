@@ -39,19 +39,33 @@ from routes.human_approval_api import router as human_approval_router
 
 
 async def _cron_scheduler_loop():
-    """后台定时任务调度器 — 每 30s 检查 cron 表达式."""
+    """后台定时任务调度器 — 每 30s 检查 cron 表达式（受数据库租约保护）."""
     import datetime
     import calendar
     from database import SessionLocal
     from models.scheduled_task import ScheduledTask
+    from services import cluster_store
 
     print("[cron] 定时任务调度器已启动，每 30s 检查一次")
+    standby_logged = False
 
     while True:
         try:
             await asyncio.sleep(30)
         except asyncio.CancelledError:
             break
+
+        # P1-7：多副本下只有一个副本的 cron 生效，否则同一任务会被触发多次
+        try:
+            if not cluster_store.acquire_lease("cron-scheduler", config.CLUSTER_LEASE_TTL_SECONDS):
+                if not standby_logged:
+                    print("[cron] 待命：租约由其他副本持有")
+                    standby_logged = True
+                continue
+            standby_logged = False
+        except Exception as e:
+            print(f"[cron] 租约失败，跳过本轮: {e}")
+            continue
 
         try:
             now = datetime.datetime.utcnow()

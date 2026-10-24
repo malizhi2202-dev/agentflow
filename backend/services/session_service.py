@@ -7,10 +7,10 @@
 - 权限/角色/口令变更必须旋转会话（OWASP）——由调用方 revoke 后重签。
 - PAT：`af_pat_` 前缀 + 同样的哈希存储；scopes 复用平台权限点字符串，不造第二套词；
   过期默认 90 天且**禁止永不过期**。
-- 登录节流（5 败/15min）是**进程内存**：单副本承诺下成立，多副本外置属波 2 / P1-7。
+- 登录节流（5 败/15min）已按 P1-7 落库（`rate_limit_windows` 固定窗口），
+  多副本共享同一份计数，不会各算各的。
 
-shortcut: 登录节流与 last_seen 写入节流都在进程内存/单行更新上，多副本会各自计数；
-          波 2 P1-7 状态外置时一起搬进数据库并改用租约。
+shortcut: `last_seen` 每 60 秒最多回写一次（同进程内节流），只是少写库，不影响正确性。
 """
 from __future__ import annotations
 
@@ -18,13 +18,13 @@ import datetime
 import hashlib
 import json
 import secrets
-import threading
 
 from sqlalchemy.orm import Session
 
 import config
 from database import SessionLocal
 from models.session import PatToken, SessionToken
+from services import cluster_store
 
 PAT_PREFIX = "af_pat_"
 
@@ -295,37 +295,31 @@ def revoke_pat(user_id: str, pat_id: int, db: Session | None = None) -> bool:
             db.close()
 
 
-# ── 登录节流（进程内 · 见模块 docstring 的 shortcut）────────
+# ── 登录节流（落库 · P1-7）──────────────────────────────────
 
-_login_failures: dict[tuple[str, str], list[datetime.datetime]] = {}
-_throttle_lock = threading.Lock()
+def _throttle_scope(user_id: str, ip: str) -> str:
+    return f"login:{user_id}:{ip or 'unknown'}"
 
 
-def _prune(key: tuple[str, str], now: datetime.datetime) -> list[datetime.datetime]:
-    window = datetime.timedelta(minutes=config.LOGIN_FAILURE_WINDOW_MINUTES)
-    hits = [t for t in _login_failures.get(key, []) if now - t < window]
-    if hits:
-        _login_failures[key] = hits
-    else:
-        _login_failures.pop(key, None)
-    return hits
+def _throttle_window() -> int:
+    return max(1, config.LOGIN_FAILURE_WINDOW_MINUTES) * 60
 
 
 def login_throttled(user_id: str, ip: str) -> bool:
-    with _throttle_lock:
-        return len(_prune((user_id, ip or "unknown"), _now())) >= config.LOGIN_MAX_FAILURES
+    """窗口内失败次数达到阈值即限流（只读，不消耗配额）。"""
+    return cluster_store.hits(
+        _throttle_scope(user_id, ip), _throttle_window()
+    ) >= config.LOGIN_MAX_FAILURES
 
 
 def record_login_failure(user_id: str, ip: str) -> None:
-    with _throttle_lock:
-        key = (user_id, ip or "unknown")
-        _prune(key, _now())
-        _login_failures.setdefault(key, []).append(_now())
+    cluster_store.consume(
+        _throttle_scope(user_id, ip), _throttle_window(), config.LOGIN_MAX_FAILURES,
+    )
 
 
 def clear_login_failures(user_id: str, ip: str) -> None:
-    with _throttle_lock:
-        _login_failures.pop((user_id, ip or "unknown"), None)
+    cluster_store.reset(_throttle_scope(user_id, ip))
 
 
 # ── cookie 写入 ───────────────────────────────────────────

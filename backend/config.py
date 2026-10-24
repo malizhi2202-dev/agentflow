@@ -1,6 +1,8 @@
 """AgentFlow 后端配置."""
 import os
 import json
+import secrets
+import socket
 
 
 def _env_list(name: str, default: str = "") -> list[str]:
@@ -42,6 +44,16 @@ LOGIN_FAILURE_WINDOW_MINUTES: int = int(os.environ.get("LOGIN_FAILURE_WINDOW_MIN
 # X-User-Id 调试通道：三重 opt-in（env ∧ localhost ∧ admit 白名单），缺一即关闭
 AUTH_DEBUG_HEADER_ENABLED: bool = _env_bool("AGENTFLOW_AUTH_DEBUG_HEADER")
 AUTH_DEBUG_HEADER_ADMIT_USERS: list[str] = _env_list("AGENTFLOW_AUTH_DEBUG_ADMIT")
+
+# ── 副本与单例循环（P1-7）──────────────────────────────────
+# 每个副本一个稳定标识：显式 env 优先，否则 host:pid:随机后缀（进程重启即换）
+INSTANCE_ID: str = os.environ.get("INSTANCE_ID") or (
+    f"{socket.gethostname()}:{os.getpid()}:{secrets.token_hex(2)}"
+)
+# 单例循环租约 TTL：cron/reconcile 5s 一轮、runtime watcher 30s 一轮，默认 90s 留余量
+CLUSTER_LEASE_TTL_SECONDS: int = int(os.environ.get("CLUSTER_LEASE_TTL_SECONDS", "90"))
+# 队列任务租约：领取后多久没心跳就认为持有者失联、任务回队
+QUEUE_LEASE_SECONDS: int = int(os.environ.get("QUEUE_LEASE_SECONDS", "60"))
 
 # 项目隔离：每个项目有独立的 .specs/ 和配置
 CURRENT_PROJECT: str = PROJECT_ROOT

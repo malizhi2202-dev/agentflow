@@ -1,20 +1,18 @@
-"""K8s-inspired routing & scaling service — domain auto-routing, gateway, elastic scaling."""
+"""K8s-inspired routing & scaling service — domain auto-routing, gateway, elastic scaling.
+
+P1-7：排队不再用进程内计数器（`_queued_by_capability`，重启清零、多副本各算各的），
+改为 `cluster_store` 里的真实队列行——排位=行数，队列深度=行数，谁都算得一样。
+"""
 
 from __future__ import annotations
 
-from collections import defaultdict
+import uuid
+
+from services import cluster_store
 from services.scheduler_service import SchedulerService
 
 # ── 全局单例 ──
 _scheduler = SchedulerService()
-
-# ── 每个 capability 的排队计数器（capability_key → count）
-#    格式: "domainId:capability" → queued_count
-_queued_by_capability: dict[str, int] = defaultdict(int)
-
-
-def _cap_key(domain_id: int, capability: str) -> str:
-    return f"{domain_id}:{capability}"
 
 
 def _extract_capabilities(agent_row) -> list[str]:
@@ -48,12 +46,15 @@ def _agent_to_scheduler_dict(agent_row) -> dict:
 
 
 def route_to_agent(agents: list, capability: str) -> dict:
-    """在 Agent 列表中按 capability 过滤，选负载最低的。
+    """在 Agent 列表中按 capability 过滤，选负载最低的；满载则入队（落库）。
 
     Returns:
-        {"agent_id": N, "agent_name": "..", "load": "2/5"}  或
-        {"status": "queued", "position": N}
+        {"agent_id": N, "agent_name": "..", "load": "2/5", "status": "routed"}  或
+        {"status": "queued", "position": N, "task_id": "..."}
     """
+    if not agents:
+        return {"status": "queued", "position": 0, "detail": "没有可路由的 Agent"}
+
     # 转换为调度器使用的格式
     candidates = [_agent_to_scheduler_dict(a) for a in agents]
     # 匹配 capability
@@ -73,30 +74,34 @@ def route_to_agent(agents: list, capability: str) -> dict:
             "status": "routed",
         }
 
-    # 全部繁忙 → 排队
-    domain_id = agents[0].domain_id if not isinstance(agents[0], dict) else agents[0].get("domain_id")
-    key = _cap_key(domain_id or 0, capability)
-    _queued_by_capability[key] += 1
-    position = _queued_by_capability[key]
-    return {"status": "queued", "position": position, "detail": "所有匹配 Agent 均满载"}
+    # 全部繁忙 → 入队（一行一条，重启/多副本都在同一张表里）
+    first = agents[0]
+    domain_id = first.get("domain_id") if isinstance(first, dict) else first.domain_id
+    task_id = f"route-{uuid.uuid4().hex[:12]}"
+    row = cluster_store.enqueue_task(
+        task_id, label=capability, priority=50, domain_id=domain_id,
+    )
+    return {
+        "status": "queued",
+        "position": row["position"],
+        "task_id": task_id,
+        "detail": "所有匹配 Agent 均满载",
+    }
 
 
 def get_queued_count(domain_id: int, capability: str) -> int:
-    """获取指定 capability 组当前的排队任务数."""
-    return _queued_by_capability.get(_cap_key(domain_id, capability), 0)
+    """获取指定 capability 组当前的排队任务数（来自队列行，不维护计数器）."""
+    return cluster_store.count_queued(label=capability, domain_id=domain_id)
 
 
 def get_all_queue_counts() -> dict[str, int]:
     """获取所有 capability 的排队计数."""
-    return dict(_queued_by_capability)
+    return cluster_store.queue_stats()["by_label"]
 
 
 def decrement_queue(domain_id: int, capability: str) -> int:
-    """任务被消费后减少排队计数."""
-    key = _cap_key(domain_id, capability)
-    if _queued_by_capability[key] > 0:
-        _queued_by_capability[key] -= 1
-    return _queued_by_capability[key]
+    """任务被消费后把最早的一条标完成，返回剩余排队数."""
+    return cluster_store.complete_oldest(capability, domain_id=domain_id)
 
 
 def simulate_queue_monitor(domain_id: int, capability: str, agents: list) -> dict:

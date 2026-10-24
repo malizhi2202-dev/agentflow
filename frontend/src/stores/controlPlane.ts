@@ -23,16 +23,33 @@ export interface ProbeRecord {
   created_at: string;
 }
 
+/** 队列行（P1-7 起落库 + 租约/心跳；不再有编排名称字段） */
 export interface QueueItem {
   id: number;
-  orchestration_id: number;
-  orchestration_name: string;
-  agent_id: number;
-  agent_name: string;
+  task_id: string;
+  label: string | null;
+  domain_id: number | null;
+  agent_id: number | null;
   status: string;
   priority: number;
-  created_at: string;
-  updated_at: string;
+  attempts: number;
+  enqueued_at: string | null;
+  started_at: string | null;
+  lease_owner: string | null;
+  lease_expires_at: string | null;
+  heartbeat_at: string | null;
+}
+
+/** 副本与单例循环的真相（P0-9 / P1-7） */
+export interface ClusterStatus {
+  instance_id: string;
+  deploy_mode: string;
+  lease_ttl_seconds: number;
+  leases: Record<string, { name: string; owner: string; active: boolean; expires_at: string | null }>;
+  queue: { total: number; leased: number; by_label: Record<string, number> };
+  reconcile_backoff_rows: number;
+  process_local: string[];
+  checked_at: string;
 }
 
 export interface ReconcileEntry {
@@ -49,12 +66,14 @@ interface ControlPlaneState {
   probes: AgentStatus[];
   queue: QueueItem[];
   reconcile: ReconcileEntry[];
+  cluster: ClusterStatus | null;
   selectedAgent: number | null;
   loading: boolean;
 
   fetchProbes: () => Promise<void>;
   fetchQueue: () => Promise<void>;
   fetchReconcile: () => Promise<void>;
+  fetchCluster: () => Promise<void>;
   restartAgent: (agentId: number) => Promise<any>;
   rescheduleAgent: (agentId: number) => Promise<any>;
   pauseAgent: (agentId: number) => Promise<any>;
@@ -65,6 +84,7 @@ export const useControlPlane = create<ControlPlaneState>((set, get) => ({
   probes: [],
   queue: [],
   reconcile: [],
+  cluster: null,
   selectedAgent: null,
   loading: false,
 
@@ -84,6 +104,11 @@ export const useControlPlane = create<ControlPlaneState>((set, get) => ({
     set({ loading: true });
     const result = await safeFetch('/api/control-plane/reconcile');
     set({ reconcile: (result.ok && result.data ? (Array.isArray(result.data) ? result.data : (result.data.entries || [])) : []), loading: false });
+  },
+
+  fetchCluster: async () => {
+    const result = await safeFetch('/api/control-plane/cluster');
+    set({ cluster: result.ok && result.data ? result.data : null });
   },
 
   restartAgent: async (agentId: number) => {

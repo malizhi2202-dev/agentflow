@@ -5,7 +5,7 @@ import {
   Layers, Plus, Trash2, Edit3, Check, ChevronDown, ChevronRight,
   GitBranch, Zap, CopyPlus, AlertTriangle,
 } from 'lucide-react';
-import { useControlPlane, AgentStatus, QueueItem, ReconcileEntry } from '../stores/controlPlane';
+import { useControlPlane, AgentStatus, QueueItem, ReconcileEntry, ClusterStatus } from '../stores/controlPlane';
 import { useDomains, Domain, RouteResult, ScaleResult } from '../stores/domains';
 import { useAgents, Agent } from '../stores/agents';
 
@@ -245,20 +245,24 @@ function QueueTab({ queue }: { queue: QueueItem[] }) {
       <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
         <Clock size={32} style={{ opacity: 0.3, marginBottom: 12 }} />
         <p style={{ fontSize: 13, margin: 0 }}>调度队列为空</p>
-        <p style={{ fontSize: 11, margin: '4px 0' }}>暂无待调度或执行中的任务</p>
+        <p style={{ fontSize: 11, margin: '4px 0' }}>暂无待调度或执行中的任务（队列落库，重启不清零）</p>
       </div>
     );
   }
 
   const statusStyle = function(st: string): React.CSSProperties {
-    const map: Record<string, { c: string; bg: string }> = {
-      pending:    { c: 'var(--orange)', bg: 'var(--orange-bg)' },
-      running:    { c: 'var(--blue)',   bg: 'var(--blue-bg)' },
-      completed:  { c: 'var(--green)',  bg: 'var(--green-bg)' },
-      failed:     { c: 'var(--red)',    bg: 'var(--red-bg)' },
+    const map: Record<string, { c: string; bg: string; label: string }> = {
+      queued:  { c: 'var(--orange)', bg: 'var(--orange-bg)', label: '排队中' },
+      leased:  { c: 'var(--blue)',   bg: 'var(--blue-bg)',   label: '执行中（已租约）' },
+      done:    { c: 'var(--green)',  bg: 'var(--green-bg)',  label: '完成' },
+      failed:  { c: 'var(--red)',    bg: 'var(--red-bg)',    label: '失败' },
     };
-    const m = map[st] || { c: 'var(--text-muted)', bg: 'var(--bg-input)' };
+    const m = map[st] || { c: 'var(--text-muted)', bg: 'var(--bg-input)', label: st };
     return { padding: '2px 8px', borderRadius: 3, fontSize: 10, background: m.bg, color: m.c, fontWeight: 500 };
+  };
+  const statusLabel = function(st: string) {
+    const map: Record<string, string> = { queued: '排队中', leased: '执行中', done: '完成', failed: '失败' };
+    return map[st] || st;
   };
 
   return (
@@ -266,33 +270,38 @@ function QueueTab({ queue }: { queue: QueueItem[] }) {
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
         <thead>
           <tr style={{ borderBottom: '1px solid var(--border-strong)', background: 'var(--bg-input)' }}>
-            <th style={th}>任务 ID</th>
-            <th style={th}>编排名称</th>
-            <th style={th}>目标 Agent</th>
+            <th style={th}>任务</th>
+            <th style={th}>能力标签</th>
+            <th style={th}>域</th>
             <th style={th}>状态</th>
             <th style={th}>优先级</th>
-            <th style={th}>创建时间</th>
+            <th style={th}>租约持有者</th>
+            <th style={th}>入队时间</th>
           </tr>
         </thead>
         <tbody>
           {queue.map(function(item) {
             return (
               <tr key={`queue-${item.id}`} style={{ borderBottom: '1px solid var(--border)' }}>
-                <td style={{ ...td, fontFamily: 'var(--font-mono)', fontSize: 10 }}>#{item.id}</td>
-                <td style={td}>{item.orchestration_name}</td>
-                <td style={td}>{item.agent_name || 'Agent #' + item.agent_id}</td>
-                <td style={td}><span style={statusStyle(item.status)}>{item.status}</span></td>
+                <td style={{ ...td, fontFamily: 'var(--font-mono)', fontSize: 10 }}>{item.task_id}</td>
+                <td style={td}>{item.label || '-'}</td>
+                <td style={td}>{item.domain_id != null ? '#' + item.domain_id : '未分类'}</td>
+                <td style={td}><span style={statusStyle(item.status)}>{statusLabel(item.status)}</span></td>
                 <td style={{ ...td, fontFamily: 'var(--font-mono)' }}>
                   <span style={{
                     padding: '2px 6px', borderRadius: 3, fontSize: 10,
-                    background: item.priority >= 8 ? 'var(--red-bg)' : item.priority >= 5 ? 'var(--orange-bg)' : 'var(--bg-input)',
-                    color: item.priority >= 8 ? 'var(--red)' : item.priority >= 5 ? 'var(--orange)' : 'var(--text-secondary)',
+                    background: item.priority >= 80 ? 'var(--red-bg)' : item.priority >= 50 ? 'var(--orange-bg)' : 'var(--bg-input)',
+                    color: item.priority >= 80 ? 'var(--red)' : item.priority >= 50 ? 'var(--orange)' : 'var(--text-secondary)',
                   }}>
                     P{item.priority}
                   </span>
                 </td>
                 <td style={{ ...td, fontSize: 10, color: 'var(--text-muted)' }}>
-                  {item.created_at ? new Date(item.created_at).toLocaleString('zh-CN') : '-'}
+                  {item.lease_owner || '-'}
+                  {item.lease_owner && item.lease_expires_at ? '' : ''}
+                </td>
+                <td style={{ ...td, fontSize: 10, color: 'var(--text-muted)' }}>
+                  {item.enqueued_at ? new Date(item.enqueued_at).toLocaleString('zh-CN') : '-'}
                 </td>
               </tr>
             );
@@ -1277,11 +1286,61 @@ function DetailPanel({
   );
 }
 
+function ClusterStrip({ cluster }: { cluster: ClusterStatus | null }) {
+  if (!cluster) return null;
+  const leaseNames: Record<string, string> = {
+    'cron-scheduler': '定时任务',
+    'runtime-watcher': 'runtime 监控',
+    'reconcile-loop': '调和循环',
+  };
+  const active = Object.keys(cluster.leases || {}).filter(function(k) {
+    return cluster.leases[k] && cluster.leases[k].active;
+  });
+
+  return (
+    <div style={{
+      background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8,
+      padding: '12px 16px', marginBottom: 16, display: 'flex', flexWrap: 'wrap',
+      alignItems: 'center', gap: 18, fontSize: 11, color: 'var(--text-secondary)',
+    }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <Server size={13} />
+        <span style={{ color: 'var(--text-muted)' }}>当前副本</span>
+        <code style={{ fontFamily: 'var(--font-mono)', fontSize: 10 }}>{cluster.instance_id}</code>
+      </span>
+      <span style={{ color: 'var(--text-muted)' }}>部署模式 <b style={{ color: 'var(--text)' }}>{cluster.deploy_mode}</b></span>
+      <span style={{ color: 'var(--text-muted)' }}>
+        队列 <b style={{ color: 'var(--text)' }}>{cluster.queue.total}</b>
+        （执行中 {cluster.queue.leased}）
+      </span>
+      <span style={{ color: 'var(--text-muted)' }}>
+        单例循环：
+        {active.length === 0
+          ? ' 无（待选主）'
+          : active.map(function(k) {
+              return (
+                <span key={`lease-${k}`} style={{ marginLeft: 6 }}>
+                  {leaseNames[k] || k}
+                  <code style={{ fontFamily: 'var(--font-mono)', fontSize: 10, marginLeft: 4 }}>
+                    {(cluster.leases[k].owner || '').split(':')[0] || '-'}
+                  </code>
+                </span>
+              );
+            })}
+      </span>
+      <span style={{ color: 'var(--text-muted)', flex: 1, minWidth: 220 }}>
+        队列 / 限流 / 退避 / 监控偏移均已落库；单例循环靠 {cluster.lease_ttl_seconds}s 租约选主，
+        多副本可同时启动。仍属进程内的：{cluster.process_local.join('；')}。
+      </span>
+    </div>
+  );
+}
+
 // ── 主页面 ──
 export default function AgentControlPlane() {
   const {
-    probes, queue, reconcile, selectedAgent, loading,
-    fetchProbes, fetchQueue, fetchReconcile,
+    probes, queue, reconcile, cluster, selectedAgent, loading,
+    fetchProbes, fetchQueue, fetchReconcile, fetchCluster,
     restartAgent, setSelectedAgent,
   } = useControlPlane();
 
@@ -1294,6 +1353,7 @@ export default function AgentControlPlane() {
     fetchProbes();
     fetchQueue();
     fetchReconcile();
+    fetchCluster();
     intervalRef.current = setInterval(function() {
       fetchProbes();
       fetchQueue();
@@ -1365,6 +1425,9 @@ export default function AgentControlPlane() {
 
       {/* 概览卡片 */}
       <OverviewCards probes={probes} queue={queue} />
+
+      {/* 副本与单例循环（P0-9：单副本事实写在界面上，不靠口头承诺） */}
+      <ClusterStrip cluster={cluster} />
 
       {/* Tab 导航 */}
       <div className="tab-bar">

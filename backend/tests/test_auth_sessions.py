@@ -20,7 +20,7 @@ import config
 from models import Base
 from models.session import PatToken, SessionToken
 from passwords import hash_password
-from services import session_service
+from services import cluster_store, session_service
 
 PW = "correct-horse-battery-staple"
 
@@ -46,6 +46,7 @@ class _AuthTestBase(unittest.TestCase):
             patch.object(auth, "_users_file", return_value=self.users_file),
             patch.object(auth, "_audit_file", return_value=self.audit_file),
             patch.object(session_service, "SessionLocal", self.Session),
+            patch.object(cluster_store, "SessionLocal", self.Session),
             patch.object(config, "DEPLOY_MODE", "localhost"),
             patch.object(config, "TRUSTED_PROXY_IPS", []),
             patch.object(config, "ALLOW_CIDRS", []),
@@ -55,13 +56,14 @@ class _AuthTestBase(unittest.TestCase):
         ]
         for p in self._patchers:
             p.start()
-        session_service._login_failures.clear()
+        cluster_store.truncate_rate_limits()
         self._write_users([self._user("admin")])
 
     def tearDown(self):
+        # 先清库再撤 patch：清场必须打在本用例的内存库上
+        cluster_store.truncate_rate_limits()
         for p in reversed(self._patchers):
             p.stop()
-        session_service._login_failures.clear()
         self.engine.dispose()
         self.tmp.cleanup()
 
