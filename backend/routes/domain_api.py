@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.domain import Domain
 from models.agent import Agent
+from services import attribution as attr
 from services.audit_service import log_audit
 from services.k8s_routing_service import (
     route_to_agent, get_queued_count, simulate_queue_monitor, _extract_capabilities,
@@ -99,6 +100,41 @@ def delete_domain(domain_id: int, request: Request = None, db: Session = Depends
               f"deleted (agents_released={affected})",
               request.client.host if request.client else "127.0.0.1")
     return {"status": "deleted", "agents_released": affected}
+
+
+@router.get("/{domain_id}/attribution-policy")
+def get_attribution_policy(domain_id: int, request: Request = None,
+                           db: Session = Depends(get_db)):
+    """读域归因策略。无策略 = 现状（accountable 缺省 = originator）。"""
+    user = _user(request)
+    domain = _filter_owner(db.query(Domain).filter(Domain.id == domain_id), user).first()
+    if domain is None:
+        raise HTTPException(status_code=404, detail="域不存在")
+    row = attr.get_policy(db, domain_id)
+    return {"domain_id": domain_id, "policy": row.to_dict() if row else None}
+
+
+@router.put("/{domain_id}/attribution-policy")
+def put_attribution_policy(domain_id: int, payload: dict, request: Request = None,
+                           db: Session = Depends(get_db)):
+    """写域归因策略（管理员或域 owner）。"""
+    user = _user(request)
+    domain = _filter_owner(db.query(Domain).filter(Domain.id == domain_id), user).first()
+    if domain is None:
+        raise HTTPException(status_code=404, detail="域不存在")
+    from auth import is_admin
+    if not is_admin(user) and domain.owner_id != user["id"]:
+        raise HTTPException(status_code=403, detail="需要管理员或域 owner 权限")
+    try:
+        row = attr.set_policy(
+            db, domain_id=domain_id,
+            accountable_kind=payload.get("accountable_kind", ""),
+            accountable_ref=payload.get("accountable_ref", ""),
+            actor=user["id"],
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"ok": True, "policy": row.to_dict()}
 
 
 @router.get("/{domain_id}/capabilities")

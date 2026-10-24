@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from auth import is_admin, write_audit
 from database import get_db
 from models.rsi import RSI_CATEGORIES, Proposal, SurfaceManifest
-from services import rsi_service as rsi
+from services import l0_extractor, rsi_service as rsi, shadow_runner
 
 router = APIRouter(prefix="/api/rsi", tags=["rsi"])
 
@@ -141,6 +141,49 @@ def list_reviews(memory_id: int | None = Query(default=None),
                  request: Request = None, db: Session = Depends(get_db)):
     _user(request)
     return {"reviews": rsi.list_reviews(db, memory_id=memory_id)}
+
+
+@router.post("/proposals/{proposal_id}/shadow/run")
+def run_shadow(proposal_id: int, payload: dict, request: Request,
+               db: Session = Depends(get_db)):
+    """影子重放 runner：用金标用例算 pass_rate，再走既有影子门（不新开门禁）。"""
+    _user(request)
+    try:
+        result = shadow_runner.run_shadow(
+            db, _proposal(db, proposal_id),
+            cases=payload.get("cases") or [],
+            judge_model=payload.get("judge_model", ""),
+            golden_set_frozen=bool(payload.get("golden_set_frozen", False)),
+            cross_vendor=bool(payload.get("cross_vendor", False)),
+            baseline=float(payload.get("baseline", 0.0) or 0.0),
+        )
+    except Exception as e:  # noqa: BLE001
+        _map(e)
+    return {"ok": True, **result}
+
+
+# ── L0 → L1 抽取（默认 dry_run）──────────────────────────
+
+@router.post("/l0/extract")
+def l0_extract(payload: dict, request: Request, db: Session = Depends(get_db)):
+    user = _user(request)
+    conversation_id = int(payload.get("conversation_id") or 0)
+    if not conversation_id:
+        raise HTTPException(status_code=400, detail="conversation_id 必填")
+    from models.conversation import Conversation
+
+    conv = db.query(Conversation).filter(Conversation.id == conversation_id).first()
+    if conv is None or (conv.owner_id != user["id"] and not is_admin(user)):
+        # 越权与不存在统一 404（不给探测面）
+        raise HTTPException(status_code=404, detail="会话不存在")
+    try:
+        result = l0_extractor.extract(
+            db, conv, extractor=None,        # 端点上永远 dry_run：真实抽取需服务层注入适配器
+            limit=int(payload.get("limit", 50) or 50),
+        )
+    except Exception as e:  # noqa: BLE001
+        _map(e)
+    return {"ok": True, **result}
 
 
 # ── 提案（三权分离）───────────────────────────────────────

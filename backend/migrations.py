@@ -488,6 +488,17 @@ def m012_declarative_api(conn, dialect: str) -> None:
 
 
 
+def m016_domain_attribution_policy(conn, dialect: str) -> None:
+    """R8-2 剩余面：域级 accountable 策略表（一域一条；无行 = 现状）。"""
+    pk = _pk_clause(dialect)
+    create_table_if_missing(conn, dialect, "domain_attribution_policies",
+        f"id {pk}, domain_id INTEGER NOT NULL, accountable_kind VARCHAR(16) DEFAULT 'originator', "
+        "accountable_ref VARCHAR(64), updated_by VARCHAR(64), updated_at DATETIME, "
+        "UNIQUE(domain_id)")
+    create_index_if_missing(conn, dialect, "ix_domain_attr_policy_domain",
+                            "domain_attribution_policies", "domain_id")
+
+
 def m015_attribution_columns(conn, dialect: str) -> None:
     """R8-2：任务与运行各加归因双列（originator 只鉴权 / accountable 只审计成本）。
 
@@ -591,6 +602,7 @@ MIGRATIONS: list[Migration] = [
     ("013_rsi_governance", "记忆四层/提案/可改面/熔断四表（R6/R7）", m013_rsi_governance),
     ("014_rsi_review_and_switches", "记忆因果前缀/防污染 + 晋升评审账 + 类目开关（R6-4/R7-4/R7-5）", m014_rsi_review_and_switches),
     ("015_attribution_columns", "任务/运行归因双列 originator⟂accountable（R8-2）", m015_attribution_columns),
+    ("016_domain_attribution_policy", "域级 accountable 策略表（R8-2 剩余面）", m016_domain_attribution_policy),
 ]
 
 
