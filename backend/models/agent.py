@@ -4,7 +4,10 @@ from sqlalchemy import String, Integer, DateTime, Text, JSON, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from models import Base
 
-SUPPORTED_RUNTIMES = frozenset({"langchain", "langgraph", "autogen", "crewai", "codex", "custom"})
+# v21 T-02：`hermes` / `dsh` 是本机可**真执行**的 CLI 运行时（其余仍走进程内 provider）
+SUPPORTED_RUNTIMES = frozenset({
+    "langchain", "langgraph", "autogen", "crewai", "codex", "custom", "hermes", "dsh",
+})
 
 
 class Agent(Base):

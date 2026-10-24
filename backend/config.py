@@ -63,6 +63,25 @@ RSI_JUDGE_MODEL: str = os.environ.get("RSI_JUDGE_MODEL", "").strip()
 RSI_JUDGE_API_KEY: str = os.environ.get("RSI_JUDGE_API_KEY", "").strip()
 # 每次作业最多调用次数（预算帽）；0 = 禁用
 RSI_JUDGE_MAX_CALLS: int = int(os.environ.get("RSI_JUDGE_MAX_CALLS", "0") or 0)
+# ── 运行时执行（v21 T-02）：把 Agent 的 LLM 调用委托给本机 CLI 运行时 ──────
+# 默认关闭（fail-closed）：不配置就仍走进程内 provider，绝不静默换执行体。
+RUNTIME_EXEC_ENABLED: bool = _env_bool("RUNTIME_EXEC_ENABLED")
+RUNTIME_EXEC_TIMEOUT_SECONDS: int = int(os.environ.get("RUNTIME_EXEC_TIMEOUT_SECONDS", "180") or 180)
+# 每个运行时一条命令模板（{prompt} 由平台替换成单个参数，不经 shell）
+RUNTIME_CMD_TEMPLATES: dict[str, str] = {
+    "hermes": os.environ.get(
+        "RUNTIME_CMD_HERMES",
+        "/home/malizhi/.hermes/hermes-agent/venv/bin/hermes -z {prompt}",
+    ).strip(),
+    "dsh": os.environ.get(
+        "RUNTIME_CMD_DSH",
+        f"node {os.environ.get('RSI_CLI_DSH_BIN', '/home/malizhi/ai/deepseek-harness/apps/cli/lib/bin.js')}"
+        " --profile headless {prompt}",
+    ).strip(),
+    # codex CLI 本机未安装 → 默认空模板 = fail-closed（挂上 CLI 后配 RUNTIME_CMD_CODEX 即启用）
+    "codex": os.environ.get("RUNTIME_CMD_CODEX", "").strip(),
+}
+
 # ── CLI 模型通道（用本地已部署的 hermes / dsh CLI 当 provider）──────────
 # 用途：试运行/本地无 API key 时，直接把 CLI 当模型（judge / L0 抽取都能用）。
 # 安全：**不经过 shell**（argv 列表 + shlex 解析），prompt 作为单个参数传入；超时可配。

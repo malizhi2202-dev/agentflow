@@ -8,7 +8,21 @@ from models.message import Message
 from services.encryption_service import encrypt, decrypt
 from services.audit_service import log_audit
 from services.runtime_tracer import tracer
+from services import runtime_exec
 from services.llm_providers import get_provider, SUPPORTED_PROVIDERS
+
+
+def _generate(agent, messages: list[dict], api_key: str) -> tuple[str, dict]:
+    """模型调用唯一入口：显式启用且运行时可用 → 委托 CLI 运行时；否则走进程内 provider。
+
+    **不静默降级**：运行时报错直接上抛（调用方决定 502/400），绝不偷偷回退 provider。
+    """
+    if runtime_exec.enabled(agent.runtime):
+        prompt = "\n\n".join(f"[{m['role']}] {m['content']}" for m in messages)
+        out = runtime_exec.execute(agent.runtime, prompt)
+        return out["reply"], out["usage"]
+    provider = get_provider(agent.model_provider)
+    return provider.chat(messages, api_key, agent.model_name or "gpt-3.5-turbo")
 
 
 def _system_prompt_for(agent) -> str:

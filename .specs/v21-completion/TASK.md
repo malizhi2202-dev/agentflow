@@ -13,7 +13,7 @@ Wave 5: T-07（users/audit 表化）→ 收口（S-align/UAT）
 | # | 项 | 状态 | verify（命令） |
 |---|---|---|---|
 | T-01 | 人设三件落库 | ✅ done | `unittest tests.test_agent_prompt_persist` 4 绿；SQLite/MySQL 迁移 017 各一次 |
-| T-02 | Agent 真实运行时执行 | pending | 新用例 + dsh/hermes 冒烟 |
+| T-02 | Agent 真实运行时执行 | ✅ done | `unittest tests.test_runtime_exec tests.test_chat_runtime` 12 绿；hermes 7.4s / dsh 3.7s 真跑回 '1' |
 | T-03 | 修 41 条基线红 | pending | `unittest discover` → 0 失败 |
 | T-04 | 测试基建（CI/覆盖率/E2E 接脚本/hermes/L0 循环） | pending | `npm run e2e` + CI 脚本 + 循环用例 |
 | T-05 | 前端四页（automations/runtimes/replay/board） | pending | 每页用例 + E2E |
