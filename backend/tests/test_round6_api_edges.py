@@ -17,6 +17,17 @@ from services.encryption_service import encrypt, decrypt
 # R6-01~05: chat_service 更深异常
 # ═══════════════════════════════════════════
 
+
+def _fake_provider(reply=None, error=None):
+    """v21 T-03：chat_service 经 get_provider(...).chat()；不再有 urllib 直连。"""
+    prov = MagicMock()
+    if error is not None:
+        prov.chat.side_effect = error
+    else:
+        prov.chat.return_value = (reply if reply is not None else "ok", {"total_tokens": 1})
+    return prov
+
+
 class TestRound6ChatService(unittest.TestCase):
     def setUp(self):
         self.cs = ChatService()
@@ -39,10 +50,8 @@ class TestRound6ChatService(unittest.TestCase):
     # R6-01: LLM 返回 choices[0] 无 message
     def test_llm_missing_message_key(self):
         db, agent = self._mock_all()
-        with patch("services.chat_service.urllib.request.urlopen") as m:
-            r = MagicMock(); r.status = 200
-            r.read.return_value = json.dumps({"choices": [{}]}).encode()
-            m.return_value = r
+        with patch("services.chat_service.get_provider",
+                   return_value=_fake_provider(error=ValueError("missing message"))):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
@@ -51,10 +60,8 @@ class TestRound6ChatService(unittest.TestCase):
     # R6-02: LLM 返回 choices[0].message 无 content
     def test_llm_missing_content_key(self):
         db, agent = self._mock_all()
-        with patch("services.chat_service.urllib.request.urlopen") as m:
-            r = MagicMock(); r.status = 200
-            r.read.return_value = json.dumps({"choices": [{"message": {}}]}).encode()
-            m.return_value = r
+        with patch("services.chat_service.get_provider",
+                   return_value=_fake_provider(error=ValueError("missing content"))):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
@@ -64,10 +71,7 @@ class TestRound6ChatService(unittest.TestCase):
     def test_llm_very_long_response(self):
         db, agent = self._mock_all()
         long_reply = "x" * 50000
-        with patch("services.chat_service.urllib.request.urlopen") as m:
-            r = MagicMock(); r.status = 200
-            r.read.return_value = json.dumps({"choices": [{"message": {"content": long_reply}}]}).encode()
-            m.return_value = r
+        with patch("services.chat_service.get_provider", return_value=_fake_provider(long_reply)):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)

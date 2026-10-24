@@ -96,6 +96,17 @@ class TestWebhookEdgeCases(unittest.TestCase):
 # E09~15: chat_service 异常
 # ═══════════════════════════════════════════
 
+
+def _fake_provider(reply=None, error=None):
+    """v21 T-03：chat_service 经 get_provider(...).chat()；不再有 urllib 直连。"""
+    prov = MagicMock()
+    if error is not None:
+        prov.chat.side_effect = error
+    else:
+        prov.chat.return_value = (reply if reply is not None else "ok", {"total_tokens": 1})
+    return prov
+
+
 class TestChatServiceEdgeCases(unittest.TestCase):
     """chat_service LLM 调用异常."""
 
@@ -124,11 +135,8 @@ class TestChatServiceEdgeCases(unittest.TestCase):
     # E09: LLM 返回空 choices
     def test_llm_empty_choices(self):
         db, agent = self._setup_mocks()
-        with patch("services.chat_service.urllib.request.urlopen") as mock_http:
-            mock_resp = MagicMock()
-            mock_resp.status = 200
-            mock_resp.read.return_value = json.dumps({"choices": []}).encode()
-            mock_http.return_value = mock_resp
+        with patch("services.chat_service.get_provider",
+                   return_value=_fake_provider(error=ValueError("empty choices"))):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
@@ -137,11 +145,8 @@ class TestChatServiceEdgeCases(unittest.TestCase):
     # E10: LLM 返回非 JSON
     def test_llm_non_json_response(self):
         db, agent = self._setup_mocks()
-        with patch("services.chat_service.urllib.request.urlopen") as mock_http:
-            mock_resp = MagicMock()
-            mock_resp.status = 200
-            mock_resp.read.return_value = b"not json at all"
-            mock_http.return_value = mock_resp
+        with patch("services.chat_service.get_provider",
+                   return_value=_fake_provider(error=ValueError("not json"))):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
@@ -150,11 +155,8 @@ class TestChatServiceEdgeCases(unittest.TestCase):
     # E11: LLM 返回 HTTP 500
     def test_llm_http_500(self):
         db, agent = self._setup_mocks()
-        with patch("services.chat_service.urllib.request.urlopen") as mock_http:
-            mock_resp = MagicMock()
-            mock_resp.status = 500
-            mock_resp.read.return_value = b'{"error":"internal"}'
-            mock_http.return_value = mock_resp
+        with patch("services.chat_service.get_provider",
+                   return_value=_fake_provider(error=RuntimeError("HTTP 500"))):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
@@ -167,7 +169,9 @@ class TestChatServiceEdgeCases(unittest.TestCase):
             with patch("services.chat_service.log_audit"):
                 result = self.cs.send_message(15, "hi", "admin", db)
         self.assertEqual(result["agent_message"]["status"], "done")  # fallback 消息
-        self.assertIn("暂不支持", result["agent_message"]["content"])
+        # v21 T-03：错误文案随 provider 校验升级（列出支持的提供者），断言新契约
+        self.assertIn("不支持的模型提供者", result["agent_message"]["content"])
+        self.assertIn("支持", result["agent_message"]["content"])
 
     # E13: Agent 无 api_key（Ollama）
     def test_ollama_no_api_key(self):
@@ -175,11 +179,7 @@ class TestChatServiceEdgeCases(unittest.TestCase):
             "model_provider": "ollama",
             "api_key_encrypted": "",
         })
-        with patch("services.chat_service.urllib.request.urlopen") as mock_http:
-            mock_resp = MagicMock()
-            mock_resp.status = 200
-            mock_resp.read.return_value = json.dumps({"choices": [{"message": {"content": "ok"}}]}).encode()
-            mock_http.return_value = mock_resp
+        with patch("services.chat_service.get_provider", return_value=_fake_provider("ok")):
             with patch("services.chat_service.decrypt", return_value=""):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
