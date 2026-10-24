@@ -58,6 +58,8 @@ npm run dev
 - 运行时 Session 监控（Runtime 页）
 - 健康检查报告（Health 页）
 
+> 〔波 4/5/7 已落地〕团队与小隊（Team ⟂ Squad）· 执行隔离契约（未实现档位选即拒绝）· A2A M0 静态卡。
+
 ### 🤖 Agent 编排
 - **YAML ↔ 画布双向同步**：编辑 YAML → 画布自动更新，拖拽画布 → YAML 自动更新
 - **13 种连线策略**：sequential / pipeline / parallel / fan-out / fan-in / map-reduce / fork / condition / master-slave / event-trigger / human-approval / retry-fallback / dead-letter
@@ -65,6 +67,8 @@ npm run dev
 - **Reconcile Loop**：声明式调度，期望状态 vs 实际状态 → 漂移检测 → 自动修复
 - **拓扑画布**（React Flow）：拖拽 Agent 节点 + 连线 + MiniMap
 - **拓扑监控**：实时节点状态颜色 + 跨 Agent 调用链追踪（TraceViewer）
+
+> 〔波 3 已落地〕任务（`work_items`）与收件箱（指针非副本、合并键=任务本身）已落表落 API；界面未挂载。
 
 ### 💬 对话中心
 - 独立页面（`ConversationCenter`），侧边栏一级入口
@@ -79,6 +83,8 @@ npm run dev
 - 工作流：文本声明 + 可视化 DAG（React Flow）
 - 模板市场
 
+> 〔波 3 已落地〕任务=独立 `work_items` 表 + `work_item_runs` 连接表，不并入 projects。
+
 ### 📊 项目管理
 - 项目 CRUD + 需求输入
 - 绑定 Agent + 工作流 → 执行 → 监控
@@ -89,11 +95,13 @@ npm run dev
 - 可绑定到工作流节点
 
 ### 🔒 安全
-- 密码登录 + localStorage 持久化
+- **服务端会话**：`__Host-session` HttpOnly cookie > Bearer PAT > 401（不再回退 admin）· 口令 argon2id
+- 部署闸门：`DEPLOY_MODE` 三值 + 可信代理 XFF 纪律，非法配置启动即失败
 - RBAC 权限（admin / user）
 - Agent API Key 加密存储
 - 全操作审计日志
 - Webhook 签名校验
+- 〔波 7 已落地〕归因双列 `originator`（只鉴权）⟂ `accountable`（只审计/成本）+ 瀑布 fail-closed；`rsi_switches` 四类开关（关闭=自动体已暂停）
 
 ---
 
@@ -177,6 +185,16 @@ Backend (FastAPI + SQLAlchemy + SQLite/MySQL + Redis)
 | `/api/health` | GET | 健康检查 |
 | `/api/audit` | GET | 审计日志 |
 | `/api/admin/users` | GET | 用户管理（admin） |
+| `/api/tasks` | GET/POST | 任务（`work_items`）列表/创建；`/:id/status` 状态机、`/:id/assign` 三轨指派、`/:id/runs` 运行连接 |
+| `/api/inbox` | GET | 收件箱（指针不是副本）；`/:id/read` · `/:id/archive` |
+| `/api/teams` | GET/POST | 团队（资源容器）；`/:id/members` 四档角色 · `/:id/transfer` 转让 · `/:id/assets` 五类资产挂载/释放 |
+| `/api/squads` | GET/POST | 小队（可指派编组）；`/:id/members` 混编 · `/:id/assign` 指派=给 leader 入队 leader 任务 |
+| `/api/a2a/agents/:id/card` | GET | **A2A M0 静态 AgentCard**（M2 冻结；白名单字段，无凭据） |
+| `/api/runtime/execution-contract` | GET | 执行隔离契约只读呈现；`/validate` 预检 |
+| `/api/watch?since=<id>` | GET | 声明式变更 SSE（应用层游标；过期先发 `event: resync`） |
+| `/api/rsi/{memories,proposals,surfaces,switches,breakers,reviews}` | GET/POST | 记忆四层晋升门 · 提案三权分离 · 可改面 · 四类开关 · 熔断 · 晋升评审账 |
+| `/metrics` | GET | Prometheus 文本（需 `METRICS_ENDPOINT_ENABLED=1`，且仍需身份；未开启一律 404） |
+| `/api/control-plane/cluster` | GET | 副本/租约/单例循环现状（单副本承诺如实呈现） |
 
 ---
 
