@@ -1,0 +1,413 @@
+{
+  "page_count": 127,
+  "family_count": 35,
+  "families": [
+    {
+      "family": "agent-detail",
+      "main": "agent-detail.html",
+      "title": "6.4 Agent 详情",
+      "pages": [
+        "agent-detail.html",
+        "agent-detail__config.html",
+        "agent-detail__delete-agent.html",
+        "agent-detail__probe-refused.html",
+        "agent-detail__probe-timeout.html",
+        "agent-detail__run-failed.html"
+      ],
+      "variants": 6
+    },
+    {
+      "family": "agents",
+      "main": "agents.html",
+      "title": "6.3b Agent 列表",
+      "pages": [
+        "agents.html",
+        "agents__new.html"
+      ],
+      "variants": 2
+    },
+    {
+      "family": "alerts",
+      "main": "alerts.html",
+      "title": "6.11 告警中心",
+      "pages": [
+        "alerts.html",
+        "alerts__agent-dead.html",
+        "alerts__exec-fail.html",
+        "alerts__selfheal.html",
+        "alerts__token.html"
+      ],
+      "variants": 5
+    },
+    {
+      "family": "approvals",
+      "main": "approvals.html",
+      "title": "6.17 审批中心",
+      "pages": [
+        "approvals.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "audit",
+      "main": "audit.html",
+      "title": "6.15 审计日志",
+      "pages": [
+        "audit.html",
+        "audit__evt-403-roles.html",
+        "audit__evt-cp-schedule.html",
+        "audit__evt-create-agent12.html",
+        "audit__evt-del-domain.html",
+        "audit__evt-upd-agent1.html",
+        "audit__evt-user-zhangsan.html"
+      ],
+      "variants": 7
+    },
+    {
+      "family": "automations",
+      "main": "automations.html",
+      "title": "6.31 自动化中心（全局横切 · Runbook+负责人+N 触发器）",
+      "pages": [
+        "automations.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "board",
+      "main": "board.html",
+      "title": "6.20 任务看板",
+      "pages": [
+        "board.html",
+        "board__af-109.html",
+        "board__af-116.html",
+        "board__mark-done.html",
+        "board__task-new.html"
+      ],
+      "variants": 5
+    },
+    {
+      "family": "canvas",
+      "main": "canvas.html",
+      "title": "6.5 编排画布",
+      "pages": [
+        "canvas.html",
+        "canvas__apply-diff.html",
+        "canvas__edge-review-frontend.html",
+        "canvas__node-legacy.html",
+        "canvas__node-review.html",
+        "canvas__strategies-versions.html"
+      ],
+      "variants": 6
+    },
+    {
+      "family": "chat",
+      "main": "chat.html",
+      "title": "6.8 对话中心",
+      "pages": [
+        "chat.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "control-plane",
+      "main": "control-plane.html",
+      "title": "6.3 Agent 管控面",
+      "pages": [
+        "control-plane.html",
+        "control-plane__domain-default.html",
+        "control-plane__domain-prod.html",
+        "control-plane__domain-test.html",
+        "control-plane__group-code-review.html",
+        "control-plane__task-frontend.html"
+      ],
+      "variants": 6
+    },
+    {
+      "family": "decision-models",
+      "main": "decision-models.html",
+      "title": "6.23 决策模型目录",
+      "pages": [
+        "decision-models.html",
+        "decision-models__bind.html",
+        "decision-models__jev.html",
+        "decision-models__register.html"
+      ],
+      "variants": 4
+    },
+    {
+      "family": "discipline",
+      "main": "discipline.html",
+      "title": "6.0 全局交互纪律",
+      "pages": [
+        "discipline.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "env-advisor",
+      "main": "env-advisor.html",
+      "title": "6.25 环境参谋",
+      "pages": [
+        "env-advisor.html",
+        "env-advisor__plan-l1.html",
+        "env-advisor__plan-l2.html",
+        "env-advisor__plan-l3.html",
+        "env-advisor__profile-l4.html"
+      ],
+      "variants": 5
+    },
+    {
+      "family": "finetune",
+      "main": "finetune.html",
+      "title": "6.24 微调工厂与三指标",
+      "pages": [
+        "finetune.html",
+        "finetune__cmd.html",
+        "finetune__new.html"
+      ],
+      "variants": 3
+    },
+    {
+      "family": "inbox",
+      "main": "inbox.html",
+      "title": "6.21 收件箱",
+      "pages": [
+        "inbox.html",
+        "inbox__af-116.html"
+      ],
+      "variants": 2
+    },
+    {
+      "family": "index",
+      "main": "index.html",
+      "title": "",
+      "pages": [
+        "index.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "integration",
+      "main": "integration.html",
+      "title": "6.27 对外集成面",
+      "pages": [
+        "integration.html",
+        "integration__card.html",
+        "integration__etag.html",
+        "integration__obs.html",
+        "integration__watch.html"
+      ],
+      "variants": 5
+    },
+    {
+      "family": "isolation",
+      "main": "isolation.html",
+      "title": "6.26 执行隔离策略",
+      "pages": [
+        "isolation.html",
+        "isolation__downgrade.html",
+        "isolation__egress.html",
+        "isolation__runsc.html",
+        "isolation__t2.html",
+        "isolation__t3.html"
+      ],
+      "variants": 6
+    },
+    {
+      "family": "knowledge",
+      "main": "knowledge.html",
+      "title": "6.9 知识库",
+      "pages": [
+        "knowledge.html",
+        "knowledge__notion-source.html"
+      ],
+      "variants": 2
+    },
+    {
+      "family": "login",
+      "main": "login.html",
+      "title": "6.1 登录",
+      "pages": [
+        "login.html",
+        "login__pwd-change.html"
+      ],
+      "variants": 2
+    },
+    {
+      "family": "memory",
+      "main": "memory.html",
+      "title": "6.30 记忆中心（四层管道 · 资产域晋升）",
+      "pages": [
+        "memory.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "metrics",
+      "main": "metrics.html",
+      "title": "6.12 监控仪表盘",
+      "pages": [
+        "metrics.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "projects",
+      "main": "projects.html",
+      "title": "6.13 项目管理",
+      "pages": [
+        "projects.html",
+        "projects__agentflow.html",
+        "projects__files.html",
+        "projects__new.html"
+      ],
+      "variants": 4
+    },
+    {
+      "family": "relations",
+      "main": "relations.html",
+      "title": "★ 实体关系全景（第5轮呈审）",
+      "pages": [
+        "relations.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "replay",
+      "main": "replay.html",
+      "title": "6.22 执行回放",
+      "pages": [
+        "replay.html",
+        "replay__rerun.html",
+        "replay__run.html"
+      ],
+      "variants": 3
+    },
+    {
+      "family": "roles",
+      "main": "roles.html",
+      "title": "6.14 角色市场",
+      "pages": [
+        "roles.html",
+        "roles__derive.html",
+        "roles__derived.html",
+        "roles__recon.html",
+        "roles__reviewer.html"
+      ],
+      "variants": 5
+    },
+    {
+      "family": "runtime",
+      "main": "runtime.html",
+      "title": "6.10 运行时监控",
+      "pages": [
+        "runtime.html",
+        "runtime__probes-ratelimit.html",
+        "runtime__rt-1-1783346200.html",
+        "runtime__rt-1-1783349487.html",
+        "runtime__session-filters.html"
+      ],
+      "variants": 5
+    },
+    {
+      "family": "runtimes",
+      "main": "runtimes.html",
+      "title": "6.3c 运行时发现",
+      "pages": [
+        "runtimes.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "squads",
+      "main": "squads.html",
+      "title": "",
+      "pages": [
+        "squads__code-review.html"
+      ],
+      "variants": 1
+    },
+    {
+      "family": "stage-model",
+      "main": "stage-model.html",
+      "title": "6.19 阶段模型配置",
+      "pages": [
+        "stage-model.html",
+        "stage-model__anchor-done.html",
+        "stage-model__anchor-started.html",
+        "stage-model__anchor-unstarted.html",
+        "stage-model__save-preview.html",
+        "stage-model__stage-0-change.html",
+        "stage-model__stage-edit.html",
+        "stage-model__stage-new.html"
+      ],
+      "variants": 8
+    },
+    {
+      "family": "teams",
+      "main": "teams.html",
+      "title": "6.29 小队中心（团队 Team ⟂ 协作小队 Squad）",
+      "pages": [
+        "teams.html",
+        "teams__agentflow.html"
+      ],
+      "variants": 2
+    },
+    {
+      "family": "tools",
+      "main": "tools.html",
+      "title": "6.7 工具市场",
+      "pages": [
+        "tools.html",
+        "tools__code-review-skill.html",
+        "tools__fs-read-write.html",
+        "tools__mcp-fetch.html",
+        "tools__mcp-filesystem.html",
+        "tools__new.html",
+        "tools__skill-browser.html"
+      ],
+      "variants": 7
+    },
+    {
+      "family": "users",
+      "main": "users.html",
+      "title": "6.16 用户与权限",
+      "pages": [
+        "users.html",
+        "users__admin.html",
+        "users__lisi.html",
+        "users__newbie.html",
+        "users__testuser.html",
+        "users__user-new.html",
+        "users__wangwu.html"
+      ],
+      "variants": 7
+    },
+    {
+      "family": "workbench",
+      "main": "workbench.html",
+      "title": "6.2 工作台·变更总览",
+      "pages": [
+        "workbench.html",
+        "workbench__change-agent-control-plane.html",
+        "workbench__change-agent-domains.html",
+        "workbench__change-capability-groups.html",
+        "workbench__change-k8s-final.html",
+        "workbench__change-knowledge-plus.html",
+        "workbench__change-multi-provider.html"
+      ],
+      "variants": 7
+    },
+    {
+      "family": "workflows",
+      "main": "workflows.html",
+      "title": "6.6 工作流列表",
+      "pages": [
+        "workflows.html",
+        "workflows__new.html",
+        "workflows__review-pipeline.html"
+      ],
+      "variants": 3
+    }
+  ]
+}
