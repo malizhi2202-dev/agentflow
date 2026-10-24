@@ -111,9 +111,32 @@ $ cd frontend && npm run build
 | 10-24 15:40 | D4-2 | 波 0–7 | `CHANGELOG.md` / `LESSONS.md`（L-001…L-004）/ `v20-release/UAT.md` | 同上 |
 | 10-24 16:00 | D6-1 | 波 0 | 停止跟踪 `frontend/node_modules` 与 `frontend/dist`（P0-5，用户 V3=①） | `chore(repo)` 提交 |
 
-## 6. 下一轮基线
+## 6. 第 2 轮增量（2026-10-24 · 收口后 5 提交）
 
-`13faefbe` + 本轮对齐/收口提交（见上表）—— 下次 S-align 从最后一笔「docs(closeout)」提交开始扫描。
+> 触发：`v20-ui-collab` 提交后 `ALIGNMENT` 基线落后 HEAD（R15.1 要求基线覆盖 HEAD）。
+
+**覆盖提交**：`9aaac09b`（docs closeout）· `687f4ba7`（chore repo 卫生）· `ad850f41`（fix health/metrics）· `3cb1640f`（docs align）· `fce0aea4`（feat ui-collab）
+
+**五层状态**：L1 ✔ · L2 ⚠ 1 处已登记差异 · L3 ✖ 1 项（已修）· L4 ✔ · L5 ✔（SUMMARY 已补）
+
+| 编号 | 类型 | 层 | 证据 | 描述 | 处理 |
+|---|---|---|---|---|---|
+| D1-3 | 代码变文档未变 | L3 | `fce0aea4` + `README.md` §功能模块 | 首轮写「任务与收件箱…界面未挂载」，本轮已挂载 → 句子过期 | **已合并**：改为「界面已挂载（`v20-ui-collab`）」 |
+| D1-4 | 代码变文档未变 | L3 | `ad850f41` + `README.md` | `/api/health` 修复属内部质量，无对外契约变化 | 无需合并（记录即可） |
+| D4-3 | 执行留痕缺口 | L5 | `.specs/v20-ui-collab/` | 缺 `SUMMARY.md`（4-dev 要求） | **已补** |
+| D3-2 | 原型漂移（已登记） | L2 | `prototype/board.html` vs `pages/Tasks.tsx` | 实现是**四列简化看板**，原型是三视角+统一抽屉；属 `CHANGE.md`「明确不做」的范围收缩 | 已登记，不视为漂移 |
+| D6-2 | 孤儿产物 | L5 | `git status` | 首轮后 `frontend/dist` / `node_modules` 已停止跟踪，工作区干净 | **已解决** |
+
+**已对齐记录**：
+
+| 时间 | 漂移 | 合并动作 | 提交 |
+|---|---|---|---|
+| 10-24 16:20 | D1-3 | README「界面未挂载」→「界面已挂载」 | 本轮 docs 提交 |
+| 10-24 16:20 | D4-3 | 补 `.specs/v20-ui-collab/SUMMARY.md` | 本轮 docs 提交 |
+
+## 7. 下一轮基线
+
+`fce0aea4` —— 下次 S-align 从此开始扫描（含本轮 docs 提交后顺延）。
 
 ---
 
