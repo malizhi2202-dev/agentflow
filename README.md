@@ -491,6 +491,25 @@ INSTANCE_ID=node-2 uvicorn main:app --port 8001
 
 接口：`/api/rsi/memories`、`/api/rsi/proposals`、`/api/rsi/surfaces`、`/api/rsi/breakers`。
 
+### 内网一键起栈（真 MySQL + 前后端，0.0.0.0 监听）
+
+```bash
+bash scripts/serve_lan.sh start     # 起 MySQL(3307) + 后端(0.0.0.0:8000) + 前端(0.0.0.0:5173)
+bash scripts/serve_lan.sh status    # 端口/健康/局域网 URL
+bash scripts/serve_lan.sh dump      # mysqldump → ~/ai/agentflow-data/backups（留最近 10 份）
+bash scripts/serve_lan.sh stop
+```
+
+- 数据：MySQL 数据目录 `/var/tmp/agentflow-mysql`（**不是 /tmp**：Ubuntu AppArmor 把 mysqld
+  限制在 `/var/lib/mysql`、`/tmp`、`/var/tmp` 下，home 会 `Permission denied`；本机 tmpfiles
+  未开启 `/var/tmp` 清理，重启不丢）；运行根/日志/备份在 `~/ai/agentflow-data`。
+- 用户：首次启动自动把种子导入 `app_users` 表（`admin` / `bob`，口令 `e2e-pass-123`，
+  之后改密走界面），表非空后由表提供档案（裁定⑦）。
+- 内网访问：`http://<本机IP>:5173`（浏览器）+ `http://<本机IP>:8000/api/health`；
+  后端按 `DEPLOY_MODE=lan` + `ALLOW_CIDRS=192.168.36.0/24` 放行（可用 env 覆盖）。
+- 想改用系统 MySQL(3306)：把 `DATABASE_URL` 指过去并设 `MYSQL_PORT=3306`
+  （当前系统实例 root 口令未知，脚本默认不碰它）。
+
 ### 数据库切换
 
 ```bash
