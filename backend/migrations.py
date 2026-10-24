@@ -295,6 +295,67 @@ def m008_alerts_and_queue_merge(conn, dialect: str) -> None:
 
 
 
+def m009_collab_layer(conn, dialect: str) -> None:
+    """P1-4：任务 / 运行连接 / 订阅 / 收件箱四表（协作层最小集）。"""
+    pk = _pk_clause(dialect)
+
+    create_table_if_missing(conn, dialect, "work_items",
+        f"id {pk}, title VARCHAR(255) NOT NULL, description TEXT, team_id VARCHAR(64), "
+        "creator_id VARCHAR(64) NOT NULL, status VARCHAR(24) DEFAULT 'backlog', "
+        "triage_state VARCHAR(16) DEFAULT 'needs_triage', assignee_kind VARCHAR(16), "
+        "assignee_id VARCHAR(64), priority INTEGER DEFAULT 50, due_date VARCHAR(32), "
+        "parent_id INTEGER, evidence_json TEXT, evidence_warned INTEGER DEFAULT 0, "
+        "archived_at DATETIME, created_at DATETIME, updated_at DATETIME")
+    for index, cols in (
+        ("ix_work_items_creator_id", "creator_id"),
+        ("ix_work_items_team_id", "team_id"),
+        ("ix_work_items_status", "status"),
+        ("ix_work_items_triage_state", "triage_state"),
+        ("ix_work_items_assignee_kind", "assignee_kind"),
+        ("ix_work_items_assignee_id", "assignee_id"),
+        ("ix_work_items_parent_id", "parent_id"),
+        ("ix_work_items_created_at", "created_at"),
+    ):
+        create_index_if_missing(conn, dialect, index, "work_items", cols)
+
+    create_table_if_missing(conn, dialect, "work_item_runs",
+        f"id {pk}, work_item_id INTEGER NOT NULL, run_id VARCHAR(80) NOT NULL, "
+        "agent_id INTEGER, status VARCHAR(16) DEFAULT 'queued', summary TEXT, "
+        "evidence_json TEXT, started_at DATETIME, finished_at DATETIME, created_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_work_item_runs_work_item_id", "work_item_runs", "work_item_id")
+    create_index_if_missing(conn, dialect, "ix_work_item_runs_run_id", "work_item_runs", "run_id")
+    create_index_if_missing(conn, dialect, "ix_work_item_runs_agent_id", "work_item_runs", "agent_id")
+    create_index_if_missing(conn, dialect, "ix_work_item_runs_status", "work_item_runs", "status")
+
+    create_table_if_missing(conn, dialect, "work_item_subscriptions",
+        f"id {pk}, work_item_id INTEGER NOT NULL, user_id VARCHAR(64) NOT NULL, "
+        "source VARCHAR(16) DEFAULT 'creator', unsubscribed INTEGER DEFAULT 0, "
+        "created_at DATETIME, UNIQUE(work_item_id, user_id)")
+    create_index_if_missing(conn, dialect, "ix_work_item_subscriptions_work_item_id",
+                            "work_item_subscriptions", "work_item_id")
+    create_index_if_missing(conn, dialect, "ix_work_item_subscriptions_user_id",
+                            "work_item_subscriptions", "user_id")
+
+    create_table_if_missing(conn, dialect, "inbox_items",
+        f"id {pk}, user_id VARCHAR(64) NOT NULL, work_item_id INTEGER, "
+        "event_type VARCHAR(24) DEFAULT 'status', relation VARCHAR(16) DEFAULT 'responsible', "
+        "title VARCHAR(255) DEFAULT '', body TEXT, action_required INTEGER DEFAULT 0, "
+        "has_failure INTEGER DEFAULT 0, merged_count INTEGER DEFAULT 1, "
+        "read_at DATETIME, archived_at DATETIME, "
+        "created_at DATETIME, updated_at DATETIME, UNIQUE(user_id, work_item_id)")
+    for index, cols in (
+        ("ix_inbox_items_user_id", "user_id"),
+        ("ix_inbox_items_work_item_id", "work_item_id"),
+        ("ix_inbox_items_event_type", "event_type"),
+        ("ix_inbox_items_relation", "relation"),
+        ("ix_inbox_items_action_required", "action_required"),
+        ("ix_inbox_items_has_failure", "has_failure"),
+        ("ix_inbox_items_created_at", "created_at"),
+    ):
+        create_index_if_missing(conn, dialect, index, "inbox_items", cols)
+
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -304,6 +365,7 @@ MIGRATIONS: list[Migration] = [
     ("006_auth_sessions", "新建 sessions/PAT 令牌表（P0-1 服务端会话）", m006_auth_sessions),
     ("007_cluster_state", "队列落库+租约/心跳，限流/退避/租约/监控偏移四表（P1-7）", m007_cluster_state),
     ("008_alerts_and_queue_merge", "告警落表 + 双队列并表（P1-16）", m008_alerts_and_queue_merge),
+    ("009_collab_layer", "任务/运行连接/订阅/收件箱四表（P1-4）", m009_collab_layer),
 ]
 
 

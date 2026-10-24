@@ -32,6 +32,12 @@ from models.knowledge_tag import KnowledgeTag, KnowledgeSourceTag  # noqa: E402,
 from models.scheduled_task import ScheduledTask  # noqa: E402, F401
 from models.session import SessionToken, PatToken  # noqa: E402, F401
 from models.alert import Alert  # noqa: E402, F401
+from models.collab import (  # noqa: E402, F401
+    InboxItem,
+    WorkItem,
+    WorkItemRun,
+    WorkItemSubscription,
+)
 from models.cluster import (  # noqa: E402, F401
     ClusterLease,
     RateLimitWindow,
