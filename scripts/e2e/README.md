@@ -12,9 +12,12 @@
    ```bash
    cd backend
    DATABASE_URL="mysql+pymysql://root@127.0.0.1:3307/agentflow_e2e" \
-   RSI_JUDGE_PROVIDER=cli RSI_CLI_PROVIDER=dsh RSI_JUDGE_MAX_CALLS=4 \
+   RSI_CLI_PROVIDER=dsh \               # 换 hermes 即整条链走 hermes CLI
+   RSI_JUDGE_PROVIDER=cli RSI_JUDGE_MODEL=dsh-cli RSI_JUDGE_MAX_CALLS=4 \
    RSI_EXTRACTOR_PROVIDER=cli RSI_EXTRACTOR_MODEL=dsh-cli \
    uvicorn main:app --port 8000
+   # 注意 RSI_JUDGE_MODEL 必须给（judge 走 config，不吃请求里的 judge_model；
+   # 缺它 = judge 未配置 → shadow/run(judge=llm) 直接 400 fail-closed）
    ```
 3. **前端**：`cd frontend && npm run dev`（5173，代理 /api → 8000）
 4. **Playwright**：`NODE_PATH=<playwright 包路径>`（本机 `~/.npm/_npx/*/node_modules`），浏览器用 headless shell：

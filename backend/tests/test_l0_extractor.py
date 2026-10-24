@@ -143,6 +143,21 @@ class TestLlmExtractorShape(unittest.TestCase):
 
     def test_garbage_is_dropped_not_guessed(self):
         self.assertEqual(self._extract('不是 JSON'), [])
-        # 缺字段的对象保留为空字段（下游三字段门会判 no_entry）；非对象/非三元组的项丢弃
-        self.assertEqual(self._extract('[{"foo":1}, 42]'),
-                         [{"cue": "", "lesson": "", "evidence": []}])
+        # 缺字段的条目直接丢（不猜、不留空壳让下游误判）；非对象/非三元组的项同样丢弃
+        self.assertEqual(self._extract('[{"foo":1}, 42]'), [])
+
+    def test_real_cli_object_envelope_and_alias_keys(self):
+        """真实 CLI（hermes）会把候选包在 {"experiences": [...]} 里、字段叫 title/content/notes。"""
+        reply = (
+            "```json\n{\"experiences\": [{\"title\": \"线上 502 报警\","
+            " \"content\": \"先看网关日志和后端健康\","
+            " \"notes\": \"助手原话：先看网关日志\"}]}\n```\n\n补充说明：仅供参考。"
+        )
+        got = self._extract(reply)
+        self.assertEqual(got, [{"cue": "线上 502 报警",
+                                "lesson": "先看网关日志和后端健康",
+                                "evidence": ["助手原话：先看网关日志"]}])
+
+    def test_evidence_string_is_wrapped(self):
+        got = self._extract('[{"cue":"c","lesson":"l","evidence":"r"}]')
+        self.assertEqual(got, [{"cue": "c", "lesson": "l", "evidence": ["r"]}])

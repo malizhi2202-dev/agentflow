@@ -11,3 +11,10 @@ audit.jsonl
 users.json
 project_state.json
 data/
+
+# 覆盖率产物（v21 T-04）
+.coverage
+.coverage.*
+backend/.coverage
+frontend/coverage/
+lcov.info

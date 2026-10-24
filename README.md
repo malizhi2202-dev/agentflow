@@ -391,9 +391,30 @@ agentflow/
 | `RSI_JUDGE_PROVIDER` / `RSI_JUDGE_MODEL` / `RSI_JUDGE_API_KEY` / `RSI_JUDGE_MAX_CALLS` | (空/0=禁用) | 影子重放的**真实** judge（异厂系）。四件缺一即拒绝（不默认回退、不偷偷花钱）；`MAX_CALLS` 为每次作业预算帽 |
 | `RSI_CLI_PROVIDER` | `dsh` | CLI 模型通道：`dsh`（`node <dsh bin> --profile headless "<prompt>"`）或 `hermes`（`<hermes bin> -z "<prompt>"`）；`RSI_JUDGE_PROVIDER=cli` / `RSI_EXTRACTOR_PROVIDER=cli` 时生效，**免 key** |
 | `RSI_CLI_TIMEOUT_SECONDS` | `180` | CLI 调用超时；超时即失败（不重试、不降级） |
+| `RUNTIME_EXEC_ENABLED` | `false` | 把 Agent 的 LLM 调用**委托给本机 CLI 运行时**（hermes/dsh/codex）；关闭时走进程内 provider，**不静默降级** |
+| `RUNTIME_EXEC_TIMEOUT_SECONDS` | `180` | 运行时执行超时；超时/非零退出/命令缺失一律**响亮失败** |
+| `RUNTIME_CMD_HERMES` / `RUNTIME_CMD_DSH` / `RUNTIME_CMD_CODEX` | hermes/dsh 有默认，codex 空 | 每个运行时的命令模板，`{prompt}` 由平台替换成**单个 argv 参数**（不经 shell）；空模板 = 该运行时不可用（fail-closed） |
 | `L0_EXTRACT_INTERVAL_SECONDS` | `0`（关闭） | L0→L1 定时抽取间隔；>0 启单例循环（租约保护） |
 | `L0_EXTRACT_MAX_CONVERSATIONS` | `5` | 每轮最多处理的会话数（预算帽） |
 | `METRICS_ENDPOINT_ENABLED` | `false` | 开启 `GET /metrics`（Prometheus 文本格式，直读现表；仍需身份鉴权） |
+
+### 质量门 / CI（v21 T-04）
+
+一条命令跑完四道门（每步打印真实命令与输出，失败非 0 退出）：
+
+```bash
+bash scripts/ci.sh                  # pyflakes 未定义名 → 后端全量单测 → 前端 tsc+vitest → 生产构建
+bash scripts/ci.sh --with-coverage  # 同上 + 前后端覆盖率
+```
+
+- 远端同源步骤在 `.github/workflows/ci.yml`（E2E 需 MySQL，不进默认 job）。
+- 覆盖率：前端 v8 只统计 `src/**`（排除测试/入口，`npm run coverage`）；后端 `coverage --source=.`。
+- 界面 E2E（**真实 MySQL + 真实 CLI + 真实浏览器**）：
+
+```bash
+E2E_CLI=dsh bash scripts/e2e/run_e2e.sh      # 13 条；前置见 scripts/e2e/README.md
+E2E_CLI=hermes bash scripts/e2e/run_e2e.sh   # 同一脚本切通道，后端 provider/judge 同换
+```
 
 ### 副本与单例循环（P0-9 / P1-7）
 

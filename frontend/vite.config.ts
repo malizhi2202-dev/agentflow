@@ -4,5 +4,16 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: { port: 5173, proxy: { '/api': 'http://127.0.0.1:8000' } },
-  test: { environment: 'jsdom', globals: true, setupFiles: './src/test-setup.ts' },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test-setup.ts',
+    // 覆盖率门：只统计 src，排除测试与入口（v21 T-04）
+    coverage: {
+      provider: 'v8',
+      reporter: ['text-summary', 'lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/test-setup.ts', 'src/main.tsx'],
+    },
+  },
 });

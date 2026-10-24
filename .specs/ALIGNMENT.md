@@ -235,7 +235,19 @@ $ cd frontend && npm run build
 | D4-11 | 执行留痕 | L5 | `.specs/v20-e2e-mysql/` | 工件齐（CHANGE/TASK/TEST/REVIEW/SUMMARY） | 已闭环 |
 | D6-4 | 环境/可复现性 | L5 | `scripts/e2e/README.md` | E2E 前置与命令入仓（MySQL 私有实例/后端 env/playwright） | 已闭环 |
 
-## 14. 下一轮基线
+## 14. 第 10 轮增量（2026-10-24 · v21 T-04 测试基建）
+
+**覆盖**：`v21-completion` T-04（CI/覆盖率/E2E 脚本 + 3 处产品修正）
+
+| 编号 | 类型 | 层 | 证据 | 处理 |
+|---|---|---|---|---|
+| D1-11 | 代码变文档未变 | L3 | `scripts/e2e/README.md` | E2E 前置漏 `RSI_JUDGE_MODEL`（缺它 judge=llm 直接 400） | **已合并**：README 补该 env 与 fail-closed 说明 |
+| D7-5 | 脚本断言失真 | L5 | `scripts/e2e/seed_l0_mysql.py` | seed 用 `run_once` 取「最近更新会话」，多轮后抽的不是自建会话（0 候选也算绿） | **已修**：直连自建会话 + 抽不到按失败退出；教训 L-008 |
+| D7-6 | 前端一致性 | L3 | `frontend/src/utils/requestDedup.ts` | 失效只清缓存、不清在途 → 写后读读到旧值（E2E 3 轮复现 1 次） | **已修**：缓存代际 + 4 条回归用例；教训 L-007 |
+| D7-7 | 外部输入容错 | L3 | `services/l0_llm_extractor.py` | 真实 CLI 输出容器键/字段别名/单字符串 evidence 未兼容；prompt 逃生口导致稳定 0 候选 | **已修**：`parse_reply` 兼容 + prompt 正面界定；3 条新用例 |
+| D4-12 | 执行留痕 | L5 | `.specs/v21-completion/T-04-SUMMARY.md` + `TEST.md §T-04` | 证据齐（CI 真实输出 / 双通道 13/13 / 覆盖率数字） | 已闭环 |
+
+## 15. 下一轮基线
 
 `v20-ui-polish` 提交（见 `git log`）—— 下次 S-align 从此开始扫描。
 

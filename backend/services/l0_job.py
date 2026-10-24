@@ -11,6 +11,21 @@ from models.message import Message
 from services import l0_extractor, l0_llm_extractor
 
 DEFAULT_MAX_CONVERSATIONS = 5
+LEASE_NAME = "l0-extract"
+
+
+def tick(db, *, extractor=None, cluster_store=None) -> dict | None:
+    """单例循环的一轮（可测）：拿不到租约返回 None（待命），拿到则跑一次并返回统计。
+
+    租约失败不应让进程崩：由调用方（循环）捕获；本函数只抛业务异常。
+    """
+    from services import cluster_store as _cs
+
+    store = cluster_store or _cs
+    ok = store.acquire_lease(LEASE_NAME, config.CLUSTER_LEASE_TTL_SECONDS)
+    if not ok:
+        return None
+    return run_once(db, extractor=extractor)
 
 
 def run_once(db, *, extractor=None, max_conversations: int | None = None,

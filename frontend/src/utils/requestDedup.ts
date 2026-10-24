@@ -12,6 +12,12 @@
 interface CacheEntry {
   promise: Promise<Response>;
   timestamp: number;
+  gen: number;
+}
+
+interface InFlightEntry {
+  promise: Promise<Response>;
+  gen: number;
 }
 
 interface SafeFetchResult {
@@ -24,7 +30,16 @@ interface SafeFetchResult {
 // ── 状态 ──────────────────────────────────────────────
 
 /** in-flight 请求 Map：key=标准化 URL → 共享 Promise */
-const inFlight = new Map<string, Promise<Response>>();
+const inFlight = new Map<string, InFlightEntry>();
+
+/**
+ * 缓存代际：invalidateCache() 自增。
+ *
+ * 为什么需要：请求**在途中**被 invalidate 时，它 settle 后仍会把自己写回缓存，
+ * 于是「创建后立刻刷新列表」拿到的是创建前的旧响应（5s 内一直错，用户看不到新团队）。
+ * 用代际标记让旧代际的响应既不写缓存、也不被后续请求当作 in-flight 复用。
+ */
+let generation = 0;
 
 /** 缓存 Map：key=标准化 URL → { promise, timestamp } */
 const cache = new Map<string, CacheEntry>();
@@ -81,40 +96,42 @@ export function dedupedFetch(url: string, options?: RequestInit): Promise<Respon
   const key = `${method} ${canonicalUrl(url)}`;
   const cacheable = method === 'GET';
 
-  // 1. 查缓存（未过期；只对 GET 生效）
+  // 1. 查缓存（未过期；只对 GET 生效；旧代际一律视为失效）
   const cached = cacheable ? cache.get(key) : undefined;
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+  if (cached && cached.gen === generation && Date.now() - cached.timestamp < CACHE_TTL) {
     if (IS_DEV) console.debug(`[requestDedup] cache hit: ${key}`);
     return cached.promise.then(r => r.clone());
   }
   // 过期则清除
   if (cached) cache.delete(key);
 
-  // 2. 查 in-flight
+  // 2. 查 in-flight（旧代际的在途请求已作废，不能复用它的旧结果）
   const flying = inFlight.get(key);
-  if (flying) {
+  if (flying && flying.gen === generation) {
     if (IS_DEV) console.debug(`[requestDedup] in-flight hit: ${key}`);
-    return flying.then(r => r.clone());
+    return flying.promise.then(r => r.clone());
   }
+  if (flying) inFlight.delete(key);
 
   // 3. 新建请求
   if (IS_DEV) console.debug(`[requestDedup] new fetch: ${key}`);
+  const gen = generation;
   const promise = window.fetch(url, options);
 
   // 存入 in-flight
-  inFlight.set(key, promise);
+  inFlight.set(key, { promise, gen });
 
-  // 完成后：移入缓存，移出 in-flight
+  // 完成后：移入缓存，移出 in-flight（仅在代际未变时；被 invalidate 过的响应作废）
   promise
     .then(() => {
-      inFlight.delete(key);
-      if (cacheable) {
-        cache.set(key, { promise, timestamp: Date.now() });
+      if (inFlight.get(key)?.promise === promise) inFlight.delete(key);
+      if (cacheable && gen === generation) {
+        cache.set(key, { promise, timestamp: Date.now(), gen });
         evictIfNeeded();
       }
     })
     .catch(() => {
-      inFlight.delete(key);
+      if (inFlight.get(key)?.promise === promise) inFlight.delete(key);
       // 不缓存失败的请求
     });
 
@@ -162,6 +179,7 @@ export async function safeFetch(
  * @param url 要失效的 URL（不传则清空全部缓存）
  */
 export function invalidateCache(url?: string): void {
+  generation += 1;   // 作废所有在途请求的写缓存资格（见 generation 注释）
   if (url) {
     // 同一 URL 的读缓存与写条目一起失效（键已带 method 前缀）
     const key = canonicalUrl(url);

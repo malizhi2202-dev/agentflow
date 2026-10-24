@@ -6,6 +6,7 @@ const BASE = process.env.E2E_BASE || 'http://127.0.0.1:5173';
 const SHOTS = process.env.E2E_SHOTS || '/tmp/e2e-mysql/shots';
 const USER = process.env.E2E_USER || 'admin';
 const PASS = process.env.E2E_PASS || 'e2e-pass-123';
+const CLI = process.env.E2E_CLI || 'dsh';
 const SHELL = process.env.E2E_CHROME ||
   '/home/malizhi/.cache/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell';
 const stamp = Date.now().toString().slice(-6);
@@ -64,10 +65,17 @@ const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' 
   await page.getByLabel('团队 slug').fill(`mysql-${stamp}`);
   await page.getByLabel('团队名称').fill(team);
   await page.getByRole('button', { name: '创建团队' }).click();
-  await page.getByText(team).first().waitFor({ timeout: 20000 });
-  // 列表卡片按钮的可达名=卡片全文；用正则匹配更稳（aria-label 偶发时序不稳）
+  // 列表卡片按钮的可达名=「打开团队 <name>」；直接等按钮出现（文本可能先于列表渲染命中）
   const esc = team.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  await page.getByRole('button', { name: new RegExp(esc) }).first().click({ timeout: 20000 });
+  const teamCard = page.getByRole('button', { name: new RegExp(esc) });
+  try {
+    await teamCard.first().waitFor({ state: 'visible', timeout: 25000 });
+  } catch (e) {
+    const dump = await page.locator('button').evaluateAll((bs) => bs.map((b) => b.getAttribute('aria-label') || (b.textContent || '').trim().slice(0, 30)));
+    console.error('DIAG buttons=', JSON.stringify(dump));
+    throw e;
+  }
+  await teamCard.first().click({ timeout: 20000 });
   await page.getByLabel('成员 user id').fill('bob');
   await page.getByRole('button', { name: '添加成员' }).click();
   await page.getByText('bob').first().waitFor({ timeout: 15000 });
@@ -149,19 +157,21 @@ const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' 
   await page.getByRole('button', { name: '创建提案' }).click();
   await page.getByText(`MySQL 提案 ${stamp}`).waitFor({ timeout: 20000 });
 
-  await page.getByLabel('探针步数').fill('3');
-  await page.getByLabel('探针 token 数').fill('1200');
-  await page.getByRole('button', { name: '记录探针' }).click();
-  await page.getByRole('button', { name: '记录影子重放' }).waitFor({ timeout: 15000 });
-  await page.getByLabel('judge 模型').fill('dsh-cli');
-  await page.getByLabel('pass_rate').fill('0.9');
-  await page.getByLabel('baseline').fill('0.5');
-  const checks = page.getByRole('checkbox');
+  // 库里可能残留历史提案卡片 → 一律限定在本次提案的 article 内，避免 strict mode 撞车
+  const pcard = page.getByRole('article', { name: `提案 MySQL 提案 ${stamp}` });
+  await pcard.getByLabel('探针步数').fill('3');
+  await pcard.getByLabel('探针 token 数').fill('1200');
+  await pcard.getByRole('button', { name: '记录探针' }).click();
+  await pcard.getByRole('button', { name: '记录影子重放' }).waitFor({ timeout: 15000 });
+  await pcard.getByLabel('judge 模型').fill(`${CLI}-cli`);
+  await pcard.getByLabel('pass_rate').fill('0.9');
+  await pcard.getByLabel('baseline').fill('0.5');
+  const checks = pcard.getByRole('checkbox');
   await checks.nth(0).check(); await checks.nth(1).check();
-  await page.getByRole('button', { name: '记录影子重放' }).click();
-  await page.getByRole('button', { name: '人批发布' }).waitFor({ timeout: 15000 });
-  await page.getByRole('button', { name: '人批发布' }).click();
-  await page.getByRole('button', { name: /确认发布/ }).click();
+  await pcard.getByRole('button', { name: '记录影子重放' }).click();
+  await pcard.getByRole('button', { name: '人批发布' }).waitFor({ timeout: 15000 });
+  await pcard.getByRole('button', { name: '人批发布' }).click();
+  await pcard.getByRole('button', { name: /确认发布/ }).click();
   await page.waitForTimeout(1500);
   await page.screenshot({ path: `${SHOTS}/proposals.png` });
   log('提案：探针 → 影子 → 人批发布 全链路', (await page.getByText('published').count()) > 0);
@@ -190,7 +200,7 @@ const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' 
     });
     return { ok: res.ok, status: res.status, body: await res.json().catch(() => ({})) };
   });
-  log('运行时：judge=llm 真实调用 dsh CLI', runtime.ok && runtime.body.judge_kind === 'llm_judge',
+  log(`运行时：judge=llm 真实调用 ${CLI} CLI`, runtime.ok && runtime.body.judge_kind === 'llm_judge',
       `pass_rate=${runtime.body.pass_rate} kind=${runtime.body.judge_kind}`);
 
   await browser.close();

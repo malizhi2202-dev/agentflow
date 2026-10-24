@@ -62,20 +62,16 @@ async def _l0_extract_loop():
             await asyncio.sleep(interval)
         except asyncio.CancelledError:
             break
+        db = SessionLocal()
         try:
-            if not cluster_store.acquire_lease("l0-extract", config.CLUSTER_LEASE_TTL_SECONDS):
+            out = l0_job.tick(db)          # 租约 + 作业一体，便于单测
+            if out is None:
                 if not standby_logged:
                     print("[l0] 待命：租约由其他副本持有")
                     standby_logged = True
-                continue
-            standby_logged = False
-        except Exception as e:  # noqa: BLE001
-            print(f"[l0] 租约失败，跳过本轮: {e}")
-            continue
-        db = SessionLocal()
-        try:
-            out = l0_job.run_once(db)
-            print(f"[l0] 本轮：会话 {out['conversations']} · 候选 {out['candidates']} · 入库 {out['created']}")
+            else:
+                standby_logged = False
+                print(f"[l0] 本轮：会话 {out['conversations']} · 候选 {out['candidates']} · 入库 {out['created']}")
         except Exception as e:  # noqa: BLE001 — 作业失败不拖垮进程
             print(f"[l0] 本轮失败: {e}")
         finally:

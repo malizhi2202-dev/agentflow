@@ -1,0 +1,3 @@
+# 开发/CI 专用依赖（不进生产 requirements.txt）
+coverage>=7.0
+pyflakes>=3.0

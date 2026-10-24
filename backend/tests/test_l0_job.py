@@ -62,3 +62,48 @@ class TestL0Job(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestTick(unittest.TestCase):
+    """定时循环的一轮：租约拿到才跑；拿不到待命；可用假 store 注入（不依赖真实 DB 集群表）。"""
+
+    def setUp(self):
+        from tests.test_l0_job import TestL0Job  # noqa: F401 — 复用夹具写法
+        self._outer = TestL0Job("test_default_dry_run_counts_only")
+        self._outer.setUp()
+
+    def tearDown(self):
+        self._outer.tearDown()
+
+    class _Store:
+        def __init__(self, ok):
+            self.ok = ok
+            self.calls = 0
+
+        def acquire_lease(self, name, ttl):
+            self.calls += 1
+            return self.ok
+
+    def test_tick_returns_none_when_standby(self):
+        store = self._Store(False)
+        out = l0_job.tick(self._outer.db, cluster_store=store)
+        self.assertIsNone(out)
+        self.assertEqual(store.calls, 1)
+
+    def test_tick_runs_job_when_lease_acquired(self):
+        store = self._Store(True)
+        out = l0_job.tick(self._outer.db, cluster_store=store)
+        self.assertIsNotNone(out)
+        self.assertEqual(out["conversations"], 3)
+        self.assertTrue(out["dry_run"])
+
+    def test_tick_uses_lease_name_constant(self):
+        names = []
+
+        class S:
+            def acquire_lease(self, name, ttl):
+                names.append(name)
+                return True
+
+        l0_job.tick(self._outer.db, cluster_store=S())
+        self.assertEqual(names, [l0_job.LEASE_NAME])
