@@ -1,5 +1,7 @@
 # D-S15-agent-resource-model — S15 · Agent 资源关联模型
 
+> 〔口径注 2026-10-23 · v20 归并〕本包为**历史评审记录**（成文早于 v20）；现行有效口径以 `platform-evolution/RULINGS.md` 与 `product-design/PRODUCT-DESIGN.html` **v20** 为准——与本文冲突处让位 RULINGS，**原文不改写**（历史保留纪律）。
+
 > 审核: **通过（2026-10-23 · 同上）· 字典已成文 DICT-agent-resource-model.md**（第5轮 2026-09-23）
 
 **一句话**：把「一个 Agent 实体应关联哪些资源、每种关联是拥有/挂载/共享/引用哪种语义、生命周期与配额怎么归属、关系图上哪些进 DB 外键哪些留 JSON」定成一份有据可查的《Agent 资源关联字典》，补齐缺失关联并修复现有关联的图谱碎片化。

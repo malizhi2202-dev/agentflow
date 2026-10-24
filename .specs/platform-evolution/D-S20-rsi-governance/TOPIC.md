@@ -1,5 +1,7 @@
 # D-S20-rsi-governance — S20 · RSI 产物层自进化（第 6 轮）
 
+> 〔口径注 2026-10-23 · v20 归并〕本包为**历史评审记录**（成文早于 v20）；现行有效口径以 `platform-evolution/RULINGS.md` 与 `product-design/PRODUCT-DESIGN.html` **v20** 为准——与本文冲突处让位 RULINGS，**原文不改写**（历史保留纪律）。
+
 > 审核: **通过（第 6 轮）** · 用户原话：「我同意」（2026-10-23）
 > 状态：①-⑤ 全走完，已过审。
 

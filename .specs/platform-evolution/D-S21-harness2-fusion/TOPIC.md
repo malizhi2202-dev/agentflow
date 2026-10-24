@@ -1,5 +1,7 @@
 # S21 · harness2 糅合 · 递归脚手架改进并入 RSI 框架
 
+> 〔口径注 2026-10-23 · v20 归并〕本包为**历史评审记录**（成文早于 v20）；现行有效口径以 `platform-evolution/RULINGS.md` 与 `product-design/PRODUCT-DESIGN.html` **v20** 为准——与本文冲突处让位 RULINGS，**原文不改写**（历史保留纪律）。
+
 > 轮次: 第 7 轮（2026-10-23 · 用户点名开启）
 > 依据: 用户原话三裁定（见 TOPICS.md 第 7 轮申报）· Google Harness² arXiv 2610.14224（摘要已 web_fetch 一手核验）· /home/malizhi/project/harness2 全仓精读（深读包 26dbf892）
 > 审核: **通过（第 7 轮）** · 用户原话：「同意」（2026-10-23）

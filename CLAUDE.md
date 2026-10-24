@@ -8,6 +8,21 @@
 核心能力：Agent 编排（YAML ↔ 画布）、K8s 式管控（隔离域 / 自动路由 / 渐进扩容 / Reconcile 自愈）、
 工作流知识产物监控、对话中心、工具库与模板市场、RBAC + 审计。
 
+## 文档地图（先看这里 · 2026-10-23 v20 归并）
+
+**本仓有两层，别混**：**设计档**（`.specs/`，持续更新到 **v20**）与**代码**（基线 `4ac819bf`·2026-10-12，**落后设计约 6 轮**）。**产品应该是什么样 → 看设计档；代码现在有什么 → 看 `STATE.md` 现状表。**
+
+| 想知道什么 | 打开哪一份 |
+|---|---|
+| 产品应该是什么样（唯一权威设计文本） | `.specs/product-design/PRODUCT-DESIGN.html` **v20** |
+| 界面形态（**127** 页可点原型） | `.specs/product-design/prototype/index.html` |
+| **这句话现在还作数吗** | `.specs/platform-evolution/RULINGS.md`（现行口径单一事实源） |
+| 文档索引 / 审核台账 | `.specs/product-design/INDEX.md` |
+| 过审结论 / 议题状态 | `.specs/platform-evolution/ROADMAP.md` / `TOPICS.md` |
+| 跨会话状态 / 代码基线 | `STATE.md` |
+
+**归并纪律**：① 一条口径只活在一个地方（现行→`RULINGS.md`；设计→`PRODUCT-DESIGN`；界面→`prototype/`）。② 推翻 = 加 `⛔` 标记 + 指针，**不删原文**。③ 改设计先改 RULINGS 一行 → 再改主档 → 同批同步原型与术语表。④ 文档写「未实现」就是未实现，**不据文档反推代码**。
+
 ## 代码布局
 
 | 路径 | 说明 |
@@ -36,12 +51,12 @@ cd frontend && npm install && npm run dev
 | 事实 | 影响 |
 |---|---|
 | **`npm run build` 必然失败**（`tsc` 报 32 个 TS 错误） | 当前**没有可用的生产构建**；`npx vite build` 可绕过类型检查但不是项目构建契约 |
-| **`node_modules` 被 git 跟踪**（35,847 个跟踪文件中 35,517 个是它） | `.gitignore` 已含规则但历史已纳入跟踪，规则不生效；跑 dev server 会污染 `git status` |
+| **`node_modules` 被 git 跟踪**（10-23 复测：**36,134** 个跟踪文件中 35,517 个是它） | `.gitignore` 已含规则但历史已纳入跟踪，规则不生效；跑 dev server 会污染 `git status` |
 | **认证身份来自 `X-User-Id` 请求头且默认 admin**，`get_current_user` 缺身份时回退 admin | fail-open 后门；唯一缓解（localhost 限制）在反向代理后失效 |
 | **口令为无盐 `hashlib.sha256`**，默认口令硬编码 `123456` | 待修为自适应哈希（修方案=文档 v8 P0-1/2/3 已过审，开发冻结中） |
 | **三处关键状态在进程内存**：调度队列、控制面限流、调和退避 | 「路由/扩容/自愈」**仅在单副本下成立**，多副本会各自为政 |
 | **`Domain` 不是安全边界** | 它只是逻辑分组（4 字段）；Agent 在平台进程内执行，无沙箱 |
-| **9 阶段模型硬编码在 13 个文件** | 与「不绑定任何开发流程」的定位存在张力；`/api/admin/workflow` + `workflow.json` 是已存在但未接上的配置落点 |
+| **9 阶段模型硬编码在 12 个文件**（10-23 复测：后端 6 + 前端 6） | 与「不绑定任何开发流程」的定位存在张力；`/api/admin/workflow` + `workflow.json` 是已存在但未接上的配置落点 |
 | **无 CI / Dockerfile / Makefile / LICENSE / pyproject.toml** | 无自动化质量门 |
 | **迁移是 `database.py` 里 3 条内联 `ALTER TABLE`** | 无版本账本、无回滚 |
 | **裁定⑦（2026-09-23）**：可计量追踪数据（用户/会话/PAT/错误告警/审计/变更账本/指标 trace）权威库 = MySQL；SQLite 降为本地体验档；`users.json`/`audit.jsonl` 将表化退役 | 一切新数据模型设计按 MySQL 档书写，不再新增文件态权威数据 |

@@ -4,6 +4,24 @@
 
 ---
 
+## 文档地图（最新版在哪）
+
+> **本仓现在有两层**：**设计档**（持续更新，最新到 2026-10-23 v20）与**代码**（基线 `4ac819bf`·2026-10-12，**落后设计 6 轮**）。**判断「产品应该是什么样」看设计档，判断「代码现在有什么」看 STATE.md。**
+
+| 想知道什么 | 打开哪一份 |
+|---|---|
+| **产品应该是什么样**（唯一权威设计文本） | `.specs/product-design/PRODUCT-DESIGN.html` · **v20** |
+| **界面长什么样**（**127** 页可点原型） | `.specs/product-design/prototype/index.html` |
+| **这句话现在还作数吗**（现行口径总表） | `.specs/platform-evolution/RULINGS.md` |
+| **文档总索引 / 审核台账** | `.specs/product-design/INDEX.md` |
+| 过审结论台账 / 议题状态 | `.specs/platform-evolution/ROADMAP.md` · `TOPICS.md` |
+| 代码现状 / 待办 / 冻结状态 | `STATE.md`（裁定⑧：开发冻结中，只改文档与原型） |
+| 竞品证据 | `.specs/COMPETITIVE-RESEARCH-2026-09-agent-harness.md` · `.specs/product-design/RECON-MULTICA-DOCS.md` |
+
+> ⚠ 下文「功能模块」描述的是**代码现状**（老版本），不是设计目标；两者差异与升级波次见 `PRODUCT-DESIGN.html` §1.6.0。
+
+---
+
 ## 启动
 
 ```bash

@@ -1,7 +1,10 @@
 # CONTEXT.md — AgentFlow 项目上下文
 
-> 自动生成：2026-07-06 · I-intel-scan
+> 自动生成：2026-07-06 · I-intel-scan（**已作废的快照**）
 > 证据来源：grep / find / wc -l / sqlite3
+>
+> ⛔ **本文件是 2026-07-06 的代码扫描快照，此后产品定位、数据模型、术语与竞品判断全部重写过（现为 v20）。仓库路径、表数、功能描述均已过时——不要引用。**
+> **现行上下文请读**：`.specs/product-design/INDEX.md`（文档索引）· `PRODUCT-DESIGN.html` **v20**（设计）· `.specs/platform-evolution/RULINGS.md`（现行口径）· `STATE.md`（代码基线 `4ac819bf`）。
 
 ---
 

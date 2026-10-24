@@ -1,5 +1,7 @@
 # D-declarative-api — S9 · 声明式 API 面（差距②）
 
+> 〔口径注 2026-10-23 · v20 归并〕本包为**历史评审记录**（成文早于 v20）；现行有效口径以 `platform-evolution/RULINGS.md` 与 `product-design/PRODUCT-DESIGN.html` **v20** 为准——与本文冲突处让位 RULINGS，**原文不改写**（历史保留纪律）。
+
 > **状态**：通过（第 4 轮 · 2026-09-23 用户原话「通过」）· 完整链路见 REVIEW/PANEL
 > **拆解依据（R16.4 用户点名 = 第 4 轮重启合法性来源）**：用户原话②「没有声明式 API 面——有 YAML apply，但没有 CRD 那样的稳定契约与 watch 语义」。问题清单：非 K8s 栈的 watch 实现形态（revision 游标/SSE/ETag/changes-feed）；apiVersion 生命周期与弃用惯例；conditions/observedGeneration 最小语义集；kagent CRD kinds 实证清单；SQLite+FastAPI 落点参照（P2-5 充实）。
 

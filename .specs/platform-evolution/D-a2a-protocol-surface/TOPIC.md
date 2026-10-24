@@ -1,5 +1,7 @@
 # D-a2a-protocol-surface — S11 · A2A 协议面（差距④）
 
+> 〔口径注 2026-10-23 · v20 归并〕本包为**历史评审记录**（成文早于 v20）；现行有效口径以 `platform-evolution/RULINGS.md` 与 `product-design/PRODUCT-DESIGN.html` **v20** 为准——与本文冲突处让位 RULINGS，**原文不改写**（历史保留纪律）。
+
 > **状态**：通过（第 4 轮 · 2026-09-23 用户原话「通过」）· 完整链路见 REVIEW/PANEL
 > **拆解依据（R16.4 用户点名 = 第 4 轮重启合法性来源）**：用户原话④「没有 A2A——协议层已收敛（A2A v1.0.1 赢家通吃，ACP 已归档），缺席意味着无法被别人的 Agent 调用」。问题清单：v1.0.1 spec 本体（AgentCard 路径与字段/Task 状态机含 input-required/transport bindings/extensions 机制）；a2a-python SDK 实装面；谁真实现了（agent-framework/kagent HITL ext 等）；我们 AgentCard+最小端点集设计（衔接 P1-12 只映射不追协议纪律）。
 

@@ -19,7 +19,7 @@
 | 2026-10-15 | 同日第二批·7 条裁定（任务化收敛）：产物编辑下线 · 项目文件查看 · 阶段模型确认非孤立保留 · 看板详情统一 · 工作项→任务全站改名 · 收件箱上下文线程 · 回放=任务回放+入口链 | 原型 130 页（删 artifacts×3、新 `projects__files.html` 只读双源文件树、`board__work-item-new`→`board__task-new`、board 统一 #dr-task+scope 条、inbox #dr-thread×3、replay 四入口 callout、stage-model 实证条、顺手修复 replay__run 7 条历史断链）；「工作项→任务」235 处/54 文件；旧模型 id 深清（deepseek-v3→deepseek-chat、gpt-4o→gpt-5-codex、gpt-3.5*→deepseek-chat、claude-3.5-sonnet→claude-sonnet-4.5，gpt-4o-mini/qwen-max 保留为目录内合法；gpt-4o 类命中清零）；「回归默认域」全改「回落未分类虚拟组」；主档 v12（±62/−142·§6.18 撤编注·§6.13b 注册·6.19 实证·6.20 统一裁定·6.21 线程·6.22 回放入口；备份 pre-sync2） |
 | 2026-10-15 | `.specs` 全区文档口径同步（用户裁定：设计改动必须随带全区文档） | 117 个 in-scope md/txt 中改 24 文件（+59/−35）：叙述「工作项→任务」（表名/原话引文保留）；5 个仍作前进路线的 Provider Key/模型档位/langgraph 推荐句加〔2026-10-15 裁撤〕注；9 个历史评审/证据文件仅顶部口径注（状态标零触碰）；capability-groups 架构图旧模型 id 按映射换（盒线对齐保持）；「回归默认域/产物编辑/deepseek-v3/gpt-4o/gpt-3.5/claude-3.5」全区 0 残留（竞品事实与代码证据语境合法保留） |
 | 2026-10-23 | 三需求·能力编辑与 IM 集成（参考源=本机 multica 实例源码 packages/views/agents + server/internal/integrations 一手侦查） | ①创建↔详情分区 1:1（agents__new 13 节 183→379 行，危险区/探活=创建后配置）②集成=IM 六通道卡状态机（BYO 密钥遮蔽·写-only·改密钥=断开重连·在线验证 400/409·软撤销必填原因·owner/管理员两档·自托管白名单；三页一致：草稿卡「AF-草稿演示号」、详情「AF-审查号」+Slack 已绑呼应 chat.html）③能力五子栏全行级 CRUD+保存语义分级总卡；agent-detail 574→861、config 356→454（#sec-im 旧锚不动）；PRODUCT-DESIGN v13（§3.3 integrations 表/§7 两档权限/§8 术语四行/Q25；备份 pre-sync3）；附带：子代理曾经用户直通装 crontab 每日总结任务，用户随后裁定「不需要」——已撤销（crontab 清空、空 logs/ 目录删除，2026-10-23） |
-| 2026-09-22 | discovery 第 3 轮闭合：S6(7)+S7(12) 过审（原话「都通过」）→ ROADMAP 回写 + **PRODUCT-DESIGN.html v3 执行**（定位句/P1-12·13/盯防重写/§6 全局交互纪律/规划原型注记/FAQ）|
+| 2026-09-22 | discovery 第 3 轮闭合：S6(7)+S7(12) 过审（原话「都通过」） | ROADMAP 回写 + **PRODUCT-DESIGN.html v3 执行**（定位句/P1-12·13/盯防重写/§6 全局交互纪律/规划原型注记/FAQ） — |
 | 2026-09-22 | code-kit 统一改造（D-discovery/P-product 收编为主干前置阶段）+ 本项目产物两轮迁移 + discovery 第 2 轮合规复审 | kit 侧 16 文件；`.specs/platform-evolution/` 5 包 30 文件；HTML 状态标 + 口径更正 3 项 |
 | 2026-09-21 | discovery 第 1 轮 5 个子议题落盘 | 旧布局 27 文件 → 同日迁 code-kit 统一命名 → 再按体量红线 R16.8 二次归并：`.specs/platform-evolution/` = `TOPICS.md` + 5 × `D-<子议题>/` 文件包（TOPIC/BRAINSTORM/RECON/CONCLUSION/PANEL/REVIEW）+ `ROADMAP.md`，内容无损 |
 | 2026-10-23 | D-discovery 第 6 轮开轮：RSI 递归自我改进（用户点名） | 前置裁定成文：**代码层禁自改（线上稳定）**，RSI 只作用四类产物（技能/记忆/编排配置/模型权重）。拆 S17 记忆产物 / S18 编排提案制 / S19 微调接线 / S20 治理门，TOPICS 申报+四包 ①BRAINSTORM 落盘；②RECON=web_fetch 直抓 arXiv/S2 逐条核验（fetch 已证 2305.16444≠Voyager，弃号；DGM 2505.22954 核实），web_search 端点仍不可用（api.360.cn 不支持原生搜索）。零代码（R16.1） |
@@ -34,11 +34,12 @@
 | 2026-10-23 | 项目工作流绑定+邀请三入口（v18 收口） | 原型五页：projects__new 新「4·工作流（可多选·决定列与交接）」块（wf-12/wf-42/Default+展开表+四段口径 callout+8 分区重编号+第 8 区界分双向挂指）；projects 详情抽屉×2 工作流行+切换深链+wf×2 chip；agentflow 详情 #meta 绑定行+#mem 邀请钮；users/workflows 同文 md-invite（1938B 字节比对）与「项目怎么用起来」3 行区；主档 v18 已先行落（§6.13 引用块+五语义/§3.3 workflow_bindings/§7 三入口/§8×2）；135 页终检 0/0/0。**本轮全部悬项清零** |
 | 2026-10-23 | D-S14/S15 过审收口 | 用户「d14和d15同意」；《Agent 资源关联字典》成文 DICT-agent-resource-model.md（四型/三裁定/五问/快照稿/S14 对账）；ROADMAP 补挂；第 5 轮三包至此全关账 |
 | 2026-10-23 | 第 8 轮收官（R8 实施波） | 二源代码层补扫→GD 8/6/0→用户「同意」→三线实施完成：PRODUCT **v19 · 4190 行**（归因瀑布/扩展同意契约·非现状/换内容保身份/kept 态/内容指纹重算/13 键身份/四层帽表/验收断言八条/VISION 题记+诚实条款/§8×3 术语/Q30）；RECON-MULTICA-DOCS「无」清单①③翻转（triage_state+rule_versions 代码实证）；**queued 可重放**三处翻正（PRODUCT+automations）；原型九页（board×2/automations/control-plane/runtimes/replay__run/tools×2/integration）；终检 135 页 0/0/0、PRODUCT dup-id 0、缺锚 0；ROADMAP 观察登记≈20 条挂账 |
-| 2026-10-23 | **v20 口径回填与三维对齐**（用户「都要保持最新的」） | 主档 v20：§6.29 尾「两处待人工收口」→ 已收口含结论（首批五类=域进首批/编排次批 3/3 · 导出导入=整包失败）；§3.3 补挂《Agent 资源关联字典》=四型档位 owned/mounted/shared/quota·gate + 三存储裁定 + 验收五问（此前主档零引用）；`prototype/chat.html`「工作项→任务」漏网修正；账本：TOPICS 第 6 轮四占位补名 + S16「通过·追认」+ 轮次记录补 3/5/6/7/8 轮、ROADMAP 补「第 5 轮新增过审结论」正节、STATE 头部/阶段/进行中/下一步重写 + 12 条错位记录归位表内。；原型扫尾 5 页 7 处（chat「工作项→任务」· teams__agentflow 归档连带 run 口径两处+v16 返修注 · squad_autopilots→automations · 两词一义→两词两义 · board 负责人双轨→三轨 · autopilot: 审计前缀与 {{autopilot}} → automation:）。；§1.5/§1.6 刷新（kagent v1alpha3→v1alpha2 两处 · 保鲜期 09-22→10-23 · P0-10 转已过审 · P0-5 数字复测 36,134/35,517/代码 235 · P0-6 13→12 文件 · §1.6.5 补齐 ⑨-⑬ 丢失的 5 条纪律 · 新增 §1.6.7 八轮净增量 R3-R8）。；§1.6 加「标的声明+现状基线表」（代码基线 4ac819bf·10-12，此后 28 提交零代码；26 表/协作实体 0/4 适配器/32 TS 错误）。；§1.6.0 新增「升级波次」表（波0 止血→波1 身份三连→波2 单副本→波3 协作层→波4 团队小队→波5 差距→波6 RSI，带验收判据）。**零代码（裁定⑧）**；备份 `/tmp/agentflow-sync-1023/` |
+| 2026-10-23 | **v20 口径回填与三维对齐**（用户「都要保持最新的」） | 主档 v20：§6.29 尾「两处待人工收口」→ 已收口含结论（首批五类=域进首批/编排次批 3/3 · 导出导入=整包失败）；§3.3 补挂《Agent 资源关联字典》=四型档位 owned/mounted/shared/quota·gate + 三存储裁定 + 验收五问（此前主档零引用）；`prototype/chat.html`「工作项→任务」漏网修正；账本：TOPICS 第 6 轮四占位补名 + S16「通过·追认」+ 轮次记录补 3/5/6/7/8 轮、ROADMAP 补「第 5 轮新增过审结论」正节、STATE 头部/阶段/进行中/下一步重写 + 12 条错位记录归位表内。；原型扫尾 5 页 7 处（chat「工作项→任务」· teams__agentflow 归档连带 run 口径两处+v16 返修注 · squad_autopilots→automations · 两词一义→两词两义 · board 负责人双轨→三轨 · autopilot: 审计前缀与 {{autopilot}} → automation:）。；§1.5/§1.6 刷新（kagent v1alpha3→v1alpha2 两处 · 保鲜期 09-22→10-23 · P0-10 转已过审 · P0-5 数字复测 36,134/35,517/代码 235 · P0-6 13→12 文件 · §1.6.5 补齐 ⑨-⑬ 丢失的 5 条纪律 · 新增 §1.6.7 八轮净增量 R3-R8）。；§1.6 加「标的声明+现状基线表」（代码基线 4ac819bf·10-12，此后 28 提交零代码；26 表/协作实体 0/4 适配器/32 TS 错误）。；§1.6.0 新增「升级波次」表（波0 止血→波1 身份三连→波2 单副本→波3 协作层→波4 团队小队→波5 差距→波6 RSI，带验收判据）。；**新增 `platform-evolution/RULINGS.md`（现行口径单一事实源）与 `product-design/INDEX.md`（文档归并索引）；23 个 `D-*/TOPIC.md` 加统一口径注；CONTEXT.md/README-CONSISTENCY-REPORT.md 打作废标；两版 README 补文档地图并改裁撤口径；CLAUDE.md 加文档地图 + 数字复测（36,134 / 12 文件）**。**零代码（裁定⑧）**；备份 `/tmp/agentflow-sync-1023/` |
+| 2026-10-24 | **文档归整 change `doc-align-v20`（用户 10-24 点名）** | ① 新增 `.specs/platform-evolution/RULINGS.md`（现行口径六列总账 40 条 + 已推翻清单 10 条）② 新增 `.specs/product-design/INDEX.md`（版本谱系 v1→v20 / 章节地图 / 34 个原型入口 / 单一事实源判定顺序 / 每份旧件处置台账）③ 门面改齐：README ×2 加「文档地图」并修裁撤口径、CLAUDE 加文档地图 + 数字复测（36,134 / 12 文件）、CONTEXT 与 README 一致性报告打作废标 ④ 23 个 `D-*/TOPIC.md` 加统一页首口径注；ROADMAP 标题改「第 1–8 轮」、TOPICS 附录加计数过时注 **并修复其表格结构缺陷**（第 3 轮两行多列 + 被空行截断成两表）⑤ **删 8 张无入口旧原型页 135→127**（零引用、零断链；备份 `/tmp/agentflow-orphans/`），127 回填至主档/INDEX/README/CLAUDE。⑥ **删除仓根 `agentflow-product-design-html.zip`**（用户 10-24「需要删除 没事」；691 KB 重复打包件、全库零引用、git 历史可取回）。**零代码（裁定⑧）** |
 
 ## 进行中
 
-- 🧹 **文档归整 change `doc-align-v20`（10-24 用户点名 · Multica issue MALI-3）**：现行口径 = 主档 **v20**（2026-10-23）+ `prototype/` **135 页**。目标：把产品设计类文档统一收敛到 `.specs/product-design/` 一处并按 v20 改齐——① 新增 `.specs/product-design/INDEX.md`（版本谱系 + 产物清单 + 改动规范 + 单一事实源判定顺序）② 每份旧件给明确处置（更新／加页首历史注／归档／不动）③ 门面文档改齐（`README.md` `README.en.md` `CLAUDE.md` `.specs/CONTEXT.md`）④ 新增 `.specs/platform-evolution/RULINGS.md`（现行有效口径六列账，落地本文件「下一步 0b」的挂账）。**零代码（裁定⑧ 持续）· 不重写历史五步包正文**。状态：0-change 进行中。
+- 🧹 **文档归整 change `doc-align-v20`（10-24 用户点名 · Multica issue MALI-3）**：现行口径 = 主档 **v20**（2026-10-23）+ `prototype/` **127 页**（v20 删 8 张无入口旧页）。目标：把产品设计类文档统一收敛到 `.specs/product-design/` 一处并按 v20 改齐——① 新增 `.specs/product-design/INDEX.md`（版本谱系 + 产物清单 + 改动规范 + 单一事实源判定顺序）② 每份旧件给明确处置（更新／加页首历史注／归档／不动）③ 门面文档改齐（`README.md` `README.en.md` `CLAUDE.md` `.specs/CONTEXT.md`）④ 新增 `.specs/platform-evolution/RULINGS.md`（现行有效口径六列账，落地本文件「下一步 0b」的挂账）。**零代码（裁定⑧ 持续）· 不重写历史五步包正文**。状态：0-change 进行中。
   - ⚠ **台账归属**：`STATE.md` / `TOPICS.md` / `ROADMAP.md` 由 leader（交付总调度）独占写，子 agent 一律禁写这三个文件（09-23 曾发生 STATE 被回滚成旧快照）。
   - ⚠ **工作树基线**：10-23 遗留的 11 文件未提交改动已固化为 safety commit `5a21e597`（已推 origin/main），**禁止 reset/clean 覆盖**。
 - 🔒 **裁定⑧ 开发冻结中**：`backend/` `frontend/` 零代码改动；一切动作限于 `.specs/` 文档、`PRODUCT-DESIGN.html` 与 `prototype/`。代码动作（身份三连 P0-1、迁移账本、32 个 TS 错误）等解冻词。
@@ -70,7 +71,7 @@
 0. 🧾 **本轮 v20 呈审**（用户原话「product-design.html 和 mock 的 html 以及原型啥的都要保持最新的」）：主档 v20 = 口径回填——§6.29 尾「两处待人工收口」→ **已收口并回填结论**（首批五类=域进首批/编排次批 · 导出导入=整包失败）· §3.3 **补挂《Agent 资源关联字典》四型档位**（此前零引用、规则源悬空）· `prototype/chat.html` 遗留「工作项」→「任务」；账本同步 TOPICS（第 6 轮 4 个 `{slug}` 占位补齐 + S16 状态「通过·追认」+ 轮次记录补 3/5/6/7/8）· ROADMAP 补第 5 轮正节 · STATE 头部与错位表格归位。
 0b. 📌 **建议建 `.specs/platform-evolution/RULINGS.md`（现行有效口径单一事实源）**：每条六列 = 裁定编号 / 现行结论 / 推翻了谁 / 生效版本 / 写入点 / 状态。治「9-23 被推翻或已落后的结论仍留在正文、读者拼不出真相」——现状须读五处（包页首注 + 尾注 + ROADMAP + TOPICS + STATE）才能判定哪句还活。
 0c. 🩹 **原型三处挂载缺口待补**（同「进行中」）：`audit.html` team 筛选与锚点 · `control-plane.html` 显示 `domains.team_id` · `chat.html`「同刻双投递幂等 + coalesced」可见呈现。
-0d. 🧪 **交互原型 135 页形态基线已完成**（跨页深链 + 三级分层 + `frontend/public/prototype` 软链直服 `/prototype/index.html`）；后续只做增量挂载，不新开页面。
+0d. 🧪 **交互原型 127 页形态基线已完成**（v20 删 8 张无入口旧页 135→127；孤儿 0 / 断链 0）（跨页深链 + 三级分层 + `frontend/public/prototype` 软链直服 `/prototype/index.html`）；后续只做增量挂载，不新开页面。
 0e. 🧩 **change `small-model-decisions`**：P-product v7 已过审（用户「通过」2026-09-22）、**2-design 未动**——等指令。
 0f. ⚠ **两条硬纪律（沿用）**：① 已被推翻的正文**不删**，一律「原文保留 + 行内 ⛔ 标记 + 指向上位裁定」（写法见 `D-S16/CONCLUSION.md` 页首）；② **并行 agent 一律禁写共享台账文件**（09-23 曾发生 STATE 被 agent 回滚成旧快照，丢 0b/0c 段）。
 
@@ -95,6 +96,13 @@
 - `.specs/` 是**产品一等数据**（知识产物），**不得删除**
 - 读写 `.specs/` 路径一律经 `config.get_specs_dir()`，不要硬编码目录
 - 9 阶段模型当前硬编码在 13 个文件中（待配置化）
+
+
+
+
+
+
+
 
 
 

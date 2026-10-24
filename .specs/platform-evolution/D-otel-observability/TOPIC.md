@@ -1,5 +1,7 @@
 # D-otel-observability — S10 · 可观测标准化（差距③）
 
+> 〔口径注 2026-10-23 · v20 归并〕本包为**历史评审记录**（成文早于 v20）；现行有效口径以 `platform-evolution/RULINGS.md` 与 `product-design/PRODUCT-DESIGN.html` **v20** 为准——与本文冲突处让位 RULINGS，**原文不改写**（历史保留纪律）。
+
 > **状态**：通过（第 4 轮 · 2026-09-23 用户原话「通过」）· 完整链路见 REVIEW/PANEL
 > **拆解依据（R16.4 用户点名 = 第 4 轮重启合法性来源）**：用户原话③「没有可观测标准——自建 SQLite 指标，无 OTel/Prometheus，无法接入既有可观测栈」。问题清单：OTel GenAI semconv 2026-09 稳定度（哪些 span 名/属性 stable）；OpenInference vs OTel GenAI 分歧与选型；Langfuse/Phoenix OTLP 接法；prometheus-fastapi-instrumentator 模式；trace_spans→OTel span 映射表与 exporter 最小路径（P2-4 充实）。
 

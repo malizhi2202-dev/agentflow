@@ -1,5 +1,7 @@
 # D-identity-and-security-2 — S13 · 身份三连修复方案（用户「再补充这些」2026-09-22）
 
+> 〔口径注 2026-10-23 · v20 归并〕本包为**历史评审记录**（成文早于 v20）；现行有效口径以 `platform-evolution/RULINGS.md` 与 `product-design/PRODUCT-DESIGN.html` **v20** 为准——与本文冲突处让位 RULINGS，**原文不改写**（历史保留纪律）。
+
 > **状态**：通过（第 4 轮 · 2026-09-23 用户原话「通过」）· 完整链路见 REVIEW/PANEL
 > **拆解依据（R16.4 用户点名 = 第 4 轮重启合法性来源）**：用户点名三条：①身份是客户端自述的（X-User-Id 缺省 admin）②localhost 闸门反代后失效（无 X-Forwarded-For/可信代理处理）③无盐 SHA-256+硬编码 123456+缺失自愈重置分支。问题清单：local-first 控制台认证先例（Jupyter/Open WebUI/Gitea token 模式）；可信代理正确姿势；argon2id 参数与首登强制改密惯例；session 旋转/吊销；MCP 2026-07-28 授权规范参照；P0-1/2/3 修法具体化（令牌形态/TTL/配置面）+界面落点（p1 改密弹窗/p16 部署模式卡）。
 

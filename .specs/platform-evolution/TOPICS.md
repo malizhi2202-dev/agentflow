@@ -12,9 +12,8 @@
 | `identity-and-security` | 身份与安全模型：身份是客户端自述的 | 1 | 通过 |
 | `single-process-state` | 单进程状态与工程化交付 | 1 | 通过 |
 | `stage-model-coupling` | 阶段模型硬编码：通用平台定位下残留的流程绑定 | 1 | 通过 |
-| `harness-landscape-2026` | 多 team 协作 harness 品类 2026-08/09 新动态与空白再校准 | 用户原话（2026-09-22 重申"参考同类产品，不要 LangChain/LangGraph/Dify"）+ 67 仓库调研保鲜期 | 3 | 通过 |
-| `multica-borrow-wave2` | multica 第二波借鉴：数据模型 / 协作机制 / 运行时 harness / UI 层深读（定稿 12 条） | 用户原话点名"参考 ~/project/multica" + 第 1 轮仅采纳 9 个点（D-collaboration-layer 等），UI 与模型层未穷尽 | 3 | 通过 |
-
+| `harness-landscape-2026` |多 team 协作 harness 品类 2026-08/09 新动态与空白再校准<br>**依据**：用户原话（2026-09-22 重申"参考同类产品，不要 LangChain/LangGraph/Dify"）+ 67 仓库调研保鲜期| 3 | 通过 |
+| `multica-borrow-wave2` |multica 第二波借鉴：数据模型 / 协作机制 / 运行时 harness / UI 层深读（定稿 12 条）<br>**依据**：用户原话点名"参考 ~/project/multica" + 第 1 轮仅采纳 9 个点（D-collaboration-layer 等），UI 与模型层未穷尽| 3 | 通过 |
 | `execution-isolation-2` | 沙箱补深：可行隔离阶梯与界面（差距①） | 4 | 通过（第 4 轮） |
 | `declarative-api` | 声明式契约与 watch 语义的非 K8s 实现（差距②） | 4 | 通过（第 4 轮） |
 | `otel-observability` | OTel/Prometheus 可观测标准化路径（差距③） | 4 | 通过（第 4 轮） |
@@ -37,6 +36,8 @@
 | 8 | 2026-10-23 用户指示二源代码层补扫：multica server/packages（1888+1673 文件）+ harness2 internals | S22 multica 代码增量 / S23 harness2 internals 二遍 → R8-1…14 | 过审（「同意」·GD 8/6/0）；实施波收官 → 主档 **v19 · 4190 行** + 原型九页 + 观察登记≈20 条挂账 |
 
 ## 附录 · 第 1 轮拆解全文（原 00-subtopics.md，无损保留）
+
+> 〔口径注 2026-10-23 · v20 归并〕以下为 **2026-09-21 第 1 轮拆解原文**，其中的文件计数（如 35,847 / 13 个文件）与部分判断已过时：**现行口径见 `RULINGS.md`，实数复测见 `PRODUCT-DESIGN.html` §1.6（10-23 复测：36,134 跟踪文件 / 阶段表硬编码 12 文件）**。原文不改写。
 
 > **change-id**：`platform-evolution`
 > **议题**：参考 `~/project/multica` 与网络同类开源多 Team 协作 harness，找出 AgentFlow 的改进方向
@@ -167,5 +168,6 @@ R16.2 要求：**每条子议题必须有事实依据**（文件 / 代码行 / �
 | S23-harness2-internals | harness2 二遍：substrate/benchmarks/cli/tests 未映射件还能喂我们什么 | 前轮 RECON 已覆盖 ①-⑥ 面，本包只挖增量 | **通过（10-23）** |
 
 > 边界：S22/S23 均先出「增量清单+已覆盖不复述」，再由 ①③④ 收敛；⑤ 前禁进 ROADMAP。
+
 
 

@@ -2,6 +2,24 @@
 
 > **Full-stack AI Development Platform** — Agent Orchestration + Visual Monitoring from Requirements to Archive
 
+
+---
+
+## 📚 Documentation Map (where the latest lives)
+
+> This repo has **two layers**: a **design track** (actively updated, currently **v20 / 2026-10-23**) and the **code** (baseline `4ac819bf` / 2026-10-12, which **lags the design by ~6 rounds**). For *what the product should be*, read the design track; for *what the code actually has*, read `STATE.md`.
+
+| You want to know | Open |
+|---|---|
+| **The product as designed** (single source of truth) | `.specs/product-design/PRODUCT-DESIGN.html` — **v20** |
+| **The UI** (**127** clickable prototype pages) | `.specs/product-design/prototype/index.html` |
+| **Is this statement still valid?** | `.specs/platform-evolution/RULINGS.md` |
+| **Doc index & review ledger** | `.specs/product-design/INDEX.md` |
+| Approved conclusions / topic states | `.specs/platform-evolution/ROADMAP.md` · `TOPICS.md` |
+| Code reality / freeze status | `STATE.md` (ruling ⑧: development frozen — docs & prototypes only) |
+
+> ⚠ The "Core Advantages" and feature sections below describe the **code as it is today** (older version), not the design target. The two have drifted: see `PRODUCT-DESIGN.html` §1.6.0 (upgrade waves) and §1.6.7.
+
 ![demo](./demo.gif)
 
 > 📖 [中文版 / Chinese Version](./README.md)
@@ -45,7 +63,7 @@ From 2025 to 2026, AI agent orchestration tools have exploded — Dify, Coze, n8
 
 ## 🎯 Core Advantages
 
-### 1. 15 Edge Strategies (Most in the World)
+### 1. 15 Edge Strategies ⚠ **"most in the world" claim retired — v20 §1.5 says the world-first assumption was disproved**
 
 ```
 pipeline │ fan-out │ fan-in │ map-reduce │ fork │ condition
@@ -98,7 +116,7 @@ Desired State (YAML)  ──→  Topology Snapshot
 
 > K8s-style declarative orchestration. Every competitor is "fire and forget."
 
-### 5. Full Development Lifecycle
+### 5. Full Development Lifecycle ⚠ **per v20 the 9-stage model is configurable, not hardcoded — see §1.6.1 P0-6 / §6.19**
 
 ```
 CHANGE → REQUIREMENT → DESIGN → UI-DESIGN → TASK
@@ -355,8 +373,8 @@ spec:
     - name: reviewer
       kind: Agent
       spec:
-        runtime: langgraph
-        model: { provider: openai, name: gpt-4o }
+        runtime: claude_code      # 运行时 = 外部 AI 编码 CLI（v11 起；§6.28）
+        model_tier: coding        # 模型由运行时暴露，Agent 只选档位（Provider/API Key 已裁撤）
         workflow_id: 1
   routes:
     - { from: reviewer, to: analyzer, type: pipeline }
@@ -528,7 +546,7 @@ A: Currently a local development tool. For production deployment, we recommend: 
 - [ ] CI/CD Integration
 - [ ] Unit + E2E Test Coverage
 - [ ] Natural Language → Topology Canvas (Mothership-style)
-- [ ] Canvas → Multi-Runtime Compilation (LangGraph/CrewAI/Mastra)
+- [ ] ~~Canvas → Multi-Runtime Compilation (LangGraph/CrewAI/Mastra)~~ — **裁撤**：画布应用内直接部署为工作流，运行时不编译（§6.28）
 - [ ] MCP Server Publishing
 - [ ] Docker One-Click Deploy
 
