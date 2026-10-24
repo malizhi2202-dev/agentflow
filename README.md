@@ -188,7 +188,7 @@ Backend (FastAPI + SQLAlchemy + SQLite/MySQL + Redis)
 | `/api/tasks` | GET/POST | 任务（`work_items`）列表/创建；`/:id/status` 状态机、`/:id/assign` 三轨指派、`/:id/runs` 运行连接 |
 | `/api/inbox` | GET | 收件箱（指针不是副本）；`/:id/read` · `/:id/archive` |
 | `/api/teams` | GET/POST | 团队（资源容器）；`/:id/members` 四档角色 · `/:id/transfer` 转让 · `/:id/assets` 五类资产挂载/释放 |
-| `/api/squads` | GET/POST | 小队（可指派编组）；`/:id/members` 混编 · `/:id/assign` 指派=给 leader 入队 leader 任务 |
+| `/api/squads` | GET/POST | 小队（可指派编组）；`/:id/members` 混编 · `/:id/assign` 指派=给 leader 入队 leader 任务；**写操作限 creator 或平台管理员（403）** |
 | `/api/a2a/agents/:id/card` | GET | **A2A M0 静态 AgentCard**（M2 冻结；白名单字段，无凭据） |
 | `/api/runtime/execution-contract` | GET | 执行隔离契约只读呈现；`/validate` 预检 |
 | `/api/watch?since=<id>` | GET | 声明式变更 SSE（应用层游标；过期先发 `event: resync`） |

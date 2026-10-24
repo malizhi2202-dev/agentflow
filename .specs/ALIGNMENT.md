@@ -155,9 +155,28 @@ $ cd frontend && npm run build
 | 10-24 17:10 | D1-5 | README 团队与小隊节补界面入口与能力 | 本轮 docs 提交 |
 | 10-24 17:10 | D4-4 | 单 change 维度产物补齐（SUMMARY×4 + 门票） | `5ed535b5` |
 
-## 8. 下一轮基线
+## 8. 第 4 轮增量（2026-10-24 · 小队授权补漏）
 
-`5ed535b5`（+ 本轮 docs 提交）—— 下次 S-align 从此开始扫描。
+**覆盖提交**：`f55e53c7`（fix squad-authz）+ 本轮 docs 提交
+
+| 编号 | 类型 | 层 | 证据 | 描述 | 处理 |
+|---|---|---|---|---|---|
+| D1-6 | 代码变文档未变 | L3 | `f55e53c7` + `README.md` §API 速查 | `/api/squads` 行为变了（写需 creator/admin），速查表未写 | **已合并**：该行补「写操作限 creator 或平台管理员（403）」 |
+| D4-6 | 执行留痕 | L5 | `.specs/v20-squad-authz/` | 新 change 产物齐（CHANGE/REQUIREMENT/DESIGN/TASK/SUMMARY×3/TEST/REVIEW + G1/G2/Task/G3/测试/G4 门票） | **已闭环** |
+| D5-2 | 需求失配（修复型） | L3 | `v20-ui-teams/REVIEW.md` 遗留 #4 | 指出的权限缺口本轮修掉；UI-teams 的 REVIEW 已加指针 | 已处理（不改历史正文，只加指针） |
+
+> 流程债（历史 9 个 change 缺 REQUIREMENT/DESIGN/门票）状态不变：**不伪造补档**，后续新 change 走完整链。
+
+**已对齐记录**：
+
+| 时间 | 漂移 | 合并动作 | 提交 |
+|---|---|---|---|
+| 10-24 17:40 | D1-6 | README `/api/squads` 行补授权口径 | 本轮 docs 提交 |
+| 10-24 17:40 | D5-2 | `v20-ui-teams/REVIEW.md` 遗留 #4 标注"已在 v20-squad-authz 修" | 本轮 docs 提交 |
+
+## 9. 下一轮基线
+
+`f55e53c7`（+ 本轮 docs 提交）—— 下次 S-align 从此开始扫描。
 
 ---
 
