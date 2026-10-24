@@ -25,8 +25,7 @@ export default function WorkflowCreate({ onBack, onCreated }: { onBack: () => vo
   var [mode, setMode] = useState<'md'|'upload'|'visual'>('md');
 
   useEffect(function() {
-    var uid = localStorage.getItem('current_user_id') || 'admin';
-    fetch('/api/tools', { headers: { 'X-User-Id': uid } }).then(function(r) { return r.json(); }).then(function(d) { setTools(d.tools || []); });
+    fetch('/api/tools').then(function(r) { return r.json(); }).then(function(d) { setTools(d.tools || []); });
   }, []);
 
   // 从 MD 解析节点和连线

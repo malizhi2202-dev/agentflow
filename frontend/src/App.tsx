@@ -33,6 +33,7 @@ import AlertsPage from './pages/AlertsPage';
 import KnowledgeBase from './pages/KnowledgeBase';
 import ApprovalPage from './pages/ApprovalPage';
 import UserArea from './components/UserSelect';
+import ForcePasswordChange from './components/ForcePasswordChange';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuth } from './stores/auth';
 import { useStageConfig } from './stores/stageConfig';
@@ -110,15 +111,24 @@ export default function App() {
   const [agentDetail, setAgentDetail] = useState<any>(null);
   const [agentSaveError, setAgentSaveError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
-  const { isAdmin, rolePermissions, fetchMe, fetchUsers, loaded } = useAuth();
+  const { isAdmin, rolePermissions, fetchMe, fetchUsers, loaded, currentUser, mustChangePassword } = useAuth();
   const [alertCount, setAlertCount] = useState(0);
 
-  // 阶段模型：进应用拉一次（后端单一事实源，失败回退默认表）
-  const fetchStageConfig = useStageConfig((st) => st.fetchStageConfig);
-  useEffect(() => { fetchStageConfig(); }, [fetchStageConfig]);
-
-  // 轮询告警数量（接入去重层，降低频率 15s → 30s）
+  // 身份真相源：服务端会话（cookie）。挂载时问一次 /api/auth/me
   useEffect(() => {
+    fetchMe().then(() => {
+      const state = useAuth.getState();
+      if (state.isAdmin) fetchUsers();
+    });
+  }, []);
+
+  // 阶段模型：登录后再拉（后端单一事实源，失败回退默认表）
+  const fetchStageConfig = useStageConfig((st) => st.fetchStageConfig);
+  useEffect(() => { if (currentUser) fetchStageConfig(); }, [currentUser, fetchStageConfig]);
+
+  // 轮询告警数量（接入去重层，降低频率 15s → 30s）；未登录不轮询
+  useEffect(() => {
+    if (!currentUser) return;
     const pollAlerts = () => {
       safeFetch('/api/alerts/count').then(result => {
         if (result.ok && result.data) {
@@ -129,20 +139,18 @@ export default function App() {
     pollAlerts();
     const t = setInterval(pollAlerts, 30000);
     return () => clearInterval(t);
-  }, []);
+  }, [currentUser]);
 
-  // 未登录 → 显示登录页
-  const userId = localStorage.getItem('current_user_id');
-  if (!userId) {
-    return <LoginPage />;
+  // 所有 hook 之后再决定渲染哪个壳（不能像旧代码那样在 hook 之间 return）
+  if (!loaded) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw', background: 'var(--bg-app)' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>正在确认登录状态...</p>
+      </div>
+    );
   }
-
-  useEffect(() => {
-    fetchMe().then(() => {
-      const state = useAuth.getState();
-      if (state.isAdmin) fetchUsers();
-    });
-  }, []);
+  if (!currentUser) return <LoginPage />;
+  if (mustChangePassword) return <ForcePasswordChange />;
 
   const perm = (p: string) => isAdmin || rolePermissions.includes(p);
   const visibleNav = NAV;
@@ -164,11 +172,10 @@ export default function App() {
   const renderContent = () => {
     if (agentDetail) {
       var handleSaveAgent = async function(data: any) {
-        var uid = localStorage.getItem('current_user_id') || 'admin';
         setAgentSaveError(null);
         var url = data.id ? '/api/agents/' + data.id : '/api/agents';
         var method = data.id ? 'PUT' : 'POST';
-        var res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json', 'X-User-Id': uid }, body: JSON.stringify(data) });
+        var res = await fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         if (!res.ok) {
           var err = await res.json().catch(function() { return { detail: '保存失败 (' + res.status + ')' }; });
           setAgentSaveError(err.detail || '保存失败');
@@ -177,21 +184,20 @@ export default function App() {
         setAgentDetail(null);
       };
       var handleDeleteAgent = function() {
-        if (agentDetail.id) { fetch('/api/agents/' + agentDetail.id, { method: 'DELETE', headers: { 'X-User-Id': localStorage.getItem('current_user_id') || 'admin' } }).then(function() { setAgentDetail(null); }); }
+        if (agentDetail.id) { fetch('/api/agents/' + agentDetail.id, { method: 'DELETE' }).then(function() { setAgentDetail(null); }); }
       };
       return <AgentDetail agent={agentDetail} onBack={() => { setAgentDetail(null); setAgentSaveError(null); }} onSave={handleSaveAgent} onDelete={agentDetail.id ? handleDeleteAgent : undefined} saveError={agentSaveError} />;
     }
     if (toolDetail) {
       var handleSaveTool = function(data: any) {
-        var uid = localStorage.getItem('current_user_id') || 'admin';
         if (data.id) {
-          fetch('/api/tools/' + data.id, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid }, body: JSON.stringify(data) }).then(function() { setToolDetail(null); });
+          fetch('/api/tools/' + data.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(function() { setToolDetail(null); });
         } else {
-          fetch('/api/tools', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid }, body: JSON.stringify(data) }).then(function() { setToolDetail(null); });
+          fetch('/api/tools', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(function() { setToolDetail(null); });
         }
       };
       var handleDeleteTool = function() {
-        if (toolDetail.id) { fetch('/api/tools/' + toolDetail.id, { method: 'DELETE', headers: { 'X-User-Id': localStorage.getItem('current_user_id') || 'admin' } }).then(function() { setToolDetail(null); }); }
+        if (toolDetail.id) { fetch('/api/tools/' + toolDetail.id, { method: 'DELETE' }).then(function() { setToolDetail(null); }); }
       };
       return <ToolDetail tool={toolDetail} onBack={() => setToolDetail(null)} onSave={handleSaveTool} onDelete={toolDetail.id ? handleDeleteTool : undefined} />;
     }
@@ -205,17 +211,15 @@ export default function App() {
         { id: 'dev-lead', name: '研发负责人' }, { id: 'test-engineer', name: '资深测试工程师' },
       ];
       var handleSaveRole = function(data: any) {
-        var uid = localStorage.getItem('current_user_id') || 'admin';
         if (data.id) {
-          fetch('/api/roles/custom/' + data.id, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid }, body: JSON.stringify(data) }).then(function() { setRoleDetail(null); });
+          fetch('/api/roles/custom/' + data.id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(function() { setRoleDetail(null); });
         } else {
-          fetch('/api/roles/custom', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid }, body: JSON.stringify(data) }).then(function() { setRoleDetail(null); });
+          fetch('/api/roles/custom', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(function() { setRoleDetail(null); });
         }
       };
       var handleDeleteRole = function() {
         if (roleDetail.id) {
-          var uid = localStorage.getItem('current_user_id') || 'admin';
-          fetch('/api/roles/custom/' + roleDetail.id, { method: 'DELETE', headers: { 'X-User-Id': uid } }).then(function() { setRoleDetail(null); });
+          fetch('/api/roles/custom/' + roleDetail.id, { method: 'DELETE' }).then(function() { setRoleDetail(null); });
         }
       };
       return <RoleDetail role={roleDetail} templates={builtinTemplates} onBack={() => setRoleDetail(null)} onSave={handleSaveRole} onDelete={roleDetail.id ? handleDeleteRole : undefined} />;
@@ -272,8 +276,7 @@ export default function App() {
         borderRight: '1px solid var(--border)',
         display: 'flex', flexDirection: 'column',
         transition: 'width var(--normal) var(--ease)',
-        flexShrink: 0, overflow: 'hidden',
-      }}>
+        flexShrink: 0, overflow: 'hidden' }}>
         {/* Logo */}
         <div style={{ padding: collapsed ? '12px 10px' : '12px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ color: 'var(--blue)', fontWeight: 800, fontSize: 16, flexShrink: 0 }}>◈</span>
@@ -290,8 +293,7 @@ export default function App() {
             display: 'flex', alignItems: 'center', gap: 8,
             padding: collapsed ? '8px 14px' : '8px 16px',
             borderBottom: '1px solid var(--border)',
-            color: 'var(--text-secondary)', fontSize: 12.5, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0,
-          }}
+            color: 'var(--text-secondary)', fontSize: 12.5, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
         >
           <span style={{ flexShrink: 0 }}>📄</span>
           {!collapsed && <span>文档资料 · 原型</span>}
@@ -312,8 +314,7 @@ export default function App() {
                 border: 'none', color: nav === item.id && !detailId ? 'var(--blue)' : 'var(--text-secondary)',
                 cursor: 'pointer', fontSize: 13, fontWeight: nav === item.id && !detailId ? 600 : 400,
                 transition: 'all var(--fast)',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-              }}
+                justifyContent: collapsed ? 'center' : 'flex-start' }}
             >
               {item.icon}
               {!collapsed && <span>{item.label}</span>}
@@ -341,8 +342,7 @@ export default function App() {
                     border: 'none', color: nav === item.id && !detailId ? 'var(--blue)' : 'var(--text-secondary)',
                     cursor: 'pointer', fontSize: 13, fontWeight: nav === item.id && !detailId ? 600 : 400,
                     transition: 'all var(--fast)',
-                    justifyContent: collapsed ? 'center' : 'flex-start',
-                  }}
+                    justifyContent: collapsed ? 'center' : 'flex-start' }}
                 >
                   {item.icon}
                   {!collapsed && <span>{item.label}</span>}
@@ -367,8 +367,7 @@ export default function App() {
               cursor: 'pointer', fontSize: 13, fontWeight: nav === 'alerts' ? 600 : 400,
               transition: 'all var(--fast)',
               justifyContent: collapsed ? 'center' : 'flex-start',
-              position: 'relative' as const,
-            }}
+              position: 'relative' as const }}
           >
             <Bell size={16} />
             {!collapsed && <span>告警中心</span>}
@@ -377,8 +376,7 @@ export default function App() {
                 position: 'absolute', top: 2, right: collapsed ? -2 : 8,
                 background: 'var(--red)', color: '#fff', borderRadius: 10,
                 padding: '0px 5px', fontSize: 10, fontWeight: 700,
-                minWidth: 16, textAlign: 'center', lineHeight: '16px',
-              }}>
+                minWidth: 16, textAlign: 'center', lineHeight: '16px' }}>
                 {alertCount > 99 ? '99+' : alertCount}
               </span>
             )}

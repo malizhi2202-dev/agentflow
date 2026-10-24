@@ -16,10 +16,9 @@ export default function AgentBuilder({ onSelect }: Props) {
   var loadMemories = async function(agentId: number) {
     setMemoryLoading(function(prev) { return { ...prev, [agentId]: true }; });
     try {
-      var uid = localStorage.getItem('current_user_id') || 'admin';
       var res = await fetch('/api/agents/' + agentId + '/load-memory', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Id': uid },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ limit: 20, days: 7 }),
       });
       var data = await res.json();

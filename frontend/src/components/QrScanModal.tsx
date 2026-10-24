@@ -25,7 +25,6 @@ export default function QrScanModal({ channelType, agentId, onSuccess, onClose, 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const mountedRef = useRef(true);
   const meta = CHANNEL_META[channelType] || { label: channelType, icon: '🔌' };
-  const uid = () => localStorage.getItem('current_user_id') || 'admin';
 
   // 发起 OAuth
   useEffect(() => {
@@ -39,7 +38,7 @@ export default function QrScanModal({ channelType, agentId, onSuccess, onClose, 
     try {
       const res = await fetch('/api/channels/' + channelType + '/oauth/start', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ agent_id: agentId }),
       });
       if (!res.ok) {
@@ -79,9 +78,7 @@ export default function QrScanModal({ channelType, agentId, onSuccess, onClose, 
       }
 
       try {
-        const res = await fetch('/api/channels/' + channelType + '/oauth/poll?device_code=' + encodeURIComponent(code), {
-          headers: { 'X-User-Id': uid() },
-        });
+        const res = await fetch('/api/channels/' + channelType + '/oauth/poll?device_code=' + encodeURIComponent(code));
         if (!res.ok) {
           if (res.status === 429) return; // rate limited, skip this round
           return;

@@ -30,8 +30,6 @@ spec:
       type: sequential
 `;
 
-const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
 export default function OrchestrationPage() {
   const store = useOrchestration();
   const {
@@ -62,7 +60,7 @@ export default function OrchestrationPage() {
     const match = path.match(/\/orchestration\/(\d+)\/edit/);
     if (match) {
       const id = parseInt(match[1]);
-      fetch(`/api/orchestration/${id}`, { headers: { 'X-User-Id': uid() } })
+      fetch(`/api/orchestration/${id}`)
         .then((r) => r.json())
         .then((d) => {
           setYamlContent(d.yaml_raw || '');

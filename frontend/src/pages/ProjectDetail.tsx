@@ -35,18 +35,17 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
 
   useEffect(() => {
     if (tab === 'agent' && boundAgent) {
-      const uid = localStorage.getItem('current_user_id') || 'admin';
-      fetch('/api/metrics/project/' + projectId + '/breakdown?minutes=60', { headers: { 'X-User-Id': uid } })
+      fetch('/api/metrics/project/' + projectId + '/breakdown?minutes=60')
         .then(r => r.json()).then(d => setBreakdown(d)).catch(() => setBreakdown(null));
       // 编排组信息
       if (orchId) {
-        fetch('/api/orchestration', { headers: { 'X-User-Id': uid } })
+        fetch('/api/orchestration')
           .then(r => r.json()).then(d => {
             const orch = (Array.isArray(d) ? d : (d.instances || [])).find((o: any) => o.id === orchId);
             setOrchInfo(orch || null);
           }).catch(() => setOrchInfo(null));
       }
-      fetch('/api/metrics/sessions?entity_type=agent&limit=50&minutes=1440', { headers: { 'X-User-Id': uid } })
+      fetch('/api/metrics/sessions?entity_type=agent&limit=50&minutes=1440')
         .then(r => r.json()).then(d => {
           const all = (d.sessions || []).filter((s: any) => s.entity_type === 'agent' && s.owner_id === (project?.owner_id));
           setSessions(all);
@@ -63,8 +62,6 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
   useEffect(() => { fetchProjects(); fetchAgents(); fetchWorkflows(); }, []);
   useEffect(() => { if (projectId) fetchMetrics('project', projectId, 60); }, [projectId, tab]);
 
-  const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
   const sendChatMessage = (content: string) => {
     if (!boundAgent) { setChatError('请先绑定 Agent'); return; }
     setChatLoading(true); setChatError(null);
@@ -72,7 +69,7 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
     setChatMessages(prev => [...prev, tempMsg]);
     fetch('/api/agents/' + boundAgent.id + '/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content, conversation_id: chatConversationId, project_id: projectId }),
     }).then(r => r.json()).then(d => {
       if (d.ok) {

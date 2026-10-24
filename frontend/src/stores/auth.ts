@@ -10,70 +10,72 @@ interface AuthState {
   currentUser: UserInfo | null;
   userList: UserInfo[];
   isAdmin: boolean;
+  /** true = 已向服务端问过身份（无论有没有会话）；页面据此决定登录页/主体 */
   loaded: boolean;
+  /** 服务端 must_change_password：true 时除 /api/auth/* 外全被 403 */
+  mustChangePassword: boolean;
   rolePermissions: string[];
   permissionDefs: Record<string, { name: string; description: string; dangerous: boolean }>;
   fetchMe: () => Promise<void>;
   fetchUsers: () => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
-function getUserId(): string {
-  return localStorage.getItem('current_user_id') || '';
-}
-
-export const useAuth = create<AuthState>((set, get) => ({
+export const useAuth = create<AuthState>((set) => ({
   currentUser: null,
   userList: [],
   isAdmin: false,
   loaded: false,
+  mustChangePassword: false,
   rolePermissions: [],
   permissionDefs: {},
 
+  /**
+   * 身份的**唯一真相源**是服务端会话（HttpOnly cookie）：
+   * 不再读 localStorage，也不再有「本地有 id 就算登录」。
+   */
   fetchMe: async () => {
-    const uid = getUserId();
-    if (!uid) {
-      set({ loaded: true });
-      return;
-    }
-    const result = await safeFetch('/api/auth/me');
+    // redirectOn401:false —— 探针自己处理 401，不能触发 safeFetch 的整页刷新
+    const result = await safeFetch('/api/auth/me', { credentials: 'same-origin' }, { redirectOn401: false });
     if (result.ok && result.data) {
       const u = result.data.user;
       set({
         currentUser: u,
         isAdmin: u?.role === 'admin',
         loaded: true,
+        mustChangePassword: !!result.data.must_change_password,
         rolePermissions: result.data.role_permissions || [],
-        permissionDefs: result.data.permissions || {},
-      });
-    } else if (result.status === 401) {
-      localStorage.removeItem('current_user_id');
-      set({ loaded: true });
+        permissionDefs: result.data.permissions || {} });
     } else {
-      set({ loaded: true });
+      set({
+        currentUser: null, isAdmin: false, loaded: true, mustChangePassword: false,
+        rolePermissions: [], permissionDefs: {} });
     }
   },
 
   fetchUsers: async () => {
-    const uid = getUserId();
-    if (!uid) return;
-    const result = await safeFetch('/api/auth/users');
+    const result = await safeFetch('/api/auth/users', { credentials: 'same-origin' });
     if (result.ok && result.data) {
       set({ userList: result.data.users || [] });
     } else if (result.status === 403) {
       set({ userList: [] });
     }
-    // silently ignore other errors
   },
 
-  logout: () => {
-    localStorage.removeItem('current_user_id');
-    set({ currentUser: null, isAdmin: false, loaded: false, rolePermissions: [], userList: [] });
+  logout: async () => {
+    // 先吊销服务端会话，再清前端状态（顺序反了会留下「服务端还认为你登录着」）
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+    } catch {
+      // 网络失败也要把界面退回登录页
+    }
+    set({
+      currentUser: null, isAdmin: false, loaded: true, mustChangePassword: false,
+      rolePermissions: [], permissionDefs: {}, userList: [] });
     window.location.reload();
-  },
-}));
+  } }));
 
+/** 请求头（身份由 cookie 携带，这里只声明 JSON）。 */
 export function authHeaders(): Record<string, string> {
-  const uid = localStorage.getItem('current_user_id') || 'admin';
-  return { 'X-User-Id': uid, 'Content-Type': 'application/json' };
+  return { 'Content-Type': 'application/json' };
 }

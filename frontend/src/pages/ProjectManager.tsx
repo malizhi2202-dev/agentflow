@@ -18,7 +18,7 @@ export default function ProjectManager({ onSelect }: Props) {
 
   useEffect(() => {
     fetchProjects(); fetchAgents(); fetchWorkflows();
-    fetch('/api/orchestration', { headers: { 'X-User-Id': localStorage.getItem('current_user_id') || 'admin' } })
+    fetch('/api/orchestration')
       .then(r => r.json()).then(d => setOrchInstances(Array.isArray(d) ? d : (d.instances || []))).catch(() => {});
   }, []);
 

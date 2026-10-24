@@ -13,7 +13,7 @@ export default function OrchestrationListPage() {
   useEffect(() => { fetchOrchestrations(); }, []);
 
   const handleDelete = async (id: number) => {
-    await fetch(`/api/orchestration/${id}`, { method: 'DELETE', headers: { 'X-User-Id': localStorage.getItem('current_user_id') || 'admin' } });
+    await fetch(`/api/orchestration/${id}`, { method: 'DELETE' });
     setDeleteId(null);
     fetchOrchestrations();
   };

@@ -16,7 +16,6 @@ describe('chat store', () => {
       loading: false,
       error: null,
     });
-    localStorage.setItem('current_user_id', 'admin');
   });
 
   afterEach(() => {

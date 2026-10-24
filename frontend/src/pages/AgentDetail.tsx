@@ -44,20 +44,18 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
   var [showTaskForm, setShowTaskForm] = useState(false);
   var [taskForm, setTaskForm] = useState<any>({ name: '', cron_expr: '0 9 * * *', capability: '', enabled: true });
 
-  var uid = function() { return localStorage.getItem('current_user_id') || 'admin'; };
-
   useEffect(function() {
-    fetch('/api/workflows', { headers: { 'X-User-Id': uid() } }).then(function(r) { return r.json(); }).then(function(d) { setWorkflows(d.workflows || []); });
+    fetch('/api/workflows').then(function(r) { return r.json(); }).then(function(d) { setWorkflows(d.workflows || []); });
     // 加载资料源 + 记忆
     if (agent?.id) {
-      fetch('/api/agents/' + agent.id + '/knowledge-sources', { headers: { 'X-User-Id': uid() } }).then(function(r) { return r.json(); }).then(function(d) { if (Array.isArray(d)) setKnowledgeSources(d); });
+      fetch('/api/agents/' + agent.id + '/knowledge-sources').then(function(r) { return r.json(); }).then(function(d) { if (Array.isArray(d)) setKnowledgeSources(d); });
       loadMemories();
       loadMemoryStats();
       // 加载定时任务
-      fetch('/api/agents/' + agent.id + '/scheduled-tasks', { headers: { 'X-User-Id': uid() } }).then(function(r) { return r.json(); }).then(function(d) { if (Array.isArray(d)) setScheduledTasks(d); });
+      fetch('/api/agents/' + agent.id + '/scheduled-tasks').then(function(r) { return r.json(); }).then(function(d) { if (Array.isArray(d)) setScheduledTasks(d); });
     }
     if (agent?.id) {
-      fetch('/api/metrics/sessions?limit=500&entity_type=agent', { headers: { 'X-User-Id': uid() } }).then(function(r) { return r.json(); }).then(function(d) {
+      fetch('/api/metrics/sessions?limit=500&entity_type=agent').then(function(r) { return r.json(); }).then(function(d) {
         var all = (d.sessions || []).filter(function(s: any) { return s.entity_id === agent.id || s.entity_type === 'agent'; });
         // 时间分桶
         var bm: Record<number, any> = {};
@@ -79,7 +77,7 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
     var url = '/api/agents/' + agent.id + '/knowledge-sources';
     var method = sourceForm.id ? 'PUT' : 'POST';
     var apiUrl = sourceForm.id ? url + '/' + sourceForm.id : url;
-    fetch(apiUrl, { method: method, headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() }, body: JSON.stringify(sourceForm) })
+    fetch(apiUrl, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sourceForm) })
       .then(function(r) { return r.json(); })
       .then(function(d) {
         if (d.ok || d.source) {
@@ -97,25 +95,25 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
 
   var deleteSource = function(sourceId: number) {
     if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/knowledge-sources/' + sourceId, { method: 'DELETE', headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents/' + agent.id + '/knowledge-sources/' + sourceId, { method: 'DELETE' })
       .then(function() { setKnowledgeSources(knowledgeSources.filter(function(s: any) { return s.id !== sourceId; })); });
   };
 
   // 记忆 CRUD
   var loadMemories = function() {
     if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/memory?limit=100', { headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents/' + agent.id + '/memory?limit=100')
       .then(function(r) { return r.json(); }).then(function(d) { if (Array.isArray(d)) setMemories(d); });
   };
   var loadMemoryStats = function() {
     if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/memory/channels', { headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents/' + agent.id + '/memory/channels')
       .then(function(r) { return r.json(); }).then(function(d) { setMemoryChannels(d.channels || {}); });
   };
   var saveMemory = function() {
     if (!agent?.id) return;
     fetch('/api/agents/' + agent.id + '/memory', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(Object.assign({}, memForm, { value: (function() { try { return JSON.parse(memForm.value); } catch(e) { return memForm.value; } })() })),
     }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.ok) { setShowMemForm(false); setMemForm({ channel: 'web', key: '', value: '', memory_type: 'fact', priority: 5 }); loadMemories(); loadMemoryStats(); }
@@ -123,7 +121,7 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
   };
   var deleteMemory = function(mid: number) {
     if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/memory/' + mid, { method: 'DELETE', headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents/' + agent.id + '/memory/' + mid, { method: 'DELETE' })
       .then(function() { loadMemories(); loadMemoryStats(); });
   };
 
@@ -133,7 +131,7 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
     var url = '/api/agents/' + agent.id + '/scheduled-tasks';
     var method = taskForm.id ? 'PUT' : 'POST';
     var apiUrl = taskForm.id ? url + '/' + taskForm.id : url;
-    fetch(apiUrl, { method: method, headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() }, body: JSON.stringify(taskForm) })
+    fetch(apiUrl, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(taskForm) })
       .then(function(r) { return r.json(); })
       .then(function(d) {
         if (d.ok || d.task) {
@@ -151,7 +149,7 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
 
   var deleteTask = function(taskId: number) {
     if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/scheduled-tasks/' + taskId, { method: 'DELETE', headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents/' + agent.id + '/scheduled-tasks/' + taskId, { method: 'DELETE' })
       .then(function() { setScheduledTasks(scheduledTasks.filter(function(st: any) { return st.id !== taskId; })); });
   };
 
@@ -159,7 +157,7 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
     if (!agent?.id) return;
     fetch('/api/agents/' + agent.id + '/scheduled-tasks/' + taskId, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled: enabled }),
     }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.ok || d.task) {
@@ -170,7 +168,7 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
 
   var testSource = function(sourceId: number) {
     if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/knowledge-sources/' + sourceId + '/test', { method: 'POST', headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents/' + agent.id + '/knowledge-sources/' + sourceId + '/test', { method: 'POST' })
       .then(function(r) { return r.json(); })
       .then(function(d) {
         var newList = knowledgeSources.map(function(s: any) {
@@ -189,7 +187,6 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
     fd.append('name', file.name);
     fetch('/api/agents/' + agent.id + '/knowledge-sources/upload', {
       method: 'POST',
-      headers: { 'X-User-Id': uid() },
       body: fd,
     }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.ok && d.source) {
@@ -205,7 +202,7 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
     setChatMessages(function(prev: any[]) { return prev.concat([tempMsg]); });
     fetch('/api/agents/' + agent.id + '/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: content, conversation_id: chatConversationId }),
     }).then(function(r) { return r.json(); }).then(function(d) {
       if (d.ok) {

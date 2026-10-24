@@ -4,8 +4,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import config
 from config import CORS_ORIGIN, HOST, PORT
-from auth import get_user, load_users
+from auth import get_user, load_users, write_audit
+from services import deploy_guard, session_service
 from routes.changes import router as changes_router
 from routes.change_detail import router as detail_router
 from routes.artifact import router as artifact_router
@@ -64,21 +66,16 @@ async def _cron_scheduler_loop():
                         print(f"[cron] 触发任务: agent={task.agent_id} capability={task.capability} cron={task.cron_expr}")
                         task.last_run = now
                         db.commit()
-                        # 异步调用 agent run（不阻塞调度器）
+                        # 直调 service（P0-1 AC-1.5）：不再回环 HTTP、不再伪造 X-User-Id
                         try:
-                            import urllib.request
-                            import json as _json
-                            data = _json.dumps({}).encode("utf-8")
-                            req = urllib.request.Request(
-                                f"http://127.0.0.1:8000/api/agents/{task.agent_id}/run",
-                                data=data,
-                                method="POST",
-                                headers={
-                                    "Content-Type": "application/json",
-                                    "X-User-Id": task.owner_id,
-                                },
-                            )
-                            urllib.request.urlopen(req, timeout=10)
+                            from services.agent_trigger import AgentRunError, trigger_agent_run
+                            try:
+                                result = trigger_agent_run(task.agent_id, task.owner_id)
+                            except AgentRunError as e:
+                                print(f"[cron] 跳过 agent={task.agent_id}: {e}")
+                            else:
+                                if result is None:
+                                    print(f"[cron] 跳过 agent={task.agent_id}: 不存在或不属于 owner={task.owner_id}")
                         except Exception as e:
                             print(f"[cron] 触发失败 agent={task.agent_id}: {e}")
             finally:
@@ -135,24 +132,40 @@ def _cron_matches(cron_expr: str, now, last_run) -> bool:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # 部署配置先响亮失败（P0-3）：非法配置不启动，绝不静默降级
+    deploy_guard.validate_deploy_config()
+    print(
+        f"[deploy] 模式={config.DEPLOY_MODE} · 可信代理={config.TRUSTED_PROXY_IPS or '无'} · "
+        f"网段={config.ALLOW_CIDRS or '无'} · TLS={config.TLS_TERMINATED} · "
+        f"会话 cookie={deploy_guard.session_cookie_name()}"
+    )
+    if not deploy_guard.cookie_secure():
+        print("[deploy] ⚠ 非 TLS：会话 cookie 退化为 af_session（__Host- 前缀需要 Secure）")
+    if deploy_guard.debug_header_enabled():
+        print(
+            "[deploy] ⚠⚠ X-User-Id 调试通道已开启（env ∧ localhost ∧ admit 白名单）："
+            f"{config.AUTH_DEBUG_HEADER_ADMIT_USERS} —— 每个请求都会写 auth:debug_header 审计"
+        )
     print(f"[monitor] 启动中... 数据源: .specs/ 扫描间隔: 5s")
     from database import init_db
+    # 迁移失败必须让启动失败（P0-8：失败即抛；旧实现把它 try/except 成「跳过」）
+    init_db()
+    print("[monitor] 数据库表已就绪")
     try:
-        init_db()
-        print("[monitor] 数据库表已就绪")
-        # 自动创建默认域
-        from models.domain import Domain
-        from database import SessionLocal
-        _db = SessionLocal()
-        try:
-            if not _db.query(Domain).filter(Domain.name == "默认域", Domain.owner_id == "admin").first():
-                _db.add(Domain(name="默认域", owner_id="admin"))
-                _db.commit()
-                print("[monitor] 默认域 '默认域' 已创建")
-        finally:
-            _db.close()
+        session_service.cleanup_expired()
     except Exception as e:
-        print(f"[monitor] 数据库初始化跳过（可能 MySQL 未启动）: {e}")
+        print(f"[monitor] 会话清理跳过: {e}")
+    # 自动创建默认域（可失败：MySQL 未起时上面 init_db 已经先挂了）
+    from models.domain import Domain
+    from database import SessionLocal
+    _db = SessionLocal()
+    try:
+        if not _db.query(Domain).filter(Domain.name == "默认域", Domain.owner_id == "admin").first():
+            _db.add(Domain(name="默认域", owner_id="admin"))
+            _db.commit()
+            print("[monitor] 默认域 '默认域' 已创建")
+    finally:
+        _db.close()
     # 启动 runtime.jsonl 文件监控器（每 30s 增量导入运行时数据）
     from services.runtime_watcher import start_watcher
     start_watcher()
@@ -181,34 +194,100 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="AgentFlow", version="0.1.0", lifespan=lifespan)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[CORS_ORIGIN],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
+# ── 认证中间件（P0-1 重写）───────────────────────────────
+# 身份唯一来源：cookie 会话 > Bearer PAT > 三重 opt-in 的 debug header > 401。
+# X-User-Id 默认**不产生身份**；开启调试通道要 env ∧ localhost ∧ admit 白名单
+# 三者同时成立，且每个请求都写 auth:debug_header 审计。
+_PUBLIC_PATHS = frozenset({"/api/health", "/api/ping"})
+# 无需身份、但仍受来源闸门约束的入口（登录页要拿用户列表/权限表）
+_ANON_AUTH_PATHS = frozenset({"/api/auth/login", "/api/auth/list", "/api/auth/permissions"})
+_MUST_CHANGE_EXEMPT_PREFIX = "/api/auth/"
 
 
-# 认证中间件：读取 X-User-Id header，注入 request.state.user
+def _resolve_identity(request: Request):
+    """解析身份；返回 (user, session_info, source)。任一层无效即整体 401。"""
+    cookie_token = (
+        request.cookies.get("__Host-session") or request.cookies.get("af_session")
+    )
+    if cookie_token:
+        row = session_service.resolve_session(cookie_token)
+        if not row:
+            return None, None, "invalid_session"
+        user = get_user(row["user_id"])
+        if not user:
+            return None, None, "unknown_user"
+        return user, row, "session"
+
+    header = request.headers.get("authorization", "")
+    if header.lower().startswith("bearer "):
+        pat = session_service.resolve_pat(header[7:].strip())
+        if not pat:
+            return None, None, "invalid_pat"
+        user = get_user(pat["user_id"])
+        if not user:
+            return None, None, "unknown_user"
+        return user, pat, "pat"
+
+    # 最后一档：调试头（默认关闭；三重 opt-in、开启有红条、逐请求审计）
+    if deploy_guard.debug_header_enabled():
+        debug_uid = request.headers.get("x-user-id")
+        if debug_uid and deploy_guard.debug_header_allows(debug_uid):
+            user = get_user(debug_uid)
+            if not user:
+                return None, None, "unknown_user"
+            return user, {"debug_header": True}, "debug_header"
+
+    return None, None, None
+
+
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    # localhost 安全检查
-    host = request.client.host if request.client else "unknown"
-    if host not in ("127.0.0.1", "localhost", "::1"):
-        return JSONResponse({"error": "forbidden: localhost only"}, status_code=403)
+    path = request.url.path
+    peer = request.client.host if request.client else "unknown"
+    # health/ping 是探活面：不要求身份、也不受来源闸门限制（仅 GET，无副作用）
+    if path in _PUBLIC_PATHS:
+        request.state.client_ip = peer
+        return await call_next(request)
 
-    # 加载用户：从 X-User-Id header 获取
-    # - 未传 header → 默认 admin（向后兼容）
-    # - 传了 header 但用户不存在 → 401（安全：不静默提权）
-    user_id = request.headers.get("X-User-Id")
-    if user_id:
-        user = get_user(user_id)
-        if not user:
-            return JSONResponse({"error": f"用户 '{user_id}' 不存在"}, status_code=401)
-    else:
-        user = get_user("admin")  # 默认 admin
+    # 1) 来源闸门：DEPLOY_MODE 三值（localhost 仅回环 / lan 网段 / behind-proxy 只收可信反代）
+    if not deploy_guard.peer_allowed(peer):
+        return JSONResponse(
+            {"detail": f"forbidden: 来源不在允许范围（DEPLOY_MODE={config.DEPLOY_MODE}）"},
+            status_code=403,
+        )
+    # 2) 客户端 IP 只用于审计/节流；XFF 仅在 peer 是可信代理时采纳，取右起首个非可信
+    client_ip = deploy_guard.effective_client_ip(peer, request.headers.get("x-forwarded-for"))
+    request.state.client_ip = client_ip
+
+    # 3) 匿名入口（登录/用户列表/权限表）：不需要身份，来源闸门仍然生效
+    if path in _ANON_AUTH_PATHS:
+        request.state.user = None
+        return await call_next(request)
+
+    # 4) 凭证解析（cookie 会话 / Bearer PAT / debug 头）
+    user, session_info, source = _resolve_identity(request)
+    if not user:
+        return JSONResponse({"detail": "未认证"}, status_code=401)
+    if not user.get("active", True):
+        return JSONResponse({"detail": "用户已被禁用"}, status_code=403)
+
     request.state.user = user
+    request.state.session = session_info
+    request.state.auth_source = source
+
+    if source == "debug_header":
+        # 开启=逐请求审计（设计口径：知道谁在用后门）
+        write_audit(user, "auth:debug_header", user["id"], "auth",
+                    f"X-User-Id 调试通道；path={path}", request=request)
+
+    # 5) 首登强制改密：除 /api/auth/* 外一律 403（服务端才是门，前端弹窗只是体验）
+    if user.get("must_change_password") and not path.startswith(_MUST_CHANGE_EXEMPT_PREFIX):
+        return JSONResponse(
+            {"detail": "必须先修改初始口令", "code": "password_change_required"},
+            status_code=403,
+        )
+
     return await call_next(request)
 
 
@@ -226,7 +305,9 @@ async def metrics_middleware(request: Request, call_next):
     if method in ("POST", "PUT") and any(k in path for k in ("/chat", "/run", "/execute", "/stop")):
         try:
             from services.runtime_tracer import tracer
-            user = getattr(request.state, "user", {"id": "admin"})
+            user = getattr(request.state, "user", None)
+            if not user:
+                return response  # 未认证请求已在 auth 中间件被 401，不记 trace
             # 从路径推断 entity_type 和 entity_id
             import re
             entity_type = "agent"
@@ -289,6 +370,16 @@ app.include_router(gateway_router)
 app.include_router(alerts_router)
 app.include_router(human_approval_router)
 
+# CORS 必须**最后**加（Starlette 的 add_middleware 头插 → 最后注册 = 最外层）：
+# 这样来源闸门/认证返回的 403/401 与预检响应都带 CORS 头（P0-3 AC-3.3）。
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[CORS_ORIGIN],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/api/ping")
 async def ping():
@@ -297,4 +388,6 @@ async def ping():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)
+    # proxy_headers=False：XFF 由 deploy_guard 自己按 TRUSTED_PROXY_IPS 解析，
+    # 不让 uvicorn 再按 forwarded_allow_ips 改写 request.client（避免两套真相）。
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=True, proxy_headers=False)

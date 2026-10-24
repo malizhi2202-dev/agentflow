@@ -15,7 +15,7 @@ def api_list_templates(request: Request = None):
 
 @router.get("/custom")
 def api_list_custom_roles(request: Request = None, db: Session = Depends(get_db)):
-    user = request.state.user if request else None
+    user = request.state.user  # 中间件已保证已认证（P0-1）
     q = db.query(CustomRole)
     if user and user.get("role") != "admin":
         q = q.filter(CustomRole.owner_id == user["id"])
@@ -25,8 +25,8 @@ def api_list_custom_roles(request: Request = None, db: Session = Depends(get_db)
 
 @router.post("/custom")
 def api_create_custom_role(payload: dict, request: Request = None, db: Session = Depends(get_db)):
-    user = request.state.user if request else None
-    owner = user["id"] if user else "admin"
+    user = request.state.user  # 中间件已保证已认证（P0-1）
+    owner = user["id"]
     role = CustomRole(
         owner_id=owner, name=payload["name"], based_on=payload.get("based_on"),
         temperament=payload.get("temperament", ""),
@@ -42,7 +42,7 @@ def api_create_custom_role(payload: dict, request: Request = None, db: Session =
 
 @router.put("/custom/{role_id}")
 def api_update_custom_role(role_id: int, payload: dict, request: Request = None, db: Session = Depends(get_db)):
-    user = request.state.user if request else None
+    user = request.state.user  # 中间件已保证已认证（P0-1）
     q = db.query(CustomRole).filter(CustomRole.id == role_id)
     if user and user.get("role") != "admin":
         q = q.filter(CustomRole.owner_id == user["id"])
@@ -59,7 +59,7 @@ def api_update_custom_role(role_id: int, payload: dict, request: Request = None,
 
 @router.delete("/custom/{role_id}")
 def api_delete_custom_role(role_id: int, request: Request = None, db: Session = Depends(get_db)):
-    user = request.state.user if request else None
+    user = request.state.user  # 中间件已保证已认证（P0-1）
     q = db.query(CustomRole).filter(CustomRole.id == role_id)
     if user and user.get("role") != "admin":
         q = q.filter(CustomRole.owner_id == user["id"])

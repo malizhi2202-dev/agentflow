@@ -7,37 +7,39 @@ export default function LoginPage() {
   const [users, setUsers] = useState<SimpleUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<SimpleUser | null>(null);
+  const [manualId, setManualId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [logging, setLogging] = useState(false);
 
   useEffect(() => {
-    fetch('/api/auth/list')
-      .then(r => r.json())
+    // 非 localhost 模式下服务端不再公开用户目录（401）→ 退化为手输 user_id
+    fetch('/api/auth/list', { credentials: 'same-origin' })
+      .then(r => (r.ok ? r.json() : { users: [] }))
       .then(d => {
-        const list = d.users || [];
-        setUsers(list);
+        setUsers(d.users || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
 
   const handleLogin = async () => {
-    if (!selected || !password) return;
+    const userId = selected?.id || manualId.trim();
+    if (!userId || !password) return;
     setLogging(true);
     setError('');
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: selected.id, password }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        localStorage.setItem('current_user_id', selected.id);
+        credentials: 'same-origin',
+        body: JSON.stringify({ user_id: userId, password }) });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        // 身份由服务端 cookie 携带；整页刷新让所有 store 用新身份重载
         window.location.reload();
       } else {
-        setError(data.detail || '登录失败');
+        setError(data.detail || `登录失败 (${res.status})`);
       }
     } catch {
       setError('网络错误');
@@ -67,8 +69,7 @@ export default function LoginPage() {
       <div style={{
         background: 'var(--bg-card)', border: '1px solid var(--border-strong)',
         borderRadius: 'var(--r-lg)', padding: '32px 40px', maxWidth: 420, width: '90%',
-        boxShadow: 'var(--shadow-md)',
-      }}>
+        boxShadow: 'var(--shadow-md)' }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <span style={{ color: 'var(--blue)', fontWeight: 800, fontSize: 28 }}>◈</span>
@@ -83,14 +84,33 @@ export default function LoginPage() {
         {/* 用户列表 */}
         {!selected ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {users.length === 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
+                  当前部署不公开用户列表，请输入用户 ID
+                </p>
+                <input placeholder="用户 ID（如 admin）" value={manualId}
+                  onChange={e => setManualId(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && manualId.trim()) {
+                      setSelected({ id: manualId.trim(), name: manualId.trim(), role: 'user' });
+                    }
+                  }}
+                  autoFocus style={{ width: '100%', fontSize: 14 }} />
+                <button className="btn btn-primary" disabled={!manualId.trim()}
+                  onClick={() => setSelected({ id: manualId.trim(), name: manualId.trim(), role: 'user' })}
+                  style={{ width: '100%', padding: '10px 0', justifyContent: 'center' }}>
+                  继续 <ArrowRight size={16} />
+                </button>
+              </div>
+            )}
             {users.map(u => (
               <button key={u.id} onClick={() => setSelected(u)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 12, width: '100%',
                   padding: '12px 16px', border: '1px solid var(--border)',
                   borderRadius: 'var(--r-md)', background: 'var(--bg-main)',
-                  cursor: 'pointer', transition: 'all var(--fast)',
-                }}
+                  cursor: 'pointer', transition: 'all var(--fast)' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--blue)'; e.currentTarget.style.background = 'var(--bg-selected)'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg-main)'; }}
               >
@@ -109,8 +129,7 @@ export default function LoginPage() {
             {/* 选中的用户 */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
-              background: 'var(--bg-selected)', borderRadius: 'var(--r-md)', marginBottom: 16,
-            }}>
+              background: 'var(--bg-selected)', borderRadius: 'var(--r-md)', marginBottom: 16 }}>
               {selected.role === 'admin' ? <Shield size={16} style={{ color: 'var(--blue)' }} /> : <User size={16} />}
               <span style={{ fontWeight: 600, fontSize: 14 }}>{selected.name}</span>
               <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{selected.role === 'admin' ? '管理员' : '用户'}</span>
@@ -142,7 +161,7 @@ export default function LoginPage() {
         )}
 
         <p style={{ textAlign: 'center', marginTop: 20, fontSize: 11, color: 'var(--text-muted)' }}>
-          仅 localhost · 默认管理员密码 123456
+          会话由服务端签发 · 初始口令见启动日志或部署配置
         </p>
       </div>
     </div>

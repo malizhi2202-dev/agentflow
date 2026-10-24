@@ -11,17 +11,15 @@ export default function AssemblyView() {
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
 
-  const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
   useEffect(() => {
-    fetch('/api/assembly/list', { headers: { 'X-User-Id': uid() } }).then(r => r.json()).then(d => {
+    fetch('/api/assembly/list').then(r => r.json()).then(d => {
       setBindings(d.bindings || d.assemblies || []);
     }).catch(() => {
       setBindings([]);
     }).finally(() => setLoading(false));
 
-    fetch('/api/workflows', { headers: { 'X-User-Id': uid() } }).then(r => r.json()).then(d => setWorkflows(d.workflows || [])).catch(() => {});
-    fetch('/api/roles/custom', { headers: { 'X-User-Id': uid() } }).then(r => r.json()).then(d => setRoles(d.roles || [])).catch(() => {
+    fetch('/api/workflows').then(r => r.json()).then(d => setWorkflows(d.workflows || [])).catch(() => {});
+    fetch('/api/roles/custom').then(r => r.json()).then(d => setRoles(d.roles || [])).catch(() => {
       // 回退到内置角色
       setRoles([
         { id: 1, name: '架构师' }, { id: 2, name: '高级产品经理' }, { id: 3, name: '安全审计师' },
@@ -31,13 +29,13 @@ export default function AssemblyView() {
   }, []);
 
   const handleBind = async () => {
-    await fetch('/api/assembly/bind', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() }, body: JSON.stringify(form) });
+    await fetch('/api/assembly/bind', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
     setShowCreate(false);
     setBindings([...bindings, { id: Date.now(), workflow_id: form.workflow_id, workflow_name: workflows.find(w => w.id === form.workflow_id)?.name || '', node_id: form.node_id, role_id: form.role_id, role_name: roles.find(r => r.id === form.role_id)?.name || '', mode: form.mode }]);
   };
 
   const handleUnbind = async (id: number) => {
-    await fetch(`/api/assembly/unbind/${id}`, { method: 'DELETE', headers: { 'X-User-Id': uid() } });
+    await fetch(`/api/assembly/unbind/${id}`, { method: 'DELETE' });
     setBindings(bindings.filter(b => b.id !== id));
   };
 

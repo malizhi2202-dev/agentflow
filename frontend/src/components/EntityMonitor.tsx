@@ -44,8 +44,7 @@ export default function EntityMonitor({ entityType, entityId, entityName, onClos
   const [modes, setModes] = useState<Record<string, ChartMode>>({ token: 'bar', hit: 'bar', freq: 'bar' });
 
   useEffect(() => {
-    const uid = localStorage.getItem('current_user_id') || 'admin';
-    fetch(`/api/metrics/sessions?limit=500&entity_type=${entityType}`, { headers: { 'X-User-Id': uid } })
+    fetch(`/api/metrics/sessions?limit=500&entity_type=${entityType}`)
       .then(r => r.json())
       .then(d => {
         const all = (d.sessions || []).filter((s: any) => s.entity_id === entityId);

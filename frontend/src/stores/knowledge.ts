@@ -59,11 +59,8 @@ interface KnowledgeState {
   removeSourceTag: (sourceId: number, tagId: number) => Promise<boolean>;
 }
 
-const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
 const headers = () => ({
-  'X-User-Id': uid(),
-});
+  });
 
 export const useKnowledge = create<KnowledgeState>((set) => ({
   sources: [],
@@ -88,7 +85,7 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
   createSource: async (agentId: number, data: Partial<KnowledgeSource>) => {
     const res = await fetch(`/api/agents/${agentId}/knowledge-sources`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     if (!res.ok) return null;
@@ -101,7 +98,7 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
   updateSource: async (agentId: number, sourceId: number, data: Partial<KnowledgeSource>) => {
     const res = await fetch(`/api/agents/${agentId}/knowledge-sources/${sourceId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     if (!res.ok) return null;
@@ -148,7 +145,6 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
 
     const res = await fetch(`/api/agents/${agentId}/knowledge-sources/upload`, {
       method: 'POST',
-      headers: { 'X-User-Id': uid() },
       body: formData,
     });
     if (!res.ok) return null;
@@ -183,7 +179,7 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
   createTag: async (name: string, color?: string) => {
     const res = await fetch('/api/agents/knowledge/tags', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, color: color || '#3b82f6' }),
     });
     if (!res.ok) return null;
@@ -206,7 +202,7 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
   addSourceTag: async (sourceId: number, tagId: number) => {
     const res = await fetch(`/api/agents/knowledge-sources/${sourceId}/tags`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tag_id: tagId }),
     });
     if (!res.ok) return false;

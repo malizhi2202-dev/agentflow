@@ -119,15 +119,23 @@ export function dedupedFetch(url: string, options?: RequestInit): Promise<Respon
  * 安全 fetch：包装 dedupedFetch，拦截非 200 响应返回结构化错误对象。
  * 这样不会因为 500 返回 HTML 而报 SyntaxError。
  */
-export async function safeFetch(url: string, options?: RequestInit): Promise<SafeFetchResult> {
+export async function safeFetch(
+  url: string,
+  options?: RequestInit,
+  opts?: { redirectOn401?: boolean },
+): Promise<SafeFetchResult> {
   try {
     const res = await dedupedFetch(url, options);
 
-    // 401 特殊处理：清除 localStorage 并 reload
+    // 401：服务端会话失效 → 清缓存并回登录页。
+    // 身份探针（/api/auth/me）必须传 redirectOn401:false，否则登录页会无限刷新。
     if (res.status === 401) {
-      localStorage.removeItem('current_user_id');
-      window.location.reload();
-      return { ok: false, status: 401, error: 'Unauthorized — redirecting to login' };
+      cache.clear();
+      inFlight.clear();
+      if (opts?.redirectOn401 !== false) {
+        window.location.reload();
+      }
+      return { ok: false, status: 401, error: 'Unauthorized — reloading to login' };
     }
 
     if (!res.ok) {

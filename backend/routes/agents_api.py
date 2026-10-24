@@ -6,13 +6,18 @@ from models.agent import Agent
 from services.encryption_service import encrypt
 from services.audit_service import log_audit
 from services.llm_providers import SUPPORTED_PROVIDERS
+from services.agent_trigger import AgentRunError, trigger_agent_run
 from models.agent import SUPPORTED_RUNTIMES
 
 router = APIRouter(prefix="/api/agents", tags=["agents"])
 
 
 def _user(request: Request) -> dict:
-    return request.state.user
+    # P0-1：身份只由中间件注入（cookie > Bearer > debug 三重 opt-in）；缺省即 401
+    user = getattr(request.state, "user", None)
+    if not user:
+        raise HTTPException(status_code=401, detail="未认证")
+    return user
 
 
 def _filter_owner(q, user: dict):
@@ -116,45 +121,17 @@ def api_delete_agent(agent_id: int, request: Request = None, db: Session = Depen
 @router.post("/{agent_id}/run")
 def api_run_agent(agent_id: int, request: Request = None, db: Session = Depends(get_db)):
     user = _user(request)
-    q = _filter_owner(db.query(Agent).filter(Agent.id == agent_id), user)
-    a = q.first()
-    if not a:
-        raise HTTPException(status_code=404, detail="Agent 不存在")
-    if a.total_tokens_used >= a.token_hard_limit:
-        raise HTTPException(status_code=400, detail=f"Token 已达硬限制 ({a.token_hard_limit})")
-    a.status = "running"
-    db.commit()
-
-    # ── A2: 自动加载同域 + 重叠 capabilities 的记忆 ──
-    import json as _json
-    from models.agent_memory import AgentMemory
-    from datetime import datetime, timedelta
-    recent_since = datetime.utcnow() - timedelta(days=7)
-    capabilities = (a.model_config_json or {}).get("capabilities", [])
-    mem_q = db.query(AgentMemory).filter(
-        AgentMemory.owner_id == user["id"],
-        AgentMemory.created_at >= recent_since,
-    )
-    if a.domain_id is not None:
-        mem_q = mem_q.filter(
-            (AgentMemory.domain_id == a.domain_id) | (AgentMemory.domain_id.is_(None))
+    try:
+        result = trigger_agent_run(
+            agent_id, user["id"], is_admin=(user.get("role") == "admin"), db=db,
         )
-    loaded_memories = mem_q.order_by(AgentMemory.priority.desc(), AgentMemory.created_at.desc()).limit(20).all()
-
-    # 按 capability 过滤：记忆的 key 包含 capability 关键词
-    if capabilities:
-        filtered = []
-        for m in loaded_memories:
-            for cap in capabilities:
-                if cap.lower() in m.key.lower() or cap.lower() in (m.value or "").lower():
-                    filtered.append(m)
-                    break
-        loaded_memories = filtered
-
-    loaded = [m.to_dict() for m in loaded_memories]
-
-    log_audit(user["id"], user.get("name", user["id"]), "agent.run", a.name, "agent", "started", request.client.host if request.client else "127.0.0.1")
-    return {"status": "running", "agent_id": a.id, "runtime": a.runtime, "model": a.model_name, "loaded_memories": loaded, "loaded_count": len(loaded)}
+    except AgentRunError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    if result is None:
+        raise HTTPException(status_code=404, detail="Agent 不存在")
+    log_audit(user["id"], user.get("name", user["id"]), "agent.run", result["agent_name"], "agent", "started",
+              request.client.host if request.client else "127.0.0.1")
+    return result
 
 
 @router.post("/{agent_id}/stop")

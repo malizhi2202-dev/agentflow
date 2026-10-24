@@ -123,8 +123,8 @@ def api_get_metrics(entity_type: str, entity_id: int, minutes: int = 60, request
 
 @router.get("/global")
 def api_get_global_metrics(minutes: int = 60, request: Request = None, db: Session = Depends(get_db)):
-    user = request.state.user if request else None
-    if user and user.get("role") != "admin":
+    user = request.state.user  # 中间件已保证已认证（P0-1）
+    if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="仅 admin 可查看全局监控")
     return get_global_metrics(db, minutes)
 
@@ -200,8 +200,8 @@ def api_entity_breakdown(minutes: int = 1440, request: Request = None, db: Sessi
 
 @router.post("/record")
 def api_record_metric(payload: dict, request: Request = None, db: Session = Depends(get_db)):
-    user = request.state.user if request else None
-    owner = user["id"] if user else "system"
+    user = request.state.user  # 中间件已保证已认证（P0-1）
+    owner = user["id"]
     record_metric(db, payload["entity_type"], payload["entity_id"], owner, payload.get("model_name", ""), payload.get("token_count", 0), payload.get("tool_hit_count", 0), payload.get("execution_time_ms", 0), payload.get("status", "success"))
     return {"status": "recorded"}
 

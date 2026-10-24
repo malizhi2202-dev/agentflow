@@ -63,8 +63,6 @@ interface DomainsState {
   toggleAutoRoute: (domainId: string) => void;
 }
 
-const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
 export const useDomains = create<DomainsState>((set, get) => ({
   domains: [],
   loading: false,
@@ -74,7 +72,7 @@ export const useDomains = create<DomainsState>((set, get) => ({
   fetchDomains: async () => {
     set({ loading: true });
     try {
-      const res = await fetch('/api/domains', { headers: { 'X-User-Id': uid() } });
+      const res = await fetch('/api/domains');
       const data = await res.json();
       set({ domains: data.domains || [], loading: false });
     } catch {
@@ -85,7 +83,7 @@ export const useDomains = create<DomainsState>((set, get) => ({
   createDomain: async (name: string) => {
     const res = await fetch('/api/domains', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
     });
     if (!res.ok) {
@@ -100,7 +98,7 @@ export const useDomains = create<DomainsState>((set, get) => ({
   updateDomain: async (id: number, name: string) => {
     const res = await fetch(`/api/domains/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
     });
     if (!res.ok) return null;
@@ -113,8 +111,7 @@ export const useDomains = create<DomainsState>((set, get) => ({
 
   deleteDomain: async (id: number) => {
     const res = await fetch(`/api/domains/${id}`, {
-      method: 'DELETE',
-      headers: { 'X-User-Id': uid() },
+      method: 'DELETE'
     });
     if (!res.ok) return false;
     await res.json();
@@ -129,7 +126,7 @@ export const useDomains = create<DomainsState>((set, get) => ({
       : `/api/domains/${domainId}/route`;
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ capability, task: task || {} }),
     });
     if (!res.ok) return null;
@@ -139,7 +136,7 @@ export const useDomains = create<DomainsState>((set, get) => ({
   gatewayRoute: async (capability: string, task?: any) => {
     const res = await fetch('/api/gateway/route', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ capability, task: task || {} }),
     });
     if (!res.ok) return null;
@@ -149,7 +146,7 @@ export const useDomains = create<DomainsState>((set, get) => ({
   scaleAgents: async (domainId: number, capability: string, desiredReplicas: number) => {
     const res = await fetch(`/api/domains/${domainId}/scale`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ capability, desired_replicas: desiredReplicas }),
     });
     if (!res.ok) return null;
@@ -157,9 +154,7 @@ export const useDomains = create<DomainsState>((set, get) => ({
   },
 
   fetchQueueCounts: async (domainId: number) => {
-    const res = await fetch(`/api/domains/${domainId}/queue-count`, {
-      headers: { 'X-User-Id': uid() },
-    });
+    const res = await fetch(`/api/domains/${domainId}/queue-count`);
     if (!res.ok) return {};
     const data = await res.json();
     const counts = data.queued_by_capability || {};
@@ -175,9 +170,7 @@ export const useDomains = create<DomainsState>((set, get) => ({
 
   fetchQueueMonitor: async (domainId: number, capability?: string) => {
     const params = capability ? `?capability=${encodeURIComponent(capability)}` : '';
-    const res = await fetch(`/api/domains/${domainId}/queue-monitor${params}`, {
-      headers: { 'X-User-Id': uid() },
-    });
+    const res = await fetch(`/api/domains/${domainId}/queue-monitor${params}`);
     if (!res.ok) return null;
     const data = await res.json();
     return data.monitors || data;

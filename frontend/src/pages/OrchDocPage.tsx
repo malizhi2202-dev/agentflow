@@ -2,8 +2,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, Save, FileText, FileCode, RotateCcw } from 'lucide-react';
 
-const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
 export default function OrchDocPage() {
   const path = window.location.pathname; // /orchestration/:id/md or /orchestration/:id/yaml
   const match = path.match(/\/orchestration\/(\d+)\/(md|yaml)/);
@@ -16,13 +14,13 @@ export default function OrchDocPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/orchestration/${id}`, { headers: { 'X-User-Id': uid() } })
+    fetch(`/api/orchestration/${id}`)
       .then((r) => r.json())
       .then((d) => {
         setName(d.name || '');
         // Load appropriate format
         if (mode === 'md') {
-          fetch(`/api/orchestration/${id}/md`, { headers: { 'X-User-Id': uid() } })
+          fetch(`/api/orchestration/${id}/md`)
             .then((r) => r.text())
             .then((t) => { setContent(t); setLoading(false); });
         } else {
@@ -36,7 +34,7 @@ export default function OrchDocPage() {
     const mdContent = mode === 'md' ? content : '';
     await fetch(`/api/orchestration/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(mode === 'yaml' ? { yaml_raw: content } : { yaml_raw: content }),
     });
     setSaved(true);

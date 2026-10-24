@@ -28,15 +28,12 @@ export default function EntityBreakdownPanel({ entityType, entityId, entityName,
   const [minutes, setMinutes] = useState(60);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const toggle = (key: string) => setExpanded(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; });
-  const uid = () => localStorage.getItem('current_user_id') || 'admin';
   const mainColor = COLORS[entityType] || '#5cb878';
 
   useEffect(() => {
     let url = `/api/metrics/entity/${entityType}/${entityId}/breakdown?minutes=${minutes}`;
     if (entityType === 'tool' && toolName) url += `&tool_name=${encodeURIComponent(toolName)}`;
-    fetch(url, {
-      headers: { 'X-User-Id': uid() },
-    }).then(r => r.json()).then(d => setData(d)).catch(() => setData(null));
+    fetch(url).then(r => r.json()).then(d => setData(d)).catch(() => setData(null));
   }, [entityType, entityId, minutes, toolName]);
 
   if (!data) return <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-dim)', fontSize: 12 }}>加载中...</div>;

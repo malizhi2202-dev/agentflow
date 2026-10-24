@@ -36,8 +36,6 @@ interface ChatState {
   clearError: () => void;
 }
 
-const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
 export const useChat = create<ChatState>((set, get) => ({
   conversations: [],
   currentConversationId: null,
@@ -47,7 +45,7 @@ export const useChat = create<ChatState>((set, get) => ({
   error: null,
 
   loadConversations: () => {
-    fetch('/api/chat/conversations', { headers: { 'X-User-Id': uid() } })
+    fetch('/api/chat/conversations')
       .then(r => r.json())
       .then(data => {
         set({ conversations: Array.isArray(data) ? data : [] });
@@ -69,7 +67,7 @@ export const useChat = create<ChatState>((set, get) => ({
     try {
       const r = await fetch('/api/chat/conversations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ agent_id: agentId }),
       });
       const conv = await r.json();
@@ -111,7 +109,7 @@ export const useChat = create<ChatState>((set, get) => ({
     try {
       const r = await fetch('/api/agents/' + currentAgentId + '/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, conversation_id: currentConversationId }),
       });
       const data = await r.json();
@@ -144,7 +142,7 @@ export const useChat = create<ChatState>((set, get) => ({
     if (!currentConversationId) return;
     let url = '/api/chat/' + currentConversationId + '/messages?limit=100';
     if (sinceId) url += '&since_id=' + sinceId;
-    fetch(url, { headers: { 'X-User-Id': uid() } })
+    fetch(url)
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) {

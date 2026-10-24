@@ -62,8 +62,6 @@ interface OrchestrationState {
   setYamlDirty: (dirty: boolean) => void;
 }
 
-const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
 export const useOrchestration = create<OrchestrationState>((set, get) => ({
   orchestrations: [], loading: false,
   yamlContent: '',
@@ -86,14 +84,14 @@ export const useOrchestration = create<OrchestrationState>((set, get) => ({
   },
 
   fetchDetail: async (id: number) => {
-    const res = await fetch(`/api/orchestration/${id}`, { headers: { 'X-User-Id': uid() } });
+    const res = await fetch(`/api/orchestration/${id}`);
     if (!res.ok) return null;
     return await res.json();
   },
 
   applyYaml: async (yaml: string, edgesConfig?: EdgeConfig[]) => {
     const res = await fetch('/api/orchestration/apply', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ yaml_raw: yaml, edges_config: edgesConfig || [] }),
     });
     return await res.json();
@@ -101,40 +99,40 @@ export const useOrchestration = create<OrchestrationState>((set, get) => ({
 
   validateYaml: async (yaml: string) => {
     const res = await fetch('/api/orchestration/validate', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ yaml_raw: yaml }),
     });
     return await res.json();
   },
 
   fetchQueue: async () => {
-    const res = await fetch('/api/orchestration/queue/list', { headers: { 'X-User-Id': uid() } });
+    const res = await fetch('/api/orchestration/queue/list');
     const data = await res.json();
     set({ queue: Array.isArray(data) ? data : [] });
   },
 
   fetchTemplates: async () => {
-    const res = await fetch('/api/orchestration/templates', { headers: { 'X-User-Id': uid() } });
+    const res = await fetch('/api/orchestration/templates');
     const data = await res.json();
     set({ templates: Array.isArray(data) ? data : [] });
   },
 
   deployTemplate: async (id: number, values: Record<string, string>) => {
     const res = await fetch(`/api/orchestration/templates/${id}/deploy`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ values }),
     });
     return await res.json();
   },
 
   fetchTrace: async (id: number) => {
-    const res = await fetch(`/api/metrics/orchestration/${id}/trace`, { headers: { 'X-User-Id': uid() } });
+    const res = await fetch(`/api/metrics/orchestration/${id}/trace`);
     const data = await res.json();
     set({ traceSpans: Array.isArray(data) ? data : [] });
   },
 
   fetchMetrics: async (id: number, minutes: number = 60) => {
-    const res = await fetch(`/api/metrics/orchestration/${id}?minutes=${minutes}`, { headers: { 'X-User-Id': uid() } });
+    const res = await fetch(`/api/metrics/orchestration/${id}?minutes=${minutes}`);
     const data = await res.json();
     set({ metricData: data });
   },
@@ -153,7 +151,7 @@ export const useOrchestration = create<OrchestrationState>((set, get) => ({
   },
   setNodePool: (agents: AgentPoolItem[]) => set({ nodePool: agents }),
   fetchNodePool: async () => {
-    const res = await fetch('/api/agents', { headers: { 'X-User-Id': uid() } });
+    const res = await fetch('/api/agents');
     const data = await res.json();
     const agents = Array.isArray(data) ? data : (data.agents || []);
     set({ nodePool: agents.map((a: any) => ({

@@ -15,11 +15,9 @@ export default function ConversationCenter() {
   const [agentSearch, setAgentSearch] = useState('');
   const [showAgentPicker, setShowAgentPicker] = useState(false);
 
-  const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
   useEffect(() => {
     loadConversations();
-    fetch('/api/agents', { headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents')
       .then(r => r.json())
       .then(d => setAgents(d.agents || []))
       .catch(() => {});

@@ -13,8 +13,6 @@ export default function RoleMarket({ onSelectRole }: Props) {
   var [selected, setSelected] = useState<string | null>(null);
   var [deleteId, setDeleteId] = useState<number | null>(null);
 
-  var uid = function() { return localStorage.getItem('current_user_id') || 'admin'; };
-
   useEffect(function() {
     // 内置模板
     setTemplates([
@@ -36,7 +34,7 @@ export default function RoleMarket({ onSelectRole }: Props) {
   }, []);
 
   var fetchCustom = function() {
-    fetch('/api/roles/custom', { headers: { 'X-User-Id': uid() } }).then(function(r) { return r.json(); }).then(function(d) {
+    fetch('/api/roles/custom').then(function(r) { return r.json(); }).then(function(d) {
       setCustomRoles(d.roles || []);
     }).catch(function() {});
   };
@@ -67,7 +65,7 @@ export default function RoleMarket({ onSelectRole }: Props) {
   };
 
   var handleDelete = function(id: number) {
-    fetch('/api/roles/custom/' + id, { method: 'DELETE', headers: { 'X-User-Id': uid() } }).then(function() {
+    fetch('/api/roles/custom/' + id, { method: 'DELETE' }).then(function() {
       fetchCustom(); setDeleteId(null);
     });
   };

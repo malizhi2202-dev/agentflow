@@ -189,10 +189,15 @@ def get_user(user_id: str) -> dict | None:
 
 
 def get_current_user(request: Request) -> dict:
-    """从 request.state 获取当前用户（由中间件注入）。"""
+    """从 request.state 获取当前用户（由中间件注入）。
+
+    P0-1：**不再回退 admin**。中间件是唯一身份入口（cookie > Bearer PAT >
+    三重 opt-in 的 debug header），缺失即 401。这里再兜一层是为了防止
+    未来有人绕过中间件直接单测路由——缺身份一律 401，不做任何降级。
+    """
     user = getattr(request.state, "user", None)
     if not user:
-        user = get_user("admin") or _default_admin()
+        raise HTTPException(status_code=401, detail="未认证")
     return user
 
 
@@ -399,7 +404,14 @@ def audit_stats(days: int = 7) -> dict:
 
 
 def _get_client_ip(request: Request) -> str:
-    """从 Request 获取客户端 IP。"""
+    """从 Request 获取客户端 IP。
+
+    P0-3：优先用中间件算好的 `state.client_ip`（behind-proxy 下是 XFF 右起首个
+    非可信地址）；没有中间件时退回传输层 peer，不直接信 XFF。
+    """
+    ip = getattr(request.state, "client_ip", None)
+    if ip:
+        return ip
     if request.client:
         return request.client.host
     return "unknown"

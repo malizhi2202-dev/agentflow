@@ -58,7 +58,11 @@ def _save_workflow(data: dict):
 
 @router.get("/api/admin/workflow")
 async def get_workflow():
-    wf = _load_workflow()
+    try:
+        wf = stage_config.load_workflow()
+        stage_config.validate(wf)
+    except (ValueError, OSError):
+        wf = stage_config.DEFAULT_WORKFLOW  # 配置坏了：回退默认表，不把 500 丢给前端
     # merge roles into each gate
     roles_data = {}
     if os.path.exists(_roles_file()):

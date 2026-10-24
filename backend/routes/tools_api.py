@@ -12,7 +12,11 @@ router = APIRouter(prefix="/api/tools", tags=["tools"])
 
 
 def _user(request: Request) -> dict:
-    return request.state.user
+    # P0-1：身份只由中间件注入（cookie > Bearer > debug 三重 opt-in）；缺省即 401
+    user = getattr(request.state, "user", None)
+    if not user:
+        raise HTTPException(status_code=401, detail="未认证")
+    return user
 
 
 def _require_owner_or_admin(tool, user: dict):

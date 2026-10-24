@@ -26,16 +26,14 @@ export default function WorkflowDetail({ workflowId, onBack }: { workflowId: num
 
   useEffect(function() {
     fetchWorkflows();
-    var uid = localStorage.getItem('current_user_id') || 'admin';
-    fetch('/api/tools', { headers: { 'X-User-Id': uid } }).then(function(r) { return r.json(); }).then(function(d) { setTools(d.tools || []); });
+    fetch('/api/tools').then(function(r) { return r.json(); }).then(function(d) { setTools(d.tools || []); });
   }, []);
 
   useEffect(function() {
     if (wf) {
       setNodes(wf.spec_json?.nodes || []);
       setEdges(wf.spec_json?.edges || []);
-      var uid = localStorage.getItem('current_user_id') || 'admin';
-      fetch('/api/metrics/sessions?limit=200&entity_type=workflow', { headers: { 'X-User-Id': uid } })
+      fetch('/api/metrics/sessions?limit=200&entity_type=workflow')
         .then(function(r) { return r.json(); }).then(function(d) { setMonitorData(d.sessions || []); });
     }
   }, [wf]);

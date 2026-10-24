@@ -31,9 +31,8 @@ export const useTools = create<ToolsState>((set, get) => ({
     set({ tools: (result.ok && result.data ? result.data.tools : []) || [], loading: false });
   },
   createTool: async (payload) => {
-    const uid = localStorage.getItem('current_user_id') || 'admin';
     const res = await fetch('/api/tools', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
     if (!res.ok) return null;
@@ -42,8 +41,7 @@ export const useTools = create<ToolsState>((set, get) => ({
     return tool;
   },
   deleteTool: async (id) => {
-    const uid = localStorage.getItem('current_user_id') || 'admin';
-    const res = await fetch(`/api/tools/${id}`, { method: 'DELETE', headers: { 'X-User-Id': uid } });
+    const res = await fetch(`/api/tools/${id}`, { method: 'DELETE' });
     if (!res.ok) return false;
     set((s) => ({ tools: s.tools.filter((t) => t.id !== id) }));
     return true;

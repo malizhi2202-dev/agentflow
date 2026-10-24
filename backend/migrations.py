@@ -88,10 +88,12 @@ def create_table_if_missing(conn, dialect: str, table: str, body: str) -> bool:
     return True
 
 
-def create_index_if_missing(conn, dialect: str, index: str, table: str, columns: str) -> bool:
+def create_index_if_missing(conn, dialect: str, index: str, table: str, columns: str,
+                            unique: bool = False) -> bool:
     if _index_exists(conn, dialect, index, table):
         return False
-    conn.cursor().execute(f"CREATE INDEX {index} ON {table}({columns})")
+    kind = "UNIQUE INDEX" if unique else "INDEX"
+    conn.cursor().execute(f"CREATE {kind} {index} ON {table}({columns})")
     return True
 
 
@@ -134,12 +136,31 @@ def m005_scheduled_tasks(conn, dialect: str) -> None:
     create_index_if_missing(conn, dialect, "ix_scheduled_tasks_owner_id", "scheduled_tasks", "owner_id")
 
 
+def m006_auth_sessions(conn, dialect: str) -> None:
+    """P0-1：服务端会话 + PAT 令牌（只存哈希）。"""
+    pk = _pk_clause(dialect)
+    create_table_if_missing(conn, dialect, "sessions",
+        f"id {pk}, token_hash VARCHAR(64) NOT NULL, user_id VARCHAR(64) NOT NULL, "
+        "created_at DATETIME, last_seen DATETIME, expires_at DATETIME NOT NULL, "
+        "absolute_expires_at DATETIME NOT NULL, ip VARCHAR(64), ua VARCHAR(255), revoked_at DATETIME")
+    create_index_if_missing(conn, dialect, "ux_sessions_token_hash", "sessions", "token_hash", unique=True)
+    create_index_if_missing(conn, dialect, "ix_sessions_user_id", "sessions", "user_id")
+
+    create_table_if_missing(conn, dialect, "pat_tokens",
+        f"id {pk}, name VARCHAR(128) NOT NULL, user_id VARCHAR(64) NOT NULL, "
+        "token_hash VARCHAR(64) NOT NULL, scopes_json TEXT, created_at DATETIME, "
+        "expires_at DATETIME NOT NULL, last_used_at DATETIME, revoked_at DATETIME")
+    create_index_if_missing(conn, dialect, "ux_pat_tokens_token_hash", "pat_tokens", "token_hash", unique=True)
+    create_index_if_missing(conn, dialect, "ix_pat_tokens_user_id", "pat_tokens", "user_id")
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
     ("003_knowledge_tags", "新建 knowledge_tags 标签表", m003_knowledge_tags),
     ("004_knowledge_source_tags", "新建 knowledge_source_tags 连接表", m004_knowledge_source_tags),
     ("005_scheduled_tasks", "新建 scheduled_tasks 定时任务表", m005_scheduled_tasks),
+    ("006_auth_sessions", "新建 sessions/PAT 令牌表（P0-1 服务端会话）", m006_auth_sessions),
 ]
 
 

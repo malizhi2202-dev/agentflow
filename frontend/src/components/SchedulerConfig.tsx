@@ -102,10 +102,9 @@ export default function SchedulerConfig() {
   };
 
   const saveGlobalConfig = () => {
-    const uid = localStorage.getItem('current_user_id') || 'admin';
     fetch('/api/scheduler/config', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(globalConfig),
     })
       .then((r) => r.json())
@@ -135,10 +134,9 @@ export default function SchedulerConfig() {
 
   const saveAgentRow = (idx: number) => {
     const row = agentRows[idx];
-    const uid = localStorage.getItem('current_user_id') || 'admin';
     fetch(`/api/scheduler/agents/${row.agent_id}/tags`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tags: row.tags.split(',').map((t) => t.trim()).filter(Boolean),
         priority: row.priority,

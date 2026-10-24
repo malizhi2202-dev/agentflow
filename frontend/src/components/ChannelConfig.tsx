@@ -67,11 +67,10 @@ export default function ChannelConfigComponent({ agentId }: ChannelConfigProps) 
   const [testing, setTesting] = useState<number | null>(null);
   const [showQrScan, setShowQrScan] = useState(false);
   const [qrScanChannelType, setQrScanChannelType] = useState('feishu');
-  const uid = () => localStorage.getItem('current_user_id') || 'admin';
 
   const loadChannels = () => {
     if (!agentId) return;
-    fetch('/api/agents/' + agentId + '/channels', { headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents/' + agentId + '/channels')
       .then(r => r.json())
       .then(d => { if (Array.isArray(d)) setChannels(d); })
       .catch(() => {});
@@ -84,7 +83,7 @@ export default function ChannelConfigComponent({ agentId }: ChannelConfigProps) 
     const method = 'POST';
     fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ channel_type: form.channel_type, credentials: form.credentials }),
     })
       .then(r => r.json())
@@ -98,13 +97,13 @@ export default function ChannelConfigComponent({ agentId }: ChannelConfigProps) 
   };
 
   const deleteChannel = (chId: number) => {
-    fetch('/api/agents/' + agentId + '/channels/' + chId, { method: 'DELETE', headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents/' + agentId + '/channels/' + chId, { method: 'DELETE' })
       .then(() => loadChannels());
   };
 
   const testChannel = (chId: number) => {
     setTesting(chId);
-    fetch('/api/agents/' + agentId + '/channels/' + chId + '/test', { method: 'POST', headers: { 'X-User-Id': uid() } })
+    fetch('/api/agents/' + agentId + '/channels/' + chId + '/test', { method: 'POST' })
       .then(r => r.json())
       .then(() => { loadChannels(); setTesting(null); })
       .catch(() => { setTesting(null); });
@@ -114,7 +113,7 @@ export default function ChannelConfigComponent({ agentId }: ChannelConfigProps) 
     const newStatus = ch.status === 'disabled' ? 'draft' : 'disabled';
     fetch('/api/agents/' + agentId + '/channels/' + ch.id, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
     })
       .then(r => r.json())

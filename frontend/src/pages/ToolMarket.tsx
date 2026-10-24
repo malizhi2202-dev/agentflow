@@ -20,9 +20,7 @@ export default function ToolMarket({ onSelect }: Props) {
 
   useEffect(function() { fetchTools(typeFilter || undefined); }, [typeFilter]);
   useEffect(function() {
-    fetch('/api/metrics/rankings?dimension=tool&top=50&minutes=1440', {
-      headers: { 'X-User-Id': localStorage.getItem('current_user_id') || 'admin' }
-    }).then(r => r.json()).then(d => {
+    fetch('/api/metrics/rankings?dimension=tool&top=50&minutes=1440').then(r => r.json()).then(d => {
       var map: Record<string, any> = {};
       (Array.isArray(d) ? d : []).forEach(function(item: any) { map[item.name] = item; });
       setToolStats(map);

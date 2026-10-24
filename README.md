@@ -349,6 +349,17 @@ agentflow/
 | `SCAN_INTERVAL` | `5` | 文件扫描间隔（秒） |
 | `ENCRYPTION_KEY` | (必填) | 加密密钥（32 字节）。⚠ 短键当前被零填充且无 KDF，属已知缺陷（P0-10①）——请使用全长随机密钥 |
 | `CHANNEL_OAUTH_MOCK` | `false` | OAuth Mock 模式 |
+| `DEPLOY_MODE` | `localhost` | 部署模式：`localhost`（仅回环）/ `lan`（+`ALLOW_CIDRS` 网段）/ `behind-proxy`（只收 `TRUSTED_PROXY_IPS` 反代）。非法值**启动即失败** |
+| `ALLOW_CIDRS` | (空) | `DEPLOY_MODE=lan` 必填，逗号分隔网段（如 `192.168.0.0/16`） |
+| `TRUSTED_PROXY_IPS` | (空) | `behind-proxy` 必填，可信反代地址；`*` 一律拒绝。仅在 peer 可信时解析 `X-Forwarded-For` |
+| `TLS_TERMINATED` | `false` | 反代已终结 TLS：会话 cookie 用 `__Host-session` + `Secure`（否则退化 `af_session`） |
+| `AGENTFLOW_ADMIN_PASSWORD` | (空=随机并只打一次启动日志) | 首启管理员口令；不设则强制首登改密 |
+| `SESSION_IDLE_MINUTES` | `30` | 会话空闲到期（随活动前移） |
+| `SESSION_ABSOLUTE_HOURS` | `8` | 会话绝对到期（不随活动延长） |
+| `PAT_DEFAULT_EXPIRES_DAYS` | `90` | 个人访问令牌默认有效期（禁止永不过期） |
+| `LOGIN_MAX_FAILURES` / `LOGIN_FAILURE_WINDOW_MINUTES` | `5` / `15` | 登录节流（超限 429）；当前为进程内存，多副本各自计数（P1-7） |
+| `AGENTFLOW_AUTH_DEBUG_HEADER` | `false` | `X-User-Id` 调试通道开关；需同时满足 localhost 与 `AGENTFLOW_AUTH_DEBUG_ADMIT` 白名单，开启即启动红条 + 逐请求审计 |
+| `AGENTFLOW_AUTH_DEBUG_ADMIT` | (空) | 调试通道允许自述的用户 id 列表（逗号分隔） |
 
 ### 数据库切换
 

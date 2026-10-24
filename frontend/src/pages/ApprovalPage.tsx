@@ -14,8 +14,6 @@ interface Approval {
   resolved_at: string | null;
 }
 
-const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
 export default function ApprovalPage() {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +48,7 @@ export default function ApprovalPage() {
     try {
       const res = await fetch(`/api/approvals/${selectedApproval.id}/respond`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           status: responseStatus,
           response_data: { comment: responseText, timestamp: new Date().toISOString() },

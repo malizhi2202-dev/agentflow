@@ -6,16 +6,15 @@ interface SecurityDefaults { gate_pre_check: string | null; gate_post_check: str
 export default function SecurityPage() {
   const [defaults, setDefaults] = useState<SecurityDefaults>({ gate_pre_check: null, gate_post_check: null, token_soft_limit: 80000, token_hard_limit: 100000, io_filter: 'none', audit_enabled: true });
   const [saved, setSaved] = useState(false);
-  const uid = () => localStorage.getItem('current_user_id') || 'admin';
 
   useEffect(() => {
-    fetch('/api/admin/security-config', { headers: { 'X-User-Id': uid() } }).then(r => r.json()).then(d => {
+    fetch('/api/admin/security-config').then(r => r.json()).then(d => {
       if (d.config) setDefaults(d.config);
     }).catch(() => {});
   }, []);
 
   const save = async () => {
-    await fetch('/api/admin/security-config', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() }, body: JSON.stringify(defaults) });
+    await fetch('/api/admin/security-config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(defaults) });
     setSaved(true); setTimeout(() => setSaved(false), 2000);
   };
 

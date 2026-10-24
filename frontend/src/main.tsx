@@ -8,22 +8,8 @@ import '@fontsource/ibm-plex-sans/600.css';
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/600.css';
 
-// ── 全局 fetch 拦截器：自动注入 X-User-Id ──
-// 从此所有 fetch 调用无需手动加 authHeaders()，身份自动携带。
-// 登录页（无 current_user_id）不注入 header，后端默认 admin。
-const _fetch = window.fetch;
-window.fetch = function (input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  const uid = localStorage.getItem('current_user_id');
-  if (uid) {
-    init = init || {};
-    const headers = new Headers(init.headers || {});
-    if (!headers.has('X-User-Id')) {
-      headers.set('X-User-Id', uid);
-    }
-    init.headers = headers;
-  }
-  return _fetch(input, init);
-};
+// P0-1：身份由服务端签发、随 HttpOnly cookie 自动携带（同源 fetch 默认带 cookie）。
+// 原来的「全局注入 X-User-Id」拦截器已删除——它让前端自己声明自己是谁。
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><App /></React.StrictMode>

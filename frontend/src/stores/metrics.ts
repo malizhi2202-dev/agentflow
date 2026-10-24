@@ -12,8 +12,6 @@ interface MetricsState {
   fetchGlobal: (minutes?: number) => Promise<void>;
 }
 
-const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
 export const useMetrics = create<MetricsState>((set) => ({
   data: null, global: null, loading: false,
   fetchMetrics: async (entityType, entityId, minutes = 60) => {

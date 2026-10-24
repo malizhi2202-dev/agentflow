@@ -21,8 +21,6 @@ interface WorkflowsState {
   executeWorkflow: (id: number) => Promise<any>;
 }
 
-const uid = () => localStorage.getItem('current_user_id') || 'admin';
-
 export const useWorkflows = create<WorkflowsState>((set, get) => ({
   workflows: [], loading: false,
   fetchWorkflows: async () => {
@@ -32,7 +30,7 @@ export const useWorkflows = create<WorkflowsState>((set, get) => ({
   },
   createWorkflow: async (payload) => {
     const res = await fetch('/api/workflows', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
     if (!res.ok) return null;
@@ -42,7 +40,7 @@ export const useWorkflows = create<WorkflowsState>((set, get) => ({
   },
   updateWorkflow: async (id, payload) => {
     const res = await fetch(`/api/workflows/${id}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-User-Id': uid() },
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
     if (!res.ok) return null;
@@ -51,20 +49,20 @@ export const useWorkflows = create<WorkflowsState>((set, get) => ({
     return wf;
   },
   deleteWorkflow: async (id) => {
-    const res = await fetch(`/api/workflows/${id}`, { method: 'DELETE', headers: { 'X-User-Id': uid() } });
+    const res = await fetch(`/api/workflows/${id}`, { method: 'DELETE' });
     if (!res.ok) return false;
     set((s) => ({ workflows: s.workflows.filter((w) => w.id !== id) }));
     return true;
   },
   publishWorkflow: async (id) => {
-    const res = await fetch(`/api/workflows/${id}/publish`, { method: 'POST', headers: { 'X-User-Id': uid() } });
+    const res = await fetch(`/api/workflows/${id}/publish`, { method: 'POST' });
     if (!res.ok) return false;
     const wf = await res.json();
     set((s) => ({ workflows: s.workflows.map((w) => (w.id === id ? wf : w)) }));
     return true;
   },
   executeWorkflow: async (id) => {
-    const res = await fetch(`/api/workflows/${id}/execute`, { method: 'POST', headers: { 'X-User-Id': uid() } });
+    const res = await fetch(`/api/workflows/${id}/execute`, { method: 'POST' });
     if (!res.ok) return null;
     return res.json();
   },
