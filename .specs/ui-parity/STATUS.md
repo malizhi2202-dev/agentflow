@@ -37,3 +37,23 @@ python3 scripts/proto_parity_check.py          # 看差距
 python3 scripts/proto_parity_check.py --md     # 刷新 GAP.md（随实现推进同步）
 python3 scripts/proto_parity_check.py --strict # 后续接 CI：缺失族未清零即失败
 ```
+
+## 本轮验证（2026-10-25）
+
+```text
+$ cd frontend && npx tsc --noEmit && npx vitest run && npm run build
+tsc 0 · Test Files 19 passed · Tests 174 passed · build ✓
+
+$ python3 scripts/proto_parity_check.py --strict
+原型 127 页 / 35 族；独立页 31 · 部分 0 · 缺失 0 · 元页 4   （exit 0）
+
+$ NODE_PATH=~/ai/agentflow-data/e2e-deps/node_modules E2E_CLI=hermes bash scripts/e2e/run_e2e.sh
+SUMMARY 39/39 passed
+  · 新增 8 页族可达：阶段模型配置 / 决策模型目录 / 微调工厂 / 执行隔离 / 对外集成 / 环境参谋 / Agent 详情 / 小队中心
+  · 每页同时跑 a11y（0 违规）；壳层 .crumb 由 span 改 h1 后「页面无标题」清零
+```
+
+顺带修掉的 E2E 假红（都是本仓自身变更带来的选择器漂移，不是产品回归）：
+- v22 把页名移到壳层 crumb → 原 `getByRole('heading')` 断言改为 crumb 断言；
+- 登录页用户列表默认不公开 → 登录抽成 `login()` 并兼容「用户卡片 / 手填 ID」两形态；
+- E2E 默认解释器/库名指向旧 `/tmp` venv 与 `agentflow_e2e` → 改为持久 venv 与 `agentflow`。

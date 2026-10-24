@@ -134,7 +134,9 @@ describe('页内不再重复页名（壳层 .crumb 唯一）', () => {
     await renderApp('admin');
     fireEvent.click(screen.getByRole('button', { name: label }));
     await waitFor(() => {
+      // 壳层顶栏的 .crumb 现在用 h1 承载（a11y），它不属于「页内标题」，要排除
       const headings = Array.from(document.querySelectorAll('main h1, main h2'))
+        .filter((el) => !el.closest('.app-top'))
         .map((el) => (el.textContent || '').trim());
       const dup = headings.filter((t) => t === label || t.endsWith(label));
       expect(dup).toEqual([]);

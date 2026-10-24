@@ -3,7 +3,7 @@
 退出码：0=至少抽到并落库 1 条；3=CLI 跑通但没抽到候选（真调用、结果是空，属外部模型行为）。
 """
 import os, sys, json
-os.environ["DATABASE_URL"] = os.environ.get("DATABASE_URL", "mysql+pymysql://root@127.0.0.1:3307/agentflow_e2e")
+os.environ["DATABASE_URL"] = os.environ.get("DATABASE_URL", "mysql+pymysql://root@127.0.0.1:3307/agentflow")
 os.environ.setdefault("ENCRYPTION_KEY", "e2e-key-32bytes-0123456789abcdef")
 CLI = os.environ.get("RSI_CLI_PROVIDER", "dsh")
 os.environ["RSI_EXTRACTOR_PROVIDER"] = "cli"

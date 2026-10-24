@@ -21,10 +21,11 @@ export interface AppTopBarProps {
 export default function AppTopBar({ crumb, context, chips, actions }: AppTopBarProps) {
   return (
     <div className="app-top" role="banner">
-      <span className="crumb">
+      {/* a11y：页面名是这一屏唯一的「页面级标题」，用 h1 承载；样式仍走 .crumb（视觉同原型） */}
+      <h1 className="crumb">
         {crumb}
         {context && <span className="dim"> · {context}</span>}
-      </span>
+      </h1>
       {(chips || actions) && (
         <span className="right">
           {chips}

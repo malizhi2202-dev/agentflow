@@ -17,6 +17,7 @@
 | 2026-10-25 | `v22-agent-runtime-model` | 创建 Agent 去掉「模型 Provider / API Key」（RULINGS 10-15 裁撤项的代码落地）：运行时 + 模型改由「运行时发现」注册表提供（`models` 取自运行时、留空=运行时默认）；后端不再收 Agent 级凭据、provider 由运行时推导、`cli` 通道跟随该 Agent 的运行时（落不到即报错）；daemon 补模型目录读法（修前两个 CLI 都读不到 → 恒空）；门禁 tsc 0 · vitest 130/130 · build ✓ · 新增单测 27 条 | 见「feat(agent-model-from-runtime)」提交 | — |
 | 2026-10-24 | `doc-align-v20` | 文档归并：RULINGS/INDEX 建档、门面改齐、删 8 张孤儿原型页（135→127） | `fcc00645` | — |
 | 2026-10-24 | `v20-rsi-adapters` | 真实 judge 适配器（显式配置 + 预算帽 + 可注入）+ L0 定时抽取作业（默认关闭）；三类业务错由 500 改正 400 | 见「feat(rsi-adapters)」提交 | — |
+| 2026-10-25 | `ui-parity` | 前端按 127 页原型全量对齐（P1+P2+P5）：补齐 6 个缺失页族（阶段模型配置/决策模型/微调工厂/环境参谋/执行隔离/对外集成）· Agent 详情与小队中心转独立页 · 页族覆盖 31/35（缺失 0 · 部分 0 · 元页 4）· `--strict` 接 CI · E2E **39/39**（8 新页可达 + a11y） | 见「feat(ui-parity P1/P2)」提交 | — |
 | 2026-10-24 | `v21-completion`（收口） | 8 项任务全部完成（T-01…T-08）；最终 CI 全绿：后端 **523 OK**（services/routes 覆盖 50%）、前端 **109 例**（语句 18.22% / 分支 67.74%）、build ✓；真实 MySQL + 真实 CLI E2E **23/23**；收口报告含诚实边界（a11y 非 axe / 无 down 迁移 / dsh 本轮外部不可用 / 门禁为自评轮） | 见「feat(v21-t07)」「docs(v21-closeout)」提交 | L-007 L-008 |
 | 2026-10-24 | `v21-completion` T-07 | 裁定⑦收尾：迁移 018 建 `app_users`/`audit_log`；用户档案与审计权威源切表（文件降为导入源/兜底）；导入脚本 dry-run/--apply 幂等；删掉 `users.json` 后真实 MySQL + hermes E2E 仍 **23/23** | 见「feat(v21-t07)」提交 | — |
 | 2026-10-24 | `v21-completion` T-06 | a11y 五页 0 违规（自研轻量审计，抓出 2 处误报并校正审计器）· 多用户 bob 视角（列表不可见 + 详情 404）· 多副本租约 5 例（独占/续租/过期接管/释放/待命 tick）· 迁移纪律 6 例（expand-only，禁破坏性 SQL）；E2E 16→**23/23** | 见「test(v21-t06)」提交 | — |

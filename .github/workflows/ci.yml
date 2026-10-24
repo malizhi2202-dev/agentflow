@@ -16,6 +16,8 @@ jobs:
       - name: 后端全量单测
         env: { ENCRYPTION_KEY: test-key-for-ci-32bytes!! }
         run: cd backend && python -m unittest discover -s tests
+      - name: 原型对齐检查（缺失/部分页族=0）
+        run: python scripts/proto_parity_check.py --strict
       - name: 前端依赖
         run: cd frontend && npm ci --legacy-peer-deps
       - name: 前端类型/单测/构建

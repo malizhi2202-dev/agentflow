@@ -39,6 +39,9 @@ else
   run bash -c "cd frontend && npx vitest run 2>&1 | tail -3"
 fi
 
+step "原型对齐：缺失/部分页族必须为 0"
+run bash -c "python3 scripts/proto_parity_check.py --strict >/tmp/ci-parity.log 2>&1 || (cat /tmp/ci-parity.log; exit 1)"
+
 step "前端：生产构建"
 run bash -c "cd frontend && npm run build 2>&1 | tail -3"
 

@@ -44,6 +44,15 @@
   flex-direction: column;
   gap: var(--s3);
 }
+/* 页面名用 h1 承载（a11y），视觉沿用原型 .crumb 的字号/字重 */
+.app-top h1.crumb {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
 .page-note {
   font-size: 11.5px;
   color: var(--text-muted);

@@ -22,8 +22,16 @@ fi
 [ -n "${NODE_PATH:-}" ] || { echo "找不到 playwright 包（设置 NODE_PATH）"; exit 2; }
 
 echo "== 种子：用 CLI 真跑一次 L0 抽取 =="
-PY="${PY:-/tmp/afvenv2/bin/python}"
-DATABASE_URL="${DATABASE_URL:-mysql+pymysql://root@127.0.0.1:3307/agentflow_e2e}" \
+# Python 解释器：优先持久 venv（~/ai/agentflow-data/venv），其次 /tmp 旧 venv，最后系统 python3
+PY="${PY:-}"
+if [ -z "$PY" ]; then
+  for cand in "$HOME/ai/agentflow-data/venv/bin/python" /tmp/afvenv2/bin/python; do
+    [ -x "$cand" ] && { PY="$cand"; break; }
+  done
+fi
+PY="${PY:-python3}"
+[ -x "$(command -v "$PY" 2>/dev/null || echo "$PY")" ] || { echo "找不到 Python：$PY（设 PY=...）"; exit 2; }
+DATABASE_URL="${DATABASE_URL:-mysql+pymysql://root@127.0.0.1:3307/agentflow}" \
 ENCRYPTION_KEY="${ENCRYPTION_KEY:-e2e-key-32bytes-0123456789abcdef}" \
 RSI_EXTRACTOR_PROVIDER=cli RSI_CLI_PROVIDER="$CLI" RSI_EXTRACTOR_MODEL="$CLI-cli" \
   "$PY" scripts/e2e/seed_l0_mysql.py || exit 3

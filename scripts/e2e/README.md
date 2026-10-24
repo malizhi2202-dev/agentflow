@@ -11,7 +11,7 @@
 2. **后端**（MySQL + CLI 运行时）：
    ```bash
    cd backend
-   DATABASE_URL="mysql+pymysql://root@127.0.0.1:3307/agentflow_e2e" \
+   DATABASE_URL="mysql+pymysql://root@127.0.0.1:3307/agentflow" \
    RSI_CLI_PROVIDER=dsh \               # 换 hermes 即整条链走 hermes CLI
    RSI_JUDGE_PROVIDER=cli RSI_JUDGE_MODEL=dsh-cli RSI_JUDGE_MAX_CALLS=4 \
    RSI_EXTRACTOR_PROVIDER=cli RSI_EXTRACTOR_MODEL=dsh-cli \

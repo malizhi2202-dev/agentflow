@@ -11,6 +11,35 @@ const SHELL = process.env.E2E_CHROME ||
   '/home/malizhi/.cache/ms-playwright/chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell';
 const stamp = Date.now().toString().slice(-6);
 const results = [];
+const waitCrumb = async (page, label) => {
+  await page.locator('.app-top .crumb').filter({ hasText: label }).first()
+    .waitFor({ state: 'visible', timeout: 20000 });
+};
+
+/** 登录：兼容两种形态（公开用户列表 = 点卡片；不公开 = 填用户 ID 后继续）。 */
+async function login(page, userId, password) {
+  const idInput = page.getByPlaceholder('用户 ID（如 admin）');
+  const pwd = page.getByPlaceholder('密码');
+  // 等「任一形态」出现再判断（刚 goto 完时两者 count 都可能为 0 → 误判成用户卡片形态）
+  await Promise.race([
+    idInput.waitFor({ state: 'visible', timeout: 20000 }),
+    pwd.waitFor({ state: 'visible', timeout: 20000 }),
+  ]).catch(() => {});
+  if (await idInput.count()) {
+    await idInput.fill(userId);
+    await page.getByRole('button', { name: /继续/ }).click();
+  } else {
+    // 公开用户列表形态：admin 的显示名是「管理员」，不能只按 id 匹配
+    const byId = page.getByRole('button', { name: new RegExp(userId, 'i') }).first();
+    if (await byId.count()) await byId.click();
+    else await page.getByRole('button', { name: /管理员|Administrator/ }).first().click();
+  }
+  await pwd.waitFor({ state: 'visible', timeout: 20000 });
+  await pwd.fill(password);
+  await page.getByRole('button', { name: /^登录$/ }).click();
+  await page.getByRole('button', { name: '任务', exact: true }).waitFor({ timeout: 20000 });
+}
+
 const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' — ' + d : ''}`); };
 
 /**
@@ -54,12 +83,7 @@ async function auditA11y(page, label) {
 
   // ---- 登录 ----
   await page.goto(BASE, { waitUntil: 'networkidle' });
-  const idInput = page.getByPlaceholder('用户 ID（如 admin）');
-  if (await idInput.count()) { await idInput.fill(USER); await page.getByRole('button', { name: /继续/ }).click(); }
-  if ((await page.getByPlaceholder('密码').count()) === 0) await page.getByRole('button', { name: new RegExp(USER) }).first().click();
-  await page.getByPlaceholder('密码').fill(PASS);
-  await page.getByRole('button', { name: /^登录$/ }).click();
-  await page.getByRole('button', { name: '任务', exact: true }).waitFor({ timeout: 20000 });
+  await login(page, USER, PASS);
   log('登录（MySQL + 服务端会话）', true);
 
   // ---- 任务：建单 + 状态推进 ----
@@ -85,7 +109,7 @@ async function auditA11y(page, label) {
   await page.getByRole('button', { name: /^创建$/ }).click();
   await page.getByText(t2).waitFor({ timeout: 15000 });
   await page.getByRole('button', { name: '收件箱' }).click();
-  await page.getByRole('heading', { name: /收件箱/ }).waitFor();
+  await waitCrumb(page, '收件箱');
   await page.waitForTimeout(1200);
   const unreadBefore = await page.getByText(/未读 \d+ · 需我处理 \d+/).first().innerText();
   await page.screenshot({ path: `${SHOTS}/inbox.png` });
@@ -121,7 +145,7 @@ async function auditA11y(page, label) {
 
   // ---- 自动化 / 运行时 / 回放：三页可达 + 至少一条真交互 ----
   await page.getByRole('button', { name: '自动化', exact: true }).click();
-  await page.getByRole('heading', { name: /自动化中心/ }).waitFor({ timeout: 20000 });
+  await waitCrumb(page, '自动化');
   await page.getByRole('button', { name: /新建定时任务/ }).click();
   const agentSel = page.locator('#auto-agent');
   const agentVals = await agentSel.locator('option').evaluateAll((os) => os.map((o) => o.value).filter(Boolean));
@@ -137,11 +161,11 @@ async function auditA11y(page, label) {
   log('自动化：新建定时任务（真落库）', true);
 
   await page.getByRole('button', { name: '运行时', exact: true }).click();
-  await page.getByRole('heading', { name: '运行时' }).waitFor({ timeout: 20000 });
+  await waitCrumb(page, '运行时');
   log('运行时：页面可达（summary/sessions）', (await page.getByRole('region', { name: '运行时会话' }).count()) > 0);
 
   await page.getByRole('button', { name: '回放', exact: true }).click();
-  await page.getByRole('heading', { name: '回放' }).waitFor({ timeout: 20000 });
+  await waitCrumb(page, '回放');
   await page.getByLabel(/^回放任务/).first().click();
   await page.waitForTimeout(1200);
   await page.screenshot({ path: `${SHOTS}/replay.png` });
@@ -150,17 +174,35 @@ async function auditA11y(page, label) {
   // ---- a11y：四个主页面各审一次（0 违规才算过）----
   await auditA11y(page, '回放');
   await page.getByRole('button', { name: '任务', exact: true }).click();
-  await page.getByRole('heading', { name: /^任务/ }).waitFor({ timeout: 20000 });
+  await waitCrumb(page, '任务');
   await auditA11y(page, '任务看板');
   await page.getByRole('button', { name: '团队与小队', exact: true }).click();
-  await page.getByRole('heading', { name: /团队与小队/ }).waitFor({ timeout: 20000 });
+  await waitCrumb(page, '团队与小队');
   await auditA11y(page, '团队与小队');
   await page.getByRole('button', { name: '记忆中心', exact: true }).click();
-  await page.getByRole('heading', { name: '记忆中心' }).waitFor({ timeout: 20000 });
+  await waitCrumb(page, '记忆中心');
   await auditA11y(page, '记忆中心');
   await page.getByRole('button', { name: '自动化', exact: true }).click();
-  await page.getByRole('heading', { name: /自动化中心/ }).waitFor({ timeout: 20000 });
+  await waitCrumb(page, '自动化');
   await auditA11y(page, '自动化中心');
+
+  // ---- ui-parity 新页族：8 页可达 + 各自 a11y（用户要求「全量对齐」后的回归入口）----
+  const NEW_PAGES = [
+    ['阶段模型配置', /阶段表（唯一事实源）/],
+    ['决策模型目录', /规划原型 · 后端未接入/],
+    ['微调工厂', /训练批次/],
+    ['执行隔离', /档位清单/],
+    ['对外集成', /消息渠道（六通道）/],
+    ['环境参谋', /机器画像/],
+    ['Agent 详情', /选一只 Agent 看详情/],
+    ['小队中心', /小队列表/],
+  ];
+  for (const [label, marker] of NEW_PAGES) {
+    await page.getByRole('button', { name: label, exact: true }).click();
+    await page.getByText(marker).first().waitFor({ timeout: 20000 });
+    await auditA11y(page, label);
+    log(`页族可达：${label}`, true);
+  }
 
   // ---- 多用户：bob 的视角（不可见与越权都走 404，不泄漏存在性）----
   const adminTaskId = await page.evaluate(async (title) => {
@@ -173,12 +215,7 @@ async function auditA11y(page, label) {
   const bobCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const bobPage = await bobCtx.newPage();
   await bobPage.goto(BASE, { waitUntil: 'networkidle' });
-  const bobId = bobPage.getByPlaceholder('用户 ID（如 admin）');
-  if (await bobId.count()) { await bobId.fill('bob'); await bobPage.getByRole('button', { name: /继续/ }).click(); }
-  if ((await bobPage.getByPlaceholder('密码').count()) === 0) await bobPage.getByRole('button', { name: /bob/ }).first().click();
-  await bobPage.getByPlaceholder('密码').fill(PASS);
-  await bobPage.getByRole('button', { name: /^登录$/ }).click();
-  await bobPage.getByRole('button', { name: '任务', exact: true }).waitFor({ timeout: 20000 });
+  await login(bobPage, 'bob', PASS);
   const bobView = await bobPage.evaluate(async ({ title, taskId }) => {
     const list = await fetch('/api/tasks').then((r) => r.json());
     const titles = (list.tasks || []).map((t) => t.title);
@@ -195,7 +232,7 @@ async function auditA11y(page, label) {
 
   // ---- 记忆：列表（应含 L0 抽取结果）+ 写入 + 评审 ----
   await page.getByRole('button', { name: '记忆中心', exact: true }).click();
-  await page.getByRole('heading', { name: /记忆中心/ }).waitFor();
+  await waitCrumb(page, '记忆中心');
   await page.getByText(/自动化治理/).waitFor({ timeout: 15000 });
   // L0 抽取由 dsh CLI 生成，cue 措辞可能不同：用关键词 + 行数双重判定
   await page.getByText('看评审').first().waitFor({ timeout: 20000 });
