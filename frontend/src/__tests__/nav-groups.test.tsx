@@ -76,9 +76,9 @@ describe('侧栏分组', () => {
     const names = (name: string) =>
       group(name).getAllByRole('button').map(b => b.getAttribute('aria-label'));
 
-    expect(names('构建')).toEqual(['工具库', '工作流', '角色', 'Agent', '阶段模型配置', '决策模型目录', '微调工厂']);
+    expect(names('构建')).toEqual(['工具库', '工作流', '角色', 'Agent', 'Agent 详情', '阶段模型配置', '决策模型目录', '微调工厂']);
     expect(names('运行')).toEqual(['编排', 'Agent 管控', '运行时', '回放', '自动化', '执行隔离', '对外集成', '环境参谋']);
-    expect(names('协作')).toEqual(['项目', '任务', '收件箱', '团队与小队', '💬 对话中心']);
+    expect(names('协作')).toEqual(['项目', '任务', '收件箱', '团队与小队', '小队中心', '💬 对话中心']);
     expect(names('知识')).toEqual(['知识库', '记忆中心']);
     expect(names('观测')).toEqual(['监控', '告警中心']);
     expect(names('治理')).toEqual(['审批', '用户管理', '审计日志']);

@@ -9,7 +9,7 @@
 ```text
 $ python3 scripts/proto_parity_check.py
 原型：127 页 / 35 页族；导航 34 项
-实现：独立页面页族 29；部分实现 2；App.tsx 导航项 39
+实现：独立页面页族 31；部分实现 0；App.tsx 导航项 41
 缺失页族（0）：无
 部分实现（2）：agent-detail（现为列表抽屉）/ squads（现为团队页 tab）
 元页面（不计缺失，4）：discipline / index / login / relations

@@ -42,6 +42,8 @@ import Finetune from './pages/Finetune';
 import Isolation from './pages/Isolation';
 import Integration from './pages/Integration';
 import EnvAdvisor from './pages/EnvAdvisor';
+import AgentDetailPage from './pages/AgentDetailPage';
+import SquadsPage from './pages/SquadsPage';
 import Automations from './pages/Automations';
 import Runtimes from './pages/Runtimes';
 import Replay from './pages/Replay';
@@ -79,6 +81,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'workflows', label: '工作流', icon: <GitBranch size={16} /> },
       { id: 'roles-page', label: '角色', icon: <Users size={16} /> },
       { id: 'agents', label: 'Agent', icon: <Bot size={16} /> },
+      { id: 'agent-detail', label: 'Agent 详情', icon: <Bot size={16} /> },
       { id: 'stage-model', label: '阶段模型配置', icon: <ListTodo size={16} /> },
       { id: 'decision-models', label: '决策模型目录', icon: <Brain size={16} /> },
       { id: 'finetune', label: '微调工厂', icon: <Wrench size={16} /> },
@@ -102,6 +105,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'tasks', label: '任务', icon: <ListTodo size={16} /> },
       { id: 'inbox', label: '收件箱', icon: <InboxIcon size={16} /> },
       { id: 'teams', label: '团队与小队', icon: <Users size={16} /> },
+      { id: 'squads', label: '小队中心', icon: <Users size={16} /> },
       { id: 'chat', label: '💬 对话中心', icon: <MessageSquare size={16} /> },
     ],
   },
@@ -164,7 +168,9 @@ type View =
   | { page: 'finetune' }
   | { page: 'isolation' }
   | { page: 'integration' }
-  | { page: 'env-advisor' };
+  | { page: 'env-advisor' }
+  | { page: 'agent-detail' }
+  | { page: 'squads' };
 
 export default function App() {
   const getInitialNav = () => {
@@ -345,6 +351,8 @@ export default function App() {
       case 'isolation': return perm('project:read') ? <Isolation /> : <EmptyPerm />;
       case 'integration': return perm('project:read') ? <Integration /> : <EmptyPerm />;
       case 'env-advisor': return perm('project:read') ? <EnvAdvisor /> : <EmptyPerm />;
+      case 'agent-detail': return perm('project:read') ? <AgentDetailPage /> : <EmptyPerm />;
+      case 'squads': return perm('project:read') ? <SquadsPage /> : <EmptyPerm />;
       default: return <ProjectManager onSelect={(id) => setProjectDetailId(id)} />;
     }
   };

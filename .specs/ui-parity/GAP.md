@@ -4,11 +4,11 @@
 > 口径：**页面** = 独立页面且已接路由；**部分** = 只以抽屉/子 tab 形态存在；**元页** = 壳/登录流程/文档页（不计缺失）；**缺失** = 无对应实现。
 
 - 原型 127 页 / 35 页族（导航 34 项）
-- 已实现独立页 29 族 · 部分 2 族 · 缺失 0 族 · 元页 4 族
+- 已实现独立页 31 族 · 部分 0 族 · 缺失 0 族 · 元页 4 族
 
 | 页族 | 原型页 | 现有视图 | 形态 | 路由 | 导航 |
 |---|---|---|---|---|---|
-| `agent-detail` | 6 | agents | 部分 | ✓ | ✓ |
+| `agent-detail` | 6 | agent-detail | 页面 | ✓ | ✓ |
 | `agents` | 2 | agents | 页面 | ✓ | ✓ |
 | `alerts` | 5 | alerts | 页面 | ✓ | ✓ |
 | `approvals` | 1 | approvals | 页面 | ✓ | ✓ |
@@ -36,7 +36,7 @@
 | `roles` | 5 | roles-page | 页面 | ✓ | ✓ |
 | `runtime` | 5 | runtime | 页面 | ✓ | · |
 | `runtimes` | 1 | runtimes | 页面 | ✓ | ✓ |
-| `squads` | 1 | teams | 部分 | ✓ | ✓ |
+| `squads` | 1 | squads | 页面 | ✓ | ✓ |
 | `stage-model` | 8 | stage-model | 页面 | ✓ | ✓ |
 | `teams` | 2 | teams | 页面 | ✓ | ✓ |
 | `tools` | 7 | tools | 页面 | ✓ | ✓ |

@@ -24,7 +24,7 @@ APP = os.path.join(ROOT, "frontend/src/App.tsx")
 # 口径：本脚本只判「有没有对应实现形态」，页面深度是否达标由 change 的验收用例决定。
 FAMILY_VIEW = {
     "control-plane": ("control-plane", "page"), "agents": ("agents", "page"),
-    "agent-detail": ("agents", "partial"),      # 目前是列表里的抽屉
+    "agent-detail": ("agent-detail", "page"),
     "runtimes": ("runtimes", "page"), "canvas": ("orchestration", "page"),
     "workflows": ("workflows", "page"), "tools": ("tools", "page"),
     "chat": ("chat", "page"), "knowledge": ("knowledge", "page"),
@@ -34,7 +34,7 @@ FAMILY_VIEW = {
     "users": ("users", "page"), "approvals": ("approvals", "page"),
     "board": ("tasks", "page"), "inbox": ("inbox", "page"),
     "replay": ("replay", "page"), "teams": ("teams", "page"),
-    "squads": ("teams", "partial"),             # 团队页里的「小队」tab
+    "squads": ("squads", "page"),
     "memory": ("memory", "page"), "automations": ("automations", "page"),
     # 缺失
     "workbench": ("home", "page"),             # 工作台 = 变更总览（Home.tsx）
