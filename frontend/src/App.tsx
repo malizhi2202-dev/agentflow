@@ -34,6 +34,7 @@ import KnowledgeBase from './pages/KnowledgeBase';
 import ApprovalPage from './pages/ApprovalPage';
 import Tasks from './pages/Tasks';
 import Inbox from './pages/Inbox';
+import Teams from './pages/Teams';
 import UserArea from './components/UserSelect';
 import ForcePasswordChange from './components/ForcePasswordChange';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -64,6 +65,7 @@ const NAV: NavItem[] = [
   { id: 'projects', label: '项目', icon: <FolderKanban size={16} /> },
   { id: 'tasks', label: '任务', icon: <ListTodo size={16} /> },
   { id: 'inbox', label: '收件箱', icon: <InboxIcon size={16} /> },
+  { id: 'teams', label: '团队与小隊', icon: <Users size={16} /> },
   { id: 'knowledge', label: '知识库', icon: <BookOpen size={16} /> },
   { id: 'approvals', label: '审批', icon: <Shield size={16} /> },
 ];
@@ -97,7 +99,8 @@ type View =
   | { page: 'knowledge' }
   | { page: 'approvals' }
   | { page: 'tasks' }
-  | { page: 'inbox' };
+  | { page: 'inbox' }
+  | { page: 'teams' };
 
 export default function App() {
   const getInitialNav = () => {
@@ -107,6 +110,7 @@ export default function App() {
     if (path.startsWith('/workflows')) return 'workflows';
     if (path.startsWith('/tasks')) return 'tasks';
     if (path.startsWith('/inbox')) return 'inbox';
+    if (path.startsWith('/teams')) return 'teams';
     return 'projects';
   };
   const [nav, setNav] = useState(getInitialNav);
@@ -273,6 +277,7 @@ export default function App() {
       case 'approvals': return perm('project:read') ? <ApprovalPage /> : <EmptyPerm />;
       case 'tasks': return perm('project:read') ? <Tasks /> : <EmptyPerm />;
       case 'inbox': return <Inbox />;
+      case 'teams': return perm('project:read') ? <Teams /> : <EmptyPerm />;
       default: return <ProjectManager onSelect={(id) => setProjectDetailId(id)} />;
     }
   };
