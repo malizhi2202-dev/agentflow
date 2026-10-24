@@ -37,7 +37,8 @@ export default function AgentBuilder({ onSelect }: Props) {
     <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, margin: 0 }}>Agent</h1>
-        <button onClick={function() { if (onSelect) onSelect({ name: '', description: '', runtime: 'langgraph', model_provider: 'ollama', model_name: 'qwen2:0.5b', api_key: '', workflow_id: 0, token_soft_limit: 800000, token_hard_limit: 1000000, gate_pre: '', gate_post: '', io_filter: 'none', system_prompt: '', role_def: '', sop: '' }); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}>
+        {/* 新建默认值不再预置模型 / Provider / API Key：运行时与模型由表单从「运行时发现」里选 */}
+        <button onClick={function() { if (onSelect) onSelect({ name: '', description: '' }); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}>
           <Plus size={14} /> 创建 Agent
         </button>
       </div>
@@ -88,7 +89,8 @@ export default function AgentBuilder({ onSelect }: Props) {
                   </div>
                 )}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', marginBottom: 8 }}>
-                  <span>运行时: {a.runtime}</span><span>模型: {a.model_name}</span>
+                  {/* 模型留空 = 用运行时自身默认；不显示成空白，免得看成「未配置」 */}
+                  <span>运行时: {a.runtime || '未选'}</span><span>模型: {a.model_name || '随运行时默认'}</span>
                   <span>软限制: {a.token_soft_limit?.toLocaleString()}</span><span>硬限制: {a.token_hard_limit?.toLocaleString()}</span>
                 </div>
                 <div style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-dim)' }}>Token 已用: {a.total_tokens_used?.toLocaleString()} | 项目: {a.project_count}</div>

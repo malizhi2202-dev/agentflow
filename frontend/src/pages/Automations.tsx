@@ -52,8 +52,7 @@ export default function Automations() {
   return (
     <div style={{ padding: 16 }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <h2 style={{ fontSize: 16, margin: 0 }}>自动化中心</h2>
-        <span style={{ color: 'var(--text-muted)', fontSize: 11.5 }}>
+        <span className="chip mono">
           共 {items.length} 条 · 启用 {items.filter((i) => i.enabled).length}
         </span>
         <div style={{ flex: 1 }} />

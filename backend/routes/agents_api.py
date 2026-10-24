@@ -3,13 +3,20 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from database import get_db
 from models.agent import Agent
-from services.encryption_service import encrypt
 from services.audit_service import log_audit
-from services.llm_providers import SUPPORTED_PROVIDERS
+from services.agent_channel import CLI_RUNTIMES, checked_provider, provider_for_runtime
 from services.agent_trigger import AgentRunError, trigger_agent_run
 from models.agent import SUPPORTED_RUNTIMES
 
 router = APIRouter(prefix="/api/agents", tags=["agents"])
+
+
+def _checked_provider(runtime: str, explicit) -> str:
+    """provider 推导/校验的唯一实现在 `services/agent_channel.py`（导入脚本共用同一口径）。"""
+    try:
+        return checked_provider(runtime, explicit)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 def _user(request: Request) -> dict:
@@ -47,18 +54,23 @@ def api_list_agents(status: str | None = None, domain_id: int | None = None, cap
 @router.post("")
 def api_create_agent(payload: dict, request: Request = None, db: Session = Depends(get_db)):
     user = _user(request)
-    api_key = payload.get("api_key", "") or "not_set"
-    # 验证 model_provider
-    model_provider = payload.get("model_provider", "openai")
-    if model_provider not in SUPPORTED_PROVIDERS:
-        raise HTTPException(status_code=400, detail=f"不支持的 model_provider: '{model_provider}'。支持: {sorted(SUPPORTED_PROVIDERS)}")
     # 验证 runtime
     runtime = payload.get("runtime", "langgraph")
     if runtime not in SUPPORTED_RUNTIMES:
         raise HTTPException(status_code=400, detail=f"不支持的 runtime: '{runtime}'。支持: {sorted(SUPPORTED_RUNTIMES)}")
-    agent = Agent(owner_id=user["id"], name=payload["name"], description=payload.get("description", ""), runtime=runtime, model_provider=model_provider, model_name=payload.get("model_name", ""), model_config_json=payload.get("model_config_json", {}), api_key_encrypted=encrypt(api_key), workflow_id=payload.get("workflow_id"), token_soft_limit=payload.get("token_soft_limit", 800000), token_hard_limit=payload.get("token_hard_limit", 1000000), domain_id=payload.get("domain_id"),
+    # provider 不再由表单提交：按运行时推导（显式传入仍校验）。凭据不再收（api_key 字段已裁撤）。
+    model_provider = _checked_provider(runtime, payload.get("model_provider"))
+    agent = Agent(owner_id=user["id"], name=payload["name"], description=payload.get("description", ""), runtime=runtime, model_provider=model_provider, model_name=payload.get("model_name", ""), model_config_json=payload.get("model_config_json", {}), api_key_encrypted="", workflow_id=payload.get("workflow_id"), token_soft_limit=payload.get("token_soft_limit", 800000), token_hard_limit=payload.get("token_hard_limit", 1000000), domain_id=payload.get("domain_id"),
                   # T-05：人设三件落库（此前只收不存）
-                  system_prompt=payload.get("system_prompt"), role_def=payload.get("role_def"), sop=payload.get("sop"))
+                  system_prompt=payload.get("system_prompt"), role_def=payload.get("role_def"), sop=payload.get("sop"),
+                  # v23（multica 迁移）：展示与配置块
+                  avatar_url=payload.get("avatar_url"),
+                  custom_env=payload.get("custom_env"),
+                  custom_args=payload.get("custom_args"),
+                  mcp_config=payload.get("mcp_config"),
+                  thinking_level=payload.get("thinking_level"),
+                  service_tier=payload.get("service_tier"),
+                  composio_toolkit_allowlist=payload.get("composio_toolkit_allowlist"))
     db.add(agent)
     db.commit()
     db.refresh(agent)
@@ -89,19 +101,25 @@ def api_update_agent(agent_id: int, payload: dict, request: Request = None, db: 
     if not a:
         raise HTTPException(status_code=404, detail="Agent 不存在")
     # T-05：人设三件也是可编辑字段（以前漏在这里 → 编辑后不落库）
-    for f in ("name", "description", "model_provider", "model_name", "model_config_json",
+    runtime_changed = "runtime" in payload
+    for f in ("name", "description", "model_name", "model_config_json",
               "system_prompt", "role_def", "sop",
-              "workflow_id", "token_soft_limit", "token_hard_limit", "domain_id"):
+              "workflow_id", "token_soft_limit", "token_hard_limit", "domain_id",
+              # v23（multica 迁移）：展示与配置块也可编辑
+              "avatar_url", "custom_env", "custom_args", "mcp_config",
+              "thinking_level", "service_tier", "composio_toolkit_allowlist"):
         if f in payload:
-            if f == "model_provider" and payload[f] not in SUPPORTED_PROVIDERS:
-                raise HTTPException(status_code=400, detail=f"不支持的 model_provider: '{payload[f]}'。支持: {sorted(SUPPORTED_PROVIDERS)}")
             setattr(a, f, payload[f])
-    if "runtime" in payload:
+    if runtime_changed:
         if payload["runtime"] not in SUPPORTED_RUNTIMES:
             raise HTTPException(status_code=400, detail=f"不支持的 runtime: '{payload['runtime']}'。支持: {sorted(SUPPORTED_RUNTIMES)}")
         a.runtime = payload["runtime"]
-    if "api_key" in payload and payload["api_key"]:
-        a.api_key_encrypted = encrypt(payload["api_key"])
+    # provider：显式给就校验；否则**仅在运行时变了时**跟随新运行时推导。
+    # 不无条件改写旧行——一次改名顺手把存量 Agent 的模型通道换掉，是静默换通道。
+    if "model_provider" in payload:
+        a.model_provider = _checked_provider(a.runtime, payload["model_provider"])
+    elif runtime_changed:
+        a.model_provider = provider_for_runtime(a.runtime)
     db.commit()
     db.refresh(a)
     log_audit(user["id"], user.get("name", user["id"]), "agent.update", a.name, "agent", "updated", request.client.host if request.client else "127.0.0.1")
@@ -258,4 +276,73 @@ def api_delete_scheduled_task(agent_id: int, task_id: int, request: Request = No
     db.delete(task)
     db.commit()
     log_audit(user["id"], user.get("name", user["id"]), "scheduled_task.delete", task.name or task.capability, "scheduled_task", "deleted", request.client.host if request.client else "127.0.0.1")
+    return {"ok": True}
+
+
+# ── Agent ↔ 工具/技能 绑定（v23 · multica agent_skill 迁移的落点）──────────
+
+@router.get("/{agent_id}/tools")
+def api_list_agent_tools(agent_id: int, request: Request = None, db: Session = Depends(get_db)):
+    """该 Agent 绑定的技能/工具（只读聚合；绑定 ≠ 授权）。"""
+    from models.agent_tool import AgentTool
+    from models.tool import Tool
+
+    user = _user(request)
+    if not _filter_owner(db.query(Agent).filter(Agent.id == agent_id), user).first():
+        raise HTTPException(status_code=404, detail="Agent 不存在")
+    rows = db.query(AgentTool).filter(AgentTool.agent_id == agent_id).all()
+    tool_ids = [r.tool_id for r in rows]
+    tools = db.query(Tool).filter(Tool.id.in_(tool_ids)).all() if tool_ids else []
+    return {"tools": [{"id": t.id, "name": t.name, "type": t.type,
+                       "description": t.description or ""} for t in tools]}
+
+
+@router.post("/{agent_id}/tools")
+def api_bind_agent_tool(agent_id: int, payload: dict, request: Request = None, db: Session = Depends(get_db)):
+    """绑定一个技能/工具（幂等：已绑定不重复插入）。"""
+    from models.agent_tool import AgentTool
+    from models.tool import Tool
+
+    user = _user(request)
+    agent = _filter_owner(db.query(Agent).filter(Agent.id == agent_id), user).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent 不存在")
+    try:
+        tool_id = int(payload.get("tool_id"))
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=400, detail="缺 tool_id 或不是整数")
+    tool = db.query(Tool).filter(Tool.id == tool_id).first()
+    if tool is None:
+        raise HTTPException(status_code=404, detail="工具不存在")
+    if user.get("role") != "admin" and tool.owner_id != user["id"]:
+        raise HTTPException(status_code=404, detail="工具不存在")
+    already = db.query(AgentTool).filter(
+        AgentTool.agent_id == agent_id, AgentTool.tool_id == tool_id).first()
+    if already is None:
+        db.add(AgentTool(agent_id=agent_id, tool_id=tool_id))
+        db.commit()
+    log_audit(user["id"], user.get("name", user["id"]), "agent.tool_bind",
+              f"{agent.name} → {tool.name}", "agent", "bound",
+              request.client.host if request.client else "127.0.0.1")
+    return {"ok": True, "tool_id": tool_id}
+
+
+@router.delete("/{agent_id}/tools/{tool_id}")
+def api_unbind_agent_tool(agent_id: int, tool_id: int, request: Request = None, db: Session = Depends(get_db)):
+    """解绑（只解关系，不删工具本身）。"""
+    from models.agent_tool import AgentTool
+
+    user = _user(request)
+    agent = _filter_owner(db.query(Agent).filter(Agent.id == agent_id), user).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent 不存在")
+    row = db.query(AgentTool).filter(
+        AgentTool.agent_id == agent_id, AgentTool.tool_id == tool_id).first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="未绑定该工具")
+    db.delete(row)
+    db.commit()
+    log_audit(user["id"], user.get("name", user["id"]), "agent.tool_unbind",
+              f"{agent.name} → #{tool_id}", "agent", "unbound",
+              request.client.host if request.client else "127.0.0.1")
     return {"ok": True}

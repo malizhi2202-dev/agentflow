@@ -391,6 +391,9 @@ agentflow/
 | `RSI_JUDGE_PROVIDER` / `RSI_JUDGE_MODEL` / `RSI_JUDGE_API_KEY` / `RSI_JUDGE_MAX_CALLS` | (空/0=禁用) | 影子重放的**真实** judge（异厂系）。四件缺一即拒绝（不默认回退、不偷偷花钱）；`MAX_CALLS` 为每次作业预算帽 |
 | `RSI_CLI_PROVIDER` | `dsh` | CLI 模型通道：`dsh`（`node <dsh bin> --profile headless "<prompt>"`）或 `hermes`（`<hermes bin> -z "<prompt>"`）；`RSI_JUDGE_PROVIDER=cli` / `RSI_EXTRACTOR_PROVIDER=cli` 时生效，**免 key** |
 | `RSI_CLI_TIMEOUT_SECONDS` | `180` | CLI 调用超时；超时即失败（不重试、不降级） |
+| `AF_DAEMON_TOKEN` | （空=拒绝上报） | 运行时发现的 daemon 机器级 token；与 `scripts/runtime-daemon.py --token` 必须同值。**未配置时 `POST /api/daemon/report` 返回 503**（fail-closed） |
+| `AF_DAEMON_OWNER` | `admin` | daemon 上报的运行时归属哪个平台用户（机器级凭据只能映射到一个 owner，上报体里的 owner 被忽略） |
+| `RUNTIME_OFFLINE_AFTER_SECONDS` | `180` | 运行时离线判定阈值：`last_seen` 超过该秒数 = `offline`（记录不删） |
 | `RUNTIME_EXEC_ENABLED` | `false` | 把 Agent 的 LLM 调用**委托给本机 CLI 运行时**（hermes/dsh/codex）；关闭时走进程内 provider，**不静默降级** |
 | `RUNTIME_EXEC_TIMEOUT_SECONDS` | `180` | 运行时执行超时；超时/非零退出/命令缺失一律**响亮失败** |
 | `RUNTIME_CMD_HERMES` / `RUNTIME_CMD_DSH` / `RUNTIME_CMD_CODEX` | hermes/dsh 有默认，codex 空 | 每个运行时的命令模板，`{prompt}` 由平台替换成**单个 argv 参数**（不经 shell）；空模板 = 该运行时不可用（fail-closed） |
@@ -545,6 +548,24 @@ DATABASE_URL="mysql+aiomysql://root:***@localhost:3306/platform" uvicorn main:ap
 ```
 
 ---
+
+### 运行时发现（daemon）
+
+```bash
+# 平台侧（agentflow.env）：先配 token 并重启后端
+AF_DAEMON_TOKEN=<随机串>
+systemctl --user restart agentflow-backend
+
+# 机器侧：探测一次看结果（不上报）
+python3 scripts/runtime-daemon.py --once --dry-run
+
+# 上报一次 / 常驻 15s 心跳（装成 systemd 用户服务见 deploy/systemd/user/af-runtime-daemon.service.in）
+AF_DAEMON_TOKEN=<同一随机串> python3 scripts/runtime-daemon.py --once
+AF_DAEMON_TOKEN=<同一随机串> python3 scripts/runtime-daemon.py
+```
+
+探测三处来源：`AF_RUNTIME_CLI_<CLI>_BIN` 覆盖 → `PATH` → 已知安装位置（**本机 dsh/hermes 不在 PATH，靠第三处命中**）。
+只读 `--version` / `--list-models` 的 stdout，**不上报任何登录凭据**；解析不出模型时界面显示「不可读」而不是「0 个模型」。
 
 ## 演示流程
 

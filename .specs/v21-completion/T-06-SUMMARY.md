@@ -11,7 +11,7 @@ E2E 内置 `auditA11y()`，逐页检查硬项：按钮可达名（aria-label/tit
 ```text
 PASS a11y：回放（0 违规）
 PASS a11y：任务看板（0 违规）
-PASS a11y：团队与小隊（0 违规）
+PASS a11y：团队与小队（0 违规）
 PASS a11y：记忆中心（0 违规）
 PASS a11y：自动化中心（0 违规）
 ```

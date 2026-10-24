@@ -23,8 +23,7 @@ export default function OrchestrationListPage() {
 
   return (
     <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 20, fontWeight: 600, margin: 0 }}>Agent 编排</h1>
+      <div className="toolbar" style={{ justifyContent: 'flex-end', marginBottom: 20 }}>
         <a href="/orchestration/new" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 'var(--r-md)', cursor: 'pointer', fontSize: 13, textDecoration: 'none', fontWeight: 500 }}>
           <Plus size={14} /> 新建编排
         </a>

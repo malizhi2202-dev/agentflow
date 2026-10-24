@@ -316,13 +316,6 @@ export default function KnowledgeBase() {
 
   return (
     <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <BookOpen size={22} color="var(--color-primary)" />
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, margin: 0 }}>知识库</h1>
-        </div>
-      </div>
-
       {/* Agent 选择器 */}
       <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
         <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>选择 Agent：</label>

@@ -75,15 +75,15 @@ export default function AlertsPage() {
   return (
     <div style={{ padding: '20px 24px', height: '100%', overflow: 'auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, margin: 0, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Bell size={18} /> 告警中心
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Bell size={18} />
           {unackCount > 0 && (
             <span style={{
               background: 'var(--red)', color: '#fff', borderRadius: 10, padding: '1px 8px',
               fontSize: 11, fontWeight: 700, marginLeft: 4,
             }}>{unackCount}</span>
           )}
-        </h1>
+        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <select
             value={typeFilter}

@@ -18,7 +18,7 @@
 | 2 | `8b87035e` | docs(state): 波 4/5/6 收口登记 + 门面事实对齐 | L3+L5 |
 | 3 | `64e44de6` | feat(v20-wave6): RSI 产物治理 | L1+L3+L5 |
 | 4 | `943b7e5e` | feat(v20-wave5): 可观测产生端 + 声明式 API 四件组 + 隔离契约 | L1+L3+L5 |
-| 5 | `ac839aa0` | feat(v20-wave4): 团队与小隊两实体 + 五类资产归属 | L1+L3+L5 |
+| 5 | `ac839aa0` | feat(v20-wave4): 团队与小队两实体 + 五类资产归属 | L1+L3+L5 |
 | 6 | `faf37aa7` | docs(state): 波 2/波 3 收口登记 | L3+L5 |
 | 7 | `67420190` | feat(v20-wave3): 任务 + 运行连接 + 收件箱三规则 | L1+L3+L5 |
 | 8 | `57945f50` | feat(v20-wave3): 告警落表 + 双队列并表 | L1+L5 |
@@ -134,7 +134,7 @@ $ cd frontend && npm run build
 | 10-24 16:20 | D1-3 | README「界面未挂载」→「界面已挂载」 | 本轮 docs 提交 |
 | 10-24 16:20 | D4-3 | 补 `.specs/v20-ui-collab/SUMMARY.md` | 本轮 docs 提交 |
 
-## 7. 第 3 轮增量（2026-10-24 · 团队与小隊页）
+## 7. 第 3 轮增量（2026-10-24 · 团队与小队页）
 
 > 触发：首个**按 GO.md 走完整链**的 change（`v20-ui-teams`）落地。
 
@@ -142,7 +142,7 @@ $ cd frontend && npm run build
 
 | 编号 | 类型 | 层 | 证据 | 描述 | 处理 |
 |---|---|---|---|---|---|
-| D1-5 | 代码变文档未变 | L3 | `5ed535b5` + `README.md` §功能模块 | 「团队与小隊」上线前只写"已落地"未写界面入口 | **已合并**：补侧栏入口与四项能力 |
+| D1-5 | 代码变文档未变 | L3 | `5ed535b5` + `README.md` §功能模块 | 「团队与小队」上线前只写"已落地"未写界面入口 | **已合并**：补侧栏入口与四项能力 |
 | D4-4 | 执行留痕缺口（已改善） | L5 | `.specs/v20-ui-teams/` | 本 change 补齐了 REQUIREMENT / DESIGN / UI-DESIGN / T01–T04-SUMMARY / TEST / REVIEW / UAT + 四道门票 | **已闭环**（单 change 维度） |
 | D4-5 | 执行留痕缺口（历史债） | L5 | `.specs/v20-wave0…7`、`v20-ui-collab` | 这 9 个 change 仍无 REQUIREMENT / DESIGN / UI-DESIGN / 门禁记录（当时走压缩路径） | **不动历史**：不伪造补档；作为流程债登记，后续新 change 一律走完整链 |
 | D3-3 | 原型漂移（已登记） | L2 | `prototype/teams.html` vs `pages/Teams.tsx` | 原型是双 tab + 组织八区；实现是双 tab + 列表/抽屉（组织八区未做） | 已登记（CHANGE「范围排除」） |
@@ -152,7 +152,7 @@ $ cd frontend && npm run build
 
 | 时间 | 漂移 | 合并动作 | 提交 |
 |---|---|---|---|
-| 10-24 17:10 | D1-5 | README 团队与小隊节补界面入口与能力 | 本轮 docs 提交 |
+| 10-24 17:10 | D1-5 | README 团队与小队节补界面入口与能力 | 本轮 docs 提交 |
 | 10-24 17:10 | D4-4 | 单 change 维度产物补齐（SUMMARY×4 + 门票） | `5ed535b5` |
 
 ## 8. 第 4 轮增量（2026-10-24 · 小队授权补漏）

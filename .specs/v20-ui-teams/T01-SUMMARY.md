@@ -5,7 +5,7 @@
 
 ## 做了什么
 
-新建 `stores/teams.ts`：团队列表 / 团队详情（team+members+assets）/ 小隊列表 三块状态 + 14 个动作。
+新建 `stores/teams.ts`：团队列表 / 团队详情（team+members+assets）/ 小队列表 三块状态 + 14 个动作。
 读写分工沿用 `stores/collab.ts`：GET 走 `safeFetch`（5s 缓存 + 去重），写走 `dedupedFetch` 并**读取后端 `detail`**（`safeFetch` 会把 4xx 压成 `Server error: 400`），成功后 `invalidateCache()` 再重拉。
 类型按 `backend/routes/teams_api.py` 的实际返回形状定义（`_team_dict` / `list_assets` / `_squad_dict`）。
 

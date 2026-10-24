@@ -1,16 +1,16 @@
 # ui-parity · 只读盘点与复核（不属于并行会话的实现范围）
 
-- **状态**：盘点/复核工具（**不改** `frontend/`、`backend/`）
-- **实现归属**：`.specs/v22-ui-align`（并行会话，W1 实施中）+ `v22-nav-groups` / `v22-runtime-discovery` / `v22-agent-runtime-model`
-- **为什么不在本目录实现**：本仓 L-001——并行 agent 同仓写入会互相吞掉改动。用户已指定由 v22 会话继续实现，本目录只提供可复跑的差距基线，避免两边各写一版。
+- **状态**：**实现中**（P1 完成；P2+ 进行）
+- **实现归属**：本 change 接管；前置设计/壳层由并行会话 `v22-ui-align`（W1/W2 已交付）+ `v22-nav-groups` / `v22-runtime-discovery` / `v22-agent-runtime-model` 落地
+- **并行会话已收工**：用户确认后由本 change 接管；L-001 教训仍生效——同仓多会话写同一批文件会互相吞掉，接管前已确认对方工作已落树。
 
 ## 当前基线（`scripts/proto_parity_check.py` 实测）
 
 ```text
 $ python3 scripts/proto_parity_check.py
 原型：127 页 / 35 页族；导航 34 项
-实现：独立页面页族 22；部分实现 2；App.tsx 导航项 33
-缺失页族（7）：decision-models / env-advisor / finetune / integration / isolation / stage-model / workbench
+实现：独立页面页族 29；部分实现 2；App.tsx 导航项 39
+缺失页族（0）：无
 部分实现（2）：agent-detail（现为列表抽屉）/ squads（现为团队页 tab）
 元页面（不计缺失，4）：discipline / index / login / relations
 ```

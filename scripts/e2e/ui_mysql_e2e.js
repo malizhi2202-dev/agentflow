@@ -94,7 +94,7 @@ async function auditA11y(page, label) {
   log('收件箱：指派进箱 + 标读', true, unreadBefore);
 
   // ---- 团队：建团 + 成员 + 暂停 ----
-  await page.getByRole('button', { name: '团队与小隊', exact: true }).click();
+  await page.getByRole('button', { name: '团队与小队', exact: true }).click();
   const team = `MySQL 团队 ${stamp}`;
   await page.getByRole('button', { name: /新建团队/ }).click();
   await page.getByLabel('团队 slug').fill(`mysql-${stamp}`);
@@ -152,9 +152,9 @@ async function auditA11y(page, label) {
   await page.getByRole('button', { name: '任务', exact: true }).click();
   await page.getByRole('heading', { name: /^任务/ }).waitFor({ timeout: 20000 });
   await auditA11y(page, '任务看板');
-  await page.getByRole('button', { name: '团队与小隊', exact: true }).click();
-  await page.getByRole('heading', { name: /团队与小隊/ }).waitFor({ timeout: 20000 });
-  await auditA11y(page, '团队与小隊');
+  await page.getByRole('button', { name: '团队与小队', exact: true }).click();
+  await page.getByRole('heading', { name: /团队与小队/ }).waitFor({ timeout: 20000 });
+  await auditA11y(page, '团队与小队');
   await page.getByRole('button', { name: '记忆中心', exact: true }).click();
   await page.getByRole('heading', { name: '记忆中心' }).waitFor({ timeout: 20000 });
   await auditA11y(page, '记忆中心');

@@ -1,0 +1,114 @@
+/* 平台壳层与语义组件（v22-ui-align W1）
+ *
+ * 为什么单独一个文件：原型用 `.app-top / .crumb / .panel / .tbl / .chip / .btn` 这些**语义类**
+ * 统一形态（127 页一致），而实现侧此前是 2669 处内联样式 —— 每组内联对象都在重新发明间距与字号。
+ * 这里只搬**用到的**规则，且颜色/间距全部取 tokens.css 里已有的 CSS 变量，
+ * 不复制原型 assets/base.css（两套 token 会打架）。
+ */
+
+/* ── 壳层顶栏：左侧面包屑 + 右侧 chip / 动作 ───────────────── */
+.app-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: 44px;
+  padding: var(--s2) var(--s4);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-main);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.crumb {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.crumb .dim {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.app-top .right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex-wrap: wrap;
+}
+
+/* ── 页面体：统一内边距（页面不再各自 padding:16）───────────── */
+.app-body {
+  padding: var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+.page-note {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── 面板 ───────────────────────────────────────────────── */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--s3);
+}
+.panel + .panel { margin-top: var(--s2); }
+
+/* ── chip（状态/元信息）：不只用颜色，文字本身可读 ───────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  height: 20px;
+  padding: 0 var(--s2);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.chip.mono { font-family: var(--font-mono); }
+.chip.ok { color: var(--green); border-color: var(--green); }
+.chip.bad { color: var(--red); border-color: var(--red); }
+.chip.warn { color: var(--orange, #c80); border-color: var(--orange, #c80); }
+.chip.info { color: var(--blue); border-color: var(--blue); }
+
+/* ── 工具栏：页面级动作行（与顶栏分开：顶栏归属壳层，工具栏归属页面）── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  flex-wrap: wrap;
+}
+.toolbar .grow { flex: 1; }
+
+/* ── 表格：原型 .tbl.compact 的最小等价物 ───────────────────── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tbl th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: var(--s1) 6px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.tbl td { padding: 6px; border-top: 1px solid var(--border); vertical-align: top; }
+.tbl.compact td, .tbl.compact th { padding: 4px 6px; }
+.tbl tbody tr:hover { background: var(--bg-selected); }
+
+/* ── 页面级 h1/h2：原先 27 页 h1(24px)/19 页 h2(16px)/7 页 header 混用，
+ *    统一为一个阶：页面名在 .crumb，页面内只剩分区标题 ───────── */
+.section-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 var(--s1);
+}

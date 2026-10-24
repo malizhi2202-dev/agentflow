@@ -250,7 +250,7 @@ describe('团队 tab', () => {
   });
 });
 
-describe('小隊 tab', () => {
+describe('小队 tab', () => {
   it('列表 + 建队 + 归档 409 文案透传', async () => {
     const calls = mockApi({
       'GET /api/teams': { body: { teams: [] } },
@@ -259,7 +259,8 @@ describe('小隊 tab', () => {
       'POST /api/squads/code-review/archive': { status: 409, body: { detail: 'leader Agent 已归档' } },
     });
     render(<Teams />);
-    await waitFor(() => expect(screen.getByText('团队与小隊')).toBeInTheDocument());
+    // 页名已移到壳层顶栏（.crumb），页面内只断言结构：tablist 存在
+    await waitFor(() => expect(screen.getByRole('tablist', { name: '团队或小队' })).toBeInTheDocument());
     fireEvent.click(screen.getByRole('tab', { name: '小队' }));
 
     await waitFor(() => expect(screen.getByText('代码审查小队')).toBeInTheDocument());

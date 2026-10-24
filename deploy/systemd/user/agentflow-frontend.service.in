@@ -5,6 +5,9 @@ After=network.target agentflow-backend.service
 [Service]
 Type=simple
 WorkingDirectory=@REPO@/frontend
+# 机器上 inotify watch 预算被打满（多套 dev server + 编辑器同机）时的降级：
+# 轮询不占 watch，代价是 CPU 略升（LESSONS L-010）
+Environment=VITE_WATCH_POLLING=1
 Environment=PATH=@NODE_BIN@:/usr/local/bin:/usr/bin:/bin
 ExecStart=@NODE_BIN@/node @REPO@/frontend/node_modules/vite/bin/vite.js --host 0.0.0.0 --port 5173 --strictPort
 Restart=always

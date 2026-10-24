@@ -65,8 +65,7 @@ export default function AuditLog() {
     <div style={{ padding: '20px 24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <h1 style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 700, margin: 0 }}>审计日志</h1>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{entries.length} 条记录</span>
+          <span className="chip mono">{entries.length} 条记录</span>
         </div>
         <button onClick={fetchData} className="btn btn-ghost btn-sm" disabled={loading}>
           <RefreshCw size={14} style={{ animation: loading ? 'spin 0.7s linear infinite' : 'none' }} />

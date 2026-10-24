@@ -36,6 +36,12 @@ import Tasks from './pages/Tasks';
 import Inbox from './pages/Inbox';
 import Teams from './pages/Teams';
 import Memory from './pages/Memory';
+import StageModel from './pages/StageModel';
+import DecisionModels from './pages/DecisionModels';
+import Finetune from './pages/Finetune';
+import Isolation from './pages/Isolation';
+import Integration from './pages/Integration';
+import EnvAdvisor from './pages/EnvAdvisor';
 import Automations from './pages/Automations';
 import Runtimes from './pages/Runtimes';
 import Replay from './pages/Replay';
@@ -45,6 +51,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { useAuth } from './stores/auth';
 import { useStageConfig } from './stores/stageConfig';
 import { safeFetch } from './utils/requestDedup';
+import AppTopBar from './components/ui/AppTopBar';
 
 function EmptyPerm() {
   return (
@@ -56,32 +63,74 @@ function EmptyPerm() {
   );
 }
 
-type NavItem = { id: string; label: string; icon: React.ReactNode };
-const NAV: NavItem[] = [
-  { id: 'tools', label: '工具库', icon: <Wrench size={16} /> },
-  { id: 'workflows', label: '工作流', icon: <GitBranch size={16} /> },
-  { id: 'roles-page', label: '角色', icon: <Users size={16} /> },
-  { id: 'agents', label: 'Agent', icon: <Bot size={16} /> },
-  { id: 'chat', label: '💬 对话中心', icon: <MessageSquare size={16} /> },
-  { id: 'control-plane', label: 'Agent 管控', icon: <Radio size={16} /> },
-  { id: 'orchestration', label: '编排', icon: <Network size={16} /> },
-  { id: 'monitor', label: '监控', icon: <BarChart3 size={16} /> },
-  { id: 'projects', label: '项目', icon: <FolderKanban size={16} /> },
-  { id: 'tasks', label: '任务', icon: <ListTodo size={16} /> },
-  { id: 'inbox', label: '收件箱', icon: <InboxIcon size={16} /> },
-  { id: 'automations', label: '自动化', icon: <Timer size={16} /> },
-  { id: 'runtimes', label: '运行时', icon: <Boxes size={16} /> },
-  { id: 'replay', label: '回放', icon: <RotateCcw size={16} /> },
-  { id: 'teams', label: '团队与小隊', icon: <Users size={16} /> },
-  { id: 'memory', label: '记忆中心', icon: <Brain size={16} /> },
-  { id: 'knowledge', label: '知识库', icon: <BookOpen size={16} /> },
-  { id: 'approvals', label: '审批', icon: <Shield size={16} /> },
+type NavItem = { id: string; label: string; icon: React.ReactNode; perm?: string; badge?: 'alerts' };
+type NavGroup = { key: string; title: string; items: NavItem[] };
+
+/**
+ * 侧栏信息架构（v22-nav-groups）：父级标题 = 业务链的一段，组内顺序即使用顺序。
+ * 阅读顺序：造（构建）→ 跑（运行）→ 一起干（协作）→ 沉淀（知识）→ 看（观测）→ 管（治理）。
+ * `id` 与 `View` 值一一对应：分组只改变呈现，不改路由、不改权限语义
+ * （治理组两项仍由 `user:manage` / `audit:view` 过滤，`perm` 不填 = 登录即可见）。
+ */
+const NAV_GROUPS: NavGroup[] = [
+  {
+    key: 'build', title: '构建', items: [
+      { id: 'tools', label: '工具库', icon: <Wrench size={16} /> },
+      { id: 'workflows', label: '工作流', icon: <GitBranch size={16} /> },
+      { id: 'roles-page', label: '角色', icon: <Users size={16} /> },
+      { id: 'agents', label: 'Agent', icon: <Bot size={16} /> },
+      { id: 'stage-model', label: '阶段模型配置', icon: <ListTodo size={16} /> },
+      { id: 'decision-models', label: '决策模型目录', icon: <Brain size={16} /> },
+      { id: 'finetune', label: '微调工厂', icon: <Wrench size={16} /> },
+    ],
+  },
+  {
+    key: 'run', title: '运行', items: [
+      { id: 'orchestration', label: '编排', icon: <Network size={16} /> },
+      { id: 'control-plane', label: 'Agent 管控', icon: <Radio size={16} /> },
+      { id: 'runtimes', label: '运行时', icon: <Boxes size={16} /> },
+      { id: 'replay', label: '回放', icon: <RotateCcw size={16} /> },
+      { id: 'automations', label: '自动化', icon: <Timer size={16} /> },
+      { id: 'isolation', label: '执行隔离', icon: <Shield size={16} /> },
+      { id: 'integration', label: '对外集成', icon: <Link2 size={16} /> },
+      { id: 'env-advisor', label: '环境参谋', icon: <Network size={16} /> },
+    ],
+  },
+  {
+    key: 'collab', title: '协作', items: [
+      { id: 'projects', label: '项目', icon: <FolderKanban size={16} /> },
+      { id: 'tasks', label: '任务', icon: <ListTodo size={16} /> },
+      { id: 'inbox', label: '收件箱', icon: <InboxIcon size={16} /> },
+      { id: 'teams', label: '团队与小队', icon: <Users size={16} /> },
+      { id: 'chat', label: '💬 对话中心', icon: <MessageSquare size={16} /> },
+    ],
+  },
+  {
+    key: 'knowledge', title: '知识', items: [
+      { id: 'knowledge', label: '知识库', icon: <BookOpen size={16} /> },
+      { id: 'memory', label: '记忆中心', icon: <Brain size={16} /> },
+    ],
+  },
+  {
+    key: 'observe', title: '观测', items: [
+      { id: 'monitor', label: '监控', icon: <BarChart3 size={16} /> },
+      { id: 'alerts', label: '告警中心', icon: <Bell size={16} />, badge: 'alerts' },
+    ],
+  },
+  {
+    key: 'govern', title: '治理', items: [
+      { id: 'approvals', label: '审批', icon: <Shield size={16} /> },
+      { id: 'users', label: '用户管理', icon: <Shield size={16} />, perm: 'user:manage' },
+      { id: 'audit', label: '审计日志', icon: <FileSearch size={16} />, perm: 'audit:view' },
+    ],
+  },
 ];
 
-const ADMIN_NAV: NavItem[] = [
-  { id: 'users', label: '用户管理', icon: <Shield size={16} /> },
-  { id: 'audit', label: '审计日志', icon: <FileSearch size={16} /> },
-];
+/** 壳层面包屑文案（v22-ui-align W1）：页面名只在这里出现一次，页面内不再写大字标题。 */
+const PAGE_LABELS: Record<string, string> = {
+  home: '工作台', detail: '变更详情', specs: '规格', runtime: '运行时数据', workflow: '工作流画布',
+  roles: '角色', docs: '文档', profile: '用户中心',
+};
 
 type View =
   | { page: 'home' }
@@ -109,7 +158,13 @@ type View =
   | { page: 'tasks' }
   | { page: 'inbox' }
   | { page: 'teams' }
-  | { page: 'memory' };
+  | { page: 'memory' }
+  | { page: 'stage-model' }
+  | { page: 'decision-models' }
+  | { page: 'finetune' }
+  | { page: 'isolation' }
+  | { page: 'integration' }
+  | { page: 'env-advisor' };
 
 export default function App() {
   const getInitialNav = () => {
@@ -175,14 +230,6 @@ export default function App() {
   if (mustChangePassword) return <ForcePasswordChange />;
 
   const perm = (p: string) => isAdmin || rolePermissions.includes(p);
-  const visibleNav = NAV;
-  const visibleAdminNav = ADMIN_NAV.filter(item => {
-    switch (item.id) {
-      case 'users': return perm('user:manage');
-      case 'audit': return perm('audit:view');
-      default: return false;
-    }
-  });
 
   const navigate = (id: string) => {
     setNav(id);
@@ -292,6 +339,12 @@ export default function App() {
       case 'replay': return perm('project:read') ? <Replay /> : <EmptyPerm />;
       case 'teams': return perm('project:read') ? <Teams /> : <EmptyPerm />;
       case 'memory': return perm('project:read') ? <Memory /> : <EmptyPerm />;
+      case 'stage-model': return perm('project:write') ? <StageModel /> : <EmptyPerm />;
+      case 'decision-models': return perm('project:read') ? <DecisionModels /> : <EmptyPerm />;
+      case 'finetune': return perm('project:read') ? <Finetune /> : <EmptyPerm />;
+      case 'isolation': return perm('project:read') ? <Isolation /> : <EmptyPerm />;
+      case 'integration': return perm('project:read') ? <Integration /> : <EmptyPerm />;
+      case 'env-advisor': return perm('project:read') ? <EnvAdvisor /> : <EmptyPerm />;
       default: return <ProjectManager onSelect={(id) => setProjectDetailId(id)} />;
     }
   };
@@ -312,104 +365,79 @@ export default function App() {
           {!collapsed && <span style={{ fontWeight: 600, fontSize: 14, whiteSpace: 'nowrap' }}>AI 开发平台</span>}
         </div>
 
-        {/* 文档资料入口 → 产品文档与交互原型（静态资源，见 .specs/product-design/prototype → public 软链） */}
-        <a
-          href="/prototype/index.html"
-          target="_blank"
-          rel="noreferrer"
-          title="产品文档与交互原型（新标签打开）"
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: collapsed ? '8px 14px' : '8px 16px',
-            borderBottom: '1px solid var(--border)',
-            color: 'var(--text-secondary)', fontSize: 12.5, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
-        >
-          <span style={{ flexShrink: 0 }}>📄</span>
-          {!collapsed && <span>文档资料 · 原型</span>}
-        </a>
-
-        {/* 导航 */}
-        <nav style={{ flex: 1, padding: '8px' }}>
-          {visibleNav.map(item => (
-            <button
-              key={item.id}
-              onClick={() => navigate(item.id)}
-              aria-label={item.label}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                width: '100%', padding: collapsed ? '8px 0' : '7px 10px',
-                marginBottom: 2, borderRadius: 'var(--r-sm)',
-                background: nav === item.id && !detailId ? 'var(--bg-selected)' : 'transparent',
-                border: 'none', color: nav === item.id && !detailId ? 'var(--blue)' : 'var(--text-secondary)',
-                cursor: 'pointer', fontSize: 13, fontWeight: nav === item.id && !detailId ? 600 : 400,
-                transition: 'all var(--fast)',
-                justifyContent: collapsed ? 'center' : 'flex-start' }}
-            >
-              {item.icon}
-              {!collapsed && <span>{item.label}</span>}
-            </button>
-          ))}
-
-          {/* Admin only nav */}
-          {visibleAdminNav.length > 0 && (
-            <>
-              {!collapsed && (
-                <div style={{ padding: '4px 10px', marginTop: 8, marginBottom: 4, fontSize: 9, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.06 }}>
-                  管理
-                </div>
-              )}
-              {visibleAdminNav.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => navigate(item.id)}
-                  aria-label={item.label}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    width: '100%', padding: collapsed ? '8px 0' : '7px 10px',
-                    marginBottom: 2, borderRadius: 'var(--r-sm)',
-                    background: nav === item.id && !detailId ? 'var(--bg-selected)' : 'transparent',
-                    border: 'none', color: nav === item.id && !detailId ? 'var(--blue)' : 'var(--text-secondary)',
-                    cursor: 'pointer', fontSize: 13, fontWeight: nav === item.id && !detailId ? 600 : 400,
-                    transition: 'all var(--fast)',
-                    justifyContent: collapsed ? 'center' : 'flex-start' }}
-                >
-                  {item.icon}
-                  {!collapsed && <span>{item.label}</span>}
-                </button>
-              ))}
-            </>
-          )}
-        </nav>
-
-        {/* 底部：用户信息 + 登出 + 状态 + 折叠 */}
-        <div style={{ padding: '8px', borderTop: '1px solid var(--border)' }}>
-          {/* 告警按钮 */}
-          <button
-            onClick={() => navigate('alerts')}
-            aria-label="告警中心"
+        {/* 文档资料入口 → 产品文档与交互原型（静态资源，见 .specs/product-design/prototype → public 软链）。
+            仅平台管理员可见：原型里含内部设计口径与未实现面，对普通成员/业务使用者是误导源。 */}
+        {isAdmin && (
+          <a
+            href="/prototype/index.html"
+            target="_blank"
+            rel="noreferrer"
+            title="产品文档与交互原型（新标签打开）"
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              width: '100%', padding: collapsed ? '8px 0' : '7px 10px',
-              marginBottom: 6, borderRadius: 'var(--r-sm)',
-              background: nav === 'alerts' ? 'var(--bg-selected)' : 'transparent',
-              border: 'none', color: nav === 'alerts' ? 'var(--blue)' : alertCount > 0 ? 'var(--red)' : 'var(--text-secondary)',
-              cursor: 'pointer', fontSize: 13, fontWeight: nav === 'alerts' ? 600 : 400,
-              transition: 'all var(--fast)',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              position: 'relative' as const }}
+              padding: collapsed ? '8px 14px' : '8px 16px',
+              borderBottom: '1px solid var(--border)',
+              color: 'var(--text-secondary)', fontSize: 12.5, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
           >
-            <Bell size={16} />
-            {!collapsed && <span>告警中心</span>}
-            {alertCount > 0 && (
-              <span style={{
-                position: 'absolute', top: 2, right: collapsed ? -2 : 8,
-                background: 'var(--red)', color: '#fff', borderRadius: 10,
-                padding: '0px 5px', fontSize: 10, fontWeight: 700,
-                minWidth: 16, textAlign: 'center', lineHeight: '16px' }}>
-                {alertCount > 99 ? '99+' : alertCount}
-              </span>
-            )}
-          </button>
+            <span style={{ flexShrink: 0 }}>📄</span>
+            {!collapsed && <span>文档资料 · 原型</span>}
+          </a>
+        )}
+
+        {/* 导航：条目多于视口高度时必须可滚动——aside 是 overflow:hidden，
+            不在这里给滚动容器，底部分组会被裁掉看不见。 */}
+        <nav style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '8px' }}>
+          {NAV_GROUPS.map(group => {
+            // 先按权限过滤，组空则整组不渲染（普通成员不会看到空的「治理」之外的空壳）
+            const items = group.items.filter(item => !item.perm || perm(item.perm));
+            if (items.length === 0) return null;
+            return (
+              <div key={group.key} role="group" aria-label={group.title} style={{ marginBottom: 8 }}>
+                {!collapsed && (
+                  <div style={{
+                    padding: '4px 10px', marginBottom: 2, fontSize: 9.5, color: 'var(--text-muted)',
+                    fontWeight: 700, letterSpacing: 0.06 }}>
+                    {group.title}
+                  </div>
+                )}
+                {items.map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => navigate(item.id)}
+                    aria-label={item.label}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      width: '100%', padding: collapsed ? '8px 0' : '7px 10px',
+                      marginBottom: 2, borderRadius: 'var(--r-sm)',
+                      background: nav === item.id && !detailId ? 'var(--bg-selected)' : 'transparent',
+                      border: 'none',
+                      color: nav === item.id && !detailId ? 'var(--blue)'
+                        : item.badge === 'alerts' && alertCount > 0 ? 'var(--red)' : 'var(--text-secondary)',
+                      cursor: 'pointer', fontSize: 13, fontWeight: nav === item.id && !detailId ? 600 : 400,
+                      transition: 'all var(--fast)',
+                      justifyContent: collapsed ? 'center' : 'flex-start',
+                      position: 'relative' as const }}
+                  >
+                    {item.icon}
+                    {!collapsed && <span>{item.label}</span>}
+                    {item.badge === 'alerts' && alertCount > 0 && (
+                      <span style={{
+                        position: 'absolute', top: 2, right: collapsed ? -2 : 8,
+                        background: 'var(--red)', color: '#fff', borderRadius: 10,
+                        padding: '0px 5px', fontSize: 10, fontWeight: 700,
+                        minWidth: 16, textAlign: 'center', lineHeight: '16px' }}>
+                        {alertCount > 99 ? '99+' : alertCount}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
+        </nav>
+
+        {/* 底部：用户信息 + 登出 + 折叠（告警已移入「观测」组，角标随之） */}
+        <div style={{ padding: '8px', borderTop: '1px solid var(--border)' }}>
           <UserArea collapsed={collapsed} onNavigateProfile={() => navigate('profile')} />
           <button
             onClick={() => setCollapsed(!collapsed)}
@@ -423,6 +451,12 @@ export default function App() {
 
       {/* ── 右侧内容区 ── */}
       <main style={{ flex: 1, overflow: 'auto', background: 'var(--bg-main)' }}>
+        {/* 壳层顶栏（原型 .app-top）：页面名 + 上下文 + 右侧 chip/动作。页面自己的动作留在页面工具栏。 */}
+        <AppTopBar
+          crumb={PAGE_LABELS[nav] || (NAV_GROUPS.flatMap(g => g.items).find(i => i.id === nav)?.label ?? nav)}
+          context={detailId || projectDetailId || workflowDetailId || agentDetail || toolDetail || roleDetail
+            ? '详情' : undefined}
+        />
         <ErrorBoundary>{renderContent()}</ErrorBoundary>
       </main>
     </div>

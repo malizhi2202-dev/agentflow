@@ -615,6 +615,99 @@ def m018_users_and_audit_tables(conn, dialect: str) -> None:
 
 
 
+def m019_runtime_registry(conn, dialect: str) -> None:
+    """运行时发现注册表（v22 · §6.28）：daemon 上报的「机器 × CLI × 协议族」。
+
+    - 唯一键 `(machine_id, cli, protocol_family)` → daemon 重启只更新不新建（AC-1）
+    - `models` / `capabilities` 用 TEXT 存 JSON 数组：不依赖方言 JSON 类型，读侧自解析（D6/D7）
+    - **不落 status 列**：online/offline 由 `last_seen` 在读侧现算（D5）
+    - 不存任何凭据字段：账号 / OAuth / Key 留成员本机（AC-7）
+    """
+    create_table_if_missing(conn, dialect, "runtime_registry",
+        f"id {_pk_clause(dialect)}, machine_id VARCHAR(64) NOT NULL, machine_name VARCHAR(128), "
+        "cli VARCHAR(32) NOT NULL, protocol_family VARCHAR(16) NOT NULL DEFAULT 'exec', "
+        "binary_path VARCHAR(512), source_file VARCHAR(64), version VARCHAR(64), "
+        "models TEXT, models_error VARCHAR(200), capabilities TEXT, "
+        "owner_id VARCHAR(64) NOT NULL, visibility VARCHAR(16) DEFAULT 'private', "
+        "last_seen DATETIME, created_at DATETIME, updated_at DATETIME, "
+        "UNIQUE(machine_id, cli, protocol_family)")
+    create_index_if_missing(conn, dialect, "ix_runtime_registry_owner",
+                            "runtime_registry", "owner_id")
+    create_index_if_missing(conn, dialect, "ix_runtime_registry_last_seen",
+                            "runtime_registry", "last_seen")
+
+
+def m020_tool_skill_files(conn, dialect: str) -> None:
+    """工具库的**多文件技能包**（v23 · multica 迁移）：`files_json` = [{path, content}] 的 JSON 文本。
+
+    为什么用 TEXT 存 JSON：`m019` 已定「不依赖方言 JSON 类型、读侧自解析」，
+    SQLite / MySQL 同一份 DDL 都能跑（MySQL 上 TEXT 存 JSON 文本同样合法）。
+    只给 `tools` 加列，不新建表：技能 = `tools.type='skill'` 的一种，文件是它的附属内容。
+    """
+    add_column_if_missing(conn, dialect, "tools", "files_json", "TEXT")
+
+
+def m021_tool_skill_files_longtext(conn, dialect: str) -> None:
+    """把 `tools.files_json` 从 TEXT(64KB) 拓宽到 MEDIUMTEXT(16MB)（MySQL）。
+
+    为什么需要：多文件技能包会超过 64KB——multica 现网实测有技能「正文 + 12 个文件」序列化后
+    >86KB，TEXT 列直接 `Data too long for column 'files_json'`（真库撞到过）。
+    SQLite 无宽度概念，跳过；已是 mediumtext/longtext 时幂等跳过。
+    """
+    if _is_sqlite(dialect):
+        return
+    if "files_json" not in _columns(conn, dialect, "tools"):
+        return
+    cur = conn.cursor()
+    cur.execute("SELECT data_type FROM information_schema.columns "
+                "WHERE table_schema=DATABASE() AND table_name='tools' AND column_name='files_json'")
+    row = cur.fetchone()
+    if not row or (row[0] or "").lower() in ("mediumtext", "longtext"):
+        return
+    cur.execute("ALTER TABLE tools MODIFY COLUMN files_json MEDIUMTEXT")
+
+
+def m022_tool_config_and_squad_role(conn, dialect: str) -> None:
+    """工具通用 config（multica `skill.config`）+ 小队成员角色（multica `squad_member.role`）。
+
+    - `tools.config_json`：TEXT 存 JSON（与 019/020 同口径，方言无关）；
+    - `squad_members.role`：'' = 未标注（multica 有 member / leader / expert-reviewer 三种）。
+    """
+    add_column_if_missing(conn, dialect, "tools", "config_json", "TEXT")
+    add_column_if_missing(conn, dialect, "squad_members", "role", "VARCHAR(32) DEFAULT ''")
+
+
+def m023_agent_extra_fields(conn, dialect: str) -> None:
+    """Agent 的迁移补齐字段（multica `agent` 表里有、agentflow 原来没有的列）。
+
+    `avatar_url` 是 multica 的 `emoji:🧠` 形态（本机 38 个 Agent 全部有值）；
+    其余是 opaque 配置块，用 TEXT 存 JSON 文本（不依赖方言 JSON 类型）。
+    """
+    for column, ddl in (
+        ("avatar_url", "VARCHAR(512)"),
+        ("custom_env", "TEXT"),
+        ("custom_args", "TEXT"),
+        ("mcp_config", "TEXT"),
+        ("thinking_level", "VARCHAR(16)"),
+        ("service_tier", "VARCHAR(16)"),
+        ("composio_toolkit_allowlist", "TEXT"),
+    ):
+        add_column_if_missing(conn, dialect, "agents", column, ddl)
+
+
+def m024_agent_tools(conn, dialect: str) -> None:
+    """Agent ↔ 工具/技能 关联表（multica `agent_skill` 的落点）。
+
+    agentflow 此前没有这层关系：技能只能躺在工具库里，挂不到具体 Agent 上。
+    唯一键 `(agent_id, tool_id)`：重复绑定幂等，不产生重复行。
+    """
+    create_table_if_missing(conn, dialect, "agent_tools",
+        f"id {_pk_clause(dialect)}, agent_id INT NOT NULL, tool_id INT NOT NULL, "
+        "created_at DATETIME, UNIQUE(agent_id, tool_id)")
+    create_index_if_missing(conn, dialect, "ix_agent_tools_agent", "agent_tools", "agent_id")
+    create_index_if_missing(conn, dialect, "ix_agent_tools_tool", "agent_tools", "tool_id")
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -634,6 +727,12 @@ MIGRATIONS: list[Migration] = [
     ("016_domain_attribution_policy", "域级 accountable 策略表（R8-2 剩余面）", m016_domain_attribution_policy),
     ("017_agent_prompt_fields", "Agent 人设三件落库（T-05）", m017_agent_prompt_fields),
     ("018_users_and_audit_tables", "用户档案与审计日志表化（裁定⑦收尾，T-07）", m018_users_and_audit_tables),
+    ("019_runtime_registry", "运行时发现注册表（§6.28，daemon 上报机器×CLI×协议族）", m019_runtime_registry),
+    ("020_tool_skill_files", "工具库多文件技能包（files_json，v23 multica 迁移）", m020_tool_skill_files),
+    ("021_tool_skill_files_longtext", "技能文件包拓宽到 MEDIUMTEXT（>64KB 技能包，MySQL）", m021_tool_skill_files_longtext),
+    ("022_tool_config_and_squad_role", "工具通用 config + 小队成员 role（v23 multica 迁移）", m022_tool_config_and_squad_role),
+    ("023_agent_extra_fields", "Agent 迁移补齐字段（avatar/custom_env/自定义参数/mcp/thinking/服务档/工具白名单）", m023_agent_extra_fields),
+    ("024_agent_tools", "Agent ↔ 工具/技能 关联表（multica agent_skill 落点）", m024_agent_tools),
 ]
 
 

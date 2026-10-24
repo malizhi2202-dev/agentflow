@@ -278,7 +278,7 @@ function TeamDetail({ teamRef }: { teamRef: string }) {
   );
 }
 
-/* ────────────────────────── 小隊 tab ────────────────────────── */
+/* ────────────────────────── 小队 tab ────────────────────────── */
 
 function SquadCreateForm({ onDone }: { onDone: () => void }) {
   const createSquad = useTeams((s) => s.createSquad);
@@ -473,10 +473,7 @@ export default function Teams() {
 
   return (
     <div style={{ padding: 16 }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-        <h2 style={{ fontSize: 16, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Users size={16} />团队与小隊
-        </h2>
+      <header className="toolbar" style={{ marginBottom: 12 }}>
         <div role="tablist" aria-label="团队或小队" style={{ display: 'flex', gap: 4 }}>
           {TABS.map((k, idx) => (
             <button key={k} role="tab" id={`teams-tab-${k}`} aria-selected={tab === k}

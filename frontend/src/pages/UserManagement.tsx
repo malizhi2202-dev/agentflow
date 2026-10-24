@@ -95,10 +95,7 @@ export default function UserManagement() {
     <div style={{ padding: '20px 24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <h1 style={{ fontFamily: 'var(--font-mono)', fontSize: 20, fontWeight: 700, margin: 0 }}>用户管理</h1>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-            {userList.length} 个用户
-          </span>
+          <span className="chip mono">{userList.length} 个用户</span>
         </div>
         <button onClick={() => setShowAdd(true)} className="btn btn-primary btn-sm">
           <Plus size={14} /> 新增用户

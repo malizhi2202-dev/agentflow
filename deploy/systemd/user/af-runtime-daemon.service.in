@@ -1,0 +1,22 @@
+[Unit]
+Description=AgentFlow runtime daemon (v22 §6.28 · 探测本机 CLI 并 15s 上报)
+After=network.target agentflow-backend.service
+# 平台没起也要能起（daemon 会自动退避重试），所以只 Wants 不 Requires
+Wants=agentflow-backend.service
+
+[Service]
+Type=simple
+# daemon 不属于后端进程：它代表「这台机器」，与平台解耦部署
+WorkingDirectory=@REPO@
+# 与后端共用同一份 env（AF_DAEMON_TOKEN 必须同值；AF_DAEMON_API 指平台地址）
+EnvironmentFile=@DATA@/agentflow.env
+Environment=AF_DAEMON_API=http://127.0.0.1:8000
+ExecStart=@DATA@/venv/bin/python @REPO@/scripts/runtime-daemon.py
+# token 缺失时脚本以 3 退出 → 不无限重启刷日志（on-failure + 上限）
+Restart=on-failure
+RestartSec=15
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Install]
+WantedBy=default.target

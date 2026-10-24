@@ -7,7 +7,7 @@
 
 ## Why（为什么做）
 
-`v20-ui-teams` 的 REVIEW 遗留 #4 实测发现：**小隊的写路由只校验"已登录"**，不校验"能不能改这支队"。
+`v20-ui-teams` 的 REVIEW 遗留 #4 实测发现：**小队的写路由只校验"已登录"**，不校验"能不能改这支队"。
 
 - `POST /api/squads`（建队）：任何登录用户可建 —— 这是设计允许的。
 - `POST /api/squads/{ref}/members`（加人）、`DELETE …/members/{kind}/{id}`（移人）、`POST …/archive`（归档）、`POST …/assign`（指派任务）：**同样只有 `_user(request)`** → 任何登录用户都能改**别人的**小队、甚至把别人的队归档。

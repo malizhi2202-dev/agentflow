@@ -1,6 +1,6 @@
 # TEST · v20-wave4
 
-## 1. 团队与小隊（19 条，全绿）
+## 1. 团队与小队（19 条，全绿）
 
 ```
 $ cd backend && /tmp/afvenv2/bin/python -m unittest tests.test_teams -v

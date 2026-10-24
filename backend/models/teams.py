@@ -1,4 +1,4 @@
-"""团队（Team）与小隊（Squad）ORM 模型 —— R5-3 / R5-4 / R5-6。
+"""团队（Team）与小队（Squad）ORM 模型 —— R5-3 / R5-4 / R5-6。
 
 两词两义（禁止混用）：
 - **Team 团队** = 组织层资源容器：成员四档 + 五类资产（`team_id` + `owner_kind`）+ 配额 + 审计边界；
@@ -149,6 +149,8 @@ class SquadMember(Base):
     member_kind: Mapped[str] = mapped_column(String(16), default="agent", index=True)
     # agent | member
     member_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    # v23（multica 迁移）：成员角色（member / leader / expert-reviewer）；'' = 未标注
+    role: Mapped[str] = mapped_column(String(32), default="")
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime, default=datetime.datetime.utcnow
     )
@@ -157,6 +159,7 @@ class SquadMember(Base):
         return {
             "id": self.id,
             "squad_id": self.squad_id,
+            "role": self.role or "",
             "member_kind": self.member_kind,
             "member_id": self.member_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,

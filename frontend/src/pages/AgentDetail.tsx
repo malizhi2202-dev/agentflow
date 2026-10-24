@@ -3,25 +3,34 @@ import { ArrowLeft, Save, Trash2, ShieldAlert, Plus, X, ChartBarIncreasing, Refr
 import ChatWindow from '../components/ChatWindow';
 import ChannelConfigComponent from '../components/ChannelConfig';
 import EntityBreakdownPanel from '../components/EntityBreakdownPanel';
+import { useRuntimes } from '../stores/runtimes';
+import { uniqueRuntimesByCli, modelsForRuntime, modelsErrorForRuntime } from '../utils/runtimeOptions';
 
 var lbl: React.CSSProperties = { fontSize: 11, fontWeight: 500, color: 'var(--text-dim)', display: 'block', marginBottom: 4 };
 var inp: React.CSSProperties = { width: '100%', padding: '8px', background: 'var(--bg-input)', color: 'var(--color-text)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12, boxSizing: 'border-box' };
 var th: React.CSSProperties = { padding: '6px 8px', textAlign: 'left', color: 'var(--text-dim)', fontWeight: 500, fontSize: 10, whiteSpace: 'nowrap' };
 var td: React.CSSProperties = { padding: '4px 8px', fontSize: 11, color: 'var(--color-text)', whiteSpace: 'nowrap' };
+var hintS: React.CSSProperties = { fontSize: 10, color: 'var(--text-dim)', margin: '4px 0 0', lineHeight: 1.5 };
 
 export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError }: {
   agent: any; onBack: () => void; onSave: (data: any) => void; onDelete?: () => void; saveError?: string | null;
 }) {
   var isNew = !agent || !agent.id;
+  // 模型相关字段（Provider / API Key）已从表单撤下（RULINGS 2026-10-15）：
+  // 运行时决定模型通道，模型目录由运行时暴露；平台不再让人填厂商凭据。
   var [data, setData] = useState<any>(Object.assign({
-    name: '', description: '', runtime: 'langgraph', model_provider: 'ollama', model_name: 'qwen2:0.5b',
-    api_key: '', workflow_ids: [], token_soft_limit: 800000, token_hard_limit: 1000000,
+    name: '', description: '', runtime: '', model_name: '',
+    workflow_ids: [], token_soft_limit: 800000, token_hard_limit: 1000000,
     gate_pre: '', gate_post: '', io_filter: 'none', system_prompt: '', role_def: '', sop: '',
   }, agent || {}));
   var [saved, setSaved] = useState(false);
   var [workflows, setWorkflows] = useState<any[]>([]);
   var [monData, setMonData] = useState<any>(null);
   var [tab, setTab] = useState('edit');
+  // 运行时发现（v22 §6.28）：模型可选项 = 该运行时上报的 models
+  // 数据源与「运行时」页同一份 store 状态（registry），不另开第二个注册表缓存。
+  var runtimeRegistry = useRuntimes();
+  var [runtimeFetched, setRuntimeFetched] = useState(false);
   // 资料源
   var [knowledgeSources, setKnowledgeSources] = useState<any[]>([]);
   var [showSourceForm, setShowSourceForm] = useState(false);
@@ -43,6 +52,17 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
   var [scheduledTasks, setScheduledTasks] = useState<any[]>([]);
   var [showTaskForm, setShowTaskForm] = useState(false);
   var [taskForm, setTaskForm] = useState<any>({ name: '', cron_expr: '0 9 * * *', capability: '', enabled: true });
+
+  useEffect(function() {
+    Promise.resolve(runtimeRegistry.fetchRegistry()).then(function() { setRuntimeFetched(true); });
+  }, []);
+
+  // 新建时默认挑第一个**在线**运行时（没有发现 → 保持空，让区块显式提示去运行时页）
+  useEffect(function() {
+    if (!isNew || data.runtime) return;
+    var online = uniqueRuntimesByCli(runtimeRegistry.registry).filter(function(r) { return r.status === 'online'; });
+    if (online.length > 0) setData(function(prev: any) { return Object.assign({}, prev, { runtime: online[0].cli }); });
+  }, [runtimeRegistry.registry, isNew, data.runtime]);
 
   useEffect(function() {
     fetch('/api/workflows').then(function(r) { return r.json(); }).then(function(d) { setWorkflows(d.workflows || []); });
@@ -70,6 +90,64 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
   }, [agent]);
 
   var handleSave = function() { onSave(Object.assign({}, data, { knowledge_sources: knowledgeSources })); setSaved(true); setTimeout(function() { setSaved(false); }, 1500); };
+
+  // ── 能力 · 技能（v23 · multica agent_skill 迁移的落点）：绑定 ≠ 授权 ──
+  var [agentTools, setAgentTools] = useState<any[]>([]);
+  var [allSkills, setAllSkills] = useState<any[]>([]);
+  var [toolPick, setToolPick] = useState<any>('');
+  var [toolsError, setToolsError] = useState<string | null>(null);
+
+  var loadAgentTools = function(id: number) {
+    fetch('/api/agents/' + id + '/tools')
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(d) { setAgentTools(d.tools || []); setToolsError(null); })
+      .catch(function(e) { setToolsError('技能绑定读取失败：' + ((e && e.message) || String(e))); });
+  };
+
+  var bindTool = function(toolId: number) {
+    if (!agent?.id) return;
+    fetch('/api/agents/' + agent.id + '/tools', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tool_id: toolId }),
+    }).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      setToolPick('');
+      loadAgentTools(agent.id);
+    }).catch(function(e) { setToolsError('绑定失败：' + ((e && e.message) || String(e))); });
+  };
+
+  var unbindTool = function(toolId: number) {
+    if (!agent?.id) return;
+    fetch('/api/agents/' + agent.id + '/tools/' + toolId, { method: 'DELETE' })
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        loadAgentTools(agent.id);
+      })
+      .catch(function(e) { setToolsError('解绑失败：' + ((e && e.message) || String(e))); });
+  };
+
+  useEffect(function() {
+    // 技能目录一次拉全；绑定关系按 Agent 拉
+    fetch('/api/tools?type=skill')
+      .then(function(r) { return r.json(); })
+      .then(function(d) { setAllSkills(d.tools || []); })
+      .catch(function() { /* 目录拉不到不影响编辑其它字段，绑定区会显示「暂无可用技能」 */ });
+    if (agent?.id) loadAgentTools(agent.id);
+  }, [agent && agent.id]);
+
+  // ── 运行时 + 模型（模型目录来自运行时上报，平台不内置）──
+  var runtimeOptions = uniqueRuntimesByCli(runtimeRegistry.registry);
+  var runtimeKnown = runtimeOptions.some(function(rt) { return rt.cli === data.runtime; });
+  var runtimeModels = data.runtime ? modelsForRuntime(runtimeRegistry.registry, data.runtime) : [];
+  var runtimeModelsError = data.runtime ? modelsErrorForRuntime(runtimeRegistry.registry, data.runtime) : '';
+
+  var chooseRuntime = function(cli: string) {
+    // 原型口径：切换运行时后旧模型失效需重选（旧值不在新目录里就清掉，免得存一个跑不动的模型）。
+    // model_provider 置 undefined：JSON 里不出现 → 服务端按新运行时推导，而不是沿用旧厂商通道。
+    var nextModels = modelsForRuntime(runtimeRegistry.registry, cli);
+    var keep = nextModels.indexOf(data.model_name) >= 0 ? data.model_name : '';
+    setData(Object.assign({}, data, { runtime: cli, model_name: keep, model_provider: undefined }));
+  };
 
   // 资料源 CRUD
   var saveSource = function() {
@@ -250,9 +328,9 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
         <div style={{ maxWidth: 680, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div><label style={lbl}>名称</label><input value={data.name} onChange={function(e) { setData(Object.assign({}, data, { name: e.target.value })); }} style={inp} /></div>
-            <div><label style={lbl}>运行时</label><select value={data.runtime} onChange={function(e) { setData(Object.assign({}, data, { runtime: e.target.value })); }} style={inp}><option value="langgraph">LangGraph</option><option value="langchain">LangChain</option><option value="autogen">AutoGen</option><option value="crewai">CrewAI</option><option value="codex">OpenAI Codex CLI</option><option value="custom">自定义</option></select></div>
+            {/* 运行时统一在下方「运行时 + 模型」区块里选（唯一的运行时选择点） */}
+            <div><label style={lbl}>描述</label><input value={data.description} onChange={function(e) { setData(Object.assign({}, data, { description: e.target.value })); }} style={inp} /></div>
           </div>
-          <div><label style={lbl}>描述</label><input value={data.description} onChange={function(e) { setData(Object.assign({}, data, { description: e.target.value })); }} style={inp} /></div>
 
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
             <label style={{ ...lbl, fontSize: 13 }}>📝 系统 Prompt</label>
@@ -267,10 +345,76 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
             <textarea value={data.sop || ''} onChange={function(e) { setData(Object.assign({}, data, { sop: e.target.value })); }} rows={3} style={{ ...inp, resize: 'vertical', fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.6, minHeight: 60 }} placeholder={'触发: on_project_create\n输入: requirement_doc\n输出: review_report'} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-            <div><label style={lbl}>模型 Provider</label><select value={data.model_provider} onChange={function(e) { setData(Object.assign({}, data, { model_provider: e.target.value })); }} style={inp}><option value="ollama">Ollama</option><option value="openai">OpenAI</option><option value="anthropic">Anthropic</option><option value="deepseek">DeepSeek</option><option value="gemini">Gemini</option><option value="codex">Codex</option><option value="hermes">Hermes</option></select></div>
-            <div><label style={lbl}>模型名称</label><input value={data.model_name} onChange={function(e) { setData(Object.assign({}, data, { model_name: e.target.value })); }} style={inp} /></div>
-            <div><label style={lbl}>API Key</label><input type="password" value={data.api_key || ''} onChange={function(e) { setData(Object.assign({}, data, { api_key: e.target.value })); }} style={inp} /></div>
+          {/* 运行时 + 模型：模型目录由运行时暴露，平台不内置模型清单；不再有 Provider / API Key */}
+          <div role="region" aria-label="运行时 + 模型" style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+            <label style={{ ...lbl, fontSize: 13 }}>
+              🖥 运行时 + 模型
+              <span style={{ marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 3, background: 'var(--blue-bg)', color: 'var(--blue)' }}>平台不本地运行模型</span>
+            </label>
+            <p style={{ ...hintS, margin: '2px 0 8px' }}>
+              运行时由本机 daemon 探测注册（见「运行时」页）；模型目录由所选运行时自己暴露，平台不内置。
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div>
+                <label style={lbl}>运行时</label>
+                <select aria-label="运行时" value={data.runtime || ''} onChange={function(e) { chooseRuntime(e.target.value); }} style={inp}>
+                  {!data.runtime && <option value="">（未选择 · 先到「运行时」页确认在线）</option>}
+                  {data.runtime && !runtimeKnown && <option value={data.runtime}>{data.runtime}（当前值 · 未被发现）</option>}
+                  {runtimeOptions.map(function(rt) {
+                    var offline = rt.status !== 'online';
+                    return (
+                      <option key={rt.cli} value={rt.cli} disabled={offline} title={offline ? '离线运行时不可选：先确认 daemon 在线与已登录' : '在线'}>
+                        {rt.cli}{rt.version ? ' · ' + rt.version : ''}{offline ? ' · 离线 · 不可选' : ' · ✓在线'}
+                      </option>
+                    );
+                  })}
+                </select>
+                {runtimeRegistry.registryLoading && <p style={hintS}>正在读取已发现的运行时…</p>}
+                {runtimeRegistry.registryError && <p style={{ ...hintS, color: 'var(--red)' }} role="alert">运行时列表读取失败：{runtimeRegistry.registryError}</p>}
+                {runtimeFetched && !runtimeRegistry.registryLoading && runtimeOptions.length === 0 && (
+                  <p style={{ ...hintS, color: 'var(--red)' }} role="alert">
+                    尚未发现任何运行时（daemon 未上报）。到「运行时」页起 daemon 并确认在线后，再来选运行时与模型。
+                  </p>
+                )}
+                {runtimeOptions.length > 0 && <p style={hintS}>离线项置灰不可选；模型调用一律交给所选运行时的 CLI，平台不接收厂商凭据。</p>}
+              </div>
+              <div>
+                <label style={lbl}>
+                  模型
+                  <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--purple-bg)', color: 'var(--purple)' }}>随运行时获取</span>
+                  <button
+                    type="button"
+                    onClick={function() { runtimeRegistry.fetchRegistry(); }}
+                    disabled={runtimeRegistry.registryLoading}
+                    title="重新向运行时读取模型目录"
+                    style={{ marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 3, border: '1px solid var(--border)', background: 'var(--bg-input)', color: runtimeRegistry.registryLoading ? 'var(--text-dim)' : 'var(--blue)', cursor: runtimeRegistry.registryLoading ? 'wait' : 'pointer' }}>
+                    ⟳ 刷新模型列表
+                  </button>
+                </label>
+                <select
+                  aria-label="模型"
+                  value={data.model_name || ''}
+                  onChange={function(e) { setData(Object.assign({}, data, { model_name: e.target.value })); }}
+                  disabled={runtimeModels.length === 0}
+                  style={Object.assign({}, inp, { opacity: runtimeModels.length === 0 ? 0.65 : 1 })}
+                  title={runtimeModels.length === 0 ? '该运行时未上报模型目录：留空即用运行时自身默认模型' : ''}>
+                  <option value="">{runtimeModels.length > 0 ? '（留空 · 用运行时自身默认）' : '（该运行时未上报模型目录）'}</option>
+                  {runtimeModels.map(function(m) { return <option key={m} value={m}>{m}</option>; })}
+                  {data.model_name && runtimeModels.indexOf(data.model_name) < 0 && (
+                    <option value={data.model_name}>{data.model_name}（当前值 · 未在目录中）</option>
+                  )}
+                </select>
+                {runtimeModelsError ? (
+                  <p style={{ ...hintS, color: 'var(--red)' }} role="alert">模型目录不可读：{runtimeModelsError}（留空即用运行时自身默认）</p>
+                ) : data.runtime && runtimeModels.length === 0 ? (
+                  <p style={hintS}>该运行时暂未暴露模型目录（不是 0 个模型，是没读到）；留空即用运行时自身默认。</p>
+                ) : runtimeModels.length > 0 ? (
+                  <p style={hintS}>目录来自运行时（共 {runtimeModels.length} 个）；切换运行时后需重新选。</p>
+                ) : (
+                  <p style={hintS}>先选运行时，模型可选项才会出现。</p>
+                )}
+              </div>
+            </div>
           </div>
 
           <div>
@@ -400,6 +544,54 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
                   </div>
                 </div>
               )}
+            </div>
+          </details>
+
+          {/* 能力 · 技能（绑定 ≠ 授权） */}
+          <details open style={{ borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+            <summary style={{ cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+              🧩 能力 · 技能（{agentTools.length}）
+            </summary>
+            <div role="region" aria-label="能力技能" style={{ marginTop: 8 }}>
+              <p style={hintS}>绑定只是「这个 Agent 可以用这个技能」，调用权仍按执行与安全闸门判定。</p>
+              {toolsError && <p style={{ ...hintS, color: 'var(--red)' }} role="alert">{toolsError}</p>}
+              {isNew && <p style={hintS}>先保存 Agent，之后才能绑定技能。</p>}
+              {!isNew && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '8px 0' }}>
+                  {agentTools.map(function(t: any) {
+                    return (
+                      <span key={t.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 4, background: 'var(--purple-bg)', color: 'var(--purple)', fontSize: 11 }}>
+                        {t.name}
+                        <button onClick={function() { unbindTool(t.id); }} title={'解绑 ' + t.name}
+                          style={{ background: 'none', border: 'none', color: 'var(--purple)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+                          <X size={11} />
+                        </button>
+                      </span>
+                    );
+                  })}
+                  {agentTools.length === 0 && <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>尚未绑定任何技能</span>}
+                </div>
+              )}
+              {!isNew && (function() {
+                var bound = agentTools.map(function(t: any) { return t.id; });
+                var options = allSkills.filter(function(sk: any) { return bound.indexOf(sk.id) < 0; });
+                if (options.length === 0) {
+                  return <p style={hintS}>暂无可绑定的技能（工具库里还没有未绑定的技能）。</p>;
+                }
+                return (
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <select aria-label="选择要绑定的技能" value={toolPick} onChange={function(e) { setToolPick(e.target.value); }} style={{ ...inp, flex: 1 }}>
+                      <option value="">（选择技能）</option>
+                      {options.map(function(sk: any) { return <option key={sk.id} value={sk.id}>{sk.name}</option>; })}
+                    </select>
+                    <button disabled={!toolPick} onClick={function() { if (toolPick) bindTool(parseInt(String(toolPick))); }}
+                      title={toolPick ? '' : '先选一个技能'}
+                      style={{ padding: '8px 12px', background: toolPick ? 'var(--color-primary)' : 'var(--bg-input)', color: toolPick ? '#fff' : 'var(--text-dim)', border: '1px solid var(--border)', borderRadius: 4, cursor: toolPick ? 'pointer' : 'not-allowed', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Plus size={12} /> 绑定
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           </details>
 

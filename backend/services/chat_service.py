@@ -21,7 +21,7 @@ def _generate(agent, messages: list[dict], api_key: str) -> tuple[str, dict]:
         prompt = "\n\n".join(f"[{m['role']}] {m['content']}" for m in messages)
         out = runtime_exec.execute(agent.runtime, prompt)
         return out["reply"], out["usage"]
-    provider = get_provider(agent.model_provider)
+    provider = get_provider(agent.model_provider, getattr(agent, "runtime", None))
     return provider.chat(messages, api_key, agent.model_name or "gpt-3.5-turbo")
 
 
@@ -130,7 +130,7 @@ class ChatService:
         # 7. 调用 LLM（通过提供者适配器）
         try:
             api_key = decrypt(agent.api_key_encrypted) if agent.api_key_encrypted else ""
-            provider = get_provider(agent.model_provider)
+            provider = get_provider(agent.model_provider, getattr(agent, "runtime", None))
             reply, usage = provider.chat(
                 messages, api_key,
                 agent.model_name or "gpt-3.5-turbo",

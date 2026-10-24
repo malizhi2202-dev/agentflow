@@ -405,7 +405,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <a href="#s2-8">2.8 记忆与知识库</a>
     <a href="#s2-9">2.9 审批与人工闸门</a>
     <a href="#s2-10">2.10 角色与权限</a>
-    <a href="#s2-11">2.11 小队 Squad 与团队 Team</a>
+    <a href="#s2-10a">2.10a 侧栏信息架构</a> · <a href="#s2-11">2.11 小队 Squad 与团队 Team</a>
     <a href="#s2-12">2.12 决策模型（System One）</a>
     <p class="grp">架构</p>
     <a href="#s3">3 · 系统架构</a>
@@ -1136,6 +1136,22 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <li><b>项目可见性</b>：admin 未指定 <span class="mono">project_ids</span> 时表示「全部可见」；普通用户只能看到被分配的项目；未分配任何项目 = 看不到任何项目。</li>
     </ul>
     <p class="small muted"><b>与其他概念：</b>权限决定 §5.0 的模块可见性，并直接映射到 §7 的角色权限矩阵。</p>
+
+    <h3 id="s2-10a">2.10a 侧栏信息架构（6 个父级分组）<span class="chip ok">现行 · 已实施</span></h3>
+    <p class="q">本节回答：功能这么多，用户从侧栏怎么找到东西。</p>
+    <p><b>口径（RULINGS R9-1，2026-10-24 用户令）</b>：侧栏按业务链分 <b>6 个父级分组</b>，组内顺序即使用顺序——<b>造 → 跑 → 一起干 → 沉淀 → 看 → 管</b>；原型 <span class="mono">nav-grp</span> 原先的「工作区 / 管理」两组口径<b>被本节取代</b>。</p>
+    <table class="tbl compact">
+      <thead><tr><th>父级分组</th><th>组内条目</th><th>为什么在这组</th></tr></thead>
+      <tbody>
+        <tr><td><b>构建</b></td><td>工具库 · 工作流 · 角色 · Agent</td><td>一次性造出来、之后被复用/绑定的资产</td></tr>
+        <tr><td><b>运行</b></td><td>编排 · Agent 管控 · 运行时 · 回放 · 自动化</td><td>怎么跑起来、跑在哪、跑过什么（触发与执行）</td></tr>
+        <tr><td><b>协作</b></td><td>项目 · 任务 · 收件箱 · 团队与小队 · 对话中心</td><td>人 × 项目 × 组织，任务与消息在这里流转</td></tr>
+        <tr><td><b>知识</b></td><td>知识库 · 记忆中心</td><td>沉淀物（L0–L3 记忆 / 知识资产域）</td></tr>
+        <tr><td><b>观测</b></td><td>监控 · 告警中心（带未确认角标）</td><td>只读地看现状与异常</td></tr>
+        <tr><td><b>治理</b></td><td>审批 · 用户管理<sup>*</sup> · 审计日志<sup>*</sup></td><td>不可逆动作与人/权；<sup>*</sup> 仍按 <span class="mono">user:manage</span> / <span class="mono">audit:view</span> 过滤</td></tr>
+      </tbody>
+    </table>
+    <p class="tiny dim"><b>两条附带纪律</b>：① 分组只改<b>呈现</b>，不改路由与权限语义——组内条目 <span class="mono">id</span> 与既有 <span class="mono">View</span> 一一对应；② 「文档资料 · 原型」入口<b>仅平台管理员渲染</b>（原型含未实现面与内部口径，对业务使用者是误导源）。</p>
 
     <h3 id="s2-11">2.11 小队 Squad 与团队 Team <span class="chip warn">v14 新增 · 2026-10-23 裁定（multica 方案）</span></h3>
     <p class="q">本节回答：多个 Agent 与人「一起干活」在平台里到底是什么对象、能被谁指派、权限怎么算。这是<b>两层两词</b>——先把两层分清，再谈细节。</p>

@@ -5,6 +5,9 @@ export interface Tool {
   id: number; owner_id: string; type: 'plugin' | 'skill' | 'mcp';
   name: string; description: string;
   content_md: string;
+  /** 技能附带文件数（列表接口）；详情接口另给 files_json 全文 */
+  files_count?: number;
+  files_json?: Array<{ path: string; content: string }>;
   token_soft_limit: number; token_hard_limit: number;
   permissions: string[]; mcp_host_config: any;
   status: string; visibility: string;

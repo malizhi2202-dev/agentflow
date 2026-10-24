@@ -74,8 +74,7 @@ export default function RoleMarket({ onSelectRole }: Props) {
 
   return (
     <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, margin: 0 }}>角色</h1>
+      <div className="toolbar" style={{ justifyContent: 'flex-end', marginBottom: 16 }}>
         <button onClick={function() { if (onSelectRole) onSelectRole({ name: '', based_on: '', temperament: '', responsibilities: [], triggers: [], boundaries_can: [], boundaries_cannot: [], evaluation: [], inputs: [], outputs: [] }); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}>
           <Plus size={14} /> 创建角色
         </button>

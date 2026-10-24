@@ -222,10 +222,7 @@ export default function MonitoringDashboard() {
 
   return (
     <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, margin: 0 }}>
-          <BarChart3 size={22} style={{ verticalAlign: -4, marginRight: 8 }} />监控
-        </h1>
+      <div className="toolbar" style={{ justifyContent: 'flex-end', marginBottom: 16 }}>
         <button onClick={fetchAll} style={{ padding: '6px 12px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
           <RefreshCw size={13} /> 刷新
         </button>

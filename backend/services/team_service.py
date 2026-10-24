@@ -1,4 +1,4 @@
-"""团队与小隊服务（R5-3 / R5-4 / R5-6）。
+"""团队与小队服务（R5-3 / R5-4 / R5-6）。
 
 硬口径（写在服务层，不靠提示词）：
 - **非成员一律 404**（不泄露团队存在性，不用 403 探测）；
@@ -265,7 +265,7 @@ def set_status(db: Session, team: Team, status: str) -> Team:
     """三态：active / paused / archived。
 
     - paused：停配额新增与新增指派（加成员、挂资产都被拒）；
-    - archived：资产转 platform 托管；**可恢复**（团队有地方可托管，与小隊相反）。
+    - archived：资产转 platform 托管；**可恢复**（团队有地方可托管，与小队相反）。
     """
     if status not in TEAM_STATUSES:
         raise TeamError(f"status 必须是 {sorted(TEAM_STATUSES)} 之一")
@@ -448,7 +448,8 @@ def create_squad(db: Session, slug: str, name: str, leader_agent_id: int,
     return squad
 
 
-def add_squad_member(db: Session, squad: Squad, member_kind: str, member_id: str) -> SquadMember:
+def add_squad_member(db: Session, squad: Squad, member_kind: str, member_id: str,
+                     role: str = "") -> SquadMember:
     if member_kind not in ("agent", "member"):
         raise TeamError("member_kind 只能是 agent | member")
     if squad.status == "archived":
@@ -460,7 +461,8 @@ def add_squad_member(db: Session, squad: Squad, member_kind: str, member_id: str
     ).first()
     if exists is not None:
         raise TeamError("成员已在池中")
-    row = SquadMember(squad_id=squad.id, member_kind=member_kind, member_id=member_id)
+    row = SquadMember(squad_id=squad.id, member_kind=member_kind, member_id=member_id,
+                      role=(role or "")[:32])
     db.add(row)
     db.commit()
     db.refresh(row)

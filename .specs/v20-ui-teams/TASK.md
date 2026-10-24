@@ -1,4 +1,4 @@
-# TASK: 团队与小隊页
+# TASK: 团队与小队页
 
 - **Change ID**: v20-ui-teams
 - **关联**: `@.specs/v20-ui-teams/REQUIREMENT.md`、`@.specs/v20-ui-teams/DESIGN.md`、`@.specs/v20-ui-teams/UI-DESIGN.md`
@@ -10,7 +10,7 @@
 ```
 Wave 1: T01（store 层，其余任务都依赖它）
 Wave 2: T02（团队 tab：列表/建团/状态/成员/转让/资产配额）
-Wave 3: T03（小隊 tab：列表/建队/成员/归档）
+Wave 3: T03（小队 tab：列表/建队/成员/归档）
 Wave 4: T04（App 挂载 + 页面用例 + 回归门）
 ```
 
@@ -69,7 +69,7 @@ Wave 4: T04（App 挂载 + 页面用例 + 回归门）
 </task>
 
 <task id="T03" parallel="false" status="pending">
-  <name>小隊 tab：列表 / 建队 / 成员混编 / 归档</name>
+  <name>小队 tab：列表 / 建队 / 成员混编 / 归档</name>
   <read_files>
     <frontend/src/pages/Teams.tsx（T02 产出）>
     <backend/models/teams.py（Squad / SquadMember 字段）>
@@ -78,7 +78,7 @@ Wave 4: T04（App 挂载 + 页面用例 + 回归门）
     <frontend/src/pages/Teams.tsx>
   </write_files>
   <action>
-    第二个 tab：小隊列表（slug/name/leader/成员数/状态）、建队表单（slug+name+leader_agent_id+指令）、
+    第二个 tab：小队列表（slug/name/leader/成员数/状态）、建队表单（slug+name+leader_agent_id+指令）、
     成员混编增删（member_kind ∈ agent|member）、归档（二次确认；409 leader_bound 文案透传）。
     界面**不得**出现「归档会取消在跑运行」字样（R8-4：只停未来指派）。
   </action>
@@ -99,9 +99,9 @@ Wave 4: T04（App 挂载 + 页面用例 + 回归门）
     <frontend/src/__tests__/teams-page.test.tsx>
   </write_files>
   <action>
-    App.tsx 加 NAV「团队与小隊」、View 值、渲染分支（project:read 权限壳）、初始路径 /teams。
+    App.tsx 加 NAV「团队与小队」、View 值、渲染分支（project:read 权限壳）、初始路径 /teams。
     写用例：列表渲染与字段、建团校验（非法 slug 不发请求）、409 文案透传、archived 禁用按钮、
-    成员添加/移除、转让需 confirm、资产挂载请求体、小隊建队/加成员/归档 409、空态文案。
+    成员添加/移除、转让需 confirm、资产挂载请求体、小队建队/加成员/归档 409、空态文案。
     跑三件门：tsc / vitest / build。
   </action>
   <verify>cd frontend && npx tsc --noEmit && npx vitest run && npm run build</verify>
@@ -121,7 +121,7 @@ Wave 4: T04（App 挂载 + 页面用例 + 回归门）
 |---|---|---|---|---|---|
 | T01 store | ✅ 面小、纯封装 | ✅ 类型即验证（tsc） | ✅ 不新增授权逻辑 | 3/3 | `true` |
 | T02 团队 tab | ✅ 单文件、结构清楚 | ✅ 6 条 AC 都有可断言行为 | ✅ 错误透传不吞、archived 禁用 | 3/3 | `true` |
-| T03 小隊 tab | ✅ 复用 T02 骨架 | ✅ 归档 409 可断言 | ✅ 不改后端权限 | 3/3 | `true` |
+| T03 小队 tab | ✅ 复用 T02 骨架 | ✅ 归档 409 可断言 | ✅ 不改后端权限 | 3/3 | `true` |
 | T04 挂载+用例 | ✅ 只加一行 NAV 与分支 | ✅ 三件门可复现 | ✅ 权限壳沿用 `EmptyPerm` | 3/3 | `true` |
 
 **为什么全 `true`**：四个 task 都在单一前端文件/单一 store 内，且每个 task 都有可执行 verify（tsc / vitest / build）；没有不可逆外部动作、没有 schema、没有凭据面。

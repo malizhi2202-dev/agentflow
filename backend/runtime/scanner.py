@@ -14,7 +14,13 @@ import stage_config  # 阶段表单点：不再各自维护一份（P0-7）
 
 
 def _read_instrumented(specs_dir: str) -> list[dict]:
-    """读取所有 change 的埋点数据."""
+    """读取所有 change 的埋点数据.
+
+    `specs_dir` 不存在是**合法空态**（隔离部署里 PROJECT_ROOT 是空运行根，产物目录尚未建），
+    不是异常：直接按「没有埋点数据」返回，让 /api/runtime/* 给空列表而不是 500。
+    """
+    if not os.path.isdir(specs_dir):
+        return []
     events = []
     for entry in os.listdir(specs_dir):
         path = os.path.join(specs_dir, entry)
@@ -57,6 +63,7 @@ def _infer_stage(timestamp: str) -> str:
     except Exception:
         return ""
     specs_dir = get_specs_dir()
+    if not os.path.isdir(specs_dir): return ""   # 空运行根：推断不出阶段就是空，不抛
     for entry in os.listdir(specs_dir):
         path = os.path.join(specs_dir, entry)
         if not os.path.isdir(path) or entry.startswith('.'): continue

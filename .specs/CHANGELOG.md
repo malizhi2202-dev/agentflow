@@ -9,10 +9,12 @@
 | 2026-10-24 | `v20-wave1` | 波 1 身份三连：服务端会话（cookie>PAT>401）· argon2id + 废出厂口令 · 部署闸门（DEPLOY_MODE/XFF） | `5cf2a6fa` `129c33ec` | — |
 | 2026-10-24 | `v20-wave2` | 波 2 单副本事实固化：队列/限流/退避/偏移落库 + 任务租约 + 单例循环租约选主 + 集群条 | `09950db4` | — |
 | 2026-10-24 | `v20-wave3` | 波 3 协作层最小集：告警落表 + 双队列并表 · work_items/work_item_runs/订阅/收件箱三规则 | `57945f50` `67420190` | — |
-| 2026-10-24 | `v20-wave4` | 波 4 团队与小隊：Team ⟂ Squad 两实体 + 五类资产归属（配额/转让/释放）+ leader 任务指派 | `ac839aa0` | — |
+| 2026-10-24 | `v20-wave4` | 波 4 团队与小队：Team ⟂ Squad 两实体 + 五类资产归属（配额/转让/释放）+ leader 任务指派 | `ac839aa0` | — |
 | 2026-10-24 | `v20-wave5` | 波 5 差距能力：可观测产生端 + /metrics · 声明式四件组（ETag→412/conditions/change_log/watch SSE）· 执行隔离契约 fail-closed | `943b7e5e` | L-002 L-003 L-004 |
 | 2026-10-24 | `v20-wave6` | 波 6 RSI 治理：记忆四层晋升门 · 提案三权分离（探针不作发布依据）· 可改面 · 四熔断 + NOISE FLOOR | `64e44de6` | — |
 | 2026-10-24 | `v20-wave7` | 波 7 遗留项收口：A2A M0 静态卡 · 因果前缀 + 晋升评审账 + 防污染双扫 · 四类开关 · 归因双列 + 瀑布 fail-closed | `13faefbe` | L-001 |
+| 2026-10-25 | `v23-multica-import` | multica 内容搬入：多文件技能包（迁移 020/021）· `content_md` 真正落库 · 列表 `files_count` / 详情 `files_json` · 前端技能文件区与「N 文件」角标 · 幂等导入脚本；真库 30 技能（145 文件）/38 Agent/2 小队/34 成员，逐字节 30/30 一致；**追加轮全字段**：迁移 022/023/024（tools.config_json · squad_members.role · agents 7 列 · agent_tools 关联表）+ 绑定接口 + Agent 详情技能区，绑定 104 条与源集合完全一致 | 见「feat(multica-import)」提交 | L-011 |
+| 2026-10-25 | `v22-agent-runtime-model` | 创建 Agent 去掉「模型 Provider / API Key」（RULINGS 10-15 裁撤项的代码落地）：运行时 + 模型改由「运行时发现」注册表提供（`models` 取自运行时、留空=运行时默认）；后端不再收 Agent 级凭据、provider 由运行时推导、`cli` 通道跟随该 Agent 的运行时（落不到即报错）；daemon 补模型目录读法（修前两个 CLI 都读不到 → 恒空）；门禁 tsc 0 · vitest 130/130 · build ✓ · 新增单测 27 条 | 见「feat(agent-model-from-runtime)」提交 | — |
 | 2026-10-24 | `doc-align-v20` | 文档归并：RULINGS/INDEX 建档、门面改齐、删 8 张孤儿原型页（135→127） | `fcc00645` | — |
 | 2026-10-24 | `v20-rsi-adapters` | 真实 judge 适配器（显式配置 + 预算帽 + 可注入）+ L0 定时抽取作业（默认关闭）；三类业务错由 500 改正 400 | 见「feat(rsi-adapters)」提交 | — |
 | 2026-10-24 | `v21-completion`（收口） | 8 项任务全部完成（T-01…T-08）；最终 CI 全绿：后端 **523 OK**（services/routes 覆盖 50%）、前端 **109 例**（语句 18.22% / 分支 67.74%）、build ✓；真实 MySQL + 真实 CLI E2E **23/23**；收口报告含诚实边界（a11y 非 axe / 无 down 迁移 / dsh 本轮外部不可用 / 门禁为自评轮） | 见「feat(v21-t07)」「docs(v21-closeout)」提交 | L-007 L-008 |
@@ -31,7 +33,7 @@
 | 2026-10-24 | `v20-residual` | 后端遗留三项：域级 accountable 策略（迁移 016，fail-closed）+ 影子重放 runner（exact_match 自证，沿用影子门）+ L0 抽取器（默认 dry_run） | 见「feat(residual)」提交 | — |
 | 2026-10-24 | `v20-ui-rsi` | 记忆中心 + 提案抽屉（双 tab）：记忆四层列表/写入/晋升评审账/检疫/衰减 + 治理折叠（四开关/四熔断）+ 提案状态机/探针/影子/会签/人批发布；实现中修 surfaces 未拉取与写入结论被覆盖两个 bug | 见「feat(ui-rsi)」提交 | — |
 | 2026-10-24 | `v20-squad-authz` | 小队写操作授权：creator 或平台管理员（4 个写端点接门 + 建队落 `created_by`）；修 `v20-ui-teams` 发现的权限缺口 | 见「fix(squad-authz)」提交 | — |
-| 2026-10-24 | `v20-ui-teams` | 团队与小隊页（首个走完整 code-kit 链：0→1→2→2a→3→4→5→6，四道规划门 + G3/G4 留票）；修资产释放 kind 误用与小隊归档多余 body | 见「feat(ui-teams)」提交 | — |
+| 2026-10-24 | `v20-ui-teams` | 团队与小队页（首个走完整 code-kit 链：0→1→2→2a→3→4→5→6，四道规划门 + G3/G4 留票）；修资产释放 kind 误用与小队归档多余 body | 见「feat(ui-teams)」提交 | — |
 | 2026-10-24 | `v20-ui-collab` | 任务看板 + 收件箱接入界面（波 3 的表第一次上界面）；顺带修 `requestDedup` 缓存键缺 method 的写静默失效（L-005） | 见「feat(ui-collab)」提交 | L-005 |
 | 2026-10-24 | `v20-release` | **7-integration 收口**：S-align 首次对齐（`ALIGNMENT.md`）+ 8 份 SUMMARY + 程序级 UAT（8 条全绿）+ LESSONS L-001…L-004 + 本表；UAT 暴露并修掉 2 个已上线 bug（`/api/health` 500 · metrics_api 死代码）；README 端点/能力同步；P0-5 停止跟踪 node_modules/dist | 见「docs(closeout)」「chore(repo)」提交 | L-001…L-004 |
 

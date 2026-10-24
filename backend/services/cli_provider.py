@@ -16,6 +16,10 @@ from services.llm_providers import BaseProvider
 
 ANSI_RE = re.compile(r"\x1b\[[0-9;]*[mK]")
 
+# 本机可委托执行的 CLI 运行时。`get_provider('cli', runtime)` 用这个集合判定
+# 「这个 Agent 的运行时能否真落到某条 CLI 上」，判不了就报错——不静默换另一个 CLI 代跑。
+CLI_KINDS = ("dsh", "hermes")
+
 
 def build_argv(prompt: str, kind: str | None = None) -> list[str]:
     """构造 argv。白名单两种 CLI；prompt 永远作为最后一个独立参数。"""
@@ -25,7 +29,7 @@ def build_argv(prompt: str, kind: str | None = None) -> list[str]:
                 "--profile", config.RSI_CLI_DSH_PROFILE, prompt]
     if kind == "hermes":
         return [config.RSI_CLI_HERMES_BIN, "-z", prompt]
-    raise ValueError(f"不支持的 CLI provider: {kind!r}（只允许 dsh / hermes）")
+    raise ValueError(f"不支持的 CLI provider: {kind!r}（只允许 {' / '.join(CLI_KINDS)}）")
 
 
 def normalize_reply(stdout: str) -> str:

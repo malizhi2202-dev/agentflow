@@ -20,7 +20,12 @@ class Tool(Base):
     token_hard_limit: Mapped[int] = mapped_column(Integer, default=100000)
     permissions: Mapped[dict] = mapped_column(JSON, default=list)
     mcp_host_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    content_md: Mapped[str] = mapped_column(Text, default="")  # markdown 内容
+    content_md: Mapped[str] = mapped_column(Text, default="")  # markdown 内容（技能的主 SKILL.md）
+    # v23：多文件技能包（[{path, content}]）。技能 = tools.type='skill'，文件是它的附属内容；
+    # 迁移 020 用 TEXT 落列（方言无关），这里仍按 JSON 读写 → 读侧统一成 list。
+    files_json: Mapped[list] = mapped_column(JSON, default=list)
+    # v23（multica 迁移）：工具/技能的通用 config（multica `skill.config`，本机 30 条全为空对象）
+    config_json: Mapped[dict] = mapped_column(JSON, default=dict)
     # 安全闸门（null=使用全局默认值）
     gate_pre_check: Mapped[str | None] = mapped_column(Text, nullable=True)
     gate_post_check: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -30,7 +35,12 @@ class Tool(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
-    def to_dict(self, include_sensitive: bool = False) -> dict:
+    def to_dict(self, include_sensitive: bool = False, with_files: bool = True) -> dict:
+        """`with_files=False` 用于**列表**：只给 `files_count`。
+
+        多文件技能包会让单个技能到 86KB，30 个技能全带上就把 `/api/tools` 撑到 1MB+；
+        列表页只需要「几个文件」，正文与文件详情由详情接口按需取。
+        """
         d = {
             "id": self.id,
             "owner_id": self.owner_id,
@@ -42,6 +52,9 @@ class Tool(Base):
             "permissions": self.permissions or [],
             "mcp_host_config": self.mcp_host_config,
             "content_md": self.content_md,
+            "config_json": self.config_json or {},
+            "files_count": len(self.files_json or []),
+            "files_json": (self.files_json or []) if with_files else [],
             "gate_pre_check": self.gate_pre_check,
             "gate_post_check": self.gate_post_check,
             "io_filter": self.io_filter,

@@ -651,10 +651,7 @@ export default function Memory() {
 
   return (
     <div style={{ padding: 16 }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-        <h2 style={{ fontSize: 16, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Brain size={16} />记忆中心
-        </h2>
+      <header className="toolbar" style={{ marginBottom: 12 }}>
         <div role="tablist" aria-label="记忆或提案" style={{ display: 'flex', gap: 4 }}>
           {(['memories', 'proposals'] as const).map((k) => (
             <button key={k} role="tab" aria-selected={tab === k} tabIndex={tab === k ? 0 : -1}

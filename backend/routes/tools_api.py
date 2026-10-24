@@ -5,7 +5,9 @@ import zipfile
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from database import get_db
-from services.tool_service import create_tool, get_tool, list_tools, update_tool, delete_tool, disable_tool
+from services.tool_service import (
+    ToolPayloadError, create_tool, get_tool, list_tools, update_tool, delete_tool, disable_tool,
+)
 from services.audit_service import log_audit
 
 router = APIRouter(prefix="/api/tools", tags=["tools"])
@@ -27,7 +29,8 @@ def _require_owner_or_admin(tool, user: dict):
 @router.get("")
 def api_list_tools(type: str | None = None, status: str | None = None, request: Request = None, db: Session = Depends(get_db)):
     tools = list_tools(db, _user(request), type, status)
-    return {"tools": [t.to_dict() for t in tools], "total": len(tools)}
+    # 列表不带 files_json（技能包会让响应到 MB 级），只给 files_count；详情接口再取全文
+    return {"tools": [t.to_dict(with_files=False) for t in tools], "total": len(tools)}
 
 
 @router.post("")
@@ -37,7 +40,11 @@ def api_create_tool(payload: dict, request: Request = None, db: Session = Depend
         raise HTTPException(status_code=400, detail="工具名称不能为空")
     if not payload.get("type") or payload["type"] not in ("plugin", "skill", "mcp"):
         raise HTTPException(status_code=400, detail="工具类型必须为 plugin/skill/mcp 之一")
-    tool = create_tool(db, user, payload)
+    try:
+        tool = create_tool(db, user, payload)
+    except ToolPayloadError as exc:
+        # 技能文件包非法 → 400 且把具体原因原样带回（别压成通用「创建失败」）
+        raise HTTPException(status_code=400, detail=str(exc))
     log_audit(user["id"], user.get("name", user["id"]), "tool.create", tool.name, "tool", "created", request.client.host if request.client else "127.0.0.1")
     return tool.to_dict()
 
@@ -53,7 +60,10 @@ def api_get_tool(tool_id: int, request: Request = None, db: Session = Depends(ge
 @router.put("/{tool_id}")
 def api_update_tool(tool_id: int, payload: dict, request: Request = None, db: Session = Depends(get_db)):
     user = _user(request)
-    tool = update_tool(db, tool_id, user, payload)
+    try:
+        tool = update_tool(db, tool_id, user, payload)
+    except ToolPayloadError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
     if not tool:
         raise HTTPException(status_code=404, detail="工具不存在")
     log_audit(user["id"], user.get("name", user["id"]), "tool.update", tool.name, "tool", "updated", request.client.host if request.client else "127.0.0.1")

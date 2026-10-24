@@ -107,7 +107,7 @@ OK (skipped=6)                    （新增 test_cluster_lease.py 5 例 + test_m
 
 $ E2E_CLI=dsh bash scripts/e2e/run_e2e.sh
 SUMMARY 23/23 passed
-PASS a11y：回放/任务看板/团队与小隊/记忆中心/自动化中心（各 0 违规）
+PASS a11y：回放/任务看板/团队与小队/记忆中心/自动化中心（各 0 违规）
 PASS 多用户：bob 的任务列表不含 admin 的任务 — bob 可见 0 条
 PASS 多用户：bob 直取 admin 任务详情 = 404 — status=404
 ```

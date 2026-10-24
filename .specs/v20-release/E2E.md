@@ -27,9 +27,9 @@ SUMMARY 7/7 passed
 $ node /tmp/e2e/layout.js
 PASS 任务 无横向溢出 | bg=rgb(13, 14, 18) | nav=21 | alerts=0 | 任务
 PASS 收件箱 无横向溢出 | bg=rgb(13, 14, 18) | nav=21 | alerts=0 | 收件箱
-PASS 团队与小隊 无横向溢出 | bg=rgb(13, 14, 18) | nav=21 | alerts=0 | 团队与小隊
+PASS 团队与小队 无横向溢出 | bg=rgb(13, 14, 18) | nav=21 | alerts=0 | 团队与小队
 PASS 记忆中心 无横向溢出 | bg=rgb(13, 14, 18) | nav=21 | alerts=0 | 记忆中心
-PASS 团队与小隊 @880px 无横向溢出 | bg=rgb(13, 14, 18) | nav=21 | alerts=0 | 团队与小隊
+PASS 团队与小队 @880px 无横向溢出 | bg=rgb(13, 14, 18) | nav=21 | alerts=0 | 团队与小队
 
 LAYOUT SUMMARY 5/5 clean
 ```

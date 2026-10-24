@@ -78,7 +78,6 @@ export default function ApprovalPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <ShieldCheck size={22} color="var(--color-primary)" />
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, margin: 0 }}>人工审批</h1>
           {pendingCount > 0 && (
             <span style={{
               background: 'var(--red)', color: '#fff', borderRadius: 10,

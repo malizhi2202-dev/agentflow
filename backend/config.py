@@ -82,6 +82,14 @@ RUNTIME_CMD_TEMPLATES: dict[str, str] = {
     "codex": os.environ.get("RUNTIME_CMD_CODEX", "").strip(),
 }
 
+# ── 运行时发现（v22 · §6.28）：daemon 上报外部 CLI 注册表 ──────────────
+# daemon 专用 token：**未配置即拒绝上报**（503），不做「无 token 也收」的静默放行。
+AF_DAEMON_TOKEN: str = os.environ.get("AF_DAEMON_TOKEN", "").strip()
+# 离线判定：last_seen 超过该秒数 = offline（读侧计算，不落状态列）
+RUNTIME_OFFLINE_AFTER_SECONDS: int = int(os.environ.get("RUNTIME_OFFLINE_AFTER_SECONDS", "180") or 180)
+# 机器级 token 归属的平台用户：daemon 不接受上报体里的 owner（否则谁都自称 admin）
+AF_DAEMON_OWNER: str = os.environ.get("AF_DAEMON_OWNER", "admin").strip() or "admin"
+
 # ── CLI 模型通道（用本地已部署的 hermes / dsh CLI 当 provider）──────────
 # 用途：试运行/本地无 API key 时，直接把 CLI 当模型（judge / L0 抽取都能用）。
 # 安全：**不经过 shell**（argv 列表 + shlex 解析），prompt 作为单个参数传入；超时可配。

@@ -1,4 +1,4 @@
-# REVIEW: 团队与小隊页
+# REVIEW: 团队与小队页
 
 - **Change ID**: v20-ui-teams
 - **阶段**: 6-review（2026-10-24）
@@ -15,7 +15,7 @@
 | AC-5 成员 | ✅ | 四档角色下拉（排除 owner）；owner 行移除禁用并给原因 |
 | AC-6 转让 | ✅ | 必须勾选 confirm；请求体 `{new_owner, confirm:true}` |
 | AC-7 资产配额 | ✅（含修复） | 挂载/释放请求体正确；**释放 kind bug 已修**（见「发现的问题」#1） |
-| AC-8 小隊 | ✅ | 建队/入池/移出/归档；`leader_bound` 透传；无"取消在跑运行"字样 |
+| AC-8 小队 | ✅ | 建队/入池/移出/归档；`leader_bound` 透传；无"取消在跑运行"字样 |
 | AC-9 可见性 | ✅ | 前端零授权判断，列表只用后端结果 |
 | AC-10 错误/空态 | ✅ | 读失败横幅 / 写失败就地 / 四类空态 |
 | AC-11 质量门 | ✅ | tsc 0 · vitest 74 · build 18.30s |
@@ -42,7 +42,7 @@
 | 只用既有 token、单强调色 | ✅ |
 | 无卡片套卡片 / 彩色侧条 / 渐变 | ✅ |
 | label 不与 placeholder 混用 | ✅ 所有输入都有 `<label htmlFor>` + `aria-label` |
-| 不可逆动作确认 | ✅ 归档团队/小隊、转让 owner 三处 |
+| 不可逆动作确认 | ✅ 归档团队/小队、转让 owner 三处 |
 | 状态不只靠颜色 | ✅ chip 有文字、配额有数字 |
 | `role=alert/status` | ✅ 错误用 alert |
 | Esc 关闭抽屉 | ✅ `keydown` 监听 + 清理 |

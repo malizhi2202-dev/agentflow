@@ -31,8 +31,7 @@ export default function ToolMarket({ onSelect }: Props) {
 
   return (
     <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, margin: 0 }}>工具库</h1>
+      <div className="toolbar" style={{ justifyContent: 'flex-end', marginBottom: 16 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 14px', background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
             <Upload size={13} /> 上传 MD
@@ -64,6 +63,10 @@ export default function ToolMarket({ onSelect }: Props) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ color: 'var(--color-primary)' }}>{TYPE_ICONS[tool.type]}</span>
                     <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>{TYPE_LABELS[tool.type]}</span>
+                  {/* 多文件技能包：列表只带 files_count（文件全文按需在详情拉） */}
+                  {(tool.files_count || 0) > 0 && (
+                    <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 3, background: 'var(--blue-bg)', color: 'var(--blue)' }}>{tool.files_count} 文件</span>
+                  )}
                     <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 3, background: tool.status === 'active' ? 'var(--green-bg)' : 'var(--red-bg)', color: tool.status === 'active' ? 'var(--green)' : 'var(--red)' }}>{tool.status === 'active' ? '已发布' : '已禁用'}</span>
                   </div>
                   <div style={{ display: 'flex', gap: 4 }}>

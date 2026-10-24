@@ -83,11 +83,8 @@ export default function Inbox() {
 
   return (
     <div style={{ padding: 16 }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-        <h2 style={{ fontSize: 16, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <InboxIcon size={16} />收件箱
-        </h2>
-        <span style={{ color: 'var(--text-muted)', fontSize: 11.5 }}>未读 {unreadCount} · 需我处理 {actionRequired.length}</span>
+      <header className="toolbar" style={{ marginBottom: 12 }}>
+        <span className="chip mono">未读 {unreadCount} · 需我处理 {actionRequired.length}</span>
         <div style={{ flex: 1 }} />
         <button className="btn btn-ghost btn-sm" onClick={() => fetchInbox()} disabled={inboxLoading}>
           <RefreshCw size={13} style={{ marginRight: 4 }} />刷新

@@ -18,6 +18,8 @@ from routes.search import router as search_router
 from routes.roles_api import router as roles_router
 from routes.admin_api import router as admin_router
 from routes.runtime_api import router as runtime_router
+from routes.daemon_api import router as daemon_router
+from routes.runtimes_api import router as runtimes_router
 from routes.auth_api import router as auth_router
 from routes.audit_api import router as audit_router
 from routes.tools_api import router as tools_router
@@ -267,6 +269,9 @@ app = FastAPI(title="AgentFlow", version="0.1.0", lifespan=lifespan)
 # X-User-Id 默认**不产生身份**；开启调试通道要 env ∧ localhost ∧ admit 白名单
 # 三者同时成立，且每个请求都写 auth:debug_header 审计。
 _PUBLIC_PATHS = frozenset({"/api/health", "/api/ping"})
+# daemon 上报自带机器级 token（routes/daemon_api）：跳过用户会话；
+# 来源闸门不跳过（deploy_guard.peer_allowed 在它之前执行）。
+_DAEMON_PATHS = frozenset({"/api/daemon/report"})
 # 无需身份、但仍受来源闸门约束的入口（登录页要拿用户列表/权限表）
 _ANON_AUTH_PATHS = frozenset({"/api/auth/login", "/api/auth/list", "/api/auth/permissions"})
 _MUST_CHANGE_EXEMPT_PREFIX = "/api/auth/"
@@ -330,6 +335,11 @@ async def auth_middleware(request: Request, call_next):
     # 2.5) /metrics 开关：未开启连 401 都不给（404，不暴露端点存在）
     if path == "/metrics" and not config.METRICS_ENDPOINT_ENABLED:
         return JSONResponse({"detail": "metrics endpoint disabled"}, status_code=404)
+
+    # 2.6) daemon 上报：机器级 token 在路由里校验；这里不解析用户会话
+    if path in _DAEMON_PATHS:
+        request.state.user = None
+        return await call_next(request)
 
     # 3) 匿名入口（登录/用户列表/权限表）：不需要身份，来源闸门仍然生效
     if path in _ANON_AUTH_PATHS:
@@ -423,6 +433,8 @@ app.include_router(roles_router)
 app.include_router(admin_router)
 app.include_router(runtime_router)
 app.include_router(auth_router)
+app.include_router(daemon_router)      # v22 §6.28：daemon 上报（token 鉴权）
+app.include_router(runtimes_router)    # v22 §6.28：运行时注册表（会话鉴权）
 app.include_router(audit_router)
 app.include_router(tools_router)
 app.include_router(workflows_router)

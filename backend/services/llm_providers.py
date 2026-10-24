@@ -319,18 +319,35 @@ provider_registry: dict[str, type[BaseProvider]] = {
 
 SUPPORTED_PROVIDERS = frozenset(provider_registry.keys())
 
+# 本地已部署 CLI 通道的 provider 名（不落平台凭据，凭据留在运行时机器上）。
+# RULINGS 10-15：Provider / Base URL / Agent 级 API Key 旧宇宙已裁撤，
+# 新建 Agent 的 provider 由运行时推导（CLI 运行时 → 'cli'），表单不再让人选。
+CLI_PROVIDER = "cli"
 
-def get_provider(name: str) -> BaseProvider:
-    if (name or "").strip().lower() == "cli":
-        # 本地已部署的 hermes / dsh CLI（试运行/无 key 通道）
-        from services.cli_provider import CliProvider
-        return CliProvider()
+
+def get_provider(name: str, runtime: str | None = None) -> BaseProvider:
     """根据名称获取提供者实例.
 
+    `runtime` 只对 `cli` 通道有意义：Agent 的运行时是 dsh / hermes 时，模型调用
+    必须落到**这个** CLI 上；运行时不在白名单里就报错，绝不静默改用全局默认 CLI
+    代跑（那等于换了一个模型通道却不告诉任何人）。
+
     Raises:
-        ValueError: 未知的 provider 名称.
+        ValueError: 未知的 provider 名称 / cli 通道无法落到该运行时.
     """
-    cls = provider_registry.get(name)
+    key = (name or "").strip().lower()
+    if key == CLI_PROVIDER:
+        from services.cli_provider import CLI_KINDS, CliProvider
+
+        kind = (runtime or "").strip().lower().replace("-", "_")
+        if not kind:
+            return CliProvider()          # 未指定运行时：沿用全局 RSI_CLI_PROVIDER
+        if kind not in CLI_KINDS:
+            raise ValueError(
+                f"cli 通道不支持运行时 '{runtime}'（只支持 {list(CLI_KINDS)}）"
+            )
+        return CliProvider(kind=kind)
+    cls = provider_registry.get(key or name)
     if cls is None:
         raise ValueError(
             f"不支持的模型提供者: '{name}'。"

@@ -37,8 +37,10 @@ FAMILY_VIEW = {
     "squads": ("teams", "partial"),             # 团队页里的「小队」tab
     "memory": ("memory", "page"), "automations": ("automations", "page"),
     # 缺失
-    "workbench": None, "stage-model": None, "decision-models": None, "finetune": None,
-    "env-advisor": None, "isolation": None, "integration": None,
+    "workbench": ("home", "page"),             # 工作台 = 变更总览（Home.tsx）
+    "stage-model": ("stage-model", "page"), "decision-models": ("decision-models", "page"),
+    "finetune": ("finetune", "page"), "env-advisor": ("env-advisor", "page"),
+    "isolation": ("isolation", "page"), "integration": ("integration", "page"),
     # 元页面（不算业务缺失）
     "index": ("shell", "meta"), "login": ("login", "meta"),
     "discipline": ("discipline", "meta"), "relations": ("relations", "meta"),

@@ -40,6 +40,15 @@ class Agent(Base):
     system_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
     role_def: Mapped[str | None] = mapped_column(Text, nullable=True)
     sop: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # v23（multica 迁移）：Agent 维度的展示/配置块
+    # avatar_url 是 multica 的 `emoji:🧠` 形态；其余是 opaque 配置（JSON 文本），来源侧当前多为空
+    avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    custom_env: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    custom_args: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    mcp_config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    thinking_level: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    service_tier: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    composio_toolkit_allowlist: Mapped[list | None] = mapped_column(JSON, nullable=True)
     visibility: Mapped[str] = mapped_column(String(16), default="private")
     project_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
@@ -64,6 +73,14 @@ class Agent(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "api_key": self._mask_key() if self.api_key_encrypted else None,
+            # v23（multica 迁移）：这些字段原来是「有源无列」，现在有列也有出参
+            "avatar_url": self.avatar_url,
+            "custom_env": self.custom_env,
+            "custom_args": self.custom_args,
+            "mcp_config": self.mcp_config,
+            "thinking_level": self.thinking_level,
+            "service_tier": self.service_tier,
+            "composio_toolkit_allowlist": self.composio_toolkit_allowlist,
         }
 
     def _mask_key(self) -> str:

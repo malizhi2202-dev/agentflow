@@ -173,9 +173,8 @@ export default function Tasks() {
 
   return (
     <div style={{ padding: 16 }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-        <h2 style={{ fontSize: 16, margin: 0 }}>任务</h2>
-        <span style={{ color: 'var(--text-muted)', fontSize: 11.5 }}>共 {tasks.length} 条</span>
+      <header className="toolbar" style={{ marginBottom: 12 }}>
+        <span className="chip mono">共 {tasks.length} 条</span>
         <div style={{ flex: 1 }} />
         <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-secondary)' }}>
           <input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} />

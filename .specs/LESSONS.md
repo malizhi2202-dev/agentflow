@@ -263,3 +263,71 @@ uvicorn 绑定失败时退出码就是 **3**（STARTUP_FAILURE），日志里不
 - 判断「服务真的起来了」用「pid 属于该 unit + 端口探测 + 一次真实请求」，三者对齐；
   只看端口会被旧进程骗过。
 - 安装脚本里可以对端口做归属校验（`systemd` 的 `MainPID` vs 监听 pid 不一致即报错退出）。
+
+---
+
+### L-010 · [lib] 「CLI 支持 --list-models」是设计假设，不是事实——外部能力必须现场探一次
+
+- **关键词**: --list-models 不支持 模型目录为空 恒空 provider_models_cache agent-default-model 运行时发现 能力探测 假空
+
+**问题场景**
+v22「运行时发现」按 `DESIGN.md` 写了 `<cli> --list-models` 拉模型目录。daemon 真跑后
+两个本机 CLI 都失败：`hermes --list-models` → argparse usage 错；`dsh --list-models` →
+`error: --profile <name> is required`。于是注册表里 `models` **恒为空**、`models_error` 恒有值，
+下游「创建 Agent 选模型」的下拉永远是空的——但账面看不出来：设计文档、daemon 代码、单测都不报错。
+
+**当时容易走的两条歪路**
+① 把 `models` 真的当「0 个模型」显示 → 用户以为运行时没有模型；
+② 平台内置一份模型清单兜底 → 又回到「平台假装知道运行时的模型」的旧宇宙。
+
+**为什么不行**
+`--list-models` 是**我们假设**的接口，不是 CLI 的契约。外部 CLI 的能力只能实测，
+文档/帮助文本只能当线索；「没读到」与「没有」在数据模型里必须分开（`models` vs `models_error`）。
+
+**当前推荐做法**
+- 探测顺序：先试通用契约（`--list-models`），失败再读**运行时自己的**来源：
+  hermes → 它 `hermes model --refresh` 落盘的 `~/.hermes/provider_models_cache.json`
+  + `hermes config show` 的默认 provider；dsh → `--profile <p> --dump-config` 里 `agent-default-model`
+  段（profile 必须与**执行模板**同一份，否则探的不是真跑时那份配置）。
+- 两条路都读不到才写 `models_error`，并保留更具体的原因（CLI 用法错 vs 配置里没这一段）。
+- 解析函数做成纯函数 + 单测（喂真实片段），IO 与解析分离；真实读法用 `--once --dry-run` 留证。
+- 每加一个「平台依赖外部 CLI 的某个 flag」，先现场跑一次并把它记进 TEST.md——别只写 design。
+
+## L-011 · 同机多套 dev server 把 inotify watch 预算打满，vite 以 ENOSPC 起不来
+
+**现象**：`agentflow-frontend` crash-loop，`journalctl --user -u agentflow-frontend` 里
+`fs.watch ... code: 'ENOSPC'` + systemd `Failed to add memory inotify watch descriptor`；5173 拒绝连接。
+磁盘 14G 空闲、inode 31% —— **不是磁盘满**。
+
+**判据**：`cat /proc/sys/fs/inotify/max_user_watches` = 65152，同机多套 vite / 编辑器 server / 多工作区共享同一用户预算。
+
+**处置（无 sudo 也可）**：
+1. `vite.config.ts` 显式 `server.watch.ignored` = `**/node_modules/**`、`**/dist/**`、`**/.git/**`（本仓 node_modules 3.6 万文件）；
+2. 仍不够 → `VITE_WATCH_POLLING=1` 退回轮询（已做成 vite 配置开关 + systemd 单元 env）；
+3. 根治（需 root）：`sysctl -w fs.inotify.max_user_watches=524288`。
+
+**教训**：这类失败先看 unit 日志的 errno，别当页面代码 bug；同时在`测试/构建`与`dev server`同机跑时优先关掉多余 watcher。
+
+---
+
+### L-011 · [data] 迁移器的「源列名/列宽」不能靠看文档，先跑一次真源真库
+
+- **关键词**: 迁移 Data too long 1406 TEXT 64KB MEDIUMTEXT 列名不存在 created_by creator_id JSON 列 列表载荷暴涨
+
+**问题场景**
+把 multica（Postgres）的技能/Agent/小队搬进 agentflow（MySQL）。脚本按 design 写完，
+两次真跑各炸一次：① `squad.created_by` 列不存在（multica 叫 `creator_id`）→ 整批 read 阶段失败；
+② 多文件技能包写 `files_json`（TEXT）→ `(1406) Data too long`：某技能正文 + 13 个文件序列化后 **>86KB**，TEXT 上限 64KB。
+③ 修完前两条又发现列表接口把文件全文一起返回，`/api/tools` 从 478KB 涨到 **1.37MB**。
+
+**为什么容易漏**
+设计文档写的是「skills → tools（content_md）」，不会写源列名细节；JSON 列在 SQLite 上永远不撞 64KB（测试全绿）；
+列表接口在只有 2 个样例技能时也不显大。
+
+**当前推荐做法**
+- 迁移脚本第一步就 `psql -c "\d 表"` 或直接跑一次 `--dry-run` 读真源，**列名以真库为准**；读失败要 `SystemExit` 带原文，不吞。
+- 大字段（JSON/正文）先量真实最大值再定列型：MySQL 侧 TEXT 64KB / MEDIUMTEXT 16MB / LONGTEXT 4GB；
+  测试库若是 SQLite 就没有这个上限，**别拿 SQLite 绿当通过**。
+- 附带内容默认**不要**塞进列表接口：列表给 `count`/`preview`，详情按 id 取全文；改完量一次 `size_download` 留证。
+- 映射函数（模型名 `provider:id → provider/id`、运行时映射、slug 派生）拆成纯函数 + 单测，
+  真跑负责证明「数据一致」（逐字节回读），单测负责证明「形状对」。

@@ -26,8 +26,7 @@ export default function WorkflowList({ onSelect, onCreate }: Props) {
 
   return (
     <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, margin: 0 }}>工作流</h1>
+      <div className="toolbar" style={{ justifyContent: 'flex-end', marginBottom: 16 }}>
         <button onClick={function() { if (onCreate) onCreate(); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13 }}>
           <Plus size={14} /> 创建工作流
         </button>

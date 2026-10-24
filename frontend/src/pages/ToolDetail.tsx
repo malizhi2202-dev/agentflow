@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, Trash2, Download, Eye, ShieldAlert, Plus, X } from 'lucide-react';
 
+interface SkillFile { path: string; content: string; }
+
 interface ToolData {
   id?: number; name: string; type: string; description: string;
   content_md: string; token_soft_limit: number; token_hard_limit: number;
   permissions: string[]; gate_pre: string; gate_post: string; io_filter: string;
+  /** 多文件技能包（详情接口给全文；列表接口只给 files_count） */
+  files_json?: SkillFile[];
+  files_count?: number;
 }
 
 var emptyTool = function(): ToolData {
-  return { name: '', type: 'plugin', description: '', content_md: '', token_soft_limit: 80000, token_hard_limit: 100000, permissions: ['read'], gate_pre: '', gate_post: '', io_filter: 'none' };
+  return { name: '', type: 'plugin', description: '', content_md: '', token_soft_limit: 80000, token_hard_limit: 100000, permissions: ['read'], gate_pre: '', gate_post: '', io_filter: 'none', files_json: [] };
 };
 
 export default function ToolDetail({ tool, onBack, onSave, onDelete }: {
@@ -19,6 +24,9 @@ export default function ToolDetail({ tool, onBack, onSave, onDelete }: {
   var [saved, setSaved] = useState(false);
   var [newPerm, setNewPerm] = useState('');
   var [showPreview, setShowPreview] = useState(true);
+  // 技能文件包：列表接口只给 files_count，详情要按 id 再拉一次
+  var [filesLoading, setFilesLoading] = useState(false);
+  var [filesError, setFilesError] = useState<string | null>(null);
 
   useEffect(function() {
     if (tool) {
@@ -31,7 +39,58 @@ export default function ToolDetail({ tool, onBack, onSave, onDelete }: {
     }
   }, [tool]);
 
-  var handleSave = function() { onSave(data); setSaved(true); setTimeout(function() { setSaved(false); }, 1500); };
+  // 已有技能：挂载后按 id 取详情拿 files_json（列表接口不带文件全文）
+  useEffect(function() {
+    var existing: any = tool;
+    if (!existing || !existing.id || existing.type !== 'skill') return;   // 只有技能有文件包
+    if (Array.isArray(existing.files_json) && existing.files_json.length > 0) return;   // 列表已带文件就不重复拉
+    setFilesLoading(true);
+    fetch('/api/tools/' + existing.id)
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(d) {
+        setData(function(prev: any) { return Object.assign({}, prev, { files_json: d.files_json || [] }); });
+      })
+      .catch(function(e) { setFilesError('技能文件加载失败：' + ((e && e.message) || String(e))); })
+      .then(function() { setFilesLoading(false); });
+  }, [tool]);
+
+  var setFiles = function(next: SkillFile[]) {
+    setData(Object.assign({}, data, { files_json: next }));
+  };
+
+  var handleSave = function() {
+    var files: SkillFile[] = Array.isArray(data.files_json) ? data.files_json : [];
+    if (data.type === 'skill') {
+      // 只做格式预校验（与服务端同一口径的**早失败**，不是授权判断）
+      var seen: Record<string, boolean> = {};
+      for (var i = 0; i < files.length; i++) {
+        var p = (files[i].path || '').trim();
+        if (!p) { setFilesError('第 ' + (i + 1) + ' 个技能文件缺 path'); return; }
+        if (seen[p]) { setFilesError('技能文件 path 重复：' + p); return; }
+        seen[p] = true;
+      }
+    }
+    setFilesError(null);
+    onSave(Object.assign({}, data, {
+      files_json: files.map(function(f) { return { path: (f.path || '').trim(), content: f.content || '' }; }),
+    }));
+    setSaved(true);
+    setTimeout(function() { setSaved(false); }, 1500);
+  };
+  var removeFile = function(idx: number) {
+    var files: SkillFile[] = Array.isArray(data.files_json) ? data.files_json.slice() : [];
+    files.splice(idx, 1);
+    setFiles(files);
+  };
+  var addFile = function() {
+    var files: SkillFile[] = Array.isArray(data.files_json) ? data.files_json.slice() : [];
+    setFiles(files.concat([{ path: '', content: '' }]));
+  };
+  var updateFile = function(idx: number, patch: Partial<SkillFile>) {
+    var files: SkillFile[] = Array.isArray(data.files_json) ? data.files_json.slice() : [];
+    files[idx] = Object.assign({}, files[idx], patch);
+    setFiles(files);
+  };
 
   var fmtPerms = function(p: any) { if (Array.isArray(p)) return p.join(', '); try { return JSON.parse(p || '[]').join(', '); } catch(e) { return 'read'; } };
   var isNew = !tool || !tool.id;
@@ -133,6 +192,50 @@ export default function ToolDetail({ tool, onBack, onSave, onDelete }: {
               <button onClick={function() { if (newPerm.trim()) { var arr = Array.isArray(data.permissions) ? data.permissions.slice() : []; setData(Object.assign({}, data, { permissions: arr.concat([newPerm.trim()]) })); setNewPerm(''); } }} style={{ padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer' }}><Plus size={12} /></button>
             </div>
           </div>
+
+          {/* 技能文件包（v23 · multica 迁移）：技能 = 主 SKILL.md（上方编辑器）+ 附带文件 */}
+          {data.type === 'skill' && (
+            <div role="region" aria-label="技能文件" style={{ border: '1px solid var(--border)', borderRadius: 6, padding: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 600 }}>📦 技能文件（{(data.files_json || []).length}）</span>
+                {filesLoading && <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>加载中…</span>}
+                <button onClick={addFile} style={{ marginLeft: 'auto', padding: '4px 10px', background: 'var(--bg-input)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 3, cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}><Plus size={11} /> 新增文件</button>
+              </div>
+              <p style={{ fontSize: 10, color: 'var(--text-dim)', margin: '0 0 8px', lineHeight: 1.5 }}>
+                附带文件随技能一起保存（path 同技能内唯一）；正文仍是上方主 SKILL.md。
+              </p>
+              {filesError && <div role="alert" style={{ color: 'var(--red)', fontSize: 11, marginBottom: 8 }}>{filesError}</div>}
+              {(data.files_json || []).length === 0 && !filesLoading && (
+                <p style={{ fontSize: 11, color: 'var(--text-dim)', margin: 0 }}>该技能暂无附带文件（只保存 SKILL.md 正文）</p>
+              )}
+              {(data.files_json || []).map(function(f, i) {
+                return (
+                  <details key={i} style={{ border: '1px solid var(--border)', borderRadius: 4, marginBottom: 6, background: 'var(--bg-card)' }}>
+                    <summary style={{ cursor: 'pointer', padding: '6px 8px', fontSize: 11, fontFamily: 'var(--font-mono)', display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>📄 {f.path || '(未命名)'}</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>{(f.content || '').length} 字符</span>
+                    </summary>
+                    <div style={{ padding: '0 8px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <input
+                        aria-label={'文件路径 ' + (i + 1)}
+                        value={f.path}
+                        onChange={function(e) { updateFile(i, { path: e.target.value }); }}
+                        style={inp}
+                        placeholder="references/checklist.md" />
+                      <textarea
+                        aria-label={'文件内容 ' + (i + 1)}
+                        value={f.content}
+                        onChange={function(e) { updateFile(i, { content: e.target.value }); }}
+                        rows={6}
+                        spellCheck={false}
+                        style={{ ...inp, resize: 'vertical', fontFamily: 'var(--font-mono)', fontSize: 11, lineHeight: 1.5 }} />
+                      <button onClick={function() { removeFile(i); }} style={{ alignSelf: 'flex-start', padding: '3px 10px', background: 'none', color: 'var(--color-danger)', border: '1px solid var(--color-danger)', borderRadius: 3, cursor: 'pointer', fontSize: 11 }}>删除该文件</button>
+                    </div>
+                  </details>
+                );
+              })}
+            </div>
+          )}
 
           {/* 安全闸门 */}
           <details style={{ borderTop: '1px solid var(--border)', paddingTop: 10 }}>

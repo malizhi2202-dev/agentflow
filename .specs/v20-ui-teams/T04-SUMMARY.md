@@ -5,7 +5,7 @@
 
 ## 做了什么
 
-- `App.tsx`：NAV 加「团队与小隊」、`View` 加 `teams`、渲染分支 `perm('project:read') ? <Teams /> : <EmptyPerm />`、初始路径 `/teams`。
+- `App.tsx`：NAV 加「团队与小队」、`View` 加 `teams`、渲染分支 `perm('project:read') ? <Teams /> : <EmptyPerm />`、初始路径 `/teams`。
 - 新增 `src/__tests__/teams-page.test.tsx` 11 条用例（列表/空态/非法 slug 不发请求/409 透传/抽屉我的角色/成员增删/archived 禁用/转让 confirm/资产挂载/释放 kind/小队建队/小队归档 409）。
 - 跑三件门并留证。
 
