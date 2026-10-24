@@ -234,3 +234,32 @@ E2E 建团队后等卡片出现，偶发 20s 都等不到；DB 里数据已写�
 
 **何时可重新评估**
 接结构化输出 / 固定 seed 的模型后，可去掉重试。
+
+---
+
+### L-009 · [ops] 交给 systemd 之前，先确认端口没被“上一轮手工进程”占着
+
+- **首发**: agentflow 服务化（systemd user units）· 2026-10-24
+- **上次复核**: 2026-10-24
+- **适用栈**: 任何「手工起过一阵 → 改成 systemd 托管」的进程
+- **状态**: active
+- **关键词**: systemd restart loop uvicorn exit 3 address already in use 端口占用 双份进程
+
+**问题场景**
+把 MySQL/后端/前端从手工 `&` 启动改成 `systemctl --user` 托管后，`agentflow-backend` 三秒一重启，
+journal 里只有正常启动日志 + `[monitor] 关闭.`，然后 `status=3/NOTIMPLEMENTED`；前端 vite 报 `EADDRINUSE`。
+
+**当时尝试的方案**
+先怀疑 unit 写错（EnvironmentFile/路径/权限），逐项核对都正常。
+
+**为什么不行**
+不是 unit 的问题：**上一轮手工启动的 uvicorn / vite 还活着并占着 8000/5173**。
+uvicorn 绑定失败时退出码就是 **3**（STARTUP_FAILURE），日志里不打印明显的 “address in use”，
+于是看起来像「服务自己退了」。端口探测误报「up」也是同一个原因——那是旧进程。
+
+**当前推荐做法**
+- 切 supervisor 前先确认端口归属：`ss -lptn 'sport = :8000'`，看 pid 是否是**当前** supervisor 的子进程。
+- 用 `systemctl --user reset-failed` 清掉 failed 计数再 `restart`，否则看不到干净状态。
+- 判断「服务真的起来了」用「pid 属于该 unit + 端口探测 + 一次真实请求」，三者对齐；
+  只看端口会被旧进程骗过。
+- 安装脚本里可以对端口做归属校验（`systemd` 的 `MainPID` vs 监听 pid 不一致即报错退出）。
