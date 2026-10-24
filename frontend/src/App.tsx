@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Activity, GitBranch, Users, ChevronLeft, PanelLeft, Shield, FileSearch, User as UserIcon, AlertCircle, Wrench, Bot, Network, FolderKanban, BarChart3, Link2, MessageSquare, Radio, Bell, BookOpen, ListTodo, Inbox as InboxIcon } from 'lucide-react';
+import { Activity, GitBranch, Users, ChevronLeft, PanelLeft, Shield, FileSearch, User as UserIcon, AlertCircle, Wrench, Bot, Network, FolderKanban, BarChart3, Link2, MessageSquare, Radio, Bell, BookOpen, ListTodo, Inbox as InboxIcon, Brain } from 'lucide-react';
 import Home from './pages/Home';
 import Detail from './pages/Detail';
 import Roles from './pages/Roles';
@@ -35,6 +35,7 @@ import ApprovalPage from './pages/ApprovalPage';
 import Tasks from './pages/Tasks';
 import Inbox from './pages/Inbox';
 import Teams from './pages/Teams';
+import Memory from './pages/Memory';
 import UserArea from './components/UserSelect';
 import ForcePasswordChange from './components/ForcePasswordChange';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -66,6 +67,7 @@ const NAV: NavItem[] = [
   { id: 'tasks', label: '任务', icon: <ListTodo size={16} /> },
   { id: 'inbox', label: '收件箱', icon: <InboxIcon size={16} /> },
   { id: 'teams', label: '团队与小隊', icon: <Users size={16} /> },
+  { id: 'memory', label: '记忆中心', icon: <Brain size={16} /> },
   { id: 'knowledge', label: '知识库', icon: <BookOpen size={16} /> },
   { id: 'approvals', label: '审批', icon: <Shield size={16} /> },
 ];
@@ -100,7 +102,8 @@ type View =
   | { page: 'approvals' }
   | { page: 'tasks' }
   | { page: 'inbox' }
-  | { page: 'teams' };
+  | { page: 'teams' }
+  | { page: 'memory' };
 
 export default function App() {
   const getInitialNav = () => {
@@ -111,6 +114,7 @@ export default function App() {
     if (path.startsWith('/tasks')) return 'tasks';
     if (path.startsWith('/inbox')) return 'inbox';
     if (path.startsWith('/teams')) return 'teams';
+    if (path.startsWith('/memory')) return 'memory';
     return 'projects';
   };
   const [nav, setNav] = useState(getInitialNav);
@@ -278,6 +282,7 @@ export default function App() {
       case 'tasks': return perm('project:read') ? <Tasks /> : <EmptyPerm />;
       case 'inbox': return <Inbox />;
       case 'teams': return perm('project:read') ? <Teams /> : <EmptyPerm />;
+      case 'memory': return perm('project:read') ? <Memory /> : <EmptyPerm />;
       default: return <ProjectManager onSelect={(id) => setProjectDetailId(id)} />;
     }
   };
