@@ -118,6 +118,22 @@ class TestRoute(AuthHarnessMixin := __import__("tests._auth_harness", fromlist=[
         self.assertEqual(r.status_code, 400, r.text)
         self.assertIn("judge 未配置", r.json()["detail"])
 
+    def test_llm_mode_marks_llm_judge_without_calling_real_cli(self):
+        # 用 patch 替掉真实 judge 调用：只验路由口径（judge_kind=llm_judge、dry_run=false）
+        from unittest.mock import patch
+        with patch("services.judge_adapter.configured", return_value=True), \
+             patch("services.judge_adapter.judge_cases", return_value=0.75):
+            r = self.client("root").post(f"/api/rsi/proposals/{self.pid}/shadow/run", json={
+                "cases": [{"expected": "a", "actual": "a"}], "judge_model": "x",
+                "golden_set_frozen": True, "cross_vendor": True,
+                "baseline": 0.0, "judge": "llm",
+            })
+        self.assertEqual(r.status_code, 200, r.text)
+        body = r.json()
+        self.assertEqual(body["judge_kind"], "llm_judge")
+        self.assertFalse(body["dry_run"])
+        self.assertEqual(body["pass_rate"], 0.75)
+
     def test_missing_golden_via_route_is_409(self):
         r = self.client("root").post(f"/api/rsi/proposals/{self.pid}/shadow/run", json={
             "cases": [{"expected": "a", "actual": "a"}], "judge_model": "x",

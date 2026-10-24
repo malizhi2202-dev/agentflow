@@ -225,7 +225,17 @@ $ cd frontend && npm run build
 | D1-9 | 代码变文档未变 | L3 | `06ea9150` + `README.md §配置` | 新增 5 个 env（judge 四件 + L0 两件） | **已合并**：配置表补 3 行（judge 合并一行） |
 | D4-10 | 执行留痕 | L5 | `.specs/v20-rsi-adapters/` | 产物齐（CHANGE/REQUIREMENT/DESIGN/TASK/TEST/REVIEW + 门票） | 已闭环 |
 
-## 13. 下一轮基线
+## 13. 第 9 轮增量（2026-10-24 · MySQL + 真实运行时 E2E）
+
+**覆盖**：`v20-e2e-mysql`（测试/基础设施 + 1 处产品修正）
+
+| 编号 | 类型 | 层 | 证据 | 处理 |
+|---|---|---|---|---|
+| D1-10 | 代码变文档未变 | L3 | `routes/rsi_api.py` | `judge_kind` 归一 llm_judge | **已合并**：README/工件同步 |
+| D4-11 | 执行留痕 | L5 | `.specs/v20-e2e-mysql/` | 工件齐（CHANGE/TASK/TEST/REVIEW/SUMMARY） | 已闭环 |
+| D6-4 | 环境/可复现性 | L5 | `scripts/e2e/README.md` | E2E 前置与命令入仓（MySQL 私有实例/后端 env/playwright） | 已闭环 |
+
+## 14. 下一轮基线
 
 `v20-ui-polish` 提交（见 `git log`）—— 下次 S-align 从此开始扫描。
 

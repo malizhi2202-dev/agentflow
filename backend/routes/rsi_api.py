@@ -170,7 +170,8 @@ def run_shadow(proposal_id: int, payload: dict, request: Request,
             golden_set_frozen=bool(payload.get("golden_set_frozen", False)),
             cross_vendor=bool(payload.get("cross_vendor", False)),
             baseline=float(payload.get("baseline", 0.0) or 0.0),
-            scorer=scorer, judge_kind=mode if mode == "llm" else "exact_match",
+            # 响应口径：exact_match（确定性）或 llm_judge（真实评审），不暴露内部 mode 简称
+            scorer=scorer, judge_kind="llm_judge" if mode == "llm" else "exact_match",
         )
     except Exception as e:  # noqa: BLE001
         _map(e)
