@@ -37,11 +37,11 @@
 
 ```bash
 # 后端（首次启动自动建库）
-cd backend && uvicorn main:app --port 8000 --reload   # 本机 127.0.0.1；身份修复（P0-1）前勿用 --host 0.0.0.0
+cd backend && uvicorn main:app --port 8000 --reload   # 本机 127.0.0.1；对外暴露前先设 DEPLOY_MODE + TRUSTED_PROXY_IPS
 
 # 前端
 cd frontend && npm install && npm run dev
-# 默认管理员 admin / 123456（出厂口令，P0-2 将废除——现行有效，别外暴）
+# 首启口令：AGENTFLOW_ADMIN_PASSWORD 或随机生成（只打一次启动日志），首登强制改密
 ```
 
 ## 现状与已知缺陷（动手前必读）
@@ -50,17 +50,17 @@ cd frontend && npm install && npm run dev
 
 | 事实 | 影响 |
 |---|---|
-| **`npm run build` 必然失败**（`tsc` 报 32 个 TS 错误） | 当前**没有可用的生产构建**；`npx vite build` 可绕过类型检查但不是项目构建契约 |
+| **`npm run build` 已恢复**（波 0 清零 32 个 TS 错误） | 构建与 `vitest` 是现行质量门；新增类型错误会让门变红 |
 | **`node_modules` 被 git 跟踪**（10-23 复测：**36,134** 个跟踪文件中 35,517 个是它） | `.gitignore` 已含规则但历史已纳入跟踪，规则不生效；跑 dev server 会污染 `git status` |
-| **认证身份来自 `X-User-Id` 请求头且默认 admin**，`get_current_user` 缺身份时回退 admin | fail-open 后门；唯一缓解（localhost 限制）在反向代理后失效 |
-| **口令为无盐 `hashlib.sha256`**，默认口令硬编码 `123456` | 待修为自适应哈希（修方案=文档 v8 P0-1/2/3 已过审，开发冻结中） |
-| **三处关键状态在进程内存**：调度队列、控制面限流、调和退避 | 「路由/扩容/自愈」**仅在单副本下成立**，多副本会各自为政 |
-| **`Domain` 不是安全边界** | 它只是逻辑分组（4 字段）；Agent 在平台进程内执行，无沙箱 |
-| **9 阶段模型硬编码在 12 个文件**（10-23 复测：后端 6 + 前端 6） | 与「不绑定任何开发流程」的定位存在张力；`/api/admin/workflow` + `workflow.json` 是已存在但未接上的配置落点 |
+| **认证 = 服务端会话**（波 1 已实施）：`__Host-session` HttpOnly cookie > Bearer PAT > 401，**不再回退 admin**；`DEPLOY_MODE` 三值 + 可信代理 XFF 纪律 | fail-open 已清零；改身份相关代码先读 `backend/main.py` 中间件与 `deploy_guard` |
+| **口令 = argon2id**（scrypt 兜底），出厂口令 `123456` 已废除，首启强制改密（`must_change_password` 服务端 403） | 不要恢复 `hashlib.sha256` 直存；登录节流已落库（5 败/15min，多副本共享） |
+| **关键状态已落库**（波 2 已实施）：调度队列/限流/退避/监控偏移 + 任务租约 + 单例循环选主 | 多副本仍以「单副本承诺」为界（`/api/control-plane/cluster` 如实呈现） |
+| **`Domain` 不是安全边界** | 它只是逻辑分组（4 字段）；Agent 在平台进程内执行，**执行隔离只是契约先行**（P2-3：档位未实现就显式拒绝） |
+| **9 阶段模型已收口为单一事实源**（波 0） | 后端 `stage_config.py` + `/api/admin/workflow` + 前端 `stores/stageConfig.ts`；改阶段表只改一处 |
 | **无 CI / Dockerfile / Makefile / LICENSE / pyproject.toml** | 无自动化质量门 |
-| **迁移是 `database.py` 里 3 条内联 `ALTER TABLE`** | 无版本账本、无回滚 |
+| **迁移账本已版式化**（波 0：`backend/migrations.py` 001…013 幂等账本） | 新增 schema 一律加迁移号，不写内联 `ALTER TABLE` |
 | **裁定⑦（2026-09-23）**：可计量追踪数据（用户/会话/PAT/错误告警/审计/变更账本/指标 trace）权威库 = MySQL；SQLite 降为本地体验档；`users.json`/`audit.jsonl` 将表化退役 | 一切新数据模型设计按 MySQL 档书写，不再新增文件态权威数据 |
-| **裁定⑧**：开发冻结——只改文档与产品原型（PRODUCT-DESIGN.html） | 任何 4-dev/code 动作需等解冻指令 |
+| **裁定⑧**：开发冻结 ⛔ **已于 2026-10-24 解除** | 代码可改；`PRODUCT-DESIGN.html` §1.6.0 的**波 0–6 全部已落地**（提交见 `STATE.md`），后续按 `RULINGS.md` 增量推进 |
 | **git 历史已扫描（09-23）**：56 rev 全量无凭据泄露；遗留三件强度项（KDF/Secret Scanning/提交元数据邮箱） | 无需紧急轮换；见 `.specs/credential-scan/SCAN-REPORT.md` 与 v10 P0-10 |
 
 完整改进路线图：`.specs/platform-evolution/ROADMAP.md`
