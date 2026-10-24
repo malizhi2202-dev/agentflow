@@ -282,7 +282,18 @@ $ cd frontend && npm run build
 | D7-11 | 多副本无验证 | L5 | `tests/test_cluster_lease.py` | 租约逻辑只有注入式假 store | **已补**：文件库双会话真并发语义 + tick 待命 |
 | D7-12 | 迁移无纪律守卫 | L5 | `tests/test_migrations_discipline.py` | 无 down 也无「禁止加破坏性迁移」的守卫 | **已补**：禁破坏性 SQL + 幂等 + 失败不入账 |
 
-## 18. 下一轮基线
+## 18. 第 14 轮增量（2026-10-24 · v21 T-07 用户/审计表化）
+
+**覆盖**：`v21-completion` T-07（裁定⑦收尾）
+
+| 编号 | 类型 | 层 | 证据 | 处理 |
+|---|---|---|---|---|
+| D7-13 | 文件态权威数据 | L3 | `auth.load_users/_save_users` · `services/audit_service.py` | `users.json` / `audit.jsonl` 仍是权威源，与裁定⑦（MySQL 权威）不符 | **已切表**：表非空即权威；文件降为导入源/本地副本 |
+| D7-14 | 双写入器 | L3 | `auth.write_audit` vs `audit_service.log_audit` | 两处各写一份审计，字段与轮转逻辑重复 | **已收敛**：auth 委托 audit_service（单一写入器） |
+| D7-15 | 历史不丢 | L5 | `auth.read_audit` | 切表后旧 jsonl 行会「消失」 | **已合并**：表优先 + 文件历史去重补入；用例锁定 |
+| D4-13 | 执行留痕 | L5 | `.specs/v21-completion/T-07-SUMMARY.md` + `TEST.md §T-07` | MySQL 实测 + 删文件后的 E2E 证据 | 已闭环 |
+
+## 19. 下一轮基线
 
 `v20-ui-polish` 提交（见 `git log`）—— 下次 S-align 从此开始扫描。
 

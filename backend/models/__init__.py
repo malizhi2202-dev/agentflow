@@ -54,6 +54,7 @@ from models.collab import (  # noqa: E402, F401
     WorkItemRun,
     WorkItemSubscription,
 )
+from models.user import AppUser, AuditLog  # noqa: E402, F401
 from models.cluster import (  # noqa: E402, F401
     ClusterLease,
     RateLimitWindow,

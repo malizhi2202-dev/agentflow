@@ -592,6 +592,29 @@ def m013_rsi_governance(conn, dialect: str) -> None:
 
 
 
+def m018_users_and_audit_tables(conn, dialect: str) -> None:
+    """用户档案与审计日志表化（裁定⑦：MySQL 为权威档，文件态退化为导入源/兜底）。
+
+    口令只存哈希；`project_ids`/`custom_permissions` 用 TEXT 存 JSON 数组
+    （SQLite 与 MySQL 都能存，读侧自己 json.loads——不依赖方言的 JSON 类型）。
+    """
+    create_table_if_missing(conn, dialect, "app_users",
+        "id VARCHAR(64) PRIMARY KEY, name VARCHAR(128), role VARCHAR(16) DEFAULT 'member', "
+        "password_hash VARCHAR(512), must_change_password BOOLEAN DEFAULT 0, "
+        "project_ids TEXT, custom_permissions TEXT, active BOOLEAN DEFAULT 1, "
+        "created_at VARCHAR(32), updated_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_app_users_role", "app_users", "role")
+
+    create_table_if_missing(conn, dialect, "audit_log",
+        f"id {_pk_clause(dialect)}, timestamp VARCHAR(32), user_id VARCHAR(64), "
+        "user_name VARCHAR(128), action VARCHAR(64), target TEXT, target_type VARCHAR(64), "
+        "detail TEXT, ip VARCHAR(64), result VARCHAR(16) DEFAULT 'success'")
+    create_index_if_missing(conn, dialect, "ix_audit_log_timestamp", "audit_log", "timestamp")
+    create_index_if_missing(conn, dialect, "ix_audit_log_user", "audit_log", "user_id")
+    create_index_if_missing(conn, dialect, "ix_audit_log_action", "audit_log", "action")
+
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -610,6 +633,7 @@ MIGRATIONS: list[Migration] = [
     ("015_attribution_columns", "任务/运行归因双列 originator⟂accountable（R8-2）", m015_attribution_columns),
     ("016_domain_attribution_policy", "域级 accountable 策略表（R8-2 剩余面）", m016_domain_attribution_policy),
     ("017_agent_prompt_fields", "Agent 人设三件落库（T-05）", m017_agent_prompt_fields),
+    ("018_users_and_audit_tables", "用户档案与审计日志表化（裁定⑦收尾，T-07）", m018_users_and_audit_tables),
 ]
 
 

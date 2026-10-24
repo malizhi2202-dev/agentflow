@@ -124,7 +124,18 @@ def _default_admin() -> dict:
 # ── 用户加载/保存 ─────────────────────────────────────────
 
 def load_users() -> dict:
-    """加载 users.json，不存在则创建默认 admin；存在则自动修复缺字段的旧数据。"""
+    """加载用户档案：表非空以**表**为权威（裁定⑦），否则读 users.json（迁移期/未导入）。
+
+    表化切换由 `scripts/import_users_to_db.py --apply` 完成；导入后表恒非空，路径稳定。
+    """
+    from services import user_store
+    try:
+        rows = user_store.load_all()
+    except Exception:  # noqa: BLE001 — 表不可用（未迁移/裸库）→ 文件语料
+        rows = None
+    if rows is not None:
+        return {"users": rows}
+
     path = _users_file()
     if os.path.exists(path):
         try:
@@ -154,7 +165,15 @@ def load_users() -> dict:
 
 
 def _save_users(data: dict):
-    """保存 users.json，自动备份（保留最近 5 个）+ 文件锁。"""
+    """保存用户档案：表已启用（非空）时写**表**；否则写 users.json（自动备份 + 文件锁）。"""
+    from services import user_store
+    try:
+        if user_store.available():
+            user_store.replace_all(data.get("users", []))
+            return
+    except Exception as e:  # noqa: BLE001 — 表写失败不许静默丢用户
+        raise RuntimeError(f"用户表写入失败：{e}") from e
+
     path = _users_file()
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
@@ -303,42 +322,19 @@ def write_audit(
     result: str = "success",
     request: Request | None = None,
 ):
-    """追加一条审计日志到 audit.jsonl（带文件锁 + 自动轮转）。"""
-    entry = {
-        "timestamp": datetime.now().isoformat(),
-        "user_id": user.get("id", "unknown"),
-        "user_name": user.get("name", "unknown"),
-        "action": action,
-        "target": target,
-        "target_type": target_type,
-        "detail": detail,
-        "ip": _get_client_ip(request) if request else "unknown",
-        "result": result,
-    }
-    path = _audit_file()
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    _rotate_audit_if_needed()
-
-    def _write(f):
-        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    _locked_write(path, _write)
+    """追加一条审计：表化后以 `audit_log` 表为查询权威，本地 jsonl 仍留一份（离线排查/导出）。"""
+    from services.audit_service import log_audit as _log
+    _log(user.get("id", "unknown"), user.get("name", "unknown"), action, target, target_type,
+         detail, _get_client_ip(request) if request else "unknown", result)
 
 
-def read_audit(
-    limit: int = 200,
-    user_id: str | None = None,
-    action: str | None = None,
-    days: int | None = None,
-) -> list[dict]:
-    """读取审计日志，支持筛选。会同时读取当前日志和归档目录。"""
-    entries = []
-    cutoff = None
-    if days:
-        cutoff = datetime.now().timestamp() - days * 86400
+def _read_file_audit(limit: int, user_id: str | None, action: str | None,
+                     days: int | None) -> list[dict]:
+    """读 audit.jsonl（含归档目录）；筛选与旧实现一致。"""
+    entries: list[dict] = []
+    cutoff = datetime.now().timestamp() - days * 86400 if days else None
 
-    # 读取当前 audit.jsonl
     def _read_file(filepath: str):
-        nonlocal entries
         if not os.path.exists(filepath):
             return
         content = _locked_read(filepath)
@@ -358,26 +354,55 @@ def read_audit(
                 continue
             if cutoff and e.get("timestamp"):
                 try:
-                    ts = datetime.fromisoformat(e["timestamp"]).timestamp()
-                    if ts < cutoff:
+                    if datetime.fromisoformat(e["timestamp"]).timestamp() < cutoff:
                         continue
                 except Exception:
                     pass
             entries.append(e)
 
     _read_file(_audit_file())
-
-    # 也读归档目录
     archive_dir = os.path.join(os.path.dirname(_audit_file()), "audit_archive")
     if days and os.path.isdir(archive_dir):
         for fname in sorted(os.listdir(archive_dir), reverse=True):
             _read_file(os.path.join(archive_dir, fname))
             if len(entries) >= limit * 2:
                 break
-
-    # 最新的在前
     entries.reverse()
-    return entries[:limit]
+    return entries
+
+
+def read_audit(
+    limit: int = 200,
+    user_id: str | None = None,
+    action: str | None = None,
+    days: int | None = None,
+) -> list[dict]:
+    """读审计：表优先，文件里的历史行（表化之前）补进来并按时间倒序去重。
+
+    表不可用（未迁移/裸库）时退化为只读文件——与旧行为一致。
+    """
+    from services import audit_service
+
+    merged: list[dict] = []
+    seen: set[tuple] = set()
+
+    def _take(rows):
+        for e in rows:
+            key = (e.get("timestamp"), e.get("user_id"), e.get("action"), str(e.get("target")))
+            if key in seen:
+                continue
+            seen.add(key)
+            merged.append(e)
+            if len(merged) >= limit:
+                return True
+        return False
+
+    db_rows = audit_service.read_rows(limit=limit, user_id=user_id, action=action, days=days)
+    if db_rows is not None and _take(db_rows):
+        return merged
+    if _take(_read_file_audit(limit, user_id, action, days)):
+        return merged
+    return merged
 
 
 def audit_stats(days: int = 7) -> dict:

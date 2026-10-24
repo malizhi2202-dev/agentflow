@@ -5,9 +5,9 @@
 
 ## 会话状态（GO.md 第一步四字段 · 2026-10-24 起必填）
 
-- **活跃 Change**：`v21-completion`（T-01…T-06、T-08 ✅；T-07 pending）
-- **当前阶段**：4-dev（v21 收口程序：T-01…T-06 + T-08 完成；仅剩 T-07）
-- **当前 Task**：T-07（users.json / audit.jsonl 表化，裁定⑦收尾）
+- **活跃 Change**：`v21-completion`（T-01…T-08 **全部 ✅**）
+- **当前阶段**：7-integration（v21 收口程序 8 项任务全部完成，进入最终门禁与留证）
+- **当前 Task**：（无；最终 CI + 收口台账）
 - **中断任务**：（空）
 - **ai_context_doc**：`CLAUDE.md`（2026-10-24 用户选定；`.specs/CONTEXT.md` 已作废不用）
 - **last_intel_scan**：（未跑；按用户选择跳过）

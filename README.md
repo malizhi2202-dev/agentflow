@@ -398,6 +398,21 @@ agentflow/
 | `L0_EXTRACT_MAX_CONVERSATIONS` | `5` | 每轮最多处理的会话数（预算帽） |
 | `METRICS_ENDPOINT_ENABLED` | `false` | 开启 `GET /metrics`（Prometheus 文本格式，直读现表；仍需身份鉴权） |
 
+### 用户与审计已表化（v21 T-07 / 裁定⑦）
+
+`users.json` / `audit.jsonl` 不再是权威源：
+
+- **用户**：`app_users` 表非空即由表提供档案（登录、权限、用户管理都走它）；表空时退回 `users.json`（迁移期）。
+  切换用导入脚本（默认 dry-run）：
+  ```bash
+  cd backend
+  DATABASE_URL=... python scripts/import_users_to_db.py --file /path/users.json          # 先看会导多少
+  DATABASE_URL=... python scripts/import_users_to_db.py --file /path/users.json --apply  # 真正导入
+  ```
+- **审计**：写 `audit_log` 表（同时保留本地 `audit.jsonl` 一份，便于离线排查/导出）；
+  `GET /api/audit` 以表为准，表化之前的历史行从文件补进来并去重。
+- 迁移号 `018_users_and_audit_tables`；口令只存哈希，导入原样搬运、不重算。
+
 ### 质量门 / CI（v21 T-04）
 
 一条命令跑完四道门（每步打印真实命令与输出，失败非 0 退出）：

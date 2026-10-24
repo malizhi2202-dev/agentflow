@@ -117,3 +117,37 @@ PASS 多用户：bob 直取 admin 任务详情 = 404 — status=404
 - 多用户：列表侧不可见 + 详情侧 404（不以 403 泄漏存在性）
 - 多副本：单租约独占 · 续租 · 过期接管 · 释放交接 · 待命副本 tick 返回 None
 - 迁移：禁止 DROP COLUMN/TRUNCATE/DELETE；裸 DROP TABLE 仅限表重建或登记的历史表；逐条幂等；中途失败不入账且可 fix-forward
+
+## T-07 用户/审计表化（2026-10-24）
+
+```text
+$ MySQL：apply_migrations(raw_conn, "mysql")
+applied: ['018_users_and_audit_tables'] · pending: []
+app_users / audit_log 列齐全（口令哈希、must_change_password、project_ids、custom_permissions…）
+
+$ python scripts/import_users_to_db.py --file /tmp/e2e-mysql/users.json          # dry-run
+[import-users] 文件内用户 2 条；导入前表已启用=False → 未写库
+$ ... --apply                                                    → upserted=2 deleted=0
+$ ... --apply（第二次）                                           → upserted=2 deleted=0（幂等）
+
+$ 移走 users.json 后重启后端
+login(no users.json)=200        # 证明登录读表，不回退文件
+
+$ E2E_CLI=hermes bash scripts/e2e/run_e2e.sh
+SUMMARY 23/23 passed            # users.json 全程不在
+
+$ mysql> SELECT COUNT(*) FROM audit_log;  → 7（含 auth:login / rsi.breaker.trip / rsi.breaker.reset / scheduled_task.create）
+$ GET /api/audit → 返回表内行（表化为查询权威）
+
+$ backend: unittest discover -s tests
+Ran 523 tests in 113.483s
+OK (skipped=6)
+```
+
+覆盖点（`tests/test_t07_user_store.py` 13 例）：
+- 迁移 018 建表与列（app_users/audit_log）
+- 表空不权威 · 导入 dry-run 不写 · apply 全字段往返（哈希原样）
+- 导入幂等 + 删除多余用户
+- `auth.load_users` 表优先（文件里同名用户不参与）· 表空退回文件 · `_save_users` 断言不写文件 · `get_user` 读表
+- 审计写表 + 留文件 · 读表优先 · 表化前历史行合并去重
+- 真实 app 登录：表里的用户能登进来，文件里的「幽灵用户」401
