@@ -100,3 +100,14 @@ $ 迁移 020（真 MySQL）：automations / automation_triggers / automation_run
 结果：Agent 详情十六分区一次通过（9 例自测）；自动化 9 节后端 26 例中 2 条断言与实现语义冲突、
 前端 1 处 TS 错误、旧 automations 用例与 E2E 断言漂移 —— 由父会话逐项修正后合并。
 教训：**子 agent 的自测断言也要当代码 review**（它不是验收）。
+
+## 更正（迁移号）
+
+自动化中心四表的迁移号是 **`025_automations_center`**，不是提交信息里写的 `020`：
+`020_tool_skill_files`…`024_agent_tools` 已被 v23 multica 迁移占用，账本按 version 字符串判重，
+重号会静默顶掉已有迁移。提交 `67dd1491` 的信息无法改写，以此行为准。
+
+已在真 MySQL 复核：`pending=[]`，四表列齐（automations 15 / automation_triggers 11 / automation_runs 10 / automation_deliveries 12）。
+
+同批还有一处 `backend/main.py` 的必要改动：认证中间件放行 `/api/webhooks/automations/` 前缀
+（外部系统无会话，**token 即凭据**；来源闸门 `peer_allowed` 仍在更早一档生效，未知/已轮换 token 一律 404）。
