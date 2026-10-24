@@ -46,6 +46,42 @@ from routes.rsi_api import router as rsi_router
 from routes.a2a_api import router as a2a_router
 
 
+async def _l0_extract_loop():
+    """L0→L1 定时抽取（默认关闭：`L0_EXTRACT_INTERVAL_SECONDS=0`）。
+
+    单例租约与 cron 一致：多副本只有一个跑；未配置抽取器时只统计规模（dry-run），不花钱。
+    """
+    from database import SessionLocal
+    from services import cluster_store, l0_job
+
+    interval = int(config.L0_EXTRACT_INTERVAL_SECONDS or 0)
+    print(f"[l0] 抽取作业启动，每 {interval}s 一次（dry-run：无抽取器）")
+    standby_logged = False
+    while True:
+        try:
+            await asyncio.sleep(interval)
+        except asyncio.CancelledError:
+            break
+        try:
+            if not cluster_store.acquire_lease("l0-extract", config.CLUSTER_LEASE_TTL_SECONDS):
+                if not standby_logged:
+                    print("[l0] 待命：租约由其他副本持有")
+                    standby_logged = True
+                continue
+            standby_logged = False
+        except Exception as e:  # noqa: BLE001
+            print(f"[l0] 租约失败，跳过本轮: {e}")
+            continue
+        db = SessionLocal()
+        try:
+            out = l0_job.run_once(db)
+            print(f"[l0] 本轮：会话 {out['conversations']} · 候选 {out['candidates']} · 入库 {out['created']}")
+        except Exception as e:  # noqa: BLE001 — 作业失败不拖垮进程
+            print(f"[l0] 本轮失败: {e}")
+        finally:
+            db.close()
+
+
 async def _cron_scheduler_loop():
     """后台定时任务调度器 — 每 30s 检查 cron 表达式（受数据库租约保护）."""
     import datetime
@@ -208,12 +244,21 @@ async def lifespan(app: FastAPI):
         print("[monitor] 📊 演示数据生成器已启动（每 5min）")
     # 启动定时任务 cron 调度器
     _cron_task = asyncio.create_task(_cron_scheduler_loop())
+    _l0_task = None
+    if int(config.L0_EXTRACT_INTERVAL_SECONDS or 0) > 0:
+        _l0_task = asyncio.create_task(_l0_extract_loop())
     yield
     _cron_task.cancel()
     try:
         await _cron_task
     except asyncio.CancelledError:
         pass
+    if _l0_task is not None:
+        _l0_task.cancel()
+        try:
+            await _l0_task
+        except asyncio.CancelledError:
+            pass
     print("[monitor] 关闭.")
 
 

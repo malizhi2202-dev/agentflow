@@ -5,7 +5,7 @@
 
 ## 会话状态（GO.md 第一步四字段 · 2026-10-24 起必填）
 
-- **活跃 Change**：`v20-ui-polish`（已收口）· `v20-residual` · `v20-ui-rsi` · `v20-ui-teams` · `v20-squad-authz`
+- **活跃 Change**：`v20-rsi-adapters`（已收口）· `v20-ui-polish`· `v20-residual` · `v20-ui-rsi` · `v20-ui-teams` · `v20-squad-authz`
 - **当前阶段**：7-integration（四 change 收口；真实浏览器 E2E 已留证）
 - **当前 Task**：T01–T04 全部 done
 - **中断任务**：（空）
@@ -56,6 +56,7 @@
 - ✅ **change `v20-wave4`（波 4 团队与小队）已收口（10-24）**：`teams`/`team_members`（四档角色，owner 只能转让且需 confirm）+ `squads`/`squad_members`（leader 必须未归档 Agent）+ 五类资产 `team_id/owner_kind`（存量零回填）+ 迁 010；非成员 404、成员非 owner/admin 403；指派小队 = 给 leader 入队 leader 任务（去重）；Team⟂Squad 无外键。验证：test_teams 19 绿。提交 `ac839aa0`。
 - ✅ **change `v20-wave5`（波 5 差距能力）已收口（10-24）**：**P2-4** trace_spans 产生端（根/子 span + 合成 trace_id）+ `/metrics`（Prometheus 文本、直读现表、env 门 + 身份）· **P2-5** ETag/If-Match→412 + apiVersion/kind + generation/conditions + change_log 单账本同事务 + `/api/watch` SSE（游标过期 resync） · **P2-3** 执行隔离契约（tier 阶梯、ttl/retain、egress 默认拒、fail-closed，未实现档位选即拒绝）。迁移 011/012；测试 24 条。提交 `943b7e5e`。
 - ✅ **change `v20-wave6`（波 6 RSI 治理）已收口（10-24）**：记忆四层 + 晋升三字段缺一即 `no_entry` + confounded 默认 + 检疫/衰减 · 提案三权分离（生成限额 → 探针不作发布依据 → 影子重放冻结金标+异厂 judge → 人批发布，领域类需会签）· 可改面声明对象（scripts/plugins/hooks 永久禁改、代码层 RSI 禁止、路径穿越拒绝）· 四熔断 + NOISE FLOOR。迁移 013；test_rsi 18 绿。提交 `64e44de6`。
+- ✅ **change `v20-rsi-adapters`（真实 judge + L0 定时作业）已收口（10-24）**：`judge_adapter`（四件配置才启用、预算帽硬停、provider 可注入）· `/shadow/run` 支持 `judge=exact_match|llm`（未知/未配置 400，响应 `judge_kind` 如实）· `l0_job` + `_l0_extract_loop`（`L0_EXTRACT_INTERVAL_SECONDS=0` 默认关闭；单例租约；每轮会话上限）· `_map` 把 Runner/Judge/Extractor 错从 500 改成 400。验证：19 条新用例绿；全量 **445 用例 29F/12E/6S**，失败清单与基线 diff 为空。**真实厂商仍未定** → 保持未配置（fail-closed）。
 - ✅ **S24 原型三处挂载缺口已实施（10-24，用户「同意你开始吧」）**：`audit.html` 团队筛选弹层（`audit.team_id` 聚合 + 锚点 `#team-agentflow`）· `control-plane.html` 域树三行显示 `team_id=1/NULL` 与归属说明 · `chat.html` 顶部「投递纪律」句 + 「同刻合并 2 条」徽章（`coalesced_comment_ids`）。校验：三页 id 无重复、新增锚点存在、弹层走 proto.js 通用 `data-pop`。
 - ✅ **change `v20-ui-polish`（遗留小项）已收口（10-24）**：熔断**手动 trip**（必填原因）· 记忆中心 Tabs **←/→ + roving tabindex** · 管理员**新建可改面**表单（含禁改前缀说明）· `scripts/backfill_squad_creator.py`（默认 dry-run，`--apply` 必须 `--owner`，幂等）。验证：vitest 89/89（86+3）· tsc 0 · build 27.18s · 后端 436 用例 29F/12E（失败清单与基线 diff 为空）。
 - ✅ **change `v20-residual`（后端遗留三项）已收口（10-24）**：**① 域策略**（迁移 016 `domain_attribution_policies` + `resolve_accountable`：无策略=originator / member / team_owner，不可解析即 fail-closed；API GET/PUT 管理员或域 owner）· **② 影子重放 runner**（`score_cases` 确定性精确比对 + `run_shadow` 调既有 `record_shadow`，门禁不复制；响应自证 `judge_kind=exact_match`/`dry_run`）· **③ L0 抽取器**（`l0_extractor.extract` 可注入，默认 dry_run 不写库；注入且三字段齐 → `propose_memory`，机器抽取默认 confounded；端点强制 dry_run）。验证：新 29 条用例全绿（11+10+8）；全量 **434 用例 29F/12E/6S**，失败清单与基线 diff 为空。
@@ -110,7 +111,7 @@
 7. ~~波 6（RSI）~~（`64e44de6` 治理契约与门禁已落地；影子重放执行器/金标本体/前端页面未做）：记忆四层唯一管道 L0→L1→L2→L3 · 编排提案制三权分离 · 四熔断 + NOISE FLOOR · 晋升三字段缺一不入库 · 代码层禁自改
 
 8. ~~波 7（设计遗留项收口）~~（已收口）：A2A M0 静态卡（M2 冻结）· 因果前缀 `source_seq` + 晋升评审账 + 防污染双扫 · `rsi_switches` 四类开关 · 归因双列 originator⟂accountable + 瀑布 fail-closed
-9. **下一步（按设计剩余面，不假装已具备）**：① 前端界面挂载（**任务+收件箱 / 团队与小隊 / 记忆中心+提案抽屉** 均已挂；真实后端+浏览器 E2E 见 `.specs/v20-release/E2E.md`）② ~~RSI 执行器~~（`v20-residual` 已做确定性 runner；真实 LLM judge 适配器仍需凭据裁定）③ ~~域策略表~~（`v20-residual` 已做，迁移 016）④ ~~L0 抽取器~~（`v20-residual` 已做，默认 dry_run；定时作业未做）⑤ ~~P0-5 仓库卫生~~（`v20-release` 已做：`git rm --cached` node_modules/dist + `.gitignore` 补 `dist`）⑥ ~~`TOPICS.md` S24 原型三缺口~~（10-24 用户「同意你开始吧」→ **已实施**：audit 团队筛选弹层 / control-plane `team_id` 归属 / chat 同刻合并徽章）
+9. **下一步（按设计剩余面，不假装已具备）**：① 前端界面挂载（**任务+收件箱 / 团队与小隊 / 记忆中心+提案抽屉** 均已挂；真实后端+浏览器 E2E 见 `.specs/v20-release/E2E.md`）② ~~RSI 执行器~~（`v20-residual` 确定性 runner + `v20-rsi-adapters` 真实 judge 适配器；**启用需你给厂商与预算**：`RSI_JUDGE_PROVIDER/MODEL/API_KEY/MAX_CALLS`）③ ~~域策略表~~（`v20-residual` 已做，迁移 016）④ ~~L0 抽取器~~（`v20-residual` 已做，默认 dry_run；定时作业未做）⑤ ~~P0-5 仓库卫生~~（`v20-release` 已做：`git rm --cached` node_modules/dist + `.gitignore` 补 `dist`）⑥ ~~`TOPICS.md` S24 原型三缺口~~（10-24 用户「同意你开始吧」→ **已实施**：audit 团队筛选弹层 / control-plane `team_id` 归属 / chat 同刻合并徽章）
 
 完整路线图见 `.specs/platform-evolution/ROADMAP.md`（议题状态账本：同目录 `TOPICS.md`）。
 

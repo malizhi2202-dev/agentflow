@@ -56,6 +56,17 @@ EXECUTION_EGRESS_ALLOW: list[str] = _env_list("EXECUTION_EGRESS_ALLOW")
 # /metrics 直读现表（不做第二套存储）；默认关闭，显式开启才暴露
 METRICS_ENDPOINT_ENABLED: bool = _env_bool("METRICS_ENDPOINT_ENABLED")
 
+# ── RSI 适配器（波 8 收口）─────────────────────────────────
+# 影子重放的**真实** judge：默认全空 = 未配置 → 端点拒绝（fail-closed），不偷偷花钱。
+RSI_JUDGE_PROVIDER: str = os.environ.get("RSI_JUDGE_PROVIDER", "").strip()
+RSI_JUDGE_MODEL: str = os.environ.get("RSI_JUDGE_MODEL", "").strip()
+RSI_JUDGE_API_KEY: str = os.environ.get("RSI_JUDGE_API_KEY", "").strip()
+# 每次作业最多调用次数（预算帽）；0 = 禁用
+RSI_JUDGE_MAX_CALLS: int = int(os.environ.get("RSI_JUDGE_MAX_CALLS", "0") or 0)
+# L0 → L1 定时抽取：0 = 关闭（默认）；>0 时单例循环按该间隔跑
+L0_EXTRACT_INTERVAL_SECONDS: int = int(os.environ.get("L0_EXTRACT_INTERVAL_SECONDS", "0") or 0)
+L0_EXTRACT_MAX_CONVERSATIONS: int = int(os.environ.get("L0_EXTRACT_MAX_CONVERSATIONS", "5") or 5)
+
 # ── 副本与单例循环（P1-7）──────────────────────────────────
 # 每个副本一个稳定标识：显式 env 优先，否则 host:pid:随机后缀（进程重启即换）
 INSTANCE_ID: str = os.environ.get("INSTANCE_ID") or (

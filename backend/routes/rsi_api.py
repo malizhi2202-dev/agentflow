@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from auth import is_admin, write_audit
 from database import get_db
 from models.rsi import RSI_CATEGORIES, Proposal, SurfaceManifest
-from services import l0_extractor, rsi_service as rsi, shadow_runner
+from services import judge_adapter, l0_extractor, rsi_service as rsi, shadow_runner
 
 router = APIRouter(prefix="/api/rsi", tags=["rsi"])
 
@@ -24,6 +24,12 @@ def _user(request: Request) -> dict:
 
 
 def _map(exc: Exception):
+    # 本模块新增的三类业务错（runner / judge / 抽取）都映射 400：是"调用方给错了"，
+    # 不是服务端 500；Gate 类仍是 409（治理状态不允许）。
+    for err_type in (shadow_runner.RunnerError, judge_adapter.JudgeError,
+                     l0_extractor.ExtractorError):
+        if isinstance(exc, err_type):
+            raise HTTPException(status_code=400, detail=str(exc))
     if isinstance(exc, rsi.GateError):
         raise HTTPException(status_code=409, detail=str(exc))
     if isinstance(exc, rsi.RsiError):
@@ -149,13 +155,22 @@ def run_shadow(proposal_id: int, payload: dict, request: Request,
     """影子重放 runner：用金标用例算 pass_rate，再走既有影子门（不新开门禁）。"""
     _user(request)
     try:
+        cases = payload.get("cases") or []
+        mode = (payload.get("judge") or "exact_match").strip()
+        if mode == "llm":
+            scorer = lambda cs: judge_adapter.judge_cases(cs)   # noqa: E731 — 真实 judge（需显式配置）
+        elif mode == "exact_match":
+            scorer = None
+        else:
+            raise HTTPException(status_code=400, detail="judge 只能是 exact_match 或 llm")
         result = shadow_runner.run_shadow(
             db, _proposal(db, proposal_id),
-            cases=payload.get("cases") or [],
+            cases=cases,
             judge_model=payload.get("judge_model", ""),
             golden_set_frozen=bool(payload.get("golden_set_frozen", False)),
             cross_vendor=bool(payload.get("cross_vendor", False)),
             baseline=float(payload.get("baseline", 0.0) or 0.0),
+            scorer=scorer, judge_kind=mode if mode == "llm" else "exact_match",
         )
     except Exception as e:  # noqa: BLE001
         _map(e)

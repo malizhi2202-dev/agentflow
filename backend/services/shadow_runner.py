@@ -36,10 +36,10 @@ def score_cases(cases: list[dict]) -> float:
 
 def run_shadow(db: Session, proposal, *, cases: list[dict], judge_model: str,
                golden_set_frozen: bool, cross_vendor: bool,
-               baseline: float = 0.0) -> dict:
+               baseline: float = 0.0, scorer=None, judge_kind: str = "exact_match") -> dict:
     if not (judge_model or "").strip():
         raise RunnerError("judge_model 不能为空（影子门要求标明评审模型）")
-    pass_rate = score_cases(cases)
+    pass_rate = (scorer or score_cases)(cases)
     # 门禁全部沿用 rsi_service：缺金标/异厂 → GateError(409)；低于 NOISE FLOOR → collapsed
     rsi_service.record_shadow(
         db, proposal,
@@ -51,7 +51,7 @@ def run_shadow(db: Session, proposal, *, cases: list[dict], judge_model: str,
         "baseline": float(baseline or 0.0),
         "delta": round(pass_rate - float(baseline or 0.0), 4),
         "cases": len(cases),
-        "judge_kind": "exact_match",   # 不冒充异厂模型评审
-        "dry_run": True,               # 本版不调外部模型
+        "judge_kind": judge_kind,      # exact_match 或 llm_judge（由调用方显式选择）
+        "dry_run": judge_kind == "exact_match",
         "proposal": proposal.to_dict(),
     }

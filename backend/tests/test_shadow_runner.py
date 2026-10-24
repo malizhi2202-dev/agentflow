@@ -102,6 +102,22 @@ class TestRoute(AuthHarnessMixin := __import__("tests._auth_harness", fromlist=[
         self.assertEqual(body["judge_kind"], "exact_match")
         self.assertTrue(body["dry_run"])
 
+    def test_unknown_judge_mode_is_400(self):
+        r = self.client("root").post(f"/api/rsi/proposals/{self.pid}/shadow/run", json={
+            "cases": [{"expected": "a", "actual": "a"}], "judge_model": "x",
+            "golden_set_frozen": True, "cross_vendor": True, "judge": "bogus",
+        })
+        self.assertEqual(r.status_code, 400, r.text)
+
+    def test_llm_judge_without_config_is_400(self):
+        r = self.client("root").post(f"/api/rsi/proposals/{self.pid}/shadow/run", json={
+            "cases": [{"expected": "a", "actual": "a"}], "judge_model": "x",
+            "golden_set_frozen": True, "cross_vendor": True, "judge": "llm",
+        })
+        # 默认未配置 judge → 400（不偷偷调外部模型）
+        self.assertEqual(r.status_code, 400, r.text)
+        self.assertIn("judge 未配置", r.json()["detail"])
+
     def test_missing_golden_via_route_is_409(self):
         r = self.client("root").post(f"/api/rsi/proposals/{self.pid}/shadow/run", json={
             "cases": [{"expected": "a", "actual": "a"}], "judge_model": "x",

@@ -388,6 +388,9 @@ agentflow/
 | `EXECUTION_TTL_SECONDS` | `300` | 单次执行时限（秒），上限 3600 |
 | `EXECUTION_RETAIN` | `false` | 保留执行工作区（必须配 ttl） |
 | `EXECUTION_EGRESS_ALLOW` | (空=默认拒绝) | 出网白名单（逗号分隔域名/CIDR）；`*` 一律拒绝 |
+| `RSI_JUDGE_PROVIDER` / `RSI_JUDGE_MODEL` / `RSI_JUDGE_API_KEY` / `RSI_JUDGE_MAX_CALLS` | (空/0=禁用) | 影子重放的**真实** judge（异厂系）。四件缺一即拒绝（不默认回退、不偷偷花钱）；`MAX_CALLS` 为每次作业预算帽 |
+| `L0_EXTRACT_INTERVAL_SECONDS` | `0`（关闭） | L0→L1 定时抽取间隔；>0 启单例循环（租约保护） |
+| `L0_EXTRACT_MAX_CONVERSATIONS` | `5` | 每轮最多处理的会话数（预算帽） |
 | `METRICS_ENDPOINT_ENABLED` | `false` | 开启 `GET /metrics`（Prometheus 文本格式，直读现表；仍需身份鉴权） |
 
 ### 副本与单例循环（P0-9 / P1-7）
