@@ -1,7 +1,8 @@
 """GET /api/changes/<id> — 单个 change 详情（开发者/Leader/PM 三维度）."""
 import os
 from fastapi import APIRouter, HTTPException
-from scanner import get_file_scanner, STAGE_NAMES, _phase_order
+from scanner import get_file_scanner, _phase_order
+import stage_config
 from parsers.section import SectionParser
 from parsers.task import parse_tasks
 from parsers.gate import parse_gates
@@ -51,7 +52,7 @@ async def get_change(change_id: str):
         hours = info.stage_durations.get(stage_id)
         stage_timeline.append({
             'id': stage_id,
-            'name': STAGE_NAMES.get(stage_id, stage_id),
+            'name': stage_config.STAGE_NAMES.get(stage_id, stage_id),
             'duration_hours': hours,
             'status': 'done' if _phase_order(stage_id) < _phase_order(info.phase) else ('current' if stage_id == info.phase else 'pending'),
         })
@@ -60,7 +61,7 @@ async def get_change(change_id: str):
     bottleneck = None
     if info.stage_durations:
         slowest = max(info.stage_durations, key=lambda k: info.stage_durations[k])
-        bottleneck = {'stage': slowest, 'stage_name': STAGE_NAMES.get(slowest, slowest), 'hours': info.stage_durations[slowest]}
+        bottleneck = {'stage': slowest, 'stage_name': stage_config.STAGE_NAMES.get(slowest, slowest), 'hours': info.stage_durations[slowest]}
 
     return {
         # 基础

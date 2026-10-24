@@ -10,16 +10,7 @@ from config import get_specs_dir, CURRENT_PROJECT
 
 CACHE_TTL = 60.0
 
-STAGE_FILES = {
-    '0-change': 'CHANGE.md', '1-requirement': 'REQUIREMENT.md',
-    '2-design': 'DESIGN.md', '2a-ui-design': 'UI-DESIGN.md',
-    '3-task': 'TASK.md', '5-test': 'TEST.md', '6-review': 'REVIEW.md',
-}
-STAGE_NAMES = {
-    '0-change': '变更提案', '1-requirement': '需求分析', '2-design': '技术设计',
-    '2a-ui-design': 'UI设计', '3-task': '任务拆分', '4-dev': '开发执行',
-    '5-test': '测试验证', '6-review': '代码审查', '7-integration': '集成归档',
-}
+import stage_config  # 阶段表单点：不再各自维护一份（P0-7）
 
 
 def _read_instrumented(specs_dir: str) -> list[dict]:
@@ -69,7 +60,7 @@ def _infer_stage(timestamp: str) -> str:
     for entry in os.listdir(specs_dir):
         path = os.path.join(specs_dir, entry)
         if not os.path.isdir(path) or entry.startswith('.'): continue
-        for stage, fname in STAGE_FILES.items():
+        for stage, fname in stage_config.STAGE_FILES.items():
             fp = os.path.join(path, fname)
             if os.path.exists(fp):
                 if datetime.fromtimestamp(os.path.getmtime(fp)) <= ts:
@@ -200,7 +191,7 @@ class RuntimeScanner:
                 'week': week_input + week_output,
                 'total': total_input + total_output,
             },
-            'by_stage': [{'stage': k, 'name': STAGE_NAMES.get(k, k), 'tokens': v} for k, v in sorted(by_stage.items(), key=lambda x: -x[1])],
+            'by_stage': [{'stage': k, 'name': stage_config.STAGE_NAMES.get(k, k), 'tokens': v} for k, v in sorted(by_stage.items(), key=lambda x: -x[1])],
             'by_skill': [{'skill': k, 'tokens': v} for k, v in sorted(by_skill.items(), key=lambda x: -x[1])],
             'by_mcp': [{'mcp': k, 'tokens': v} for k, v in sorted(by_mcp.items(), key=lambda x: -x[1])],
             'by_model': [{'model': k, 'tokens': v} for k, v in sorted(by_model.items(), key=lambda x: -x[1])],

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useStageConfig } from '../stores/stageConfig';
 import { CheckCircle, Circle, Play, Users, ChevronDown, ChevronRight, ArrowRight, GitCommit } from 'lucide-react';
 
 interface StageInfo {
@@ -27,11 +28,17 @@ const EXPERT_COLORS: Record<string, string> = {
 
 export default function WorkflowTab({ data }: { data: any }) {
   const [expanded, setExpanded] = useState<string | null>(null);
-  const currentIdx = STAGES.findIndex(s => data.phase === s.id || data.phase?.startsWith(s.id));
+  const stageDefs = useStageConfig((st) => st.stages);
+  // 顺序与显示名以配置为准；编辑性文案（what/tasks）按 id 兜底
+  const orderedStages: StageInfo[] = stageDefs.map((d) => {
+    const editor = STAGES.find((s) => s.id === d.id);
+    return editor ? { ...editor, name: d.name } : { id: d.id, name: d.name, what: '', tasks: [], experts: [], autoAction: '' };
+  });
+  const currentIdx = orderedStages.findIndex(s => data.phase === s.id || data.phase?.startsWith(s.id));
 
   return (
     <div>
-      {STAGES.map((stage, i) => {
+      {orderedStages.map((stage, i) => {
         const done = i < currentIdx;
         const current = i === currentIdx;
         const pending = i > currentIdx;
@@ -48,7 +55,7 @@ export default function WorkflowTab({ data }: { data: any }) {
               {done ? <CheckCircle size={18} style={{ color: 'var(--green)' }} />
                 : current ? <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--blue)', boxShadow: '0 0 8px var(--blue)' }} />
                 : <Circle size={18} style={{ color: 'var(--text-weak)' }} />}
-              {i < STAGES.length - 1 && <div style={{ width: 2, flex: 1, minHeight: 16, background: i < currentIdx ? 'var(--green)' : 'var(--border-weak)', marginTop: 4 }} />}
+              {i < orderedStages.length - 1 && <div style={{ width: 2, flex: 1, minHeight: 16, background: i < currentIdx ? 'var(--green)' : 'var(--border-weak)', marginTop: 4 }} />}
             </div>
 
             {/* 内容 */}

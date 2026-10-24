@@ -3,16 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { Save, Edit3, X, FileText, ChevronRight } from 'lucide-react';
 import { artifactName } from '../hooks/useFileNames';
 import ConfirmDialog from './ConfirmDialog';
-
-const STAGE_MAP: Record<string, { stage: string; name: string; order: number }> = {
-  'CHANGE.md':      { stage: '0-change', name: '变更提案', order: 0 },
-  'REQUIREMENT.md': { stage: '1-requirement', name: '需求分析', order: 1 },
-  'DESIGN.md':      { stage: '2-design', name: '技术设计', order: 2 },
-  'UI-DESIGN.md':   { stage: '2a-ui-design', name: 'UI 设计', order: 3 },
-  'TASK.md':        { stage: '3-task', name: '任务拆分', order: 4 },
-  'TEST.md':        { stage: '5-test', name: '测试验证', order: 6 },
-  'REVIEW.md':      { stage: '6-review', name: '代码审查', order: 7 },
-};
+import { useStageConfig } from '../stores/stageConfig';
 
 const STAGE_COLORS: Record<string, string> = {
   '0-change': 'var(--blue)', '1-requirement': 'var(--green)', '2-design': 'var(--purple)',
@@ -20,13 +11,23 @@ const STAGE_COLORS: Record<string, string> = {
   '5-test': 'var(--green)', '6-review': 'var(--purple)', '7-integration': 'var(--text-muted)',
 };
 
-function getStageInfo(fname: string) {
-  if (STAGE_MAP[fname]) return STAGE_MAP[fname];
+type StageInfo = { stage: string; name: string; order: number };
+
+function buildStageMap(stages: { id: string; name: string; file: string | null; order: number }[]): Record<string, StageInfo> {
+  const map: Record<string, StageInfo> = {};
+  for (const s of stages) if (s.file) map[s.file] = { stage: s.id, name: s.name, order: s.order };
+  return map;
+}
+
+function getStageInfo(stageMap: Record<string, StageInfo>, fname: string): StageInfo {
+  if (stageMap[fname]) return stageMap[fname];
   if (fname.includes('-SUMMARY')) return { stage: '4-dev', name: '开发执行', order: 5 };
   return { stage: 'unknown', name: '其他', order: 99 };
 }
 
 export default function ArtifactTab({ changeId, artifacts }: { changeId: string; artifacts: string[] }) {
+  const stageDefs = useStageConfig((st) => st.stages);
+  const stageMap = buildStageMap(stageDefs);
   const [selected, setSelected] = useState('');
   const [content, setContent] = useState('');
   const [original, setOriginal] = useState('');
@@ -37,8 +38,8 @@ export default function ArtifactTab({ changeId, artifacts }: { changeId: string;
 
   // 分组排序
   const sorted = [...artifacts].sort((a, b) => {
-    const sa = getStageInfo(a).order;
-    const sb = getStageInfo(b).order;
+    const sa = getStageInfo(stageMap, a).order;
+    const sb = getStageInfo(stageMap, b).order;
     if (sa !== sb) return sa - sb;
     return a.localeCompare(b);
   });
@@ -70,7 +71,7 @@ export default function ArtifactTab({ changeId, artifacts }: { changeId: string;
   };
 
   const isModified = editContent !== original;
-  const info = selected ? getStageInfo(selected) : null;
+  const info = selected ? getStageInfo(stageMap, selected) : null;
   const isMd = selected.endsWith('.md');
 
   return (
@@ -78,7 +79,7 @@ export default function ArtifactTab({ changeId, artifacts }: { changeId: string;
       {/* 左侧文件列表 */}
       <div style={{ width: 240, flexShrink: 0, borderRight: '1px solid var(--border)', paddingRight: 12, overflow: 'auto' }}>
         {sorted.map(fname => {
-          const si = getStageInfo(fname);
+          const si = getStageInfo(stageMap, fname);
           const isSummary = fname.includes('-SUMMARY');
           return (
             <div

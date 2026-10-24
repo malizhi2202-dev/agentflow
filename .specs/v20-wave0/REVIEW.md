@@ -42,3 +42,18 @@
 | 依赖 | ✅ 纯标准库；未引入 Alembic | `requirements.txt` diff 空 |
 | 只增不减 | ✅ 5 个迁移全为 expand（加列/建表/建索引） | `MIGRATIONS` 清单 |
 | 遗留 | ⚠ MySQL 端到端未验（本机无依赖）；MySQL 建表未写外键约束（SQLite 的 inline REFERENCES 在 MySQL 无效），靠应用层 | 已在 REVIEW 明写 |
+
+---
+
+## 六、P0-6/P0-7 追加复审（T-07）
+
+| 维度 | 结论 | 依据 |
+|---|---|---|
+| 单一事实源 | ✅ 默认值只剩 `stage_config.DEFAULT_WORKFLOW` 一份（admin_api 副本已删） | `grep -c "DEFAULT_WORKFLOW = {"` = 1 |
+| 两份扫描器合一 | ✅ 本地 `STAGE_FILES/STAGE_NAMES` 删除，改取属性（热更新可达） | 10 号用例 + `hasattr` 断言 |
+| 热更新 | ✅ admin PUT → `validate` → 落盘 → `apply()`；scanner/前端立即生效 | `routes/admin_api.py` update_workflow |
+| 响亮失败 | ✅ 非法配置 400 且**不写盘**；`apply` 失败不改旧快照 | `test_rejects_missing_or_bad` / `test_invalid_apply_keeps_old_snapshot` |
+| 首屏不阻塞 | ✅ 前端先渲染 `DEFAULT_STAGES`，fetch 失败只记 `error` 不弹窗 | `stores/stageConfig.ts` |
+| 类型诚实 | ✅ 自定义阶段 `file=null`，不猜文件名 | `normalizeStages` 用例 |
+| **越界** | ⚠ `WorkflowTab` 的 `what/tasks`（编辑性文案）仍硬编码 —— 配置 schema 无此字段，**刻意不塞**；若要做，属下一轮「阶段配置 v2」 | REVIEW 明写 |
+| 遗留 | ⚠ 后端集成测试未实跑（依赖装不上），`GET/PUT` 端到端只做了静态审查 | 同波 0 既有边界 |

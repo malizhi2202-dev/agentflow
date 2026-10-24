@@ -9,19 +9,9 @@ from config import get_specs_dir, CURRENT_PROJECT
 
 CACHE_TTL = 5.0  # 缓存 5 秒过期
 
-STAGES = ['0-change', '1-requirement', '2-design', '2a-ui-design', '3-task', '4-dev', '5-test', '6-review', '7-integration']
-STAGE_FILES = {
-    '0-change': 'CHANGE.md', '1-requirement': 'REQUIREMENT.md',
-    '2-design': 'DESIGN.md', '2a-ui-design': 'UI-DESIGN.md',
-    '3-task': 'TASK.md', '5-test': 'TEST.md', '6-review': 'REVIEW.md',
-}
-ARTIFACTS = ['CHANGE.md', 'REQUIREMENT.md', 'DESIGN.md', 'UI-DESIGN.md', 'TASK.md', 'TEST.md', 'REVIEW.md']
-STAGE_NAMES = {
-    '0-change': '变更提案', '1-requirement': '需求分析', '2-design': '技术设计',
-    '2a-ui-design': 'UI设计', '3-task': '任务拆分', '4-dev': '开发执行',
-    '5-test': '测试验证', '6-review': '代码审查', '7-integration': '集成归档',
-}
-
+# 阶段表单一事实源：见 stage_config.py（P0-6/P0-7）。
+# 一律取属性而非 from-import，这样 admin 改配置后 reload 立刻生效。
+import stage_config
 
 @dataclass
 class ChangeInfo:
@@ -65,7 +55,7 @@ def _phase_order(phase: str) -> int:
 
 def _detect_phase(change_dir: str) -> str:
     found = '0-change'
-    for stage, fname in STAGE_FILES.items():
+    for stage, fname in stage_config.STAGE_FILES.items():
         if os.path.exists(os.path.join(change_dir, fname)):
             found = stage
     if os.path.exists(os.path.join(change_dir, 'T01-SUMMARY.md')) or os.path.exists(os.path.join(change_dir, 'T00-SUMMARY.md')):
@@ -128,9 +118,9 @@ def _parse_stage_durations(change_dir: str) -> dict:
     """根据文件 mtime 估算各阶段耗时."""
     durations = {}
     prev_time = None
-    for stage in STAGES:
-        if stage in STAGE_FILES:
-            path = os.path.join(change_dir, STAGE_FILES[stage])
+    for stage in stage_config.STAGES:
+        if stage in stage_config.STAGE_FILES:
+            path = os.path.join(change_dir, stage_config.STAGE_FILES[stage])
             if os.path.exists(path):
                 mtime = os.path.getmtime(path)
                 if prev_time:
@@ -175,14 +165,14 @@ def _next_action(info: 'ChangeInfo') -> str:
     """推断下一步动作."""
     if info.interrupted: return f'恢复任务 {info.interrupted_task}'
     idx = _phase_order(info.phase)
-    if idx < len(STAGES) - 1:
-        next_stage = STAGES[idx + 1]
+    if idx < len(stage_config.STAGES) - 1:
+        next_stage = stage_config.STAGES[idx + 1]
         if '4-dev' in info.phase:
             total, done, _, _ = _count_tasks(change_dir=os.path.join(get_specs_dir(), info.id))
             pending = total - done
             if pending > 0: return f'还有 {pending} 个 task 待执行'
             return '全部 task 完成 — 运行 G3 门禁后进入 5-test'
-        return f'进入 {STAGE_NAMES.get(next_stage, next_stage)}'
+        return f'进入 {stage_config.STAGE_NAMES.get(next_stage, next_stage)}'
     return '归档完成 ✅'
 
 
@@ -216,7 +206,7 @@ class FileScanner:
             total, done, in_prog, blocked = _count_tasks(content=task_content)
             interrupted, interrupted_task = _check_interrupted(self.specs_dir, entry)
             phase = _detect_phase(path)
-            artifacts = [f for f in ARTIFACTS if os.path.exists(os.path.join(path, f))]
+            artifacts = [f for f in stage_config.ARTIFACTS if os.path.exists(os.path.join(path, f))]
             artifacts += sorted([f for f in os.listdir(path) if f.endswith('-SUMMARY.md')])
             # 时间线
             created_at = None
@@ -268,7 +258,7 @@ class FileScanner:
             manual_count = len(re.findall(r'<auto>false</auto>', task_content)) if task_content else 0
             pct = round(done / total * 100) if total > 0 else 0
             info = ChangeInfo(
-                id=entry, phase=phase, phase_name=STAGE_NAMES.get(phase, phase),
+                id=entry, phase=phase, phase_name=stage_config.STAGE_NAMES.get(phase, phase),
                 progress=f'{done}/{total}', progress_pct=pct,
                 status='interrupted' if interrupted else ('blocked' if blocked > 0 else 'normal'),
                 interrupted=interrupted, interrupted_task=interrupted_task,

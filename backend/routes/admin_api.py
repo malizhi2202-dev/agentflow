@@ -28,35 +28,8 @@ def _roles_file() -> str:
 # 工作流配置
 # ═══════════════════════════════════════════
 
-DEFAULT_WORKFLOW = {
-    "stages": [
-        {"id": "0-change", "name": "变更提案", "gate": "G1", "prompt": "prompts/0-change.md", "order": 0},
-        {"id": "1-requirement", "name": "需求分析", "gate": "需求门", "prompt": "prompts/1-requirement.md", "order": 1},
-        {"id": "2-design", "name": "技术设计", "gate": "G2", "prompt": "prompts/2-design.md", "order": 2},
-        {"id": "2a-ui-design", "name": "UI 设计", "gate": "G2a", "prompt": "prompts/2a-ui-design.md", "order": 3},
-        {"id": "3-task", "name": "任务拆分", "gate": "Task", "prompt": "prompts/3-task.md", "order": 4},
-        {"id": "4-dev", "name": "开发执行", "gate": "G3", "prompt": "prompts/4-dev.md", "order": 5},
-        {"id": "5-test", "name": "测试验证", "gate": "测试门", "prompt": "prompts/5-test.md", "order": 6},
-        {"id": "6-review", "name": "代码审查", "gate": "G4", "prompt": "prompts/6-review.md", "order": 7},
-        {"id": "7-integration", "name": "集成归档", "gate": None, "prompt": "prompts/7-integration.md", "order": 8},
-    ],
-    "gates": [
-        {"id": "G1", "name": "G1 需求方向门", "experts": ["高级产品经理", "资深用户评测员", "架构师", "安全审计师"]},
-        {"id": "需求门", "name": "需求质量门", "experts": ["高级产品经理", "资深用户评测员", "架构师", "安全审计师"]},
-        {"id": "G2", "name": "G2 方案门", "experts": ["架构师", "研发负责人", "领域专家", "安全审计师"]},
-        {"id": "G2a", "name": "G2a UI设计门", "experts": ["资深UI设计师", "资深用户体验官", "前端架构师", "无障碍专家"]},
-        {"id": "Task", "name": "Task 门", "experts": ["工程效能专家", "架构师", "研发负责人", "资深测试工程师"]},
-        {"id": "G3", "name": "G3 代码门", "experts": ["研发负责人", "架构师", "资深测试工程师", "安全审计师"]},
-        {"id": "测试门", "name": "测试门", "experts": ["资深测试工程师", "研发负责人", "高级产品经理", "资深用户体验官"]},
-        {"id": "G4", "name": "G4 审查门", "experts": ["资深测试工程师", "架构师", "领域专家", "安全审计师"]},
-    ],
-}
-
-
-def _load_workflow() -> dict:
-    if os.path.exists(_workflow_file()):
-        return json.load(open(_workflow_file(), encoding="utf-8"))
-    return dict(DEFAULT_WORKFLOW)
+import stage_config
+from stage_config import DEFAULT_WORKFLOW  # 单一事实源（原副本已删）
 
 
 def _backup_file(filepath: str):
@@ -99,10 +72,16 @@ async def update_workflow(request: Request):
     if not has_permission(user, "project:write"):
         raise HTTPException(status_code=403, detail="需要权限: project:write")
     body = await request.json()
+    # 先校验后落盘：残缺/重复阶段的配置直接 400，不写坏文件（S7-C4 响亮失败）
+    try:
+        stage_config.validate(body)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"workflow 配置非法: {e}")
     _save_workflow(body)
+    stage_config.apply(body)          # 进程内快照同步，scanner/前端立即看到新阶段
     write_audit(user, "project:write", "workflow.json", "config",
                 "更新工作流配置", request=request)
-    return {"ok": True}
+    return {"ok": True, "stages": [s["id"] for s in stage_config.validate(body)]}
 
 
 # ═══════════════════════════════════════════

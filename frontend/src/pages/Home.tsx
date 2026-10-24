@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useChanges, filteredChanges } from '../stores/changes';
+import { useStageConfig } from '../stores/stageConfig';
 import ChangeCard from '../components/ChangeCard';
 import { Search, PanelTop } from 'lucide-react';
 
 export default function Home({ onSelect }: { onSelect: (id: string) => void }) {
   const { changes, summary: s, loading, filter, fetchChanges } = useChanges();
+  const stages = useStageConfig((st) => st.stages);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function Home({ onSelect }: { onSelect: (id: string) => void }) {
         </select>
         <select value={filter.phase} onChange={e => useChanges.getState().setFilter({ phase: e.target.value })}>
           <option value="all">全部阶段</option>
-          {['0-change','1-requirement','2-design','2a-ui-design','3-task','4-dev','5-test','6-review','7-integration'].map(p => <option key={p} value={p}>{p}</option>)}
+          {stages.map(st => <option key={st.id} value={st.id}>{st.name}</option>)}
         </select>
         <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{list.length}/{changes.length}</span>
       </div>

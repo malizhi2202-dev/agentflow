@@ -46,3 +46,21 @@
 - **do**：账本表 `schema_migrations(version PK, description, applied_at)`；迁移为**幂等函数**（先查后改），新库/老库同一路径；只做 expand；**失败即抛**；方言**显式传入**（不按连接类名猜——SQLAlchemy `raw_connection()` 是代理对象）。
 - **verify**：`python3 -m unittest tests.test_migrations -v` → 6 用例全绿；`py_compile database.py migrations.py` 通过。
 - **不做**：不引 Alembic、不加依赖、不做 down 迁移（本仓只增不减）；真正的 MySQL 端到端验证等依赖可用时补。
+
+---
+
+## T-07 / P0-6 + P0-7 阶段模型单一事实源（2026-10-24 续）
+
+- **问题**：9 阶段与产物文件名硬编码在 **12 个文件**（后端 6 + 前端 6）；`workflow.json` + `/api/admin/workflow` 是已存在但没接上的配置落点；两份扫描器各存一套 `STAGE_FILES/STAGE_NAMES`。
+- **files**：
+  - 新 `backend/stage_config.py`（唯一默认值 + 校验 + 派生快照 + 读盘 reload）
+  - `backend/scanner.py`、`backend/runtime/scanner.py`（删本地表，改取 `stage_config.*`）
+  - `backend/routes/admin_api.py`（删 `DEFAULT_WORKFLOW` 副本；PUT 先校验后落盘 + `apply()` 热更新）
+  - `backend/routes/change_detail.py`（`STAGE_NAMES` 改取单一事实源）
+  - 新 `backend/tests/test_stage_config.py`
+  - 新 `frontend/src/stores/stageConfig.ts`（`GET /api/admin/workflow` + 默认兜底 + `normalizeStages`）
+  - 前端 6 消费者：`App.tsx`（启动拉一次）、`SearchBar`、`Home`、`Runtime`、`SpecsEditor`、`ArtifactTab`、`WorkflowTab`
+  - 新 `frontend/src/__tests__/stage-config.test.ts`
+- **do**：默认值只留一份；运行时以 `workflow.json` 为准；**配置非法即 400 且不落盘**（S7-C4 响亮失败）；前端先渲染默认表、拿到配置后覆盖（不阻塞首屏）。
+- **verify**：后端 10 用例 + 前端 57 用例 + `npm run build` 全绿（详见 TEST.md §五）。
+- **不做**：不做阶段级权限；不改 `workflow.json` schema 之外的结构；`what/tasks` 这类编辑性文案仍留在 `WorkflowTab`（配置 schema 没有该字段，硬塞会让配置变成文案仓库）。

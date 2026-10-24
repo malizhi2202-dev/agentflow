@@ -2,18 +2,7 @@ import { useEffect, useState } from 'react';
 import { FileText, Save, X, Edit3, ChevronRight, Clock, FolderOpen } from 'lucide-react';
 import { artifactName } from '../hooks/useFileNames';
 import { useAuth } from '../stores/auth';
-
-const STAGES = [
-  { id: '0-change', name: '变更提案', file: 'CHANGE.md' },
-  { id: '1-requirement', name: '需求分析', file: 'REQUIREMENT.md' },
-  { id: '2-design', name: '技术设计', file: 'DESIGN.md' },
-  { id: '2a-ui-design', name: 'UI 设计', file: 'UI-DESIGN.md' },
-  { id: '3-task', name: '任务拆分', file: 'TASK.md' },
-  { id: '4-dev', name: '开发执行', file: null },
-  { id: '5-test', name: '测试验证', file: 'TEST.md' },
-  { id: '6-review', name: '代码审查', file: 'REVIEW.md' },
-  { id: '7-integration', name: '集成归档', file: null },
-];
+import { useStageConfig } from '../stores/stageConfig';
 
 const STAGE_COLORS: Record<string, string> = {
   '0-change': 'var(--blue)', '1-requirement': 'var(--green)', '2-design': 'var(--purple)',
@@ -25,6 +14,7 @@ interface ArtifactInfo { changeId: string; fname: string; phase: string; }
 
 export default function SpecsEditor({ onSelect }: { onSelect: (id: string) => void }) {
   const { isAdmin, rolePermissions } = useAuth();
+  const STAGES = useStageConfig((st) => st.stages);
   const canWrite = isAdmin || rolePermissions.includes('project:write');
   const [changes, setChanges] = useState<any[]>([]);
   const [activeStage, setActiveStage] = useState('0-change');

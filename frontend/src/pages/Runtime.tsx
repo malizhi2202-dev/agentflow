@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Activity, Zap, ChevronRight, RefreshCw, Loader2 } from 'lucide-react';
 import StatsTab from '../components/StatsTab';
+import { useStageConfig } from '../stores/stageConfig';
 
 interface Session {
   session_id: string; agent: string; model: string; timestamp: string;
@@ -9,11 +10,6 @@ interface Session {
 }
 
 const AGENT_ICONS: Record<string, string> = { 'claude-code': '◈', 'codex': '⬡', 'hermes': '⚚', 'xiaolongxia': '🦞' };
-const STAGE_NAMES: Record<string, string> = {
-  '0-change': '变更提案', '1-requirement': '需求分析', '2-design': '技术设计',
-  '2a-ui-design': 'UI设计', '3-task': '任务拆分', '4-dev': '开发执行',
-  '5-test': '测试验证', '6-review': '代码审查', '7-integration': '集成归档',
-};
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   success: { label: '成功', color: 'var(--green)', bg: 'var(--green-bg)' },
   error: { label: '失败', color: 'var(--red)', bg: 'var(--red-bg)' },
@@ -21,6 +17,8 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
 };
 
 export default function Runtime() {
+  const stageDefs = useStageConfig((st) => st.stages);
+  const STAGE_NAMES: Record<string, string> = Object.fromEntries(stageDefs.map((d) => [d.id, d.name]));
   const [sessions, setSessions] = useState<Session[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [selected, setSelected] = useState<string | null>(null);

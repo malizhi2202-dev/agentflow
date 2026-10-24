@@ -35,6 +35,7 @@ import ApprovalPage from './pages/ApprovalPage';
 import UserArea from './components/UserSelect';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuth } from './stores/auth';
+import { useStageConfig } from './stores/stageConfig';
 import { safeFetch } from './utils/requestDedup';
 
 function EmptyPerm() {
@@ -111,6 +112,10 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(false);
   const { isAdmin, rolePermissions, fetchMe, fetchUsers, loaded } = useAuth();
   const [alertCount, setAlertCount] = useState(0);
+
+  // 阶段模型：进应用拉一次（后端单一事实源，失败回退默认表）
+  const fetchStageConfig = useStageConfig((st) => st.fetchStageConfig);
+  useEffect(() => { fetchStageConfig(); }, [fetchStageConfig]);
 
   // 轮询告警数量（接入去重层，降低频率 15s → 30s）
   useEffect(() => {

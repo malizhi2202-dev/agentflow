@@ -1,10 +1,12 @@
 import { useChanges } from '../stores/changes';
+import { useStageConfig } from '../stores/stageConfig';
 
 const STATUSES = ['all', 'normal', 'interrupted', 'blocked'];
-const PHASES = ['all', '0-change', '1-requirement', '2-design', '2a-ui-design', '3-task', '4-dev', '5-test', '6-review', '7-integration'];
 
 export default function SearchBar() {
   const { filter, setFilter } = useChanges();
+  const stages = useStageConfig((s) => s.stages);
+  const PHASES = ['all', ...stages.map((s) => s.id)];
 
   return (
     <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>

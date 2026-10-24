@@ -68,3 +68,32 @@ Ran 6 tests in 0.09s — OK
 **未覆盖（诚实）**：`database.init_db()` 的真实调用需要 SQLAlchemy，本机装不上（PyPI 超时、仓库无 venv），
 故 `create_all → apply_migrations` 的端到端链路未实跑；已用「代理连接」用例把最容易错的方言判定钉死。
 依赖可用时补一条 `init_db()` 冒烟即可。
+
+---
+
+## 五、P0-6/P0-7 阶段模型单一事实源（T-07 · 追加）
+
+```
+$ cd backend && python3 -m unittest tests.test_stage_config -v
+test_default_stages ... ok
+test_stage_files_and_artifacts ... ok
+test_missing_file_falls_back_to_default ... ok
+test_reload_reads_project_file ... ok
+test_workflow_file_location ... ok
+test_runtime_scanner_has_no_local_tables ... ok
+test_scanners_share_the_same_module ... ok
+test_custom_order_is_respected ... ok
+test_invalid_apply_keeps_old_snapshot ... ok
+test_rejects_missing_or_bad ... ok
+Ran 10 tests in 0.065s — OK
+
+$ cd frontend && npx tsc --noEmit          → 0 错误
+$ npm test                                 → 6 files / 57 tests 全绿（新增 stage-config 5 条）
+$ npm run build                            → ✓ built in 17.90s
+```
+
+**关键断言**：
+- `assertIs(scanner.stage_config, sc)` —— 扫描器与单一事实源是同一个模块对象
+- `assertFalse(hasattr(runtime.scanner, "STAGE_FILES"))` —— 运行时扫描器不再有本地表
+- `test_invalid_apply_keeps_old_snapshot` —— 非法配置不得污染既有快照
+- `normalizeStages` 单测 5 条：排序 / 文件映射 / 自定义阶段 file=null / 缺 name 回退 id / 非法输入抛错
