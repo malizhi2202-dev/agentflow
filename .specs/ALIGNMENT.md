@@ -174,9 +174,27 @@ $ cd frontend && npm run build
 | 10-24 17:40 | D1-6 | README `/api/squads` 行补授权口径 | 本轮 docs 提交 |
 | 10-24 17:40 | D5-2 | `v20-ui-teams/REVIEW.md` 遗留 #4 标注"已在 v20-squad-authz 修" | 本轮 docs 提交 |
 
-## 9. 下一轮基线
+## 9. 第 5 轮增量（2026-10-24 · 记忆中心与提案抽屉）
 
-`f55e53c7`（+ 本轮 docs 提交）—— 下次 S-align 从此开始扫描。
+**覆盖提交**：`8c3f1906`（feat ui-rsi）+ 本轮 docs 提交
+
+| 编号 | 类型 | 层 | 证据 | 描述 | 处理 |
+|---|---|---|---|---|---|
+| D1-7 | 代码变文档未变 | L3 | `8c3f1906` + `README.md` §RSI 产物治理 | 治理面上线，README 仍只写后端 | **已合并**：标题补「界面已挂载 `v20-ui-rsi`」 |
+| D4-7 | 执行留痕 | L5 | `.specs/v20-ui-rsi/` | 产物齐（CHANGE/REQUIREMENT/DESIGN/UI-DESIGN/TASK/SUMMARY×4/TEST/REVIEW + G1/需求/G2/G2a/Task/G3/测试/G4） | **已闭环** |
+| D4-8 | 执行留痕 | L5 | `v20-ui-rsi/REVIEW.md` | 实现中抓到 2 个自造 bug（surfaces 未拉取 / setResult 覆盖）并留回归用例 | 已记录 |
+
+> 流程债：历史 9 个 change 仍缺 REQUIREMENT/DESIGN/门票（不伪造），后续新 change 继续走完整链。
+
+**已对齐记录**：
+
+| 时间 | 漂移 | 合并动作 | 提交 |
+|---|---|---|---|
+| 10-24 18:20 | D1-7 | README RSI 节标题补界面挂载 | 本轮 docs 提交 |
+
+## 10. 下一轮基线
+
+`8c3f1906`（+ 本轮 docs 提交）—— 下次 S-align 从此开始扫描。
 
 ---
 

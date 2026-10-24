@@ -430,7 +430,7 @@ INSTANCE_ID=node-2 uvicorn main:app --port 8001
   `status.observedGeneration` 区分「没处理」与「处理了结果未变」。
 - `GET /api/watch?since=<id>`：SSE 推 `change_log` 事件；游标被裁剪 → 先发 `event: resync`（410 等价）。
 
-### RSI 产物治理（波 6 · R6/R7）
+### RSI 产物治理（波 6 · R6/R7 · 界面已挂载 `v20-ui-rsi`）
 
 治理对象是**四类产物**（技能 / 记忆 / 编排配置 / 模型权重），**代码层 RSI 禁止**（线上稳定优先）：
 
