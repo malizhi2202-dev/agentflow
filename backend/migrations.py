@@ -488,6 +488,12 @@ def m012_declarative_api(conn, dialect: str) -> None:
 
 
 
+def m017_agent_prompt_fields(conn, dialect: str) -> None:
+    """T-05：Agent 人设三件落库（system_prompt / role_def / sop）。"""
+    for column in ("system_prompt", "role_def", "sop"):
+        add_column_if_missing(conn, dialect, "agents", column, "TEXT")
+
+
 def m016_domain_attribution_policy(conn, dialect: str) -> None:
     """R8-2 剩余面：域级 accountable 策略表（一域一条；无行 = 现状）。"""
     pk = _pk_clause(dialect)
@@ -603,6 +609,7 @@ MIGRATIONS: list[Migration] = [
     ("014_rsi_review_and_switches", "记忆因果前缀/防污染 + 晋升评审账 + 类目开关（R6-4/R7-4/R7-5）", m014_rsi_review_and_switches),
     ("015_attribution_columns", "任务/运行归因双列 originator⟂accountable（R8-2）", m015_attribution_columns),
     ("016_domain_attribution_policy", "域级 accountable 策略表（R8-2 剩余面）", m016_domain_attribution_policy),
+    ("017_agent_prompt_fields", "Agent 人设三件落库（T-05）", m017_agent_prompt_fields),
 ]
 
 

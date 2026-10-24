@@ -56,7 +56,9 @@ def api_create_agent(payload: dict, request: Request = None, db: Session = Depen
     runtime = payload.get("runtime", "langgraph")
     if runtime not in SUPPORTED_RUNTIMES:
         raise HTTPException(status_code=400, detail=f"不支持的 runtime: '{runtime}'。支持: {sorted(SUPPORTED_RUNTIMES)}")
-    agent = Agent(owner_id=user["id"], name=payload["name"], description=payload.get("description", ""), runtime=runtime, model_provider=model_provider, model_name=payload.get("model_name", ""), model_config_json=payload.get("model_config_json", {}), api_key_encrypted=encrypt(api_key), workflow_id=payload.get("workflow_id"), token_soft_limit=payload.get("token_soft_limit", 800000), token_hard_limit=payload.get("token_hard_limit", 1000000), domain_id=payload.get("domain_id"))
+    agent = Agent(owner_id=user["id"], name=payload["name"], description=payload.get("description", ""), runtime=runtime, model_provider=model_provider, model_name=payload.get("model_name", ""), model_config_json=payload.get("model_config_json", {}), api_key_encrypted=encrypt(api_key), workflow_id=payload.get("workflow_id"), token_soft_limit=payload.get("token_soft_limit", 800000), token_hard_limit=payload.get("token_hard_limit", 1000000), domain_id=payload.get("domain_id"),
+                  # T-05：人设三件落库（此前只收不存）
+                  system_prompt=payload.get("system_prompt"), role_def=payload.get("role_def"), sop=payload.get("sop"))
     db.add(agent)
     db.commit()
     db.refresh(agent)
@@ -86,7 +88,10 @@ def api_update_agent(agent_id: int, payload: dict, request: Request = None, db: 
     a = q.first()
     if not a:
         raise HTTPException(status_code=404, detail="Agent 不存在")
-    for f in ("name", "description", "model_provider", "model_name", "model_config_json", "workflow_id", "token_soft_limit", "token_hard_limit", "domain_id"):
+    # T-05：人设三件也是可编辑字段（以前漏在这里 → 编辑后不落库）
+    for f in ("name", "description", "model_provider", "model_name", "model_config_json",
+              "system_prompt", "role_def", "sop",
+              "workflow_id", "token_soft_limit", "token_hard_limit", "domain_id"):
         if f in payload:
             if f == "model_provider" and payload[f] not in SUPPORTED_PROVIDERS:
                 raise HTTPException(status_code=400, detail=f"不支持的 model_provider: '{payload[f]}'。支持: {sorted(SUPPORTED_PROVIDERS)}")

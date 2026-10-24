@@ -33,6 +33,10 @@ class Agent(Base):
     gate_pre_check: Mapped[str | None] = mapped_column(Text, nullable=True)
     gate_post_check: Mapped[str | None] = mapped_column(Text, nullable=True)
     io_filter: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    # T-05：人设三件（此前只在请求体里传、不落库 → 编辑后丢）。统一存 Text，可空。
+    system_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
+    role_def: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sop: Mapped[str | None] = mapped_column(Text, nullable=True)
     visibility: Mapped[str] = mapped_column(String(16), default="private")
     project_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
@@ -47,6 +51,9 @@ class Agent(Base):
             "workflow_id": self.workflow_id,
             "token_soft_limit": self.token_soft_limit, "token_hard_limit": self.token_hard_limit,
             "total_tokens_used": self.total_tokens_used,
+            "system_prompt": self.system_prompt,
+            "role_def": self.role_def,
+            "sop": self.sop,
             "gate_pre_check": self.gate_pre_check, "gate_post_check": self.gate_post_check, "io_filter": self.io_filter,
             "status": self.status, "visibility": self.visibility,
             "domain_id": self.domain_id,

@@ -10,6 +10,11 @@ from services.audit_service import log_audit
 from services.runtime_tracer import tracer
 from services.llm_providers import get_provider, SUPPORTED_PROVIDERS
 
+
+def _system_prompt_for(agent) -> str:
+    """T-05：人设优先级 system_prompt > description > 默认（三件之一落库后即生效）。"""
+    return getattr(agent, "system_prompt", None) or agent.description or "You are a helpful assistant."
+
 _ATTACK_PREFIXES = [
     "ignore all previous instructions",
     "ignore previous instructions",
@@ -91,7 +96,7 @@ class ChatService:
         db.refresh(agent_msg)
 
         # 6. 构造 prompt（角色标记隔离）
-        system_prompt = getattr(agent, "system_prompt", None) or agent.description or "You are a helpful assistant."
+        system_prompt = _system_prompt_for(agent)
         messages = [{"role": "system", "content": system_prompt}]
         user_content = content
         if was_truncated:
