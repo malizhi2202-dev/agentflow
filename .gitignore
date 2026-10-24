@@ -5,3 +5,9 @@ __pycache__
 dist
 frontend/dist
 .vite
+
+# 运行期数据（不入库）
+audit.jsonl
+users.json
+project_state.json
+data/
