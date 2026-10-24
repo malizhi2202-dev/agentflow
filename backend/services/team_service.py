@@ -112,7 +112,7 @@ def get_for_member(db: Session, user: dict, ref: str) -> Team:
     team = _find_team(db, ref)
     if team is None:
         raise NotFound("团队不存在")
-    if user.get("role") == "admin":
+    if _is_admin(user):
         return team
     if member_role(db, team, user["id"]) is None:
         raise NotFound("团队不存在")
@@ -120,7 +120,7 @@ def get_for_member(db: Session, user: dict, ref: str) -> Team:
 
 
 def list_for_user(db: Session, user: dict) -> list[dict]:
-    if user.get("role") == "admin":
+    if _is_admin(user):
         teams = db.query(Team).order_by(Team.id.asc()).all()
     else:
         ids = [r.team_id for r in db.query(TeamMember).filter(
@@ -181,8 +181,9 @@ def add_member(db: Session, team: Team, user_id: str, role: str = "member") -> T
         raise TeamError("owner 只能通过转让产生")
     if member_role(db, team, user_id) is not None:
         raise TeamError("成员已存在")
-    if team.status == "archived":
-        raise TeamError("团队已归档，不能再加成员")
+    # 暂停 = 停配额新增；归档 = 冻结。两者都不允许再加成员
+    if team.status != "active":
+        raise TeamError(f"团队状态为 {team.status}，不能再加成员")
     count = db.query(TeamMember).filter(TeamMember.team_id == team.id).count()
     if count >= team.max_members:
         raise TeamError(f"成员数已达上限 {team.max_members}")
@@ -228,14 +229,84 @@ def transfer_owner(db: Session, team: Team, new_owner: str, confirm: bool) -> Te
     return team
 
 
+def _set_assets_owner_kind(db: Session, team: Team, owner_kind: str) -> int:
+    """归档/恢复时切换资产托管方；team_id 保留，恢复时可原路认回。"""
+    touched = 0
+    for model in ASSET_MODELS.values():
+        touched += db.query(model).filter(model.team_id == team.id).update(
+            {model.owner_kind: owner_kind}, synchronize_session=False,
+        )
+    return int(touched or 0)
+
+
 def set_status(db: Session, team: Team, status: str) -> Team:
+    """三态：active / paused / archived。
+
+    - paused：停配额新增与新增指派（加成员、挂资产都被拒）；
+    - archived：资产转 platform 托管；**可恢复**（团队有地方可托管，与小隊相反）。
+    """
     if status not in TEAM_STATUSES:
         raise TeamError(f"status 必须是 {sorted(TEAM_STATUSES)} 之一")
+    if status == team.status:
+        return team
+    if status == "archived":
+        _set_assets_owner_kind(db, team, "platform")
+    elif team.status == "archived" and status == "active":
+        _set_assets_owner_kind(db, team, "team")
     team.status = status
     team.updated_at = _now()
     db.commit()
     db.refresh(team)
     return team
+
+
+def team_token_usage(db: Session, team: Team) -> int:
+    """团队近 30 天 token = 归属该团队的 Agent 的 session_metrics 汇总（成本记在资产上）。"""
+    agent_ids = [
+        i for (i,) in db.query(Agent.id).filter(Agent.team_id == team.id).all()
+    ]
+    if not agent_ids:
+        return 0
+    since = _now() - datetime.timedelta(days=TOKEN_WINDOW_DAYS)
+    total = db.query(func.coalesce(func.sum(SessionMetric.total_tokens), 0)).filter(
+        SessionMetric.entity_type == "agent",
+        SessionMetric.entity_id.in_(agent_ids),
+        SessionMetric.timestamp >= since,
+    ).scalar()
+    return int(total or 0)
+
+
+def token_budget(db: Session, team: Team) -> dict:
+    used = team_token_usage(db, team)
+    level = "ok"
+    if used >= team.token_hard_limit:
+        level = "hard"
+    elif used >= team.token_soft_limit:
+        level = "soft"
+    return {
+        "used": used,
+        "soft_limit": team.token_soft_limit,
+        "hard_limit": team.token_hard_limit,
+        "level": level,
+        "window_days": TOKEN_WINDOW_DAYS,
+    }
+
+
+def _enforce_token_budget(db: Session, leader: Agent) -> dict | None:
+    """新增指派前查 leader 所属团队配额：软=放行并带告警，硬=拒绝并说明违反哪一条。"""
+    if leader.team_id is None:
+        return None
+    team = db.query(Team).filter(Team.id == leader.team_id).first()
+    if team is None:
+        return None
+    budget = token_budget(db, team)
+    if budget["level"] == "hard":
+        raise Rejection(
+            "quota_token_hard",
+            f"团队 {team.slug} 近 {TOKEN_WINDOW_DAYS} 天 token 已达硬上限 "
+            f"{team.token_hard_limit}（used={budget['used']}），拒绝新增指派",
+        )
+    return budget if budget["level"] == "soft" else None
 
 
 # ── 资产归属（五类）───────────────────────────────────────
@@ -268,9 +339,9 @@ def _asset(db: Session, kind: str, asset_id: int):
 
 
 def claim_asset(db: Session, team: Team, actor: str, kind: str, asset_id: int) -> dict:
-    """把个人资产挂到团队（一次转让 + 审计）：之后原个人不再自动共享。"""
-    if team.status == "archived":
-        raise TeamError("团队已归档，不能再挂资产")
+    """把个人资产挂到团队（一次转让）：之后原个人不再自动共享。"""
+    if team.status != "active":
+        raise TeamError(f"团队状态为 {team.status}，不能再挂资产（暂停/归档停配额新增）")
     row = _asset(db, kind, asset_id)
     if row.team_id == team.id:
         return {"id": row.id, "team_id": row.team_id, "owner_kind": row.owner_kind}

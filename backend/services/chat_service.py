@@ -98,6 +98,16 @@ class ChatService:
             user_content += "\n\n[系统提示：你的消息超过长度限制，以上基于前 {} 字符回复]".format(MAX_MESSAGE_LENGTH)
         messages.append({"role": "user", "content": user_content})
 
+        # 6.5 执行隔离契约（P2-3）：档位不可用即在此失败，绝不静默降级
+        from services import execution_contract
+        try:
+            execution_contract.assert_can_execute()
+        except execution_contract.ExecutionContractError as e:
+            agent_msg.content = f"[执行被拒绝] {e}"
+            agent_msg.status = "error"
+            db.commit()
+            raise RuntimeError(f"执行隔离契约不成立: {e}")
+
         # 7. 调用 LLM（通过提供者适配器）
         try:
             api_key = decrypt(agent.api_key_encrypted) if agent.api_key_encrypted else ""

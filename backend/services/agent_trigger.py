@@ -22,6 +22,11 @@ class AgentRunError(ValueError):
 def trigger_agent_run(agent_id: int, owner_id: str, is_admin: bool = False,
                       db: Session | None = None) -> dict | None:
     """把 Agent 置为 running 并载入相关记忆；不存在/无权返回 None。"""
+    # P2-3：执行隔离契约先行——档位不可用直接拒绝（fail-closed，不降级）
+    from services import execution_contract
+
+    execution_contract.assert_can_execute()
+
     own = db is None
     db = db or SessionLocal()
     try:

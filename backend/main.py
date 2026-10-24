@@ -39,6 +39,9 @@ from routes.human_approval_api import router as human_approval_router
 from routes.tasks_api import router as tasks_router
 from routes.inbox_api import router as inbox_router
 from routes.teams_api import router as teams_router
+from routes.prom_metrics import router as prom_metrics_router
+from routes.watch_api import router as watch_router
+from routes.execution_api import router as execution_router
 
 
 async def _cron_scheduler_loop():
@@ -151,6 +154,9 @@ def _cron_matches(cron_expr: str, now, last_run) -> bool:
 async def lifespan(app: FastAPI):
     # 部署配置先响亮失败（P0-3）：非法配置不启动，绝不静默降级
     deploy_guard.validate_deploy_config()
+    # 执行隔离契约（P2-3）：选了未实现的 tier 就拒绝启动，不静默降级到 inproc
+    from services.execution_contract import validate_startup as _validate_exec
+    print(f"[exec] 执行隔离契约：{_validate_exec().to_dict()}")
     print(
         f"[deploy] 模式={config.DEPLOY_MODE} · 可信代理={config.TRUSTED_PROXY_IPS or '无'} · "
         f"网段={config.ALLOW_CIDRS or '无'} · TLS={config.TLS_TERMINATED} · "
@@ -277,6 +283,10 @@ async def auth_middleware(request: Request, call_next):
     client_ip = deploy_guard.effective_client_ip(peer, request.headers.get("x-forwarded-for"))
     request.state.client_ip = client_ip
 
+    # 2.5) /metrics 开关：未开启连 401 都不给（404，不暴露端点存在）
+    if path == "/metrics" and not config.METRICS_ENDPOINT_ENABLED:
+        return JSONResponse({"detail": "metrics endpoint disabled"}, status_code=404)
+
     # 3) 匿名入口（登录/用户列表/权限表）：不需要身份，来源闸门仍然生效
     if path in _ANON_AUTH_PATHS:
         request.state.user = None
@@ -389,6 +399,9 @@ app.include_router(human_approval_router)
 app.include_router(tasks_router)
 app.include_router(inbox_router)
 app.include_router(teams_router)
+app.include_router(prom_metrics_router)
+app.include_router(watch_router)
+app.include_router(execution_router)
 
 # CORS 必须**最后**加（Starlette 的 add_middleware 头插 → 最后注册 = 最外层）：
 # 这样来源闸门/认证返回的 403/401 与预检响应都带 CORS 头（P0-3 AC-3.3）。

@@ -6,6 +6,7 @@ import datetime
 from contextlib import contextmanager
 from database import SessionLocal
 from models.metrics import SessionMetric, MetricRaw
+from models.orchestration import TraceSpan
 
 
 class RuntimeTracer:
@@ -39,6 +40,28 @@ class RuntimeTracer:
                 status=status, timestamp=datetime.datetime.utcnow()
             )
             db.add(agg)
+            # ── P2-4 产生端：写 trace_spans（此前这张表零写入）──
+            # trace_id 是**合成 ID**（非 W3C traceparent）：B 档契约不冻结，先让数据长出来
+            trace_id = uuid.uuid4().hex[:16]
+            span_status = "ok" if status == "success" else "error"
+            root = TraceSpan(
+                trace_id=trace_id, parent_span_id=None,
+                owner_id=owner_id, name=f"{entity_type}:{model_name}",
+                span_kind="server", status=span_status,
+                duration_ms=duration_ms, tokens=total,
+                to_agent_id=entity_id if entity_type == "agent" else None,
+                span_type="model_call",
+            )
+            db.add(root)
+            db.flush()
+            if tool_name:
+                db.add(TraceSpan(
+                    trace_id=trace_id, parent_span_id=root.id,
+                    owner_id=owner_id, name=tool_name,
+                    span_kind="client", status=span_status,
+                    duration_ms=0, tokens=0, span_type="tool_call",
+                ))
+
             # 通知探针系统（被动收集执行数据）
             try:
                 from services.agent_probe_service import _notify_activity

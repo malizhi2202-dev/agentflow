@@ -412,6 +412,82 @@ def m010_teams_and_squads(conn, dialect: str) -> None:
 
 
 
+def m011_trace_spans_observability(conn, dialect: str) -> None:
+    """P2-4 前置：trace_spans 补父子链与产端字段（expand-only）。
+
+    旧表把 `instance_id` / `to_agent_id` 设为 NOT NULL，只能装编排实例内的调用；
+    绝大多数模型调用（chat / tool）没有实例，于是这张表长期零行。SQLite 不能改
+    可空性，因此整表重建（旧行按列搬，缺失列给默认值）。表此前实测零写入，
+    但迁移仍按「保数据」写。
+    """
+    cols = _columns(conn, dialect, "trace_spans")
+    if not cols or "trace_id" in cols:
+        return
+
+    new = "trace_spans__p2_4"
+    cur = conn.cursor()
+    cur.execute(f"DROP TABLE IF EXISTS {new}")
+    cur.execute(
+        f"CREATE TABLE {new} (id {_pk_clause(dialect)}, trace_id VARCHAR(32), "
+        "parent_span_id INTEGER, instance_id INTEGER, from_agent_id INTEGER, "
+        "to_agent_id INTEGER, owner_id VARCHAR(64), name VARCHAR(128), "
+        "span_kind VARCHAR(16), status VARCHAR(16), duration_ms INTEGER DEFAULT 0, "
+        "tokens INTEGER DEFAULT 0, input_hash VARCHAR(64), output_hash VARCHAR(64), "
+        "span_type VARCHAR(16), timestamp DATETIME)"
+    )
+    ph = "%s" if dialect == "mysql" else "?"
+    cur.execute(
+        "SELECT id, instance_id, from_agent_id, to_agent_id, duration_ms, tokens, "
+        "input_hash, output_hash, span_type, timestamp FROM trace_spans"
+    )
+    rows = cur.fetchall()
+    for row in rows:
+        cur.execute(
+            f"INSERT INTO {new} (id, instance_id, from_agent_id, to_agent_id, duration_ms, "
+            f"tokens, input_hash, output_hash, span_type, timestamp, trace_id, span_kind, status) "
+            f"VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, '', 'internal', 'ok')",
+            row,
+        )
+    cur.execute("DROP TABLE trace_spans")
+    cur.execute(f"ALTER TABLE {new} RENAME TO trace_spans")
+    for index, column in (
+        ("ix_trace_spans_trace_id", "trace_id"),
+        ("ix_trace_spans_parent_span_id", "parent_span_id"),
+        ("ix_trace_spans_instance_id", "instance_id"),
+        ("ix_trace_spans_to_agent_id", "to_agent_id"),
+        ("ix_trace_spans_owner_id", "owner_id"),
+        ("ix_trace_spans_status", "status"),
+        ("ix_trace_spans_timestamp", "timestamp"),
+    ):
+        create_index_if_missing(conn, dialect, index, "trace_spans", column)
+
+
+
+def m012_declarative_api(conn, dialect: str) -> None:
+    """P2-5：change_log 单账本 + resource_conditions（generation/observedGeneration）。"""
+    pk = _pk_clause(dialect)
+    create_table_if_missing(conn, dialect, "change_log",
+        f"id {pk}, resource_type VARCHAR(32) NOT NULL, resource_id VARCHAR(64), "
+        "generation INTEGER DEFAULT 1, actor VARCHAR(64), action VARCHAR(32), "
+        "before_hash VARCHAR(64), after_hash VARCHAR(64), payload_json TEXT, created_at DATETIME")
+    for index, cols in (
+        ("ix_change_log_resource", "resource_type, resource_id"),
+        ("ix_change_log_generation", "generation"),
+        ("ix_change_log_created_at", "created_at"),
+    ):
+        create_index_if_missing(conn, dialect, index, "change_log", cols)
+
+    create_table_if_missing(conn, dialect, "resource_conditions",
+        f"id {pk}, resource_type VARCHAR(32) NOT NULL, resource_id VARCHAR(64), "
+        "condition_type VARCHAR(32) DEFAULT 'Ready', status VARCHAR(8) DEFAULT 'True', "
+        "reason VARCHAR(64), message TEXT, generation INTEGER DEFAULT 1, "
+        "observed_generation INTEGER DEFAULT 0, last_transition_at DATETIME, "
+        "UNIQUE(resource_type, resource_id, condition_type)")
+    create_index_if_missing(conn, dialect, "ix_resource_conditions_resource",
+                            "resource_conditions", "resource_type, resource_id")
+
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -423,6 +499,8 @@ MIGRATIONS: list[Migration] = [
     ("008_alerts_and_queue_merge", "告警落表 + 双队列并表（P1-16）", m008_alerts_and_queue_merge),
     ("009_collab_layer", "任务/运行连接/订阅/收件箱四表（P1-4）", m009_collab_layer),
     ("010_teams_and_squads", "Team/Squad 两实体 + 五类资产归属列（R5）", m010_teams_and_squads),
+    ("011_trace_spans_observability", "trace_spans 父子链与产端字段（P2-4）", m011_trace_spans_observability),
+    ("012_declarative_api", "change_log 单账本 + resource_conditions（P2-5）", m012_declarative_api),
 ]
 
 

@@ -1,10 +1,11 @@
 """工作流 API 路由 — CRUD + 执行 + 发布."""
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from database import get_db
 from models.workflow import Workflow, WorkflowSnapshot
 from services.snapshot_service import create_snapshot
 from services.audit_service import log_audit
+from services import declarative
 
 router = APIRouter(prefix="/api/workflows", tags=["workflows"])
 
@@ -46,12 +47,23 @@ def api_create_workflow(payload: dict, request: Request = None, db: Session = De
 
 
 @router.get("/{workflow_id}")
-def api_get_workflow(workflow_id: int, request: Request = None, db: Session = Depends(get_db)):
+def api_get_workflow(workflow_id: int, request: Request = None, response: Response = None,
+                     db: Session = Depends(get_db)):
     q = _filter_owner(db.query(Workflow).filter(Workflow.id == workflow_id), _user(request))
     wf = q.first()
     if not wf:
         raise HTTPException(status_code=404, detail="工作流不存在")
-    return wf.to_dict()
+    data = wf.to_dict()
+    # P2-5：ETag + 声明式状态（generation / conditions / observedGeneration）
+    if response is not None:
+        response.headers["ETag"] = declarative.etag_for(_etag_payload(wf))
+    data.update(declarative.envelope(data, "workflow", str(wf.id), db))
+    return data
+
+
+def _etag_payload(wf) -> dict:
+    return {"id": wf.id, "name": wf.name, "spec": wf.spec_json or {},
+            "updated_at": wf.updated_at.isoformat() if wf.updated_at else None}
 
 
 @router.put("/{workflow_id}")
@@ -63,9 +75,25 @@ def api_update_workflow(workflow_id: int, payload: dict, request: Request = None
         raise HTTPException(status_code=404, detail="工作流不存在")
     if wf.status == "running":
         raise HTTPException(status_code=400, detail="运行中工作流不可编辑")
+    # P2-5 ①：If-Match 不匹配即 412（治「PUT 盲覆盖」）
+    declarative.check_if_match(request, _etag_payload(wf))
+    before_hash = declarative.canonical_hash(_etag_payload(wf))
     for f in ("name", "description", "spec_json", "token_soft_limit", "token_hard_limit"):
         if f in payload:
             setattr(wf, f, payload[f])
+    after = _etag_payload(wf)
+    after["updated_at"] = None      # updated_at 由 onupdate 生成，不能参与哈希
+    after_hash = declarative.canonical_hash({**after, "updated_at": None})
+    change = declarative.append_change(
+        db, "workflow", str(wf.id), user["id"], "update",
+        before_hash=before_hash, after_hash=after_hash,
+        payload={"name": wf.name},
+    )
+    declarative.set_condition(
+        db, "workflow", str(wf.id), "True", reason="Applied",
+        message=f"generation {change.generation} 已应用",
+        observed_generation=change.generation,
+    )
     db.commit()
     db.refresh(wf)
     log_audit(user["id"], user.get("name", user["id"]), "workflow.update", wf.name, "workflow", "updated", request.client.host if request.client else "127.0.0.1")

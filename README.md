@@ -363,6 +363,11 @@ agentflow/
 | `INSTANCE_ID` | `host:pid:随机` | 副本标识（租约持有者/队列租约都用它） |
 | `CLUSTER_LEASE_TTL_SECONDS` | `90` | 单例循环租约 TTL；到期未续即被其他副本接管 |
 | `QUEUE_LEASE_SECONDS` | `60` | 队列任务租约；心跳停止超时后任务回队 |
+| `EXECUTION_TIER` | `inproc` | 执行隔离档位；本版只实现 `inproc`，其它档位（process/container/microvm/remote）选即**启动失败**（fail-closed） |
+| `EXECUTION_TTL_SECONDS` | `300` | 单次执行时限（秒），上限 3600 |
+| `EXECUTION_RETAIN` | `false` | 保留执行工作区（必须配 ttl） |
+| `EXECUTION_EGRESS_ALLOW` | (空=默认拒绝) | 出网白名单（逗号分隔域名/CIDR）；`*` 一律拒绝 |
+| `METRICS_ENDPOINT_ENABLED` | `false` | 开启 `GET /metrics`（Prometheus 文本格式，直读现表；仍需身份鉴权） |
 
 ### 副本与单例循环（P0-9 / P1-7）
 
@@ -390,6 +395,22 @@ INSTANCE_ID=node-2 uvicorn main:app --port 8001
 
 > 注意：SQLite 单文件在 NFS/多机共享上不可靠；要真正多副本请用 MySQL（裁定⑦ 权威库）。
 > 前端「Agent 管控」页顶部的集群条读 `GET /api/control-plane/cluster`：当前副本、部署模式、租约持有者、队列深度一并呈现。
+
+### 可观测（P2-4）
+
+- `trace_spans` 此前**零写入**，现在由 `services/runtime_tracer.py` 每次模型调用写一条根 span
+  （`trace_id` 为**合成 ID，不是 W3C traceparent**）并在有工具调用时写子 span（父子链）。
+- `GET /metrics`（需 `METRICS_ENDPOINT_ENABLED=1` + 身份）：Prometheus 文本，直读
+  `session_metrics` / `trace_spans` / `alerts` / `work_items` / 队列，不做第二套存储。
+- OTLP 导出（B 档）与语义版本化（C 档）**未做**：gen_ai 语义仍在 Development，不提前冻契约。
+
+### 声明式 API（P2-5）
+
+- `GET /api/admin/workflow` 返回 `ETag`；`PUT` 带 `If-Match` 不匹配 → **412**（治 PUT 盲覆盖）。
+- 文档体可带 `apiVersion` / `kind`（`agentflow/v1`）；未知 `kind` 400，弃用版本只告警。
+- 每次变更加 `change_log`（全局单账本，同事务）与 `generation`；
+  `status.observedGeneration` 区分「没处理」与「处理了结果未变」。
+- `GET /api/watch?since=<id>`：SSE 推 `change_log` 事件；游标被裁剪 → 先发 `event: resync`（410 等价）。
 
 ### 数据库切换
 

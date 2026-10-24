@@ -45,6 +45,17 @@ LOGIN_FAILURE_WINDOW_MINUTES: int = int(os.environ.get("LOGIN_FAILURE_WINDOW_MIN
 AUTH_DEBUG_HEADER_ENABLED: bool = _env_bool("AGENTFLOW_AUTH_DEBUG_HEADER")
 AUTH_DEBUG_HEADER_ADMIT_USERS: list[str] = _env_list("AGENTFLOW_AUTH_DEBUG_ADMIT")
 
+# ── 执行隔离契约（P2-3）──────────────────────────────────
+# 本版只实现 inproc；选未实现档位 = 启动失败（fail-closed，不静默降级）
+EXECUTION_TIER: str = os.environ.get("EXECUTION_TIER", "inproc").strip().lower()
+EXECUTION_TTL_SECONDS: int = int(os.environ.get("EXECUTION_TTL_SECONDS", "300"))
+EXECUTION_RETAIN: bool = _env_bool("EXECUTION_RETAIN")
+EXECUTION_EGRESS_ALLOW: list[str] = _env_list("EXECUTION_EGRESS_ALLOW")
+
+# ── 可观测（P2-4 A 档）────────────────────────────────────
+# /metrics 直读现表（不做第二套存储）；默认关闭，显式开启才暴露
+METRICS_ENDPOINT_ENABLED: bool = _env_bool("METRICS_ENDPOINT_ENABLED")
+
 # ── 副本与单例循环（P1-7）──────────────────────────────────
 # 每个副本一个稳定标识：显式 env 优先，否则 host:pid:随机后缀（进程重启即换）
 INSTANCE_ID: str = os.environ.get("INSTANCE_ID") or (
