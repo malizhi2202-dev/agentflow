@@ -1,0 +1,18 @@
+# AgentFlow 私有 MySQL（独立于系统实例；端口 3307）
+# 为什么 datadir 在 /var/tmp：Ubuntu AppArmor 把 mysqld 限制在 /var/lib/mysql、/tmp、/var/tmp，
+# home 目录会 Permission denied；本机 tmpfiles 未开启 /var/tmp 清理，重启不丢。
+[Unit]
+Description=AgentFlow MySQL (private, 127.0.0.1:3307)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/mysqld --no-defaults --datadir=/var/tmp/agentflow-mysql/data --basedir=/usr \
+  --port=3307 --bind-address=127.0.0.1 --socket=/var/tmp/agentflow-mysql/run/mysqld.sock \
+  --mysqlx=0 --pid-file=/var/tmp/agentflow-mysql/run/mysqld.pid
+Restart=on-failure
+RestartSec=3
+TimeoutStartSec=180
+
+[Install]
+WantedBy=default.target

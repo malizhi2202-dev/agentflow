@@ -58,7 +58,7 @@ npm run dev
 - 运行时 Session 监控（Runtime 页）
 - 健康检查报告（Health 页）
 
-> 〔波 4/5/7 已落地 + 界面已挂载（`v20-ui-teams`）〕团队与小隊（Team ⟂ Squad）侧栏「团队与小隊」可管理：建团/状态/成员四档/转让/五类资产挂载释放/配额；小隊建队/混编成员/归档 · 执行隔离契约（未实现档位即拒绝）· A2A M0 静态卡。
+> 〔波 4/5/7 已落地 + 界面已挂载（`v20-ui-teams`）〕团队与小队（Team ⟂ Squad）侧栏「团队与小队」可管理：建团/状态/成员四档/转让/五类资产挂载释放/配额；小队建队/混编成员/归档 · 执行隔离契约（未实现档位即拒绝）· A2A M0 静态卡。
 
 ### 🤖 Agent 编排
 - **YAML ↔ 画布双向同步**：编辑 YAML → 画布自动更新，拖拽画布 → YAML 自动更新
@@ -491,7 +491,31 @@ INSTANCE_ID=node-2 uvicorn main:app --port 8001
 
 接口：`/api/rsi/memories`、`/api/rsi/proposals`、`/api/rsi/surfaces`、`/api/rsi/breakers`。
 
-### 内网一键起栈（真 MySQL + 前后端，0.0.0.0 监听）
+### 用 systemd（user 级）管理整套栈——推荐
+
+不需要 root，unit 装在 `~/.config/systemd/user/`，开机自启（linger 已开）：
+
+```bash
+bash scripts/systemd_user_install.sh          # 首次：建持久 venv + 初始化 MySQL + 装 unit + enable --now
+
+systemctl --user status agentflow.target      # 三个服务一起看
+systemctl --user restart agentflow-backend    # 单独重启
+journalctl --user -u agentflow-backend -f     # 跟随日志
+systemctl --user stop agentflow.target        # 全停
+```
+
+| unit | 作用 | 监听 |
+|---|---|---|
+| `agentflow-mysql` | 私有 MySQL（数据 `/var/tmp/agentflow-mysql`） | `127.0.0.1:3307` |
+| `agentflow-backend` | FastAPI（`EnvironmentFile=~/ai/agentflow-data/agentflow.env`） | `0.0.0.0:8000` |
+| `agentflow-frontend` | Vite（`/api` 代理到 8000） | `0.0.0.0:5173` |
+| `agentflow.target` | 上面三个的集合（enable 的就是它） | — |
+
+- unit 模板在 `deploy/systemd/user/*.in`（`@REPO@/@DATA@/@NODE_BIN@` 安装时渲染）；
+- 持久 venv：`~/ai/agentflow-data/venv`；配置：`~/ai/agentflow-data/agentflow.env`（600，含随机 `ENCRYPTION_KEY`）；
+- 数据目录为什么在 `/var/tmp`：Ubuntu AppArmor 把 mysqld 限制在 `/var/lib/mysql`、`/tmp`、`/var/tmp`，home 会 `Permission denied`。
+
+### 内网一键起栈（备用：不用 systemd 时）
 
 ```bash
 bash scripts/serve_lan.sh start     # 起 MySQL(3307) + 后端(0.0.0.0:8000) + 前端(0.0.0.0:5173)

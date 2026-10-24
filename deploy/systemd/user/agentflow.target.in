@@ -1,0 +1,7 @@
+[Unit]
+Description=AgentFlow full stack (mysql + backend + frontend)
+Wants=agentflow-mysql.service agentflow-backend.service agentflow-frontend.service
+After=agentflow-mysql.service agentflow-backend.service agentflow-frontend.service
+
+[Install]
+WantedBy=default.target

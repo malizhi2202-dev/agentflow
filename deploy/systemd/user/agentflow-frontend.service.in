@@ -1,0 +1,15 @@
+[Unit]
+Description=AgentFlow frontend (vite 0.0.0.0:5173)
+After=network.target agentflow-backend.service
+
+[Service]
+Type=simple
+WorkingDirectory=@REPO@/frontend
+Environment=PATH=@NODE_BIN@:/usr/local/bin:/usr/bin:/bin
+ExecStart=@NODE_BIN@/node @REPO@/frontend/node_modules/vite/bin/vite.js --host 0.0.0.0 --port 5173 --strictPort
+Restart=always
+RestartSec=3
+TimeoutStartSec=90
+
+[Install]
+WantedBy=default.target
