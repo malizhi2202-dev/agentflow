@@ -18,6 +18,7 @@
 | 2026-10-24 | `doc-align-v20` | 文档归并：RULINGS/INDEX 建档、门面改齐、删 8 张孤儿原型页（135→127） | `fcc00645` | — |
 | 2026-10-24 | `v20-rsi-adapters` | 真实 judge 适配器（显式配置 + 预算帽 + 可注入）+ L0 定时抽取作业（默认关闭）；三类业务错由 500 改正 400 | 见「feat(rsi-adapters)」提交 | — |
 | 2026-10-25 | `ui-parity`（更正） | 自动化中心迁移号更正：`025_automations_center`（020–024 已被 v23 multica 占用）；`main.py` 放行 `/api/webhooks/automations/`（token 即凭据，来源闸门仍生效） | — | — |
+| 2026-10-25 | `ui-parity` P3-3/P3-4 | 看板变体态 + done 证据门（警告式，200+evidence_warned，不硬拦）· 对话中心四语义（私密/一条消息=一 run/离线 queued/归档只读）· 知识库四节（权限矩阵/公共知识/空间 1:1/外部源只写不读）· 管控面三卡组（RSI 开关+SurfaceSpec 四列/调度底座/维护作业，缺字段逐格「未接入」）；后端 659 OK · 前端 250 例 · E2E 43/43 | 见「feat(ui-parity P3-b2)」提交 | — |
 | 2026-10-25 | `ui-parity` P3-1/P3-2 | 自动化中心 9 节落地（迁移 020 四表：三段构成/schedule/webhook 六步推断/执行模式/两级账本/失败治理/权限两本账）· Agent 详情 config 十六分区（12 组件 + 锚点条，env/CLI/MCP 双写 JSON 与专用列）；后端 649 OK · 前端 199 例 · E2E 39/39 | 见「feat(ui-parity P3)」提交 | — |
 | 2026-10-25 | `ui-parity` P4 | 三页从规划态切真后端：迁移 019（`decision_models` / `finetune_batches`）+ 决策模型登记/绑定/重探（fail-closed unprobed）+ 微调三指标门禁（硬件→准确率→ECE，服务端判定）+ 环境参谋只读画像与分层方案；后端 12 例、前端 14 例 | 见「feat(ui-parity P4)」提交 | — |
 | 2026-10-25 | `ui-parity` | 前端按 127 页原型全量对齐（P1+P2+P5）：补齐 6 个缺失页族（阶段模型配置/决策模型/微调工厂/环境参谋/执行隔离/对外集成）· Agent 详情与小队中心转独立页 · 页族覆盖 31/35（缺失 0 · 部分 0 · 元页 4）· `--strict` 接 CI · E2E **39/39**（8 新页可达 + a11y） | 见「feat(ui-parity P1/P2)」提交 | — |

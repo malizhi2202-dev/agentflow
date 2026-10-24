@@ -111,3 +111,31 @@ $ 迁移 020（真 MySQL）：automations / automation_triggers / automation_run
 
 同批还有一处 `backend/main.py` 的必要改动：认证中间件放行 `/api/webhooks/automations/` 前缀
 （外部系统无会话，**token 即凭据**；来源闸门 `peer_allowed` 仍在更早一档生效，未知/已轮换 token 一律 404）。
+
+## P3 第二批（2026-10-25）：看板 / 对话 / 知识库 / 管控面
+
+```text
+$ backend: unittest discover -s tests
+Ran 659 tests in 314.035s · OK (skipped=6)      （+10：test_board_evidence）
+
+$ frontend: vitest run
+Test Files 25 passed · Tests 250 passed          （+51：board 8 / chat 15 / knowledge 13 / control-plane 15）
+
+$ E2E（hermes）
+SUMMARY 43/43 passed
+  · 看板：无证据完成 → 仍完成但出现「缺证据」警告（不硬拦）
+  · 对话中心：私密 / 一条消息=一 run / 离线 queued 口径可见
+  · 知识库：§0 权限矩阵 + §3 外部源
+  · 管控面：调度底座 / RSI 开关 / 维护作业 三块卡区
+```
+
+三族口径要点（均由用例锁定）：
+- **看板**：状态×受理两轴不混（改状态不动 triage）· 状态标签不授予行为 · **done 缺证据=警告式**（200 完成 + `evidence_warned` + 收件箱提醒，不做 400）· 指派三轨（squad=leader 入队）。
+- **对话中心**：1:1 完全私密 · 一条消息=一个 run（含 queued/running/done/failed）· 运行时离线排队提示（并明标「排队转 queued 自动补发尚未实现」）· 归档只读 / Agent 不可运行禁发。
+- **知识库**：§0 权限矩阵一屏 · §1 公共知识四分类 · §2 空间 1:1 真实项目 · §3 外部源（凭据值全页不渲染）；写操作 detail 透传（旧 `T|null` 签名吞 detail 已修）。
+- **管控面**：三卡组数据全部来自接口，缺字段逐格「未接入」；RSI 总闸无端点 → 按类目逐个打并如实报部分失败；维护作业入口禁用（无端点不做假按钮）。
+
+并行执行复盘（第二批）：
+- 3 个 subagent 并行的**产出可用率**高于第一批（自动化那个中途挂掉），但**测试/选择器与既有用例的漂移**仍是主要返工点：
+  本轮 E2E 先后修了 4 处定位（卡片 `article[aria-label]`、表单开关式 `ensureNewTask`、三轨 chip 按钮、`→ 待验收` 标签）。
+- 结论：并行可以提速写实现，但**跨族集成（E2E/全量门禁）必须串行收口**，且 E2E 定位要优先用语义角色/稳定 aria 标识而不是层级 XPath。

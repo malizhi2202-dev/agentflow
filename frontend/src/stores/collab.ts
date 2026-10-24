@@ -108,7 +108,12 @@ interface CollabState {
   inboxError: string | null;
   inboxLoading: boolean;
 
-  fetchTasks: (opts?: { mine?: boolean; status?: string }) => Promise<void>;
+  fetchTasks: (opts?: {
+    mine?: boolean;
+    status?: string;
+    triageState?: 'needs_triage' | 'triaged';
+    assigneeKind?: 'member' | 'agent' | 'squad';
+  }) => Promise<void>;
   createTask: (payload: {
     title: string; description?: string;
     assignee_kind?: 'member' | 'agent' | 'squad' | null; assignee_id?: string | null;
@@ -134,6 +139,9 @@ export const useCollab = create<CollabState>((set, get) => ({
     const params = new URLSearchParams();
     if (opts?.mine) params.set('mine', 'true');
     if (opts?.status) params.set('status', opts.status);
+    // 视图过滤（看板变体 board__af-109 / af-116）：受理态一轴、负责人轨一轴
+    if (opts?.triageState) params.set('triage_state', opts.triageState);
+    if (opts?.assigneeKind) params.set('assignee_kind', opts.assigneeKind);
     const qs = params.toString();
     const result = await safeFetch(`/api/tasks${qs ? `?${qs}` : ''}`);
     if (!result.ok) {

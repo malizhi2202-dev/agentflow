@@ -40,6 +40,14 @@ async function login(page, userId, password) {
   await page.getByRole('button', { name: '任务', exact: true }).waitFor({ timeout: 20000 });
 }
 
+/** 新建任务表单是「开关式」且提交后不自动关闭：只在没打开时才点，避免点两下又关掉。 */
+async function ensureNewTask(page) {
+  if ((await page.getByLabel('任务标题').count()) === 0) {
+    await page.getByRole('button', { name: /新建任务/ }).click();
+  }
+  await page.getByLabel('任务标题').waitFor({ state: 'visible', timeout: 20000 });
+}
+
 const log = (n, ok, d) => { results.push({ n, ok }); console.log(`${ok ? 'PASS' : 'FAIL'} ${n}${d ? ' — ' + d : ''}`); };
 
 /**
@@ -89,22 +97,25 @@ async function auditA11y(page, label) {
   // ---- 任务：建单 + 状态推进 ----
   await page.getByRole('button', { name: '任务', exact: true }).click();
   const t1 = `MYSQL 任务 ${stamp}`;
-  await page.getByRole('button', { name: /新建任务/ }).click();
+  await ensureNewTask(page);
   await page.getByLabel('任务标题').fill(t1);
   await page.getByRole('button', { name: /^创建$/ }).click();
   await page.getByText(t1).waitFor({ timeout: 15000 });
   // 卡片 DOM：标题 span → 头部 div(1) → 卡片 div(2)。用祖先两层的卡片容器限定范围
-  const card1 = page.getByText(t1, { exact: true }).locator('xpath=ancestor::div[2]');
+  // 卡片是 <article aria-label="任务 <title>">（P3 重写后的稳定标识），比 ancestor::div 稳
+  const card1 = page.getByRole('article', { name: `任务 ${t1}` });
   await card1.getByRole('button', { name: /→ 待做/ }).click();
-  await page.getByText(t1, { exact: true }).locator('xpath=ancestor::div[2]')
-    .getByRole('button', { name: /→ 进行中/ }).waitFor({ timeout: 20000 });
+  await card1.getByRole('button', { name: /→ 进行中/ }).waitFor({ timeout: 20000 });
   log('任务：建单 → 推进到待做', true);
 
   // ---- 任务：指派给自己 → 收件箱 ----
   const t2 = `MYSQL 指派 ${stamp}`;
-  await page.getByRole('button', { name: /新建任务/ }).click();
+  await ensureNewTask(page);
   await page.getByLabel('任务标题').fill(t2);
-  await page.getByLabel('负责人类型').selectOption('member');
+  // 三轨是指派选择器里的 chip 按钮（不是 <select>）
+  // aria-label 挂在一个 div.panel 上（不是表单控件）→ 用 role=region 取；三轨是 chip 按钮
+  // aria-label 在 div.panel 上（无 landmark role）→ 用属性选择器；三轨按钮文字是 人/Agent/小队
+  await page.locator('[aria-label="指派负责人"]').getByRole('button', { name: /^人$/ }).first().click();
   await page.getByLabel('负责人 ID').fill('admin');
   await page.getByRole('button', { name: /^创建$/ }).click();
   await page.getByText(t2).waitFor({ timeout: 15000 });
@@ -181,6 +192,52 @@ async function auditA11y(page, label) {
   await page.waitForTimeout(1200);
   await page.screenshot({ path: `${SHOTS}/replay.png` });
   log('回放：选任务看运行时间线', (await page.getByText(/run #\d+|还没有运行记录/).count()) > 0);
+
+  // ---- P3 四族：看板证据门 / 对话中心语义 / 知识库四节 / 管控面三卡组 ----
+  // ① 看板：把一条任务标完成且不附证据 → 完成态但要出现「缺证据」警告
+  await page.getByRole('button', { name: '任务', exact: true }).click();
+  await waitCrumb(page, '任务');
+  const boardTask = `E2E 证据 ${stamp}`;
+  await ensureNewTask(page);
+  await page.getByLabel('任务标题').fill(boardTask);
+  await page.getByRole('button', { name: /^创建$/ }).click();
+  await page.getByText(boardTask).first().waitFor({ timeout: 20000 });
+  const card = page.getByRole('article', { name: `任务 ${boardTask}` });
+  await card.getByRole('button', { name: /→ 待做/ }).click();
+  await page.waitForTimeout(800);
+  await card.getByRole('button', { name: /→ 进行中/ }).click();
+  await page.waitForTimeout(800);
+  // 到 done 的路径：in_progress → in_review → done（状态机；done 走「附证据」表单，可空证据=可疑完成）
+  await card.getByRole('button', { name: /→ 待验收/ }).click();
+  await page.waitForTimeout(800);
+  await card.getByRole('button', { name: /→ 完成（需证据）/ }).click();
+  await card.getByRole('button', { name: /无证据提交（记为可疑完成）/ }).click();
+  await page.waitForTimeout(1200);
+  await page.getByText(/缺证据/).first().waitFor({ timeout: 20000 });
+  log('看板：无证据完成 → 仍完成但出现「缺证据」警告（不硬拦）', true);
+
+  // ② 对话中心：四语义文案与规则面板
+  await page.getByRole('button', { name: /对话中心/ }).click();
+  await waitCrumb(page, '对话中心');
+  for (const marker of [/完全私密/, /一条消息/, /离线/]) {
+    await page.getByText(marker).first().waitFor({ timeout: 20000 });
+  }
+  log('对话中心：私密 / 一条消息=一 run / 离线 queued 口径可见', true);
+
+  // ③ 知识库：§0 权限矩阵 + §3 外部源
+  await page.getByRole('button', { name: '知识库', exact: true }).click();
+  await waitCrumb(page, '知识库');
+  await page.getByText(/权限矩阵/).first().waitFor({ timeout: 20000 });
+  await page.getByText(/外部源/).first().waitFor({ timeout: 20000 });
+  log('知识库：§0 权限矩阵 + §3 外部源 可见', true);
+
+  // ④ 管控面：三块卡区
+  await page.getByRole('button', { name: 'Agent 管控', exact: true }).click();
+  await waitCrumb(page, 'Agent 管控');
+  for (const marker of [/调度底座/, /RSI/, /维护作业/]) {
+    await page.getByText(marker).first().waitFor({ timeout: 20000 });
+  }
+  log('管控面：调度底座 / RSI 开关 / 维护作业 三块卡区可见', true);
 
   // ---- a11y：四个主页面各审一次（0 违规才算过）----
   await auditA11y(page, '回放');

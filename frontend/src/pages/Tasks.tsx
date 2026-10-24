@@ -1,146 +1,54 @@
+/**
+ * 任务看板（原型 6.20 `board.html` + 5 个变体）— change ui-parity · P3-3
+ *
+ * 两轴正交（状态 = 到哪一步 / 受理 = 这算不算活）分开显示；状态标签不授予行为；
+ * done 的「需证据 + 同伴复核」是**警告式**建议，不是硬拦。
+ *
+ * 变体落点：
+ * - `board__task-new`   → `components/task/NewTaskForm.tsx`（必填/可空 + 三轨 + 创建≠派单）
+ * - `board__mark-done`  → `components/task/MarkDoneForm.tsx`（证据 label + ref，空证据仍可完成）
+ * - `board__af-109` / `board__af-116`（本页可读的部分）→ `BoardFilters` 的「需我处理」与
+ *   「负责人含 Agent」两个过滤（真打端点、状态可见可清）
+ * - `board__assign-*`（原型里是 board.html 的 `pp-assignee` pop，没有单独文件）
+ *   → `components/task/AssigneePicker.tsx`（三轨切换 + 失败文案透传）
+ *
+ * 页面内不写 h1/h2（页面名在壳层 `.crumb`），分区标题用 `.section-title`；
+ * 列头保留 h3（既有用例按 heading 断言列名）。
+ */
 import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, CheckCircle2, Circle, Clock, Plus, RefreshCw } from 'lucide-react';
-import {
-  useCollab, COLUMNS, NEXT_STATUS, STATUS_LABEL, type Task, type TaskStatus,
-} from '../stores/collab';
 
-const cardStyle: React.CSSProperties = {
-  background: 'var(--bg-panel)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--r-sm)',
-  padding: '8px 10px',
-  marginBottom: 8,
-  fontSize: 12.5,
+import { COLUMNS, useCollab, type Task } from '../stores/collab';
+import BoardFilters, {
+  EMPTY_FILTERS, activeFilters, type BoardFiltersState,
+} from '../components/task/BoardFilters';
+import NewTaskForm from '../components/task/NewTaskForm';
+import TaskCard from '../components/task/TaskCard';
+import { STATUS_BEHAVIOR_NOTE, TRIAGE_GATE_NOTE } from '../components/task/axis';
+
+/** 列头注（原型锚行为清单的四条，逐条对着列说话）。 */
+const COLUMN_NOTES: Record<string, string> = {
+  unstarted: '停车闸：闸内不入队、不派生执行；待受理禁止派生执行（@点名除外）',
+  started: '进入「进行中」≠ 自动启动 Agent；本列里只有真的收到运行请求的才在跑',
+  review: '审核中：自动化运行到此结束，done 留人（验收 → 完成 / 打回 → 进行中）',
+  done: 'done 需证据 + 同伴复核（警告式，缺证据记为可疑完成）；cancelled 必填理由',
 };
-
-const chipStyle: React.CSSProperties = {
-  display: 'inline-block', padding: '1px 6px', borderRadius: 10,
-  fontSize: 10.5, border: '1px solid var(--border)', color: 'var(--text-secondary)',
-  marginRight: 4,
-};
-
-function AssigneeChip({ task }: { task: Task }) {
-  if (!task.assignee_kind || !task.assignee_id) {
-    return <span style={{ ...chipStyle, color: 'var(--text-muted)' }}>未指派</span>;
-  }
-  const label = task.assignee_kind === 'member' ? '人' : task.assignee_kind === 'squad' ? '小队' : 'Agent';
-  return <span style={chipStyle}>{label} · {task.assignee_id}</span>;
-}
-
-function TaskCard({ task }: { task: Task }) {
-  const moveStatus = useCollab((s) => s.moveStatus);
-  const triage = useCollab((s) => s.triage);
-  const assign = useCollab((s) => s.assign);
-  const [err, setErr] = useState<string | null>(null);
-  const [assigning, setAssigning] = useState(false);
-  const [kind, setKind] = useState<'member' | 'agent' | 'squad'>('member');
-  const [assigneeId, setAssigneeId] = useState('');
-
-  const run = async (fn: () => Promise<{ ok: boolean; error?: string }>) => {
-    setErr(null);
-    const out = await fn();
-    if (!out.ok) setErr(out.error || '操作失败');
-  };
-
-  return (
-    <div style={cardStyle}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-        <span style={{ fontWeight: 600, lineHeight: 1.35 }}>{task.title}</span>
-        <span style={{ color: 'var(--text-muted)', fontSize: 11, flexShrink: 0 }}>P{task.priority}</span>
-      </div>
-
-      <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ ...chipStyle, color: 'var(--blue)' }}>{STATUS_LABEL[task.status]}</span>
-        <AssigneeChip task={task} />
-        {task.is_leader_task && <span style={{ ...chipStyle, color: 'var(--orange)' }}>leader 任务</span>}
-        {task.triage_state === 'needs_triage' && (
-          <button
-            className="btn btn-ghost btn-sm"
-            style={{ ...chipStyle, cursor: 'pointer', color: 'var(--orange)' }}
-            onClick={() => run(() => triage(task.id))}
-            title="标记为已分诊（triage 与 status 正交）"
-          >
-            待分诊
-          </button>
-        )}
-        {task.evidence_warned && (
-          <span style={{ ...chipStyle, color: 'var(--orange)' }} title="done 缺证据（建议层，不阻断）">
-            缺证据
-          </span>
-        )}
-      </div>
-
-      <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {NEXT_STATUS[task.status].map((next) => (
-          <button
-            key={next}
-            className="btn btn-ghost btn-sm"
-            onClick={() => run(() => moveStatus(task.id, next))}
-            title={`把状态改为 ${STATUS_LABEL[next]}（合法性由后端判定）`}
-          >
-            → {STATUS_LABEL[next]}
-          </button>
-        ))}
-        <button
-          className="btn btn-ghost btn-sm"
-          onClick={() => setAssigning((v) => !v)}
-          aria-expanded={assigning}
-        >
-          指派
-        </button>
-      </div>
-
-      {assigning && (
-        <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-          <select
-            aria-label="负责人类型"
-            value={kind}
-            onChange={(e) => setKind(e.target.value as typeof kind)}
-            style={{ fontSize: 12, padding: '3px 6px' }}
-          >
-            <option value="member">人</option>
-            <option value="agent">Agent</option>
-            <option value="squad">小队</option>
-          </select>
-          <input
-            aria-label="负责人 ID"
-            value={assigneeId}
-            onChange={(e) => setAssigneeId(e.target.value)}
-            placeholder="负责人 ID"
-            style={{ fontSize: 12, padding: '3px 6px', width: 120 }}
-          />
-          <button
-            className="btn btn-ghost btn-sm"
-            disabled={!assigneeId.trim()}
-            onClick={() => run(() => assign(task.id, kind, assigneeId.trim()))}
-          >
-            确定
-          </button>
-        </div>
-      )}
-
-      {err && (
-        <div role="alert" style={{ marginTop: 6, color: 'var(--red)', fontSize: 11.5 }}>
-          {err}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function Tasks() {
-  const {
-    tasks, tasksLoading, tasksError, fetchTasks, createTask,
-  } = useCollab();
-  const [mine, setMine] = useState(false);
+  const { tasks, tasksLoading, tasksError, fetchTasks, createTask } = useCollab();
+  const [filters, setFilters] = useState<BoardFiltersState>({ ...EMPTY_FILTERS });
   const [showCreate, setShowCreate] = useState(false);
-  const [title, setTitle] = useState('');
-  const [kind, setKind] = useState<'member' | 'agent' | 'squad'>('member');
-  const [assigneeId, setAssigneeId] = useState('');
-  const [priority, setPriority] = useState(50);
-  const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => { fetchTasks({ mine }); }, [mine, fetchTasks]);
+  // 过滤真打端点：需我处理 = 与我有关 + 已受理；负责人含 Agent = assignee_kind=agent
+  const query = {
+    mine: filters.urgent || undefined,
+    triageState: filters.urgent ? ('triaged' as const) : undefined,
+    assigneeKind: filters.agentAssignee ? ('agent' as const) : undefined,
+  };
+  const { mine: queryMine, triageState: queryTriage, assigneeKind: queryKind } = query;
+  useEffect(() => {
+    fetchTasks({ mine: queryMine, triageState: queryTriage, assigneeKind: queryKind });
+  }, [queryMine, queryTriage, queryKind, fetchTasks]);
 
   const grouped = useMemo(() => {
     const map: Record<string, Task[]> = {};
@@ -152,81 +60,53 @@ export default function Tasks() {
     return map;
   }, [tasks]);
 
-  const submit = async () => {
-    setFormError(null);
-    if (!title.trim()) {
-      setFormError('标题不能为空');
-      return;
-    }
-    const payload: any = { title: title.trim(), priority };
-    if (assigneeId.trim()) {
-      payload.assignee_kind = kind;
-      payload.assignee_id = assigneeId.trim();
-    }
-    const out = await createTask(payload);
-    if (!out.ok) {
-      setFormError(out.error || '创建失败');
-      return;
-    }
-    setTitle(''); setAssigneeId(''); setPriority(50); setShowCreate(false);
-  };
+  const active = activeFilters(filters);
+  /** 受理门是否已接入后端：当前没有派生执行入口 → 如实标「未接入」，不造假门。 */
+  const triageGateWired = false;
 
   return (
     <div style={{ padding: 16 }}>
-      <header className="toolbar" style={{ marginBottom: 12 }}>
-        <span className="chip mono">共 {tasks.length} 条</span>
-        <div style={{ flex: 1 }} />
-        <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-secondary)' }}>
-          <input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} />
-          只看与我有关
-        </label>
-        <button className="btn btn-ghost btn-sm" onClick={() => fetchTasks({ mine })} disabled={tasksLoading}>
+      <header className="toolbar" style={{ marginBottom: 8 }}>
+        <span className="chip mono">看板 · 四列 = 语义锚</span>
+        <span className={`chip ${triageGateWired ? 'ok' : 'warn'}`} title={TRIAGE_GATE_NOTE}>
+          受理门 · {triageGateWired ? '已接入' : '后端未接入'}
+        </span>
+        <div className="grow" />
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => fetchTasks(query)}
+          disabled={tasksLoading}
+        >
           <RefreshCw size={13} style={{ marginRight: 4 }} />刷新
         </button>
-        <button className="btn btn-primary btn-sm" onClick={() => setShowCreate((v) => !v)} aria-expanded={showCreate}>
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={() => setShowCreate((v) => !v)}
+          aria-expanded={showCreate}
+        >
           <Plus size={13} style={{ marginRight: 4 }} />新建任务
         </button>
       </header>
 
+      <p className="page-note" style={{ marginBottom: 8 }}>
+        两根正交轴分开显示：
+        <strong>状态</strong>答「到哪一步」（四类生命周期：未开始 / 进行中 / 完成 / 关闭），
+        <strong>受理</strong>答「这算不算活」（待受理 / 已受理）——改状态不动受理态。
+        {STATUS_BEHAVIOR_NOTE}
+        {TRIAGE_GATE_NOTE}
+      </p>
+
+      <BoardFilters value={filters} onChange={setFilters} total={tasks.length} />
+
+      {active.length > 0 && (
+        <p className="page-note" style={{ marginTop: 4 }}>
+          当前视图：{active.map((f) => `${f.label}（${f.hint}）`).join(' · ')}——
+          过滤状态始终可见，逐条可清（✕）或一键「清除全部过滤」。
+        </p>
+      )}
+
       {showCreate && (
-        <section
-          aria-label="新建任务"
-          style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', padding: 10, marginBottom: 12 }}
-        >
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <input
-              aria-label="任务标题"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="任务标题（必填）"
-              style={{ flex: '1 1 220px', fontSize: 13, padding: '5px 8px' }}
-            />
-            <select aria-label="负责人类型" value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} style={{ fontSize: 12, padding: '5px 6px' }}>
-              <option value="member">人</option>
-              <option value="agent">Agent</option>
-              <option value="squad">小队</option>
-            </select>
-            <input
-              aria-label="负责人 ID"
-              value={assigneeId}
-              onChange={(e) => setAssigneeId(e.target.value)}
-              placeholder="负责人 ID（空=未指派）"
-              style={{ fontSize: 12, padding: '5px 8px', width: 160 }}
-            />
-            <input
-              aria-label="优先级"
-              type="number"
-              min={0}
-              max={100}
-              value={priority}
-              onChange={(e) => setPriority(Number(e.target.value))}
-              style={{ fontSize: 12, padding: '5px 8px', width: 72 }}
-            />
-            <button className="btn btn-primary btn-sm" onClick={submit}>创建</button>
-            <button className="btn btn-ghost btn-sm" onClick={() => { setShowCreate(false); setFormError(null); }}>取消</button>
-          </div>
-          {formError && <div role="alert" style={{ marginTop: 8, color: 'var(--red)', fontSize: 12 }}>{formError}</div>}
-        </section>
+        <NewTaskForm onCreate={createTask} onCancel={() => setShowCreate(false)} />
       )}
 
       {tasksError && (
@@ -236,17 +116,24 @@ export default function Tasks() {
       )}
 
       {!tasksLoading && tasks.length === 0 && !tasksError && (
-        <p style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>还没有任务。点「新建任务」开始。</p>
+        active.length > 0
+          ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>
+              当前视图下没有任务；可逐条清除过滤或「清除全部过滤」看全量。
+            </p>
+          )
+          : <p style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>还没有任务。点「新建任务」开始。</p>
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>
         {COLUMNS.map((col) => (
-          <section key={col.key} aria-label={col.label}>
-            <h3 style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <section key={col.key} aria-label={col.label} style={{ minWidth: 0 }}>
+            <h3 style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '0 0 2px', display: 'flex', alignItems: 'center', gap: 4 }}>
               {col.key === 'done' ? <CheckCircle2 size={13} /> : col.key === 'started' ? <Clock size={13} /> : <Circle size={13} />}
               {col.label}
               <span style={{ color: 'var(--text-muted)' }}>({(grouped[col.key] || []).length})</span>
             </h3>
+            <p className="page-note" style={{ marginBottom: 6 }}>{COLUMN_NOTES[col.key]}</p>
             {(grouped[col.key] || []).map((task) => <TaskCard key={task.id} task={task} />)}
           </section>
         ))}

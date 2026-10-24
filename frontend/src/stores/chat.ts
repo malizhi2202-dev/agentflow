@@ -1,23 +1,14 @@
 import { create } from 'zustand';
+import type { Conversation, Message as ChatMessage } from '../components/chat/types';
 
-interface ChatMessage {
-  id: number;
-  role: 'user' | 'agent' | 'system';
-  content: string;
-  status: string;
-  created_at: string;
-}
-
-interface Conversation {
-  id: number;
-  agent_id: number;
-  owner_id: string;
-  channel_type: string;
-  title: string;
-  last_message?: ChatMessage | null;
-  created_at: string;
-  updated_at: string;
-}
+/**
+ * 会话/消息类型单一事实源 = `components/chat/types.ts`（页面、拆件、store 共用一份）。
+ * 这里只做视图层的会话编排：拉列表 / 选会话 / 发消息 / 轮询新消息。
+ *
+ * 四语义（私密 / 一条消息=一个 run / 离线 queued / 归档只读）的判定与文案
+ * 都在 `components/chat/chatSemantics.ts`，store 不重复实现一遍。
+ */
+export type { Conversation, ChatMessage };
 
 interface ChatState {
   conversations: Conversation[];

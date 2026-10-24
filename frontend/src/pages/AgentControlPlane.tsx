@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import {
-  Radio, Circle, Activity, RefreshCw, Clock, XCircle,
+  Circle, Activity, RefreshCw, Clock, XCircle,
   Play, Pause, RotateCcw, X, Server, Cpu, BarChart3, Link2,
   Layers, Plus, Trash2, Edit3, Check, ChevronDown, ChevronRight,
   GitBranch, Zap, CopyPlus, AlertTriangle,
@@ -8,6 +8,9 @@ import {
 import { useControlPlane, AgentStatus, QueueItem, ReconcileEntry, ClusterStatus } from '../stores/controlPlane';
 import { useDomains, Domain, RouteResult, ScaleResult } from '../stores/domains';
 import DomainPolicyCard from '../components/DomainPolicyCard';
+import RsiSwitchesCard from '../components/control/RsiSwitchesCard';
+import SchedulerBaseCard from '../components/control/SchedulerBaseCard';
+import MaintenanceJobsCard from '../components/control/MaintenanceJobsCard';
 import { useAgents, Agent } from '../stores/agents';
 
 // ── 常量 ──
@@ -1342,20 +1345,25 @@ function ClusterStrip({ cluster }: { cluster: ClusterStatus | null }) {
 export default function AgentControlPlane() {
   const {
     probes, queue, reconcile, cluster, selectedAgent, loading,
-    fetchProbes, fetchQueue, fetchReconcile, fetchCluster,
+    fetchProbes, fetchQueue, fetchReconcile, fetchCluster, fetchRsi,
     restartAgent, setSelectedAgent,
   } = useControlPlane();
 
   const [activeTab, setActiveTab] = useState<TabKey>('agents');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // 初始加载 + 3 秒轮询（useRef 防泄漏）
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  useEffect(function() {
+  const refreshAll = useCallback(function() {
     fetchProbes();
     fetchQueue();
     fetchReconcile();
     fetchCluster();
+    fetchRsi();
+  }, [fetchProbes, fetchQueue, fetchReconcile, fetchCluster, fetchRsi]);
+
+  // 初始加载 + 3 秒轮询（useRef 防泄漏）
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(function() {
+    refreshAll();
     intervalRef.current = setInterval(function() {
       fetchProbes();
       fetchQueue();
@@ -1364,7 +1372,7 @@ export default function AgentControlPlane() {
     return function() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [fetchProbes, fetchQueue, fetchReconcile]);
+  }, [refreshAll, fetchProbes, fetchQueue, fetchReconcile]);
 
   const selectedAgentData = selectedAgent !== null
     ? probes.find(function(a) { return a.agent_id === selectedAgent; }) || null
@@ -1405,20 +1413,15 @@ export default function AgentControlPlane() {
 
   return (
     <div style={{ padding: 24, height: '100%', overflow: 'auto', position: 'relative' }}>
-      {/* 头部 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Radio size={24} style={{ color: 'var(--blue)' }} />
-          Agent 控制面板
-        </h1>
+      {/* 页级工具栏：页名由壳层 `.app-top h1.crumb` 承担，页面内不写 h1/h2 */}
+      <div className="toolbar" style={{ marginBottom: 16 }}>
+        <span className="chip">探针 / 队列 / 调和每 3 秒轮询</span>
+        <span className="chip mono">副本 {cluster ? cluster.instance_id : '未接入'}</span>
+        <span className="grow" />
         <button
-          onClick={function() { fetchProbes(); fetchQueue(); fetchReconcile(); }}
-          style={{
-            padding: '6px 14px', background: 'var(--bg-card)',
-            border: '1px solid var(--border)', borderRadius: 4,
-            cursor: 'pointer', color: 'var(--text-secondary)',
-            fontSize: 12, display: 'flex', alignItems: 'center', gap: 5,
-          }}
+          className="btn btn-ghost btn-sm"
+          onClick={refreshAll}
+          title="刷新探针、队列、调和记录、副本事实与 RSI 开关"
         >
           <RefreshCw size={13} style={loading ? { animation: 'spin 1s linear infinite' } : undefined} />
           刷新
@@ -1487,6 +1490,14 @@ export default function AgentControlPlane() {
             actionLoading={actionLoading}
           />
         )}
+      </div>
+
+      {/* 另挂三块（原型 6.3）：调度底座 / RSI 开关 / 维护作业。
+          顺序照原型：队列事实 → 调度底座 → 自动化改进 → 调和记录 → 维护作业。 */}
+      <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <SchedulerBaseCard />
+        <RsiSwitchesCard />
+        <MaintenanceJobsCard />
       </div>
     </div>
   );

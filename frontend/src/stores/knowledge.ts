@@ -15,6 +15,7 @@ export interface KnowledgeSource {
   name: string;
   source_type: 'rag_api' | 'mysql' | 'postgres' | 'redis' | 'http_api' | 'url_crawl' | 'local_file';
   url: string;
+  /** 连接配置。后端 `to_dict(mask_secrets=True)` 只把 password / api_key 两键打码 → 页面不展示它。 */
   config_json: Record<string, any>;
   enabled: boolean;
   description: string;
@@ -39,21 +40,34 @@ export interface SourceStatus {
   updated_at: string | null;
 }
 
+/**
+ * 写操作统一返回 { ok, data?, error? }。
+ *
+ * 为什么不再用 `T | null`：知识库页的纪律是「写失败把后端 detail 原样显示」，
+ * 旧签名（失败返回 null）把 detail 丢掉了，页面只能写「失败，请重试」——等于把
+ * 后端「不支持的文件类型: .exe」「文件过大: 11534336 bytes…」这些可执行信息吃掉。
+ */
+export interface WriteResult<T = unknown> {
+  ok: boolean;
+  data?: T;
+  error?: string;
+}
+
 interface KnowledgeState {
   sources: KnowledgeSource[];
   loading: boolean;
   tags: KnowledgeTag[];
   tagsLoading: boolean;
   fetchKnowledgeSources: (agentId: number, tag?: string) => Promise<void>;
-  createSource: (agentId: number, data: Partial<KnowledgeSource>) => Promise<KnowledgeSource | null>;
-  updateSource: (agentId: number, sourceId: number, data: Partial<KnowledgeSource>) => Promise<KnowledgeSource | null>;
-  deleteSource: (agentId: number, sourceId: number) => Promise<boolean>;
-  testSource: (agentId: number, sourceId: number) => Promise<{ ok: boolean; detail: string } | null>;
-  uploadFile: (agentId: number, file: File, name?: string, description?: string) => Promise<KnowledgeSource | null>;
+  createSource: (agentId: number, data: Partial<KnowledgeSource>) => Promise<WriteResult<KnowledgeSource>>;
+  updateSource: (agentId: number, sourceId: number, data: Partial<KnowledgeSource>) => Promise<WriteResult<KnowledgeSource>>;
+  deleteSource: (agentId: number, sourceId: number) => Promise<WriteResult>;
+  testSource: (agentId: number, sourceId: number) => Promise<WriteResult<{ ok: boolean; detail: string }>>;
+  uploadFile: (agentId: number, file: File, name?: string, description?: string) => Promise<WriteResult<KnowledgeSource>>;
   getSourceStatus: (agentId: number, sourceId: number) => Promise<SourceStatus | null>;
   // 标签
   fetchTags: () => Promise<void>;
-  createTag: (name: string, color?: string) => Promise<KnowledgeTag | null>;
+  createTag: (name: string, color?: string) => Promise<WriteResult<KnowledgeTag>>;
   deleteTag: (tagId: number) => Promise<boolean>;
   addSourceTag: (sourceId: number, tagId: number) => Promise<boolean>;
   removeSourceTag: (sourceId: number, tagId: number) => Promise<boolean>;
@@ -61,6 +75,12 @@ interface KnowledgeState {
 
 const headers = () => ({
   });
+
+/** 读失败响应里的 detail（原样透传，不吞成「请求失败」）。 */
+async function failure(res: Response, fallback: string): Promise<WriteResult<any>> {
+  const data = await res.json().catch(() => ({}));
+  return { ok: false, error: (data && data.detail) || `${fallback}（HTTP ${res.status}）` };
+}
 
 export const useKnowledge = create<KnowledgeState>((set) => ({
   sources: [],
@@ -88,11 +108,11 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) return null;
+    if (!res.ok) return failure(res, '创建资料源失败');
     const result = await res.json();
     const src = result.source;
     set((s) => ({ sources: [src, ...s.sources] }));
-    return src;
+    return { ok: true, data: src };
   },
 
   updateSource: async (agentId: number, sourceId: number, data: Partial<KnowledgeSource>) => {
@@ -101,13 +121,13 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) return null;
+    if (!res.ok) return failure(res, '更新资料源失败');
     const result = await res.json();
     const updated = result.source;
     set((s) => ({
       sources: s.sources.map((src) => (src.id === sourceId ? { ...src, ...updated } : src)),
     }));
-    return updated;
+    return { ok: true, data: updated };
   },
 
   deleteSource: async (agentId: number, sourceId: number) => {
@@ -115,9 +135,9 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
       method: 'DELETE',
       headers: headers(),
     });
-    if (!res.ok) return false;
+    if (!res.ok) return failure(res, '删除资料源失败');
     set((s) => ({ sources: s.sources.filter((src) => src.id !== sourceId) }));
-    return true;
+    return { ok: true };
   },
 
   testSource: async (agentId: number, sourceId: number) => {
@@ -125,7 +145,7 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
       method: 'POST',
       headers: headers(),
     });
-    if (!res.ok) return null;
+    if (!res.ok) return failure(res, '测试连接失败');
     const result = await res.json();
     set((s) => ({
       sources: s.sources.map((src) =>
@@ -134,7 +154,7 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
           : src
       ),
     }));
-    return result;
+    return { ok: true, data: result };
   },
 
   uploadFile: async (agentId: number, file: File, name?: string, description?: string) => {
@@ -147,11 +167,11 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
       method: 'POST',
       body: formData,
     });
-    if (!res.ok) return null;
+    if (!res.ok) return failure(res, '上传文件失败');
     const result = await res.json();
     const src = result.source;
     set((s) => ({ sources: [src, ...s.sources] }));
-    return src;
+    return { ok: true, data: src };
   },
 
   getSourceStatus: async (agentId: number, sourceId: number) => {
@@ -182,11 +202,11 @@ export const useKnowledge = create<KnowledgeState>((set) => ({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, color: color || '#3b82f6' }),
     });
-    if (!res.ok) return null;
+    if (!res.ok) return failure(res, '创建标签失败');
     const result = await res.json();
     const tag = result.tag;
     set((s) => ({ tags: [...s.tags, tag] }));
-    return tag;
+    return { ok: true, data: tag };
   },
 
   deleteTag: async (tagId: number) => {

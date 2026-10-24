@@ -1,117 +1,105 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { BookOpen, Plus, Trash2, Database, Globe, Server, Network, Cable, RefreshCw, CheckCircle, XCircle, FolderOpen, Upload, FileText, Loader2, Tag } from 'lucide-react';
-import { useKnowledge, KnowledgeSource, KnowledgeTag, SourceStatus } from '../stores/knowledge';
-import { useAgents } from '../stores/agents';
+/**
+ * 知识库（原型 6.9 `knowledge.html`，change ui-parity · P3-4）
+ *
+ * 四节 + 一屏权限矩阵，全部落在语义类上（panel / tbl / chip / toolbar / page-note / section-title），
+ * 页名由壳层 `.crumb` 承担 —— 本页不写 h1/h2。
+ *
+ * 数据诚实性（本轮的关键）：
+ *   §0 权限矩阵 = 产品口径（无权限端点）→ 标「口径」+ 说明按钮可用性以后端 403/404 为准
+ *   §1 公共知识 = 只有四分类口径（无公共知识表/端点）→ 不摆示例文档
+ *   §2 知识空间 = 用**真实项目列表**做 1:1 归属映射；成员 / 文档数 / 最近写入标未接入
+ *   §3 外部源   = 真端点（/api/agents/<id>/knowledge-sources + upload + test + delete），
+ *                 但「源 ↔ 空间关联」与源级授权没有端点 → 标未接入
+ * 写操作失败一律把后端 `detail` 原样显示（stores/knowledge.ts 的 WriteResult 负责带回来）。
+ */
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Plus, Tag } from 'lucide-react';
 import ConfirmDialog from '../components/ConfirmDialog';
+import PermissionMatrix from '../components/knowledge/PermissionMatrix';
+import PublicKnowledgeSection from '../components/knowledge/PublicKnowledgeSection';
+import KnowledgeSpacesSection from '../components/knowledge/KnowledgeSpacesSection';
+import ExternalSourcesSection from '../components/knowledge/ExternalSourcesSection';
+import { SPACE_PROJECT_1TO1 } from '../components/knowledge/policy';
+import { useKnowledge, type KnowledgeSource } from '../stores/knowledge';
+import { useAgents } from '../stores/agents';
+import { useProjects } from '../stores/projects';
 
-// Brain icon fallback
-const BrainIcon = ({ size = 14 }: { size?: number }) => <span style={{ fontSize: size, lineHeight: 1 }}>🧠</span>;
+type Scope = 'all' | 'public' | 'spaces' | 'external';
 
-const SOURCE_TYPE_CONFIG: Record<string, { label: string; icon: React.ReactNode }> = {
-  rag_api: { label: 'RAG API', icon: <BrainIcon size={14} /> },
-  mysql: { label: 'MySQL', icon: <Database size={14} /> },
-  postgres: { label: 'PostgreSQL', icon: <Database size={14} /> },
-  redis: { label: 'Redis', icon: <Server size={14} /> },
-  http_api: { label: 'HTTP API', icon: <Globe size={14} /> },
-  url_crawl: { label: 'URL 抓取', icon: <Network size={14} /> },
-  local_file: { label: '本地文件', icon: <FolderOpen size={14} /> },
-};
-
-function sourceTypeIcon(type: string) {
-  const cfg = SOURCE_TYPE_CONFIG[type];
-  if (cfg) return cfg.icon;
-
-  const icons: Record<string, string> = {
-    rag_api: '🧠', mysql: '🐬', postgres: '🐘', redis: '🔴', http_api: '🌐', url_crawl: '🕸️', local_file: '📂',
-  };
-  return <span style={{ fontSize: 14 }}>{icons[type] || '📁'}</span>;
-}
-
-function sourceTypeLabel(type: string) {
-  const cfg = SOURCE_TYPE_CONFIG[type];
-  return cfg ? cfg.label : type;
-}
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; progress: number }> = {
-  uploading: { label: '上传中', color: '#f59e0b', progress: 10 },
-  processing: { label: '解析中', color: '#3b82f6', progress: 35 },
-  indexing: { label: '索引中', color: '#8b5cf6', progress: 70 },
-  indexed: { label: '已完成', color: '#10b981', progress: 100 },
-  failed: { label: '失败', color: '#ef4444', progress: 0 },
-};
+const SUPPORTED_EXT = ['.pdf', '.docx', '.txt', '.md', '.py', '.js', '.json'];
 
 export default function KnowledgeBase() {
   const { agents, fetchAgents } = useAgents();
-  const { sources, loading, fetchKnowledgeSources, createSource, deleteSource, testSource, uploadFile, getSourceStatus, tags, fetchTags, createTag, deleteTag, addSourceTag, removeSourceTag } = useKnowledge();
+  const { projects, loading: projectsLoading, fetchProjects } = useProjects();
+  const {
+    sources, loading, fetchKnowledgeSources, createSource, deleteSource, testSource,
+    uploadFile, getSourceStatus, tags, fetchTags, createTag, addSourceTag, removeSourceTag,
+  } = useKnowledge();
 
   const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [testingId, setTestingId] = useState<number | null>(null);
-  const [testResult, setTestResult] = useState<Record<number, { ok: boolean; detail: string }>>({});
-
-  // 标签状态
+  const [scope, setScope] = useState<Scope>('all');
+  const [search, setSearch] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [showTagModal, setShowTagModal] = useState(false);
-  const [newTagName, setNewTagName] = useState('');
-  const [newTagColor, setNewTagColor] = useState('#3b82f6');
-  const [tagError, setTagError] = useState('');
 
-  // 表单状态
+  // 外部源（§3）的临时态
+  const [testingId, setTestingId] = useState<number | null>(null);
+  const [testResults, setTestResults] = useState<Record<number, { ok: boolean; detail: string }>>({});
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [actionError, setActionError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 添加外部源表单
+  const [showModal, setShowModal] = useState(false);
   const [formName, setFormName] = useState('');
   const [formType, setFormType] = useState('http_api');
   const [formUrl, setFormUrl] = useState('');
   const [formConfigJson, setFormConfigJson] = useState('');
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  // 文件上传状态
-  const [uploading, setUploading] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
-  const [uploadError, setUploadError] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // 轮询状态
-  const [statusPolling, setStatusPolling] = useState<Record<number, SourceStatus | null>>({});
+  // 标签创建
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
+  const [tagError, setTagError] = useState('');
 
   useEffect(() => {
     fetchAgents();
+    fetchProjects();
     fetchTags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (selectedAgentId) {
-      fetchKnowledgeSources(selectedAgentId, selectedTag || undefined);
-    }
+    if (selectedAgentId) fetchKnowledgeSources(selectedAgentId, selectedTag || undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAgentId, selectedTag]);
 
-  // 轮询处理中的资料源状态
+  // 处理中的本地文件：3s 轮询状态（真端点 /knowledge-sources/<id>/status）
   useEffect(() => {
     if (!selectedAgentId) return;
-    const processingSources = sources.filter(
-      (s) => s.status && ['uploading', 'processing', 'indexing'].includes(s.status)
-    );
-    if (processingSources.length === 0) return;
-
+    const processing = sources.filter((s) => s.status && ['uploading', 'processing', 'indexing'].includes(s.status));
+    if (processing.length === 0) return;
     const timer = setInterval(async () => {
-      for (const src of processingSources) {
-        const status = await getSourceStatus(selectedAgentId, src.id);
-        if (status) {
-          setStatusPolling((prev) => ({ ...prev, [src.id]: status }));
-        }
+      // 逐个探状态（真端点）+ 整表刷新：进度只看后端，不在前端推测
+      for (const src of processing) {
+        await getSourceStatus(selectedAgentId, src.id);
       }
-      // Refresh full list
       fetchKnowledgeSources(selectedAgentId);
     }, 3000);
-
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAgentId, sources]);
 
-  const handleAdd = async () => {
-    setFormError('');
-    if (!formName.trim()) { setFormError('请输入资料源名称'); return; }
-    if (!formUrl.trim()) { setFormError('请输入 URL'); return; }
+  const selectedAgent = agents.find((a) => a.id === selectedAgentId) || null;
 
+  // ── 写操作：失败 detail 原样透传 ───────────────────────────────
+  const handleAddSource = async () => {
+    setFormError('');
+    if (!formName.trim()) { setFormError('请输入外部源名称'); return; }
+    if (!formUrl.trim()) { setFormError('请输入 URL'); return; }
     let configJson: Record<string, any> = {};
     if (formConfigJson.trim()) {
       try {
@@ -121,100 +109,63 @@ export default function KnowledgeBase() {
         return;
       }
     }
-
     setSubmitting(true);
     try {
-      const result = await createSource(selectedAgentId!, {
+      const res = await createSource(selectedAgentId!, {
         name: formName.trim(),
         source_type: formType as KnowledgeSource['source_type'],
         url: formUrl.trim(),
         config_json: configJson,
         enabled: true,
       });
-      if (result) {
+      if (res.ok) {
         setShowModal(false);
-        resetForm();
+        setFormName(''); setFormType('http_api'); setFormUrl(''); setFormConfigJson('');
       } else {
-        setFormError('创建失败，请重试');
+        setFormError(res.error || '创建失败');
       }
-    } catch {
-      setFormError('创建失败，请检查网络连接');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const resetForm = () => {
-    setFormName('');
-    setFormType('http_api');
-    setFormUrl('');
-    setFormConfigJson('');
-    setFormError('');
-  };
-
-  // 文件上传处理
   const handleFileUpload = useCallback(async (file: File) => {
     if (!selectedAgentId) return;
     setUploadError('');
     setUploading(true);
     try {
-      const result = await uploadFile(selectedAgentId, file, file.name, '');
-      if (result) {
-        // 自动开始轮询状态
-        const status = await getSourceStatus(selectedAgentId, result.id);
-        if (status) {
-          setStatusPolling((prev) => ({ ...prev, [result.id]: status }));
-        }
-      } else {
-        setUploadError('上传失败，请重试');
+      const res = await uploadFile(selectedAgentId, file, file.name, '');
+      if (!res.ok) {
+        // 后端 detail 原样显示（原型口径：400「不支持的文件类型: .exe」/「文件过大: …」）
+        setUploadError(res.error || '上传失败');
       }
-    } catch {
-      setUploadError('上传失败，请检查网络连接');
     } finally {
       setUploading(false);
     }
-  }, [selectedAgentId, uploadFile, getSourceStatus]);
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-  };
+  }, [selectedAgentId, uploadFile]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file) {
-      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
-      if (!['.pdf', '.docx', '.txt', '.md', '.py', '.js', '.json'].includes(ext)) {
-        setUploadError(`不支持的文件类型: ${ext}，支持: PDF/DOCX/TXT/MD/PY/JS/JSON`);
-        return;
-      }
-      handleFileUpload(file);
+    if (!file) return;
+    const ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
+    if (!SUPPORTED_EXT.includes(ext)) {
+      setUploadError(`不支持的文件类型: ${ext}`);
+      return;
     }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileUpload(file);
-    }
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    handleFileUpload(file);
   };
 
   const handleTest = async (sourceId: number) => {
     if (!selectedAgentId) return;
     setTestingId(sourceId);
     try {
-      const result = await testSource(selectedAgentId, sourceId);
-      if (result) {
-        setTestResult((prev) => ({ ...prev, [sourceId]: result }));
-        fetchKnowledgeSources(selectedAgentId);
+      const res = await testSource(selectedAgentId, sourceId);
+      if (res.ok && res.data) {
+        setTestResults((prev) => ({ ...prev, [sourceId]: res.data as { ok: boolean; detail: string } }));
+      } else {
+        setTestResults((prev) => ({ ...prev, [sourceId]: { ok: false, detail: res.error || '测试失败' } }));
       }
     } finally {
       setTestingId(null);
@@ -223,548 +174,188 @@ export default function KnowledgeBase() {
 
   const handleDelete = async () => {
     if (!selectedAgentId || deleteId === null) return;
-    await deleteSource(selectedAgentId, deleteId);
+    const res = await deleteSource(selectedAgentId, deleteId);
+    if (!res.ok) setActionError(res.error || '删除失败');
     setDeleteId(null);
   };
 
-  // 标签处理
   const handleCreateTag = async () => {
     setTagError('');
     if (!newTagName.trim()) { setTagError('请输入标签名称'); return; }
-    const result = await createTag(newTagName.trim(), newTagColor);
-    if (result) {
+    const res = await createTag(newTagName.trim());
+    if (res.ok) {
       setShowTagModal(false);
       setNewTagName('');
-      setNewTagColor('#3b82f6');
     } else {
-      setTagError('创建标签失败');
+      setTagError(res.error || '创建标签失败');
     }
   };
 
-  const handleTagClick = (tagName: string) => {
-    if (selectedTag === tagName) {
-      setSelectedTag(null); // 取消过滤
-    } else {
-      setSelectedTag(tagName);
-    }
-  };
-
-  const handleAddTagToSource = async (sourceId: number, tagId: number) => {
-    await addSourceTag(sourceId, tagId);
-    // 刷新列表
-    if (selectedAgentId) {
-      fetchKnowledgeSources(selectedAgentId, selectedTag || undefined);
-    }
-  };
-
-  const handleRemoveTagFromSource = async (sourceId: number, tagId: number) => {
-    await removeSourceTag(sourceId, tagId);
-    if (selectedAgentId) {
-      fetchKnowledgeSources(selectedAgentId, selectedTag || undefined);
-    }
-  };
-
-  const statusIndicator = (src: KnowledgeSource) => {
-    // 如果是处理中的本地文件，显示进度
-    if (src.source_type === 'local_file' && src.status && ['uploading', 'processing', 'indexing'].includes(src.status)) {
-      const cfg = STATUS_CONFIG[src.status] || { label: src.status, color: '#6b7280', progress: 30 };
-      return (
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <Loader2 size={12} style={{ animation: 'spin 1s linear infinite', color: cfg.color }} />
-          <span style={{ fontSize: 11, color: cfg.color }}>{cfg.label}</span>
-          <div style={{ width: 60, height: 4, background: 'var(--bg-input)', borderRadius: 2 }}>
-            <div style={{ width: `${cfg.progress}%`, height: '100%', background: cfg.color, borderRadius: 2, transition: 'width 0.5s ease' }} />
-          </div>
-        </div>
-      );
-    }
-    if (src.status === 'indexed') {
-      return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, padding: '1px 6px', borderRadius: 3, background: 'var(--color-success)', color: '#fff' }}>
-          <CheckCircle size={10} /> 已索引
-        </span>
-      );
-    }
-    if (src.status === 'failed') {
-      return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, padding: '1px 6px', borderRadius: 3, background: 'var(--color-danger)', color: '#fff' }}>
-          <XCircle size={10} /> 处理失败
-        </span>
-      );
-    }
-    if (!src.enabled) {
-      return <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 3, background: 'var(--text-dim)', color: '#fff' }}>已禁用</span>;
-    }
-    if (src.last_test_ok === true) {
-      return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, padding: '1px 6px', borderRadius: 3, background: 'var(--color-success)', color: '#fff' }}>
-          <CheckCircle size={10} /> 测试通过
-        </span>
-      );
-    }
-    if (src.last_test_ok === false) {
-      return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, padding: '1px 6px', borderRadius: 3, background: 'var(--color-danger)', color: '#fff' }}>
-          <XCircle size={10} /> 测试失败
-        </span>
-      );
-    }
-    return <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 3, background: 'var(--color-success)', color: '#fff' }}>已启用</span>;
-  };
-
-  const selectedAgent = agents.find((a) => a.id === selectedAgentId);
+  const showPublic = scope === 'all' || scope === 'public';
+  const showSpaces = scope === 'all' || scope === 'spaces';
+  const showExternal = scope === 'all' || scope === 'external';
 
   return (
-    <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      {/* Agent 选择器 */}
-      <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>选择 Agent：</label>
-        <select
-          value={selectedAgentId ?? ''}
-          onChange={(e) => {
-            const id = e.target.value ? Number(e.target.value) : null;
-            setSelectedAgentId(id);
-            setTestResult({});
-            setStatusPolling({});
-          }}
-          style={{
-            padding: '7px 12px',
-            borderRadius: 'var(--r-sm)',
-            border: '1px solid var(--border)',
-            background: 'var(--bg-input)',
-            color: 'var(--text-primary)',
-            fontSize: 13,
-            minWidth: 260,
-          }}
-        >
-          <option value="">-- 请选择 Agent --</option>
-          {agents.map((a) => (
-            <option key={a.id} value={a.id}>{a.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* 操作栏 */}
-      {selectedAgentId && (
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <button
-              onClick={() => { resetForm(); setShowModal(true); }}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '8px 16px', background: 'var(--color-primary)', color: '#fff',
-                border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13,
-              }}
-            >
-              <Plus size={14} /> 添加资料源
-            </button>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '8px 16px', background: 'var(--color-success)', color: '#fff',
-                border: 'none', borderRadius: 4, cursor: uploading ? 'wait' : 'pointer', fontSize: 13,
-                opacity: uploading ? 0.6 : 1,
-              }}
-            >
-              {uploading ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Upload size={14} />}
-              上传文件
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.docx,.txt,.md,.py,.js,.json"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-            />
-            {selectedAgent && (
-              <span style={{ marginLeft: 12, fontSize: 12, color: 'var(--text-dim)' }}>
-                当前 Agent: <strong>{selectedAgent.name}</strong>
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 拖拽上传区域 */}
-      {selectedAgentId && (
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          style={{
-            border: `2px dashed ${dragOver ? 'var(--color-primary)' : 'var(--border)'}`,
-            borderRadius: 8,
-            padding: '20px 16px',
-            textAlign: 'center',
-            marginBottom: 16,
-            background: dragOver ? 'var(--blue-bg)' : 'var(--bg-card)',
-            transition: 'all var(--fast)',
-            cursor: 'pointer',
-          }}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Upload size={20} style={{ color: 'var(--text-dim)', marginBottom: 8 }} />
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>
-            拖拽文件到此处上传（PDF / DOCX / TXT / MD / PY / JS / JSON）
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-dim)', margin: '4px 0 0' }}>
-            或点击选择文件
-          </p>
-        </div>
-      )}
-
-      {uploadError && (
-        <div style={{ padding: '8px 12px', borderRadius: 4, background: 'var(--red-bg)', color: 'var(--red)', fontSize: 12, marginBottom: 12 }}>
-          {uploadError}
-        </div>
-      )}
-
-      {/* 标签云 */}
-      {selectedAgentId && tags.length > 0 && (
-        <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginRight: 4 }}>
-            <Tag size={12} style={{ marginRight: 4 }} />标签：
-          </span>
-          {tags.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => handleTagClick(t.name)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-                padding: '3px 10px',
-                borderRadius: 12,
-                border: selectedTag === t.name ? `2px solid ${t.color}` : '1px solid var(--border)',
-                background: selectedTag === t.name ? `${t.color}20` : 'var(--bg-input)',
-                color: selectedTag === t.name ? t.color : 'var(--text-secondary)',
-                cursor: 'pointer',
-                fontSize: 12,
-                fontWeight: selectedTag === t.name ? 600 : 400,
-                transition: 'all var(--fast)',
-              }}
-            >
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: t.color, display: 'inline-block' }} />
-              {t.name}
-              {selectedTag === t.name && ' ✕'}
-            </button>
-          ))}
-          <button
-            onClick={() => { setShowTagModal(true); setNewTagName(''); setNewTagColor('#3b82f6'); setTagError(''); }}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: '3px 10px',
-              borderRadius: 12,
-              border: '1px dashed var(--border)',
-              background: 'none',
-              color: 'var(--text-dim)',
-              cursor: 'pointer',
-              fontSize: 12,
-            }}
-            title="创建新标签"
-          >
-            <Plus size={10} /> 标签
+    <div className="app-body">
+      {/* ── 页级工具栏（页名在壳层 .crumb） ── */}
+      <div className="panel">
+        <div className="toolbar">
+          <span className="section-title" style={{ margin: 0 }}>知识库 · 公共知识 + 知识空间（与项目 1:1）</span>
+          <span className="chip">公共 4 类 · 全局只读</span>
+          <span className="chip mono">空间 {projects.length} · 与项目 1:1</span>
+          <span className="chip mono">外部源 {sources.length}</span>
+          <span className="grow" />
+          <button className="btn btn-ghost btn-sm" disabled title={SPACE_PROJECT_1TO1}>
+            + 新建空间
+          </button>
+          <button className="btn btn-primary btn-sm" onClick={() => { setShowModal(true); setFormError(''); }}>
+            <Plus size={13} /> 添加外部源
+          </button>
+          <button className="btn btn-ghost btn-sm" onClick={() => { setShowTagModal(true); setTagError(''); }}>
+            <Tag size={13} /> 新建标签
           </button>
         </div>
-      )}
 
-      {/* 创建标签 Modal */}
-      {showTagModal && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, zIndex: 1100,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(0,0,0,0.5)',
-          }}
-          onClick={() => setShowTagModal(false)}
-          role="dialog" aria-modal="true" aria-label="创建标签"
-        >
-          <div
+        <div className="toolbar" style={{ marginTop: 6 }}>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="搜索知识"
+            placeholder="搜索空间 / 外部源名称…"
             style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-strong)',
-              borderRadius: 'var(--r-lg)',
-              padding: '24px 28px',
-              maxWidth: 400, width: '90%',
-              boxShadow: 'var(--shadow-md)',
+              padding: '5px 10px', background: 'var(--bg-input)', color: 'var(--text-color)',
+              border: '1px solid var(--border)', borderRadius: 4, fontSize: 12, minWidth: 220,
             }}
-            onClick={(e) => e.stopPropagation()}
+          />
+          <label style={{ fontSize: 11.5, color: 'var(--text-muted)' }} htmlFor="kb-scope">范围</label>
+          <select
+            id="kb-scope"
+            value={scope}
+            onChange={(e) => setScope(e.target.value as Scope)}
+            style={{
+              padding: '5px 8px', background: 'var(--bg-input)', color: 'var(--text-color)',
+              border: '1px solid var(--border)', borderRadius: 4, fontSize: 12,
+            }}
           >
-            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>创建标签</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>名称</label>
-                <input
-                  type="text"
-                  value={newTagName}
-                  onChange={(e) => setNewTagName(e.target.value)}
-                  placeholder="例如：重要、文档、API"
-                  style={{
-                    width: '100%', padding: '7px 10px',
-                    borderRadius: 'var(--r-sm)', border: '1px solid var(--border)',
-                    background: 'var(--bg-input)', color: 'var(--text-primary)',
-                    fontSize: 13, boxSizing: 'border-box',
-                  }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleCreateTag(); }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>颜色</label>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {['#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'].map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setNewTagColor(c)}
-                      style={{
-                        width: 28, height: 28, borderRadius: '50%',
-                        background: c,
-                        border: newTagColor === c ? '3px solid var(--text-primary)' : '2px solid transparent',
-                        cursor: 'pointer',
-                        transition: 'all var(--fast)',
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-              {tagError && (
-                <div style={{ padding: '8px 12px', borderRadius: 4, background: 'var(--red-bg)', color: 'var(--red)', fontSize: 12 }}>
-                  {tagError}
-                </div>
-              )}
-            </div>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
-              <button className="btn" onClick={() => setShowTagModal(false)}>取消</button>
-              <button className="btn btn-primary" onClick={handleCreateTag}>创建标签</button>
-            </div>
-          </div>
+            <option value="all">全部（公共 + 空间 + 外部源）</option>
+            <option value="public">仅公共知识</option>
+            <option value="spaces">仅知识空间</option>
+            <option value="external">仅外部源</option>
+          </select>
+          <span className="grow" />
+          <label style={{ fontSize: 11.5, color: 'var(--text-muted)' }} htmlFor="kb-agent">外部源所属 Agent</label>
+          <select
+            id="kb-agent"
+            value={selectedAgentId ?? ''}
+            onChange={(e) => {
+              const id = e.target.value ? Number(e.target.value) : null;
+              setSelectedAgentId(id);
+              setTestResults({});
+              setActionError('');
+            }}
+            style={{
+              padding: '5px 8px', background: 'var(--bg-input)', color: 'var(--text-color)',
+              border: '1px solid var(--border)', borderRadius: 4, fontSize: 12, minWidth: 180,
+            }}
+          >
+            <option value="">-- 请选择 Agent --</option>
+            {agents.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <p className="page-note" style={{ marginTop: 6 }}>
+          搜索 / 范围两个筛选跨节生效；但<b>写操作只在空间层出现</b> —— 公共知识行只有「查看 · 关联到空间」，
+          外部源行只有「测试连接 / 关联到空间 / 删除」。缺的端点如实标未接入，不造数据。
+        </p>
+      </div>
+
+      {actionError && (
+        <div role="alert" className="panel" style={{ borderColor: 'var(--red)', color: 'var(--red)' }}>
+          {actionError}
         </div>
       )}
 
-      {/* 资料源列表 */}
-      {!selectedAgentId ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
-          <BookOpen size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
-          <p style={{ fontSize: 14 }}>请先选择一个 Agent 以管理其知识库资料源</p>
-        </div>
-      ) : loading ? (
-        <p style={{ color: 'var(--text-dim)' }}>加载中...</p>
-      ) : sources.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-dim)' }}>
-          <Database size={40} style={{ opacity: 0.3, marginBottom: 12 }} />
-          <p style={{ fontSize: 14 }}>该 Agent 暂无资料源</p>
-          <p style={{ fontSize: 12 }}>点击"添加资料源"接入外部数据，或上传文件</p>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {sources.map((src) => {
-            const tr = testResult[src.id];
-            return (
-              <div
-                key={src.id}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '12px 16px',
-                  background: 'var(--color-surface)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 8,
-                  transition: 'all var(--fast)',
-                }}
-              >
-                {/* 类型图标 */}
-                <div style={{
-                  width: 36, height: 36, borderRadius: 8,
-                  background: 'var(--blue-bg)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'var(--blue)',
-                  flexShrink: 0,
-                }}>
-                  {sourceTypeIcon(src.source_type)}
-                </div>
-
-                {/* 信息 */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                    <span style={{ fontWeight: 600, fontSize: 14 }}>{src.name}</span>
-                    <span style={{
-                      fontSize: 10, padding: '1px 6px', borderRadius: 3,
-                      background: 'var(--bg-input)', color: 'var(--text-dim)',
-                    }}>
-                      {sourceTypeLabel(src.source_type)}
-                    </span>
-                    {statusIndicator(src)}
-                    {tr && (
-                      <span style={{ fontSize: 11, color: tr.ok ? 'var(--color-success)' : 'var(--color-danger)' }}>
-                        {tr.detail}
-                      </span>
-                    )}
-                  </div>
-                  {src.url && (
-                    <div style={{ fontSize: 12, color: 'var(--text-dim)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {src.url}
-                    </div>
-                  )}
-                  {src.last_test_at && (
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                      上次测试: {new Date(src.last_test_at).toLocaleString('zh-CN')}
-                    </div>
-                  )}
-                  {/* 标签 */}
-                  {src.tags && src.tags.length > 0 && (
-                    <div style={{ display: 'flex', gap: 4, marginTop: 4, flexWrap: 'wrap' }}>
-                      {src.tags.map((t: KnowledgeTag) => (
-                        <span
-                          key={t.id}
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 3,
-                            fontSize: 10, padding: '1px 6px', borderRadius: 10,
-                            background: `${t.color}20`, color: t.color,
-                            border: `1px solid ${t.color}40`,
-                          }}
-                        >
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: t.color, display: 'inline-block' }} />
-                          {t.name}
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleRemoveTagFromSource(src.id, t.id); }}
-                            style={{
-                              background: 'none', border: 'none', cursor: 'pointer',
-                              color: t.color, fontSize: 10, padding: 0, lineHeight: 1,
-                              marginLeft: 1,
-                            }}
-                            title="移除标签"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* 操作按钮 */}
-                <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'flex-start' }}>
-                  {/* 添加标签下拉 */}
-                  {tags.length > 0 && (
-                    <select
-                      value=""
-                      onChange={(e) => {
-                        const tagId = parseInt(e.target.value);
-                        if (tagId) {
-                          handleAddTagToSource(src.id, tagId);
-                          e.target.value = '';
-                        }
-                      }}
-                      style={{
-                        padding: '4px 6px', fontSize: 11,
-                        borderRadius: 4, border: '1px solid var(--border)',
-                        background: 'var(--bg-input)', color: 'var(--text-secondary)',
-                        maxWidth: 80,
-                      }}
-                      title="添加标签"
-                    >
-                      <option value="">+标签</option>
-                      {tags.filter((t) => !(src.tags || []).find((st: KnowledgeTag) => st.id === t.id)).map((t) => (
-                        <option key={t.id} value={t.id}>{t.name}</option>
-                      ))}
-                    </select>
-                  )}
-                  <button
-                    onClick={() => handleTest(src.id)}
-                    disabled={testingId === src.id}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '5px 12px',
-                      background: 'var(--bg-input)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 4, cursor: testingId === src.id ? 'wait' : 'pointer',
-                      fontSize: 12, color: 'var(--text-primary)',
-                    }}
-                    title="测试连接"
-                  >
-                    {testingId === src.id ? (
-                      <RefreshCw size={12} style={{ animation: 'spin 1s linear infinite' }} />
-                    ) : (
-                      <Cable size={12} />
-                    )}
-                    测试连接
-                  </button>
-                  <button
-                    onClick={() => setDeleteId(src.id)}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 4,
-                      padding: '5px 12px',
-                      background: 'var(--bg-input)',
-                      border: '1px solid var(--border)',
-                      borderRadius: 4, cursor: 'pointer',
-                      fontSize: 12, color: 'var(--color-danger)',
-                    }}
-                    title="删除"
-                  >
-                    <Trash2 size={12} />
-                    删除
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <PermissionMatrix />
+      {showPublic && <PublicKnowledgeSection />}
+      {showSpaces && (
+        <KnowledgeSpacesSection projects={projects} loading={projectsLoading} search={search} />
+      )}
+      {showExternal && (
+        <ExternalSourcesSection
+          agentId={selectedAgentId}
+          agentName={selectedAgent?.name || null}
+          sources={sources}
+          loading={loading}
+          search={search}
+          tags={tags}
+          selectedTag={selectedTag}
+          onSelectTag={setSelectedTag}
+          testingId={testingId}
+          testResults={testResults}
+          onTest={handleTest}
+          onDelete={(id) => setDeleteId(id)}
+          uploading={uploading}
+          dragOver={dragOver}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setDragOver(false); }}
+          onDrop={handleDrop}
+          onPickFile={() => fileInputRef.current?.click()}
+          onAddSource={() => { setShowModal(true); setFormError(''); }}
+          onRemoveTag={(sourceId, tagId) => { removeSourceTag(sourceId, tagId).then(() => { if (selectedAgentId) fetchKnowledgeSources(selectedAgentId, selectedTag || undefined); }); }}
+          onAddTag={(sourceId, tagId) => { addSourceTag(sourceId, tagId).then(() => { if (selectedAgentId) fetchKnowledgeSources(selectedAgentId, selectedTag || undefined); }); }}
+          uploadError={uploadError}
+        />
       )}
 
-      {/* 添加资料源 Modal */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={SUPPORTED_EXT.join(',')}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFileUpload(file);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }}
+        style={{ display: 'none' }}
+      />
+
+      {/* ── 添加外部源（真端点 POST /knowledge-sources） ── */}
       {showModal && (
         <div
-          style={{
-            position: 'fixed', inset: 0, zIndex: 1000,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(0,0,0,0.5)',
-          }}
-          onClick={() => { setShowModal(false); resetForm(); }}
-          role="dialog" aria-modal="true" aria-label="添加资料源"
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setShowModal(false)}
+          role="dialog" aria-modal="true" aria-label="添加外部源"
         >
           <div
-            style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-strong)',
-              borderRadius: 'var(--r-lg)',
-              padding: '24px 28px',
-              maxWidth: 520, width: '90%',
-              boxShadow: 'var(--shadow-md)',
-            }}
+            className="panel"
+            style={{ maxWidth: 520, width: '90%', padding: '20px 22px' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>添加资料源</h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
-                  名称 <span style={{ color: 'var(--color-danger)' }}>*</span>
-                </label>
+            <div className="toolbar" style={{ marginBottom: 8 }}>
+              <span className="section-title" style={{ margin: 0 }}>添加外部源</span>
+              <span className="grow" />
+              <span className="chip">凭据只写不读</span>
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <label style={{ fontSize: 12 }}>
+                名称 <span style={{ color: 'var(--red)' }}>*</span>
                 <input
-                  type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="例如：产品文档 RAG API"
-                  style={{
-                    width: '100%', padding: '7px 10px',
-                    borderRadius: 'var(--r-sm)', border: '1px solid var(--border)',
-                    background: 'var(--bg-input)', color: 'var(--text-primary)',
-                    fontSize: 13, boxSizing: 'border-box',
-                  }}
+                  placeholder="例如：Confluence · 架构决策记录"
+                  aria-label="外部源名称"
+                  style={{ width: '100%', marginTop: 4, padding: '6px 10px', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text-color)', fontSize: 12, boxSizing: 'border-box' }}
                 />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
-                  类型
-                </label>
+              </label>
+              <label style={{ fontSize: 12 }}>
+                类型
                 <select
                   value={formType}
                   onChange={(e) => setFormType(e.target.value)}
-                  style={{
-                    width: '100%', padding: '7px 10px',
-                    borderRadius: 'var(--r-sm)', border: '1px solid var(--border)',
-                    background: 'var(--bg-input)', color: 'var(--text-primary)',
-                    fontSize: 13, boxSizing: 'border-box',
-                  }}
+                  aria-label="外部源类型"
+                  style={{ width: '100%', marginTop: 4, padding: '6px 10px', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text-color)', fontSize: 12 }}
                 >
                   <option value="http_api">HTTP API</option>
                   <option value="rag_api">RAG API</option>
@@ -772,75 +363,73 @@ export default function KnowledgeBase() {
                   <option value="postgres">PostgreSQL</option>
                   <option value="redis">Redis</option>
                   <option value="url_crawl">URL 抓取</option>
-                  <option value="local_file">📂 本地文件</option>
+                  <option value="local_file">本地文件</option>
                 </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
-                  URL <span style={{ color: 'var(--color-danger)' }}>*</span>
-                </label>
+              </label>
+              <label style={{ fontSize: 12 }}>
+                URL <span style={{ color: 'var(--red)' }}>*</span>
                 <input
-                  type="text"
                   value={formUrl}
                   onChange={(e) => setFormUrl(e.target.value)}
-                  placeholder="例如：https://api.example.com/rag"
-                  style={{
-                    width: '100%', padding: '7px 10px',
-                    borderRadius: 'var(--r-sm)', border: '1px solid var(--border)',
-                    background: 'var(--bg-input)', color: 'var(--text-primary)',
-                    fontSize: 13, boxSizing: 'border-box',
-                  }}
+                  placeholder="https://…"
+                  aria-label="外部源 URL"
+                  style={{ width: '100%', marginTop: 4, padding: '6px 10px', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text-color)', fontSize: 12, boxSizing: 'border-box' }}
                 />
-              </div>
-
-              {/* Config JSON */}
-              <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
-                  config_json (选填)
-                </label>
+              </label>
+              <label style={{ fontSize: 12 }}>
+                config_json（选填 · 凭据只写不读，页面不回显）
                 <textarea
                   value={formConfigJson}
                   onChange={(e) => setFormConfigJson(e.target.value)}
-                  placeholder='{"api_key": "your-key", "timeout": 10}'
-                  rows={4}
-                  style={{
-                    width: '100%', padding: '7px 10px',
-                    borderRadius: 'var(--r-sm)', border: '1px solid var(--border)',
-                    background: 'var(--bg-input)', color: 'var(--text-primary)',
-                    fontSize: 12, fontFamily: 'monospace', boxSizing: 'border-box',
-                    resize: 'vertical',
-                  }}
+                  placeholder='{"api_key": "…"}'
+                  rows={3}
+                  aria-label="外部源连接配置"
+                  style={{ width: '100%', marginTop: 4, padding: '6px 10px', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text-color)', fontSize: 12, fontFamily: 'var(--font-mono)', boxSizing: 'border-box' }}
                 />
-              </div>
-
-              {formError && (
-                <div style={{ padding: '8px 12px', borderRadius: 4, background: 'var(--red-bg)', color: 'var(--red)', fontSize: 12 }}>
-                  {formError}
-                </div>
-              )}
+              </label>
+              {formError && <div role="alert" style={{ color: 'var(--red)', fontSize: 12 }}>{formError}</div>}
             </div>
-
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
-              <button className="btn" onClick={() => { setShowModal(false); resetForm(); }}>取消</button>
-              <button
-                className="btn btn-primary"
-                onClick={handleAdd}
-                disabled={submitting}
-                style={{ opacity: submitting ? 0.6 : 1 }}
-              >
-                {submitting ? '创建中...' : '确认添加'}
+            <div className="toolbar" style={{ marginTop: 12, justifyContent: 'flex-end' }}>
+              <button className="btn" onClick={() => setShowModal(false)}>取消</button>
+              <button className="btn btn-primary" onClick={handleAddSource} disabled={submitting}>
+                {submitting ? '提交中…' : '确认添加'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 删除确认 */}
+      {/* ── 新建标签（真端点 POST /knowledge/tags） ── */}
+      {showTagModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setShowTagModal(false)}
+          role="dialog" aria-modal="true" aria-label="新建标签"
+        >
+          <div className="panel" style={{ maxWidth: 380, width: '90%' }} onClick={(e) => e.stopPropagation()}>
+            <div className="toolbar" style={{ marginBottom: 8 }}>
+              <span className="section-title" style={{ margin: 0 }}>新建标签</span>
+            </div>
+            <input
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
+              placeholder="例如：规范、接口、安全"
+              aria-label="标签名称"
+              style={{ width: '100%', padding: '6px 10px', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text-color)', fontSize: 12, boxSizing: 'border-box' }}
+            />
+            {tagError && <div role="alert" style={{ color: 'var(--red)', fontSize: 12, marginTop: 6 }}>{tagError}</div>}
+            <div className="toolbar" style={{ marginTop: 12, justifyContent: 'flex-end' }}>
+              <button className="btn" onClick={() => setShowTagModal(false)}>取消</button>
+              <button className="btn btn-primary" onClick={handleCreateTag}>创建标签</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ConfirmDialog
         open={deleteId !== null}
-        title="确认删除"
-        message="确定要删除该资料源吗？此操作不可恢复。"
+        title="确认删除外部源"
+        message="删除只影响该 Agent 的检索范围：已索引内容一并移除，历史会话引用保持快照（破坏性操作需二次确认）。"
         danger
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}

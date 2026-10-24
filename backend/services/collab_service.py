@@ -43,7 +43,11 @@ TRANSITIONS: dict[str, set[str]] = {
 FAILURE_EVENTS = ("task_failed", "run_failed")
 
 # 需要人拍板的事件（进「需我处理」并 ping）
-ACTION_REQUIRED_EVENTS = ("assigned", "mentioned", "task_failed", "review_requested")
+ACTION_REQUIRED_EVENTS = ("assigned", "mentioned", "task_failed", "review_requested",
+                          "evidence_missing")
+
+# done 缺证据的提醒文案（**警告式**：原型是「建议」不是硬拦，硬性 400 会破坏既有流程）
+EVIDENCE_WARNING = "缺证据：done 建议补证据 + 请同伴复核（仅提醒，未阻断完成）"
 
 
 class TransitionError(ValueError):
@@ -117,23 +121,58 @@ def unsubscribe(db: Session, item: WorkItem, user_id: str) -> bool:
     return True
 
 
+def has_evidence(evidence: list | None) -> bool:
+    """证据是否「真的附上了」：label / ref 至少一项非空。
+
+    空壳条目（`{}` / `{"label": "  "}`）不算证据——否则「空手完成」会被一条空行洗白，
+    变成「有证据完成」，警告永远发不出来。
+    """
+    for entry in evidence or []:
+        if isinstance(entry, str):
+            if entry.strip():
+                return True
+            continue
+        if not isinstance(entry, dict):
+            continue
+        for key in ("label", "ref"):
+            value = entry.get(key)
+            if isinstance(value, str) and value.strip():
+                return True
+    return False
+
+
 def change_status(db: Session, item: WorkItem, user: str, new_status: str,
                   evidence: list[dict] | None = None) -> dict:
-    """状态转移（唯一入口）。返回 {'warnings': [...], 'archived_notifications': N}。"""
+    """状态转移（唯一入口）。
+
+    返回 `{'warnings': [...], 'archived_notifications': N, 'evidence_warned': bool,
+    'evidence_warning': str | None}`——`evidence_warned` / `evidence_warning` 供界面
+    直接渲染「缺证据」警告（**不硬拦**：原型 §6.20 的口径是「需证据 + 同伴复核」建议层）。
+    """
     current = item.status
     if new_status not in TRANSITIONS:
         raise TransitionError(f"未知状态: {new_status}")
+    if evidence is not None and not isinstance(evidence, list):
+        raise TransitionError("evidence 必须是数组（[{'label': ..., 'ref': ...}]）")
     if new_status == current:
-        return {"warnings": [], "archived_notifications": 0}
+        return {"warnings": [], "archived_notifications": 0,
+                "evidence_warned": bool(item.evidence_warned),
+                "evidence_warning": EVIDENCE_WARNING if item.evidence_warned else None}
     if new_status not in TRANSITIONS[current]:
         raise TransitionError(f"不允许的状态转移: {current} → {new_status}")
 
     warnings: list[str] = []
+    evidence_warned = False
+    evidence_warning: str | None = None
     if new_status == "done":
         evidence = evidence if evidence is not None else json.loads(item.evidence_json or "[]")
-        if not evidence:
+        if has_evidence(evidence):
+            item.evidence_warned = 0     # 补上证据后撤销旧警告
+        else:
             # R0-2：done 需证据是**建议层**——不拦，但要留痕，界面可见
             item.evidence_warned = 1
+            evidence_warned = True
+            evidence_warning = EVIDENCE_WARNING
             warnings.append("done_without_evidence")
 
     item.status = new_status
@@ -142,18 +181,29 @@ def change_status(db: Session, item: WorkItem, user: str, new_status: str,
         item.evidence_json = json.dumps(evidence, ensure_ascii=False)
     db.commit()
 
+    # 缺证据完成：给负责人 / 订阅人一条「请补证据 + 同伴复核」提醒。
+    # 这条提醒**并进规则①的同一处发通知**（见下），不单独调一次——合并键=任务本身，
+    # 两次 notify 会互相覆盖，最后留下的是谁后写谁赢，等于提醒被静默吞掉。
+
     # 规则③：交还给人（blocked 例外）→ 历史失败通知自愈归档
     archived = 0
     if new_status in HANDED_BACK_TO_HUMAN:
         archived = archive_failures(db, item)
 
-    # 规则①：进 in_review = 待人验收，属需决策事件；其它普通状态变化只进折叠组
-    if new_status == "in_review":
+    # 规则①：进 in_review = 待人验收，属需决策事件；**缺证据完成 = 可疑完成**同样要人处理。
+    # 注意：收件箱合并键 = 任务本身，所以「缺证据」会把该任务的合并行重新浮出
+    # （event_type=evidence_missing、正文换成补证据提醒）——这正是原型
+    # 「可疑完成并推收件箱」的落地形态；它不新增行，也不掩盖这是同一项任务。
+    if evidence_warned:
+        notify(db, item, "evidence_missing", actor=user, action_required=True,
+               body=EVIDENCE_WARNING)
+    elif new_status == "in_review":
         notify(db, item, "review_requested", actor=user, action_required=True)
     else:
         notify(db, item, "status", actor=user, action_required=False,
                body=f"{current} → {new_status}")
-    return {"warnings": warnings, "archived_notifications": archived}
+    return {"warnings": warnings, "archived_notifications": archived,
+            "evidence_warned": evidence_warned, "evidence_warning": evidence_warning}
 
 
 def assign(db: Session, item: WorkItem, actor: str, kind: str, assignee_id: str) -> WorkItem:
