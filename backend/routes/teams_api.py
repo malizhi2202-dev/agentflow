@@ -27,6 +27,8 @@ def _map_error(exc: Exception):
         raise HTTPException(status_code=404, detail=str(exc))
     if isinstance(exc, ts.TeamConflict):
         raise HTTPException(status_code=409, detail=str(exc))
+    if isinstance(exc, ts.SquadForbidden):
+        raise HTTPException(status_code=403, detail=str(exc))
     if isinstance(exc, ts.TeamError):
         raise HTTPException(status_code=400, detail=str(exc))
     raise exc
@@ -184,12 +186,13 @@ def list_squads(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/squads")
 def create_squad(payload: dict, request: Request, db: Session = Depends(get_db)):
-    _user(request)
+    user = _user(request)
     try:
         squad = ts.create_squad(
             db, slug=payload.get("slug", ""), name=payload.get("name", ""),
             leader_agent_id=int(payload.get("leader_agent_id") or 0),
             instructions=payload.get("instructions", ""),
+            created_by=user["id"],     # 写操作授权来源（assert_can_manage_squad 读它）
         )
     except Exception as e:  # noqa: BLE001
         _map_error(e)
@@ -209,9 +212,10 @@ def get_squad(ref: str, request: Request, db: Session = Depends(get_db)):
 @router.post("/squads/{ref}/members")
 def add_squad_member(ref: str, payload: dict, request: Request,
                      db: Session = Depends(get_db)):
-    _user(request)
+    user = _user(request)
     try:
         squad = ts._squad(db, ref)
+        ts.assert_can_manage_squad(db, squad, user)
         row = ts.add_squad_member(
             db, squad, payload.get("member_kind", "agent"), payload.get("member_id", ""),
         )
@@ -223,9 +227,10 @@ def add_squad_member(ref: str, payload: dict, request: Request,
 @router.delete("/squads/{ref}/members/{member_kind}/{member_id}")
 def remove_squad_member(ref: str, member_kind: str, member_id: str, request: Request,
                         db: Session = Depends(get_db)):
-    _user(request)
+    user = _user(request)
     try:
         squad = ts._squad(db, ref)
+        ts.assert_can_manage_squad(db, squad, user)
         ok = ts.remove_squad_member(db, squad, member_kind, member_id)
     except Exception as e:  # noqa: BLE001
         _map_error(e)
@@ -236,9 +241,10 @@ def remove_squad_member(ref: str, member_kind: str, member_id: str, request: Req
 
 @router.post("/squads/{ref}/archive")
 def archive_squad(ref: str, request: Request, db: Session = Depends(get_db)):
-    _user(request)
+    user = _user(request)
     try:
         squad = ts._squad(db, ref)
+        ts.assert_can_manage_squad(db, squad, user)
         squad = ts.archive_squad(db, squad)
     except Exception as e:  # noqa: BLE001
         _map_error(e)
@@ -250,6 +256,7 @@ def assign_squad(ref: str, payload: dict, request: Request, db: Session = Depend
     user = _user(request)
     try:
         squad = ts._squad(db, ref)
+        ts.assert_can_manage_squad(db, squad, user)
         result = ts.assign_task_to_squad(db, squad, user["id"], int(payload.get("task_id") or 0))
     except Exception as e:  # noqa: BLE001
         _map_error(e)

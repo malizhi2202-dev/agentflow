@@ -62,6 +62,28 @@ class NotFound(LookupError):
     """不存在或无权（路由统一 404）。"""
 
 
+class SquadForbidden(Exception):
+    """小队写操作被拒（creator/管理员之外）——路由映射 403。
+
+    故意**不**继承 TeamError：TeamError 统一映射 400（参数/状态错误），
+    授权失败是另一类语义，混在一起会让客户端分不清"我参数错了"和"你没权限"。
+    """
+
+
+def assert_can_manage_squad(db: Session, squad: Squad, user: dict) -> None:
+    """小队写操作的唯一判定（§2.11「小队不是授权单位」：授权只看 creator/admin）。
+
+    - creator：自己建的队，自己管；
+    - 平台管理员：处理离职/误建/事故；
+    - 其余一律拒绝（403）。`created_by` 为空的历史小队 → 只有平台管理员可写（从严）。
+    """
+    if _is_admin(user):
+        return
+    if squad.created_by and squad.created_by == user.get("id"):
+        return
+    raise SquadForbidden("只有小队创建者或平台管理员可以修改该小队")
+
+
 class Rejection(TeamError):
     """带拒因码的拒绝（路由映射 status_code + {"code","message"}，拒因原样回给界面）。"""
 
@@ -403,7 +425,7 @@ def _squad_dict(db: Session, squad: Squad) -> dict:
 
 
 def create_squad(db: Session, slug: str, name: str, leader_agent_id: int,
-                 instructions: str = "") -> Squad:
+                 instructions: str = "", created_by: str = "") -> Squad:
     if not SLUG_RE.match(slug or ""):
         raise TeamError("slug 必须匹配 ^[a-z][a-z0-9-]{1,31}$")
     if not (name or "").strip():
@@ -415,8 +437,11 @@ def create_squad(db: Session, slug: str, name: str, leader_agent_id: int,
         raise TeamError("leader Agent 不存在")
     if leader.status in ("archived", "disabled"):
         raise TeamConflict("leader Agent 已归档/停用，不能担任 leader（leader_bound）")
+    # created_by 是 `assert_can_manage_squad` 的唯一授权来源——必须在这里落，
+    # 否则每个小队都会是"没人建的"（只有平台管理员能动）。
     squad = Squad(slug=slug, name=name.strip(), leader_agent_id=leader_agent_id,
-                  instructions=instructions or "", status="active")
+                  instructions=instructions or "", status="active",
+                  created_by=created_by or "")
     db.add(squad)
     db.commit()
     db.refresh(squad)
