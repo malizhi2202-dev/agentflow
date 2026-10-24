@@ -12,6 +12,11 @@ from fastapi.testclient import TestClient
 from main import app
 from database import get_db, SessionLocal
 from sqlalchemy.orm import Session
+import config
+
+# v21 T-03：波 1 之后身份不再接受裸 X-User-Id；这里显式开启**debug 三重 opt-in**
+# （localhost 对端 + 开关 + admit 名单）作为测试身份通道，并保持原有断言口径。
+_DEBUG_PATCHERS = None
 
 
 def _mock_db():
@@ -25,8 +30,58 @@ def _mock_db():
     return db
 
 
-# 覆盖依赖注入
-app.dependency_overrides[get_db] = _mock_db
+# 依赖注入改为模块生命周期内设置（见 setUpModule）：
+# 模块导入期设置会被其它模块的 tearDown `pop(get_db)` 清掉 → 全量运行时失效。
+
+
+def _enable_debug_identity():
+    """开启 debug 身份通道（三重 opt-in），模块级一次性。"""
+    global _DEBUG_PATCHERS
+    if _DEBUG_PATCHERS is not None:
+        return
+    from unittest.mock import patch as _patch
+    import auth
+    from passwords import hash_password
+    from tests._auth_harness import PW as _HARNESS_PW
+
+    def _fake_seed(uid, role):
+        # 用 harness 口令的**真实哈希**：同一份 load_users 既要服务 debug 身份（chat 类），
+        # 也要服务 channel 类的真实登录（否则 login 会因为假 hash 失败）
+        return {"id": uid, "name": uid, "role": role,
+                "password_hash": hash_password(_HARNESS_PW), "must_change_password": False,
+                "active": True, "project_ids": [], "custom_permissions": []}
+
+    # 直接替换 users 数据源：固定身份、免「首启必须改密」（本模块只测路由映射）
+    _DEBUG_PATCHERS = [
+        _patch.object(config, "AUTH_DEBUG_HEADER_ENABLED", True),
+        _patch.object(config, "AUTH_DEBUG_HEADER_ADMIT_USERS", ["admin", "other-user"]),
+        _patch.object(config, "DEPLOY_MODE", "localhost"),
+        _patch.object(auth, "load_users",
+                      return_value={"users": [_fake_seed("admin", "admin"),
+                                              _fake_seed("other-user", "user")]}),
+    ]
+    for p in _DEBUG_PATCHERS:
+        p.start()
+
+
+def _client():
+    # 对端必须是 127.0.0.1（debug 通道的 localhost 条件）
+    _enable_debug_identity()
+    return TestClient(app, client=("127.0.0.1", 50000))
+
+
+def setUpModule():      # noqa: N802 — unittest 钩子：模块内统一开启，模块结束必须关闭
+    _enable_debug_identity()
+    app.dependency_overrides[get_db] = _mock_db
+
+
+def tearDownModule():   # noqa: N802 — 关键：不关会把 debug 身份泄漏给后续测试模块
+    global _DEBUG_PATCHERS
+    app.dependency_overrides.pop(get_db, None)
+    if _DEBUG_PATCHERS:
+        for p in reversed(_DEBUG_PATCHERS):
+            p.stop()
+        _DEBUG_PATCHERS = None
 
 
 class TestChatApiIntegration(unittest.TestCase):
@@ -34,7 +89,7 @@ class TestChatApiIntegration(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = TestClient(app)
+        cls.client = _client()
         cls.headers = {"X-User-Id": "admin", "Content-Type": "application/json"}
 
     def setUp(self):
@@ -144,10 +199,10 @@ class TestChatApiIntegration(unittest.TestCase):
             resp = self.client.get("/api/chat/1/messages?since_id=5&limit=10", headers=self.headers)
         self.assertEqual(resp.status_code, 200)
 
-    # API-13: GET /chat/{id}/messages 无权限 → 返回空
+    # API-13: 会话隔离（另一个已认证用户看不到别人的消息）
     def test_get_messages_no_permission(self):
         with patch("services.chat_service.ChatService.get_messages") as mock_get:
-            mock_get.return_value = []  # 会话隔离
+            mock_get.return_value = []  # 会话隔离由服务层按 owner 过滤
             resp = self.client.get("/api/chat/1/messages", headers={"X-User-Id": "other-user"})
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), [])
@@ -167,19 +222,31 @@ class TestChatApiIntegration(unittest.TestCase):
 
 
 class TestChannelApiIntegration(unittest.TestCase):
-    """channel API 全量集成测试."""
+    """channel API 全量集成测试（真实内存库 + 真实登录，替代旧 MagicMock 身份）。"""
 
-    @classmethod
-    def setUpClass(cls):
-        cls.client = TestClient(app)
-        cls.headers = {"X-User-Id": "admin", "Content-Type": "application/json"}
+    def setUp(self):
+        from tests._auth_harness import AuthHarness
+        from models.agent import Agent
+        self._h = AuthHarness()
+        self._h.users = [("admin", "admin")]
+        self._h.setUp()
+        db = self._h.db
+        db.add(Agent(id=15, owner_id="admin", name="渠道测试 Agent",
+                     model_provider="deepseek", model_name="deepseek-flash",
+                     api_key_encrypted="x"))
+        db.commit()
+        self.client = self._h.client("admin")
+        self.headers = {"Content-Type": "application/json"}
+
+    def tearDown(self):
+        self._h.tearDown()
 
     # API-15: POST /channels 正常创建
     def test_create_channel(self):
         resp = self.client.post("/api/agents/15/channels",
                                 json={"channel_type": "telegram", "credentials": {"bot_token": "test:token"}},
                                 headers=self.headers)
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200, resp.text)
         data = resp.json()
         self.assertTrue(data["ok"])
         self.assertEqual(data["channel"]["channel_type"], "telegram")
@@ -211,12 +278,11 @@ class TestChannelApiIntegration(unittest.TestCase):
         resp = self.client.get("/api/agents/15/channels", headers=self.headers)
         self.assertEqual(resp.status_code, 200)
 
-    # API-20: PUT /channels 更新
+    # API-20: PUT /channels 更新（不存在 → 404 也是正常路径）
     def test_update_channel(self):
         resp = self.client.put("/api/agents/15/channels/1",
                                json={"status": "disabled"},
                                headers=self.headers)
-        # 可能 404（不存在）或 200（成功），都是正常路径
         self.assertIn(resp.status_code, [200, 404])
 
     # API-21: PUT /channels 不存在的渠道 → 404
@@ -243,12 +309,12 @@ class TestChannelApiIntegration(unittest.TestCase):
                                 headers=self.headers)
         self.assertEqual(resp.status_code, 404)
 
-    # API-25: POST webhook callback 畸形 body
+    # API-25: POST webhook callback 畸形 body → 先按 UUID 不存在拦截
     def test_webhook_malformed_body(self):
         resp = self.client.post("/api/channels/telegram/callback/nonexistent-uuid",
                                 content=b"{broken json !!!",
                                 headers={"Content-Type": "application/json"})
-        self.assertEqual(resp.status_code, 404)  # UUID 不存在先拦截
+        self.assertEqual(resp.status_code, 404)
 
     # API-26: 所有 5 种渠道类型创建
     def test_all_channel_types_create(self):
@@ -261,22 +327,22 @@ class TestChannelApiIntegration(unittest.TestCase):
             "smtp_email": {"smtp_host": "smtp.test.com", "smtp_port": 587, "smtp_user": "u", "smtp_password": "p"},
         }
         for t in types:
-            resp = self.client.post(f"/api/agents/15/channels",
+            resp = self.client.post("/api/agents/15/channels",
                                     json={"channel_type": t, "credentials": creds_map[t]},
                                     headers=self.headers)
-            self.assertEqual(resp.status_code, 200, f"渠道 {t} 创建失败")
+            self.assertEqual(resp.status_code, 200, f"渠道 {t} 创建失败: {resp.text}")
 
-    # API-27: 缺少 X-User-Id header 的场景
+    # API-27: 缺少身份 → 401（波 1 已废除「缺身份回退 admin」）
     def test_missing_user_header(self):
-        resp = self.client.get("/api/chat/conversations")
-        # 应该仍然能工作（admin 默认用户）
-        self.assertEqual(resp.status_code, 200)
+        from fastapi.testclient import TestClient
+        from main import app
+        anon = TestClient(app, client=("127.0.0.1", 50000))
+        self.assertEqual(anon.get("/api/chat/conversations").status_code, 401)
 
     # API-28: 异常 HTTP method → 405
     def test_wrong_method(self):
         resp = self.client.put("/api/chat/conversations", headers=self.headers)
         self.assertEqual(resp.status_code, 405)
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

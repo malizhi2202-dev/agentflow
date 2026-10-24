@@ -15,6 +15,7 @@
 | 2026-10-24 | `v20-wave7` | 波 7 遗留项收口：A2A M0 静态卡 · 因果前缀 + 晋升评审账 + 防污染双扫 · 四类开关 · 归因双列 + 瀑布 fail-closed | `13faefbe` | L-001 |
 | 2026-10-24 | `doc-align-v20` | 文档归并：RULINGS/INDEX 建档、门面改齐、删 8 张孤儿原型页（135→127） | `fcc00645` | — |
 | 2026-10-24 | `v20-rsi-adapters` | 真实 judge 适配器（显式配置 + 预算帽 + 可注入）+ L0 定时抽取作业（默认关闭）；三类业务错由 500 改正 400 | 见「feat(rsi-adapters)」提交 | — |
+| 2026-10-24 | `v21-completion` T-03 | 基线红 29F/12E → **0 失败**（477 用例 OK）：旧身份/urllib mock/旧文案逐条对齐；修「埋点异常打挂聊天回复」；修 dependency_overrides 生命周期缺陷 | 见「fix(v21-t03)」提交 | — |
 | 2026-10-24 | `v21-completion` T-02 | Agent 真实运行时执行通道（hermes/dsh/codex，默认关闭、fail-closed、不经 shell、不降级）；真 CLI 冒烟 hermes/dsh 均回 '1' | 见「feat(v21-t02)」提交 | — |
 | 2026-10-24 | `v21-completion` T-01 | T-05 人设三件落库（迁移 017 · 创建/更新/读取 + chat 取值可测）；程序级收口范围与「不做清单」立项 | 见「feat(t05)」提交 | — |
 | 2026-10-24 | `v20-e2e-mysql` | **MySQL 真实库 + 真实运行时（dsh CLI）界面 E2E**：16 迁移/50 表一次通过、二次幂等；13 条界面 E2E 全绿（含熔断期拒绝/复位、提案全链路、UI 内 judge=llm 真调 CLI）；修 `judge_kind` 归一为 llm_judge；E2E 脚本入仓 | 见「test(e2e-mysql)」提交 | — |

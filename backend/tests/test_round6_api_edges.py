@@ -55,7 +55,9 @@ class TestRound6ChatService(unittest.TestCase):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
-        self.assertEqual(result["agent_message"]["status"], "error")
+        # v21 T-03：provider 解析错误 → 友好回退（done + 原因）
+        self.assertEqual(result["agent_message"]["status"], "done")
+        self.assertIn("Agent", result["agent_message"]["content"])
 
     # R6-02: LLM 返回 choices[0].message 无 content
     def test_llm_missing_content_key(self):
@@ -65,7 +67,9 @@ class TestRound6ChatService(unittest.TestCase):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
-        self.assertEqual(result["agent_message"]["status"], "error")
+        # v21 T-03：provider 解析错误 → 友好回退（done + 原因）
+        self.assertEqual(result["agent_message"]["status"], "done")
+        self.assertIn("Agent", result["agent_message"]["content"])
 
     # R6-03: LLM 超长回复内容
     def test_llm_very_long_response(self):

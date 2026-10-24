@@ -140,7 +140,9 @@ class TestChatServiceEdgeCases(unittest.TestCase):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
-        self.assertEqual(result["agent_message"]["status"], "error")
+        # v21 T-03：provider 层解析错误（空 choices）→ 友好回退消息（done + 原因），不是 error
+        self.assertEqual(result["agent_message"]["status"], "done")
+        self.assertIn("empty choices", result["agent_message"]["content"])
 
     # E10: LLM 返回非 JSON
     def test_llm_non_json_response(self):
@@ -150,7 +152,9 @@ class TestChatServiceEdgeCases(unittest.TestCase):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
-        self.assertTrue(result.get("error") or result["agent_message"]["status"] == "error")
+        # 解析类错误（ValueError）→ 友好回退（done + 原因）；传输层才走 error 状态
+        self.assertEqual(result["agent_message"]["status"], "done")
+        self.assertIn("not json", result["agent_message"]["content"])
 
     # E11: LLM 返回 HTTP 500
     def test_llm_http_500(self):
@@ -160,7 +164,10 @@ class TestChatServiceEdgeCases(unittest.TestCase):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "hi", "admin", db)
-        self.assertTrue(result.get("error") or result["agent_message"]["status"] == "error")
+        # 传输层失败（RuntimeError/HTTP 500）→ error 状态 + 可重试文案（与解析错误区分）
+        self.assertEqual(result["agent_message"]["status"], "error")
+        self.assertIn("暂时无法回复", result["agent_message"]["content"])
+        self.assertTrue(result.get("error"))
 
     # E12: 不支持 model_provider
     def test_unsupported_model_provider(self):
@@ -198,13 +205,7 @@ class TestChatServiceEdgeCases(unittest.TestCase):
     # E15: Unicode/emoji 消息
     def test_unicode_emoji_message(self):
         db, agent = self._setup_mocks()
-        with patch("services.chat_service.urllib.request.urlopen") as mock_http:
-            mock_resp = MagicMock()
-            mock_resp.status = 200
-            mock_resp.read.return_value = json.dumps({
-                "choices": [{"message": {"content": "收到 🎉"}}],
-            }).encode()
-            mock_http.return_value = mock_resp
+        with patch("services.chat_service.get_provider", return_value=_fake_provider("收到 🎉")):
             with patch("services.chat_service.decrypt", return_value="k"):
                 with patch("services.chat_service.log_audit"):
                     result = self.cs.send_message(15, "你好 🌍👋 测试", "admin", db)

@@ -135,16 +135,20 @@ class ChatService:
                 messages, api_key,
                 agent.model_name or "gpt-3.5-turbo",
             )
-            # 运行时埋点：记录真实 token 消耗
-            tracer.trace_model_call(
-                entity_type="agent", entity_id=agent_id, owner_id=owner_id,
-                model_name=agent.model_name or "unknown",
-                prompt_tokens=usage.get("prompt_tokens", len(content) // 4),
-                completion_tokens=usage.get("completion_tokens", len(reply) // 4),
-                duration_ms=0,
-                tool_name="chat", tool_calls=1,
-                status="success"
-            )
+            # 运行时埋点：记录真实 token 消耗。
+            # **埋点失败绝不能把回复打成 error**（v21 T-03 实测：metrics 表缺失会让整条回复变 error）
+            try:
+                tracer.trace_model_call(
+                    entity_type="agent", entity_id=agent_id, owner_id=owner_id,
+                    model_name=agent.model_name or "unknown",
+                    prompt_tokens=usage.get("prompt_tokens", len(content) // 4),
+                    completion_tokens=usage.get("completion_tokens", len(reply) // 4),
+                    duration_ms=0,
+                    tool_name="chat", tool_calls=1,
+                    status="success"
+                )
+            except Exception as e:  # noqa: BLE001 — 可观测性不参与业务成败
+                print(f"[tracer] 埋点失败（已忽略，不影响回复）: {e}")
         except ValueError as e:
             # 未知 provider → 友好提示
             reply = f"[Agent {agent.name}]: 收到消息「{content[:100]}」，但 {e}"
