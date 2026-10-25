@@ -2,8 +2,8 @@
 
 > **用途**：回答「这句话现在还作数吗」。任何文档与本文冲突，**以本文为准**；本文没有的条目，按「所属轮次包的最新页首注 → ROADMAP 轮次节 → PRODUCT-DESIGN 对应节」的顺序回退查找。
 > **维护**：新裁定/新收口只改本文一行 + 在来源包加一行注，**不改写历史正文**（历史保留纪律，见 §五）。
-> **最近更新**：2026-10-25（**v24 代码批结案后二修**）· 对应产品档 **PRODUCT-DESIGN.html v23**（v21/v22 回填 → v23 结案）· 代码已实施波 0–7（`ac839aa0` `943b7e5e` `64e44de6` + 波 7 提交）**＋ v21（测试基建/真运行时/用户审计表化）＋ v22（导航 6 组/运行时发现/创建 Agent 去凭据/前端壳层）＋ v23（multica 内容迁入）＋ ui-parity（127 页原型逐族对齐，P0–P5）**。〔2026-10-25 起新增纪律：**本表的「状态」列必须以实测为准，引用前先查代码；设计与代码的口径差异不进本表（那是挂账），见 §六〕
-> **归并范围**：`.specs/` 全部 **309** 个 md〔2026-10-23 记 152，10-24/10-25 四轮新增后实测 309〕+ 根 4 本（README / README.en / CLAUDE / STATE）+ `prototype/` **127 页**（v20 删 8 张无入口旧页）。
+> **最近更新**：2026-10-25（**v25-r25-clearance 清账批结案后三修**：§五点五·二 挂账指针 + §五点五·三 R25 结案表 + §五点五·三之一 structure_rules 词表）· 上一修（**v24 代码批结案后二修**）对应产品档 v23，本修对应 **PRODUCT-DESIGN.html v24**（v21/v22 回填 → v23 结案 → v24 清账）· 代码已实施波 0–7（`ac839aa0` `943b7e5e` `64e44de6` + 波 7 提交）**＋ v21（测试基建/真运行时/用户审计表化）＋ v22（导航 6 组/运行时发现/创建 Agent 去凭据/前端壳层）＋ v23（multica 内容迁入）＋ ui-parity（127 页原型逐族对齐，P0–P5）＋ v24/v25 两批迁移 026–037（D1–D11 + R25 清账）**。〔2026-10-25 起新增纪律：**本表的「状态」列必须以实测为准，引用前先查代码；设计与代码的口径差异不进本表（那是挂账），见 §六〕
+> **归并范围**：`.specs/` 全部 **320** 个 md〔2026-10-23 记 152 → 10-25 实测 309 → v25 批工件目录 `.specs/v25-r25-clearance/` 5 件后 320〕+ 根 4 本（README / README.en / CLAUDE / STATE）+ `prototype/` **127 页**（v20 删 8 张无入口旧页）。
 
 ---
 
@@ -135,6 +135,8 @@
 
 ### 五点五·二 新增挂账（两路对账发现 · 待裁/待做）
 
+> **〔2026-10-25 · change `v25-r25-clearance` 结案〕**本表 R25-1…11 已经四条人工裁定并逐行清账——**结案与残项继承见 §五点五·三**；本表原文保留作发现时的证据快照。
+
 | # | 分歧/缺口 | 证据 | 性质 |
 |---|---|---|---|
 | R25-1 | 记忆前端筛选/写入未接 `domain`/`life_status`/`content`/`confidence` 新列 | `frontend/src/stores/rsi.ts:16`（LAYERS/STATUSES 旧集合）· `pages/Memory.tsx` 表单 | 前端残项（后端 API 已透传） |
@@ -150,6 +152,34 @@
 | R25-10 | 主档端点名失实三处（`/api/finetune/*`→实际 `/api/decision-models/finetune/batches`；`/api/artifact`→`/api/changes/{id}/artifact`；`/api/channel`→`/api/channels/*`） | API 对账报告 | 文档失实（本轮主档已改，见 v23 版链） |
 
 
+
+### 五点五·三 R25 结案（2026-10-25 · change `v25-r25-clearance` · 四条人工裁定）
+
+> **裁定原文**（AskUserQuestion 四裁）：批次范围=**全做 A+B+C**；R25-5=**实装 HMAC-SHA256，token 双通道过渡**；R25-7=**落表：全局一行总闸**；R25-3=**表挂起，exec_ledgers 继续只建不写**。
+> 五笔入库：`bb54ea48`（迁移 032–037）· `92e62cc7`（治理）· `66913ab1`（指派开跑）· `9531ed8b`（前端四件）· 本 docs 批。**真 MySQL 重放收口**：`pending=[]`，squads 表级 FK `fk_squads_leader_agent`、队列 7 列、automations 3 列 + triggers `signing_secret`、`mention_targets`/`im_bindings` 两表、订阅泛化列、global 行 `enabled=1` 逐项验收通过（L-014 纪律：动 schema 在权威方言实跑）。
+
+| # | 结案状态 | 落点 | 残项（如实继承） |
+|---|---|---|---|
+| R25-1 | **已结案** | `stores/rsi.ts` 补 `MEMORY_DOMAINS`（五值）/`MEMORY_LIFE_STATUSES`（三态）词表与 `Memory.domain/life_status/content/confidence` 四字段；`Memory.tsx` 写入表单三输入（内容域/内容摘要/置信 0–1 校验）+ 筛选器两 select 透传 query + 行内三 chip（**有值才渲，不渲染假默认**） | 存量行 domain=semantic/life_status=active 的物化默认仍在库层，界面只读不回填 |
+| R25-2 | **已结案** | `rsi_service.assert_editable` 消费四结构列，判定链 `path_pattern`→`exclusions`→`structure_rules`（逐条合取）→`cap_bytes`（**仅当调用点传 content 才判**）；词表成文（见下 §五点五·三之一）；写侧 `create_surface/update_surface` 同词表校验，畸形规则 **fail-closed** | `cap_bytes` 依赖调用点能给正文；给不出的入口如实不判（不是绕过，是判据不足） |
+| R25-3 | **维持挂起（用户裁定）** | 无代码改动——预算帽生成器不入批 | `exec_ledgers` 继续**只建表不写**；宁挂账不伪造恒等式（写 expected=actual 违背本表纪律） |
+| R25-4 | **已结案** | `stores/automations.ts` 加 `ruleVersions/ruleVersionsError`（读取失败**独立提示、不污染主 error**）；`Automations.tsx` 节②末「规则版本」子节：v1…vN 升序 + 任选两版 key 级 diff **只读** + 双 select 对比 | 后端无回滚端点 ⇒ 界面显式标 `只读 diff · 回滚未接入`（原型「回滚」toast **非本批口径**，差异登记于此） |
+| R25-5 | **已结案（HMAC + 双通道）** | `add_trigger/rotate` 生成并存 `signing_secret`（明文**回显一次**、密文经 `encryption_service` 落库、api 型不设）；`ingest_webhook` 认证闸：**带 `X-Webhook-Signature: sha256=<hex>` ⇒ HMAC-SHA256(raw body) + `hmac.compare_digest`；不带 ⇒ 回落旧 token 通道**；投递账 `auth` 字段记因（`hmac`/`legacy_token`），拒因分记 `signature_invalid`/`signature_unconfigured`（未配签名却带签名头=401） | **token 退役不在本批**（双通道并存，退役另批裁定） |
+| R25-6 | **已结案** | `stores/rsi.ts` 补 `goldenSets` 状态与 fetch/create/freeze；新组件 `control/GoldenSetsCard`（列表 cases_count/produced_by/冻结态/eval_mark + 管理员新建与冻结）挂管控面；`Memory.tsx` 影子重放改**选已冻结集**传 `golden_set_id` | 不选集时保自报路径并如实标 `self_declared`（D10 双口径不变） |
+| R25-7 | **已结案（落表）** | 迁移 032 幂等插 `rsi_switches.category='global'` 行；`assert_category_running` **先查总闸**（off ⇒ 短路一切类目，在任何类目判定之前）；`switches()` global 领衔（缺行合成开）；`set_switch` 与路由放行 global（停用必填原因双入口不破） | 前端**无 global 真行时如实回退**逐类目聚合并加「派生 · 」前缀（不假装是新后端） |
+| R25-8 | **已结案（含后端接线）** | 服务层 `run_from_assignment`：人轨拒（无 run）· 小队走 leader 任务如实注 · **停车闸（backlog/未开始）内禁开跑** · 终态不豁免 · 成功后 `record_run(status="queued", 触发源=指派)`；`POST /api/tasks/{id}/assign` 收 `start`（服务+路由双入口）；前端 `AssigneePicker` 拆出 `AssignConfirm` 三按钮确认层（开始/先不开工/取消，**只做一份**，`NewTaskForm`/`TaskCard` 复用），人轨不弹、parked 置灰「开始」并给 title 说明 | 「先不开工」=只登记指派不建 run（与原型口径一致）；`trigger_agent_run` 的 WorkItem 关联仅在此路径落账，其它触发源未回溯补 |
+| R25-9 | **维持不改号（已裁定）** | — | 019 双行按全名幂等不炸；改号=已部署库重放，**不做** |
+| R25-10 | **已结案（文档失实类）** | 主档端点名 v23 已订正三处；本批无代码动作 | — |
+| R25-11 | **部分结案（列形态族 · 迁移 033–037）** | 033 `squads.avatar_url` + `squad_member.created_by` + `leader_agent_id` **表级 FK `ON DELETE RESTRICT`**（MySQL 走 `add_fk_if_missing`，inline `REFERENCES` 会被静默忽略——L-014）；034 队列补 7 列（四设计列 + `is_leader_task` + `squad_id`/`workflow_id`）+ 两索引 + `to_dict` 透传；035 automations 补 `concurrency_policy DEFAULT 'queue'`/`issue_title_template`/`created_by`，triggers 补 `signing_secret`；036 建 `mention_targets` + 订阅泛化列 `subject_type`/`subscriber_type`（默认 task/member 保现状；source 词表**名差保留在案**，服务侧同义放行不 rename）；037 建 `im_bindings` + `CHANNEL_TYPES` 扩至 8 值（lark 作 feishu 同义） | **表先行、写侧未造数**（同 exec_ledgers 模式，不伪造）：队列 coalesce 投喂点未接、`concurrency_policy` 的 `replace` 语义无引擎抢占位点、`mention_targets` 收据与 `im_bindings` 入站身份解析无真实写入位点；订阅**旧 UNIQUE 不删**（expand-only），多行形态待表重建；无评论实体表 ⇒ `mention_targets.comment_id` 为普通可空列，**不造引用目标** |
+
+### 五点五·三之一 structure_rules 词表（R25-2 裁定成文 · 唯一口径处）
+
+- **字符串形态** = fnmatch 通配（`*` **含 `/`**，即不做路径分段）；空串 = 命中一切。
+- **对象形态** = `{type ∈ prefix | suffix | regex, value}`；`regex` 用 Python `re`（`search` 语义）。
+- `exclusions` **命中即拒**，优先于 path_pattern 与 structure_rules。
+- `structure_rules` **逐条合取**（全部命中才放行）；畸形规则（缺 type / 未知 type / 坏正则）**写侧拒绝、读侧 fail-closed 拒判**——坏配置不许静默变成「全部放行」。
+- `cap_bytes` 是**内容体积上限**，仅当调用点能取到正文时判定；取不到正文即不判，不以此绕过其它三条。
+- 词表在代码的唯一定义处：`backend/services/rsi_service.py`（`_pattern_matches` / `_rule_matches` / `_validate_structure_rules`）。改词表先改本节，再改码。
 
 ## 五、历史保留纪律（这次归并的执行规则）
 

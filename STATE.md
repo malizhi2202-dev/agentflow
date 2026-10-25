@@ -1,14 +1,14 @@
 # STATE — 跨会话状态
 
 > 本文件记录当前进行中的工作与上次断点。**每次会话结束前更新**。
-> 最近更新：2026-10-25（v24-doc-refresh 代码批 + 挂账结案会话）
+> 最近更新：2026-10-25（v25-r25-clearance 残项清账批会话）
 
 ## 会话状态（GO.md 第一步四字段 · 2026-10-24 起必填）
 
-- **活跃 Change**：`v24-doc-refresh`（代码 ↔ product-design 一致性——**文档批 + 代码批均完成**：主档 v21→v23 · RULINGS §五点五 挂账 D1–D10 → §五点五·一 结案 + §五点五·二 残项 R25-1…11 · 迁移 026–031 实施 D1–D11）
-  - 前序**已全部提交**：`ui-parity`（P0–P5 · `51fd105d`）· `v22-*` 三件 · `v23-multica-import`
-- **当前阶段**：v24 **两批收口完成**——文档：主档 **v23** · 4,277 行 · HTML 校验通过 · INDEX/RULINGS/CHANGELOG/STATE 同步；代码：后端 **733 OK（0 失败）** · 前端 **tsc 0 · vitest 250/250 · build ✓ 19.9s** · `proto_parity --strict` exit 0
-- **当前 Task**：向用户汇报全批结果 → 确认后提交 → 人工过目 R25 残项清单（R25-1…11，见 RULINGS §五点五·二）
+- **活跃 Change**：`v25-r25-clearance`（R25 残项清账批——四条人工裁定落码：**全做 A+B+C · HMAC-SHA256 token 双通道过渡 · 全局总闸落表 · exec_ledgers 表挂起**。五笔入库：`bb54ea48` 迁移 032–037 · `92e62cc7` 治理三件 · `66913ab1` 指派开跑 · `9531ed8b` 前端四件 · docs 批。RULINGS **§五点五·三** 结案表 + **§五点五·三之一** structure_rules 词表；主档 **v24**）
+  - 前序**已全部提交**：`v24-doc-refresh`（文档批 + 代码批 + 真库收口 `75d32a89`/`0eea314c`）· `ui-parity`（P0–P5 · `51fd105d`）· `v22-*` 三件 · `v23-multica-import`
+- **当前阶段**：v25 **五笔收口完成**——后端 **774 OK（skipped=6）** · 前端 **tsc 0 · vitest 25 文件 259/259 · build ✓** · `proto_parity --strict` exit 0 · **真 MySQL 重放 032–037：pending=[] + 形状 9 项验收全过**（L-014 纪律）
+- **当前 Task**：向用户收口汇报（五笔链 / 门禁终值 / 残项清单）→ **push 与否留用户定** → 人工过目 R25 残项继承（RULINGS §五点五·三「残项」列）
 - **中断任务**：（空）
 - **ai_context_doc**：`CLAUDE.md`（2026-10-24 用户选定；`.specs/CONTEXT.md` 已作废不用）
 - **last_intel_scan**：（未跑；按用户选择跳过）
@@ -20,12 +20,13 @@
 **本轮（v24-doc-refresh）起因**：用户指出「项目里边的代码实现和 `./specs` 的文档 product-design 的实现的不一致」。四路只读对账（数据模型 / API 端点 / 前端语义 / 文档自述）+ 质量门实测后的判定是——
 
 > **主因是「文档滞后于代码」，不是「代码写错了」。** 主档 v20 的 §1.6「代码实态」表停在 10-12 基线 `4ac819bf`；其上 **89 个提交**（32 触 `backend/`、18 触 `frontend/`）没回填一个字。
-> **次因是「设计与代码口径真有不一致」**——共 10 条（D1–D10），**不改设计也不改代码**，一律挂账等裁定。
+> **次因是「设计与代码口径真有不一致」**——共 10 条（D1–D10），当时**不改设计也不改代码**，一律挂账等裁定。〔后续账：D1–D11 已由「都做」授权实施（v24 代码批 · §五点五·一）；其残项 R25-1…11 已由四条人工裁定清账（v25 批 · §五点五·三）。〕
 
 ## 最近完成
 
 | 时间 | 事项 | 产物 |
 |---|---|---|
+| 2026-10-25 | **v25-r25-clearance · R25 残项清账批（本轮）** | 四条人工裁定（全做 A+B+C · R25-5 HMAC+token 双通道过渡 · R25-7 全局总闸落表 · R25-3 exec_ledgers 表挂起）→ 五笔入库：① `bb54ea48` **迁移 032–037**（rsi global 总闸行 · squad 形态族 `avatar_url`/`created_by`/表级 FK RESTRICT · 队列七列+两索引 · automations 三列+`signing_secret` · `mention_targets` · `im_bindings`；DOWN 032–037 逐版登记）② `92e62cc7` **治理**（总闸 off 短路一切类目 · `assert_editable` 消费四结构列 + 词表成文 · webhook HMAC-SHA256 双通道 + 投递账记因）③ `66913ab1` **指派开跑**（`run_from_assignment` 停车闸 + `assign start` 双入口）④ `9531ed8b` **前端四件**（记忆列接线 / 规则版本只读 diff / `GoldenSetsCard` + 影子重放选冻结集 / `AssignConfirm` 确认层 + 总闸真行读写）⑤ docs 批。RULINGS **§五点五·三** R25 结案表 + **§五点五·三之一** structure_rules 词表（唯一定义处）· 主档 **v24**（chip/页脚链/§3.3 十一行注/§1.6 复测 65 表 38 版 33 模块）· INDEX §五 第 12 行。**真 MySQL 重放**：pending=[] + 形状 9 项验收（FK 表级 · 七列 · 三列+签名 · 两新表 · 泛化列 · global 行）。门禁：后端 **774 OK（skipped=6）** · tsc 0 · vitest **259** · build ✓ · parity --strict exit 0。**「表先行·写侧挂账」残项族如实继承**（coalesce 投喂点 / `concurrency_policy` 消费 / 收据与 IM 绑定写侧 / 订阅多行表重建 / `avatar_url` 等写侧 / token 退役 / exec_ledgers 挂起） | `.specs/v25-r25-clearance/` · `backend/{migrations.py,models/,services/,routes/}` · `frontend/src/{stores,pages,components}/` · `RULINGS.md` · `PRODUCT-DESIGN.html` · `INDEX.md` · `STATE.md` |
 | 2026-10-25 | **v24-doc-refresh · 代码 ↔ 文档一致性回填（本轮）** | ① **四路只读对账**（数据模型 / API 端点 / 前端语义 / 文档自述）② **主档 v21/v22 回填**：§1.6 标的声明与现状基线表按 `51fd105d` 实测重写八维；§1.6.0 波 0 判据「可回滚」**降级**为「版本账本 + 幂等」（无 down 实现）；§1.6.7 ①「P0/P1/P2/W 全部仍未实施」标 ⛔ 过期；§2.12 / §5.19 / §6.19–6.27 / §6.29–6.31 共 **14 节**「规划原型 · 未实现」→「已实施」+ 各附实测口径注；§3.3 表行逐张标 **已实施 / 部分实施 / 未实现 / 口径差异** 四态；§3.3 导语 26 表 → **59 表**（53 张注册进 `Base.metadata` + 6 张仅迁移建）；页眉 chip v19 → **v21**、页脚版本链补 v21/v22 ② **RULINGS**：头部补记四轮、裁⑦「users.json 表化未做」改已做、裁⑧「波 6 在途」改波 0–7 全收口、R6-1「定时作业未做」改已做、R6-3「影子重放执行器未做」改已做、R7-1 补「金标/异厂系为调用方声明」、R9-1 删「未提交」、术语表记忆四层补代码实况；**新增 §五点五「代码 ↔ 设计口径差异挂账」10 条 D1–D10** ③ **INDEX.md** 版本谱系补 v21/v22、代码基线口径改写 ④ **STATE.md 全量重写**（本文件）⑤ 工件目录 `.specs/v24-doc-refresh/` | `.specs/product-design/PRODUCT-DESIGN.html` · `.specs/platform-evolution/RULINGS.md` · `.specs/product-design/INDEX.md` · `STATE.md` · `.specs/v24-doc-refresh/` |
 | 2026-10-25 | **ui-parity P5 + P3-b2**：127 页原型逐族对齐收口（页族缺失 0 / 部分 0，`--strict` exit 0）· 看板证据门（警告式）+ 对话四语义 + 知识库四节 + 管控面三卡组 · 自动化中心 9 节 + Agent 详情十六分区 · 决策模型/微调/环境参谋从规划态切真后端（迁移 019）· 自动化四表（迁移 **025**，非 020——020 已被 multica 占用，重号会静默顶掉） | `.specs/ui-parity/{CHANGE,TASK,GAP,STATUS,P3-*.md}` · `backend/migrations.py` · `frontend/src/{pages,components,stores}/` |
 | 2026-10-25 | **multica 内容整体搬入**（`v23-multica-import`）：技能 30（145 文件）· Agent 38 · 小队 2 · 成员 34；新增绑定接口 `GET/POST /api/agents/{id}/tools`；工具库多文件技能包（迁移 020/021）；导入脚本 `scripts/import_multica.py` | `.specs/v23-multica-import/{CHANGE,TASK,TEST,REVIEW}.md` · `scripts/import_multica.py` |
@@ -41,14 +42,14 @@
 
 ## 进行中
 
-- 🧹 **change `v24-doc-refresh`（本轮 · 用户「代码实现和 product-design 不一致」触发）**：
-  - **口径**：**只回填「文档说的代码现状」，不改设计语义、不改代码**。凡设计与代码真有不一致者 → 挂账（`RULINGS.md` §五点五 D1–D10），等人工裁定。
-  - **已交付**：主档 v21/v22（4,277 行 · HTML 校验通过 · 标签无失衡）· RULINGS（124 行 · §五点五 挂账节）· INDEX 版本谱系 · STATE 全量重写 · 工件目录。
-  - **在途**：两路对账（**API 端点契约** · **前端字段级语义**）返回后并入挂账；`scripts/ci.sh` 与 `test_t07` 两处工程断点待下一批处理（见「下一步」第 3 条）。
+- ✅ **change `v25-r25-clearance`（本轮 · 五笔收口）**：R25-1…11 残项清账——**除 R25-3（用户裁「表挂起」）与 R25-9（维持不改号）外全部结案**；结案表与「表先行·写侧挂账」残项继承在 `RULINGS.md` §五点五·三；structure_rules 词表唯一定义在 §五点五·三之一（改词表先改该节、再改码）。
+- ✅ **change `v24-doc-refresh`（前序收口）**：文档批（主档 v21→v23）+ 代码批（迁移 026–031 实施 D1–D11）+ 真库首跑修复（`0eea314c`，教训 L-014）+ 结案回写（`75d32a89`）。
   - ⚠ **台账归属**：`STATE.md` / `TOPICS.md` / `ROADMAP.md` 由 leader（交付总调度）独占写，子 agent 一律禁写这三个文件（09-23 曾发生 STATE 被回滚成旧快照）。
-- 📋 **并行对账在跑**：API 端点契约（第二次下发，前一次被限流打断）· 前端字段级语义。
+- （无并行对账在跑——两路发现早已吸收为 §五点五 的 D 批与 R25 批，R25 亦已清账。）
 
-### 挂账：代码 ↔ 设计口径差异 10 条（**等人工裁定**，明细见 `RULINGS.md` §五点五）
+### 挂账（**历史快照 · 已全部裁定并结案**，结案账见 `RULINGS.md` §五点五·一 / §五点五·三）
+
+> D1–D10 → **§五点五·一**（迁移 026–031 · v24 代码批）；由它们派生的残项 R25-1…11 → **§五点五·三**（v25 清账批 · 四条人工裁定）。下表保留仅为说明各条当年挂的是什么，**不再是待办**。
 
 | # | 一句话 | 影响面 |
 |---|---|---|
@@ -80,17 +81,19 @@
 
 〔2026-10-23 追加裁定〕① 裁定⑧ 开发冻结（10-24 **已解除**）② Squad 升为可指派一等实体 ③ 首批五类收口（域进首批、编排次批）④ Team 与小队不合并。
 
-### 待裁（**10 条 · D1–D10**）
+〔2026-10-25 v25 批四裁（AskUserQuestion 原话选项）〕① 批次范围 =「**全做 A+B+C**」 ② R25-5 =「**实装 HMAC-SHA256，token 双通道过渡**」 ③ R25-7 =「**落表：全局一行总闸**」 ④ R25-3 =「**表挂起，exec_ledgers 继续只建不写**」。结案账 `RULINGS.md` §五点五·三。
 
-见上表与 `RULINGS.md` §五点五。**每条两个选项**：「改设计对齐代码」或「改代码对齐设计」。**本轮不单方面动任何一边**——单方面把设计改成代码的样子等于裁撤设计，须留裁定记录。
+### 待裁（**0 条**）
+
+无待裁项：D1–D11 与 R25-1…11 均已裁定并结案/明确挂起（§五点五·一 / §五点五·三）。下一批候选见「下一步建议」，均需新立项或新裁定，不属遗留分歧。
 
 ## 下一步建议
 
 1. ~~先修两处工程断点~~ **已修（v24 代码批 C-0）**：ci.sh 解释器探测 · test_t07 格式二分 · 6 表注册（C-0 同项）。
-2. **📌 修「6 张表未注册进 `Base.metadata`」**：`agent_tools` / `automations` / `automation_triggers` / `automation_runs` / `automation_deliveries` / `runtime_registry` 三个模块没在 `backend/models/__init__.py` 导入 → `Base.metadata.create_all()` 不建这 6 张（真库靠迁移 024/025 建表所以不炸，但**凡用 create_all 建库的测试碰它们就是 "no such table"**——`test_automations_v2.py` 里那句「必须在 create_all 之前导入」注释就是这个坑的化石）。**修法：加 3 行 import**（幂等、便宜）。
-3. ~~裁定 D1–D10~~ **用户「都做」授权，已按 `.specs/v24-doc-refresh/RULINGS.md`（裁定记录）逐条实施 D1–D11**（迁移 026–031）。待办改为：**人工复核结案表 + 过目残项 R25-1…11**（`RULINGS.md` §五点五·一 / §五点五·二）。
-4. **📌 补完两路对账**：API 端点契约 + 前端字段级语义，回来后并入 §五点五（当前 §五点五 是 10 条，不含这两路的发现）。
-5. **✅ 已完成的不要重复**：波 0–7 · v21 T-01~T-08 · v22 三件 · v23 迁入 · ui-parity P0–P5 —— 均已提交，勿再当待办。
+2. ~~修「6 张表未注册进 `Base.metadata`」~~ **已修（v24 代码批 C-0）**：`backend/models/__init__.py` 已导入全部表模块——实测 **65 张表全注册、迁移仅建 0 张**（v25 批复测；`im_binding`/`mention_targets` 亦注册）。
+3. ~~裁定 D1–D10~~ / ~~补完两路对账~~ **均已结案**：D1–D11 实施（§五点五·一），对账发现=§五点五·二 R25 十条+一族，v25 批已清账（§五点五·三）。待办仅剩：**人工复核两张结案表 + 过目残项继承列**；**push 与否留用户定**（本批五笔仅本地提交）。
+4. **下一批候选**（均需新立项，按残项优先级）：① 评论/提及投喂真实位点（`scheduler_queue` coalesce 四列、`mention_targets` 收据、`trigger_agent_run` 评论触发源——**前提是先有评论实体表落点裁定**）② `im_bindings` 入站身份解析与 `integrations` 拆表 ③ `concurrency_policy` skip/replace 消费位点（replace 需引擎抢占语义）④ webhook **token 通道退役**裁定（双通道是过渡态）⑤ `rollback_to` 的 **down 在生产 MySQL 的 roundtrip 验证**（现仅 SQLite roundtrip + 测试库登记制）⑥ 订阅「按来源多行」的表重建（expand-only 欠账）。
+5. **✅ 已完成的不要重复**：波 0–7 · v21 T-01~T-08 · v22 三件 · v23 迁入 · ui-parity P0–P5 · v24-doc-refresh 两批 · **v25-r25-clearance 五笔** —— 均已提交，勿再当待办。
 
 ## 环境事实
 
@@ -101,8 +104,8 @@
 - 多副本：`INSTANCE_ID` + 共享 `DATABASE_URL`；单例循环租约 90s（见 README「副本与单例循环」）
 - 默认管理员：`admin` / **首启随机生成**（只打一次启动日志）；**出厂口令 `123456` 已废除**（波 1）+ `must_change_password` 强制改密
 - `node_modules` **已不再被 git 跟踪**（v20-release 裁决 V3 `git rm --cached`）
-- **代码批后质量门（2026-10-25 终值）**：`proto_parity_check --strict` exit 0 · `tsc` 0 错 · `vitest` **250/250** · `build ✓ 19.9s` · 后端 **733 例 OK（0 失败，skipped=6）** · 注册表 **63 张表**（迁移至 031）· 本机装 `argon2-cffi` 后 argon2id 生效（scrypt 兜底路径亦有断言覆盖）
-- **真 MySQL（权威档）已重放至 031 · pending=0**（10-25 首跑失败暴露三件 SQLite 掩盖问题，族级修复后幂等重放收敛：027 带 id 搬 12 行、旧表退役、memories 两条表级 FK 落地；验收证据 `.specs/v24-doc-refresh/TEST.md` §五之三，教训 L-014）。`rollback_to` down **未在生产 MySQL 验证过**——生产禁用，先测试库 roundtrip。
+- **v25 批后质量门（2026-10-25 终值）**：`proto_parity_check --strict` exit 0 · `tsc` 0 错 · `vitest` **25 文件 259/259** · `build ✓` · 后端 **774 例 OK（skipped=6）** · 注册表 **65 张表（全部注册进 `Base.metadata`，迁移仅建 0 张）** · 迁移账本 **38 版（001–037 · 019 双行）** · 本机装 `argon2-cffi` 后 argon2id 生效（scrypt 兜底路径亦有断言覆盖）
+- **真 MySQL（权威档）已重放至 037 · pending=[]**（v25 批 032–037 首跑即过——批量设计时已按 L-014 三条纪律书写：表级 FK `add_fk_if_missing` / 新列 DEFAULT 或可空 / 存在性预检幂等；形状 9 项验收：FK `fk_squads_leader_agent` · 队列七列 · automations 三列+`signing_secret` · `mention_targets`/`im_bindings` · 订阅泛化列 · `avatar_url`/`created_by` · global 行 `enabled=1`，证据 `.specs/v25-r25-clearance/TEST.md`）。`rollback_to` down **未在生产 MySQL 验证过**——生产禁用，先测试库 roundtrip（032–037 DOWN 已登记）。
 
 ## 已知约束
 
