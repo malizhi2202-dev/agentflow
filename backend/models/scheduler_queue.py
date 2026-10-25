@@ -13,8 +13,9 @@ P1-16 并表：原先还有一张 `scheduling_queue`（编排实例队列）与�
 """
 
 import datetime
+import json
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from models import Base
@@ -48,6 +49,19 @@ class SchedulerQueue(Base):
     lease_expires_at: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
     heartbeat_at: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
     finished_at: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
+    # R25-11（v25 · 迁移 034）：主档 §3.3「任务队列扩列设计注」（html:1307 / §2.11）。
+    # 全部可空/带库级默认（L-014 纪律）；写路径只接真实存在的投喂点，不造数。
+    trigger_comment_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # 计划并入的评论 id 列表（JSON 串）；与「实际投喂」收据分账（§6.0 ⑪）
+    coalesced_comment_ids: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # 交接说明：渲染进开场 prompt，**不伪造评论**
+    handoff_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # 延迟起跑/唤醒时点
+    fire_at: Mapped[datetime.datetime | None] = mapped_column(DateTime, nullable=True)
+    is_leader_task: Mapped[int] = mapped_column(Integer, default=0)
+    squad_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    # v18 设计注：workflow_id NULL = Default
+    workflow_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
 
     def to_dict(self) -> dict:
         return {
@@ -68,4 +82,12 @@ class SchedulerQueue(Base):
             "lease_owner": self.lease_owner,
             "lease_expires_at": self.lease_expires_at.isoformat() if self.lease_expires_at else None,
             "heartbeat_at": self.heartbeat_at.isoformat() if self.heartbeat_at else None,
+            "trigger_comment_id": self.trigger_comment_id,
+            "coalesced_comment_ids": json.loads(self.coalesced_comment_ids or "[]")
+                if self.coalesced_comment_ids else None,
+            "handoff_note": self.handoff_note,
+            "fire_at": self.fire_at.isoformat() if self.fire_at else None,
+            "is_leader_task": bool(self.is_leader_task),
+            "squad_id": self.squad_id,
+            "workflow_id": self.workflow_id,
         }

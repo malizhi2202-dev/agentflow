@@ -150,11 +150,62 @@ class WorkItemSubscription(Base):
     work_item_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     user_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     # creator | assignee | commenter | mentioned | automation
+    # （v25 注：主档词表为 mentioned_in_description / automation_preset——名差保留在案，
+    # 服务侧词表两值同义放行，不做数据 rename；R25-11 结案注记）
     source: Mapped[str] = mapped_column(String(16), default="creator")
     unsubscribed: Mapped[int] = mapped_column(Integer, default=0)
+    # R25-11（v25 · 迁移 036）：主档 subscriptions 的泛化维度（html:1313）。
+    # 现状仅任务一种被订阅对象，默认值即现状语义；旧 UNIQUE(work_item_id,user_id)
+    # 仍生效——「按来源多行」需表重建，**如实挂残项**（本批不 contract，expand-only）。
+    subject_type: Mapped[str] = mapped_column(String(16), default="task")     # task | project | automation
+    subscriber_type: Mapped[str] = mapped_column(String(16), default="member")  # member | agent
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime, default=datetime.datetime.utcnow
     )
+
+
+# ── 提及收据（R25-11 · 主档 html:1313「谁被叫醒」收据面）──────
+MENTIONED_TYPES: frozenset[str] = frozenset({"member", "agent", "squad"})
+MENTION_ROUTE_KINDS: frozenset[str] = frozenset(
+    {"explicit", "fallback_top", "fallback_thread", "note_skipped", "all_skipped"}
+)
+
+
+class MentionTarget(Base):
+    """触发预览与「谁被叫醒」的收据面：**计划 vs 收据分账**（§6.0 ⑪）。
+
+    引文里的 @ 与 /note、@all 全部落 *_skipped 并写拒因；「仅跳过这一次」的反选
+    也记在此表而非权限表。
+
+    `comment_id` 为**普通列**（非外键）：代码现状**无评论表**（评论全文留在调用方，
+    见 collab_service.add_comment 注）——评论表未在主档 §3.3 清单内，属设计缺口，
+    如实挂残项（RULINGS R26），不凭空造引用目标。
+    """
+
+    __tablename__ = "mention_targets"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    comment_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+    mentioned_type: Mapped[str] = mapped_column(String(16), default="member", index=True)
+    mentioned_id: Mapped[str] = mapped_column(String(64), default="", index=True)
+    route_kind: Mapped[str] = mapped_column(String(32), default="explicit")
+    will_wake: Mapped[int] = mapped_column(Integer, default=0)
+    skip_reason: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.utcnow
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "comment_id": self.comment_id,
+            "mentioned_type": self.mentioned_type,
+            "mentioned_id": self.mentioned_id,
+            "route_kind": self.route_kind,
+            "will_wake": bool(self.will_wake),
+            "skip_reason": self.skip_reason,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
 
 
 class InboxItem(Base):

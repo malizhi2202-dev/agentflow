@@ -162,12 +162,14 @@ class TestChatServiceIntegration(unittest.TestCase):
 class TestChannelStateMachine(unittest.TestCase):
     """渠道状态流转."""
 
-    # UT-35: CHANNEL_TYPES 完整性
+    # UT-35: CHANNEL_TYPES 完整性（v25 R25-11：主档 html:1303 六值对齐——
+    # 补 wecom/self_hosted_im、lark 作 feishu 同义；smtp_email 为代码侧扩展保留）
     def test_all_channel_types_defined(self):
-        expected = ["feishu", "dingtalk", "slack", "telegram", "smtp_email"]
+        expected = ["feishu", "dingtalk", "slack", "telegram", "smtp_email",
+                    "wecom", "self_hosted_im", "lark"]
         for t in expected:
             self.assertIn(t, CHANNEL_TYPES, f"缺少渠道类型: {t}")
-        self.assertEqual(len(CHANNEL_TYPES), 5)
+        self.assertEqual(len(CHANNEL_TYPES), 8)
 
     # UT-36: CHANNEL_STATUSES 完整性
     def test_all_statuses_defined(self):

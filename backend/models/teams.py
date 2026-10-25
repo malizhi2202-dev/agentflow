@@ -10,7 +10,7 @@
 
 import datetime
 
-from sqlalchemy import DateTime, Integer, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from models import Base
@@ -102,8 +102,15 @@ class Squad(Base):
     slug: Mapped[str] = mapped_column(String(32), nullable=False, unique=True, index=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False)
     # leader 必须是 Agent，且不可归档（归档 leader 会让小队失去执行者）
-    leader_agent_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    # R25-11（v25）：列名 leader_agent_id 保留（行注 v21/v23 已认账，不做破坏性 rename），
+    # 但**真外键**补实——新建库由此声明建出；已部署库由迁移 033 在 MySQL 补表级约束
+    # （SQLite 存量库无法 ALTER 加 FK，本地体验档豁免、权威档 MySQL 为真）。
+    leader_agent_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("agents.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
     instructions: Mapped[str] = mapped_column(Text, default="")
+    # 主档 §3.3 squad 注的 avatar_url（v25 R25-11 补列）
+    avatar_url: Mapped[str] = mapped_column(String(256), default="")
     status: Mapped[str] = mapped_column(String(16), default="active", index=True)
     # 写操作授权：creator 或平台管理员（§2.11「小队不是授权单位」）
     created_by: Mapped[str] = mapped_column(String(64), default="", index=True)
@@ -125,6 +132,7 @@ class Squad(Base):
             "slug": self.slug,
             "name": self.name,
             "leader_agent_id": self.leader_agent_id,
+            "avatar_url": self.avatar_url,
             "instructions": self.instructions,
             "status": self.status,
             "created_by": self.created_by,
@@ -151,6 +159,8 @@ class SquadMember(Base):
     member_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     # v23（multica 迁移）：成员角色（member / leader / expert-reviewer）；'' = 未标注
     role: Mapped[str] = mapped_column(String(32), default="")
+    # R25-11（v25）：主档 squad_member 注的 created_by（入池动作留痕，'' = 历史行无主）
+    created_by: Mapped[str] = mapped_column(String(64), default="")
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime, default=datetime.datetime.utcnow
     )
@@ -162,5 +172,6 @@ class SquadMember(Base):
             "role": self.role or "",
             "member_kind": self.member_kind,
             "member_id": self.member_id,
+            "created_by": self.created_by or "",
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

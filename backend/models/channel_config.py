@@ -4,7 +4,12 @@ from sqlalchemy import String, Integer, DateTime, Text, JSON, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from models import Base
 
-CHANNEL_TYPES = ["feishu", "dingtalk", "slack", "telegram", "smtp_email"]
+# v25（R25-11 · 主档 html:1303 六值对齐）：补 wecom / self_hosted_im；
+# 主档的 lark 与代码 feishu 是同一渠道的两个名字（lark ≡ feishu 同义放行，
+# 存量数据不 rename——词表校验两侧皆收，落库沿用现名）。
+# smtp_email 为代码侧邮箱渠道扩展（主档六值不含），保留。
+CHANNEL_TYPES = ["feishu", "lark", "dingtalk", "slack", "telegram", "smtp_email",
+                 "wecom", "self_hosted_im"]
 CHANNEL_STATUSES = ["draft", "active", "error", "disabled"]
 
 

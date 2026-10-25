@@ -71,27 +71,43 @@ class TestD9Rollback(unittest.TestCase):
         return conn
 
     def test_down_registered_for_new_migrations(self):
+        # 026 起逐版登记（波 0 判据兑现）；032–037 属 v25 批，同样必须登记
         for v in ("026_memory_dimensions_and_manifests",
                   "027_improvement_proposals_rename",
                   "028_governance_ledgers",
                   "029_automation_kind_and_keys",
-                  "030_golden_sets"):
+                  "030_golden_sets",
+                  "031_rsi_switch_reason",
+                  "032_rsi_global_switch",
+                  "033_squad_shape",
+                  "034_queue_shape",
+                  "035_automation_shape",
+                  "036_collab_receipts",
+                  "037_im_bindings"):
             self.assertIn(v, migrations.DOWN, f"{v} 应登记 down（波 0 判据兑现）")
 
     def _v24_versions(self):
-        """v24 批次（026 起）版本号，按账本动态取——031 加入后不许硬编码数错。"""
+        """v24/v25 批次（026 起）版本号，按账本动态取——不许硬编码数错。"""
         return [v for v, _d, _f in migrations.MIGRATIONS if int(v[:3]) >= 26]
 
-    def test_rollback_roundtrip_030(self):
+    def test_rollback_roundtrip_top_two(self):
+        """回滚「账上最高两版」（版本号随批次漂移，断言必须动态取）。"""
         conn = self._conn()
-        rolled = migrations.rollback_to(conn, "sqlite", "029_automation_kind_and_keys")
-        self.assertEqual(rolled, self._v24_versions()[::-1][:2])  # 最新两版逆序
+        versions = self._v24_versions()
+        top_two = versions[::-1][:2]
+        target = versions[-3]
+        rolled = migrations.rollback_to(conn, "sqlite", target)
+        self.assertEqual(rolled, top_two)  # 最新两版逆序
         tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        self.assertNotIn("golden_sets", tables)
+        self.assertNotIn("im_bindings", tables)
+        self.assertNotIn("mention_targets", tables)
         # 账行已删 → 幂等重放
-        self.assertEqual(migrations.applied_versions(conn, "sqlite").count("030_golden_sets"), 0)
+        done = migrations.applied_versions(conn, "sqlite")
+        self.assertEqual([v for v in top_two if v in done], [])
         applied = migrations.apply_migrations(conn, "sqlite")
-        self.assertIn("030_golden_sets", applied)
+        self.assertEqual(sorted(applied), sorted(top_two))
+        tables2 = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        self.assertIn("im_bindings", tables2)
         conn.close()
 
     def test_rollback_roundtrip_026(self):

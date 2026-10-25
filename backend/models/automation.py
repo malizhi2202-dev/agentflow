@@ -56,6 +56,11 @@ class Automation(Base):
     breaker_reason: Mapped[str] = mapped_column(Text, default="")
     paused_reason: Mapped[str] = mapped_column(Text, default="")
     spec_version: Mapped[int] = mapped_column(Integer, default=1)
+    # R25-11（v25 · 迁移 035）：主档 html:1308/:1311 三态并发策略与产任务标题模板；
+    # created_by 与 owner_id 分开（归属人 ⟂ 创建人，沿 R8-2 归因纪律）。
+    concurrency_policy: Mapped[str] = mapped_column(String(16), default="queue")   # skip | queue | replace
+    issue_title_template: Mapped[str] = mapped_column(String(256), default="")
+    created_by: Mapped[str] = mapped_column(String(64), default="")
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
 
@@ -72,6 +77,9 @@ class AutomationTrigger(Base):
     # webhook 用：secret 存 token 的 sha256（不落明文，回显只给 secret_preview）
     secret: Mapped[str] = mapped_column(String(128), default="", index=True)
     secret_preview: Mapped[str] = mapped_column(String(64), default="")
+    # R25-5（v25）：HMAC-SHA256 签名密钥（加密存储，见 storage 加密路径）——
+    # 与设计 §3.3「HMAC 签名校验」对齐；'' = 未启用签名（token 双通道过渡期存量）
+    signing_secret: Mapped[str] = mapped_column(String(128), default="")
     # 事件过滤：[{"event": "push", "actions": ["opened"]}, ...]；空 = 全收（不是全拒）
     event_filter: Mapped[str] = mapped_column(Text, default="[]")
     payload_limit: Mapped[int] = mapped_column(Integer, default=DEFAULT_PAYLOAD_LIMIT)

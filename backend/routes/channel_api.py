@@ -32,7 +32,8 @@ def _uid(request: Request) -> str:
 def _get_adapter(channel_type: str):
     """动态加载适配器模块."""
     try:
-        if channel_type == "feishu":
+        if channel_type in ("feishu", "lark"):
+            # v25（R25-11）：主档六值写 lark、代码沿 feishu——同义放行共用适配器
             from services.adapters.feishu import FeishuAdapter
             return FeishuAdapter()
         elif channel_type == "dingtalk":

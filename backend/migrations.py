@@ -1013,6 +1013,136 @@ def m031_rsi_switch_reason(conn, dialect: str) -> None:
     add_column_if_missing(conn, dialect, "rsi_switches", "last_actor", "VARCHAR(64)")
 
 
+def m032_rsi_global_switch(conn, dialect: str) -> None:
+    """R25-7（人工裁定 · v25）：rsi_switches「四类目 + 全局」的**全局总闸行落表**。
+
+    `category='global'` 一行；off 时短路一切类目（服务层 `assert_category_running`
+    先查总闸，见 v25 治理批接线）。初值 enabled=1——总闸默认开 = 现状零行为变化。
+    """
+    if not _table_exists(conn, dialect, "rsi_switches"):
+        return
+    cur = conn.cursor()
+    cur.execute("SELECT category FROM rsi_switches WHERE category = 'global'")
+    if cur.fetchone() is not None:
+        return
+    ph = "%s" if dialect == "mysql" else "?"
+    cur.execute(
+        "INSERT INTO rsi_switches (category, enabled, updated_by, last_reason, last_actor, updated_at) "
+        f"VALUES ({ph}, 1, {ph}, {ph}, {ph}, {ph})",
+        ("global", "migration", "全局总闸初始插入（v25 R25-7 落表）", "system",
+         datetime.datetime.utcnow()),
+    )
+
+
+def m033_squad_shape(conn, dialect: str) -> None:
+    """R25-11（C 组 · 主档 html:1306）：squad 表族列形态补。
+
+    - `squads.avatar_url`：主档有、代码缺 → 补列（NOT NULL DEFAULT ''，L-014 纪律）。
+    - `squad_members.created_by`：入池动作留痕列（历史行 '' = 无主，不回填伪造）。
+    - leader **真外键**：列名 leader_agent_id 保留（v21/v23 行注已认账，不做破坏性
+      rename），但 MySQL 权威档补表级 `fk_squads_leader_agent`（ON DELETE RESTRICT）。
+      SQLite 不支持 ALTER 加表级 FK → 本地体验档豁免（新建库由 ORM 声明建出）。
+    """
+    add_column_if_missing(conn, dialect, "squads", "avatar_url",
+                          "VARCHAR(256) NOT NULL DEFAULT ''")
+    add_column_if_missing(conn, dialect, "squad_members", "created_by",
+                          "VARCHAR(64) NOT NULL DEFAULT ''")
+    if not _is_sqlite(dialect) and _table_exists(conn, dialect, "agents"):
+        add_fk_if_missing(conn, "squads", "fk_squads_leader_agent",
+                          "FOREIGN KEY (leader_agent_id) REFERENCES agents(id) ON DELETE RESTRICT")
+
+
+def m034_queue_shape(conn, dialect: str) -> None:
+    """R25-11（C 组 · 主档 html:1307「任务队列扩列设计注」）：七列全补。
+
+    trigger_comment_id / coalesced_comment_ids / handoff_note / fire_at（v21 行注认缺
+    的四列）+ is_leader_task / squad_id / workflow_id（同注的其余设计列）。
+    全部可空或带库级默认（MySQL 严格语义）。**写路径只接真实存在的投喂点**——
+    coalesce 收据依赖评论表（代码暂无、主档 §3.3 未列，缺口挂 RULINGS 残项），
+    本迁移先行落列，不造数。
+    """
+    for column, ddl in (
+        ("trigger_comment_id", "INTEGER NULL"),
+        ("coalesced_comment_ids", "TEXT NULL"),
+        ("handoff_note", "TEXT NULL"),
+        ("fire_at", "DATETIME NULL"),
+        ("is_leader_task", "INTEGER NOT NULL DEFAULT 0"),
+        ("squad_id", "INTEGER NULL"),
+        ("workflow_id", "INTEGER NULL"),
+    ):
+        add_column_if_missing(conn, dialect, "scheduler_queue", column, ddl)
+    create_index_if_missing(conn, dialect, "ix_scheduler_queue_squad_id",
+                            "scheduler_queue", "squad_id")
+    create_index_if_missing(conn, dialect, "ix_scheduler_queue_workflow_id",
+                            "scheduler_queue", "workflow_id")
+
+
+def m035_automation_shape(conn, dialect: str) -> None:
+    """R25-11（C 组 · 主档 html:1308/:1311）：automations 三列 + trigger 签名密钥列。
+
+    - `concurrency_policy` ∈ {skip, queue, replace}，默认 queue（=现状行为，不擅改语义）。
+    - `issue_title_template`：产任务标题模板（'' = 用默认标题）。
+    - `created_by`：创建人留痕（与 owner_id 归属人分开，沿 R8-2 归因纪律）。
+    - `automation_triggers.signing_secret`：v25-R25-5 HMAC 双通道的前置列
+      （'' = 未启用签名；校验逻辑在治理批，本迁移只落列）。
+    """
+    add_column_if_missing(conn, dialect, "automations", "concurrency_policy",
+                          "VARCHAR(16) NOT NULL DEFAULT 'queue'")
+    add_column_if_missing(conn, dialect, "automations", "issue_title_template",
+                          "VARCHAR(256) NOT NULL DEFAULT ''")
+    add_column_if_missing(conn, dialect, "automations", "created_by",
+                          "VARCHAR(64) NOT NULL DEFAULT ''")
+    add_column_if_missing(conn, dialect, "automation_triggers", "signing_secret",
+                          "VARCHAR(128) NOT NULL DEFAULT ''")
+
+
+def m036_collab_receipts(conn, dialect: str) -> None:
+    """R25-11（C 组 · 主档 html:1313）：提及收据表 + 订阅泛化列。
+
+    - `mention_targets`：「谁被叫醒」收据面（计划 vs 收据分账 §6.0 ⑪）。
+      `comment_id` 为普通列非外键——代码无评论表（缺口如实挂账，不凭空造引用目标）。
+    - `work_item_subscriptions` 补 subject_type / subscriber_type 泛化列（默认
+      task / member = 现状语义）。**旧 UNIQUE(work_item_id,user_id) 保留不删**
+      （expand-only）——「按来源多行」需表重建，如实挂残项。
+    """
+    pk = _pk_clause(dialect)
+    create_table_if_missing(conn, dialect, "mention_targets",
+        f"id {pk}, comment_id INTEGER, mentioned_type VARCHAR(16) DEFAULT 'member', "
+        "mentioned_id VARCHAR(64) DEFAULT '', route_kind VARCHAR(32) DEFAULT 'explicit', "
+        "will_wake INTEGER DEFAULT 0, skip_reason VARCHAR(256), created_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_mention_targets_comment_id",
+                            "mention_targets", "comment_id")
+    create_index_if_missing(conn, dialect, "ix_mention_targets_mentioned_id",
+                            "mention_targets", "mentioned_id")
+    add_column_if_missing(conn, dialect, "work_item_subscriptions", "subject_type",
+                          "VARCHAR(16) NOT NULL DEFAULT 'task'")
+    add_column_if_missing(conn, dialect, "work_item_subscriptions", "subscriber_type",
+                          "VARCHAR(16) NOT NULL DEFAULT 'member'")
+
+
+def m037_im_bindings(conn, dialect: str) -> None:
+    """R25-11（C 组 · 主档 html:1314）：IM 身份绑定表落表（与连接配置分层两表）。
+
+    channel_configs 管「一 Agent × 一渠道怎么连」（凭据层），本表管
+    「外部 workspace 的发信人 ≡ 平台哪个 user」（身份层）——跨租户/群空间
+    的绑定不能塞进连接配置单行。状态 pending → bound → revoked（留痕不删行）。
+    写入位点 = 入站身份解析处；当前无真实入站解析位点 → **表先行挂账**
+    （同 exec_ledgers 模式，宁挂账不伪造绑定）。
+    """
+    pk = _pk_clause(dialect)
+    create_table_if_missing(conn, dialect, "im_bindings",
+        f"id {pk}, workspace_id VARCHAR(64) NOT NULL, external_user_id VARCHAR(128) NOT NULL, "
+        "external_tenant VARCHAR(128) NOT NULL DEFAULT '', user_id VARCHAR(64) NOT NULL DEFAULT '', "
+        "status VARCHAR(16) NOT NULL DEFAULT 'pending', created_at DATETIME, updated_at DATETIME, "
+        "UNIQUE(workspace_id, external_user_id, external_tenant)")
+    create_index_if_missing(conn, dialect, "ix_im_bindings_workspace_id",
+                            "im_bindings", "workspace_id")
+    create_index_if_missing(conn, dialect, "ix_im_bindings_user_id",
+                            "im_bindings", "user_id")
+    create_index_if_missing(conn, dialect, "ix_im_bindings_status",
+                            "im_bindings", "status")
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -1046,6 +1176,12 @@ MIGRATIONS: list[Migration] = [
     ("029_automation_kind_and_keys", "自动化：api 型触发器 / 投递两键分开记账 / 小队引用列（D6/D7）", m029_automation_kind_and_keys),
     ("030_golden_sets", "金标集实体表：冻结/厂牌/指纹落库，影子门改平台校验（D10）", m030_golden_sets),
     ("031_rsi_switch_reason", "类目开关补必填原因与操作人列（D11）", m031_rsi_switch_reason),
+    ("032_rsi_global_switch", "rsi_switches 全局总闸行落表：四类目+global（R25-7 · 人工裁定）", m032_rsi_global_switch),
+    ("033_squad_shape", "squad 表族形态补：avatar_url / 成员 created_by / leader 表级 FK（MySQL）（R25-11）", m033_squad_shape),
+    ("034_queue_shape", "任务队列设计注七列全补（trigger_comment_id 等 4 + is_leader_task/squad_id/workflow_id）（R25-11）", m034_queue_shape),
+    ("035_automation_shape", "automations 并发策略/标题模板/created_by + trigger signing_secret（HMAC 前置）（R25-11）", m035_automation_shape),
+    ("036_collab_receipts", "mention_targets 收据表 + 订阅泛化列（旧 UNIQUE 保留挂残项）（R25-11）", m036_collab_receipts),
+    ("037_im_bindings", "im_bindings 身份绑定表落表（与连接配置分层 · 表先行挂账）（R25-11）", m037_im_bindings),
 ]
 
 
@@ -1161,7 +1297,51 @@ def _down_031(conn, dialect: str) -> None:
         drop_column_if_exists(conn, dialect, "rsi_switches", col)
 
 
+def _down_032(conn, dialect: str) -> None:
+    if _table_exists(conn, dialect, "rsi_switches"):
+        conn.cursor().execute("DELETE FROM rsi_switches WHERE category = 'global'")
+
+
+def _down_033(conn, dialect: str) -> None:
+    if not _is_sqlite(dialect):
+        # MySQL：先把 033 加的表级 FK 约束摘净（恢复回 033 之前的形状），再删列
+        if _table_exists(conn, dialect, "squads") and _fk_exists(conn, "squads", "fk_squads_leader_agent"):
+            conn.cursor().execute("ALTER TABLE squads DROP FOREIGN KEY fk_squads_leader_agent")
+    drop_column_if_exists(conn, dialect, "squads", "avatar_url")
+    drop_column_if_exists(conn, dialect, "squad_members", "created_by")
+
+
+def _down_034(conn, dialect: str) -> None:
+    for index in ("ix_scheduler_queue_squad_id", "ix_scheduler_queue_workflow_id"):
+        drop_index_if_exists(conn, dialect, index, "scheduler_queue")
+    for col in ("trigger_comment_id", "coalesced_comment_ids", "handoff_note",
+                "fire_at", "is_leader_task", "squad_id", "workflow_id"):
+        drop_column_if_exists(conn, dialect, "scheduler_queue", col)
+
+
+def _down_035(conn, dialect: str) -> None:
+    for col in ("concurrency_policy", "issue_title_template", "created_by"):
+        drop_column_if_exists(conn, dialect, "automations", col)
+    drop_column_if_exists(conn, dialect, "automation_triggers", "signing_secret")
+
+
+def _down_036(conn, dialect: str) -> None:
+    drop_table_if_exists(conn, dialect, "mention_targets")
+    for col in ("subject_type", "subscriber_type"):
+        drop_column_if_exists(conn, dialect, "work_item_subscriptions", col)
+
+
+def _down_037(conn, dialect: str) -> None:
+    drop_table_if_exists(conn, dialect, "im_bindings")
+
+
 DOWN: dict[str, Callable[[object, str], None]] = {
+    "037_im_bindings": _down_037,
+    "036_collab_receipts": _down_036,
+    "035_automation_shape": _down_035,
+    "034_queue_shape": _down_034,
+    "033_squad_shape": _down_033,
+    "032_rsi_global_switch": _down_032,
     "031_rsi_switch_reason": _down_031,
     "026_memory_dimensions_and_manifests": _down_026,
     "027_improvement_proposals_rename": _down_027,
