@@ -1,4 +1,4 @@
-"""Agent 健康探针服务 — 后台每 3 秒轮询所有 Agent 的 /health 端点，记录探针数据并清理 7 天前旧数据."""
+"""Agent 健康探针服务 — 后台每 3 秒轮询所有 Agent 的 /health 端点，记录探针数据；按保留期分批清理旧数据."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import re
+import time
 from datetime import datetime, timedelta
 
 import httpx
@@ -50,11 +51,15 @@ def _resolve_health_url(agent: Agent) -> str | None:
 class ProbeService:
     """Agent 健康探针服务 — 后台 asyncio 任务持续监控所有 Agent 健康状态."""
 
-    def __init__(self, interval: int = 3, timeout: int = 5, failure_threshold: int = 3, retention_days: int = 1):
+    def __init__(self, interval: int = 3, timeout: int = 5, failure_threshold: int = 3, retention_days: int = 1,
+                 cleanup_interval: int = 3600, cleanup_batch: int = 5000):
         self.interval = interval          # 探针间隔（秒）
         self.timeout = timeout            # HTTP 请求超时（秒）
         self.failure_threshold = failure_threshold  # 连续失败阈值
         self.retention_days = retention_days        # 数据保留天数
+        self.cleanup_interval = cleanup_interval    # 清理周期（秒），默认 1 小时
+        self.cleanup_batch = cleanup_batch          # 每批删除行数
+        self._last_cleanup_at: float | None = None  # 上次清理时刻（monotonic）
         self._task: asyncio.Task | None = None
         self._running = False
         # 内存中跟踪每个 agent 的连续失败次数（agent_id → count）
@@ -151,6 +156,11 @@ class ProbeService:
                 _flush_events()
             except Exception:
                 pass
+            # 保留期清理按小时走，不跟每轮探针（否则每 3 秒扫一次全表）；放线程里避免堵事件循环
+            try:
+                await asyncio.to_thread(self._maybe_cleanup)
+            except Exception:
+                logger.exception("ProbeService 清理调度异常")
             await asyncio.sleep(self.interval)
 
     # ── 全量探针 ───────────────────────────────────────────────
@@ -188,9 +198,6 @@ class ProbeService:
             db2.commit()
         finally:
             db2.close()
-
-        # 4. 数据清理（每轮执行，轻量级 DELETE）
-        self._cleanup()
 
     # ── 单 Agent 探针 ───────────────────────────────────────────
 
@@ -311,17 +318,36 @@ class ProbeService:
 
     # ── 数据清理 ────────────────────────────────────────────────
 
+    def _maybe_cleanup(self) -> None:
+        """按 cleanup_interval 触发清理（默认 1 小时一次）."""
+        now = time.monotonic()
+        if self._last_cleanup_at is not None and now - self._last_cleanup_at < self.cleanup_interval:
+            return
+        self._last_cleanup_at = now
+        self._cleanup()
+
     def _cleanup(self) -> None:
-        """清理 7 天前的旧探针数据."""
+        """删除超过保留期的旧探针数据（分批，避免长事务与一次性全表扫描）."""
         db = SessionLocal()
+        deleted = 0
         try:
             cutoff = datetime.utcnow() - timedelta(days=self.retention_days)
-            deleted = (
-                db.query(AgentProbe)
-                .filter(AgentProbe.created_at < cutoff)
-                .delete(synchronize_session="fetch")
-            )
-            db.commit()
+            while True:
+                ids = [
+                    row[0]
+                    for row in db.query(AgentProbe.id)
+                    .filter(AgentProbe.created_at < cutoff)
+                    .limit(self.cleanup_batch)
+                    .all()
+                ]
+                if not ids:
+                    break
+                deleted += (
+                    db.query(AgentProbe)
+                    .filter(AgentProbe.id.in_(ids))
+                    .delete(synchronize_session=False)
+                )
+                db.commit()
             if deleted > 0:
                 logger.info("ProbeService 清理了 %d 条过期探针记录（>%d天）", deleted, self.retention_days)
         except Exception:

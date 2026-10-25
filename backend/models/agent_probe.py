@@ -17,4 +17,8 @@ class AgentProbe(Base):
     status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
     detail: Mapped[str] = mapped_column(Text, default="")
     consecutive_failures: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
+    # created_at 必须带索引：保留期清理按它过滤，无索引时每轮把全表扫两遍。
+    # 2026-10-25 实测：54 万行、每 4 秒扫 ~108 万行，稳定占掉约 28% 单核且一条也删不掉。
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime, default=datetime.datetime.utcnow, index=True
+    )
