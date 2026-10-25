@@ -35,7 +35,7 @@ const COLUMN_NOTES: Record<string, string> = {
 };
 
 export default function Tasks() {
-  const { tasks, tasksLoading, tasksError, fetchTasks, createTask } = useCollab();
+  const { tasks, tasksLoading, tasksError, fetchTasks, createTask, assign } = useCollab();
   const [filters, setFilters] = useState<BoardFiltersState>({ ...EMPTY_FILTERS });
   const [showCreate, setShowCreate] = useState(false);
 
@@ -106,7 +106,9 @@ export default function Tasks() {
       )}
 
       {showCreate && (
-        <NewTaskForm onCreate={createTask} onCancel={() => setShowCreate(false)} />
+        <NewTaskForm onCreate={createTask}
+                     onAssign={(id, k, who, start) => assign(id, k, who, start)}
+                     onCancel={() => setShowCreate(false)} />
       )}
 
       {tasksError && (

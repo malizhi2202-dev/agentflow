@@ -70,11 +70,12 @@ export default function TaskCard({ task }: { task: Task }) {
     return { ok: true, warning };
   };
 
-  const submitAssign = async () => {
+  // v25 R25-8：确认层两个决定——start=true「开始」（当场建 run）/ false「先不开工」只登记
+  const submitAssign = async (start = false) => {
     setErr(null);
-    const out = await assign(task.id, kind, assigneeId.trim());
+    const out = await assign(task.id, kind, assigneeId.trim(), start);
     if (!out.ok) {
-      setErr(out.error || '指派失败');
+      setErr(out.error || (start ? '指派已入账，开跑被拒' : '指派失败'));
       return;
     }
     setAssigning(false);
@@ -189,6 +190,8 @@ export default function TaskCard({ task }: { task: Task }) {
           onIdChange={setAssigneeId}
           onSubmit={submitAssign}
           onCancel={() => setAssigning(false)}
+          // 停车闸 = backlog/未开始（原型「backlog / 未开始 = 唯一停车闸」）：「开始」灰置
+          parked={task.status === 'backlog' || task.status === 'todo'}
         />
       )}
 

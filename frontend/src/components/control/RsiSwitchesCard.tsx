@@ -4,11 +4,12 @@
  * 三条硬口径：
  * 1. **类目与可改面全部来自接口**（`/api/rsi/switches`、`/api/rsi/surfaces`），
  *    组件里不写死四类目、不写死路径模式——真源在后端 `RSI_CATEGORIES` / `surface_manifests`。
- * 2. **后端没有的列必须标「未接入」**：`SurfaceManifest.to_dict()` 只有
- *    `name / allow_edit / immutable`，原型的「体量上限」「结构规则」两列后端未落库，
- *    所以那两列显示「未接入 · 该字段后端未提供」，绝不填演示数值。
+ * 2. **后端没有的列必须标「未接入」**；v25（R25-2）起 `path_pattern / cap_bytes /
+ *    structure_rules / exclusions` 已落库并被门禁消费——已接入的真值照画，
+ *    **未配置的项显示「—（未配置）」**（声明可选，不再是「后端未提供」）。
  * 3. **写操作走既有端点** `POST /api/rsi/switches/{category}`（停用 = 危险动作，先二次确认；
- *    失败把后端 `detail` 原样显示）。总闸 = 四类目逐个打同一端点（后端无总闸端点）。
+ *    失败把后端 `detail` 原样显示）。v25 R25-7：总闸 = **`global` 真行**（后端转换层
+ *    短路一切类目）；旧后端无 global 行时如实回退为逐类目聚合（store 内分支）。
  */
 import { useState } from 'react';
 import { AlertCircle, ArrowDownToLine, ShieldAlert } from 'lucide-react';
@@ -23,24 +24,36 @@ export const NOT_PROVIDED = '未接入';
 
 function SurfaceRow({ surface }: { surface: RsiSurfaceRow }) {
   const allow = (surface.allow_edit || []).filter(Boolean);
-  const exclude = (surface.immutable || []).filter(Boolean);
+  const exclude = (surface.exclusions || []).filter(Boolean);
+  const rules = (surface.structure_rules || []).filter((r) => r != null);
   return (
     <tr>
       <td style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{surface.name}</td>
       <td style={{ fontSize: 11.5 }}>
-        {allow.length === 0 ? (
+        {/* 可写路径模式：声明了 path_pattern 画声明；否则画白名单（两者后端语义互补） */}
+        {surface.path_pattern ? (
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5 }}>{surface.path_pattern}</span>
+        ) : allow.length === 0 ? (
           <span className="chip warn">空 · 无可写路径</span>
         ) : (
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5 }}>{allow.join(' · ')}</span>
         )}
       </td>
-      <td style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
-        {NOT_PROVIDED}
-        <span style={{ display: 'block', fontSize: 10 }}>该字段后端未提供</span>
+      <td style={{ fontSize: 11.5 }}>
+        {surface.cap_bytes ? (
+          <span className="chip mono" title="体量上限（字节）：门禁在有正文时判">{surface.cap_bytes} B</span>
+        ) : (
+          <span style={{ color: 'var(--text-muted)' }}>—（未配置）</span>
+        )}
       </td>
-      <td style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
-        {NOT_PROVIDED}
-        <span style={{ display: 'block', fontSize: 10 }}>该字段后端未提供</span>
+      <td style={{ fontSize: 11 }}>
+        {rules.length === 0 ? (
+          <span style={{ color: 'var(--text-muted)' }}>—（未配置）</span>
+        ) : (
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10 }}>
+            {rules.map((r) => (typeof r === 'string' ? r : JSON.stringify(r))).join(' ∧ ')}
+          </span>
+        )}
       </td>
       <td style={{ fontSize: 11 }}>
         {exclude.length === 0 ? (
@@ -65,15 +78,22 @@ export default function RsiSwitchesCard() {
   // D11（设计 §3.3「必填原因、双入口校验、审计落可见态」）：停用原因必填
   const [offReason, setOffReason] = useState('');
 
-  const total = rsiSwitches.length;
-  const enabledCount = rsiSwitches.filter((s) => s.enabled).length;
-  const masterText = total === 0
-    ? NOT_PROVIDED
-    : enabledCount === total
-      ? `运行中（${total} 开）`
-      : enabledCount === 0
-        ? `已停用（${total} 停）`
-        : `部分停用（${total - enabledCount} 关 / ${enabledCount} 开）`;
+  // v25 R25-7：总闸 = `global` 真行（off 由转换层短路一切类目）；缺真行 = 旧后端，
+  // 如实退聚合呈现（store 的 setRsiMaster 同样按真行有无分支，不假装是新后端）
+  const globalRow = rsiSwitches.find((s) => s.category === 'global') ?? null;
+  const categoryRows = rsiSwitches.filter((s) => s.category !== 'global');
+  const total = categoryRows.length;
+  const enabledCount = categoryRows.filter((s) => s.enabled).length;
+  const masterOn = globalRow ? globalRow.enabled : total > 0 && enabledCount === total;
+  const masterText = globalRow
+    ? (globalRow.enabled ? '开（一切类目放行）' : '停用（短路一切类目）')
+    : total === 0
+      ? NOT_PROVIDED
+      : enabledCount === total
+        ? `派生 · 运行中（${total} 开）`
+        : enabledCount === 0
+          ? `派生 · 已停用（${total} 停）`
+          : `派生 · 部分停用（${total - enabledCount} 关 / ${enabledCount} 开）`;
 
   async function runOff(category: string) {
     const reason = offReason.trim();
@@ -110,22 +130,22 @@ export default function RsiSwitchesCard() {
           总闸 {masterText}
         </span>
         <span className="grow" />
-        {total > 0 && enabledCount < total && (
+        {!masterOn && (total > 0 || globalRow) && (
           <button
             className="btn btn-ghost btn-sm"
             disabled={busy !== null}
             onClick={() => runOn('__master__')}
-            title="四类目逐个恢复（每个都单独入审计）"
+            title={globalRow ? '恢复全局总闸（真行）' : '四类目逐个恢复（每个都单独入审计）'}
           >
-            总闸 · 一键全启
+            总闸 · 恢复
           </button>
         )}
-        {total > 0 && enabledCount > 0 && (
+        {masterOn && (
           <button
             className="btn btn-ghost btn-sm"
             disabled={busy !== null}
             onClick={() => setConfirmOff('__master__')}
-            aria-label="总闸 · 一键全停（四类目同时停用）"
+            aria-label="总闸 · 一键全停（全局总闸·短路一切类目）"
           >
             <ShieldAlert size={12} /> 总闸 · 一键全停
           </button>
@@ -153,7 +173,7 @@ export default function RsiSwitchesCard() {
             </tr>
           </thead>
           <tbody>
-            {rsiSwitches.map((row) => {
+            {categoryRows.map((row) => {
               const label = rsiCategoryLabel(row.category);
               const key = `rsi-${row.category}`;
               const confirming = confirmOff === row.category;
@@ -219,7 +239,7 @@ export default function RsiSwitchesCard() {
         >
           <div style={{ fontSize: 11.5, color: 'var(--text)', lineHeight: 1.7 }}>
             <b>
-              停用「{confirmOff === '__master__' ? '总闸 · 四类目全停' : rsiCategoryLabel(confirmOff)}」？
+              停用「{confirmOff === '__master__' ? (globalRow ? '全局总闸（短路一切类目）' : '总闸 · 四类目全停') : rsiCategoryLabel(confirmOff)}」？
             </b>
             停用后该类目<b>不再产生新作业</b>（提案 / 归纳 / 反思 / 灰度回流同停）；
             <b>存量在途不受影响</b>，跑完为止；回归熔断一并停用 → 回滚转手工；
@@ -257,8 +277,9 @@ export default function RsiSwitchesCard() {
       <p className="page-note">
         四类产物各自登记 <b>可写路径模式 + 体量上限 + 结构规则 + 显式排除</b>，门禁引擎按声明判定
         「这次提案碰没碰禁改面」——「不碰代码」是<b>路径白名单问题</b>，不是措辞问题；声明与双入口校验
-        同一真源（界面与门禁各读同一份）。<b>后两列（体量上限 / 结构规则）后端尚未落库</b>，
-        故此处标「{NOT_PROVIDED}」，不填演示数值。
+        同一真源（界面与门禁各读同一份）。<b>v25（R25-2）：四结构列已落库并被 `assert_editable` 消费</b>
+        （path_pattern 命中制 · exclusions 命中即拒 · structure_rules 逐条合取 · cap_bytes 有正文时判）；
+        未配置的项显示「—（未配置）」，属声明可选，<b>不是</b>后端缺列。
       </p>
       <div style={{ overflowX: 'auto' }}>
         <table className="tbl compact" aria-label="可改面声明（SurfaceSpec 四列）">

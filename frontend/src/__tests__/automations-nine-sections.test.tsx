@@ -96,7 +96,16 @@ function mockApi(routes: Record<string, { status?: number; body: any }>) {
   return calls;
 }
 
-/** 常用 GET 路由：清单 + 详情 + 两级账本 */
+/** v25 R25-4：规则版本账夹具（GET /api/automations/1/rule-versions 的真实形状） */
+const RV = (v: number, over: Record<string, any> = {}) => ({
+  id: 100 + v, automation_id: 1, version: v,
+  spec: { exec_mode: 'run_only', runbook: { goal: `目标 v${v}` }, triggers: [`t${v}`] },
+  reason: v === 1 ? '新增 run_only 触发器' : `第 ${v} 次改动`,
+  created_by: 'alice', created_at: `2026-09-2${v}T00:00:00`, ...over,
+});
+const RULE_VERSIONS = [RV(1), RV(2), RV(3), RV(4)];
+
+/** 常用 GET 路由：清单 + 详情 + 两级账本 + 规则版本账 */
 function baseRoutes(over: Record<string, { status?: number; body: any }> = {}) {
   return {
     'GET /api/automations': {
@@ -108,6 +117,7 @@ function baseRoutes(over: Record<string, { status?: number; body: any }> = {}) {
     'GET /api/automations/1': { body: { automation: DETAIL() } },
     'GET /api/automations/1/runs': { body: { runs: [RUN], note: '第一级账本' } },
     'GET /api/automations/1/deliveries': { body: { deliveries: [DELIVERY], note: '第二级账本' } },
+    'GET /api/automations/1/rule-versions': { body: { rule_versions: RULE_VERSIONS } },
     ...over,
   };
 }
@@ -127,7 +137,8 @@ beforeEach(() => {
   useAutomations.setState({
     items: [], meta: { total: 0, enabled: 0, paused: 0, archived: 0, breaker_open: 0 },
     breakerRule: '', payloadLimit: 65536, selectedId: null, detail: null, triggers: [],
-    runs: [], deliveries: [], error: null, loading: false, notice: null, secretOnce: null,
+    runs: [], deliveries: [], ruleVersions: [], ruleVersionsError: null,
+    error: null, loading: false, notice: null, secretOnce: null,
   });
 });
 

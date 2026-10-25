@@ -46,10 +46,15 @@ const SWITCHES = {
   categories: ['memory', 'skill', 'orchestration', 'model'],
 };
 
-/** /api/rsi/surfaces 的真实形状：只有 name / allow_edit / immutable 三列 */
+/** /api/rsi/surfaces 的真实形状：v25 R25-2 起含 path_pattern / cap_bytes /
+ *  structure_rules / exclusions（后端已落库并被 assert_editable 消费）；
+ *  第二条留空以测「未配置」如实呈现。*/
 const SURFACES = {
   surfaces: [
-    { id: 1, name: 'skill', allow_edit: ['workspace/skills', 'agents/skills'], immutable: ['scripts/', 'hooks/'], owner_id: 'admin', created_at: '2026-10-20T00:00:00' },
+    { id: 1, name: 'skill', allow_edit: ['workspace/skills', 'agents/skills'], immutable: ['scripts/', 'hooks/'],
+      path_pattern: 'workspace/skills/*', cap_bytes: 65536,
+      structure_rules: ['*.md', { type: 'prefix', value: 'workspace/skills/' }], exclusions: ['drafts/*'],
+      owner_id: 'admin', created_at: '2026-10-20T00:00:00' },
     { id: 2, name: 'memory', allow_edit: [], immutable: ['scripts/'], owner_id: 'admin', created_at: '2026-10-20T00:00:00' },
   ],
   immutable_prefixes: ['scripts/', 'plugins/', 'hooks/'],
@@ -123,6 +128,7 @@ function baseRoutes(over: Record<string, { status?: number; body: any }> = {}) {
     'GET /api/control-plane/cluster': { body: CLUSTER },
     'GET /api/rsi/switches': { body: SWITCHES },
     'GET /api/rsi/surfaces': { body: SURFACES },
+    'GET /api/rsi/golden-sets': { body: { golden_sets: [] } },
     'GET /api/domains': { body: { domains: [{ id: 7, name: '生产域', agent_count: 1 }] } },
     'GET /api/agents': { body: { agents: DOMAIN_AGENTS } },
     'GET /api/domains/7/attribution-policy': { body: { policy: { accountable: 'originator' } } },
@@ -168,7 +174,7 @@ describe('① RSI 开关卡组', () => {
     expect(within(card).getByText(/部分停用（2 关 \/ 2 开）/)).toBeInTheDocument();   // 总闸态由接口派生
   });
 
-  it('SurfaceSpec 四列齐全：路径模式与显式排除来自接口，体量上限/结构规则标「该字段后端未提供」', async () => {
+  it('SurfaceSpec 四列齐全：v25 R25-2 起声明结构真值来自接口，未配置项如实标「—（未配置）」', async () => {
     mockApi(baseRoutes());
     render(<AgentControlPlane />);
     const card = rsiCard();
@@ -180,16 +186,20 @@ describe('① RSI 开关卡组', () => {
 
     const rows = within(table).getAllByRole('row').slice(1);
     expect(rows).toHaveLength(2);
-    // ① 可写路径模式：真数据
-    expect(rows[0].children[1].textContent).toContain('workspace/skills');
-    // ②③ 体量上限 / 结构规则：后端没有这两列 → 必须标未接入，不许编数值
-    expect(rows[0].children[2].textContent).toContain('未接入');
-    expect(rows[0].children[2].textContent).toContain('该字段后端未提供');
-    expect(rows[0].children[3].textContent).toContain('该字段后端未提供');
-    // ④ 显式排除：真数据
-    expect(rows[0].children[4].textContent).toContain('scripts/');
+    // ① 可写路径模式：声明了 path_pattern 优先画声明
+    expect(rows[0].children[1].textContent).toContain('workspace/skills/*');
+    // ② 体量上限 / ③ 结构规则：v25 已落真值（不再是「后端未提供」）
+    expect(rows[0].children[2].textContent).toContain('65536');
+    expect(rows[0].children[3].textContent).toContain('prefix');
+    // ④ 显式排除：画 exclusions（不是永久禁改前缀）
+    expect(rows[0].children[4].textContent).toContain('drafts/*');
     // 空白名单不等于「后端没提供」——如实说「空」
     expect(rows[1].children[1].textContent).toContain('空');
+    // 未配置的声明项 = 「—（未配置）」（声明可选，不是后端缺列）
+    expect(rows[1].children[2].textContent).toContain('未配置');
+    expect(rows[1].children[3].textContent).toContain('未配置');
+    // v25 页注口径翻案：不得再出现「该字段后端未提供」（结构列已接入）
+    expect(table.textContent).not.toContain('该字段后端未提供');
   });
 
   it('停用类目：先二次确认，确认后 POST /api/rsi/switches/{category} 并落提示', async () => {
@@ -218,7 +228,44 @@ describe('① RSI 开关卡组', () => {
       .toHaveTextContent(/已暂停「技能」自动改进/));
   });
 
-  it('总闸一键全停 = 四类目逐个打同一个既有端点（后端无总闸端点）', async () => {
+  it('总闸 = global 真行：一键全停单发 /api/rsi/switches/global（v25 R25-7 落表）', async () => {
+    // 带 global 行（enabled=true）→ 真行模式，全停只打一个端点，不再逐个类目
+    const withGlobal = {
+      'GET /api/rsi/switches': {
+        body: {
+          switches: [
+            { category: 'global', enabled: true, state: 'running', label: '全局总闸：开（短路一切类目）', updated_by: 'root', updated_at: null },
+            { category: 'memory', enabled: true, state: 'running', label: '自动体运行中', updated_by: 'admin', updated_at: '2026-10-24T08:00:00' },
+            { category: 'skill', enabled: true, state: 'running', label: '自动体运行中', updated_by: 'admin', updated_at: '2026-10-24T08:00:00' },
+            { category: 'orchestration', enabled: true, state: 'running', label: '自动体运行中', updated_by: 'admin', updated_at: '2026-10-24T08:00:00' },
+            { category: 'model', enabled: true, state: 'running', label: '自动体运行中', updated_by: 'admin', updated_at: '2026-10-24T08:00:00' },
+          ],
+          categories: ['memory', 'skill', 'orchestration', 'model'],
+        },
+      },
+    };
+    const calls = mockApi({
+      ...baseRoutes(), ...withGlobal,
+      'POST /api/rsi/switches/global': { body: { ok: true, switch: { category: 'global', enabled: false } } },
+    });
+    render(<AgentControlPlane />);
+    const card = rsiCard();
+    await waitFor(() => expect(within(card).getByLabelText('总闸 · 一键全停（全局总闸·短路一切类目）')).toBeInTheDocument());
+
+    fireEvent.click(within(card).getByLabelText('总闸 · 一键全停（全局总闸·短路一切类目）'));
+    fireEvent.change(within(card).getByLabelText('停用原因（必填）'),
+                     { target: { value: '发布窗口冻结自动体' } });
+    fireEvent.click(within(card).getByText('确认停用'));
+
+    await waitFor(() => expect(calls.filter((c) => c.method === 'POST')).toHaveLength(1));
+    const post = calls.filter((c) => c.method === 'POST')[0];
+    expect(post.url).toBe('/api/rsi/switches/global');   // 真行：一个端点，不逐个类目
+    expect(post.body).toEqual({ enabled: false, reason: '发布窗口冻结自动体' });
+    await waitFor(() => expect(within(card).getByRole('status')).toHaveTextContent(/总闸已停用/));
+  });
+
+  it('旧后端无 global 行时总闸如实回退为逐类目聚合（不假装是新后端）', async () => {
+    // baseRoutes 的 SWITCHES 无 global 行 → 派生总闸；全停按四类逐个打既有端点
     const calls = mockApi(baseRoutes({
       'POST /api/rsi/switches/memory': { body: { ok: true } },
       'POST /api/rsi/switches/skill': { body: { ok: true } },
@@ -227,23 +274,17 @@ describe('① RSI 开关卡组', () => {
     }));
     render(<AgentControlPlane />);
     const card = rsiCard();
-    await waitFor(() => expect(within(card).getByLabelText('总闸 · 一键全停（四类目同时停用）')).toBeInTheDocument());
-
-    fireEvent.click(within(card).getByLabelText('总闸 · 一键全停（四类目同时停用）'));
-    fireEvent.change(within(card).getByLabelText('停用原因（必填）'),
-                     { target: { value: '发布窗口冻结自动体' } });
-    fireEvent.click(within(card).getByText('确认停用'));
-
-    await waitFor(() => expect(calls.filter((c) => c.method === 'POST')).toHaveLength(4));
-    const urls = calls.filter((c) => c.method === 'POST').map((c) => c.url).sort();
-    expect(urls).toEqual([
-      '/api/rsi/switches/memory',
-      '/api/rsi/switches/model',
-      '/api/rsi/switches/orchestration',
-      '/api/rsi/switches/skill',
-    ]);
-    expect(calls.filter((c) => c.method === 'POST').every((c) => c.body.enabled === false)).toBe(true);
-    await waitFor(() => expect(within(card).getByRole('status')).toHaveTextContent(/总闸已停用/));
+    // 无 global 行、部分停用 → 派生总闸文案含「派生 ·」前缀，且无「短路一切类目」
+    await waitFor(() => expect(within(card).getByText(/派生 · 部分停用/)).toBeInTheDocument());
+    // 恢复按钮（部分停用态下 masterOn=false → 只显「总闸 · 恢复」）
+    const restore = within(card).getByText('总闸 · 恢复');
+    expect(restore).toBeInTheDocument();
+    fireEvent.click(restore);
+    // 恢复不需要原因；派生模式逐个类目打既有端点（enabled=true）
+    await waitFor(() => expect(calls.filter((c) => c.method === 'POST').length).toBeGreaterThanOrEqual(1));
+    const urls = calls.filter((c) => c.method === 'POST').map((c) => c.url);
+    expect(urls.every((u) => /\/api\/rsi\/switches\/(memory|skill|orchestration|model)$/.test(u))).toBe(true);
+    expect(urls).not.toContain('/api/rsi/switches/global');
   });
 
   it('写失败：后端 detail 原样出现在 role=alert 里（不改写成成功）', async () => {

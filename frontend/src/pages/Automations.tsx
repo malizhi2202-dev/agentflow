@@ -19,6 +19,7 @@ import {
   type AutomationDelivery,
   type AutomationRun,
   type Runbook,
+  type RuleVersion,
 } from '../stores/automations';
 
 const STATUS_LABEL: Record<string, string> = { enabled: '启用', paused: '暂停', archived: '已归档' };
@@ -41,6 +42,111 @@ const EMPTY_RUNBOOK: Runbook = { goal: '', background: '', constraints: '', step
 function fmtNextRun(iso: string): string {
   if (!iso || iso.length < 16) return iso || '—';
   return `${iso.slice(5, 10)} ${iso.slice(11, 16)}`;
+}
+
+/** 两版 spec 的 key 级只读对比（v25 R25-4）：added/removed/changed 三类；等值键不列。 */
+function diffSpecs(a: Record<string, unknown>, b: Record<string, unknown>):
+  { key: string; from: string; to: string; kind: 'removed' | 'added' | 'changed' }[] {
+  const norm = (v: unknown) => JSON.stringify(v ?? null);
+  const keys = Array.from(new Set([...Object.keys(a || {}), ...Object.keys(b || {})])).sort();
+  const rows: { key: string; from: string; to: string; kind: 'removed' | 'added' | 'changed' }[] = [];
+  for (const k of keys) {
+    const inA = Object.prototype.hasOwnProperty.call(a || {}, k);
+    const inB = Object.prototype.hasOwnProperty.call(b || {}, k);
+    const sa = norm((a || {})[k]);
+    const sb = norm((b || {})[k]);
+    if (inA && !inB) rows.push({ key: k, from: sa, to: '—', kind: 'removed' });
+    else if (!inA && inB) rows.push({ key: k, from: '—', to: sb, kind: 'added' });
+    else if (sa !== sb) rows.push({ key: k, from: sa, to: sb, kind: 'changed' });
+  }
+  return rows;
+}
+
+/** 规则版本子节（节②内 · 原型 automations.html「每次改动存版本快照，可看 diff」）：
+ *  v1…vN 列表 + 任选两版 key 级 diff **只读**——后端是只读账（无回滚端点），
+ *  原型 toast 里的「回滚到 v1」未实现，如实标「只读 · 回滚未接入」，不造按钮。 */
+function RuleVersionSection({ versions, current, readError }:
+  { versions: RuleVersion[]; current: number; readError?: string | null }) {
+  const [fromSel, setFromSel] = useState('');
+  const [toSel, setToSel] = useState('');
+  const list = useMemo(() => [...versions].sort((x, y) => x.version - y.version), [versions]);
+  const from = fromSel || (list.length > 1 ? String(list[list.length - 2].version)
+    : (list.length === 1 ? String(list[0].version) : ''));
+  const to = toSel || (list.length ? String(list[list.length - 1].version) : '');
+  const va = list.find((v) => String(v.version) === from);
+  const vb = list.find((v) => String(v.version) === to);
+  const diffs = useMemo(() => (va && vb ? diffSpecs(va.spec ?? {}, vb.spec ?? {}) : []), [va, vb]);
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div className="toolbar">
+        <span className="section-title">规则版本账（v1…vN · 只读 diff）—— 每次改规格留一行快照，可指回「当时按哪版跑」</span>
+        <span className="chip mono">版本 {list.length}</span>
+        <span className="chip">当前 v{current}</span>
+      </div>
+      {readError ? (
+        <p className="page-note" style={{ color: 'var(--orange)' }}>
+          规则版本读取失败（{readError}）——不影响其余节；版本账可用性以接口为准。
+        </p>
+      ) : list.length === 0 ? (
+        <p className="page-note">账上暂无版本行（版本账随创建/改动记入；旧库历史行可能缺账，界面不编版本）。</p>
+      ) : (
+        <>
+          <table className="tbl compact" aria-label="规则版本清单">
+            <thead><tr><th>版本</th><th>变更理由</th><th>创建人</th><th>时间</th></tr></thead>
+            <tbody>
+              {list.map((v) => (
+                <tr key={v.id}>
+                  <td style={MONO}>
+                    v{v.version}
+                    {v.version === current && <span className="chip ok" style={{ marginLeft: 6 }}>当前</span>}
+                  </td>
+                  <td style={{ fontSize: 11.5 }}>{v.reason || '—'}</td>
+                  <td style={{ fontSize: 11 }}>{v.created_by || '—'}</td>
+                  <td style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>
+                    {v.created_at ? new Date(v.created_at).toLocaleString('zh-CN') : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="toolbar" style={{ marginTop: 6, gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <label style={MUTED} htmlFor="rv-from">对比</label>
+            <select id="rv-from" style={INPUT} value={from} onChange={(e) => setFromSel(e.target.value)}>
+              {list.map((v) => <option key={v.id} value={String(v.version)}>v{v.version}</option>)}
+            </select>
+            <span style={MUTED}>→</span>
+            <select id="rv-to" aria-label="对比目标版本" style={INPUT} value={to} onChange={(e) => setToSel(e.target.value)}>
+              {list.map((v) => <option key={v.id} value={String(v.version)}>v{v.version}</option>)}
+            </select>
+            <span className="chip warn">只读 diff · 回滚未接入（后端是只读账，原型的「回滚到 v1」不作实现承诺）</span>
+          </div>
+          {from === to ? (
+            <p className="page-note" style={{ marginTop: 4 }}>选的是同一版，无差异。</p>
+          ) : diffs.length === 0 ? (
+            <p className="page-note" style={{ marginTop: 4 }}>v{from} → v{to} 规格逐键一致（只有理由/创建人不同）。</p>
+          ) : (
+            <table className="tbl compact" aria-label="规则版本 diff" style={{ marginTop: 4 }}>
+              <thead><tr><th>字段</th><th>v{from}</th><th>v{to}</th><th>变化</th></tr></thead>
+              <tbody>
+                {diffs.map((d) => (
+                  <tr key={d.key}>
+                    <td style={MONO}>{d.key}</td>
+                    <td style={{ ...MONO, color: 'var(--red)', wordBreak: 'break-all' }}>{d.from}</td>
+                    <td style={{ ...MONO, color: 'var(--green)', wordBreak: 'break-all' }}>{d.to}</td>
+                    <td>
+                      <span className={'chip ' + (d.kind === 'changed' ? 'warn' : d.kind === 'added' ? 'ok' : 'bad')}>
+                        {d.kind}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </>
+      )}
+    </div>
+  );
 }
 
 function fmtTime(iso: string | null | undefined): string {
@@ -71,6 +177,7 @@ export default function Automations() {
   const store = useAutomations();
   const {
     items, meta, breakerRule, payloadLimit, selectedId, detail, triggers, runs, deliveries,
+    ruleVersions, ruleVersionsError,
     error, loading, notice, secretOnce, fetchAll, select, create, saveSections, pause, resume,
     archive, setBreaker, addTrigger, toggleTrigger, deleteTrigger, rotateTrigger, previewCron,
     clearNotice,
@@ -389,6 +496,9 @@ export default function Automations() {
                 </p>
               </div>
             </div>
+
+            {/* v25 R25-4：规则版本账子节（接 GET /api/automations/{id}/rule-versions） */}
+            <RuleVersionSection versions={ruleVersions} current={detail.spec_version} readError={ruleVersionsError} />
           </section>
 
           {/* ③ schedule */}

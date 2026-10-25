@@ -107,7 +107,7 @@ describe('任务看板 · 两轴与状态标签不授予行为', () => {
 });
 
 describe('任务看板 · 指派三轨（board__assign-* / pp-assignee）', () => {
-  it('选「小队」显示给 leader 入队语义，提交按三轨打端点', async () => {
+  it('选「小队」显示给 leader 入队语义，提交先弹两决定，「先不开工」按三轨打端点', async () => {
     const calls = mockApi({
       'GET /api/tasks': { body: { tasks: [TASK()], total: 1 } },
       'POST /api/tasks/1/assign': { body: { ok: true, task: TASK({ assignee_kind: 'squad', assignee_id: 'code-review' }) } },
@@ -131,11 +131,74 @@ describe('任务看板 · 指派三轨（board__assign-* / pp-assignee）', () =
     fireEvent.change(within(picker()).getByLabelText('负责人 ID'), { target: { value: 'code-review' } });
     fireEvent.click(within(picker()).getByRole('button', { name: '确定指派' }));
 
+    // v25 R25-8（board#md-assign-confirm）：点提交不直接开跑——先弹两决定
+    await waitFor(() => expect(screen.getByText('指派确认 · 这次真的开跑谁？')).toBeInTheDocument());
+    expect(lastPost(calls, '/assign')).toBeUndefined();   // 未点决定前不发写请求
+    fireEvent.click(screen.getByRole('button', { name: '先不开工' }));
+
     await waitFor(() => {
       expect(lastPost(calls, '/assign')?.body).toMatchObject({
         assignee_kind: 'squad', assignee_id: 'code-review',
       });
     });
+    expect(lastPost(calls, '/assign')?.body).not.toHaveProperty('start');  // 先不开工 = 不带 start
+  });
+
+  it('确认层「开始」= 显式运行请求：body 带 start:true', async () => {
+    const calls = mockApi({
+      'GET /api/tasks': { body: { tasks: [TASK()], total: 1 } },
+      'POST /api/tasks/1/assign': {
+        body: { ok: true, task: TASK({ assignee_kind: 'agent', assignee_id: '5' }),
+                run: { id: 9, run_id: 'assign-x', status: 'queued', agent_id: 5 } },
+      },
+    });
+    render(<Tasks />);
+    await waitFor(() => expect(card('修构建')).toBeInTheDocument());
+    fireEvent.click(within(card('修构建')).getByRole('button', { name: '指派' }));
+    fireEvent.click(within(picker()).getByRole('button', { name: 'Agent' }));
+    fireEvent.change(within(picker()).getByLabelText('负责人 ID'), { target: { value: '5' } });
+    fireEvent.click(within(picker()).getByRole('button', { name: '确定指派' }));
+    await waitFor(() => expect(screen.getByText('指派确认 · 这次真的开跑谁？')).toBeInTheDocument());
+    // 已出停车闸（in_progress）→「开始」可点
+    const startBtn = screen.getByRole('button', { name: '开始' });
+    expect(startBtn).toBeEnabled();
+    fireEvent.click(startBtn);
+    await waitFor(() => expect(lastPost(calls, '/assign')?.body).toMatchObject({
+      assignee_kind: 'agent', assignee_id: '5', start: true,
+    }));
+  });
+
+  it('停车闸内（backlog）「开始」灰置，只留「先不开工」登记', async () => {
+    const calls = mockApi({
+      'GET /api/tasks': { body: { tasks: [TASK({ status: 'backlog', status_category: 'unstarted' })], total: 1 } },
+      'POST /api/tasks/1/assign': { body: { ok: true, task: TASK({ status: 'backlog' }) } },
+    });
+    render(<Tasks />);
+    await waitFor(() => expect(card('修构建')).toBeInTheDocument());
+    fireEvent.click(within(card('修构建')).getByRole('button', { name: '指派' }));
+    fireEvent.click(within(picker()).getByRole('button', { name: 'Agent' }));
+    fireEvent.change(within(picker()).getByLabelText('负责人 ID'), { target: { value: '5' } });
+    fireEvent.click(within(picker()).getByRole('button', { name: '确定指派' }));
+    await waitFor(() => expect(screen.getByText('指派确认 · 这次真的开跑谁？')).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: '开始' })).toBeDisabled();   // 闸内不入队
+    fireEvent.click(screen.getByRole('button', { name: '先不开工' }));      // 登记仍可以
+    await waitFor(() => expect(lastPost(calls, '/assign')).toBeTruthy());
+    expect(lastPost(calls, '/assign')?.body).not.toHaveProperty('start');
+  });
+
+  it('人轨不弹确认层（人不产生 run），提交即登记', async () => {
+    const calls = mockApi({
+      'GET /api/tasks': { body: { tasks: [TASK()], total: 1 } },
+      'POST /api/tasks/1/assign': { body: { ok: true, task: TASK({ assignee_kind: 'member', assignee_id: 'bob' }) } },
+    });
+    render(<Tasks />);
+    await waitFor(() => expect(card('修构建')).toBeInTheDocument());
+    fireEvent.click(within(card('修构建')).getByRole('button', { name: '指派' }));
+    fireEvent.click(within(picker()).getByRole('button', { name: '人' }));
+    fireEvent.change(within(picker()).getByLabelText('负责人 ID'), { target: { value: 'bob' } });
+    fireEvent.click(within(picker()).getByRole('button', { name: '确定指派' }));
+    await waitFor(() => expect(lastPost(calls, '/assign')).toBeTruthy());
+    expect(screen.queryByText('指派确认 · 这次真的开跑谁？')).not.toBeInTheDocument();
   });
 
   it('指派失败把后端 detail 原样显示', async () => {
@@ -152,6 +215,9 @@ describe('任务看板 · 指派三轨（board__assign-* / pp-assignee）', () =
     fireEvent.click(within(picker()).getByRole('button', { name: 'Agent' }));
     fireEvent.change(within(picker()).getByLabelText('负责人 ID'), { target: { value: 'repo-hygiene' } });
     fireEvent.click(within(picker()).getByRole('button', { name: '确定指派' }));
+    // v25 R25-8：Agent 轨先弹确认层；这里走「先不开工」仍打同一端点、detail 原样透传
+    await waitFor(() => expect(screen.getByText('指派确认 · 这次真的开跑谁？')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: '先不开工' }));
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('runtime offline（心跳 > 75s）');

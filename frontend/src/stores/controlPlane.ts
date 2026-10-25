@@ -61,7 +61,8 @@ export interface ClusterStatus {
  * **体量上限与结构规则后端没有落库**，界面必须标「未接入」，不许编数值。
  */
 
-/** 一个类目的自动改进开关（后端未落行时默认 running） */
+/** 一个类目的自动改进开关（后端未落行时默认 running）；
+ *  v25 R25-7：`category==='global'` 是总闸**真行**（不再是前端聚合派生） */
 export interface RsiSwitchRow {
   category: string;
   enabled: boolean;
@@ -69,14 +70,21 @@ export interface RsiSwitchRow {
   label?: string;
   updated_by?: string;
   updated_at?: string | null;
+  last_reason?: string;
+  last_actor?: string;
 }
 
-/** 可改面声明对象（SurfaceSpec）：只有路径白名单 + 永久禁改前缀是真数据 */
+/** 可改面声明对象（SurfaceSpec）：v25 起四结构列后端已落库并被门禁消费
+ *  （R25-2）——未配置项界面显示「—（未配置）」，不再标「未接入」。 */
 export interface RsiSurfaceRow {
   id: number;
   name: string;
   allow_edit: string[];
   immutable: string[];
+  path_pattern?: string;
+  cap_bytes?: number | null;
+  structure_rules?: unknown[];
+  exclusions?: string[];
   owner_id?: string;
   created_at?: string | null;
 }
@@ -242,10 +250,29 @@ export const useControlPlane = create<ControlPlaneState>((set, get) => ({
     return out;
   },
 
-  /* 总闸 = 四类目同时启停。后端没有总闸端点，所以按类目逐个打同一个既有端点，
-   * 每个都单独入审计；任何一类失败都把后端 detail 原样收集后透传（不假装成功）。 */
+  /* 总闸（v25 R25-7）：后端 `switches/global` 真行——off 在转换层短路一切类目。
+   * 旧后端（无 global 行/端点未放行）如实回退为逐类目启停，每个单独入审计，
+   * 任何一类失败把后端 detail 原样收集透传（不假装成功）。 */
   setRsiMaster: async (enabled, reason) => {
-    const categories = get().rsiSwitches.map((s) => s.category);
+    const rows = get().rsiSwitches;
+    if (rows.some((s) => s.category === 'global')) {
+      const out = await writeJson('/api/rsi/switches/global',
+                                  { enabled, ...(reason ? { reason } : {}) });
+      await get().fetchRsi();
+      if (!out.ok) {
+        const error = out.error || '总闸操作失败';
+        set({ rsiError: error, rsiNotice: null });
+        return { ok: false, error };
+      }
+      set({
+        rsiError: null,
+        rsiNotice: enabled
+          ? '全局总闸已恢复 · 一切类目重新可自动改进'
+          : '全局总闸已停用 · 转换层短路一切类目（存量在途不受影响）',
+      });
+      return out;
+    }
+    const categories = rows.map((s) => s.category).filter((c) => c !== 'global');
     if (categories.length === 0) {
       const error = '未读到四类目（/api/rsi/switches 为空），总闸无法执行';
       set({ rsiError: error, rsiNotice: null });

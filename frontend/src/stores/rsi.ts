@@ -16,6 +16,9 @@ export const LAYERS = ['L1', 'L2', 'L3'] as const;
 export const MEMORY_STATUSES = ['promoted', 'confounded', 'quarantined', 'no_entry'] as const;
 export const CATEGORIES = ['memory', 'skill', 'orchestration', 'model'] as const;
 export const DIMENSIONS = ['invariant', 'domain'] as const;
+// v25 R25-1：与后端 models/rsi.py 词表逐字对齐（内容域 ⟂ 生命周期，两正交维）
+export const MEMORY_DOMAINS = ['semantic', 'procedural', 'preference', 'instruction', 'rule'] as const;
+export const MEMORY_LIFE_STATUSES = ['active', 'revoked', 'stale-flagged'] as const;
 
 export interface Memory {
   id: number; layer: string; kind: string; scope: string; owner_id: string;
@@ -24,13 +27,19 @@ export interface Memory {
   source_seq: number; cites_seq: number;
   pollution_flagged: boolean; post_ingest_scan: boolean;
   decay_score: number; last_used_at: string | null; created_at: string | null;
+  // v25 R25-1：内容域 / 生命周期 / 正文摘要 / 置信度（后端 rsi_api 已透传，此前前端未接）
+  domain?: string; life_status?: string; content?: string | null; confidence?: number | null;
 }
 export interface Review {
   id: number; memory_id: number; verdict: string;
   fields_complete: boolean; causal_check: boolean; pollution_scan: boolean;
   reviewer: string; note: string; created_at: string | null;
 }
-export interface Switch { category: string; enabled: boolean; state: string; label: string; updated_by: string; updated_at: string | null }
+export interface Switch { category: string; enabled: boolean; state: string; label: string; updated_by: string; updated_at: string | null; last_reason?: string; last_actor?: string }
+// v25 R25-6：金标集（cases_count 只给条数不给全文；frozen 后不可改，影子门平台校验靠它）
+export interface GoldenSet { id: number; name: string; kind: string; cases_count: number;
+  produced_by: string; frozen: boolean; frozen_at: string | null; frozen_by: string;
+  eval_mark: string | null; owner_id: string; created_at: string | null }
 export interface Breaker { name: string; status: 'closed' | 'open' | 'half_open'; reason: string; counter: number; opened_at: string | null }
 export interface Proposal {
   id: number; title: string; dimension: string; surface_name: string; target: string;
@@ -66,8 +75,10 @@ interface RsiState {
   candidates: Memory[]; decayDays: number;
   proposals: Proposal[]; proposalsError: string | null; proposalsLoading: boolean;
   surfaces: Surface[]; immutablePrefixes: string[];
+  goldenSets: GoldenSet[]; goldenSetsError: string | null;
 
-  fetchMemories: (opts?: { layer?: string; status?: string }) => Promise<void>;
+  fetchMemories: (opts?: { layer?: string; status?: string;
+                           domain?: string; life_status?: string }) => Promise<void>;
   proposeMemory: (payload: Record<string, unknown>) => Promise<WriteResult>;
   fetchReviews: (memoryId: number) => Promise<void>;
   quarantine: (sourceRef: string) => Promise<WriteResult>;
@@ -82,6 +93,9 @@ interface RsiState {
   updateSurface: (id: number, allowEdit: string[]) => Promise<WriteResult>;
   deleteSurface: (id: number) => Promise<WriteResult>;
   createProposal: (payload: Record<string, unknown>) => Promise<WriteResult>;
+  fetchGoldenSets: () => Promise<void>;
+  createGoldenSet: (payload: Record<string, unknown>) => Promise<WriteResult>;
+  freezeGoldenSet: (id: number) => Promise<WriteResult>;
   recordProbe: (id: number, steps: number, tokens: number) => Promise<WriteResult>;
   recordShadow: (id: number, payload: Record<string, unknown>) => Promise<WriteResult>;
   signoff: (id: number) => Promise<WriteResult>;
@@ -95,16 +109,40 @@ export const useRsi = create<RsiState>((set, get) => ({
   candidates: [], decayDays: 90,
   proposals: [], proposalsError: null, proposalsLoading: false,
   surfaces: [], immutablePrefixes: [],
+  goldenSets: [], goldenSetsError: null,
 
   fetchMemories: async (opts) => {
     set({ memoriesLoading: true, memoriesError: null });
     const qs = new URLSearchParams();
     if (opts?.layer) qs.set('layer', opts.layer);
     if (opts?.status) qs.set('status', opts.status);
+    // v25 R25-1：内容域 / 生命周期两正交维筛选（后端 rsi_api.py 已接受这两 query）
+    if (opts?.domain) qs.set('domain', opts.domain);
+    if (opts?.life_status) qs.set('life_status', opts.life_status);
     const suffix = qs.toString() ? `?${qs}` : '';
     const result = await safeFetch(`/api/rsi/memories${suffix}`);
     if (!result.ok) { set({ memoriesLoading: false, memoriesError: result.error || '记忆读取失败' }); return; }
     set({ memories: result.data?.memories || [], memoriesLoading: false });
+  },
+
+  // ── v25 R25-6：金标集（后端 /api/rsi/golden-sets 已就绪，前端此前 0 消费）──────
+  fetchGoldenSets: async () => {
+    set({ goldenSetsError: null });
+    const result = await safeFetch('/api/rsi/golden-sets');
+    if (!result.ok) { set({ goldenSetsError: result.error || '金标集读取失败' }); return; }
+    set({ goldenSets: result.data?.golden_sets || [] });
+  },
+
+  createGoldenSet: async (payload) => {
+    const out = await writeJson('/api/rsi/golden-sets', payload);
+    if (out.ok) await get().fetchGoldenSets();
+    return out;
+  },
+
+  freezeGoldenSet: async (id) => {
+    const out = await writeJson(`/api/rsi/golden-sets/${id}/freeze`);
+    if (out.ok) await get().fetchGoldenSets();
+    return out;
   },
 
   createSurface: async (name, allowEdit) => {

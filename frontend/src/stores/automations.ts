@@ -132,6 +132,13 @@ export interface OneTimeSecret {
 
 export type WriteResult = { ok: boolean; data?: any; error?: string };
 
+/** 规则版本不可变行账（v25 R25-4 · GET /api/automations/{id}/rule-versions）：
+ *  每次改规格留一行快照；界面 v1…vN + diff **只读**（后端无回滚端点，不做回滚按钮）。 */
+export interface RuleVersion {
+  id: number; automation_id: number; version: number;
+  spec: Record<string, unknown>; reason: string; created_by: string; created_at: string | null;
+}
+
 const EMPTY_META: AutomationMeta = { total: 0, enabled: 0, paused: 0, archived: 0, breaker_open: 0 };
 
 async function write(url: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<WriteResult> {
@@ -163,6 +170,8 @@ interface AutomationsState {
   triggers: AutomationTrigger[];
   runs: AutomationRun[];
   deliveries: AutomationDelivery[];
+  ruleVersions: RuleVersion[];
+  ruleVersionsError: string | null;
   // 状态位
   error: string | null;
   loading: boolean;
@@ -173,6 +182,7 @@ interface AutomationsState {
   select: (id: number | null) => Promise<void>;
   fetchRuns: (id?: number) => Promise<void>;
   fetchDeliveries: (id?: number) => Promise<void>;
+  fetchRuleVersions: (id: number) => Promise<void>;
   previewCron: (id: number, cron: string, timezone: string) => Promise<{ ok: boolean; next_runs?: string[]; error?: string }>;
   create: (payload: Record<string, unknown>) => Promise<WriteResult>;
   saveSections: (id: number, patch: Record<string, unknown>) => Promise<WriteResult>;
@@ -218,6 +228,8 @@ export const useAutomations = create<AutomationsState>((set, get) => {
     triggers: [],
     runs: [],
     deliveries: [],
+    ruleVersions: [],
+    ruleVersionsError: null,
     error: null,
     loading: false,
     notice: null,
@@ -238,7 +250,8 @@ export const useAutomations = create<AutomationsState>((set, get) => {
 
     select: async (id) => {
       if (id == null) {
-        set({ selectedId: null, detail: null, triggers: [], runs: [], deliveries: [], secretOnce: null });
+        set({ selectedId: null, detail: null, triggers: [], runs: [], deliveries: [],
+              ruleVersions: [], ruleVersionsError: null, secretOnce: null });
         return;
       }
       set({ selectedId: id, error: null, secretOnce: null });
@@ -251,7 +264,20 @@ export const useAutomations = create<AutomationsState>((set, get) => {
         detail: out.data?.automation || null,
         triggers: out.data?.automation?.triggers || [],
       });
-      await Promise.all([get().fetchRuns(id), get().fetchDeliveries(id)]);
+      await Promise.all([get().fetchRuns(id), get().fetchDeliveries(id), get().fetchRuleVersions(id)]);
+    },
+
+    /* v25 R25-4：规则版本账——v1…vN 升序只读（每次改规格留快照，可指回「当时按哪版跑」）。
+     * 读取失败**不污染主 error**（辅助子节自己的错误位），旧后端 404 也如实显示。 */
+    fetchRuleVersions: async (id) => {
+      const target = id ?? get().selectedId;
+      if (target == null) return;
+      const out = await safeFetch(`/api/automations/${target}/rule-versions`);
+      if (!out.ok) {
+        set({ ruleVersions: [], ruleVersionsError: out.error || '规则版本读取失败' });
+        return;
+      }
+      set({ ruleVersions: out.data?.rule_versions || [], ruleVersionsError: null });
     },
 
     fetchRuns: async (id) => {

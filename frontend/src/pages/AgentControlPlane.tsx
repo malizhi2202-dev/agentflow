@@ -9,6 +9,7 @@ import { useControlPlane, AgentStatus, QueueItem, ReconcileEntry, ClusterStatus 
 import { useDomains, Domain, RouteResult, ScaleResult } from '../stores/domains';
 import DomainPolicyCard from '../components/DomainPolicyCard';
 import RsiSwitchesCard from '../components/control/RsiSwitchesCard';
+import GoldenSetsCard from '../components/control/GoldenSetsCard';
 import SchedulerBaseCard from '../components/control/SchedulerBaseCard';
 import MaintenanceJobsCard from '../components/control/MaintenanceJobsCard';
 import { useAgents, Agent } from '../stores/agents';
@@ -1497,6 +1498,7 @@ export default function AgentControlPlane() {
       <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <SchedulerBaseCard />
         <RsiSwitchesCard />
+        <GoldenSetsCard />
         <MaintenanceJobsCard />
       </div>
     </div>

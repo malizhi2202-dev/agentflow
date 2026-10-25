@@ -73,6 +73,7 @@ beforeEach(() => {
     candidates: [], decayDays: 90,
     proposals: [], proposalsError: null, proposalsLoading: false,
     surfaces: [], immutablePrefixes: [],
+    goldenSets: [], goldenSetsError: null,
   });
 });
 
@@ -381,5 +382,121 @@ describe('提案 tab', () => {
         surface_name: 'agent-config', target: 'prompts/persona.md',
       });
     });
+  });
+});
+
+describe('v25 R25 接线（记忆新列 + 金标集选择）', () => {
+  const openProps = async () => {
+    render(<Memory />);
+    fireEvent.click(screen.getByRole('tab', { name: '提案' }));
+  };
+
+  // ── R25-1：写入表单带上 domain / content / confidence ──
+  it('写入表单带 domain + content + confidence（后端已收，此前落默认值）', async () => {
+    const calls = mockApi({
+      'GET /api/rsi/memories': { body: { memories: [] } },
+      'GET /api/rsi/memories/decay': { body: { candidates: [] } },
+      'POST /api/rsi/memories': { body: { stored: true, status: 'promoted', memory: MEM() } },
+      ...GOV,
+    });
+    render(<Memory />);
+    await waitFor(() => expect(screen.getByText(/还没有记忆/)).toBeInTheDocument());
+    fireEvent.click(screen.getAllByText('写入记忆')[0]);
+    const form = screen.getByRole('region', { name: '写入记忆' });
+    fireEvent.change(within(form).getByLabelText('内容域'), { target: { value: 'procedural' } });
+    fireEvent.change(within(form).getByLabelText('内容摘要'), { target: { value: '内容摘要文本' } });
+    fireEvent.change(within(form).getByLabelText('置信度'), { target: { value: '0.9' } });
+    fireEvent.change(within(form).getByLabelText('cue'), { target: { value: 'c' } });
+    fireEvent.change(within(form).getByLabelText('lesson'), { target: { value: 'l' } });
+    fireEvent.change(within(form).getByLabelText('evidence'), { target: { value: 'log-1' } });
+    fireEvent.click(within(form).getByText('写入记忆'));
+    await waitFor(() => expect(calls.some((c) => c.method === 'POST' && c.url === '/api/rsi/memories')).toBe(true));
+    const post = calls.find((c) => c.method === 'POST' && c.url === '/api/rsi/memories');
+    expect(post?.body).toMatchObject({ domain: 'procedural', content: '内容摘要文本', confidence: 0.9 });
+  });
+
+  it('筛选器把 domain / life_status 透传到 query（后端已接受，此前前端未接）', async () => {
+    const calls = mockApi({
+      'GET /api/rsi/memories': { body: { memories: [MEM({ id: 3 })] } },
+      'GET /api/rsi/memories/decay': { body: { candidates: [] } },
+      ...GOV,
+    });
+    render(<Memory />);
+    await waitFor(() => expect(screen.getByLabelText('内容域筛选')).toBeInTheDocument());
+    fireEvent.change(screen.getByLabelText('内容域筛选'), { target: { value: 'rule' } });
+    fireEvent.change(screen.getByLabelText('生命周期筛选'), { target: { value: 'stale-flagged' } });
+    await waitFor(() => expect(calls.some(
+      (c) => /domain=rule/.test(c.url) && /life_status=stale-flagged/.test(c.url))).toBe(true));
+  });
+
+  it('列表行回显 domain / 非 active 生命周期 / 置信', async () => {
+    mockApi({
+      'GET /api/rsi/memories': {
+        body: { memories: [MEM({ domain: 'rule', life_status: 'stale-flagged', confidence: 0.5, content: '一句话' })] },
+      },
+      'GET /api/rsi/memories/decay': { body: { candidates: [] } },
+      ...GOV,
+    });
+    render(<Memory />);
+    await waitFor(() => expect(screen.getByText('构建失败时先看 tsc')).toBeInTheDocument());
+    // 用 title 选中行内 chip（裸文本会撞筛选 select 的同值 option）
+    expect(screen.getByTitle('内容域（与层正交）')).toHaveTextContent('rule');   // 内容域 chip
+    expect(screen.getByTitle('生命周期：失效=标记非删除')).toHaveTextContent('stale-flagged'); // 生命周期 chip
+    expect(screen.getByText(/置信/)).toBeInTheDocument();
+    expect(screen.getByText(/· 一句话/)).toBeInTheDocument();      // 内容摘要 = lesson 尾串（带 · 前缀）
+  });
+
+  // ── R25-6：影子重放引用已冻结金标集 → 传 golden_set_id（平台校验，取代自报布尔）──
+  it('引用冻结金标集时提交带 golden_set_id，自报勾选禁用', async () => {
+    const calls = mockApi({
+      'GET /api/rsi/memories': { body: { memories: [] } },
+      'GET /api/rsi/memories/decay': { body: { candidates: [] } },
+      'GET /api/rsi/proposals': { body: { proposals: [PROP({ status: 'probed' })] } },
+      'GET /api/rsi/surfaces': { body: { surfaces: [], immutable_prefixes: [] } },
+      'GET /api/rsi/golden-sets': {
+        body: { golden_sets: [
+          { id: 7, name: '回归金标', kind: 'eval_set', cases_count: 12, produced_by: 'openai',
+            frozen: true, frozen_at: '2026-10-25T00:00:00', frozen_by: 'root', eval_mark: 'm',
+            owner_id: 'root', created_at: null },
+          { id: 8, name: '未冻结集', kind: 'eval_set', cases_count: 3, produced_by: 'anthropic',
+            frozen: false, frozen_at: null, frozen_by: '', eval_mark: null, owner_id: 'root', created_at: null },
+        ] },
+      },
+      'POST /api/rsi/proposals/1/shadow': { body: { ok: true, proposal: PROP({ status: 'shadowed' }) } },
+      ...GOV,
+    });
+    await openProps();
+    await waitFor(() => expect(screen.getByText('记录影子重放')).toBeInTheDocument());
+    // 只列已冻结集（id=7），未冻结的 8 不出现为可选项
+    const sel = screen.getByLabelText('金标集');
+    fireEvent.change(sel, { target: { value: '7' } });
+    // 选了金标集 → 两个自报勾选置灰
+    expect(screen.getByText('金标已冻结（自报）').closest('label')).toHaveStyle({ opacity: 0.45 });
+    fireEvent.click(screen.getByText('记录影子重放'));
+    await waitFor(() => expect(calls.some((c) => c.method === 'POST' && c.url === '/api/rsi/proposals/1/shadow')).toBe(true));
+    const post = calls.find((c) => c.method === 'POST' && c.url === '/api/rsi/proposals/1/shadow');
+    expect(post?.body).toMatchObject({ golden_set_id: 7 });
+    expect(post?.body).not.toHaveProperty('golden_set_frozen');   // 平台校验下不再发自报布尔
+  });
+
+  it('不引用金标集时回退自报（保持旧布尔路径 · 后端标 self_declared）', async () => {
+    const calls = mockApi({
+      'GET /api/rsi/memories': { body: { memories: [] } },
+      'GET /api/rsi/memories/decay': { body: { candidates: [] } },
+      'GET /api/rsi/proposals': { body: { proposals: [PROP({ status: 'probed' })] } },
+      'GET /api/rsi/surfaces': { body: { surfaces: [], immutable_prefixes: [] } },
+      'GET /api/rsi/golden-sets': { body: { golden_sets: [] } },
+      'POST /api/rsi/proposals/1/shadow': { body: { ok: true, proposal: PROP({ status: 'shadowed' }) } },
+      ...GOV,
+    });
+    await openProps();
+    await waitFor(() => expect(screen.getByText('记录影子重放')).toBeInTheDocument());
+    const goldenCheck = screen.getByText('金标已冻结（自报）').closest('label')?.querySelector('input');
+    if (goldenCheck) fireEvent.click(goldenCheck);
+    fireEvent.click(screen.getByText('记录影子重放'));
+    await waitFor(() => expect(calls.some((c) => c.method === 'POST' && c.url === '/api/rsi/proposals/1/shadow')).toBe(true));
+    const post = calls.find((c) => c.method === 'POST' && c.url === '/api/rsi/proposals/1/shadow');
+    expect(post?.body).toMatchObject({ golden_set_frozen: true });
+    expect(post?.body).not.toHaveProperty('golden_set_id');
   });
 });

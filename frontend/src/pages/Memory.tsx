@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, Brain, ChevronDown, ChevronRight, Plus, RefreshCw, ShieldAlert } from 'lucide-react';
 import {
-  useRsi, LAYERS, MEMORY_STATUSES, DIMENSIONS,
+  useRsi, LAYERS, MEMORY_STATUSES, MEMORY_DOMAINS, MEMORY_LIFE_STATUSES, DIMENSIONS,
   type Breaker, type Memory, type Proposal, type Switch,
 } from '../stores/rsi';
 import { useAuth } from '../stores/auth';
@@ -150,6 +150,11 @@ function WriteForm({ onDone }: { onDone: () => void }) {
   const { err, setErr, run } = useWrite();
   const [layer, setLayer] = useState<string>('L1');
   const [kind, setKind] = useState('positive');
+  // v25 R25-1：内容域（与层正交的另一维）+ 正文摘要 + 置信度——后端已收三参，
+  // 前端此前不填 = 永远落默认值（semantic / ''），本次接线补齐
+  const [domain, setDomain] = useState<string>('semantic');
+  const [content, setContent] = useState('');
+  const [confidence, setConfidence] = useState('');
   const [cue, setCue] = useState('');
   const [lesson, setLesson] = useState('');
   const [evidenceText, setEvidenceText] = useState('');
@@ -166,6 +171,11 @@ function WriteForm({ onDone }: { onDone: () => void }) {
   const submit = async () => {
     const ev = parseEvidence();
     if (ev === null) { setErr('evidence 解析失败'); return; }
+    const conf = confidence === '' ? undefined : Number(confidence);
+    if (conf !== undefined && (Number.isNaN(conf) || conf < 0 || conf > 1)) {
+      setErr('置信度必须是 0–1 的数字（留空 = 不声明）');
+      return;
+    }
     const out = await run(() => proposeMemory({
       layer, kind, cue, lesson, evidence: ev,
       confounded,
@@ -173,6 +183,11 @@ function WriteForm({ onDone }: { onDone: () => void }) {
       cites_seq: Number(citesSeq) || 0,
       // 有证据且非 confounded 才算强证据；否则后端会强制 confounded
       evidence_is_strong: ev.length > 0 && !confounded,
+      // v25 R25-1：内容域必带（后端缺省 semantic，界面显式给词表）；
+      // content 摘要与 confidence 可空——空 = 不声明，不代填假值
+      domain,
+      ...(content.trim() ? { content: content.trim() } : {}),
+      ...(conf !== undefined ? { confidence: conf } : {}),
     }));
     if (!out.ok) return;
     const data: any = out.data;
@@ -180,7 +195,7 @@ function WriteForm({ onDone }: { onDone: () => void }) {
     setResult(data?.stored
       ? `已入库：${data.status}`
       : `未入库：no_entry（缺 ${data.missing?.join(' / ') || '字段'}）——这是合法结论，不是失败`);
-    setCue(''); setLesson(''); setEvidenceText('');
+    setCue(''); setLesson(''); setEvidenceText(''); setContent('');
   };
 
   return (
@@ -199,6 +214,18 @@ function WriteForm({ onDone }: { onDone: () => void }) {
             <option value="negative">negative（负知识）</option>
           </select>
         </div>
+        {/* v25 R25-1：内容域 = 与层正交的另一维（原型 memory.html「每条记忆在四层任一层上都携带其一」） */}
+        <div>
+          <label htmlFor="m-domain" style={labelStyle}>内容域（与层正交）</label>
+          <select id="m-domain" aria-label="内容域" style={inputStyle} value={domain} onChange={(e) => setDomain(e.target.value)}>
+            {MEMORY_DOMAINS.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="m-confidence" style={labelStyle}>confidence 0–1（留空=不声明）</label>
+          <input id="m-confidence" aria-label="置信度" type="number" step="0.01" min={0} max={1}
+                 style={inputStyle} value={confidence} onChange={(e) => setConfidence(e.target.value)} />
+        </div>
         <div>
           <label htmlFor="m-source-seq" style={labelStyle}>source_seq（本条任务序号）</label>
           <input id="m-source-seq" aria-label="source_seq" type="number" style={inputStyle} value={sourceSeq} onChange={(e) => setSourceSeq(e.target.value)} />
@@ -215,6 +242,10 @@ function WriteForm({ onDone }: { onDone: () => void }) {
       <div style={{ marginTop: 8 }}>
         <label htmlFor="m-lesson" style={labelStyle}>lesson（学到什么）</label>
         <input id="m-lesson" aria-label="lesson" style={inputStyle} value={lesson} onChange={(e) => setLesson(e.target.value)} />
+      </div>
+      <div style={{ marginTop: 8 }}>
+        <label htmlFor="m-content" style={labelStyle}>内容摘要 content（可空 = 不声明，列表页展示用）</label>
+        <input id="m-content" aria-label="内容摘要" style={inputStyle} value={content} onChange={(e) => setContent(e.target.value)} />
       </div>
       <div style={{ marginTop: 8 }}>
         <label htmlFor="m-evidence" style={labelStyle}>evidence（一行一条证据 ref）</label>
@@ -241,13 +272,19 @@ function MemoryTab() {
     quarantine, candidates, fetchDecay } = useRsi();
   const [layer, setLayer] = useState('');
   const [status, setStatus] = useState('');
+  // v25 R25-1：内容域 / 生命周期两正交维筛选（后端 list_memories 已支持这两 query）
+  const [domainF, setDomainF] = useState('');
+  const [lifeF, setLifeF] = useState('');
   const [showWrite, setShowWrite] = useState(false);
   const [sourceRef, setSourceRef] = useState('');
   const [govOpen, setGovOpen] = useState(false);
   const [days, setDays] = useState(90);
   const q = useWrite();
 
-  useEffect(() => { fetchMemories({ layer: layer || undefined, status: status || undefined }); }, [layer, status, fetchMemories]);
+  useEffect(() => {
+    fetchMemories({ layer: layer || undefined, status: status || undefined,
+                    domain: domainF || undefined, life_status: lifeF || undefined });
+  }, [layer, status, domainF, lifeF, fetchMemories]);
   useEffect(() => { fetchDecay(days); }, [days, fetchDecay]);
 
   const selected = useMemo(() => memories.find((m) => m.id === reviewsMemoryId), [memories, reviewsMemoryId]);
@@ -277,6 +314,20 @@ function MemoryTab() {
             {MEMORY_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
+        <div style={{ width: 150 }}>
+          <label htmlFor="f-domain" style={labelStyle}>内容域筛选</label>
+          <select id="f-domain" aria-label="内容域筛选" style={inputStyle} value={domainF} onChange={(e) => setDomainF(e.target.value)}>
+            <option value="">全部</option>
+            {MEMORY_DOMAINS.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
+        <div style={{ width: 150 }}>
+          <label htmlFor="f-life" style={labelStyle}>生命周期筛选</label>
+          <select id="f-life" aria-label="生命周期筛选" style={inputStyle} value={lifeF} onChange={(e) => setLifeF(e.target.value)}>
+            <option value="">全部</option>
+            {MEMORY_LIFE_STATUSES.map((ls) => <option key={ls} value={ls}>{ls}</option>)}
+          </select>
+        </div>
         <div style={{ flex: 1 }} />
         <button className="btn btn-primary btn-sm" onClick={() => setShowWrite((v) => !v)} aria-expanded={showWrite}>
           <Plus size={13} style={{ marginRight: 4 }} />写入记忆
@@ -299,10 +350,18 @@ function MemoryTab() {
                 <span style={{ fontWeight: 600, fontSize: 12.5 }}>{m.cue || '（无 cue）'}</span>
                 <span style={{ ...chip, color: MEM_STATUS_COLOR[m.status] || 'var(--text-secondary)' }}>{m.status}</span>
               </div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: 11.5, marginTop: 2 }}>{m.lesson}</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: 11.5, marginTop: 2 }}>
+                {m.lesson}{m.content ? <span style={{ color: 'var(--text-muted)' }}> · {m.content}</span> : null}
+              </div>
               <div style={{ marginTop: 4 }}>
                 <span style={chip}>{m.layer}</span>
                 <span style={chip}>{m.kind}</span>
+                {/* v25 R25-1：内容域 chip + 生命周期 chip + 置信 chip（有值才渲，不渲染假默认） */}
+                {m.domain && <span style={chip} title="内容域（与层正交）">{m.domain}</span>}
+                {m.life_status && m.life_status !== 'active' && (
+                  <span style={{ ...chip, color: 'var(--orange)' }} title="生命周期：失效=标记非删除">{m.life_status}</span>
+                )}
+                {m.confidence != null && <span style={chip} title="置信度">置信 {m.confidence}</span>}
                 {m.confounded && <span style={{ ...chip, color: 'var(--orange)' }}>confounded</span>}
                 {m.pollution_flagged && <span style={{ ...chip, color: 'var(--red)' }}>污染标记</span>}
                 {(m.source_seq > 0 || m.cites_seq > 0) && (
@@ -373,19 +432,23 @@ function MemoryTab() {
 /* ───────────────── 提案 tab ───────────────── */
 
 function ProposalActions({ p }: { p: Proposal }) {
-  const { recordProbe, recordShadow, signoff, publish, fetchSurfaces } = useRsi();
+  // v25 R25-6：金标集下拉数据源（frozen 集才可引用 → 影子门走平台校验）
+  const { recordProbe, recordShadow, signoff, publish, fetchSurfaces,
+          goldenSets, fetchGoldenSets } = useRsi();
   const isAdmin = useAuth((s) => s.isAdmin);
   const { err, ok, run } = useWrite();
   const [steps, setSteps] = useState('');
   const [tokens, setTokens] = useState('');
   const [judge, setJudge] = useState('');
   const [golden, setGolden] = useState(false);
+  const [goldenSetId, setGoldenSetId] = useState('');
   const [crossVendor, setCrossVendor] = useState(false);
   const [passRate, setPassRate] = useState('');
   const [baseline, setBaseline] = useState('');
   const [confirmPublish, setConfirmPublish] = useState(false);
 
   useEffect(() => { fetchSurfaces(); }, [fetchSurfaces]);
+  useEffect(() => { fetchGoldenSets(); }, [fetchGoldenSets]);
 
   const terminalHint = useMemo(() => {
     if (p.status === 'collapsed') return '已塌缩：提升低于噪声地板，不算改进（终态）。';
@@ -432,18 +495,36 @@ function ProposalActions({ p }: { p: Proposal }) {
               <input id={`base-${p.id}`} aria-label="baseline" type="number" step="0.01" style={inputStyle} value={baseline} onChange={(e) => setBaseline(e.target.value)} />
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 10, marginTop: 4, flexWrap: 'wrap' }}>
-            <label style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 11.5 }}>
-              <input type="checkbox" checked={golden} onChange={(e) => setGolden(e.target.checked)} />金标已冻结
+          <div style={{ display: 'flex', gap: 10, marginTop: 4, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            {/* v25 R25-6：引用已冻结金标集 = 平台校验（gate_evidence=platform_validated，
+                异厂 fail-closed）；不引用 = 回退下方自报勾选，后端如实标 self_declared */}
+            <div style={{ width: 240 }}>
+              <label htmlFor={`golden-set-${p.id}`} style={labelStyle}>金标集（仅列已冻结 · 平台校验）</label>
+              <select id={`golden-set-${p.id}`} aria-label="金标集" style={inputStyle}
+                      value={goldenSetId} onChange={(e) => setGoldenSetId(e.target.value)}>
+                <option value="">不引用（自报勾选 · 后端标 self_declared）</option>
+                {goldenSets.filter((g) => g.frozen).map((g) => (
+                  <option key={g.id} value={String(g.id)}>#{g.id} {g.name}（{g.cases_count} 例 · 厂牌 {g.produced_by}）</option>
+                ))}
+              </select>
+            </div>
+            <label style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 11.5, opacity: goldenSetId ? 0.45 : 1 }}>
+              <input type="checkbox" checked={golden} disabled={!!goldenSetId}
+                     onChange={(e) => setGolden(e.target.checked)} />金标已冻结（自报）
             </label>
-            <label style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 11.5 }}>
-              <input type="checkbox" checked={crossVendor} onChange={(e) => setCrossVendor(e.target.checked)} />judge 来自异厂系
+            <label style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 11.5, opacity: goldenSetId ? 0.45 : 1 }}>
+              <input type="checkbox" checked={crossVendor} disabled={!!goldenSetId}
+                     onChange={(e) => setCrossVendor(e.target.checked)} />judge 来自异厂系（自报）
             </label>
             <button className="btn btn-ghost btn-sm"
                     onClick={() => run(() => recordShadow(p.id, {
-                      judge_model: judge, golden_set_frozen: golden, cross_vendor: crossVendor,
+                      judge_model: judge,
+                      ...(goldenSetId
+                        ? { golden_set_id: Number(goldenSetId) }
+                        : { golden_set_frozen: golden, cross_vendor: crossVendor }),
                       pass_rate: Number(passRate) || 0, baseline: Number(baseline) || 0,
-                    }), '影子重放已记录')}>
+                    }), goldenSetId ? '影子重放已记录（金标集平台校验 · platform_validated）'
+                                    : '影子重放已记录（自报口径 · 后端如实标 self_declared）')}>
               记录影子重放
             </button>
           </div>

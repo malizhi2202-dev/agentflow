@@ -120,7 +120,9 @@ interface CollabState {
     priority?: number;
   }) => Promise<WriteResult>;
   moveStatus: (id: number, status: TaskStatus, evidence?: object[]) => Promise<WriteResult>;
-  assign: (id: number, kind: 'member' | 'agent' | 'squad', assigneeId: string) => Promise<WriteResult>;
+  // v25 R25-8：`start=true` = 确认层「开始」（当场建 run）；缺省 = 「先不开工」只登记
+  assign: (id: number, kind: 'member' | 'agent' | 'squad', assigneeId: string,
+           start?: boolean) => Promise<WriteResult>;
   triage: (id: number) => Promise<WriteResult>;
 
   fetchInbox: (opts?: { includeArchived?: boolean }) => Promise<void>;
@@ -164,9 +166,11 @@ export const useCollab = create<CollabState>((set, get) => ({
     return out;
   },
 
-  assign: async (id, kind, assigneeId) => {
+  assign: async (id, kind, assigneeId, start) => {
     const out = await writeJson(`/api/tasks/${id}/assign`, {
       assignee_kind: kind, assignee_id: assigneeId,
+      // 只在「开始」那一下带 start；「先不开工」不传（= 旧行为，兼容存量调用方）
+      ...(start ? { start: true } : {}),
     });
     if (out.ok) await get().fetchTasks();
     return out;
