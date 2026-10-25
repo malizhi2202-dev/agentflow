@@ -33,7 +33,7 @@
 | **v23** | 10-25 | **挂账结案回写** | D1–D11 代码批落地后：§3.3 逐行结案注 · 波 0 判据改写（rollback 逃生门 + fix-forward 主纪律）· §6.28/6.30/6.31 结案 · 端点名订正 3 处 · 残项 R25-1…11 挂 RULINGS §五点五·二 |
 | **v24** | 10-25 | **R25 残项清账批**（change `v25-r25-clearance` · 四条人工裁定） | 全做 A+B+C · HMAC+token 双通道 · 全局总闸落表 · exec_ledgers 表挂起。迁移 032–037（总闸行/squad 形态族 FK RESTRICT/队列七列/automations 三列+signing_secret/mention_targets/im_bindings）· 治理三件（structure_rules 进门禁+词表 RULINGS §五点五·三之一 / HMAC 双通道 / 总闸短路）· `run_from_assignment` 指派开跑 · 前端四件（记忆列/规则版本只读 diff/金标集卡/指派确认层）。R25 结案表=§五点五·三；§3.3 行注逐条翻 v24；**真 MySQL 重放 pending=[] + 形状 9 项验收**；门禁 774 OK · tsc 0 · vitest 259 · parity exit 0 |
 
-> **v10 之后是否还有「定版」**：没有。v11–v23 为**逐轮增量**，最新即 v24；历史版本不保留快照（仅 v10 有冻结件），差异以版本链（主档页脚）为准。**v21/v22 不是新裁定轮**——它们是**「代码实态回填」**：只把文档里对代码现状的描述按实测改对，**没有改设计语义**；设计口径的分歧一律「挂账待裁定」，见 `.specs/v24-doc-refresh/` 与 `RULINGS.md` §五点五。**v24 版是裁定轮**——R25-1…11 已由四条人工裁定清账（RULINGS §五点五·三），change `v25-r25-clearance`。
+> **v10 之后是否还有「定版」**：没有。v11–v23 为**逐轮增量**，最新即 v24；历史版本不保留快照（仅 v10 有冻结件），差异以版本链（主档页脚）为准。**v21/v22 不是新裁定轮**——它们是**「代码实态回填」**：只把文档里对代码现状的描述按实测改对，**没有改设计语义**；设计口径的分歧一律「挂账待裁定」，见 `.specs/v24-doc-refresh/` 与 `RULINGS.md` §五点五。**v24 版是裁定轮**——R25-1…11 已由四条人工裁定清账（RULINGS §五点五·三），change `v25-r25-clearance`。**v26 不是主档定版轮**——形态批（RULINGS §五点六 R26-1…4：侧栏二级入口移除 · 详情六栏 · 升格页平铺改子栏承载 · 11 条 v1 差异登记），主档只落 §5.4/§6.4 两处〔v26 实现注〕，版本保持 v24。
 
 ## 一、当前有效（改设计只看这三类）
 
@@ -116,6 +116,7 @@
 | 10 | `ROADMAP.md` / `TOPICS.md` 头部 | 标题改「第 1–8 轮」；附录加 09-21 计数过时注 | **现行** |
 | 11 | `PRODUCT-DESIGN.html` + `RULINGS.md` + `INDEX.md`（v21/v22 · 2026-10-25） | **代码实态回填**：主档按实测回填现状数字（59 表 / 40 路由 / 32 models 模块 / 49 页 / 49 后端测试文件 / 迁移账本 26 版 / tsc 0 错 / vitest 250 例 / build ✓ / CI 已建）· §1.6.7 ①标 ⛔ 过期 · §3.3 表行标四态 · RULINGS 扩为 124 行并新增 §五点五 差异挂账（D1–D10，一律不改设计、等人工裁定）· 工件落 `.specs/v24-doc-refresh/` | **现行** |
 | 12 | `PRODUCT-DESIGN.html` + `RULINGS.md` + `INDEX.md` + `STATE.md`（v24 · 2026-10-25 · change `v25-r25-clearance`） | **R25 残项清账批**（四条人工裁定：全做 A+B+C · HMAC+token 双通道 · 总闸落表 · exec_ledgers 表挂起）：迁移 032–037 + 治理三件 + `run_from_assignment` + 前端四件（五笔入库 `bb54ea48/92e62cc7/66913ab1/9531ed8b` + docs）· RULINGS §五点五·三 结案表 + §五点五·三之一 structure_rules 词表（唯一定义处）· §3.3 行注逐条翻 v24 · §1.6 现状表复测 **65 表（全注册）/ 38 版账本 / 33 models 模块** · 真 MySQL 重放 pending=[] + 形状 9 项验收 · 门禁 774 OK / tsc 0 / vitest 259 / parity --strict exit 0 · 工件落 `.specs/v25-r25-clearance/` | **现行** |
+| 13 | `frontend/src/{pages,components,stores,styles}/` + `RULINGS.md §五点六` + 主档 §5.4/§6.4 注（v26 · 2026-10-26 · change `v26-agent-ui`） | **Agent 详情/创建 tab 化批**（用户三裁：移除侧栏二级项 · 顶层六栏 · 创建态同骨架两栏）：十六分区纵向平铺改由 能力 5/设置 7 子栏两级承载（**`panes.ts` 唯一事实源** · AnchorBar 退场 · secN 锚点保留）· 概览=只读工作台（sessions 代替口径 + 监控并入 + 只读卡「去编辑▸」）· 工作=tasks?assignee+定时任务 · 记忆/对话保留为顶层栏（差异 R26-2 带退役条件）· `useAgentDraft` 草稿提壳层（恰一次 PUT · 跨栏不丢）· 删 `AgentDetailPage.tsx` 与侧栏项。提交：`66aed2d5`（笔1/2 · 用户收编）· `68c54285`（AD-01~06）· docs 批。门禁 tsc 0 · vitest **265** · build ✓ · parity --strict exit 0（agent-detail 转 declared_but_not_routed）· 原型与脚本 0 diff · **浏览器点击走查留人工**（TEST.md 六项清单） | **现行** |
 
 ## 五之二、为什么不物理搬迁
 
@@ -147,6 +148,7 @@
 | `PRODUCT-DESIGN.html` | 1 | **更新至 v24（页脚链续 v22/v23/v24）** | 见 §五 第 1、11、12 行 |
 | `.specs/v24-doc-refresh/` | 1 | **新建** | v21/v22 代码实态回填的工件 + 一致性报告；§五 第 11 行 |
 | `.specs/v25-r25-clearance/` | 1 | **新建** | v24 R25 清账批工件（CHANGE/TASK/TEST/REVIEW + 裁定记录）；§五 第 12 行 |
+| `.specs/v26-agent-ui/` | 1 | **新建** | v26 详情/创建 tab 化批工件（CHANGE/TASK/TEST/REVIEW · 含浏览器走查欠账清单）；§五 第 13 行 |
 | `prototype/` | **127** 页 + assets | **更新**（6 页 8 处口径）**+ 删 8 张无入口旧页**（135→127） | 见 §三；备份 `/tmp/agentflow-orphans/` |
 | `platform-evolution/RULINGS.md` | 1 | **更新** | 六列总账 + 已推翻清单；2026-10-25 扩为 190 行：§五点五 挂账（D1–D10）+ §五点五·一 结案 + §五点五·二 R25 挂账 + §五点五·三 结案 + §五点五·三之一 structure_rules 词表 |
 | `product-design/INDEX.md` | 1 | **新建** | 本文件 |

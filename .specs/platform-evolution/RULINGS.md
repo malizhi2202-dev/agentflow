@@ -181,6 +181,17 @@
 - `cap_bytes` 是**内容体积上限**，仅当调用点能取到正文时判定；取不到正文即不判，不以此绕过其它三条。
 - 词表在代码的唯一定义处：`backend/services/rsi_service.py`（`_pattern_matches` / `_rule_matches` / `_validate_structure_rules`）。改词表先改本节，再改码。
 
+## 五点六 · v26 形态批（Agent 详情/创建 tab 化 · change `v26-agent-ui` · 2026-10-26）
+
+| # | 裁定 | 落点（唯一事实源加粗） | 继承 / 差异 |
+|---|---|---|---|
+| R26-1 | **侧栏二级入口移除**：删「Agent 详情」导航项与 `pages/AgentDetailPage.tsx`（其 onSave 本是 no-op）；进详情唯一入口 = Agent 列表卡片点击 / 项目详情「查看详情」（App 覆盖态）。列表卡片本身保持现状 | **`App.tsx`** 删项 · 回归锁 `nav-groups.test.tsx`（`not.toContain('Agent 详情')`）· 入口链用例 AD-02 | 覆盖态**无 URL 深链**——R3-1「视图即链接」在本页仍是欠账，登记不写已对齐 |
+| R26-2 | **详情六栏 = 原型四栏 + 实现差异**：概览 / 工作 / 能力(5 子栏) / 设置(7 子栏) 对原型；**记忆 / 对话**为本仓既有真功能（memory CRUD / ChatWindow），保留为顶层栏；**监控并入概览**（EntityBreakdownPanel 内嵌） | **`components/agent-detail/panes.ts`**（TOP_TABS_DETAIL/CREATE、CAP_PANES、SET_PANES 一张表） | 退役条件：后续批把记忆并入概览卡、对话并入对话中心后，回原型四栏并**同批改原型** |
+| R26-3 | **升格页平铺不再以实现**：`agent-detail__config.html` 的 16 分区改由 能力 5 / 设置 7 子栏两级承载；**AnchorBar（分区直达）退场**；`meta.ts` SECTIONS 与 `secN` 锚点 id **保留**（与原型 secN 对照） | `AgentConfigEditor.tsx`（草稿渲染面 + sticky 保存条）· `useAgentDraft.ts`（草稿住壳层：恰一次 PUT、跨栏不丢——CFG-06/AD-05 锁）· 六个 `*Sections.tsx` 零改动 | 创建态仅 `[能力,设置]` 两栏、默认落 设置·通用（含两项必填），探活/危险区不渲（§6.4 原口径）；原型与 parity 脚本本批 0 diff |
+| R26-4 | **v1 差异登记（11 条 · 无端点支撑不造假）** | 见下清单 | 界面处显式标「未接入 / 代替口径」或一句话注 |
+
+R26-4 清单：① 概览「最近工作」原型为 run 一等实体表（活跃/排队/取消/等待位）——无 per-agent runs 端点，以 `/api/metrics/sessions` 模型会话表**代替并注明**；② 来源徽标六类（SessionMetric 无来源列，不造）；③ Cost($)（无单价表，不造）；④ 近 30 天窗（现行参数窗 24h，界面写明）；⑤ transcript 深链（无支撑端点，不造）；⑥ Access 两轴编辑（PUT 白名单不收 `visibility`/`gate_*`——「未接入」延续）；⑦ 共享记忆「同域共 M 条」（无跨 Agent 聚合，只显本 Agent 条数）；⑧ MCP/env 行级即存（端点缺——高敏项合进草稿一次 PUT，原口径不变）；⑨ 原型草稿槽/dirty 切栏拦截（切栏不弃态故不拦，仅 dirty 粗记号「有未保存改动」）；⑩ 对话「发布到渠道」预选（ConversationCenter 无 seed prop，v1 只跳不选）；⑪ 工作栏任务表（非 admin 后端只放行 我建/指派给我——界面注明「仅显示与你有关的任务」，可能为空）。
+
 ## 五、历史保留纪律（这次归并的执行规则）
 
 1. **不删、不改写**已过审的正文；冲突处**加行内标记 + 上位指针**（写法见 `D-S16/CONCLUSION.md` 页首与 §0/§1 的 ⛔ 标记）。

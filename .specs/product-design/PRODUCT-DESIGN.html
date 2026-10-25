@@ -1574,6 +1574,8 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
       <tr><td><b>边界</b></td><td>三条横幅位：未绑定 runtime → 顶栏「Bind runtime」；无编辑权 → 页内 Lock read-only（不改 URL 不跳走）；归档态 → 只读 + Restore；env 值不回读、MCP 配置不回显；IM 通道密钥写-only 不回显、改密=断开重连，连接权限两档（owner 自助 vs 仅平台管理员，§7）、通道列表全员只读；「环境」子栏仅 canEdit 时渲染入口；编辑不会自动重启实例</td></tr>
     </tbody></table>
 
+    <p class="tiny dim">〔v26 实现注 · change <span class="mono">v26-agent-ui</span>〕实现落地为<b>顶层六栏</b>（概览 / 工作 / 能力 5 子栏 / 设置 7 子栏 / <b>记忆 / 对话</b>）——记忆、对话是本仓既有真功能，差异与退役条件见 RULINGS §五点六 R26-2；监控并入概览（EntityBreakdownPanel）。侧栏「Agent 详情」二级入口已移除、独立页随删（R26-1），入口=列表卡片 / 项目详情跳入（覆盖态）；<span class="mono">#view=</span> 深链与 dirty 切栏拦截<b>暂未实现</b>（R26-4 差异清单 11 条，界面均显式标注）；分区直达锚点条退场，能力 5/设置 7 子栏承接直达。门禁：tsc 0 · vitest 265 · build ✓ · parity --strict exit 0。</p>
+
     <h3 id="s5-5">5.5 编排画布</h3>
     <table class="tbl compact"><tbody>
       <tr><td style="width:88px"><b>入口</b></td><td>左侧导航「编排」</td></tr>
@@ -1926,6 +1928,7 @@ footer.doc-foot{border-top:1px solid var(--border);margin-top:var(--s10);padding
     <!-- ─────────── 6.4 Agent 详情 ─────────── -->
     <h3 id="p4">6.4 Agent 详情 · 四标签</h3>
     <p class="proto-note"><span class="chip warn">演示数据</span><strong>概览 / 工作 / 能力 / 设置</strong>四个一级标签，下设二级子栏，两级均走 <span class="mono">#view=</span> 深链、有未保存改动时切页被 dirty 拦截。概览是<strong>只读工作台</strong>（Now / 近 30 天 / 最近工作 + 右列只读卡），编辑动作全部收进「能力」与「设置」。头部只显示 Updated、刻意不显示 Created（创建时间归审计事件查）。三条横幅位：未绑定 runtime → 顶栏「Bind runtime」；无编辑权 → 页内 Lock read-only（不改 URL 不跳走）；归档态 → 只读 + Restore。全字段编辑另有升格落地页 <span class="mono">agent-detail__config.html</span>（16 分区，与详情页同源草稿槽、字段同源）。<b>创建向导（<span class="mono">agents__new</span>）与详情页共用同一分区集合与字段——两种入口一份配置，这是工具库「注册表单与详情字段同源」模式（§6.7）的推广。</b>规范分区集合＝身份 / 归属 / 运行时+模型 / 能力（指令 · 技能 · MCP · 集成 · 知识源）/ 设置（访问 Access · 环境变量 · CLI 参数 · 执行设置 · 闸门）；危险区与探活仅创建后配置、不进向导。</p>
+    <p class="tiny dim">〔v26 实现注〕实现为<b>六栏 = 四栏 + 记忆 + 对话</b>（差异与退役条件 RULINGS §五点六 R26-2）；升格页 <span class="mono">agent-detail__config.html</span> 的 16 分区由 能力 5 / 设置 7 子栏两级承载——<b>AnchorBar 退场、secN 锚点 id 保留</b>（R26-3）。创建向导与详情<b>同骨架</b>（两栏 · 默认落含必填的 设置·通用 · 探活/危险区不进向导）——「两种入口一份配置」（R5-1）口径不变。<span class="mono">#view=</span> 深链与 dirty 拦截未实现、run 一等实体表以会话表代替等 11 条差异登记于 R26-4；保存的高敏草稿<b>恰一次 PUT 且切栏不丢</b>已实现（草稿容器住壳层）。唯一事实源：<span class="mono">frontend/src/components/agent-detail/panes.ts</span>。</p>
     <p class="tiny dim">〔第 4 轮规划注〕P1-15 落地后，本页新增<b>「A2A 卡片」页签</b>（与四标签并列）：同一 Agent 对象的对外只读视图 + ⧉复制 + 未启用 capabilities 灰态——卡片是视图不是新实体。</p>
     <div class="proto">
       <div class="proto-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">/agents/1#view=v-overview</span><span class="fake">演示数据</span></div>
