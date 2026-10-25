@@ -796,10 +796,18 @@ def m026_memory_dimensions_and_manifests(conn, dialect: str) -> None:
     add_column_if_missing(conn, dialect, "memories", "confidence", "FLOAT")
     add_column_if_missing(conn, dialect, "memories", "quarantine_until", "DATETIME")
     # 来源链真外键：设计要求「来源 run / 会话 id」。旧列 source_ref 保留兼容（外部引用/历史行）。
-    add_column_if_missing(conn, dialect, "memories", "source_run_id",
-                          "INTEGER REFERENCES work_item_runs(id)")
-    add_column_if_missing(conn, dialect, "memories", "source_conversation_id",
-                          "INTEGER REFERENCES conversations(id)")
+    add_column_if_missing(conn, dialect, "memories", "source_run_id", "INTEGER")
+    add_column_if_missing(conn, dialect, "memories", "source_conversation_id", "INTEGER")
+    if _is_sqlite(dialect):
+        # SQLite 的表已带 FK 定义由 create_all 建；老库补列无法 ALTER 加表级 FK
+        # （SQLite 限制）——列上 inline REFERENCES 仅对新表定义有效，这里如实注记。
+        pass
+    else:
+        # MySQL 静默忽略 inline REFERENCES——权威档必须显式补表级约束
+        add_fk_if_missing(conn, "memories", "fk_memories_source_run",
+                          "FOREIGN KEY (source_run_id) REFERENCES work_item_runs(id)")
+        add_fk_if_missing(conn, "memories", "fk_memories_source_conversation",
+                          "FOREIGN KEY (source_conversation_id) REFERENCES conversations(id)")
     for index, col in (
         ("ix_memories_domain", "domain"),
         ("ix_memories_life_status", "life_status"),
@@ -813,6 +821,28 @@ def m026_memory_dimensions_and_manifests(conn, dialect: str) -> None:
     add_column_if_missing(conn, dialect, "surface_manifests", "cap_bytes", "INTEGER")
     add_column_if_missing(conn, dialect, "surface_manifests", "structure_rules", "TEXT")
     add_column_if_missing(conn, dialect, "surface_manifests", "exclusions", "TEXT")
+
+
+def _fk_exists(conn, table: str, name: str) -> bool:
+    """仅 MySQL：查表级外键约束是否存在（SQLite 的 FK 藏在列定义里，由 ALTER ADD
+    COLUMN ... REFERENCES 直接生效，无需此查）。"""
+    cur = conn.cursor()
+    cur.execute("SELECT constraint_name FROM information_schema.table_constraints "
+                "WHERE constraint_schema=DATABASE() AND table_name=%s AND constraint_name=%s",
+                (table, name))
+    return cur.fetchone() is not None
+
+
+def add_fk_if_missing(conn, table: str, name: str, ddl: str) -> bool:
+    """仅 MySQL 路径调用：SQLite 不支持 ALTER TABLE ADD CONSTRAINT FK。
+
+    背景（v24 代码批真库首跑抓出）：MySQL **静默忽略** inline `ADD COLUMN ... REFERENCES`
+    ——「day-1 真外键」在权威档必须用表级约束补实，否则只是名义外键。
+    """
+    if _fk_exists(conn, table, name):
+        return False
+    conn.cursor().execute(f"ALTER TABLE {table} ADD CONSTRAINT {name} {ddl}")
+    return True
 
 
 def drop_index_if_exists(conn, dialect: str, index: str, table: str | None = None) -> bool:
@@ -846,14 +876,31 @@ def m027_improvement_proposals_rename(conn, dialect: str) -> None:
     if has_old and not has_new:
         conn.cursor().execute(f"ALTER TABLE {old} RENAME TO {new}")
     elif has_old and has_new:
-        # 两条路径都建过表：把旧表的行补进新表（按 id 去重），再删旧表
+        # 新表由 create_all 建：ORM 每个非 Optional 的 `Mapped[X]` 都在 MySQL 落成
+        # NOT NULL，而 `default=` 是**客户端默认**（SQLAlchemy 插入时代填，裸 SQL
+        # INSERT…SELECT 带不上）——搬旧行即 1364。v24 真库首跑连抓两件
+        # （proposal_diff/probe_pack → fell_back），证明逐列点修必漏第三件，
+        # 这里**族级止住**：凡「新表有、旧表无、NOT NULL 且无库级默认」的列，
+        # 一律先放可空再搬行（ORM 写入恒给值，放可空只是迁移容纳；旧行该列得 NULL，
+        # 读取侧 `bool(None)=False` / `json.loads(None or "[]")` 已容）。SQLite 宽松无此题。
         old_cols = _columns(conn, dialect, old)
         new_cols = _columns(conn, dialect, new)
+        if not _is_sqlite(dialect):
+            cur = conn.cursor()
+            cur.execute("SELECT column_name, column_type, is_nullable, column_default "
+                        "FROM information_schema.columns "
+                        "WHERE table_schema=DATABASE() AND table_name=%s", (new,))
+            for col, ctype, nullable, dflt in cur.fetchall():
+                if col == "id" or col in old_cols:
+                    continue
+                if str(nullable).upper() == "NO" and dflt is None:
+                    cur.execute(f"ALTER TABLE {new} MODIFY {col} {ctype} NULL")
+        # 搬行**带 id**（引用一致性：probe_evidence.proposal_id 指向这些 id）
         shared = [c for c in old_cols if c in new_cols and c != "id"]
         if shared:
-            cols_sql = ", ".join(shared)
+            cols_sql = "id, " + ", ".join(shared)
             conn.cursor().execute(
-                f"INSERT INTO {new} ({cols_sql}) SELECT {cols_sql} FROM {old} "
+                f"INSERT INTO {new} ({cols_sql}) SELECT id, {', '.join(shared)} FROM {old} "
                 f"WHERE id NOT IN (SELECT id FROM {new})"
             )
         conn.cursor().execute(f"DROP TABLE {old}")
@@ -1069,6 +1116,11 @@ def drop_table_if_exists(conn, dialect: str, table: str) -> bool:
 
 
 def _down_026(conn, dialect: str) -> None:
+    if not _is_sqlite(dialect):
+        # MySQL：列被外键引用时不许 DROP COLUMN——先摘约束
+        for name in ("fk_memories_source_run", "fk_memories_source_conversation"):
+            if _fk_exists(conn, "memories", name):
+                conn.cursor().execute(f"ALTER TABLE memories DROP FOREIGN KEY {name}")
     # 先删索引再删列：SQLite 的 DROP COLUMN 不会带走该列上的索引（留下悬空即报错）
     for index in ("ix_memories_domain", "ix_memories_life_status",
                   "ix_memories_source_run_id", "ix_memories_source_conversation_id"):

@@ -145,8 +145,9 @@ class Proposal(Base):
     shadow_json: Mapped[str] = mapped_column(Text, default="{}")
     judge_model: Mapped[str] = mapped_column(String(128), default="")
     # D4：设计 §3.3 的五个列（原先证据只落在一个 JSON 串里，**不可按字段查询**）
-    proposal_diff: Mapped[str] = mapped_column(Text, default="")
-    probe_pack: Mapped[str] = mapped_column(Text, default="")
+    # 可空：旧行搬运与 MySQL TEXT 无 DEFAULT 的现实（v24 真库首跑抓出）
+    proposal_diff: Mapped[str | None] = mapped_column(Text, nullable=True)
+    probe_pack: Mapped[str | None] = mapped_column(Text, nullable=True)
     seed: Mapped[int | None] = mapped_column(Integer, nullable=True)
     blind_rank: Mapped[int | None] = mapped_column(Integer, nullable=True)
     fell_back: Mapped[int] = mapped_column(Integer, default=0)
