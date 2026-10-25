@@ -5,6 +5,8 @@
 
 | 日期 | Change | 摘要 | 提交 | 新增 LESSONS |
 |---|---|---|---|---|
+| 2026-10-25 | `v24-doc-refresh`（代码批） | **D1–D11 挂账结案**：迁移 **026–031**——记忆表两正交列（`domain` 内容域五值 + `life_status` 生命周期）+ content/confidence/quarantine_until/来源链真外键（SQLite 开 `PRAGMA foreign_keys=ON` 对齐 MySQL）· 可改面补四结构列 · 提案表名统一 `improvement_proposals` + 五列 · **治理账三表**（probe_evidence 写路径已接不传不造数 / exec_ledgers 宁挂账不伪造恒等式 R25-3 / rule_versions 创建+触发+修改逐版落账）· 触发器三型（api 型 + invoke 入口）· 投递**两键分开记账** · 小队归档→自动化转 disabled（状态转换层级联）· **运行时旧宇宙清除**（白名单删四者、runtime 必填 400、snapshot 去 langgraph/gpt-4o）· **`rollback_to()` 迁移逃生门**（026–031 登记 down，未登记显式拒绝；主纪律仍 fix-forward）· **金标集 `golden_sets`**（冻结平台查账 + 异厂厂牌判定 fail-closed + `gate_evidence`）· 开关**停用必填原因**（双入口校验 + 前端两处接线）· tools 越权 403→**404**（唯一可探测面清零）。门禁：**后端 733 OK**（+59）· tsc 0 · vitest · build ✓ | 本批提交 | — |
+| 2026-10-25 | `v24-doc-refresh`（文档批） | **代码↔product-design 一致性对账与回填**：四路只读对账（数据模型/API 契约/前端语义/文档自述）→ 判定「主因文档滞后（89 提交未回填），次因 10 条口径分歧」；主档 **v21→v22→v23**（§1.6 现状表八维重写 · 14 节芯片 + §3.3 逐行四态 · 波 0 判据「可回滚」先降级后结案 · 端点名失实三处订正）；`RULINGS.md` **§五点五挂账 10 条 → §五点五·一结案表 + §五点五·二残项 R25-1…11**；INDEX/STATE 全量重写；工程断点三修（`ci.sh` 解释器指向已删 `/tmp/afvenv2` · `test_t07` argon2 断言脆性 · **6 张表未注册 `Base.metadata`**）；对账新发现两路并入 | 本批提交 | L-012（批量改文档必须计数核验——芯片 class 写错致静默无效）L-013（长脚本走文件不走 heredoc）|
 | 2026-10-24 | `v20-wave0` | 波 0 止血：32 个 TS 错误清零（build 复绿）· 迁移账本 001…· 阶段模型单一事实源 + 两份 scanner 合一 | `d2ee8d96` `8d3fdc1d` `24c38aa1` | L-002（衍生） |
 | 2026-10-24 | `v20-wave1` | 波 1 身份三连：服务端会话（cookie>PAT>401）· argon2id + 废出厂口令 · 部署闸门（DEPLOY_MODE/XFF） | `5cf2a6fa` `129c33ec` | — |
 | 2026-10-24 | `v20-wave2` | 波 2 单副本事实固化：队列/限流/退避/偏移落库 + 任务租约 + 单例循环租约选主 + 集群条 | `09950db4` | — |
