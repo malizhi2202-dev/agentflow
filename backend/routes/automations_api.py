@@ -77,11 +77,16 @@ def _auto_row(db: Session, auto, user: dict) -> dict:
     return svc.describe(db, auto, user, with_triggers=True)
 
 
-def _secret_payload(token: str | None) -> dict | None:
+def _secret_payload(token: str | None, trigger=None) -> dict | None:
     if not token:
         return None
-    return {"token": token, "webhook_url": f"/api/webhooks/automations/{token}",
-            "note": "token 写-only：明文只在本响应出现一次，之后只给遮蔽值"}
+    out = {"token": token, "webhook_url": f"/api/webhooks/automations/{token}",
+           "note": "token 写-only：明文只在本响应出现一次，之后只给遮蔽值"}
+    # v25（R25-5）：webhook 创建/轮换当场附签名密钥明文（同「只此一次」纪律）；
+    # 存量无签名触发器 = None 不附加（token 双通道过渡，退役另批裁）
+    if trigger is not None:
+        out.update(svc.reveal_webhook_secrets(trigger) or {})
+    return out
 
 
 # ── 清单 / 新建 / 详情 ────────────────────────────────────
@@ -158,7 +163,7 @@ def add_trigger(auto_id: int, payload: dict, request: Request, db: Session = Dep
     _audit(user, request, "automation.trigger.add", auto.name,
            f"kind={trigger.kind} trigger#{trigger.id}")
     return {"ok": True, "trigger": svc._trigger_dict(trigger),
-            "secret": _secret_payload(token),
+            "secret": _secret_payload(token, trigger),
             "automation": _auto_row(db, auto, user)}
 
 
@@ -195,7 +200,7 @@ def rotate_trigger(auto_id: int, trigger_id: int, request: Request,
     _audit(user, request, "automation.trigger.rotate", auto.name,
            f"trigger#{trigger_id} 旧 URL 立即失效")
     return {"ok": True, "trigger": svc._trigger_dict(trigger),
-            "secret": _secret_payload(token),
+            "secret": _secret_payload(token, trigger),
             "automation": _auto_row(db, auto, user)}
 
 

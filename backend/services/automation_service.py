@@ -19,8 +19,10 @@ from __future__ import annotations
 
 import datetime
 import hashlib
+import hmac
 import json
 import secrets
+from services import encryption_service
 from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import Session
@@ -179,6 +181,25 @@ def next_runs(expr: str, timezone_name: str | None = DEFAULT_TIMEZONE,
 WEBHOOK_TOKEN_PREFIX = "af_wh_"
 
 
+def reveal_webhook_secrets(trigger: AutomationTrigger) -> dict | None:
+    """一次性回显（v25-R25-5）：解密 webhook 触发器的签名密钥。
+
+    路由只在**创建/Rotate 当场**对可见者（owner/admin，入口已 `_visible` 404 化）
+    调用一次；列表/详情一律不回显（describe 只给 secret_preview 遮蔽）。
+    解不开（ENCRYPTION_KEY 换过等）返回 None——不猜、不报错泄露。
+    """
+    if trigger.kind != "webhook" or not (trigger.signing_secret or ""):
+        return None
+    try:
+        return {
+            "signing_secret": encryption_service.decrypt(trigger.signing_secret),
+            "signature_note": "HMAC-SHA256 对**原始请求体**计算，请求头 "
+                              "X-Webhook-Signature: sha256=<hex>；明文只在本响应出现一次",
+        }
+    except Exception:  # noqa: BLE001 — 密钥轮换/环境变更属运维事实，静默降级
+        return None
+
+
 def _hash_token(token: str) -> str:
     """只落 sha256：库被读走也拿不到明文 token（写-only 不回显）。"""
     return hashlib.sha256(str(token).encode("utf-8")).hexdigest()
@@ -193,9 +214,16 @@ def mask_token(token: str) -> str:
     return f"{token[:12]}…{token[-3:]}"
 
 
-def _new_webhook_token() -> tuple[str, str, str]:
+def _new_webhook_token() -> tuple[str, str, str, str]:
+    """一次生成两件凭据：URL token（sha256 落库）+ HMAC 签名密钥（加密落库）。
+
+    v25（R25-5 · 人工裁定「实装 HMAC-SHA256，token 双通道过渡」）：
+    返回 (token_plain, token_hashed, token_masked, signing_plain)；
+    两件明文都**只在这次响应出现**，之后只给遮蔽/不回显。
+    """
     token = WEBHOOK_TOKEN_PREFIX + secrets.token_hex(12)
-    return token, _hash_token(token), mask_token(token)
+    signing = secrets.token_hex(16)
+    return token, _hash_token(token), mask_token(token), signing
 
 
 def _normalize_event_filter(raw) -> list[dict]:
@@ -546,8 +574,13 @@ def add_trigger(db: Session, auto: Automation, payload: dict) -> tuple[Automatio
         # webhook 与 api 都是「外部/自扩展投递」：token 即凭据（写-only）。
         # 差别在**入口**：webhook 走公开 URL（`/api/webhooks/automations/{token}`），
         # api 型走平台内自扩展通道（`invoke_api_trigger`，同样以 token 为凭据）。
-        token_plain, hashed, preview = _new_webhook_token()
+        token_plain, hashed, preview, signing_plain = _new_webhook_token()
         trigger.secret, trigger.secret_preview = hashed, preview
+        if kind == "webhook":
+            # v25（R25-5 · 人工裁定）：webhook 起签名密钥——AES-GCM 加密落库，
+            # 明文经 reveal_webhook_secrets 只随创建/轮换响应回显一次（token 同形）。
+            # api 型是平台内通道（入口自带平台鉴权），不强制签名、保持 ''。
+            trigger.signing_secret = encryption_service.encrypt(signing_plain)
         trigger.event_filter = json.dumps(_normalize_event_filter(payload.get("event_filter")),
                                          ensure_ascii=False)
         trigger.payload_limit = int(payload.get("payload_limit") or DEFAULT_PAYLOAD_LIMIT)
@@ -632,8 +665,10 @@ def rotate_trigger(db: Session, auto: Automation, trigger_id: int) -> tuple[Auto
     trigger = get_trigger(db, auto, trigger_id)
     if trigger.kind != "webhook":
         raise AutomationError("只有 webhook 触发器有 URL/token，schedule 不需要 Rotate")
-    token, hashed, preview = _new_webhook_token()
+    token, hashed, preview, signing_plain = _new_webhook_token()
     trigger.secret, trigger.secret_preview = hashed, preview
+    # v25（R25-5）：换 URL 同换签名密钥——旧 token 与旧签名**同时失效**，不留半条通道
+    trigger.signing_secret = encryption_service.encrypt(signing_plain)
     auto.updated_at = datetime.datetime.utcnow()
     db.commit()
     db.refresh(trigger)
@@ -877,6 +912,40 @@ def ingest_webhook(db: Session, token: str, headers, raw_body: bytes) -> tuple[i
     dedup_key = idem_key or delivery_key      # 兼容列：仅作历史留痕
     external_id = delivery_key or ""
 
+    # ── v25（R25-5 · 人工裁定「实装 HMAC-SHA256，token 双通道过渡」）──────────
+    # 闸序：**认证在业务闸之前**（超限/非法 JSON 都不该替未认证的请求说话）。
+    # 过渡期两通道并存、**投递账记因区分**：
+    # - 带 `X-Webhook-Signature` 头 ⇒ HMAC 通道：验签必过（hmac.compare_digest 恒时比较），
+    #   不符 401 `signature_invalid`；触发器未配签名密钥却收到签名头 ⇒ 401
+    #   `signature_unconfigured`（发送方以为在签名——静默放行才是骗人）；
+    # - 不带签名头 ⇒ 旧 token 凭据通道（URL 里本就是强秘密），如实记 `legacy_token`；
+    #   token 退役时间表属后续裁定，本批不偷偷断道。
+    sig_header = _header(headers, "x-webhook-signature")
+    signed = bool(trigger.signing_secret or "")
+    auth_mode = "hmac" if (signed and sig_header) else "legacy_token"
+    if sig_header:
+        reason = ""
+        if not signed:
+            reason = "signature_unconfigured"
+        else:
+            try:
+                secret = encryption_service.decrypt(trigger.signing_secret)
+            except Exception:  # noqa: BLE001 — 密钥解不开=签名门不可用：fail-closed
+                secret = ""
+            expected = "sha256=" + hmac.new(secret.encode("utf-8"),
+                                            raw_body or b"", hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(str(sig_header), expected):
+                reason = "signature_invalid"
+        if reason:
+            row = _record_delivery(db, auto, trigger, external_id=external_id, event="",
+                                   payload_bytes=payload_bytes, status="rejected",
+                                   response_code=401, dedup_key=dedup_key,
+                                   idem_key=idem_key, delivery_key=delivery_key,
+                                   error=f"签名校验未通过（{reason}）：头 "
+                                         f"X-Webhook-Signature 需 sha256=<hex>（对原始体 HMAC-SHA256）")
+            return 401, {"semantics": "rejected", "delivery_id": row.id, "auth": auth_mode,
+                         "reason": reason, "detail": "签名无效或未配置签名密钥"}
+
     if payload_bytes > limit:
         row = _record_delivery(db, auto, trigger, external_id=external_id, event="", 
                                payload_bytes=payload_bytes, status="rejected",
@@ -940,7 +1009,7 @@ def ingest_webhook(db: Session, token: str, headers, raw_body: bytes) -> tuple[i
     db.commit()
     db.refresh(run)
     return 202, {"semantics": "accepted", "delivery_id": row.id, "run_id": run.id,
-                 "event": event, "inferred_at_step": step,
+                 "event": event, "inferred_at_step": step, "auth": auth_mode,
                  "detail": "已收下并派生成运行；运行结果另在运行史里"}
 
 

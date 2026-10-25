@@ -233,8 +233,9 @@ def set_switch(category: str, payload: dict, request: Request,
     except Exception as e:  # noqa: BLE001
         _map(e)
     # 双入口校验：服务层已判一次类目合法性，这里再按白名单判一次（不假设前一处覆盖）
-    if category not in RSI_CATEGORIES:
-        raise HTTPException(status_code=400, detail="不是可开关的四类产物")
+    # v25（R25-7）：全局总闸行是第五个合法 category（服务层 SWITCH_GLOBAL 同判）
+    if category not in RSI_CATEGORIES and category != rsi.SWITCH_GLOBAL:
+        raise HTTPException(status_code=400, detail="不是可开关的四类产物，也不是全局总闸")
     write_audit(user, "rsi:switch", category, "rsi_switch",
                 ("自动体已暂停" if not row.enabled else "自动体已恢复")
                 + (f"（原因：{reason}）" if reason else ""),

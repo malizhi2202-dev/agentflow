@@ -5,7 +5,9 @@
 from __future__ import annotations
 
 import datetime
+import fnmatch
 import json
+import re
 
 from sqlalchemy.orm import Session
 
@@ -51,6 +53,13 @@ def _now() -> datetime.datetime:
 # ── 自动化类目开关（R6-4）────────────────────────────────
 # 只有四类产物有开关；四类之外（代码层、门禁本体、本条款自身）**不存在开关**，
 # 因此「没有开关」本身就是禁改面的实现——不是少写，是设计如此。
+#
+# R25-7（v25 · 人工裁定「落表」）：主档 §3.3 的「四类目 + 全局」里的**全局一行**
+# 由迁移 032 落表（category='global'）。总闸 off ⇒ 短路一切类目——判定收在
+# `assert_category_running` 这一处状态转换层，propose/proposal/publish 三个消费点
+# 自动生效，不在各入口重复写短路（入口 ⟂ 转换层各判一次的是「必填原因」那条，见 D11）。
+SWITCH_GLOBAL = "global"
+
 
 def _switch_row(db: Session, category: str) -> RsiSwitch | None:
     return db.query(RsiSwitch).filter(RsiSwitch.category == category).first()
@@ -60,9 +69,14 @@ def assert_category_running(db: Session, category: str) -> None:
     """状态转换层的开关判定：关闭 → 「自动体已暂停」直接拒。
 
     缺行 = 四类白名单默认允许（不是 fail-open：白名单外的类目根本没有开关可开）。
+    R25-7：先查全局总闸（off ⇒ 一切类目短路），再查类目自身行。
     """
     if category not in RSI_CATEGORIES:
         raise GateError(f"类目 {category} 不在四类白名单内（R6-4）：不得自动化")
+    gate = _switch_row(db, SWITCH_GLOBAL)
+    if gate is not None and not gate.enabled:
+        raise GateError("全局总闸已停用（R25-7）：关闭期间短路一切类目，"
+                        "拒绝自动写入/提案/发布")
     row = _switch_row(db, category)
     if row is not None and not row.enabled:
         raise GateError(f"自动体已暂停（{category}）：关闭期间拒绝一切自动写入/提案/发布")
@@ -70,6 +84,12 @@ def assert_category_running(db: Session, category: str) -> None:
 
 def switches(db: Session) -> list[dict]:
     out = []
+    # v25：总闸**真行**领衔（四类目 + 全局的主档字面）；缺行按开呈现（旧库未迁移=现状）
+    gate = _switch_row(db, SWITCH_GLOBAL)
+    out.append(gate.to_dict() if gate is not None else
+               {"category": SWITCH_GLOBAL, "enabled": True, "state": "running",
+                "label": "全局总闸：开（短路一切类目）", "updated_by": "",
+                "updated_at": None, "last_reason": "", "last_actor": ""})
     for category in RSI_CATEGORIES:
         row = _switch_row(db, category)
         if row is None:
@@ -89,8 +109,8 @@ def set_switch(db: Session, category: str, enabled: bool, actor: str = "",
     **停用**是必须人批的状态转换动作——原因必填，落列 + 由路由写审计；
     恢复也记原因（可空=「解除暂停的说明」，但留 actor）。
     """
-    if category not in RSI_CATEGORIES:
-        raise GateError(f"类目 {category} 不是可开关的四类产物（R6-4）")
+    if category not in RSI_CATEGORIES and category != SWITCH_GLOBAL:
+        raise GateError(f"类目 {category} 不是可开关的四类产物，也不是全局总闸（R6-4/R25-7）")
     if not enabled and not (reason or "").strip():
         raise GateError("停用自动体必须给原因（人批动作留痕，不靠提示词）")
     row = _switch_row(db, category)
@@ -310,6 +330,11 @@ def create_surface(db: Session, name: str, allow_edit: list[str],
         raise RsiError("name 不能为空")
     if db.query(SurfaceManifest).filter(SurfaceManifest.name == name).first():
         raise RsiError("surface 已存在")
+    # v25（R25-2）：写侧词表 fail-fast（读侧 fail-closed），畸形规则不进库
+    _validate_structure_rules(structure_rules)
+    if exclusions is not None:
+        if not isinstance(exclusions, list) or not all(isinstance(e, str) for e in exclusions):
+            raise RsiError("exclusions 必须是字符串数组")
     row = SurfaceManifest(name=name,
                           allow_edit_json=json.dumps(allow_edit or [], ensure_ascii=False),
                           path_pattern=path_pattern or "",
@@ -340,12 +365,11 @@ def update_surface(db: Session, surface_id: int, allow_edit, owner_id: str = "",
     if cap_bytes is not None:
         row.cap_bytes = cap_bytes
     if structure_rules is not None:
-        if not isinstance(structure_rules, list):
-            raise RsiError("structure_rules 必须是数组")
+        _validate_structure_rules(structure_rules)
         row.structure_rules = json.dumps(structure_rules, ensure_ascii=False)
     if exclusions is not None:
-        if not isinstance(exclusions, list):
-            raise RsiError("exclusions 必须是数组")
+        if not isinstance(exclusions, list) or not all(isinstance(e, str) for e in exclusions):
+            raise RsiError("exclusions 必须是字符串数组")
         row.exclusions = json.dumps(exclusions, ensure_ascii=False)
     row.owner_id = owner_id or row.owner_id
     db.commit()
@@ -361,8 +385,64 @@ def delete_surface(db: Session, surface_id: int) -> None:
     db.commit()
 
 
-def assert_editable(db: Session, surface_name: str, target: str) -> SurfaceManifest:
-    """可改面判定：永久禁改前缀 > 代码层禁自改 > 白名单。任一条不成立即拒。"""
+def _pattern_matches(pattern: str, target: str) -> bool:
+    """路径类词表（path_pattern / exclusions / 字符串形结构规则共用）：
+    含 `*` ⇒ fnmatch 词表（`*` 匹配任意字符段，含 `/`）；否则精确相等。
+    '' = 命中（exclusions 里出现空串即「全拒」语义，慎用——写侧不拦）。
+    ——词表定义随 R25-2 裁定成文，口径注记进 RULINGS §五点五·二 结案行。"""
+    if not pattern:
+        return True
+    if "*" in pattern:
+        return fnmatch.fnmatch(target, pattern)
+    return target == pattern
+
+
+def _rule_matches(rule, target: str) -> bool:
+    """structure_rules 单条判定：字符串 = 路径词表；对象 = {type∈prefix|suffix|regex, value}。
+    畸形规则**即拒（fail-closed）**——坏规则不许静默放行，宁可挡住一条合法路。"""
+    if isinstance(rule, str):
+        return _pattern_matches(rule, target)
+    if isinstance(rule, dict):
+        rtype = str(rule.get("type") or "")
+        value = str(rule.get("value") or "")
+        if rtype == "prefix":
+            return target.startswith(value)
+        if rtype == "suffix":
+            return target.endswith(value)
+        if rtype == "regex":
+            try:
+                return re.search(value, target) is not None
+            except re.error as e:
+                raise GateError(f"structure_rules 正则非法（{value!r}）：{e}")
+    raise GateError(f"结构规则形态非法（应为字符串或 {{type,value}} 对象）：{rule!r}")
+
+
+def _validate_structure_rules(rules) -> None:
+    """写侧词表校验（fail-fast）：读侧 _rule_matches 已 fail-closed，这里不让畸形进库。"""
+    if rules is None:
+        return
+    if not isinstance(rules, list):
+        raise RsiError("structure_rules 必须是数组")
+    for r in rules:
+        if isinstance(r, str):
+            continue
+        if (isinstance(r, dict) and str(r.get("type")) in ("prefix", "suffix", "regex")
+                and isinstance(r.get("value"), str)):
+            continue
+        raise RsiError(f"结构规则形态非法（字符串或 {{type∈prefix|suffix|regex, value}}）：{r!r}")
+
+
+def assert_editable(db: Session, surface_name: str, target: str,
+                    content: str | None = None) -> SurfaceManifest:
+    """可改面判定：永久禁改前缀 > 代码层禁自改 > 白名单 > **声明结构四列**（v25-R25-2）。
+
+    结构声明消费顺序（任一条不成立即拒）：
+    - `path_pattern`：非空则 target 必须命中（路径词表，见 `_pattern_matches`）；
+    - `exclusions`：命中任一条即拒（显式排除优先于一切放行）；
+    - `structure_rules`：**逐条都要命中**（结构=合取约束）；
+    - `cap_bytes`：体量闸——仅当调用点能取到内容（content 传入）时判定；
+      提案期只有 target 没有正文，不伪造体积判断（执行器写文件时应把内容传进来）。
+    """
     if not target:
         raise GateError("target 不能为空")
     normalized = target.replace("\\", "/").lstrip("./")
@@ -379,6 +459,21 @@ def assert_editable(db: Session, surface_name: str, target: str) -> SurfaceManif
     allowed = json.loads(surface.allow_edit_json or "[]")
     if not any(normalized == a or normalized.startswith(a.rstrip("/") + "/") for a in allowed):
         raise GateError(f"'{target}' 不在可改面 '{surface_name}' 的白名单内")
+    # ── v25（R25-2）：声明结构四列从「存而不判」进门禁 ──────────
+    if surface.path_pattern and not _pattern_matches(surface.path_pattern, normalized):
+        raise GateError(f"'{target}' 不匹配可改面 '{surface_name}' 的路径模式"
+                        f"（path_pattern={surface.path_pattern!r}）")
+    for ex in (json.loads(surface.exclusions or "[]") or []):
+        if _pattern_matches(ex, normalized):
+            raise GateError(f"'{target}' 命中显式排除（exclusions={ex!r}）")
+    for rule in (json.loads(surface.structure_rules or "[]") or []):
+        if not _rule_matches(rule, normalized):
+            raise GateError(f"'{target}' 不满足结构规则（structure_rules 条目 {rule!r}）")
+    if surface.cap_bytes and content is not None:
+        size = len(content.encode("utf-8"))
+        if size > int(surface.cap_bytes):
+            raise GateError(f"内容 {size} 字节超出可改面体量上限"
+                            f"（cap_bytes={surface.cap_bytes}）")
     return surface
 
 

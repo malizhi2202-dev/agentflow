@@ -116,7 +116,9 @@ class TestPollutionScan(_Base):
 class TestCategorySwitches(_Base):
     def test_missing_row_means_running(self):
         items = rsi.switches(self.db)
-        self.assertEqual([s["category"] for s in items], list(rsi.RSI_CATEGORIES))
+        # v25 R25-7：总闸行领衔（缺行也按「开」呈现），后接四类
+        self.assertEqual([s["category"] for s in items],
+                         [rsi.SWITCH_GLOBAL, *rsi.RSI_CATEGORIES])
         self.assertTrue(all(s["enabled"] for s in items))
 
     def test_paused_memory_blocks_propose(self):
@@ -222,8 +224,9 @@ class TestSwitchRoute(_Base):
     def test_switch_list_exposes_four_categories(self):
         r = self._client("root").get("/api/rsi/switches")
         self.assertEqual(r.status_code, 200, r.text)
+        # v25 R25-7：路由侧同样含总闸行领衔（缺行按开呈现）
         self.assertEqual([s["category"] for s in r.json()["switches"]],
-                         list(rsi.RSI_CATEGORIES))
+                         [rsi.SWITCH_GLOBAL, *rsi.RSI_CATEGORIES])
 
 
 if __name__ == "__main__":
