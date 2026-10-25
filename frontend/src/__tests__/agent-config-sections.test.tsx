@@ -1,13 +1,16 @@
 /**
- * AC：Agent 详情「编辑」标签 = 原型 16 分区配置页（change: ui-parity · P3-2）
+ * AC：Agent 详情/创建 tab 化后的分区渲染（change: v26-agent-ui · 前身 ui-parity P3-2 十六分区平铺）
  *
- * 原型：`.specs/product-design/prototype/agent-detail__config.html`（锚点 sec1…sec16 + sec-im）
- * 本用例守的是**可机读的那几条口径**：
- * - 16 个分区标题全在、页首锚点条正好 16 条链接（9A 只作说明，不占链接）；
+ * 形态口径改到 `components/agent-detail/panes.ts` 这张表：顶层 概览/工作/能力/设置/记忆/对话，
+ * 能力 5 子栏（指令/技能/MCP/集成/知识源与编排）、设置 7 子栏（通用/Access/环境/CLI 参数/闸门/探活/危险区）。
+ * 「16 分区同 DOM + 锚点条 16 链接」的旧断言**随 AnchorBar 退场作废**；守的还是同一批口径，换了测法：
+ * - 每个分区标题都能在其所属子栏渲染出来（少一个=漏分区）；
+ * - 顶层 6 栏、子栏 5/7 条，名称逐字对齐主档 §6.4；
  * - 环境变量的值恒掩码（`****` 哨兵），已存明文不出现在 DOM 里；
- * - 危险区必须二次确认才发删除请求（一次点击不落库）；
- * - 保存是**一次** PUT，且把 `model_config_json.env_vars / cli_args / mcp_servers` 一起提交；
- * - 后端 400 的 detail 原样透传（不改写成「保存失败」）。
+ * - 危险区必须二次确认才发删除请求；
+ * - 保存是**一次** PUT，且把 `model_config_json.env_vars / cli_args / mcp_servers` 一起提交——
+ *   草稿容器住在壳层，切栏/切组不丢（这条是 tab 化的命门）；
+ * - 后端 400 的 detail 原样透传。
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
@@ -65,6 +68,11 @@ const ROUTES = {
   'GET /api/agents/7/scheduled-tasks': { body: [] },
   'GET /api/agents/7/channels': { body: [] },
   'GET /api/control-plane/probes': { body: { probes: [] } },
+  // 概览栏（默认落栏）的数据源
+  'GET /api/metrics/sessions': { body: { sessions: [] } },
+  'GET /api/metrics/agent/7': { body: { limits: { total_tokens_used: 100, token_hard_limit: 240000, usage_percent: 0.04 } } },
+  'GET /api/agents/7/memory/channels': { body: { channels: {} } },
+  'GET /api/metrics/entity/agent/7/breakdown': { body: { total_tokens: 0, total_calls: 0 } },
 };
 
 beforeEach(() => {
@@ -73,58 +81,98 @@ beforeEach(() => {
   useRuntimes.setState({ registry: [], registryLoading: false, registryError: null });
 });
 
-/** 16 个分区标题（顺序即页面顺序；与原型逐字对齐） */
-const SECTION_TITLES = [
-  '1 · 标识', '2 · 域归属', '3 · 指令与开场白', '4 · 运行时与模型', '5 · 执行设置',
-  '6 · 环境变量', '7 · CLI 自定义参数', '8 · MCP 服务绑定', '9 · 对外集成', '10 · 技能',
-  '11 · 知识源', '12 · 编排引用', '13 · Access', '14 · 闸门', '15 · 健康与探活', '16 · 危险区',
-];
+/** 顶层栏切换 */
+function gotoTop(name: '概览' | '工作' | '能力' | '设置' | '记忆' | '对话') {
+  fireEvent.click(screen.getByRole('button', { name }));
+}
+/** 进能力子栏 */
+function gotoCap(pane: string) {
+  gotoTop('能力');
+  fireEvent.click(within(screen.getByLabelText('能力子栏')).getByRole('button', { name: pane }));
+}
+/** 进设置子栏 */
+function gotoSet(pane: string) {
+  gotoTop('设置');
+  fireEvent.click(within(screen.getByLabelText('设置子栏')).getByRole('button', { name: pane }));
+}
 
-describe('Agent config 十六分区', () => {
-  // CFG-01：16 个分区标题全在（少一个就是漏分区）
-  it('CFG-01 十六个分区标题全部渲染', async () => {
+/** 子栏 → 分区标题（映射与 panes.ts 同源；这里逐字写死，表漂了测试就红） */
+const CAP_PANE_TITLES: Record<string, string[]> = {
+  '指令': ['3 · 指令与开场白'],
+  '技能': ['10 · 技能'],
+  'MCP': ['8 · MCP 服务绑定'],
+  '集成': ['9 · 对外集成'],
+  '知识源与编排': ['11 · 知识源', '12 · 编排引用'],
+};
+const SET_PANE_TITLES: Record<string, string[]> = {
+  '通用': ['1 · 标识', '2 · 域归属', '4 · 运行时与模型', '5 · 执行设置'],
+  'Access': ['13 · Access'],
+  '环境': ['6 · 环境变量'],
+  'CLI 参数': ['7 · CLI 自定义参数'],
+  '闸门': ['14 · 闸门'],
+  '探活': ['15 · 健康与探活'],
+  '危险区': ['16 · 危险区'],
+};
+
+describe('Agent 详情 tab 化 · 分区渲染', () => {
+  // CFG-01：16 个分区标题全在——逐个落在其所属子栏（少一个=漏分区）
+  it('CFG-01 十六个分区标题按子栏全部渲染', async () => {
     mockApi(ROUTES);
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} />);
-    await waitFor(() => expect(screen.getByText('1 · 标识')).toBeInTheDocument());
-    SECTION_TITLES.forEach((t) => {
-      expect(screen.getByText(t), `分区标题缺失：${t}`).toBeInTheDocument();
-    });
+    // 默认落概览（只读工作台）
+    await waitFor(() => expect(screen.getByLabelText('概览')).toBeInTheDocument());
+    for (const [pane, titles] of Object.entries(CAP_PANE_TITLES)) {
+      gotoCap(pane);
+      for (const t of titles) {
+        expect(await screen.findByText(t), `子栏「${pane}」缺分区：${t}`).toBeInTheDocument();
+      }
+    }
+    for (const [pane, titles] of Object.entries(SET_PANE_TITLES)) {
+      gotoSet(pane);
+      for (const t of titles) {
+        expect(await screen.findByText(t), `子栏「${pane}」缺分区：${t}`).toBeInTheDocument();
+      }
+    }
   });
 
-  // CFG-02：锚点条 16 条链接 + 9A 说明；链接指向的锚点 id 必须真实存在
-  it('CFG-02 页首锚点条有 16 条链接且锚点存在', async () => {
+  // CFG-02：顶层 6 栏 + 子栏 5/7，名称逐字对主档 §6.4；锚点条已退场
+  it('CFG-02 顶层六栏与 5/7 子栏结构正确，分区直达锚点条不再存在', async () => {
     mockApi(ROUTES);
     const { container } = render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} />);
-    const nav = await screen.findByRole('navigation', { name: '分区直达' });
-    const links = within(nav).getAllByRole('link');
-    expect(links).toHaveLength(16);
-    expect(links.map((a) => a.getAttribute('href'))).toEqual(
-      Array.from({ length: 16 }, (_, i) => `#sec${i + 1}`),
-    );
-    // 每个 href 都能落到真实分区（不是贴了个假锚点）
-    links.forEach((a) => {
-      const id = (a.getAttribute('href') || '').slice(1);
-      expect(container.querySelector('#' + id), `锚点 ${id} 无对应分区`).toBeTruthy();
-    });
-    // 9A（集成 · IM 通道）只作编号对照说明，不占第 17 条链接
-    expect(within(nav).getByText(/9A = 集成（IM 通道）/)).toBeInTheDocument();
+    const bar = await screen.findByLabelText('Agent 详情标签');
+    expect(within(bar).getAllByRole('button').map((b) => b.textContent))
+      .toEqual(['概览', '工作', '能力', '设置', '记忆', '对话']);
+    expect(screen.queryByRole('navigation', { name: '分区直达' })).toBeNull();
+
+    gotoCap('指令');
+    expect(within(screen.getByLabelText('能力子栏')).getAllByRole('button').map((b) => b.textContent))
+      .toEqual(['指令', '技能', 'MCP', '集成', '知识源与编排']);
+
+    gotoSet('通用');
+    expect(within(screen.getByLabelText('设置子栏')).getAllByRole('button').map((b) => b.textContent))
+      .toEqual(['通用', 'Access', '环境', 'CLI 参数', '闸门', '探活', '危险区']);
+    // 分区锚点 id 保留（与升格原型 secN 可对照深链）
+    expect(container.querySelector('#sec1')).toBeTruthy();
+    expect(container.querySelector('#sec5')).toBeTruthy();
   });
 
-  // CFG-03：环境变量值恒掩码 —— 显示 ****，已存明文不进 DOM
+  // CFG-03：环境变量值恒掩码 —— 显示 ****，已存明文不进 DOM（现在要先切到 设置→环境）
   it('CFG-03 环境变量值显示掩码，明文不出现在页面', async () => {
     mockApi(ROUTES);
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} />);
+    gotoSet('环境');
     await waitFor(() => expect(screen.getByLabelText('环境变量名 1')).toHaveValue('FOO'));
     expect(screen.getByLabelText('环境变量值 1')).toHaveValue('****');
     expect(screen.getByLabelText('环境变量值 1')).toHaveAttribute('readonly');
     expect(screen.queryByDisplayValue('bar')).toBeNull();
   });
 
-  // CFG-04：危险区必须二次确认才发删除请求
+  // CFG-04：危险区必须二次确认才发删除请求（先切到 设置→危险区）
   it('CFG-04 危险区二次确认后才调用删除', async () => {
     const calls = mockApi(ROUTES);
     const onDelete = vi.fn();
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} onDelete={onDelete} />);
+    gotoSet('危险区');
     fireEvent.click(await screen.findByRole('button', { name: /删除 Agent/ }));
     // 一次点击只是开弹窗：既不调 onDelete，也不发 DELETE
     expect(onDelete).not.toHaveBeenCalled();
@@ -138,35 +186,44 @@ describe('Agent config 十六分区', () => {
   it('CFG-05 无 onDelete 时确认后才自己发 DELETE', async () => {
     const calls = mockApi({ ...ROUTES, 'DELETE /api/agents/7': { body: { status: 'deleted' } } });
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} />);
+    gotoSet('危险区');
     fireEvent.click(await screen.findByRole('button', { name: /删除 Agent/ }));
     expect(calls.some((c) => c.method === 'DELETE')).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: '确定' }));
     await waitFor(() => expect(calls.some((c) => c.method === 'DELETE' && c.url === '/api/agents/7')).toBe(true));
   });
 
-  // CFG-06：一次 PUT 把 model_config_json 三个新键（+ 专用列）一起提交
-  it('CFG-06 保存把 model_config_json 的 env_vars/cli_args/mcp_servers 一起提交', async () => {
+  // CFG-06：一次 PUT 把 model_config_json 三个新键（+ 专用列）一起提交；
+  //         tab 化命门——先切到 能力→MCP 改文本，再切回 设置 保存：草稿不随切栏蒸发
+  it('CFG-06 跨栏切换草稿不丢，保存一次 PUT 提交全部', async () => {
     const calls = mockApi({ ...ROUTES, 'PUT /api/agents/7': { body: { id: 7 } } });
     const onSave = vi.fn();
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={onSave} />);
-    fireEvent.click(await screen.findByRole('button', { name: /保存全部/ }));
+    // 切到 能力→MCP 改一笔
+    gotoCap('MCP');
+    const ta = await screen.findByLabelText('MCP 配置 JSON');
+    fireEvent.change(ta, { target: { value: '{"filesystem": {"transport": "sse", "url": "http://x"}}' } });
+    // 切到 概览再回来——草稿必须还在（壳层 useAgentDraft）
+    gotoTop('概览');
+    gotoSet('通用');
+    fireEvent.click(screen.getByRole('button', { name: /保存全部/ }));
     await waitFor(() => expect(calls.some((c) => c.method === 'PUT' && c.url === '/api/agents/7')).toBe(true));
     const put = calls.find((c) => c.method === 'PUT' && c.url === '/api/agents/7')!;
-    // 三个新键
+    // 改动跨栏存活：MCP 新值进了这次 PUT
+    expect(put.body.model_config_json.mcp_servers).toEqual({ filesystem: { transport: 'sse', url: 'http://x' } });
+    // 另两键（没改过的）按原值双写
     expect(put.body.model_config_json.env_vars).toEqual({ FOO: 'bar' });   // **** 哨兵 → 保留原值，不存星号
     expect(put.body.model_config_json.cli_args).toEqual(['--sandbox', 'read-only']);
-    expect(put.body.model_config_json.mcp_servers).toEqual({ filesystem: { transport: 'stdio', command: 'mcp-server-filesystem' } });
-    // 专用列同步（PUT 白名单里既有 JSON 块也有这三列，只写一边会造成「本页可见、别处不生效」）
     expect(put.body.custom_env).toEqual({ FOO: 'bar' });
     expect(put.body.custom_args).toEqual(['--sandbox', 'read-only']);
-    expect(put.body.mcp_config).toEqual({ filesystem: { transport: 'stdio', command: 'mcp-server-filesystem' } });
+    expect(put.body.mcp_config).toEqual({ filesystem: { transport: 'sse', url: 'http://x' } });
     // 常规字段仍在一起提交（一次 PUT，不是 N 次）
     expect(put.body.name).toBe('审查助手');
     expect(put.body.runtime).toBe('dsh');
     expect(put.body.system_prompt).toBe('你审查前端 PR');
     expect(put.body.token_soft_limit).toBe(200000);
     expect(put.body.domain_id).toBeNull();
-    expect(calls.filter((c) => c.method === 'PUT')).toHaveLength(1);
+    expect(calls.filter((c) => c.method === 'PUT' && c.url === '/api/agents/7')).toHaveLength(1);
     expect(onSave).toHaveBeenCalled();
   });
 
@@ -178,6 +235,7 @@ describe('Agent config 十六分区', () => {
     });
     const onSave = vi.fn();
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={onSave} />);
+    gotoSet('通用');
     fireEvent.click(await screen.findByRole('button', { name: /保存全部/ }));
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toContain("不支持的 runtime: 'claude'");
@@ -189,6 +247,7 @@ describe('Agent config 十六分区', () => {
   it('CFG-08 MCP JSON 不合法时拦住保存', async () => {
     const calls = mockApi({ ...ROUTES, 'PUT /api/agents/7': { body: { id: 7 } } });
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} />);
+    gotoCap('MCP');
     const ta = await screen.findByLabelText('MCP 配置 JSON');
     fireEvent.change(ta, { target: { value: '{"filesystem": ' } });
     fireEvent.click(screen.getByRole('button', { name: /保存全部/ }));
@@ -196,14 +255,37 @@ describe('Agent config 十六分区', () => {
     expect(calls.some((c) => c.method === 'PUT')).toBe(false);
   });
 
-  // CFG-09：未接入项必须显式标注（技能之外的缺口一个都不许伪造）
-  it('CFG-09 未接入项显式标注', async () => {
+  // CFG-09：未接入项必须显式标注（tab 化后分布在各子栏——逐栏累计计数，缺口一个不许伪造）
+  it('CFG-09 未接入项显式标注（跨子栏累计）', async () => {
     mockApi(ROUTES);
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} />);
-    await waitFor(() => expect(screen.getByText('1 · 标识')).toBeInTheDocument());
-    expect(screen.getAllByText('未接入').length).toBeGreaterThanOrEqual(5);
+    let unwired = 0;
+    for (const pane of ['通用', 'Access', '闸门', '探活']) {
+      gotoSet(pane);
+      await screen.findByText(pane === '通用' ? '1 · 标识' : /\d+ · /);
+      unwired += screen.getAllByText('未接入').length;
+    }
+    gotoCap('指令');
+    await screen.findByText('3 · 指令与开场白');
+    unwired += screen.getAllByText('未接入').length;
+    expect(unwired).toBeGreaterThanOrEqual(5);
     expect(screen.getByText(/会话开场白/)).toBeInTheDocument();
-    // 「别名」在分区说明与未接入说明里各出现一次，故按集合断言
+    // 「别名」在未接入说明里出现（标识区）
+    gotoSet('通用');
     expect(screen.getAllByText(/别名/).length).toBeGreaterThanOrEqual(1);
+  });
+
+  // CFG-10：创建态——两栏（能力/设置）、设置只有 5 子栏（**探活与危险区不进创建页**，主档 §6.4）
+  it('CFG-10 创建态无探活/危险区子栏且默认落在含必填的通用栏', async () => {
+    mockApi({ ...ROUTES, 'GET /api/runtimes': { body: { runtimes: [RT()] } } });
+    render(<AgentDetail agent={{ name: '', description: '' }} onBack={() => {}} onSave={() => {}} />);
+    const bar = await screen.findByLabelText('Agent 详情标签');
+    expect(within(bar).getAllByRole('button').map((b) => b.textContent)).toEqual(['能力', '设置']);
+    // 默认落 设置→通用：名称 + 运行时两个必填输入立即可见
+    expect(await screen.findByLabelText('名称')).toBeInTheDocument();
+    expect(within(screen.getByLabelText('设置子栏')).getAllByRole('button').map((b) => b.textContent))
+      .toEqual(['通用', 'Access', '环境', 'CLI 参数', '闸门']);
+    // 概览/工作/记忆/对话不进创建态
+    expect(screen.queryByLabelText('概览')).toBeNull();
   });
 });

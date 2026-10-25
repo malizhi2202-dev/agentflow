@@ -208,3 +208,6 @@ select { cursor: pointer; }
 }
 .tab:hover { color: var(--text-secondary); }
 .tab.active { color: var(--text); border-bottom-color: var(--blue); font-weight: 600; }
+/* 二级子栏（v26-agent-ui · 能力 5 栏 / 设置 7 栏）：比顶层栏紧凑一档，对齐原型 .tabs.sub 规格 */
+.tab-bar.sub { margin-bottom: var(--s3); }
+.tab-bar.sub .tab { padding: 5px 11px; font-size: 12px; }

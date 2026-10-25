@@ -1,85 +1,71 @@
 /**
- * Agent 详情（原型 6.4 · 独立页形态）· 四标签：编辑 / 记忆 / 对话 / 监控
+ * Agent 详情/创建 · 壳（change: v26-agent-ui · 原型 agent-detail.html 两级 tab 的落点）
  *
- * 为什么本文件变薄：编辑标签已按原型改造成 **16 分区配置页**
- * （`components/agent-config/`，锚点 sec1…sec16），十六个分区的字段、校验与保存口径都在那边；
- * 本文件只留页面骨架（返回 / 名称 / 四标签）与另外三个标签的真实逻辑
- * （记忆 CRUD、对话、监控），避免又长出一份「什么都在里面」的巨型组件。
+ * 形态（用户三裁 2026-10-26）：
+ * - 详情六栏：概览 / 工作 / 能力(5 子栏) / 设置(7 子栏) / 记忆 / 对话——监控并入概览；
+ *   原型是四栏，记忆/对话是本仓既有真功能（CRUD/ChatWindow），保留为顶层栏并登记差异（RULINGS §五点六 R26-2）。
+ * - 创建两栏：能力 / 设置（同骨架 tab 化，「两种入口一份配置」R5-1）；探活/危险区不进创建页（§6.4）。
+ * - 侧栏「Agent 详情」二级入口已移除：列表点卡片即进本壳（AgentDetailPage.tsx 连同删除）。
  *
- * 纪律：页面名归壳层 `.crumb`，页内不写 h1/h2（已有用例断言页内不重复页名）；
- * 这里只是把 Agent 名称绑在标题位上，用普通 span 承载。
+ * 状态纪律（CFG-06 的命门）：草稿容器 useAgentDraft 住在**本壳层**——切栏/切组都不卸载它，
+ * 保存必须一次提交；分区组件零改动、pane 组件不许再持有可写草稿态。
+ * 页面名归壳层 .crumb，页内不写 h1/h2。
  */
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, X, ExternalLink } from 'lucide-react';
-import ChatWindow from '../components/ChatWindow';
-import EntityBreakdownPanel from '../components/EntityBreakdownPanel';
+import { ArrowLeft } from 'lucide-react';
 import AgentConfigEditor from '../components/agent-config/AgentConfigEditor';
+import { useAgentDraft } from '../components/agent-config/useAgentDraft';
+import OverviewPane from '../components/agent-detail/OverviewPane';
+import WorkPane from '../components/agent-detail/WorkPane';
+import MemoryPane from '../components/agent-detail/MemoryPane';
+import ChatPane from '../components/agent-detail/ChatPane';
+import {
+  TOP_TABS_DETAIL, TOP_TABS_CREATE,
+  DEFAULT_TOP_DETAIL, DEFAULT_TOP_CREATE,
+  DEFAULT_CAP_PANE, DEFAULT_SET_PANE,
+  type CapPaneId, type SetPaneId, type TopTabId,
+} from '../components/agent-detail/panes';
 
-var lbl: React.CSSProperties = { fontSize: 11, fontWeight: 500, color: 'var(--text-dim)', display: 'block', marginBottom: 4 };
-var inp: React.CSSProperties = { width: '100%', padding: '8px', background: 'var(--bg-input)', color: 'var(--color-text)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12, boxSizing: 'border-box' };
-var hintS: React.CSSProperties = { fontSize: 10, color: 'var(--text-dim)', margin: '4px 0 0', lineHeight: 1.5 };
-
-export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError }: {
-  agent: any; onBack: () => void; onSave: (data: any) => void; onDelete?: () => void; saveError?: string | null;
+export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError, onOpenBoard }: {
+  agent: any; onBack: () => void; onSave: (data: any) => void; onDelete?: () => void;
+  saveError?: string | null; onOpenBoard?: () => void;
 }) {
   var isNew = !agent || !agent.id;
-  // 常规字段的期望态（页面持有）：编辑标签的十六个分区通过 patch 改它，保存时由 AgentConfigEditor 组装
+  // 常规字段的期望态（壳层持有）：能力/设置两栏的分区通过 patch 改它，保存时由草稿容器组装
   var [data, setData] = useState<any>(Object.assign({
     name: '', description: '', runtime: '', model_name: '',
     workflow_ids: [], token_soft_limit: 800000, token_hard_limit: 1000000,
     io_filter: 'none', system_prompt: '', role_def: '', sop: '',
   }, agent || {}));
-  var [tab, setTab] = useState('edit');
+  var draft = useAgentDraft(agent);
+  // 顶层栏 + 两栏各自的子栏选中态（切栏不丢草稿：状态在本壳层，draft 也在）
+  var [tab, setTab] = useState<TopTabId>(isNew ? DEFAULT_TOP_CREATE : DEFAULT_TOP_DETAIL);
+  var [capPane, setCapPane] = useState<CapPaneId>(DEFAULT_CAP_PANE);
+  var [setPane, setSetPane] = useState<SetPaneId>(DEFAULT_SET_PANE);
   var [workflows, setWorkflows] = useState<any[]>([]);
-
-  // 记忆
-  var [memories, setMemories] = useState<any[]>([]);
-  var [memoryChannels, setMemoryChannels] = useState<any>({});
-  var [showMemForm, setShowMemForm] = useState(false);
-  var [memForm, setMemForm] = useState<any>({ channel: 'web', key: '', value: '', memory_type: 'fact', priority: 5 });
-  // 对话
+  // 对话（一条消息 = 一个 run，回复写回同一会话；messages 留壳层——切栏不丢会话显示）
   var [chatMessages, setChatMessages] = useState<any[]>([]);
   var [chatLoading, setChatLoading] = useState(false);
   var [chatError, setChatError] = useState<string | null>(null);
   var [chatConversationId, setChatConversationId] = useState<number | null>(null);
 
-  /** 分区 → 期望态：函数式更新，避免十六个分区在同一 tick 内互相覆盖 */
+  /** 分区 → 期望态：函数式更新，避免多个分区在同一 tick 内互相覆盖；顺手标脏 */
   var patch = function (p: any) {
     setData(function (prev: any) { return Object.assign({}, prev, p); });
+    draft.touch();
+  };
+
+  /** 概览/对话卡的「去编辑 ▸」：跳到目标栏+目标子栏 */
+  var goto = function (top: 'cap' | 'set', pane: string) {
+    setTab(top);
+    if (top === 'cap') setCapPane(pane as CapPaneId);
+    else setSetPane(pane as SetPaneId);
   };
 
   useEffect(function () {
     fetch('/api/workflows').then(function (r) { return r.json(); }).then(function (d) { setWorkflows(d.workflows || []); });
-    if (agent?.id) { loadMemories(); loadMemoryStats(); }
-  }, [agent]);
+  }, []);
 
-  // 记忆 CRUD（真端点 /api/agents/{id}/memory）
-  var loadMemories = function () {
-    if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/memory?limit=100')
-      .then(function (r) { return r.json(); }).then(function (d) { if (Array.isArray(d)) setMemories(d); });
-  };
-  var loadMemoryStats = function () {
-    if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/memory/channels')
-      .then(function (r) { return r.json(); }).then(function (d) { setMemoryChannels(d.channels || {}); });
-  };
-  var saveMemory = function () {
-    if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/memory', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.assign({}, memForm, { value: (function () { try { return JSON.parse(memForm.value); } catch (e) { return memForm.value; } })() })),
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      if (d.ok) { setShowMemForm(false); setMemForm({ channel: 'web', key: '', value: '', memory_type: 'fact', priority: 5 }); loadMemories(); loadMemoryStats(); }
-    });
-  };
-  var deleteMemory = function (mid: number) {
-    if (!agent?.id) return;
-    fetch('/api/agents/' + agent.id + '/memory/' + mid, { method: 'DELETE' })
-      .then(function () { loadMemories(); loadMemoryStats(); });
-  };
-
-  // 对话（一条消息 = 一个 run，回复写回同一会话）
   var sendChatMessage = function (content: string) {
     setChatLoading(true); setChatError(null);
     var tempMsg = { id: Date.now(), role: 'user', content: content, status: 'done', created_at: new Date().toISOString() };
@@ -100,6 +86,8 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
     }).catch(function () { setChatLoading(false); setChatError('网络错误'); });
   };
 
+  var topTabs = isNew ? TOP_TABS_CREATE : TOP_TABS_DETAIL;
+
   return (
     <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
@@ -112,23 +100,27 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
         {!isNew && <span className="chip mono">{'ID ' + agent.id}</span>}
       </div>
 
-      {!isNew && (
-        <div className="tab-bar" aria-label="Agent 详情标签">
-          {['edit', 'memory', 'chat', 'monitor'].map(function (t) {
-            var label = t === 'edit' ? '✏️ 编辑' : t === 'memory' ? '🧠 记忆' : t === 'chat' ? '💬 对话' : '📊 监控';
-            return (
-              <button key={t} aria-current={tab === t ? 'page' : undefined} className={'tab' + (tab === t ? ' active' : '')}
-                onClick={function () { setTab(t); }}>
-                {label}
-              </button>
-            );
-          })}
-        </div>
+      <div className="tab-bar" aria-label="Agent 详情标签">
+        {topTabs.map(function (t) {
+          return (
+            <button key={t.id} aria-current={tab === t.id ? 'page' : undefined} className={'tab' + (tab === t.id ? ' active' : '')}
+              onClick={function () { setTab(t.id); }}>
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {tab === 'overview' && !isNew && (
+        <OverviewPane agent={agent} goto={goto} />
       )}
 
-      {tab === 'edit' && (
+      {tab === 'work' && !isNew && (
+        <WorkPane agent={agent} onOpenBoard={onOpenBoard} />
+      )}
+
+      {(tab === 'cap' || tab === 'set') && (
         <AgentConfigEditor
-          key={agent?.id || 'new-agent'}
           agent={agent}
           data={data}
           patch={patch}
@@ -136,121 +128,26 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
           onDelete={onDelete}
           saveError={saveError}
           workflows={workflows}
+          draft={draft}
+          group={tab}
+          paneId={tab === 'cap' ? capPane : setPane}
+          onSelectPane={function (id) { if (tab === 'cap') setCapPane(id as CapPaneId); else setSetPane(id as SetPaneId); }}
         />
       )}
 
-      {tab === 'chat' && agent && agent.id && (
-        <div style={{ height: 'calc(100vh - 200px)', minHeight: 400 }}>
-          <ChatWindow
-            agentId={agent.id}
-            agentName={agent.name}
-            messages={chatMessages}
-            loading={chatLoading}
-            error={chatError}
-            onSend={function (content: string) { sendChatMessage(content); }}
-            onRetry={function () { setChatError(null); }}
-            extraHeader={
-              <button onClick={function () { setTab('edit'); }}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', fontSize: 11, background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
-                <ExternalLink size={12} /> 发布到渠道
-              </button>
-            }
-          />
-        </div>
-      )}
+      {tab === 'memory' && !isNew && <MemoryPane agentId={agent.id} />}
 
-      {tab === 'memory' && (
-        <div style={{ maxWidth: 900 }}>
-          {/* 跨渠道统计卡片 */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, marginBottom: 16 }}>
-            {Object.keys(memoryChannels).map(function (ch: string) {
-              var s = memoryChannels[ch];
-              return (
-                <div key={ch} style={{ background: 'var(--bg-card)', borderRadius: 8, padding: 12, border: '1px solid var(--border)', textAlign: 'center' }}>
-                  <div style={{ fontSize: 18 }}>{ch === 'web' ? '🌐' : ch === 'feishu' ? '🐦' : ch === 'dingtalk' ? '📌' : ch === 'wechat_work' ? '💬' : ch === 'slack' ? '💎' : ch === 'telegram' ? '✈️' : '🔌'}</div>
-                  <div style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--color-primary)' }}>{s.total}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-dim)' }}>{ch}</div>
-                  <div style={{ fontSize: 9, color: 'var(--text-dim)' }}>{Object.keys(s.types || {}).join(', ')}</div>
-                </div>
-              );
-            })}
-            {Object.keys(memoryChannels).length === 0 && <div style={{ gridColumn: '1/-1', textAlign: 'center', color: 'var(--text-dim)', padding: 20 }}>暂无记忆数据</div>}
-          </div>
-
-          {/* 记忆列表 */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <span className="section-title" style={{ fontSize: 13 }}>📝 记忆条目（{memories.length}）</span>
-            {!showMemForm && <button onClick={function () { setShowMemForm(true); }} className="btn btn-primary btn-sm"><Plus size={13} /> 添加记忆</button>}
-          </div>
-
-          {/* 添加记忆表单 */}
-          {showMemForm && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 12, background: 'var(--bg-input)', borderRadius: 6, border: '1px solid var(--border)', marginBottom: 12 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                <div>
-                  <label style={lbl}>渠道</label>
-                  <select aria-label="记忆渠道" value={memForm.channel} onChange={function (e) { setMemForm(Object.assign({}, memForm, { channel: e.target.value })); }} style={inp}>
-                    <option value="web">🌐 Web</option><option value="feishu">🐦 飞书</option><option value="dingtalk">📌 钉钉</option><option value="wechat_work">💬 企微</option><option value="slack">💎 Slack</option><option value="telegram">✈️ Telegram</option><option value="api">🔌 API</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={lbl}>类型</label>
-                  <select aria-label="记忆类型" value={memForm.memory_type} onChange={function (e) { setMemForm(Object.assign({}, memForm, { memory_type: e.target.value })); }} style={inp}>
-                    <option value="fact">📋 事实</option><option value="preference">⭐ 偏好</option><option value="conversation">💬 对话</option><option value="context">📎 上下文</option>
-                  </select>
-                </div>
-              </div>
-              <div><label style={lbl}>Key</label><input aria-label="记忆 Key" value={memForm.key} onChange={function (e) { setMemForm(Object.assign({}, memForm, { key: e.target.value })); }} style={inp} placeholder="user_preference / project_context" /></div>
-              <div><label style={lbl}>Value (JSON)</label><textarea aria-label="记忆 Value" value={memForm.value} onChange={function (e) { setMemForm(Object.assign({}, memForm, { value: e.target.value })); }} rows={3} style={{ ...inp, resize: 'vertical', fontFamily: 'var(--font-mono)', fontSize: 11 }} placeholder='{"language":"zh","tone":"formal"}' /></div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                <div><label style={lbl}>优先级 (1-10)</label><input type="number" aria-label="记忆优先级" value={memForm.priority} onChange={function (e) { setMemForm(Object.assign({}, memForm, { priority: parseInt(e.target.value) || 5 })); }} style={inp} min={1} max={10} /></div>
-                <div><label style={lbl}>TTL (秒, 空=永久)</label><input type="number" aria-label="记忆 TTL" value={memForm.ttl_seconds || ''} onChange={function (e) { setMemForm(Object.assign({}, memForm, { ttl_seconds: e.target.value ? parseInt(e.target.value) : null })); }} style={inp} placeholder="86400 = 1天" /></div>
-              </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button onClick={saveMemory} className="btn btn-primary btn-sm">保存</button>
-                <button onClick={function () { setShowMemForm(false); }} className="btn btn-ghost btn-sm">取消</button>
-              </div>
-            </div>
-          )}
-
-          {/* 记忆条目列表 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {memories.map(function (m: any) {
-              var channelIcon = m.channel === 'web' ? '🌐' : m.channel === 'feishu' ? '🐦' : m.channel === 'dingtalk' ? '📌' : m.channel === 'wechat_work' ? '💬' : m.channel === 'slack' ? '💎' : m.channel === 'telegram' ? '✈️' : '🔌';
-              var typeColor = m.memory_type === 'preference' ? '#a78bfa' : m.memory_type === 'fact' ? '#5cb878' : m.memory_type === 'conversation' ? '#548cf0' : '#e8a450';
-              return (
-                <div key={m.id} style={{ background: 'var(--bg-card)', borderRadius: 6, padding: '10px 12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <span style={{ fontSize: 16 }}>{channelIcon}</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600 }}>{m.key}</span>
-                      <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 3, background: typeColor + '20', color: typeColor }}>{m.memory_type}</span>
-                      {m.priority >= 8 && <span className="badge badge-red">高优先级</span>}
-                      {m.expires_at && <span style={{ fontSize: 9, color: 'var(--text-dim)' }}>⏰ {new Date(m.expires_at).toLocaleString()}</span>}
-                    </div>
-                    <pre style={{ margin: 0, fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', wordBreak: 'break-all', maxHeight: 80, overflow: 'auto' }}>{JSON.stringify(m.value, null, 2)}</pre>
-                    <div style={{ fontSize: 9, color: 'var(--text-dim)', marginTop: 4 }}>
-                      {m.channel} · {m.session_id || '无会话'} · {m.updated_at ? new Date(m.updated_at).toLocaleString() : ''}
-                    </div>
-                  </div>
-                  <button onClick={function () { deleteMemory(m.id); }} aria-label={'删除记忆 ' + m.key} style={{ padding: 2, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dim)' }}><X size={14} /></button>
-                </div>
-              );
-            })}
-            {memories.length === 0 && !showMemForm && (
-              <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-dim)' }}>
-                <p style={{ fontSize: 28, margin: '0 0 8px' }}>🧠</p>
-                <p style={{ fontSize: 13, margin: 0 }}>暂无记忆数据</p>
-                <p style={{ fontSize: 11, margin: '4px 0' }}>Agent 运行时会自动记录跨渠道记忆</p>
-              </div>
-            )}
-          </div>
-          <p style={hintS}>记忆条目按渠道/类型归档；写入是即时请求，不进编辑标签的「保存全部」。</p>
-        </div>
-      )}
-
-      {tab === 'monitor' && agent?.id && (
-        <EntityBreakdownPanel entityType="agent" entityId={agent.id} entityName={agent.name || 'Agent'} />
+      {tab === 'chat' && !isNew && agent && agent.id && (
+        <ChatPane
+          agentId={agent.id}
+          agentName={agent.name}
+          messages={chatMessages}
+          loading={chatLoading}
+          error={chatError}
+          onSend={sendChatMessage}
+          onRetry={function () { setChatError(null); }}
+          onGoChannel={function () { goto('cap', 'int'); }}
+        />
       )}
     </div>
   );

@@ -133,6 +133,8 @@ describe('创建 Agent：模型相关字段的形态', () => {
       },
     });
     render(<AgentDetail agent={{ id: 7, name: 'a', runtime: 'dsh', model_name: 'local-anthropic/deepseek-flash' }} onBack={() => {}} onSave={() => {}} />);
+    // v26：既有 Agent 默认落「概览」，运行时/模型住在 设置→通用——先切过去
+    fireEvent.click(screen.getByRole('button', { name: '设置' }));
     const runtimeSelect = await screen.findByLabelText('运行时') as HTMLSelectElement;
     await waitFor(() => expect(runtimeSelect.value).toBe('dsh'));
     expect((screen.getByLabelText('模型') as HTMLSelectElement).value).toBe('local-anthropic/deepseek-flash');

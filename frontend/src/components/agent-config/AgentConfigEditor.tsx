@@ -1,198 +1,153 @@
 /**
- * Agent 详情「编辑」标签 = 原型 16 分区配置页（change: ui-parity · P3-2）
+ * Agent 详情/创建 ·「能力 / 设置」草稿渲染面（change: v26-agent-ui · 前身是 16 分区平铺页）
  *
- * 为什么把 16 个分区收在一个容器里：保存必须是**一次**提交（常规字段 + 三块运行时配置一起 PUT），
- * 而 env / CLI / MCP 三块是受控编辑态（掩码哨兵、一行一项、JSON 整体替换），状态只有放在
- * 提交者这一层才拿得到；分区组件保持纯展示 + 上抛补丁，避免十六个分区各自持有一份可写状态。
+ * 为什么不再是平铺大页：改造前这里纵向堆 16 个分区 + 锚点条，是一根超长页（用户原话
+ * 「平铺直序到一个超级大页面上…用一个大 tab 点击展示进入」）。现在按原型
+ * `agent-detail.html` 的两级 tab 收口：能力 5 子栏 / 设置 7 子栏（创建态裁掉探活与危险区），
+ * 一次只渲一个子栏；sticky 保存条常驻两栏底部，覆盖所有走草稿的字段。
  *
- * 未接入的一律显式标注（`<Unwired>`），不塞示例数据 —— 判据是「后端有没有这一列 + PUT 收不收」，
- * 见 `.specs/ui-parity/P3-agent-config.md` 的字段对照表。
+ * 保存仍是**一次**提交——三块受控态与 commit 逻辑已提到壳层（`useAgentDraft`），
+ * 本组件只按 `group + paneId` 渲染分区子集；分区组件保持纯展示 + 上抛补丁，**一行不改**。
+ * 「分区直达」锚点条退场：直达职责由 5+7 子栏承接（meta.ts 的 secN 编号与锚点 id 保留，
+ * 与升格原型 agent-detail__config.html 仍可对照深链）。
+ *
+ * 未接入的一律显式标注（`<Unwired>`），不塞示例数据 —— 判据是「后端有没有这一列 + PUT 收不收」。
  */
-import { useState } from 'react';
 import { Save, RotateCcw } from 'lucide-react';
-import { AnchorBar } from './Section';
-import {
-  envRowsFromEnv, envPayloadFromRows, cliArgsFromList, cliArgsPayload,
-  mcpTextFrom, parseMcpText,
-} from './model';
-import type { EnvRow } from './model';
+import { IM_ANCHOR_NOTE } from './meta';
+import type { AgentDraft } from './useAgentDraft';
 import { IdentitySection, DomainSection, AccessSection } from './BasicsSections';
 import { PromptSection } from './PromptSections';
 import { RuntimeSection, ExecutionSection, GateSection } from './RuntimeSections';
 import { EnvVarsSection, CliArgsSection, McpSection } from './ConfigSections';
 import { IntegrationsSection, SkillsSection, KnowledgeSection, OrchestrationSection } from './BindingSections';
 import { ProbeSection, DangerSection } from './OpsSections';
-import { ScheduledTasksSection } from './ExtraSections';
+import { CAP_PANES, SET_PANES, SET_PANES_CREATE, type PaneId } from '../agent-detail/panes';
 
 export interface AgentConfigEditorProps {
   agent: any;
-  /** 常规字段（名称/描述/运行时/模型/token 上限/域/人设三件…）的期望态，由页面持有 */
+  /** 常规字段（名称/描述/运行时/模型/token 上限/域/人设三件…）的期望态，由壳层持有 */
   data: any;
   patch: (p: any) => void;
   onSave: (payload: any) => void;
   onDelete?: () => void;
   saveError?: string | null;
   workflows: any[];
+  /** 草稿容器（壳层 useAgentDraft 的结果）——切栏切组都不重新挂载状态 */
+  draft: AgentDraft;
+  /** 顶层栏归属：cap=能力 5 子栏 / set=设置 7 子栏 */
+  group: 'cap' | 'set';
+  paneId: PaneId;
+  onSelectPane: (id: PaneId) => void;
 }
 
-/** 已存配置的三个来源：专用列优先，回落到 model_config_json 里同名块（两处都写，读时任意一处命中即可） */
-function initialEnv(agent: any): EnvRow[] {
-  const byColumn = agent && agent.custom_env;
-  const byJson = agent && agent.model_config_json && agent.model_config_json.env_vars;
-  return envRowsFromEnv(byColumn && Object.keys(byColumn).length ? byColumn : byJson);
-}
-function initialCli(agent: any): string[] {
-  const byColumn = agent && agent.custom_args;
-  const byJson = agent && agent.model_config_json && agent.model_config_json.cli_args;
-  return cliArgsFromList(Array.isArray(byColumn) ? byColumn : byJson);
-}
-function initialMcp(agent: any): any {
-  if (agent && agent.mcp_config !== undefined && agent.mcp_config !== null) return agent.mcp_config;
-  const byJson = agent && agent.model_config_json && agent.model_config_json.mcp_servers;
-  return byJson === undefined ? null : byJson;
-}
-
-export default function AgentConfigEditor({ agent, data, patch, onSave, onDelete, saveError, workflows }: AgentConfigEditorProps) {
+export default function AgentConfigEditor({
+  agent, data, patch, onSave, onDelete, saveError, workflows,
+  draft, group, paneId, onSelectPane,
+}: AgentConfigEditorProps) {
   const isNew = !agent || !agent.id;
   const agentId: number | undefined = agent && agent.id ? agent.id : undefined;
+  const panes = group === 'cap' ? CAP_PANES : (isNew ? SET_PANES_CREATE : SET_PANES);
+  const err = draft.localError || saveError || null;
 
-  const [envRows, setEnvRows] = useState<EnvRow[]>(function () { return initialEnv(agent); });
-  const [cliArgs, setCliArgs] = useState<string[]>(function () { return initialCli(agent); });
-  const [mcpText, setMcpText] = useState<string>(function () { return mcpTextFrom(initialMcp(agent)); });
-  const [mcpError, setMcpError] = useState<string | null>(null);
-  const [localError, setLocalError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [savedAt, setSavedAt] = useState<string | null>(null);
-
-  /** 复位三块受控编辑态（「放弃改动」= 回到最近一次已存版本） */
-  function resetBlocks() {
-    setEnvRows(initialEnv(agent));
-    setCliArgs(initialCli(agent));
-    setMcpText(mcpTextFrom(initialMcp(agent)));
-    setMcpError(null);
-    setLocalError(null);
-  }
-
-  /**
-   * 一次提交：常规字段 + `model_config_json` 三键（env_vars / cli_args / mcp_servers）一起 PUT。
-   *
-   * 双写口径（为什么要同时写专用列）：`PUT /api/agents/{id}` 的白名单里既有 `model_config_json`
-   * 也有 `custom_env / custom_args / mcp_config`；前者是通用配置块（本次新增三键的落点），
-   * 后者是 v23 迁移建的专用列（其它页面/后端服务读的是它）。只写一边会造成「本页可见、
-   * 别处不生效」的假象，所以两边同源同值。详见 P3 的「双写口径」与遗留风险。
-   */
-  async function handleSave() {
-    setLocalError(null);
-    setSavedAt(null);
-    const mcp = parseMcpText(mcpText);
-    if (!mcp.ok) {
-      // fail-closed：JSON 半截不提交，也不静默丢弃用户已写内容
-      setMcpError(mcp.error);
-      setLocalError('「8 · MCP 服务绑定」JSON 解析失败：' + mcp.error);
-      return;
+  function renderPane() {
+    switch (paneId) {
+      // ── 能力（5 子栏）──
+      case 'instr':
+        return <PromptSection data={data} patch={patch} isNew={isNew} />;
+      case 'skill':
+        return <SkillsSection agentId={agentId} isNew={isNew} />;
+      case 'mcp':
+        return (
+          <McpSection
+            text={draft.mcpText} setText={draft.setMcpText} error={draft.mcpError}
+          />
+        );
+      case 'int':
+        return (
+          <>
+            <div className="page-note" style={{ marginBottom: 8 }}>{IM_ANCHOR_NOTE}</div>
+            <IntegrationsSection agentId={agentId} isNew={isNew} />
+          </>
+        );
+      case 'know':
+        return (
+          <>
+            <KnowledgeSection agentId={agentId} isNew={isNew} />
+            <OrchestrationSection data={data} workflows={workflows} />
+          </>
+        );
+      // ── 设置（7 子栏；创建态裁掉探活与危险区）──
+      case 'gen':
+        return (
+          <>
+            <IdentitySection data={data} patch={patch} isNew={isNew} />
+            <DomainSection data={data} patch={patch} isNew={isNew} />
+            <RuntimeSection data={data} patch={patch} isNew={isNew} />
+            <ExecutionSection data={data} patch={patch} isNew={isNew} />
+          </>
+        );
+      case 'acc':
+        return <AccessSection data={data} patch={patch} isNew={isNew} />;
+      case 'env':
+        return <EnvVarsSection rows={draft.envRows} setRows={draft.setEnvRows} />;
+      case 'cli':
+        return <CliArgsSection items={draft.cliArgs} setItems={draft.setCliArgs} />;
+      case 'gate':
+        return <GateSection data={data} patch={patch} isNew={isNew} />;
+      case 'probe':
+        return <ProbeSection />;
+      case 'danger':
+        return (
+          <DangerSection agentId={agentId} agentName={data.name || (agent && agent.name)} onDelete={onDelete} />
+        );
+      default:
+        return null;
     }
-    setMcpError(null);
-
-    const originEnv = (agent && agent.custom_env && Object.keys(agent.custom_env).length)
-      ? agent.custom_env
-      : (agent && agent.model_config_json && agent.model_config_json.env_vars);
-    const envObj = envPayloadFromRows(envRows, originEnv);
-    const argsArr = cliArgsPayload(cliArgs);
-    const baseJson = (agent && agent.model_config_json) || {};
-    const modelConfigJson = Object.assign({}, baseJson, {
-      env_vars: envObj,
-      cli_args: argsArr,
-      mcp_servers: mcp.value,
-    });
-
-    const payload: any = {
-      name: data.name || '',
-      description: data.description || '',
-      runtime: data.runtime || '',
-      model_name: data.model_name || '',
-      system_prompt: data.system_prompt || '',
-      role_def: data.role_def || '',
-      sop: data.sop || '',
-      token_soft_limit: data.token_soft_limit,
-      token_hard_limit: data.token_hard_limit,
-      domain_id: (data.domain_id === undefined || data.domain_id === '') ? null : data.domain_id,
-      avatar_url: data.avatar_url || '',
-      thinking_level: data.thinking_level || '',
-      service_tier: data.service_tier || '',
-      model_config_json: modelConfigJson,
-      custom_env: envObj,
-      custom_args: argsArr,
-      mcp_config: mcp.value,
-    };
-
-    if (agentId) {
-      setSaving(true);
-      try {
-        const res = await fetch('/api/agents/' + agentId, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) {
-          // 后端 detail 原样透传（400「不支持的 runtime」/ 404 / 运行中不可删等），不改写成「保存失败」
-          const body = await res.json().catch(function () { return { detail: '保存失败 (' + res.status + ')' }; });
-          const detail = body && body.detail !== undefined ? body.detail : ('保存失败 (' + res.status + ')');
-          setLocalError(typeof detail === 'string' ? detail : JSON.stringify(detail));
-          return;
-        }
-      } catch (e: any) {
-        setLocalError('保存失败（网络错误）：' + ((e && e.message) || String(e)));
-        return;
-      } finally {
-        setSaving(false);
-      }
-    }
-
-    // 壳层仍需拿到同一份期望态（列表页用它刷新 / 关闭抽屉），保持既有 onSave 契约不变
-    onSave(payload);
-    setSavedAt(new Date().toLocaleTimeString('zh-CN'));
   }
-
-  const err = localError || saveError || null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <AnchorBar />
+      <div className="tab-bar sub" aria-label={group === 'cap' ? '能力子栏' : '设置子栏'}>
+        {panes.map(function (p) {
+          return (
+            <button key={p.id} type="button" aria-current={paneId === p.id ? 'page' : undefined}
+              className={'tab' + (paneId === p.id ? ' active' : '')}
+              onClick={function () { onSelectPane(p.id); }}>
+              {p.label}
+            </button>
+          );
+        })}
+      </div>
 
-      <IdentitySection data={data} patch={patch} isNew={isNew} />
-      <DomainSection data={data} patch={patch} isNew={isNew} />
-      <PromptSection data={data} patch={patch} isNew={isNew} />
-      <RuntimeSection data={data} patch={patch} isNew={isNew} />
-      <ExecutionSection data={data} patch={patch} isNew={isNew} />
-      <EnvVarsSection rows={envRows} setRows={setEnvRows} />
-      <CliArgsSection items={cliArgs} setItems={setCliArgs} />
-      <McpSection text={mcpText} setText={setMcpText} error={mcpError} />
-      <IntegrationsSection agentId={agentId} isNew={isNew} />
-      <SkillsSection agentId={agentId} isNew={isNew} />
-      <KnowledgeSection agentId={agentId} isNew={isNew} />
-      <OrchestrationSection data={data} workflows={workflows} />
-      <AccessSection data={data} patch={patch} isNew={isNew} />
-      <GateSection data={data} patch={patch} isNew={isNew} />
-      <ProbeSection />
-      <DangerSection agentId={agentId} agentName={data.name || (agent && agent.name)} onDelete={onDelete} />
-      {/* 附：既有「定时任务」能力，原型 16 区没有它，故不编号、不进锚点条（删掉会造成功能退化） */}
-      <ScheduledTasksSection agentId={agentId} isNew={isNew} />
+      {group === 'cap' ? (
+        <div className="page-note" style={{ margin: 0 }}>
+          保存语义分级：<span className="chip ok">低敏即存</span> 技能绑定 · 知识源 · IM 通道（行级即时落库，不受保存条影响）｜
+          <span className="chip warn">高敏草稿</span> 指令 · 环境变量 · CLI · MCP · 常规字段——切栏不丢，走底部「保存全部」一次落库。
+        </div>
+      ) : null}
 
-      {/* 保存条：页底一次提交（不分「自动保存」——本仓没有草稿槽端点，做自动保存会变成假三态） */}
-      <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {renderPane()}
+
+      {/* sticky 保存条：覆盖能力⇄设置两栏（草稿字段只在这两栏；概览/工作/记忆/对话不显示） */}
+      <div className="panel" style={{
+        display: 'flex', flexDirection: 'column', gap: 8,
+        position: 'sticky', bottom: 0, zIndex: 2,
+      }}>
         {err ? (
           <div role="alert" style={{ padding: '8px 12px', background: 'var(--red-bg)', border: '1px solid var(--red)', borderRadius: 4, color: 'var(--red)', fontSize: 12 }}>
             保存失败：{err}
           </div>
         ) : null}
         <div className="toolbar">
-          <button type="button" className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            <Save size={13} /> {saving ? '保存中…' : '保存全部'}
+          <button type="button" className="btn btn-primary" onClick={function () { void draft.commit(data, onSave); }} disabled={draft.saving}>
+            <Save size={13} /> {draft.saving ? '保存中…' : '保存全部'}
           </button>
-          <button type="button" className="btn btn-ghost" onClick={resetBlocks} disabled={saving}>
+          <button type="button" className="btn btn-ghost" onClick={draft.reset} disabled={draft.saving}>
             <RotateCcw size={13} /> 放弃改动
           </button>
-          {savedAt ? <span className="chip ok" role="status">{'已存 · ' + savedAt}</span> : null}
+          {draft.savedAt ? <span className="chip ok" role="status">{'已存 · ' + draft.savedAt}</span> : null}
+          {!draft.savedAt && draft.dirty ? <span className="chip warn">有未保存改动</span> : null}
           <span className="grow" />
           <span className="chip mono">{isNew ? '新建 · 未落库' : 'PUT /api/agents/' + agentId}</span>
         </div>

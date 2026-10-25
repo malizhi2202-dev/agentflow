@@ -113,7 +113,10 @@ interface CollabState {
     status?: string;
     triageState?: 'needs_triage' | 'triaged';
     assigneeKind?: 'member' | 'agent' | 'squad';
+    assigneeId?: string;
   }) => Promise<void>;
+  // v26：Agent 详情「工作」栏——按本 Agent 过滤，**不污染看板的全局 tasks 态**（只返回不 set）
+  fetchTasksForAgent: (agentId: number) => Promise<{ tasks: Task[]; error: string | null }>;
   createTask: (payload: {
     title: string; description?: string;
     assignee_kind?: 'member' | 'agent' | 'squad' | null; assignee_id?: string | null;
@@ -144,6 +147,7 @@ export const useCollab = create<CollabState>((set, get) => ({
     // 视图过滤（看板变体 board__af-109 / af-116）：受理态一轴、负责人轨一轴
     if (opts?.triageState) params.set('triage_state', opts.triageState);
     if (opts?.assigneeKind) params.set('assignee_kind', opts.assigneeKind);
+    if (opts?.assigneeId) params.set('assignee_id', opts.assigneeId);
     const qs = params.toString();
     const result = await safeFetch(`/api/tasks${qs ? `?${qs}` : ''}`);
     if (!result.ok) {
@@ -151,6 +155,13 @@ export const useCollab = create<CollabState>((set, get) => ({
       return;
     }
     set({ tasks: result.data?.tasks || [], tasksLoading: false, tasksError: null });
+  },
+
+  // v26：Agent 详情「工作」栏专用——只读本 Agent 相关任务，返回不写全局 tasks（避免与看板态互污）
+  fetchTasksForAgent: async (agentId) => {
+    const result = await safeFetch(`/api/tasks?assignee_kind=agent&assignee_id=${encodeURIComponent(String(agentId))}`);
+    if (!result.ok) return { tasks: [], error: result.error || '任务读取失败' };
+    return { tasks: (result.data?.tasks || []) as Task[], error: null };
   },
 
   createTask: async (payload) => {

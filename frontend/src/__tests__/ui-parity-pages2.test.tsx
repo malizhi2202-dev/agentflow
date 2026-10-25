@@ -1,23 +1,14 @@
 /**
- * ui-parity P2 用例：Agent 详情独立页（6.4）· 小队中心独立页（6.29）。
+ * ui-parity P2 用例：小队中心独立页（6.29）。
  *
- * AgentDetail 本体很重（多端点），这里用替身只验「选 Agent → 进入详情」的路由逻辑；
+ * （原「Agent 详情独立页（6.4）」describe 已随 v26-agent-ui 作废：侧栏二级入口与
+ *  AgentDetailPage.tsx 一起移除——列表点卡片即进详情壳，不再保留重复的「先选再看」入口。）
  * 小队页验真实端点：列表 / 成员 / 加成员 / 指派任务（POST）。
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { invalidateCache } from '../utils/requestDedup';
 
-vi.mock('../pages/AgentDetail', () => ({
-  default: ({ agent, onBack }: any) => (
-    <div>
-      <span>DETAIL:{agent.name}</span>
-      <button onClick={onBack}>返回列表</button>
-    </div>
-  ),
-}));
-
-import AgentDetailPage from '../pages/AgentDetailPage';
 import SquadsPage from '../pages/SquadsPage';
 import { useTeams } from '../stores/teams';
 
@@ -44,22 +35,6 @@ beforeEach(() => {
   invalidateCache(); vi.clearAllMocks();
   useTeams.setState({ teams: [], teamsError: null, teamsLoading: false, detail: null,
     detailError: null, detailLoading: false, squads: [], squadsError: null, squadsLoading: false });
-});
-
-describe('Agent 详情独立页（6.4）', () => {
-  it('列出 Agent；选中后进入详情，返回可回列表', async () => {
-    const calls = mockApi({
-      'GET /api/agents': { body: { agents: [{ id: 7, name: '巡检助手', status: 'running' }] } },
-      'GET /api/agents/7': { body: { id: 7, name: '巡检助手', status: 'running', runtime: 'hermes' } },
-    });
-    render(<AgentDetailPage />);
-    await waitFor(() => expect(screen.getByLabelText('Agent 列表')).toBeInTheDocument());
-    fireEvent.click(screen.getByLabelText('查看详情 巡检助手'));
-    await waitFor(() => expect(screen.getByText('DETAIL:巡检助手')).toBeInTheDocument());
-    expect(calls.some((c) => c.url === '/api/agents/7')).toBe(true);
-    fireEvent.click(screen.getByText('返回列表'));
-    await waitFor(() => expect(screen.getByLabelText('Agent 列表')).toBeInTheDocument());
-  });
 });
 
 describe('小队中心独立页（6.29）', () => {

@@ -6,10 +6,16 @@
  * 口径：**绑定 ≠ 授权**，前端只做动作与回显，不做权限判断。
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import AgentDetail from '../pages/AgentDetail';
 import { useRuntimes } from '../stores/runtimes';
 import { invalidateCache } from '../utils/requestDedup';
+
+/** v26：技能区现在住在「能力 → 技能」子栏——切到它（顶层栏在壳层 .tab-bar，子栏在「能力子栏」） */
+function gotoSkill() {
+  fireEvent.click(within(screen.getByLabelText('Agent 详情标签')).getByRole('button', { name: '能力' }));
+  fireEvent.click(within(screen.getByLabelText('能力子栏')).getByRole('button', { name: '技能' }));
+}
 
 const BOUND = [{ id: 11, name: 'code-review', type: 'skill', description: '代码审查' }];
 const ALL_SKILLS = [
@@ -62,6 +68,7 @@ describe('Agent 能力 · 技能', () => {
   it('AS-01 显示已绑定技能与数量', async () => {
     mockApi(ROUTES);
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} />);
+    gotoSkill();
     await waitFor(() => expect(screen.getByText('code-review')).toBeTruthy());
     expect(screen.getByText(/能力 · 技能（1）/)).toBeTruthy();
     expect(screen.getByRole('region', { name: '能力技能' })).toBeTruthy();
@@ -74,6 +81,7 @@ describe('Agent 能力 · 技能', () => {
       'POST /api/agents/7/tools': { body: { ok: true, tool_id: 12 } },
     });
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} />);
+    gotoSkill();
     const select = await screen.findByLabelText('选择要绑定的技能') as HTMLSelectElement;
     await waitFor(() => expect(Array.from(select.options).some((o) => o.value === '12')).toBe(true));
     fireEvent.change(select, { target: { value: '12' } });
@@ -89,6 +97,7 @@ describe('Agent 能力 · 技能', () => {
   it('AS-03 解绑已绑定技能', async () => {
     const calls = mockApi({ ...ROUTES, 'DELETE /api/agents/7/tools/11': { body: { ok: true } } });
     render(<AgentDetail agent={AGENT()} onBack={() => {}} onSave={() => {}} />);
+    gotoSkill();
     await waitFor(() => expect(screen.getByText('code-review')).toBeTruthy());
     fireEvent.click(screen.getByTitle('解绑 code-review'));
     await waitFor(() => expect(calls.some((c) => c.method === 'DELETE' && c.url === '/api/agents/7/tools/11')).toBe(true));
@@ -100,6 +109,7 @@ describe('Agent 能力 · 技能', () => {
   it('AS-04 新建时提示先保存，不发绑定请求', async () => {
     const calls = mockApi(ROUTES);
     render(<AgentDetail agent={{ name: '', description: '' }} onBack={() => {}} onSave={() => {}} />);
+    gotoSkill();
     await waitFor(() => expect(screen.getByText(/先保存 Agent/)).toBeTruthy());
     expect(calls.some((c) => c.url.indexOf('/tools') >= 0 && c.method !== 'GET')).toBe(false);
   });

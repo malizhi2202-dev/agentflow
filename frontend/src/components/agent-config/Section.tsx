@@ -1,12 +1,15 @@
 /**
- * 分区外壳与页首锚点条。
+ * 分区外壳与辅助件（v26-agent-ui 起：页首「分区直达」锚点条 AnchorBar 已退场）。
  *
- * 为什么需要外壳：十六个分区必须**同一个形态**（panel + 分区标题 + 说明 + 可选「未接入」标），
+ * 为什么需要外壳：各分区必须**同一个形态**（panel + 分区标题 + 说明 + 可选「未接入」标），
  * 否则每区各自写内联块就会重演「27 页 h1/19 页 h2 混用」那笔债。这里只暴露三个口子：
- * 锚点 id（与原型 secN 对齐）、编号标题、可选的「未接入」说明。
+ * 锚点 id（与升格原型 secN 对齐）、编号标题、可选的「未接入」说明。
+ *
+ * 为什么删了 AnchorBar：详情/创建改成分组 tab 后，「分区直达」的职责由 5+7 子栏承接
+ * （见 `components/agent-detail/panes.ts`）；`meta.ts` 的 SECTIONS 编号与 secN 锚点 id **保留**，
+ * 与原型 `agent-detail__config.html` 仍可逐字对照、深链 #secN 在所在子栏内依然有效。
  */
 import type { ReactNode } from 'react';
-import { SECTIONS, IM_ANCHOR_NOTE } from './meta';
 
 /** 分区外壳：`<section class="panel" id="secN">`，标题用 h3（页面名归壳层 .crumb，这里只是分区标题） */
 export function Section({ id, no, title, note, extra, children }: {
@@ -55,28 +58,5 @@ export function ReadRow({ label, value, mono }: { label: string; value: ReactNod
         {value}
       </span>
     </div>
-  );
-}
-
-/**
- * 页首「分区直达」锚点条。
- *
- * 16 条链接对应 16 个分区锚点；9A（集成 · IM 通道）不单列链接，用一条说明对齐原型编号
- * （见 meta.ts IM_ANCHOR_NOTE）。链接用真 `<a href="#...">`，因此浏览器原生跳转/复制 URL 都可用，
- * 不额外写 scrollIntoView 脚本。
- */
-export function AnchorBar() {
-  return (
-    <nav className="panel" aria-label="分区直达" style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
-      <span className="chip info">分区直达</span>
-      {SECTIONS.map(function (s) {
-        return (
-          <a key={s.id} href={'#' + s.id} className="chip" style={{ textDecoration: 'none' }}>
-            {s.no} {s.title}
-          </a>
-        );
-      })}
-      <span className="page-note" style={{ flexBasis: '100%', marginTop: 4 }}>{IM_ANCHOR_NOTE}</span>
-    </nav>
   );
 }
