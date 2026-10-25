@@ -107,8 +107,9 @@ class TestUserStore(_Db):
         self.assertFalse(user_store.available())
 
     def test_import_apply_roundtrips_all_fields(self):
+        row = _user_row("alice", "admin", must_change_password=True)
         with open(self.users_file, "w", encoding="utf-8") as f:
-            json.dump({"users": [_user_row("alice", "admin", must_change_password=True)]}, f)
+            json.dump({"users": [row]}, f)
         out = user_store.import_from_json(self.users_file, apply=True)
         self.assertTrue(out["applied"])
         self.assertTrue(user_store.available())
@@ -117,7 +118,14 @@ class TestUserStore(_Db):
         self.assertTrue(got["must_change_password"])
         self.assertEqual(got["project_ids"], ["p1"])
         self.assertEqual(got["custom_permissions"], ["task:read"])
-        self.assertTrue(got["password_hash"].startswith("$"))  # 哈希原样搬运，不重算
+        # 哈希原样搬运，不重算。**格式二分**：`passwords.py` 的设计是 argon2id 优先、
+        # 缺 argon2-cffi 时退 scrypt（合规兜底）。断言只锁「搬运的是合法哈希」，
+        # 不锁「本机装没装 argon2」——那是环境，不是代码不变量。
+        self.assertTrue(
+            got["password_hash"].startswith("$argon2") or got["password_hash"].startswith("scrypt$"),
+            f"口令哈希不是受支持的两种格式之一: {got['password_hash'][:16]!r}",
+        )
+        self.assertEqual(got["password_hash"], row["password_hash"])  # 原样搬运（不重算）
 
     def test_import_is_idempotent_and_prunes_removed_users(self):
         with open(self.users_file, "w", encoding="utf-8") as f:

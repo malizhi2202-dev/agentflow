@@ -54,8 +54,11 @@ def api_list_agents(status: str | None = None, domain_id: int | None = None, cap
 @router.post("")
 def api_create_agent(payload: dict, request: Request = None, db: Session = Depends(get_db)):
     user = _user(request)
-    # 验证 runtime
-    runtime = payload.get("runtime", "langgraph")
+    # 验证 runtime（D8：必填，不再默认 langgraph——§6.28 已清除运行时旧宇宙）
+    runtime = str(payload.get("runtime") or "").strip()
+    if not runtime:
+        raise HTTPException(status_code=400,
+                            detail="runtime 必填（取值来自运行时发现注册表 /api/runtimes）")
     if runtime not in SUPPORTED_RUNTIMES:
         raise HTTPException(status_code=400, detail=f"不支持的 runtime: '{runtime}'。支持: {sorted(SUPPORTED_RUNTIMES)}")
     # provider 不再由表单提交：按运行时推导（显式传入仍校验）。凭据不再收（api_key 字段已裁撤）。

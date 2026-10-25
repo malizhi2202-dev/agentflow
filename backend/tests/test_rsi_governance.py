@@ -120,7 +120,7 @@ class TestCategorySwitches(_Base):
         self.assertTrue(all(s["enabled"] for s in items))
 
     def test_paused_memory_blocks_propose(self):
-        rsi.set_switch(self.db, "memory", False, "root")
+        rsi.set_switch(self.db, "memory", False, "root", reason="治理演练暂停")
         with self.assertRaises(rsi.GateError) as ctx:
             self._mem()
         self.assertIn("自动体已暂停", str(ctx.exception))
@@ -134,7 +134,7 @@ class TestCategorySwitches(_Base):
                           golden_set_frozen=True, cross_vendor=True,
                           pass_rate=0.9, baseline=0.5)
         self.assertEqual(proposal.status, "awaiting_approval")
-        rsi.set_switch(self.db, "orchestration", False, "root")
+        rsi.set_switch(self.db, "orchestration", False, "root", reason="治理演练暂停")
         with self.assertRaises(rsi.GateError):
             rsi.create_proposal(self.db, title="t2", dimension="invariant",
                                 surface_name="agent-config", target="prompts/p2.md")
@@ -142,7 +142,7 @@ class TestCategorySwitches(_Base):
             rsi.publish(self.db, proposal, "root", is_admin=True)
 
     def test_resume_allows_again(self):
-        rsi.set_switch(self.db, "memory", False, "root")
+        rsi.set_switch(self.db, "memory", False, "root", reason="治理演练暂停")
         rsi.set_switch(self.db, "memory", True, "root")
         self.assertTrue(self._mem()["stored"])
 
@@ -208,13 +208,15 @@ class TestSwitchRoute(_Base):
         self.assertEqual(r.status_code, 403)
 
     def test_admin_pause_writes_audit_with_phrase(self):
-        r = self._client("root").post("/api/rsi/switches/memory", json={"enabled": False})
+        r = self._client("root").post("/api/rsi/switches/memory", json={"enabled": False, "reason": "演练暂停"})
         self.assertEqual(r.status_code, 200, r.text)
         self.assertEqual(r.json()["switch"]["label"], "自动体已暂停")
         with open(self.audit_file, encoding="utf-8") as f:
             lines = [json.loads(x) for x in f if x.strip()]
         entry = [x for x in lines if x["action"] == "rsi:switch"][-1]
-        self.assertEqual(entry["detail"], "自动体已暂停")
+        # D11：短语必须出现（审计落可见态）；原因追加在短语之后（人批动作留痕）
+        self.assertTrue(entry["detail"].startswith("自动体已暂停"), entry["detail"])
+        self.assertIn("演练暂停", entry["detail"])
         self.assertEqual(entry["target"], "memory")
 
     def test_switch_list_exposes_four_categories(self):

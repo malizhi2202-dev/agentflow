@@ -168,8 +168,19 @@ describe('记忆 tab', () => {
     fireEvent.click(screen.getByText(/自动化治理/));
     await waitFor(() => expect(screen.getByText('memory：')).toBeInTheDocument());
 
+    // D11：停用是必须人批的动作 → 前端 prompt 收因；先证「取消（空原因）= 不提交」
+    const promptSpy = vi.spyOn(window, 'prompt').mockReturnValue('');
+    fireEvent.click(screen.getByText('memory：'));
+    expect(promptSpy).toHaveBeenCalled();
+    expect(calls.some((c) => c.method === 'POST' && c.url === '/api/rsi/switches/memory')).toBe(false);
+    promptSpy.mockReturnValue('演练暂停');
     fireEvent.click(screen.getByText('memory：'));
     await waitFor(() => expect(calls.some((c) => c.method === 'POST' && c.url === '/api/rsi/switches/memory')).toBe(true));
+    // 提交体必须携带原因（服务端 400 是第二道，前端不许漏发）
+    const swPost = calls.find((c) => c.method === 'POST' && c.url === '/api/rsi/switches/memory');
+    expect(swPost).toBeDefined();
+    expect(swPost!.body).toMatchObject({ enabled: false, reason: '演练暂停' });
+    promptSpy.mockRestore();
 
     fireEvent.click(screen.getByText('复位'));
     expect(screen.getByText('确认复位')).toBeInTheDocument();

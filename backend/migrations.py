@@ -777,6 +777,195 @@ def m025_automations_center(conn, dialect: str) -> None:
                             "automation_deliveries", "automation_id")
 
 
+def m026_memory_dimensions_and_manifests(conn, dialect: str) -> None:
+    """D1/D2/D3：记忆表的两个正交维度补齐 + 可改面声明对象补结构字段。
+
+    D1（记忆表三处枚举）：设计 §3.3 要求「层级 + **内容域**（与层级正交）+ **生命周期**」三件事，
+    代码只落了层级，且把**晋升状态**占用了 `status` 列。裁定（v24-doc-refresh RULINGS）：
+    两个维度都要有，**列名以不破坏既有 API/UI 契约为约束**——
+    - `status` **保持晋升状态**语义（`GET /api/rsi/memories?status=` 与前端 `MEMORY_STATUSES` 是已发布契约）
+    - 新增 `life_status` 承载**生命周期**（active / revoked / stale-flagged）
+    - 新增 `domain` 承载**内容域**（semantic / procedural / preference / instruction / rule），与层级正交
+    D2：补 `content` / `confidence` / `quarantine_until`（静置期时间列）/ 来源链**真外键**两列。
+    D3：`surface_manifests` 补设计要求的四个结构字段（本档称「非表」，代码已建表 → 补字段而非拆表）。
+    """
+    # ── memories ──
+    add_column_if_missing(conn, dialect, "memories", "domain", "VARCHAR(32) NOT NULL DEFAULT 'semantic'")
+    add_column_if_missing(conn, dialect, "memories", "life_status", "VARCHAR(16) NOT NULL DEFAULT 'active'")
+    add_column_if_missing(conn, dialect, "memories", "content", "TEXT")
+    add_column_if_missing(conn, dialect, "memories", "confidence", "FLOAT")
+    add_column_if_missing(conn, dialect, "memories", "quarantine_until", "DATETIME")
+    # 来源链真外键：设计要求「来源 run / 会话 id」。旧列 source_ref 保留兼容（外部引用/历史行）。
+    add_column_if_missing(conn, dialect, "memories", "source_run_id",
+                          "INTEGER REFERENCES work_item_runs(id)")
+    add_column_if_missing(conn, dialect, "memories", "source_conversation_id",
+                          "INTEGER REFERENCES conversations(id)")
+    for index, col in (
+        ("ix_memories_domain", "domain"),
+        ("ix_memories_life_status", "life_status"),
+        ("ix_memories_source_run_id", "source_run_id"),
+        ("ix_memories_source_conversation_id", "source_conversation_id"),
+    ):
+        create_index_if_missing(conn, dialect, index, "memories", col)
+
+    # ── surface_manifests（可改面声明对象的四个结构字段）──
+    add_column_if_missing(conn, dialect, "surface_manifests", "path_pattern", "VARCHAR(512)")
+    add_column_if_missing(conn, dialect, "surface_manifests", "cap_bytes", "INTEGER")
+    add_column_if_missing(conn, dialect, "surface_manifests", "structure_rules", "TEXT")
+    add_column_if_missing(conn, dialect, "surface_manifests", "exclusions", "TEXT")
+
+
+def drop_index_if_exists(conn, dialect: str, index: str, table: str | None = None) -> bool:
+    """删索引（幂等）。MySQL 的 DROP INDEX 语法要带 ON <table>。"""
+    if not _index_exists(conn, dialect, index, table or ""):
+        return False
+    if _is_sqlite(dialect):
+        conn.cursor().execute(f"DROP INDEX {index}")
+    else:
+        conn.cursor().execute(f"DROP INDEX {index} ON {table}")
+    return True
+
+
+def m027_improvement_proposals_rename(conn, dialect: str) -> None:
+    """D4：提案表名统一 + 补齐设计 §3.3 的五个字段。
+
+    设计 §3.3 的表名是 `improvement_proposals`，代码里是 `orchestration_proposals`——
+    **一条口径只活在一个地方**，表名必须统一（这里统一到设计侧的名字）。
+
+    同时补设计的五个列（`proposal_diff` / `probe_pack` / `seed` / `blind_rank` /
+    `fell_back`）：原先证据包只落在一个 `probe_json` 单串里，**不可按字段查询**。
+    维度取值保留代码的可读写法 `invariant` / `domain`（与设计的 `INV` / `DOM` 等价），
+    不为字面改数据——等价映射写进设计口径。
+
+    兼容两条路径：
+    - 老库（表名是旧的）→ 重命名 + 加列 + 迁索引；
+    - 新库（`create_all` 已按 ORM 建出新表名，旧表被历史迁移 013 建出来且为空）→ 搬空表后删旧表。
+    """
+    old, new = "orchestration_proposals", "improvement_proposals"
+    has_old, has_new = _table_exists(conn, dialect, old), _table_exists(conn, dialect, new)
+    if has_old and not has_new:
+        conn.cursor().execute(f"ALTER TABLE {old} RENAME TO {new}")
+    elif has_old and has_new:
+        # 两条路径都建过表：把旧表的行补进新表（按 id 去重），再删旧表
+        old_cols = _columns(conn, dialect, old)
+        new_cols = _columns(conn, dialect, new)
+        shared = [c for c in old_cols if c in new_cols and c != "id"]
+        if shared:
+            cols_sql = ", ".join(shared)
+            conn.cursor().execute(
+                f"INSERT INTO {new} ({cols_sql}) SELECT {cols_sql} FROM {old} "
+                f"WHERE id NOT IN (SELECT id FROM {new})"
+            )
+        conn.cursor().execute(f"DROP TABLE {old}")
+    # 五个设计列
+    add_column_if_missing(conn, dialect, new, "proposal_diff", "TEXT")
+    add_column_if_missing(conn, dialect, new, "probe_pack", "TEXT")
+    add_column_if_missing(conn, dialect, new, "seed", "INTEGER")
+    add_column_if_missing(conn, dialect, new, "blind_rank", "INTEGER")
+    add_column_if_missing(conn, dialect, new, "fell_back", "INTEGER DEFAULT 0")
+    # 索引：老名换新名（SQLite 不支持改索引名 → 建新的、删旧的）。
+    # 重命名后老索引挂在**新表**上（表名变了、索引名没变），所以按新表去删。
+    for col in ("dimension", "surface_name", "status"):
+        create_index_if_missing(conn, dialect, f"ix_improvement_proposals_{col}", new, col)
+        drop_index_if_exists(conn, dialect, f"ix_orchestration_proposals_{col}", new)
+
+
+def m028_governance_ledgers(conn, dialect: str) -> None:
+    """D5：三张治理账表——探针证据包 / 作业预算账 / 规则版本账。
+
+    设计 §3.3 与 §6.30 C/E/I：
+    - `probe_evidence`：探针证据包（盲评位次 + 证据三件套 diff/trajectory/produced +
+      原始资料 source_ref + `evidence` ∈ {trajectory, deliverable} + `similarity_mean`
+      两两行级 Jaccard 均值，塌缩探测输入）。**全表无打分级字段**——把差异摆成布局
+      交给模型读，**代码不写打分器**。
+    - `exec_ledgers`：作业预算账（恒等式断言**事前写死**：批形状 k base + 2k 候选 +
+      k 终身，参数由预算帽生成器定 → expected_*；actual_* 是实际发生；
+      `budget_error` 预算偏差；`dup_label` 等式不符或标签重复=**批次失败**，不是事后账单；
+      `fp_mark` / `cache_digest` 执行指纹幂等：不同配置绝不复用旧证据、配置漂移拒续跑）。
+    - `rule_versions`：规则版本**不可变行账**（每版一行快照 + 理由 + 创建人）。
+      运行史每行带 `spec_version`；界面显示 v1…vN + 版本 diff 只读 +「为何停用」可查；
+      **不删被引用中的旧快照**（时间线要能复盘当时的规则）。
+    """
+    pk = _pk_clause(dialect)
+
+    create_table_if_missing(conn, dialect, "probe_evidence",
+        f"id {pk}, proposal_id INTEGER NOT NULL, label VARCHAR(64), "
+        "diff_ref VARCHAR(512), trajectory_ref VARCHAR(512), produced_ref VARCHAR(512), "
+        "source_ref VARCHAR(256), evidence VARCHAR(16) DEFAULT 'trajectory', "
+        "similarity_mean FLOAT, created_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_probe_evidence_proposal_id",
+                            "probe_evidence", "proposal_id")
+
+    create_table_if_missing(conn, dialect, "exec_ledgers",
+        f"id {pk}, scope VARCHAR(256) NOT NULL, "
+        "expected_rollouts INTEGER DEFAULT 0, expected_sessions INTEGER DEFAULT 0, "
+        "actual_rollouts INTEGER DEFAULT 0, actual_sessions INTEGER DEFAULT 0, "
+        "budget_error FLOAT, dup_label VARCHAR(256), fp_mark VARCHAR(128), "
+        "cache_digest VARCHAR(128), created_at DATETIME")
+    create_index_if_missing(conn, dialect, "ix_exec_ledgers_scope", "exec_ledgers", "scope")
+
+    create_table_if_missing(conn, dialect, "rule_versions",
+        f"id {pk}, automation_id INTEGER NOT NULL, version INTEGER NOT NULL, "
+        "spec_json TEXT, reason VARCHAR(512), created_by VARCHAR(64), created_at DATETIME, "
+        "UNIQUE(automation_id, version)")
+    create_index_if_missing(conn, dialect, "ix_rule_versions_automation_id",
+                            "rule_versions", "automation_id")
+
+
+def m029_automation_kind_and_keys(conn, dialect: str) -> None:
+    """D6/D7：自动化触发器加 `api` 型 · 投递账两键分开记账 · 自动化加小队引用列。
+
+    - D6：`automation_triggers.kind` ∈ {schedule, webhook, **api**}——api 型是我方自扩展通道，
+      设计明写「收口成本限定在 kind 枚举一处」（列本身是 VARCHAR，无需改 schema，只放开取值）。
+    - D6：`webhook_deliveries`（代码表名 `automation_deliveries`）**两键分开记账**：
+      `idem_key`（通用 Idempotency-Key）与 `delivery_key`（GitHub X-GitHub-Delivery）
+      各一列——**不能合成一个键**（合成 = 一方来键会吃掉另一方的投递）。
+      旧的 `dedup_key` 列保留兼容，新写入不再依赖它。
+    - D7：不另加引用列——`owner_track="squad" + owner_id_ref` 就是存在指向（两轨负责人），
+      级联查询沿它走（`disable_for_squad`）。本迁移只补两键列。
+    """
+    add_column_if_missing(conn, dialect, "automation_deliveries", "idem_key",
+                          "VARCHAR(128)")
+    add_column_if_missing(conn, dialect, "automation_deliveries", "delivery_key",
+                          "VARCHAR(128)")
+    for index, col in (
+        ("ix_automation_deliveries_idem_key", "idem_key"),
+        ("ix_automation_deliveries_delivery_key", "delivery_key"),
+    ):
+        create_index_if_missing(conn, dialect, index, "automation_deliveries", col)
+
+
+def m030_golden_sets(conn, dialect: str) -> None:
+    """D10：金标集实体表——「冻结金标 + 异厂系 judge」从**调用方自报布尔**升级为**平台按实体校验**。
+
+    设计 R7-1 终身门：影子重放必须用**冻结的金标**、judge 必须**异厂**。
+    现状是 `golden_set_frozen`/`cross_vendor` 两个入参布尔（`rsi_api.py:229-230`），
+    平台不校验——等于门禁可被自报绕过。本迁移落实体：
+    - `golden_sets`：金标集（cases_json）+ `frozen`（冻结由管理员动作置位，记 frozen_at/by）
+      + `produced_by`（金标产出厂牌——异厂判定基准：judge 厂牌 == produced_by ⇒ 拒绝，fail-closed）
+      + `eval_mark`（内容指纹：防污染闸的比对物，`rsi_service._pollution_scan` 之外的结构面）。
+    """
+    pk = _pk_clause(dialect)
+    create_table_if_missing(conn, dialect, "golden_sets",
+        f"id {pk}, name VARCHAR(128) NOT NULL, kind VARCHAR(32) DEFAULT 'eval_set', "
+        "cases_json TEXT DEFAULT '[]', produced_by VARCHAR(64) DEFAULT '', "
+        "frozen BOOLEAN DEFAULT 0, frozen_at DATETIME, frozen_by VARCHAR(64) DEFAULT '', "
+        "eval_mark VARCHAR(128) DEFAULT '', owner_id VARCHAR(64) DEFAULT '', "
+        "created_at DATETIME, UNIQUE(name)")
+    create_index_if_missing(conn, dialect, "ix_golden_sets_name", "golden_sets", "name")
+
+
+def m031_rsi_switch_reason(conn, dialect: str) -> None:
+    """D11：`rsi_switches` 补「操作必填原因」——设计 §3.3/§6.30 E 的状态转换层纪律。
+
+    停用类目是「必须人批」的动作：原因进列、进审计，不靠提示词（CLAUDE.md 纪律）。
+    （「四类目 + 全局一行」的全局行本轮仍挂账：前端已按「无总闸端点、逐类目」如实呈现，
+    全局行改动面涉及前端聚合语义，另行批次收口。）
+    """
+    add_column_if_missing(conn, dialect, "rsi_switches", "last_reason", "VARCHAR(512)")
+    add_column_if_missing(conn, dialect, "rsi_switches", "last_actor", "VARCHAR(64)")
+
+
 MIGRATIONS: list[Migration] = [
     ("001_agent_memories_domain_id", "agent_memories 增加 domain_id（域归属）", m001_agent_memories_domain_id),
     ("002_knowledge_sources_status_file_path", "knowledge_sources 增加 status/file_path", m002_knowledge_sources_status_file_path),
@@ -804,6 +993,12 @@ MIGRATIONS: list[Migration] = [
     ("023_agent_extra_fields", "Agent 迁移补齐字段（avatar/custom_env/自定义参数/mcp/thinking/服务档/工具白名单）", m023_agent_extra_fields),
     ("024_agent_tools", "Agent ↔ 工具/技能 关联表（multica agent_skill 落点）", m024_agent_tools),
     ("025_automations_center", "自动化中心四表（Runbook/负责人/触发器 + 两级账本，P3-1）", m025_automations_center),
+    ("026_memory_dimensions_and_manifests", "记忆表补内容域/生命周期/正文/置信度/静置期/来源链真外键 + 可改面补四个结构字段（D1/D2/D3）", m026_memory_dimensions_and_manifests),
+    ("027_improvement_proposals_rename", "提案表名统一为 improvement_proposals + 补五列（D4）", m027_improvement_proposals_rename),
+    ("028_governance_ledgers", "三张治理账表：探针证据包 / 作业预算账 / 规则版本账（D5）", m028_governance_ledgers),
+    ("029_automation_kind_and_keys", "自动化：api 型触发器 / 投递两键分开记账 / 小队引用列（D6/D7）", m029_automation_kind_and_keys),
+    ("030_golden_sets", "金标集实体表：冻结/厂牌/指纹落库，影子门改平台校验（D10）", m030_golden_sets),
+    ("031_rsi_switch_reason", "类目开关补必填原因与操作人列（D11）", m031_rsi_switch_reason),
 ]
 
 
@@ -844,3 +1039,112 @@ def apply_migrations(conn, dialect: str, migrations: Iterable[Migration] | None 
         applied.append(version)
     conn.commit()
     return applied
+
+
+# ── 回滚（D9：波 0 判据「可回滚」的兑现）────────────────────
+#
+# 机制：`DOWN` 登记「版本 → 回滚函数」；`rollback_to()` 从账上最高版**逐版逆序**回滚，
+# 每版执行 down 并删除账行（之后 `apply_migrations` 可幂等重放）。
+# **没登记 down 的版本显式拒绝**（`RollbackNotSupported`）——与执行隔离同一精神：
+# 不假装能回滚。001–025 属历史迁移（部分含整表重建，不可逆），按需补 down，不冒充全量。
+
+class RollbackNotSupported(RuntimeError):
+    """该版本未登记 down，或目标区间内含未登记版本：显式拒绝，不静默半回滚。"""
+
+
+def drop_column_if_exists(conn, dialect: str, table: str, column: str) -> bool:
+    if not _table_exists(conn, dialect, table):
+        return False
+    if column not in _columns(conn, dialect, table):
+        return False
+    conn.cursor().execute(f"ALTER TABLE {table} DROP COLUMN {column}")
+    return True
+
+
+def drop_table_if_exists(conn, dialect: str, table: str) -> bool:
+    if not _table_exists(conn, dialect, table):
+        return False
+    conn.cursor().execute(f"DROP TABLE {table}")
+    return True
+
+
+def _down_026(conn, dialect: str) -> None:
+    # 先删索引再删列：SQLite 的 DROP COLUMN 不会带走该列上的索引（留下悬空即报错）
+    for index in ("ix_memories_domain", "ix_memories_life_status",
+                  "ix_memories_source_run_id", "ix_memories_source_conversation_id"):
+        drop_index_if_exists(conn, dialect, index, "memories")
+    for col in ("domain", "life_status", "content", "confidence", "quarantine_until",
+                "source_run_id", "source_conversation_id"):
+        drop_column_if_exists(conn, dialect, "memories", col)
+    for col in ("path_pattern", "cap_bytes", "structure_rules", "exclusions"):
+        drop_column_if_exists(conn, dialect, "surface_manifests", col)
+
+
+def _down_027(conn, dialect: str) -> None:
+    for col in ("proposal_diff", "probe_pack", "seed", "blind_rank", "fell_back"):
+        drop_column_if_exists(conn, dialect, "improvement_proposals", col)
+    if _table_exists(conn, dialect, "improvement_proposals"):
+        conn.cursor().execute("ALTER TABLE improvement_proposals RENAME TO orchestration_proposals")
+
+
+def _down_028(conn, dialect: str) -> None:
+    for table in ("probe_evidence", "exec_ledgers", "rule_versions"):
+        drop_table_if_exists(conn, dialect, table)
+
+
+def _down_029(conn, dialect: str) -> None:
+    for index in ("ix_automation_deliveries_idem_key",
+                  "ix_automation_deliveries_delivery_key"):
+        drop_index_if_exists(conn, dialect, index, "automation_deliveries")
+    for col in ("idem_key", "delivery_key"):
+        drop_column_if_exists(conn, dialect, "automation_deliveries", col)
+
+
+def _down_030(conn, dialect: str) -> None:
+    drop_table_if_exists(conn, dialect, "golden_sets")
+
+
+def _down_031(conn, dialect: str) -> None:
+    for col in ("last_reason", "last_actor"):
+        drop_column_if_exists(conn, dialect, "rsi_switches", col)
+
+
+DOWN: dict[str, Callable[[object, str], None]] = {
+    "031_rsi_switch_reason": _down_031,
+    "026_memory_dimensions_and_manifests": _down_026,
+    "027_improvement_proposals_rename": _down_027,
+    "028_governance_ledgers": _down_028,
+    "029_automation_kind_and_keys": _down_029,
+    "030_golden_sets": _down_030,
+}
+
+
+def rollback_to(conn, dialect: str, target_version: str,
+                migrations: Iterable[Migration] | None = None) -> list[str]:
+    """把已应用迁移逐版回滚到 `target_version`（**不含**它，即它保持已应用）。
+
+    - 先全量预检：回滚区间内任何一版没登记 down → 立刻 `RollbackNotSupported`，
+      **一版都不动**（不做「回滚到一半发现不行」的半截状态）。
+    - 成功路径：逆序执行 down + 从账本删行；返回本次回滚的版本列表（新→旧）。
+    """
+    _ensure_ledger(conn, dialect)
+    known = [v for v, _d, _f in (migrations or MIGRATIONS)]
+    done = applied_versions(conn, dialect)
+    if target_version not in known:
+        raise RollbackNotSupported(f"目标版本不在账本词汇表里：{target_version!r}")
+    # 需要回滚的 = 已应用且排在 target 之后的版本，逆序（账上有、词汇表没有的不动它）
+    to_undo = [v for v in done if v in known
+               and known.index(v) > known.index(target_version)][::-1]
+    missing = [v for v in to_undo if v not in DOWN]
+    if missing:
+        raise RollbackNotSupported(
+            f"以下版本未登记 down，拒绝半截回滚：{missing}（001–025 属历史迁移，按需补登记）")
+    rolled_back: list[str] = []
+    ph = "%s" if dialect == "mysql" else "?"
+    for version in to_undo:
+        DOWN[version](conn, dialect)
+        conn.cursor().execute(
+            f"DELETE FROM {LEDGER} WHERE version = {ph}", (version,))
+        rolled_back.append(version)
+    conn.commit()
+    return rolled_back

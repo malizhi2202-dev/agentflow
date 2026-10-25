@@ -7,6 +7,15 @@ class Base(DeclarativeBase):
 
 
 from models.tool import Tool  # noqa: E402, F401
+from models.agent_tool import AgentTool  # noqa: E402, F401
+from models.runtime_registry import RuntimeRegistry  # noqa: E402, F401
+from models.automation import (  # noqa: E402, F401
+    Automation,
+    AutomationTrigger,
+    AutomationRun,
+    AutomationDelivery,
+    RuleVersion,
+)
 from models.workflow import Workflow, WorkflowSnapshot  # noqa: E402, F401
 from models.agent import Agent  # noqa: E402, F401
 from models.knowledge_source import KnowledgeSource  # noqa: E402, F401
@@ -36,7 +45,10 @@ from models.attribution import DomainAttributionPolicy  # noqa: E402, F401
 from models.declarative import ChangeLog, ResourceCondition  # noqa: E402, F401
 from models.rsi import (  # noqa: E402, F401
     BreakerState,
+    ExecLedger,
+    GoldenSet,
     Memory,
+    ProbeEvidence,
     PromotionReview,
     Proposal,
     RsiSwitch,

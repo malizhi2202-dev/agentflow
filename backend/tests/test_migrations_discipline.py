@@ -1,8 +1,10 @@
-"""迁移纪律（v21 T-06）：本仓迁移是 **expand-only**，没有 down 迁移。
+"""迁移纪律（v21 T-06 · v24-doc-refresh D9 收口）：**up 迁移 expand-only**；
+down 是**显式登记的逃生门**（`migrations.DOWN`，026 起按需登记），不是常规路径。
 
-为什么不是「写一批 down」：主档 P0-8 与 `migrations.py` 文档明确采用 **fix-forward**——
-只加列/建表/建索引，不 drop、不改类型；回滚手段 = 修一个新迁移，而不是 undo。
-因此这一组用例守的是「纪律不被动摇」而不是「down 能跑」：
+主纪律仍是 **fix-forward**（主档 P0-8 与 `migrations.py` 文档）：前滚只加列/建表/建索引，
+不 drop、不改类型；常规回滚手段 = 修一个新迁移。D9 对「波 0 判据可回滚」的兑现方式 =
+提供 `rollback_to()` 机制 + 「未登记 down 的版本显式拒绝」（不假装全量可 undo）。
+因此这一组用例守的是：
 
 1. 迁移函数里不得出现破坏性 SQL（DROP TABLE / DROP COLUMN / RENAME COLUMN / TRUNCATE）；
 2. 每个迁移单独跑两次是幂等的（重复执行无副作用）——这是 fix-forward 的前提；
@@ -34,10 +36,19 @@ FORBIDDEN = ("DROP COLUMN", "TRUNCATE", "DELETE FROM")
 
 class TestMigrationDiscipline(unittest.TestCase):
     def test_no_forbidden_destructive_sql(self):
+        """扫描范围 = **up 区**（回滚标记之前）。down 区允许 DROP——它是登记的逃生门。"""
         with open(migrations.__file__, encoding="utf-8") as f:
-            src = f.read().upper()
-        offenders = [kw for kw in FORBIDDEN if kw in src]
-        self.assertEqual(offenders, [], f"迁移里出现禁止的破坏性 SQL: {offenders}")
+            src = f.read()
+        marker = "\u2500\u2500 回滚（D9"
+        self.assertIn(marker, src, "回滚区标记必须存在（纪律边界）")
+        up_src = src.split(marker)[0].upper()
+        offenders = [kw for kw in FORBIDDEN if kw in up_src]
+        self.assertEqual(offenders, [], f"up 迁移里出现禁止的破坏性 SQL: {offenders}")
+
+    def test_down_registered_only_for_allowed_versions(self):
+        """down 是逃生门不是常规：只允许 026 起（v24 批次）登记；历史 001–025 未登记。"""
+        for v in migrations.DOWN:
+            self.assertGreaterEqual(int(v[:3]), 26, f"{v} 属历史迁移，不应有 down")
 
     def test_plain_drop_table_is_rebuild_or_retired_legacy(self):
         """`DROP TABLE x`（无 IF EXISTS）只允许：表重建（后面会 RENAME 回同名）或登记过的历史表。"""

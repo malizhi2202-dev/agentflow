@@ -23,6 +23,10 @@ if "sqlite" in DATABASE_URL:
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA journal_mode=WAL")
         cursor.execute("PRAGMA synchronous=NORMAL")
+        # SQLite 默认**不执行**外键约束（MySQL 一直执行）——不打开则设计 §3.3 的
+        # 「day-1 真外键」在本地档只是名义上的。打开它，让 SQLite 与权威档行为一致。
+        # 注意：PRAGMA 必须逐连接设置，且不能在建表事务里改。
+        cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

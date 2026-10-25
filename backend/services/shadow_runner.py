@@ -8,6 +8,8 @@
 """
 from __future__ import annotations
 
+import json
+
 from sqlalchemy.orm import Session
 
 from services import rsi_service
@@ -36,7 +38,8 @@ def score_cases(cases: list[dict]) -> float:
 
 def run_shadow(db: Session, proposal, *, cases: list[dict], judge_model: str,
                golden_set_frozen: bool, cross_vendor: bool,
-               baseline: float = 0.0, scorer=None, judge_kind: str = "exact_match") -> dict:
+               baseline: float = 0.0, scorer=None, judge_kind: str = "exact_match",
+               golden_set_id: int | None = None) -> dict:
     if not (judge_model or "").strip():
         raise RunnerError("judge_model 不能为空（影子门要求标明评审模型）")
     pass_rate = (scorer or score_cases)(cases)
@@ -45,6 +48,7 @@ def run_shadow(db: Session, proposal, *, cases: list[dict], judge_model: str,
         db, proposal,
         judge_model=judge_model.strip(), golden_set_frozen=golden_set_frozen,
         cross_vendor=cross_vendor, pass_rate=pass_rate, baseline=float(baseline or 0.0),
+        golden_set_id=golden_set_id,
     )
     return {
         "pass_rate": pass_rate,
@@ -52,6 +56,9 @@ def run_shadow(db: Session, proposal, *, cases: list[dict], judge_model: str,
         "delta": round(pass_rate - float(baseline or 0.0), 4),
         "cases": len(cases),
         "judge_kind": judge_kind,      # exact_match 或 llm_judge（由调用方显式选择）
+        # D10：门禁凭据口径——platform_validated（账上金标集校验）或 self_declared（旧布尔门）
+        "gate_evidence": (json.loads(proposal.shadow_json or "{}").get("gate_evidence")
+                          or "self_declared"),
         "dry_run": judge_kind == "exact_match",
         "proposal": proposal.to_dict(),
     }

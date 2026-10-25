@@ -22,8 +22,10 @@ def _user(request: Request) -> dict:
 
 
 def _require_owner_or_admin(tool, user: dict):
+    # §7 / CLAUDE.md 硬纪律：**越权与「资源不存在」统一 404**，避免用状态码探测他人资源。
+    # （原先回 403「无权操作此工具」= 承认该 tool_id 存在——可探测。）
     if user.get("role") != "admin" and tool.owner_id != user["id"]:
-        raise HTTPException(status_code=403, detail="无权操作此工具")
+        raise HTTPException(status_code=404, detail="工具不存在")
 
 
 @router.get("")

@@ -73,7 +73,7 @@ interface RsiState {
   quarantine: (sourceRef: string) => Promise<WriteResult>;
   fetchDecay: (days: number) => Promise<void>;
   fetchGovernance: () => Promise<void>;
-  setSwitch: (category: string, enabled: boolean) => Promise<WriteResult>;
+  setSwitch: (category: string, enabled: boolean, reason?: string) => Promise<WriteResult>;
   resetBreaker: (name: string) => Promise<WriteResult>;
   tripBreaker: (name: string, reason: string) => Promise<WriteResult>;
   fetchProposals: (status?: string) => Promise<void>;
@@ -167,8 +167,9 @@ export const useRsi = create<RsiState>((set, get) => ({
     });
   },
 
-  setSwitch: async (category, enabled) => {
-    const out = await writeJson(`/api/rsi/switches/${category}`, { enabled });
+  setSwitch: async (category, enabled, reason) => {
+    const out = await writeJson(`/api/rsi/switches/${category}`,
+                                { enabled, ...(reason ? { reason } : {}) });
     await get().fetchGovernance();
     return out;
   },

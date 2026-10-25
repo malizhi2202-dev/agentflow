@@ -75,7 +75,18 @@ function GovernanceFold({ open, onToggle }: { open: boolean; onToggle: () => voi
               {switches.map((sw: Switch) => (
                 <button key={sw.category} className="btn btn-ghost btn-sm"
                         title={sw.enabled ? '点击暂停该类自动体' : '点击恢复'}
-                        onClick={() => run(() => setSwitch(sw.category, !sw.enabled))}
+                        onClick={() => {
+                          // D11：停用是必须人批的动作——原因必填（服务端 400 是第二道）。
+                          // 空答案 = 取消操作，不自动代填原因。
+                          if (sw.enabled) {
+                            const reason = window.prompt(`暂停「${sw.category}」自动体：请填写原因（入审计）`, '');
+                            if (!reason || !reason.trim()) return;
+                            run(() => setSwitch(sw.category, false, reason.trim()));
+                          } else {
+                            // 恢复不强制原因（服务端只约束停用），不代填假原因
+                            run(() => setSwitch(sw.category, true));
+                          }
+                        }}
                         aria-pressed={sw.enabled}>
                   {sw.category}：
                   <span style={{ color: sw.enabled ? 'var(--green)' : 'var(--red)', marginLeft: 4 }}>
@@ -244,6 +255,12 @@ function MemoryTab() {
   return (
     <div>
       <GovernanceFold open={govOpen} onToggle={() => setGovOpen((v) => !v)} />
+
+      {/* v24-doc-refresh：四层为何只列三层——如实口径（不假装 L0 在库里） */}
+      <p style={{ fontSize: 11.5, color: 'var(--text-muted)', margin: '0 0 8px' }}>
+        记忆四层管道：<b>L0 对话原文</b>由会话表承载（不重复入库，L0→L1 由抽取器加工，默认 dry_run），
+        本页列 <b>L1 / L2 / L3</b> 三层加工产物。
+      </p>
 
       <header style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 8 }}>
         <div style={{ width: 120 }}>

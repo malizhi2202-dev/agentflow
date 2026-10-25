@@ -166,9 +166,9 @@ export function yamlToTopology(yamlText: string): {
       data: {
         label: agent.name,
         model: agent.spec?.model?.name || '',
-        runtime: agent.spec?.runtime || 'langgraph',
+        runtime: agent.spec?.runtime || 'custom',
         status: 'not_started',
-        badge: agent.spec?.runtime || 'langgraph',
+        badge: agent.spec?.runtime || 'custom',
         agentId: agent.spec?.workflow_id,
       },
     });
@@ -224,7 +224,7 @@ export function topologyToYaml(
     name: node.data.label || 'agent',
     kind: 'Agent',
     spec: {
-      runtime: node.data.runtime || 'langgraph',
+      runtime: node.data.runtime || 'custom',
       model: {
         provider: 'openai',
         name: node.data.model || 'gpt-4o',
@@ -368,7 +368,7 @@ function dumpYamlSafe(obj: Record<string, any>): string {
   y += `metadata:\n  name: ${obj.metadata?.name || 'unnamed'}\n`;
   y += 'spec:\n  agents:\n';
   for (const a of obj.spec?.agents || []) {
-    y += `    - name: ${a.name}\n      kind: Agent\n      spec:\n        runtime: ${a.spec?.runtime || 'langgraph'}\n        model:\n          provider: ${a.spec?.model?.provider || 'openai'}\n          name: ${a.spec?.model?.name || 'gpt-4o'}\n        workflow_id: ${a.spec?.workflow_id || 1}\n`;
+    y += `    - name: ${a.name}\n      kind: Agent\n      spec:\n        runtime: ${a.spec?.runtime || 'custom'}\n        model:\n          provider: ${a.spec?.model?.provider || 'openai'}\n          name: ${a.spec?.model?.name || 'gpt-4o'}\n        workflow_id: ${a.spec?.workflow_id || 1}\n`;
     if (a.position) y += `        position: {x: ${a.position.x}, y: ${a.position.y}}\n`;
   }
   y += '  routes:\n';

@@ -5,7 +5,24 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
-PY="${PY:-/tmp/afvenv2/bin/python}"
+# 解释器解析（v24-doc-refresh E-1）：旧版硬编码 `/tmp/afvenv2/bin/python`——那是 /tmp 下的
+# 临时 venv，重启即失，本地门禁第一步就跑不起来。改为**按序探测**，且允许 PY 覆盖：
+#   1) $PY（显式指定，最优先）
+#   2) 仓内持久 venv（.venv/bin/python）
+#   3) PATH 上的 python3
+# 注意：`/tmp` 下的路径**不再**作为默认——依赖环境不应放在临时目录里。
+PY="${PY:-}"
+if [ -z "$PY" ]; then
+  for _cand in "$ROOT/.venv/bin/python" "$(command -v python3 || true)"; do
+    if [ -n "$_cand" ] && [ -x "$_cand" ]; then PY="$_cand"; break; fi
+  done
+fi
+if [ -z "$PY" ] || [ ! -x "$PY" ]; then
+  echo "!! 找不到可用的 Python 解释器。用 PY=/path/to/python 指定，或先建 venv：" >&2
+  echo "   python3 -m venv backend/.venv && backend/.venv/bin/pip install -r backend/requirements.txt -r backend/requirements-dev.txt" >&2
+  exit 2
+fi
+echo "[ci] 解释器：$PY"
 WITH_COV=0; WITH_E2E=0
 for a in "$@"; do case "$a" in --with-coverage) WITH_COV=1;; --with-e2e) WITH_E2E=1;; esac; done
 fail=0

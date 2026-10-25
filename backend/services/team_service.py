@@ -491,6 +491,11 @@ def archive_squad(db: Session, squad: Squad) -> Squad:
     squad.updated_at = _now()
     db.commit()
     db.refresh(squad)
+    # D7（v24-doc-refresh）：指向它的自动化自动转 disabled（不静默删行；恢复=人重新指派后手动启用）。
+    # 级联在服务层（状态转换层），不靠提示词——同 CLAUDE.md「必须人批的动作加在状态转换层」的纪律。
+    from services.automation_service import disable_for_squad
+    disable_for_squad(db, squad.id)
+    db.refresh(squad)
     return squad
 
 

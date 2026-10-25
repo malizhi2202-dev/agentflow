@@ -60,9 +60,12 @@ def _proposal(db: Session, proposal_id: int) -> Proposal:
 @router.get("/memories")
 def list_memories(request: Request, layer: str | None = Query(default=None),
                   status: str | None = Query(default=None),
+                  domain: str | None = Query(default=None),
+                  life_status: str | None = Query(default=None),
                   db: Session = Depends(get_db)):
     _user(request)
-    return {"memories": rsi.list_memories(db, layer=layer, status=status)}
+    return {"memories": rsi.list_memories(db, layer=layer, status=status,
+                                           domain=domain, life_status=life_status)}
 
 
 @router.post("/memories")
@@ -79,6 +82,12 @@ def propose_memory(payload: dict, request: Request, db: Session = Depends(get_db
             source_seq=int(payload.get("source_seq", 0) or 0),
             cites_seq=int(payload.get("cites_seq", 0) or 0),
             reviewer=user["id"],
+            # v24-doc-refresh D1/D2：内容域（与层级正交）/ 正文 / 置信度 / 来源链真外键
+            domain=payload.get("domain", "semantic"),
+            content=payload.get("content", ""),
+            confidence=payload.get("confidence"),
+            source_run_id=payload.get("source_run_id"),
+            source_conversation_id=payload.get("source_conversation_id"),
         )
     except Exception as e:  # noqa: BLE001
         _map(e)
@@ -101,6 +110,43 @@ def decay(days: int = Query(default=90, ge=1, le=3650),
     return {"candidates": rsi.decay_candidates(db, days=days)}
 
 
+# ── 金标集（D10：终身门的平台可校验落点）──────────────────
+
+@router.get("/golden-sets")
+def list_golden_sets(request: Request, db: Session = Depends(get_db)):
+    _user(request)
+    return {"golden_sets": rsi.list_golden_sets(db)}
+
+
+@router.post("/golden-sets")
+def create_golden_set(payload: dict, request: Request, db: Session = Depends(get_db)):
+    """建金标集（管理员）。cases 非空；produced_by 记产出厂牌（异厂判定基准）。"""
+    user = _user(request)
+    if not is_admin(user):
+        raise HTTPException(status_code=403, detail="只有管理员可以登记金标集")
+    try:
+        row = rsi.create_golden_set(
+            db, name=payload.get("name", ""), cases=payload.get("cases") or [],
+            produced_by=payload.get("produced_by", ""),
+            kind=payload.get("kind", "eval_set"), owner_id=user["id"])
+    except Exception as e:  # noqa: BLE001
+        _map(e)
+    return {"ok": True, "golden_set": row.to_dict()}
+
+
+@router.post("/golden-sets/{golden_set_id}/freeze")
+def freeze_golden_set(golden_set_id: int, request: Request, db: Session = Depends(get_db)):
+    """冻结 = 管理员的状态转换动作（幂等；记 frozen_at/frozen_by）。冻结后金标才可当终身门用。"""
+    user = _user(request)
+    if not is_admin(user):
+        raise HTTPException(status_code=403, detail="只有管理员可以冻结金标集")
+    try:
+        row = rsi.freeze_golden_set(db, golden_set_id, actor=user["id"])
+    except Exception as e:  # noqa: BLE001
+        _map(e)
+    return {"ok": True, "golden_set": row.to_dict()}
+
+
 # ── 可改面 ────────────────────────────────────────────────
 
 @router.get("/surfaces")
@@ -117,7 +163,11 @@ def create_surface(payload: dict, request: Request, db: Session = Depends(get_db
         raise HTTPException(status_code=403, detail="只有管理员可以声明可改面")
     try:
         row = rsi.create_surface(db, payload.get("name", ""),
-                                 payload.get("allow_edit") or [], user["id"])
+                                 payload.get("allow_edit") or [], user["id"],
+                                 path_pattern=payload.get("path_pattern", ""),
+                                 cap_bytes=payload.get("cap_bytes"),
+                                 structure_rules=payload.get("structure_rules"),
+                                 exclusions=payload.get("exclusions"))
     except Exception as e:  # noqa: BLE001
         _map(e)
     return {"ok": True, "surface": row.to_dict()}
@@ -133,7 +183,11 @@ def update_surface(surface_id: int, payload: dict, request: Request,
     if db.query(SurfaceManifest).filter(SurfaceManifest.id == surface_id).first() is None:
         raise HTTPException(status_code=404, detail="surface 不存在")
     try:
-        row = rsi.update_surface(db, surface_id, payload.get("allow_edit"), user["id"])
+        row = rsi.update_surface(db, surface_id, payload.get("allow_edit"), user["id"],
+                                 path_pattern=payload.get("path_pattern"),
+                                 cap_bytes=payload.get("cap_bytes"),
+                                 structure_rules=payload.get("structure_rules"),
+                                 exclusions=payload.get("exclusions"))
     except Exception as e:  # noqa: BLE001
         _map(e)
     return {"ok": True, "surface": row.to_dict()}
@@ -169,15 +223,21 @@ def set_switch(category: str, payload: dict, request: Request,
     if not is_admin(user):
         raise HTTPException(status_code=403, detail="只有管理员可以暂停/恢复自动体")
     enabled = bool(payload.get("enabled", False))
+    reason = str(payload.get("reason") or "").strip()
+    # D11 双入口校验（入口一处、服务一处，不假设另一处覆盖了）：
+    # 停用无原因 → 400（同 RULINGS「同一不变量应在两处独立校验」）
+    if not enabled and not reason:
+        raise HTTPException(status_code=400, detail="停用必须给原因（人批动作留痕）")
     try:
-        row = rsi.set_switch(db, category, enabled, user["id"])
+        row = rsi.set_switch(db, category, enabled, user["id"], reason=reason)
     except Exception as e:  # noqa: BLE001
         _map(e)
     # 双入口校验：服务层已判一次类目合法性，这里再按白名单判一次（不假设前一处覆盖）
     if category not in RSI_CATEGORIES:
         raise HTTPException(status_code=400, detail="不是可开关的四类产物")
     write_audit(user, "rsi:switch", category, "rsi_switch",
-                "自动体已暂停" if not row.enabled else "自动体已恢复",
+                ("自动体已暂停" if not row.enabled else "自动体已恢复")
+                + (f"（原因：{reason}）" if reason else ""),
                 request=request)
     return {"ok": True, "switch": row.to_dict()}
 
@@ -212,6 +272,7 @@ def run_shadow(proposal_id: int, payload: dict, request: Request,
             golden_set_frozen=bool(payload.get("golden_set_frozen", False)),
             cross_vendor=bool(payload.get("cross_vendor", False)),
             baseline=float(payload.get("baseline", 0.0) or 0.0),
+            golden_set_id=payload.get("golden_set_id"),
             # 响应口径：exact_match（确定性）或 llm_judge（真实评审），不暴露内部 mode 简称
             scorer=scorer, judge_kind="llm_judge" if mode == "llm" else "exact_match",
         )
@@ -293,6 +354,7 @@ def record_shadow(proposal_id: int, payload: dict, request: Request,
             cross_vendor=bool(payload.get("cross_vendor", False)),
             pass_rate=float(payload.get("pass_rate", 0.0)),
             baseline=float(payload.get("baseline", 0.0)),
+            golden_set_id=payload.get("golden_set_id"),
         )
     except Exception as e:  # noqa: BLE001
         _map(e)

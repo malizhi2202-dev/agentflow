@@ -19,10 +19,10 @@ spec:
     - name: reviewer
       kind: Agent
       spec:
-        runtime: langgraph
+        runtime: hermes
         model:
-          provider: openai
-          name: gpt-4o
+          provider: cli
+          name: runtime-default
         workflow_id: 1
   routes:
     - from: reviewer

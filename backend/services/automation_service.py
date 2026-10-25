@@ -35,6 +35,7 @@ from models.automation import (
     AutomationDelivery,
     AutomationRun,
     AutomationTrigger,
+    RuleVersion,
 )
 
 # 失败率熔断门（原型 ⑦/⑨ 与小队页 ⑥ 同一数值口径）
@@ -280,6 +281,10 @@ def run_gate(auto: Automation) -> tuple[bool, str | None, str]:
         return False, "archived", "已归档：停未来全部触发，历史运行史与投递记录只读可查"
     if auto.breaker_open:
         return False, "breaker_open", "失败率熔断已打开：修好后必须人点恢复（止损非自愈）"
+    if auto.status == "disabled":
+        return False, "disabled", (
+            "已自动停用（D7：指向的小队已归档）：规则与历史账保留，"
+            "重新指派新小队后手动启用（不静默删行，也不自动恢复）")
     if not auto.enabled or auto.status == "paused":
         return False, "paused", "已手动暂停：schedule / webhook / Run now 三个入口一起停"
     return True, None, "enabled 且熔断未打开 ⇒ 各入口可派生成运行"
@@ -478,6 +483,8 @@ def create(db: Session, user: dict, payload: dict) -> Automation:
     db.add(auto)
     db.commit()
     db.refresh(auto)
+    # D5：创建即有 v1 快照（界面显示 v1…vN 的起点）
+    record_rule_version(db, auto, reason="创建", created_by=user["id"])
     return auto
 
 
@@ -510,18 +517,22 @@ def update_sections(db: Session, auto: Automation, payload: dict) -> Automation:
             auto.name = name
             touched.append("name")
     # 实质发布才追加版本号：改名不追加（改名不转移责任）
-    if set(touched) - {"name"}:
+    bumped = bool(set(touched) - {"name"})
+    if bumped:
         auto.spec_version = int(auto.spec_version or 1) + 1
     auto.updated_at = datetime.datetime.utcnow()
     db.commit()
     db.refresh(auto)
+    if bumped:  # D5：每次版本递增留一行不可变快照
+        record_rule_version(db, auto, reason="修改：" + ",".join(touched),
+                            created_by=auto.owner_id)
     return auto
 
 
 def add_trigger(db: Session, auto: Automation, payload: dict) -> tuple[AutomationTrigger, str | None]:
     kind = str(payload.get("kind") or "schedule")
     if kind not in TRIGGER_KINDS:
-        raise AutomationError(f"触发器只有 schedule 与 webhook 两类，当前「{kind}」")
+        raise AutomationError(f"触发器只有 schedule、webhook、api 三类，当前「{kind}」")
     trigger = AutomationTrigger(automation_id=auto.id, kind=kind,
                                 enabled=bool(payload.get("enabled", True)))
     token_plain = None
@@ -532,6 +543,9 @@ def add_trigger(db: Session, auto: Automation, payload: dict) -> tuple[Automatio
         resolve_timezone(tz)
         trigger.cron, trigger.timezone = cron, tz
     else:
+        # webhook 与 api 都是「外部/自扩展投递」：token 即凭据（写-only）。
+        # 差别在**入口**：webhook 走公开 URL（`/api/webhooks/automations/{token}`），
+        # api 型走平台内自扩展通道（`invoke_api_trigger`，同样以 token 为凭据）。
         token_plain, hashed, preview = _new_webhook_token()
         trigger.secret, trigger.secret_preview = hashed, preview
         trigger.event_filter = json.dumps(_normalize_event_filter(payload.get("event_filter")),
@@ -540,11 +554,49 @@ def add_trigger(db: Session, auto: Automation, payload: dict) -> tuple[Automatio
         if trigger.payload_limit <= 0:
             raise AutomationError("载荷上限必须是正整数（字节）")
     db.add(trigger)
+    db.flush()
     auto.spec_version = int(auto.spec_version or 1) + 1
     auto.updated_at = datetime.datetime.utcnow()
     db.commit()
     db.refresh(trigger)
+    # D5：规则版本不可变行账——每改一次规格留一行快照（能指回「触发当时是哪一版规则」）
+    record_rule_version(db, auto, reason=f"新增 {kind} 触发器", created_by=auto.owner_id)
     return trigger, token_plain
+
+
+def record_rule_version(db: Session, auto: Automation, *, reason: str = "",
+                        created_by: str = "") -> RuleVersion:
+    """D5：规则版本**不可变行账**（设计 §6.31 H/I）。
+
+    - 运行史每行带 `spec_version`，能指回「触发当时是哪一版规则」；
+    - 界面显示 v1…vN + 版本 diff 只读 +「为何停用」可查；
+    - **不删被引用中的旧快照**（时间线要能复盘当时的规则）。
+    """
+    version = int(auto.spec_version or 1)
+    row = db.query(RuleVersion).filter(
+        RuleVersion.automation_id == auto.id, RuleVersion.version == version
+    ).first()
+    if row is not None:
+        return row          # 同版本不重复落（幂等）
+    row = RuleVersion(
+        automation_id=auto.id, version=version,
+        spec_json=json.dumps({"runbook": auto.runbook, "owner_track": auto.owner_track,
+                               "owner_id_ref": auto.owner_id_ref, "exec_mode": auto.exec_mode,
+                               "status": auto.status}, ensure_ascii=False),
+        reason=reason or "", created_by=created_by or auto.owner_id,
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def list_rule_versions(db: Session, automation_id: int) -> list[dict]:
+    """版本 diff 只读列表：v1…vN。"""
+    rows = db.query(RuleVersion).filter(
+        RuleVersion.automation_id == int(automation_id)
+    ).order_by(RuleVersion.version.asc()).all()
+    return [r.to_dict() for r in rows]
 
 
 def get_trigger(db: Session, auto: Automation, trigger_id: int) -> AutomationTrigger:
@@ -616,6 +668,8 @@ def pause(db: Session, auto: Automation, reason: str = "") -> Automation:
 def resume(db: Session, auto: Automation) -> Automation:
     if auto.status == "archived":
         raise AutomationError("已归档的规则没有「恢复触发」：要再跑得新建一条（历史账保留）")
+    # D7：disabled（小队归档自动停用）不自动恢复——重新指派新小队后由人点 resume（沉默≠同意）；
+    # 人点了就照常启用。
     auto.enabled = True
     auto.status = "enabled"
     auto.paused_reason = ""
@@ -625,6 +679,30 @@ def resume(db: Session, auto: Automation) -> Automation:
     db.commit()
     db.refresh(auto)
     return auto
+
+
+def disable_for_squad(db: Session, squad_id: int) -> int:
+    """D7 级联：小队归档 → 指向它的自动化转 disabled（不静默删行）。
+
+    「指向」即负责人轨为 squad 且引用该小队（`owner_track='squad' + owner_id_ref`）。
+    已归档（archived）的规则不动——它本来就没有未来触发。
+    """
+    rows = db.query(Automation).filter(
+        Automation.owner_track == "squad",
+        Automation.owner_id_ref == str(int(squad_id)),
+        Automation.status.in_(["enabled", "paused", "disabled"]),
+    ).all()
+    n = 0
+    for auto in rows:
+        if auto.status == "disabled":
+            continue
+        auto.status = "disabled"
+        auto.enabled = False
+        auto.paused_reason = "自动停用：指向的小队已归档（D7；重新指派后可手动启用）"
+        auto.updated_at = datetime.datetime.utcnow()
+        n += 1
+    db.commit()
+    return n
 
 
 def archive(db: Session, auto: Automation, reason: str = "") -> Automation:
@@ -691,6 +769,8 @@ def deliveries(db: Session, auto: Automation, limit: int = 50) -> list[dict]:
         "status": r.status,
         "response_code": int(r.response_code or 200),
         "dedup_key": r.dedup_key or "",
+        # D6：两键分开记账对外可见（排查「谁把谁吃了」类幂等问题）
+        "idem_key": r.idem_key or "", "delivery_key": r.delivery_key or "",
         "error": r.error or "",
         "replayed_from": r.replayed_from,
         # 不可重放只有两类：技术性拒绝（rejected）/ 无 body（payload_bytes = 0）
@@ -736,16 +816,39 @@ def infer_event(body: dict, headers) -> tuple[str, str, int]:
 
 def _record_delivery(db: Session, auto: Automation, trigger: AutomationTrigger | None, *,
                      external_id: str, event: str, payload_bytes: int, status: str,
-                     response_code: int, dedup_key: str = "", error: str = "") -> AutomationDelivery:
+                     response_code: int, dedup_key: str = "", error: str = "",
+                     idem_key: str = "", delivery_key: str = "") -> AutomationDelivery:
     row = AutomationDelivery(
         automation_id=auto.id, trigger_id=trigger.id if trigger else None,
         external_id=external_id, event=event, payload_bytes=payload_bytes,
         status=status, response_code=response_code, dedup_key=dedup_key, error=error,
+        # D6：两键分开记账（不合成）
+        idem_key=idem_key or "", delivery_key=delivery_key or "",
     )
     db.add(row)
     db.commit()
     db.refresh(row)
     return row
+
+
+def _find_by_keys(db: Session, auto: Automation, *, idem_key: str = "",
+                  delivery_key: str = "") -> AutomationDelivery | None:
+    """按**两键分别**查已记的投递。
+
+    D6：通用 `Idempotency-Key` 与 GitHub `X-GitHub-Delivery` 语义不同（前者跨投递方、
+    后者跨重投）。合成一个键会让**一方的键吃掉另一方的投递**——所以分开查、分开记。
+    """
+    q = db.query(AutomationDelivery).filter(
+        AutomationDelivery.automation_id == auto.id,
+        AutomationDelivery.status != "duplicate",
+    )
+    if idem_key:
+        q = q.filter(AutomationDelivery.idem_key == idem_key)
+    elif delivery_key:
+        q = q.filter(AutomationDelivery.delivery_key == delivery_key)
+    else:
+        return None
+    return q.first()
 
 
 def ingest_webhook(db: Session, token: str, headers, raw_body: bytes) -> tuple[int, dict]:
@@ -768,13 +871,16 @@ def ingest_webhook(db: Session, token: str, headers, raw_body: bytes) -> tuple[i
 
     payload_bytes = len(raw_body or b"")
     limit = int(trigger.payload_limit or DEFAULT_PAYLOAD_LIMIT)
-    dedup_key = _header(headers, "idempotency-key") or _header(headers, "x-github-delivery")
-    external_id = _header(headers, "x-github-delivery") or ""
+    # D6：两键分开记账——不再用 `or` 合成一个键
+    idem_key = _header(headers, "idempotency-key")
+    delivery_key = _header(headers, "x-github-delivery")
+    dedup_key = idem_key or delivery_key      # 兼容列：仅作历史留痕
+    external_id = delivery_key or ""
 
     if payload_bytes > limit:
         row = _record_delivery(db, auto, trigger, external_id=external_id, event="", 
                                payload_bytes=payload_bytes, status="rejected",
-                               response_code=413, dedup_key=dedup_key,
+                               response_code=413, dedup_key=dedup_key, idem_key=idem_key, delivery_key=delivery_key,
                                error=f"载荷 {payload_bytes} 字节 > 上限 {limit} 字节（不截断后照跑）")
         return 413, {"semantics": "rejected", "delivery_id": row.id,
                      "detail": f"载荷 {payload_bytes} 字节超上限 {limit} 字节"}
@@ -784,22 +890,19 @@ def ingest_webhook(db: Session, token: str, headers, raw_body: bytes) -> tuple[i
     except (UnicodeDecodeError, json.JSONDecodeError) as e:
         row = _record_delivery(db, auto, trigger, external_id=external_id, event="",
                                payload_bytes=payload_bytes, status="rejected",
-                               response_code=400, dedup_key=dedup_key,
+                               response_code=400, dedup_key=dedup_key, idem_key=idem_key, delivery_key=delivery_key,
                                error=f"载荷不是合法 JSON：{e}")
         return 400, {"semantics": "rejected", "delivery_id": row.id, "detail": "载荷不是合法 JSON"}
 
     event, action, step = infer_event(body, headers)
 
-    if dedup_key:
-        seen = db.query(AutomationDelivery).filter(
-            AutomationDelivery.automation_id == auto.id,
-            AutomationDelivery.dedup_key == dedup_key,
-            AutomationDelivery.status != "duplicate",
-        ).first()
+    if idem_key or delivery_key:
+        seen = _find_by_keys(db, auto, idem_key=idem_key, delivery_key=delivery_key)
         if seen is not None:
             row = _record_delivery(db, auto, trigger, external_id=external_id, event=event,
                                    payload_bytes=payload_bytes, status="duplicate",
                                    response_code=200, dedup_key=dedup_key,
+                                   idem_key=idem_key, delivery_key=delivery_key,
                                    error=f"幂等键已在账上（投递 #{seen.id}），不新建运行")
             return 200, {"semantics": "duplicate", "delivery_id": row.id, "event": event,
                          "detail": "幂等键命中，已有那次在账上"}
@@ -811,7 +914,7 @@ def ingest_webhook(db: Session, token: str, headers, raw_body: bytes) -> tuple[i
     if not _event_matches(event_filter, event, action):
         row = _record_delivery(db, auto, trigger, external_id=external_id, event=event,
                                payload_bytes=payload_bytes, status="ignored",
-                               response_code=200, dedup_key=dedup_key,
+                               response_code=200, dedup_key=dedup_key, idem_key=idem_key, delivery_key=delivery_key,
                                error="事件过滤未命中")
         return 200, {"semantics": "ignored", "delivery_id": row.id, "event": event,
                      "detail": "事件过滤未命中，看完就放下（业务性不跑，回 200 防上游重试）"}
@@ -821,13 +924,13 @@ def ingest_webhook(db: Session, token: str, headers, raw_body: bytes) -> tuple[i
         reason = "触发器已停用" if not trigger.enabled else f"规则当前不能真跑：{run_reason}（{run_detail}）"
         row = _record_delivery(db, auto, trigger, external_id=external_id, event=event,
                                payload_bytes=payload_bytes, status="skipped",
-                               response_code=200, dedup_key=dedup_key, error=reason)
+                               response_code=200, dedup_key=dedup_key, idem_key=idem_key, delivery_key=delivery_key, error=reason)
         return 200, {"semantics": "skipped", "delivery_id": row.id, "event": event,
                      "detail": reason}
 
     row = _record_delivery(db, auto, trigger, external_id=external_id, event=event,
                            payload_bytes=payload_bytes, status="accepted",
-                           response_code=202, dedup_key=dedup_key)
+                           response_code=202, dedup_key=dedup_key, idem_key=idem_key, delivery_key=delivery_key)
     run = AutomationRun(
         automation_id=auto.id, trigger_id=trigger.id, status="queued",
         summary=f"webhook 已收（事件 {event}，六步推断第 {step} 步命中）；执行器未接入，尚未真正执行",
@@ -838,6 +941,68 @@ def ingest_webhook(db: Session, token: str, headers, raw_body: bytes) -> tuple[i
     db.refresh(run)
     return 202, {"semantics": "accepted", "delivery_id": row.id, "run_id": run.id,
                  "event": event, "inferred_at_step": step,
+                 "detail": "已收下并派生成运行；运行结果另在运行史里"}
+
+
+def invoke_api_trigger(db: Session, token: str, headers, raw_body: bytes) -> tuple[int, dict]:
+    """D6：api 型触发器 = 平台内自扩展通道的投递入口（设计 §6.31 B）。
+
+    与 webhook 同一套闸门与两级账本（载荷上限 → JSON → 两键幂等 → 事件过滤 →
+    能不能真跑 → 派生成运行）；差别只在**入口**：api 型不挂公开 URL，
+    由已鉴权的平台调用方带触发器 token 走 `/api/automations/{id}/triggers/{tid}/invoke`。
+    收口成本限定在 kind 枚举一处——这里 kind 判定与 webhook 分支同构。
+    """
+    trigger = db.query(AutomationTrigger).filter(
+        AutomationTrigger.secret == _hash_token(token),
+        AutomationTrigger.kind == "api",
+    ).first()
+    if trigger is None:
+        return 404, {"semantics": "rejected", "detail": "api 触发器不存在或已轮换"}
+    auto = db.query(Automation).filter(Automation.id == trigger.automation_id).first()
+    if auto is None:
+        return 404, {"semantics": "rejected", "detail": "触发器归属的自动化已不存在"}
+    payload_bytes = len(raw_body or b"")
+    limit = int(trigger.payload_limit or DEFAULT_PAYLOAD_LIMIT)
+    idem_key = _header(headers, "idempotency-key")
+    if payload_bytes > limit:
+        row = _record_delivery(db, auto, trigger, external_id="", event="api.invoke",
+                               payload_bytes=payload_bytes, status="rejected",
+                               response_code=413, idem_key=idem_key,
+                               error=f"载荷超上限 {limit} 字节")
+        return 413, {"semantics": "rejected", "delivery_id": row.id, "detail": "载荷超限"}
+    try:
+        body = json.loads(raw_body or b"{}")
+    except json.JSONDecodeError:
+        body = {}
+    if idem_key:
+        seen = _find_by_keys(db, auto, idem_key=idem_key)
+        if seen is not None:
+            row = _record_delivery(db, auto, trigger, external_id="", event="api.invoke",
+                                   payload_bytes=payload_bytes, status="duplicate",
+                                   response_code=200, idem_key=idem_key,
+                                   error=f"幂等键已在账上（投递 #{seen.id}）")
+            return 200, {"semantics": "duplicate", "delivery_id": row.id,
+                         "detail": "幂等键命中，已有那次在账上"}
+    books_allowed, run_reason, run_detail = run_gate(auto)
+    if not trigger.enabled or not books_allowed:
+        reason = "触发器已停用" if not trigger.enabled else f"规则当前不能真跑：{run_reason}（{run_detail}）"
+        row = _record_delivery(db, auto, trigger, external_id="", event="api.invoke",
+                               payload_bytes=payload_bytes, status="skipped",
+                               response_code=200, idem_key=idem_key, error=reason)
+        return 200, {"semantics": "skipped", "delivery_id": row.id, "detail": reason}
+    row = _record_delivery(db, auto, trigger, external_id="", event="api.invoke",
+                           payload_bytes=payload_bytes, status="accepted",
+                           response_code=202, idem_key=idem_key)
+    run = AutomationRun(
+        automation_id=auto.id, trigger_id=trigger.id, status="queued",
+        summary="api 调用已收（载荷键数 "
+                + str(len(body) if isinstance(body, dict) else 0) + "）；执行器未接入，尚未真正执行",
+        spec_version=int(auto.spec_version or 1),
+    )
+    db.add(run)
+    db.commit()
+    db.refresh(run)
+    return 202, {"semantics": "accepted", "delivery_id": row.id, "run_id": run.id,
                  "detail": "已收下并派生成运行；运行结果另在运行史里"}
 
 

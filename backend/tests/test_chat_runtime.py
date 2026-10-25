@@ -32,7 +32,7 @@ class TestGenerate(unittest.TestCase):
         fake_provider = SimpleNamespace(chat=lambda m, k, n: ("来自 provider", {"total_tokens": 3}))
         with patch.object(runtime_exec, "enabled", return_value=False), \
              patch.object(chat_service, "get_provider", return_value=fake_provider):
-            reply, usage = chat_service._generate(_agent("langgraph"), MSG, "k")
+            reply, usage = chat_service._generate(_agent("custom"), MSG, "k")
         self.assertEqual(reply, "来自 provider")
         self.assertEqual(usage["total_tokens"], 3)
 

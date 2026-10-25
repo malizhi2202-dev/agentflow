@@ -158,8 +158,9 @@ interface ControlPlaneState {
   fetchReconcile: () => Promise<void>;
   fetchCluster: () => Promise<void>;
   fetchRsi: () => Promise<void>;
-  setRsiSwitch: (category: string, enabled: boolean) => Promise<WriteOutcome>;
-  setRsiMaster: (enabled: boolean) => Promise<WriteOutcome>;
+  // D11：停用是「必须人批」的状态转换动作——原因必填，后端 400 透传
+  setRsiSwitch: (category: string, enabled: boolean, reason?: string) => Promise<WriteOutcome>;
+  setRsiMaster: (enabled: boolean, reason?: string) => Promise<WriteOutcome>;
   restartAgent: (agentId: number) => Promise<any>;
   rescheduleAgent: (agentId: number) => Promise<any>;
   pauseAgent: (agentId: number) => Promise<any>;
@@ -224,8 +225,9 @@ export const useControlPlane = create<ControlPlaneState>((set, get) => ({
   },
 
   /* 单个类目：只打既有端点 POST /api/rsi/switches/{category}（服务层 + 路由两处独立校验） */
-  setRsiSwitch: async (category, enabled) => {
-    const out = await writeJson(`/api/rsi/switches/${category}`, { enabled });
+  setRsiSwitch: async (category, enabled, reason) => {
+    const out = await writeJson(`/api/rsi/switches/${category}`,
+                                { enabled, ...(reason ? { reason } : {}) });
     if (!out.ok) {
       set({ rsiError: out.error || '开关失败', rsiNotice: null });
       return out;
@@ -242,7 +244,7 @@ export const useControlPlane = create<ControlPlaneState>((set, get) => ({
 
   /* 总闸 = 四类目同时启停。后端没有总闸端点，所以按类目逐个打同一个既有端点，
    * 每个都单独入审计；任何一类失败都把后端 detail 原样收集后透传（不假装成功）。 */
-  setRsiMaster: async (enabled) => {
+  setRsiMaster: async (enabled, reason) => {
     const categories = get().rsiSwitches.map((s) => s.category);
     if (categories.length === 0) {
       const error = '未读到四类目（/api/rsi/switches 为空），总闸无法执行';
@@ -251,7 +253,8 @@ export const useControlPlane = create<ControlPlaneState>((set, get) => ({
     }
     const failures: string[] = [];
     for (const category of categories) {
-      const out = await writeJson(`/api/rsi/switches/${category}`, { enabled });
+      const out = await writeJson(`/api/rsi/switches/${category}`,
+                                  { enabled, ...(reason ? { reason } : {}) });
       if (!out.ok) failures.push(`${rsiCategoryLabel(category)}：${out.error || '失败'}`);
     }
     await get().fetchRsi();

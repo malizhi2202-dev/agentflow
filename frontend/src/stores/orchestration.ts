@@ -156,7 +156,7 @@ export const useOrchestration = create<OrchestrationState>((set, get) => ({
     const agents = Array.isArray(data) ? data : (data.agents || []);
     set({ nodePool: agents.map((a: any) => ({
       id: a.id, name: a.name,
-      runtime: a.runtime || 'langgraph',
+      runtime: a.runtime || 'custom',
       model_name: a.model_name || a.model || '',
     })) });
   },

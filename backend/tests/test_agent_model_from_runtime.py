@@ -51,9 +51,20 @@ class TestAgentModelFromRuntime(AuthHarness, unittest.TestCase):
         self.assertEqual(body["model_provider"], "cli")
         self.assertEqual(body["model_name"], "")
 
-    def test_create_legacy_runtime_keeps_openai_default(self):
-        """MF-03：非 CLI 运行时（langgraph）维持旧默认 provider，行为不变。"""
+    def test_create_legacy_runtime_rejected(self):
+        """MF-03（D8 订正）：langgraph 不再是运行时（§6.28），创建被拒。"""
         r = self._create(runtime="langgraph")
+        self.assertEqual(r.status_code, 400, r.text)
+        self.assertIn("不支持的 runtime", r.json()["detail"])
+
+    def test_create_without_runtime_rejected(self):
+        """D8：runtime 必填（不再默认 langgraph）。"""
+        r = self.client("alice").post("/api/agents", json={"name": "no-rt"})
+        self.assertEqual(r.status_code, 400, r.text)
+
+    def test_create_custom_runtime_keeps_openai_default(self):
+        """MF-03 原意的替身：非 CLI 白名单运行时（custom）维持旧默认 provider。"""
+        r = self._create(runtime="custom")
         self.assertEqual(r.status_code, 200, r.text)
         self.assertEqual(r.json()["model_provider"], "openai")
 
@@ -76,7 +87,7 @@ class TestAgentModelFromRuntime(AuthHarness, unittest.TestCase):
     # ── 更新：provider 跟随运行时，但不无条件改写存量行 ──────────────
     def test_update_runtime_switches_provider(self):
         """MF-06：改运行时 → provider 跟着推导成 cli。"""
-        created = self._create(runtime="langgraph").json()
+        created = self._create(runtime="custom").json()
         self.assertEqual(created["model_provider"], "openai")
         r = self.client("alice").put(f"/api/agents/{created['id']}", json={"runtime": "dsh"})
         self.assertEqual(r.status_code, 200, r.text)

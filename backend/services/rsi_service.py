@@ -12,14 +12,18 @@ from sqlalchemy.orm import Session
 from models.rsi import (
     BREAKER_NAMES,
     IMMUTABLE_PREFIXES,
+    MEMORY_DOMAINS,
     MEMORY_KINDS,
+    MEMORY_LIFE_STATUSES,
     MEMORY_LAYERS,
     POLLUTION_MARKERS,
     PROPOSAL_DIMENSIONS,
     REVIEW_VERDICTS,
     RSI_CATEGORIES,
     BreakerState,
+    GoldenSet,
     Memory,
+    ProbeEvidence,
     PromotionReview,
     Proposal,
     RsiSwitch,
@@ -77,9 +81,18 @@ def switches(db: Session) -> list[dict]:
     return out
 
 
-def set_switch(db: Session, category: str, enabled: bool, actor: str = "") -> RsiSwitch:
+def set_switch(db: Session, category: str, enabled: bool, actor: str = "",
+               reason: str = "") -> RsiSwitch:
+    """类目开关（R6-4）。
+
+    D11（设计 §3.3/§6.30 E「必填原因、双入口校验、审计落可见态」）：
+    **停用**是必须人批的状态转换动作——原因必填，落列 + 由路由写审计；
+    恢复也记原因（可空=「解除暂停的说明」，但留 actor）。
+    """
     if category not in RSI_CATEGORIES:
         raise GateError(f"类目 {category} 不是可开关的四类产物（R6-4）")
+    if not enabled and not (reason or "").strip():
+        raise GateError("停用自动体必须给原因（人批动作留痕，不靠提示词）")
     row = _switch_row(db, category)
     if row is None:
         row = RsiSwitch(category=category, enabled=1 if enabled else 0, updated_by=actor)
@@ -88,6 +101,8 @@ def set_switch(db: Session, category: str, enabled: bool, actor: str = "") -> Rs
         row.enabled = 1 if enabled else 0
         row.updated_by = actor
         row.updated_at = _now()
+    row.last_reason = (reason or "").strip()
+    row.last_actor = actor or row.last_actor
     db.commit()
     db.refresh(row)
     return row
@@ -110,16 +125,27 @@ def propose_memory(db: Session, *, layer: str, cue: str, lesson: str,
                    confounded: bool | None = None,
                    evidence_is_strong: bool = True,
                    source_seq: int = 0, cites_seq: int = 0,
-                   reviewer: str = "") -> dict:
+                   reviewer: str = "",
+                   domain: str = "semantic", content: str = "",
+                   confidence: float | None = None,
+                   source_run_id: int | None = None,
+                   source_conversation_id: int | None = None,
+                   quarantine_until: datetime.datetime | None = None) -> dict:
     """提一条记忆。三字段缺一 → `no_entry`（合法结论），不入正式层。
 
     R7-4 因果前缀：`cites_seq` 必须早于 `source_seq`（不许引用未来任务）。
     R7-5 防污染：晋升前扫一次，命中即标 `pollution_flagged` 并强制 confounded。
+    v24-doc-refresh D1/D2：记忆表补**内容域**（与层级正交）、**生命周期**、正文/置信度、
+    静置期与来源链真外键。
     """
     if layer not in MEMORY_LAYERS:
         raise RsiError(f"layer 必须是 {sorted(MEMORY_LAYERS)} 之一")
     if kind not in MEMORY_KINDS:
         raise RsiError(f"kind 必须是 {sorted(MEMORY_KINDS)} 之一（负知识合法）")
+    if domain not in MEMORY_DOMAINS:
+        raise RsiError(f"domain 必须是 {sorted(MEMORY_DOMAINS)} 之一（内容域，与层级正交）")
+    if confidence is not None and not (0.0 <= float(confidence) <= 1.0):
+        raise RsiError("confidence 必须在 0.0~1.0 之间")
     assert_category_running(db, "memory")
 
     source_seq = int(source_seq or 0)
@@ -147,11 +173,20 @@ def propose_memory(db: Session, *, layer: str, cue: str, lesson: str,
     if polluted:
         is_confounded = True
 
+    # 正文：未显式给时以 cue 为正文（D2：content 是记忆正文，cue/lesson 是晋升三字段之一）
+    body = (content or "").strip() or payload["cue"]
+
     if missing:
         row = Memory(layer=layer, kind=kind, scope=scope, owner_id=owner_id,
-                     cue=payload["cue"], lesson=payload["lesson"],
+                     domain=domain, life_status="active",
+                     cue=payload["cue"], lesson=payload["lesson"], content=body,
+                     confidence=confidence,
                      evidence_json=json.dumps(payload["evidence"], ensure_ascii=False),
-                     source_ref=source_ref, status="no_entry", confounded=0,
+                     source_ref=source_ref,
+                     source_run_id=source_run_id,
+                     source_conversation_id=source_conversation_id,
+                     quarantine_until=quarantine_until,
+                     status="no_entry", confounded=0,
                      source_seq=source_seq, cites_seq=cites_seq,
                      pollution_flagged=1 if polluted else 0,
                      post_ingest_scan=1)
@@ -167,9 +202,14 @@ def propose_memory(db: Session, *, layer: str, cue: str, lesson: str,
 
     row = Memory(
         layer=layer, kind=kind, scope=scope, owner_id=owner_id,
-        cue=payload["cue"], lesson=payload["lesson"],
+        domain=domain, life_status="active",
+        cue=payload["cue"], lesson=payload["lesson"], content=body,
+        confidence=confidence,
         evidence_json=json.dumps(payload["evidence"], ensure_ascii=False),
         source_ref=source_ref,
+        source_run_id=source_run_id,
+        source_conversation_id=source_conversation_id,
+        quarantine_until=quarantine_until,
         status="confounded" if is_confounded else "promoted",
         confounded=1 if is_confounded else 0,
         source_seq=source_seq, cites_seq=cites_seq,
@@ -212,20 +252,33 @@ def list_reviews(db: Session, memory_id: int | None = None,
 
 
 def list_memories(db: Session, layer: str | None = None, status: str | None = None,
+                  domain: str | None = None, life_status: str | None = None,
                   limit: int = 100) -> list[dict]:
     q = db.query(Memory)
     if layer:
         q = q.filter(Memory.layer == layer)
     if status:
         q = q.filter(Memory.status == status)
+    if domain:
+        q = q.filter(Memory.domain == domain)
+    if life_status:
+        q = q.filter(Memory.life_status == life_status)
     return [m.to_dict() for m in q.order_by(Memory.id.desc()).limit(limit).all()]
 
 
-def quarantine_source(db: Session, source_ref: str) -> int:
-    """来源链撤回：该来源的所有记忆进检疫（不删、可追溯）。"""
+def quarantine_source(db: Session, source_ref: str,
+                      quarantine_until: datetime.datetime | None = None) -> int:
+    """来源链撤回：该来源的所有记忆进检疫（不删、可追溯）。
+
+    D2：静置期落 `quarantine_until` 时间列（NULL = 免检，站内自产；外部来源入队即非 NULL）。
+    """
     count = db.query(Memory).filter(
         Memory.source_ref == source_ref, Memory.status != "quarantined",
-    ).update({Memory.status: "quarantined"}, synchronize_session=False)
+    ).update(
+        {Memory.status: "quarantined",
+         Memory.quarantine_until: quarantine_until or _now()},
+        synchronize_session=False,
+    )
     db.commit()
     return int(count or 0)
 
@@ -244,13 +297,25 @@ def decay_candidates(db: Session, days: int = 90, limit: int = 100) -> list[dict
 # ── 可改面 ────────────────────────────────────────────────
 
 def create_surface(db: Session, name: str, allow_edit: list[str],
-                   owner_id: str = "") -> SurfaceManifest:
+                   owner_id: str = "", path_pattern: str = "",
+                   cap_bytes: int | None = None,
+                   structure_rules: list | None = None,
+                   exclusions: list | None = None) -> SurfaceManifest:
+    """建可改面声明对象。
+
+    D3：设计 §3.3 / §6.30 E 要求四个结构字段——`path_pattern`（可写路径模式）·
+    `cap_bytes`（体量上限）· `structure_rules`（结构规则）· `exclusions`（显式排除）。
+    """
     if not name:
         raise RsiError("name 不能为空")
     if db.query(SurfaceManifest).filter(SurfaceManifest.name == name).first():
         raise RsiError("surface 已存在")
     row = SurfaceManifest(name=name,
                           allow_edit_json=json.dumps(allow_edit or [], ensure_ascii=False),
+                          path_pattern=path_pattern or "",
+                          cap_bytes=cap_bytes,
+                          structure_rules=json.dumps(structure_rules or [], ensure_ascii=False),
+                          exclusions=json.dumps(exclusions or [], ensure_ascii=False),
                           owner_id=owner_id)
     db.add(row)
     db.commit()
@@ -258,8 +323,11 @@ def create_surface(db: Session, name: str, allow_edit: list[str],
     return row
 
 
-def update_surface(db: Session, surface_id: int, allow_edit, owner_id: str = "") -> SurfaceManifest:
-    """改可改面的白名单。禁改前缀即使写进白名单也不生效（assert_editable 先判前缀）。"""
+def update_surface(db: Session, surface_id: int, allow_edit, owner_id: str = "",
+                   path_pattern: str | None = None, cap_bytes: int | None = None,
+                   structure_rules: list | None = None,
+                   exclusions: list | None = None) -> SurfaceManifest:
+    """改可改面的白名单与声明结构。禁改前缀即使写进白名单也不生效（assert_editable 先判前缀）。"""
     row = db.query(SurfaceManifest).filter(SurfaceManifest.id == int(surface_id)).first()
     if row is None:
         raise RsiError("surface 不存在")
@@ -267,6 +335,18 @@ def update_surface(db: Session, surface_id: int, allow_edit, owner_id: str = "")
         if not isinstance(allow_edit, list) or not all(isinstance(p, str) for p in allow_edit):
             raise RsiError("allow_edit 必须是字符串数组")
         row.allow_edit_json = json.dumps(allow_edit, ensure_ascii=False)
+    if path_pattern is not None:
+        row.path_pattern = path_pattern
+    if cap_bytes is not None:
+        row.cap_bytes = cap_bytes
+    if structure_rules is not None:
+        if not isinstance(structure_rules, list):
+            raise RsiError("structure_rules 必须是数组")
+        row.structure_rules = json.dumps(structure_rules, ensure_ascii=False)
+    if exclusions is not None:
+        if not isinstance(exclusions, list):
+            raise RsiError("exclusions 必须是数组")
+        row.exclusions = json.dumps(exclusions, ensure_ascii=False)
     row.owner_id = owner_id or row.owner_id
     db.commit()
     db.refresh(row)
@@ -371,10 +451,30 @@ def create_proposal(db: Session, *, title: str, dimension: str, surface_name: st
     return row
 
 
-def record_probe(db: Session, proposal: Proposal, metrics: dict) -> Proposal:
-    """第一拍：探针快筛。**弱证据不定优劣**——只能把状态推到 probed。"""
+def record_probe(db: Session, proposal: Proposal, metrics: dict,
+                 evidences: list[dict] | None = None) -> Proposal:
+    """第一拍：探针快筛。**弱证据不定优劣**——只能把状态推到 probed。
+
+    D5 写路径：`evidences`（可选，逐条 {label, diff_ref, trajectory_ref,
+    produced_ref, source_ref, evidence, similarity_mean}）落 `probe_evidence` 行。
+    不传则只更新提案本身——**不编造证据包**（表先行；界面/调用方接线为残项）。
+    """
     if proposal.status != "generated":
         raise GateError(f"当前状态 {proposal.status} 不允许记录探针结果")
+    for ev in evidences or []:
+        kind = ev.get("evidence", "trajectory")
+        if kind not in ProbeEvidence.EVIDENCE_KINDS:
+            raise RsiError(f"evidence 只能是 {sorted(ProbeEvidence.EVIDENCE_KINDS)} 之一")
+        db.add(ProbeEvidence(
+            proposal_id=proposal.id, label=str(ev.get("label", "")),
+            diff_ref=str(ev.get("diff_ref", "")),
+            trajectory_ref=str(ev.get("trajectory_ref", "")),
+            produced_ref=str(ev.get("produced_ref", "")),
+            source_ref=str(ev.get("source_ref", "")),
+            evidence=kind,
+            similarity_mean=(float(ev["similarity_mean"])
+                             if ev.get("similarity_mean") is not None else None),
+        ))
     proposal.probe_json = json.dumps(metrics, ensure_ascii=False)
     proposal.status = "probed"
     proposal.updated_at = _now()
@@ -392,12 +492,109 @@ def record_probe(db: Session, proposal: Proposal, metrics: dict) -> Proposal:
     return proposal
 
 
+# ── 金标集（D10：终身门的平台可校验落点）────────────────
+
+# 厂牌前缀表（判 judge 与金标产出厂牌是否异厂；识别不了 = 未证实，fail-closed）
+_VENDOR_PREFIXES = {
+    "gpt": "openai", "o1": "openai", "o3": "openai", "o4": "openai",
+    "claude": "anthropic", "sonnet": "anthropic", "opus": "anthropic", "haiku": "anthropic",
+    "gemini": "google", "deepseek": "deepseek", "qwen": "alibaba", "llama": "meta",
+    "mistral": "mistral", "grok": "xai", "doubao": "bytedance", "kimi": "moonshot",
+}
+
+
+def _vendor_of(model: str) -> str:
+    """从模型名识厂牌；识别不了返回 unknown（调用方按未证实处理）。"""
+    m = (model or "").strip().lower()
+    for token, vendor in _VENDOR_PREFIXES.items():
+        if m.startswith(token) or token in m:
+            return vendor
+    return "unknown"
+
+
+def create_golden_set(db: Session, *, name: str, cases: list, produced_by: str = "",
+                      kind: str = "eval_set", owner_id: str = "") -> GoldenSet:
+    """建金标集（未冻结态）。cases 必填非空。"""
+    if not (name or "").strip():
+        raise RsiError("金标集必须有名字")
+    if db.query(GoldenSet).filter(GoldenSet.name == name).first():
+        raise RsiError("金标集同名已存在")
+    if not isinstance(cases, list) or not cases:
+        raise RsiError("cases 必须是非空数组（金标用例是终身门的最小输入）")
+    import hashlib
+    payload = json.dumps(cases, ensure_ascii=False, sort_keys=True)
+    row = GoldenSet(
+        name=name.strip(), kind=kind, cases_json=payload,
+        produced_by=(produced_by or "").strip().lower(),
+        eval_mark=hashlib.sha256(payload.encode()).hexdigest()[:16],
+        owner_id=owner_id,
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def freeze_golden_set(db: Session, golden_set_id: int, *, actor: str) -> GoldenSet:
+    """冻结 = 管理员动作（状态转换层，不靠提示词）。冻结后 cases 不再可改。"""
+    row = db.query(GoldenSet).filter(GoldenSet.id == int(golden_set_id)).first()
+    if row is None:
+        raise RsiError("金标集不存在")
+    if row.frozen:
+        return row  # 幂等
+    row.frozen = True
+    row.frozen_at = _now()
+    row.frozen_by = actor
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def list_golden_sets(db: Session) -> list[dict]:
+    return [g.to_dict() for g in db.query(GoldenSet).order_by(GoldenSet.id.asc()).all()]
+
+
+def validate_shadow_gate(db: Session, golden_set_id: int, judge_model: str) -> dict:
+    """平台侧校验终身门两条件（D10）。返回校验凭据；不过即 GateError。
+
+    ① 金标必须由平台账上确认 frozen（不是调用方自报）；
+    ② judge 厂牌必须**异于**金标产出厂牌——厂牌识别不了也拒绝（fail-closed）。
+    """
+    row = db.query(GoldenSet).filter(GoldenSet.id == int(golden_set_id)).first()
+    if row is None:
+        raise GateError(f"金标集 {golden_set_id} 不存在：终身门不认账外金标")
+    if not row.frozen:
+        raise GateError("金标未冻结（平台校验）：防污染闸未通过，不能作为发布依据")
+    judge_vendor = _vendor_of(judge_model)
+    if judge_vendor == "unknown":
+        raise GateError(f"judge 厂牌无法识别（{judge_model!r}）：异厂性未证实，拒绝（fail-closed）")
+    if row.produced_by and judge_vendor == row.produced_by:
+        raise GateError(
+            f"judge 与金标同厂（{judge_vendor}）：同厂评审不算独立证据")
+    return {
+        "gate_evidence": "platform_validated",
+        "golden_set": {"id": row.id, "name": row.name, "frozen": True,
+                       "produced_by": row.produced_by, "eval_mark": row.eval_mark},
+        "judge_vendor": judge_vendor,
+    }
+
+
 def record_shadow(db: Session, proposal: Proposal, *, judge_model: str,
                   golden_set_frozen: bool, cross_vendor: bool,
-                  pass_rate: float, baseline: float = 0.0) -> Proposal:
-    """第二拍（终身门）：影子重放。要求冻结金标 + 异厂系 judge；低于噪声地板不算改进。"""
+                  pass_rate: float, baseline: float = 0.0,
+                  golden_set_id: int | None = None) -> Proposal:
+    """第二拍（终身门）：影子重放。要求冻结金标 + 异厂系 judge；低于噪声地板不算改进。
+
+    D10：传 `golden_set_id` 时按账上金标集**平台校验**（冻结 + 异厂），布尔入参被校验结果取代；
+    不传时保留旧布尔门，并在 shadow_json 如实记 `gate_evidence=self_declared`（自报门不是平台门）。
+    """
     if proposal.status not in ("probed", "generated"):
         raise GateError(f"当前状态 {proposal.status} 不允许影子重放")
+    if golden_set_id is not None:
+        gate = validate_shadow_gate(db, golden_set_id, judge_model)
+        golden_set_frozen, cross_vendor = True, True
+    else:
+        gate = {"gate_evidence": "self_declared"}
     if not golden_set_frozen:
         raise GateError("金标未冻结：防污染闸未通过，不能作为发布依据")
     if not cross_vendor:
@@ -408,6 +605,7 @@ def record_shadow(db: Session, proposal: Proposal, *, judge_model: str,
         proposal.shadow_json = json.dumps({
             "judge_model": judge_model, "pass_rate": pass_rate,
             "baseline": baseline, "delta": delta, "noise_floor": NOISE_FLOOR,
+            **gate,
         }, ensure_ascii=False)
         proposal.status = "collapsed"
         proposal.updated_at = _now()
@@ -419,6 +617,7 @@ def record_shadow(db: Session, proposal: Proposal, *, judge_model: str,
         "judge_model": judge_model, "pass_rate": pass_rate,
         "baseline": baseline, "delta": delta, "noise_floor": NOISE_FLOOR,
         "golden_set_frozen": True, "cross_vendor": True,
+        **gate,
     }, ensure_ascii=False)
     proposal.judge_model = judge_model
     proposal.status = "awaiting_approval"

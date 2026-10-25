@@ -5,8 +5,11 @@ from sqlalchemy.orm import Mapped, mapped_column
 from models import Base
 
 # v21 T-02：`hermes` / `dsh` 是本机可**真执行**的 CLI 运行时（其余仍走进程内 provider）
+# §6.28（v11 运行时口径）：运行时**只有成员机器上探测到的 AI 编码 CLI**。
+# langchain/langgraph/autogen/crewai 已从白名单清除（v24-doc-refresh D8）——
+# 它们不再作为运行时表述；存量行读侧不受影响（白名单只在创建/更新的**写路径**校验）。
 SUPPORTED_RUNTIMES = frozenset({
-    "langchain", "langgraph", "autogen", "crewai", "codex", "custom", "hermes", "dsh",
+    "hermes", "dsh", "codex", "custom",
 })
 
 
@@ -20,7 +23,8 @@ class Agent(Base):
     owner_kind: Mapped[str] = mapped_column(String(16), default="personal", index=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     description: Mapped[str] = mapped_column(Text, default="")
-    runtime: Mapped[str] = mapped_column(String(32), default="langgraph")
+    # D8：默认不再是 langgraph（旧宇宙）；留空=未选，创建 API 必填校验。
+    runtime: Mapped[str] = mapped_column(String(32), default="")
     model_provider: Mapped[str] = mapped_column(String(64), nullable=False)
     model_name: Mapped[str] = mapped_column(String(128), nullable=False)
     model_config_json: Mapped[dict] = mapped_column(JSON, default=dict)

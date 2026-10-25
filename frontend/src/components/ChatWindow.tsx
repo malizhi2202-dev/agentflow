@@ -24,6 +24,7 @@ import {
   runLabel,
   runStateOf,
   type Reachability,
+  QUEUED_GAP_NOTE,
 } from './chat/chatSemantics';
 import RuntimeQueueNotice from './chat/RuntimeQueueNotice';
 
@@ -165,8 +166,13 @@ export default function ChatWindow({
                 {state === 'failed' && (
                   <span style={{ ...META, color: 'var(--red)' }}>原因：{failureReason}</span>
                 )}
+                {/* 前端对账 R 项收口：单条 chip 也要携带缺口口径（title），
+                    快看不至于误判「消息真的在队列里」 */}
                 {state === 'queued' && (
-                  <span style={{ ...META, color: 'var(--orange, #c80)' }}>运行时离线，消息等待上线（不丢、不算失败）</span>
+                  <span style={{ ...META, color: 'var(--orange, #c80)' }}
+                        title={QUEUED_GAP_NOTE} aria-label={QUEUED_GAP_NOTE}>
+                    运行时离线，消息等待上线（不丢、不算失败）
+                  </span>
                 )}
               </div>
             </div>

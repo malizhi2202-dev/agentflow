@@ -3,7 +3,8 @@ import { safeFetch } from '../utils/requestDedup';
 
 export interface Agent {
   id: number; owner_id: string; name: string; description: string;
-  runtime: 'langchain' | 'langgraph' | 'autogen' | 'crewai' | 'codex' | 'custom'; model_provider: string; model_name: string;
+  // D8（§6.28）：运行时=机器上的 AI 编码 CLI（custom=未归类）；旧四者不再是运行时取值
+  runtime: 'hermes' | 'dsh' | 'codex' | 'custom'; model_provider: string; model_name: string;
   model_config_json: any; api_key: string;
   domain_id: number | null;
   workflow_id: number | null; workflow_summary?: any;

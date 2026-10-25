@@ -62,6 +62,8 @@ export default function RsiSwitchesCard() {
   /** 待二次确认的停用目标：类目 key 或 '__master__' */
   const [confirmOff, setConfirmOff] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  // D11（设计 §3.3「必填原因、双入口校验、审计落可见态」）：停用原因必填
+  const [offReason, setOffReason] = useState('');
 
   const total = rsiSwitches.length;
   const enabledCount = rsiSwitches.filter((s) => s.enabled).length;
@@ -74,13 +76,16 @@ export default function RsiSwitchesCard() {
         : `部分停用（${total - enabledCount} 关 / ${enabledCount} 开）`;
 
   async function runOff(category: string) {
+    const reason = offReason.trim();
+    if (!reason) return;  // 必填：无原因不给提交（服务端 400 是第二道）
     setBusy(category);
     try {
-      if (category === '__master__') await setRsiMaster(false);
-      else await setRsiSwitch(category, false);
+      if (category === '__master__') await setRsiMaster(false, reason);
+      else await setRsiSwitch(category, false, reason);
     } finally {
       setBusy(null);
       setConfirmOff(null);
+      setOffReason('');
     }
   }
 
@@ -220,14 +225,23 @@ export default function RsiSwitchesCard() {
             <b>存量在途不受影响</b>，跑完为止；回归熔断一并停用 → 回滚转手工；
             待审提案保留，<b>沉默 ≠ 同意</b>，不自动采纳。运行态自愈（reconcile / 探针）不受影响（另一条轴）。
           </div>
-          <div className="toolbar" style={{ marginTop: 8 }}>
-            <button className="btn btn-ghost btn-sm" onClick={() => setConfirmOff(null)} disabled={busy !== null}>
+          <div className="toolbar" style={{ marginTop: 8, gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <input
+              id="rsi-off-reason"
+              aria-label="停用原因（必填）"
+              placeholder="停用原因（必填，入审计）"
+              style={{ flex: '1 1 220px', minWidth: 200 }}
+              value={offReason}
+              onChange={(e) => setOffReason(e.target.value)}
+              disabled={busy !== null}
+            />
+            <button className="btn btn-ghost btn-sm" onClick={() => { setConfirmOff(null); setOffReason(''); }} disabled={busy !== null}>
               取消
             </button>
             <button
               className="btn btn-primary btn-sm"
               onClick={() => runOff(confirmOff)}
-              disabled={busy !== null}
+              disabled={busy !== null || !offReason.trim()}
             >
               {busy !== null ? '提交中…' : '确认停用'}
             </button>

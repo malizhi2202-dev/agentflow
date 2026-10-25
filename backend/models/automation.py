@@ -15,19 +15,21 @@
 """
 import datetime
 
-from sqlalchemy import Boolean, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from models import Base
 
 # 触发器两类 + 保留 v14 的 api 作第三类（原型 ⑨：multica 只有两类，api 是我方自扩展）
-TRIGGER_KINDS = ("schedule", "webhook")
+# D6：三型——api 型是我方自扩展通道（设计 §6.31 B「收口成本限定在 kind 枚举一处」）
+TRIGGER_KINDS = ("schedule", "webhook", "api")
 # 执行模式两档：留痕在任务上 ⟂ 只进运行史
 EXEC_MODES = ("create_issue", "run_only")
 # 负责人二轨，不可混指
 OWNER_TRACKS = ("agent", "squad")
 # 规则状态三态（归档 = 删除的软形态，历史账全部保留）
-STATUSES = ("enabled", "paused", "archived")
+# D6/D7：设计 §3.3 状态集含 `disabled`——小队归档时指向它的自动化转 disabled（不静默删行）
+STATUSES = ("enabled", "disabled", "paused", "archived")
 # 运行史状态：skipped / cancelled / duplicate 是「不跑」的三类，都不计入失败率分母
 RUN_STATUSES = ("queued", "running", "completed", "failed", "skipped", "cancelled")
 # 投递记录状态：accepted 派生成运行；skipped/ignored/duplicate 是业务性不跑；rejected 是技术性拒绝
@@ -107,6 +109,44 @@ class AutomationDelivery(Base):
     status: Mapped[str] = mapped_column(String(16), default="accepted")
     response_code: Mapped[int] = mapped_column(Integer, default=200)
     dedup_key: Mapped[str] = mapped_column(String(128), default="")
+    # D6：设计要求「两键分开记账」——通用 Idempotency-Key 与 GitHub X-GitHub-Delivery
+    # 语义不同（前者跨投递方、后者跨重投），**不能合成一个键**（合成 = 一方来键会吃掉另一方）。
+    idem_key: Mapped[str] = mapped_column(String(128), default="", index=True)
+    delivery_key: Mapped[str] = mapped_column(String(128), default="", index=True)
     error: Mapped[str] = mapped_column(Text, default="")
     replayed_from: Mapped[int | None] = mapped_column(Integer, nullable=True)
     received_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
+
+
+class RuleVersion(Base):
+    """规则版本**不可变行账**（设计 §3.3 / §6.31 H/I）。
+
+    每版一行快照：`version` + `spec_json` + `reason` + `created_by`。
+    - 运行史每行带 `spec_version`（`automation_runs.spec_version`），能指回「触发当时是哪一版规则」；
+    - 界面显示 v1…vN + 版本 diff 只读 +「为何停用」可查；
+    - **不删被引用中的旧快照**（时间线要能复盘当时的规则）。
+    """
+
+    __tablename__ = "rule_versions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    automation_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("automations.id"), nullable=False, index=True
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    spec_json: Mapped[str] = mapped_column(Text, default="{}")
+    reason: Mapped[str] = mapped_column(String(512), default="")
+    created_by: Mapped[str] = mapped_column(String(64), default="")
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
+
+    __table_args__ = (UniqueConstraint("automation_id", "version", name="ux_rule_versions_auto_ver"),)
+
+    def to_dict(self) -> dict:
+        import json
+
+        return {
+            "id": self.id, "automation_id": self.automation_id, "version": self.version,
+            "spec": json.loads(self.spec_json or "{}"),
+            "reason": self.reason, "created_by": self.created_by,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }

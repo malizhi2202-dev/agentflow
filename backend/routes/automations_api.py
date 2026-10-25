@@ -243,6 +243,25 @@ def breaker_automation(auto_id: int, request: Request, payload: dict | None = No
     return {"ok": True, "automation": _auto_row(db, auto, user)}
 
 
+@router.post("/api/automations/{auto_id}/triggers/{trigger_id}/invoke")
+async def invoke_api_trigger(auto_id: int, trigger_id: int, request: Request,
+                             db: Session = Depends(get_db)):
+    """D6：api 型触发器 = 平台内自扩展通道入口（token 即凭据，写请求头）。
+
+    与公开 webhook 同一套闸门与两级账本；差别只在入口。收口成本限定在 kind 枚举一处。
+    """
+    user = _user(request)
+    auto = _visible(db, user, auto_id)
+    trigger = svc.get_trigger(db, auto, trigger_id)
+    if trigger.kind != "api":
+        return JSONResponse(content={"detail": "invoke 只对 api 型触发器开放"}, status_code=400)
+    token = str((request.headers.get("x-automation-token") or ""))
+    raw = await request.body()
+    code, body = svc.invoke_api_trigger(db, token, request.headers, raw)
+    _audit(user, request, "automation.invoke", auto.name, str(body.get("semantics")))
+    return JSONResponse(content=body, status_code=code)
+
+
 # ── 两级账本 ──────────────────────────────────────────────
 
 @router.get("/api/automations/{auto_id}/runs")
@@ -263,6 +282,14 @@ def list_deliveries(auto_id: int, request: Request, limit: int = 50,
 
 
 # ── webhook 入口（token 即凭据，无用户会话）────────────────
+
+@router.get("/api/automations/{auto_id}/rule-versions")
+def list_rule_versions(auto_id: int, request: Request, db: Session = Depends(get_db)):
+    """D5：规则版本 v1…vN（不可变行账，版本 diff 只读）。越权=404。"""
+    user = _user(request)
+    _visible(db, user, auto_id)
+    return {"rule_versions": svc.list_rule_versions(db, auto_id)}
+
 
 @router.post("/api/webhooks/automations/{token}")
 async def automation_webhook(token: str, request: Request, db: Session = Depends(get_db)):

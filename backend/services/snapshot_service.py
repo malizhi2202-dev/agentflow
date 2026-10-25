@@ -42,10 +42,12 @@ def migrate_spec_json_to_yaml(spec_json: dict) -> str:
         agents_yaml += f"    - name: {n.get('agentName', n.get('label', 'agent'))}\n"
         agents_yaml += "      kind: Agent\n"
         agents_yaml += "      spec:\n"
-        agents_yaml += "        runtime: langgraph\n"
+        # D8：迁移产物不写死旧宇宙（langgraph/gpt-4o 均为已裁撤表述）；
+        # custom=未归类运行时（白名单内），name 给目录内合法值（解析器要求非空）。
+        agents_yaml += "        runtime: custom\n"
         agents_yaml += "        model:\n"
         agents_yaml += f"          provider: openai\n"
-        agents_yaml += f"          name: gpt-4o\n"
+        agents_yaml += f"          name: deepseek-chat\n"
         agents_yaml += f"        workflow_id: {n.get('agentId', 1)}\n"
     routes_yaml = ""
     for e in edges:

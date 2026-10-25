@@ -203,12 +203,17 @@ describe('① RSI 开关卡组', () => {
     fireEvent.click(within(card).getByLabelText('停用「技能」自动改进'));
     // 未确认前不许发写请求
     expect(calls.filter((c) => c.method === 'POST')).toHaveLength(0);
+    // D11：无原因不给提交（必填原因 = 人批动作留痕，状态转换层纪律）
+    const confirmBtn = within(card).getByText('确认停用');
+    expect(confirmBtn).toBeDisabled();
+    fireEvent.change(within(card).getByLabelText('停用原因（必填）'),
+                     { target: { value: '评测回流疑似污染' } });
     fireEvent.click(within(card).getByText('确认停用'));
 
     await waitFor(() => expect(calls.filter((c) => c.method === 'POST')).toHaveLength(1));
     const post = calls.filter((c) => c.method === 'POST')[0];
     expect(post.url).toBe('/api/rsi/switches/skill');
-    expect(post.body).toEqual({ enabled: false });
+    expect(post.body).toEqual({ enabled: false, reason: '评测回流疑似污染' });
     await waitFor(() => expect(within(card).getByRole('status'))
       .toHaveTextContent(/已暂停「技能」自动改进/));
   });
@@ -225,6 +230,8 @@ describe('① RSI 开关卡组', () => {
     await waitFor(() => expect(within(card).getByLabelText('总闸 · 一键全停（四类目同时停用）')).toBeInTheDocument());
 
     fireEvent.click(within(card).getByLabelText('总闸 · 一键全停（四类目同时停用）'));
+    fireEvent.change(within(card).getByLabelText('停用原因（必填）'),
+                     { target: { value: '发布窗口冻结自动体' } });
     fireEvent.click(within(card).getByText('确认停用'));
 
     await waitFor(() => expect(calls.filter((c) => c.method === 'POST')).toHaveLength(4));
@@ -248,6 +255,10 @@ describe('① RSI 开关卡组', () => {
     await waitFor(() => expect(within(card).getByLabelText('停用「技能」自动改进')).toBeInTheDocument());
 
     fireEvent.click(within(card).getByLabelText('停用「技能」自动改进'));
+    // D11：先证实「无原因不给提交」，填因后再提交
+    expect(within(card).getByText('确认停用')).toBeDisabled();
+    fireEvent.change(within(card).getByLabelText('停用原因（必填）'),
+                     { target: { value: '权限演练' } });
     fireEvent.click(within(card).getByText('确认停用'));
 
     await waitFor(() => expect(within(card).getByRole('alert'))
