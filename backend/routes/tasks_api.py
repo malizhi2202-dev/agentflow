@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 
 from auth import is_admin
 from database import get_db
-from models.collab import ASSIGNEE_KINDS, TRIAGE_STATES, WorkItem, WorkItemRun
+from models.collab import (ASSIGNEE_KINDS, STATUS_CATEGORY, TRIAGE_STATES,
+                           WorkItem, WorkItemRun)
 from services import collab_service
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
@@ -176,7 +177,25 @@ def assign_task(task_id: int, payload: dict, request: Request,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return {"ok": True, "task": item.to_dict()}
+    # ── R25-8（v25 · 指派确认层）：`start=true` = 「开始」= 显式运行请求 ──
+    # 入口侧校验与服务层 run_from_assignment 同款两条（双入口纪律，不假设前一处覆盖）；
+    # 「先不开工」= 只走到这里的普通 assign（不传 start）。
+    # 注：开跑失败时**指派本身已入账**（assign 先 commit）——回 400 说清半局，不假装回滚。
+    if not bool(payload.get("start", False)):
+        return {"ok": True, "task": item.to_dict()}
+    if kind != "agent":
+        raise HTTPException(status_code=400,
+                            detail="「开始」只对 agent 轨：人轨不产生 run、小队轨走 leader 任务（R25-8）")
+    if STATUS_CATEGORY.get(item.status, "") == "unstarted":
+        raise HTTPException(status_code=400,
+                            detail="任务停在停车闸内（backlog/未开始）：「开始」不入队——先出闸或选「先不开工」")
+    try:
+        run = collab_service.run_from_assignment(
+            db, item, user["id"], is_admin=is_admin(user),
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"指派已入账，开跑被拒：{e}")
+    return {"ok": True, "task": item.to_dict(), "run": run.to_dict()}
 
 
 @router.post("/{task_id}/triage")

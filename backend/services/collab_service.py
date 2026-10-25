@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 from models.collab import (
     HANDED_BACK_TO_HUMAN,
     ASSIGNEE_KINDS,
+    STATUS_CATEGORY,
     TRIAGE_STATES,
     InboxItem,
     WorkItem,
@@ -223,6 +224,40 @@ def assign(db: Session, item: WorkItem, actor: str, kind: str, assignee_id: str)
         notify(db, item, "unassigned", actor=actor, action_required=False,
                body=f"负责人已改派给 {assignee_id}")
     return item
+
+
+def run_from_assignment(db: Session, item: WorkItem, actor: str,
+                        is_admin: bool = False) -> WorkItemRun:
+    """R25-8（v25 · 指派确认层「开始」）：**显式运行请求**——当场建 run。
+
+    原型硬口径（board#md-assign-confirm）：选 Agent/小队后两决定，「开始」=当场开跑、
+    「先不开工」=只登记负责人。本函数只管「开始」那一下；判定收在状态转换层：
+
+    - **人轨无 run**：member 轨拿到的是跟进不是 run ⇒ 拒（前端层也不提供「开始」）；
+    - **小队轨**：指派小队的既有语义=给 leader 入队一条 leader 任务（teams_api），
+      「开跑」由那条任务自己走闸——本函数不越位（R25-8 结案注如实记此差异）；
+    - **停车闸**：status ∈ unstarted 类（原型「backlog / 未开始 = 唯一停车闸」）⇒ 拒；
+    - **终态不豁免**：done/closed 也能当场开跑（原型脚注①：要「登记但不跑」只走
+      「先不开工」一条路，这里没有第二道豁免）。
+
+    路由侧另有同款入口校验（双入口纪律），不假设此处覆盖了所有调用方。
+    """
+    if item.assignee_kind != "agent":
+        raise ValueError("只有 agent 轨的指派能「当场开跑」：人轨不产生 run，小队轨走 leader 任务（R25-8）")
+    if STATUS_CATEGORY.get(item.status, "") == "unstarted":
+        raise ValueError("任务停在停车闸内（backlog/未开始）：「开始」不入队——先出闸或选「先不开工」")
+    from services.agent_trigger import AgentRunError, trigger_agent_run
+
+    agent_id = int(item.assignee_id)
+    try:
+        result = trigger_agent_run(agent_id, actor, is_admin=is_admin, db=db)
+    except AgentRunError as e:
+        raise ValueError(str(e))
+    if result is None:
+        raise ValueError(f"Agent {agent_id} 不存在或无权启动")
+    run_id = f"assign-{datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{agent_id}"
+    return record_run(db, item, run_id, status="queued", agent_id=agent_id,
+                      summary=f"指派开跑（触发源=指派 · actor={actor} · 执行={result.get('agent_name', agent_id)}）")
 
 
 def add_comment(db: Session, item: WorkItem, actor: str, body: str,
