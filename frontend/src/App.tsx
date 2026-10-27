@@ -42,7 +42,6 @@ import Finetune from './pages/Finetune';
 import Isolation from './pages/Isolation';
 import Integration from './pages/Integration';
 import EnvAdvisor from './pages/EnvAdvisor';
-import SquadsPage from './pages/SquadsPage';
 import Automations from './pages/Automations';
 import Runtimes from './pages/Runtimes';
 import Replay from './pages/Replay';
@@ -103,7 +102,6 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'tasks', label: '任务', icon: <ListTodo size={16} /> },
       { id: 'inbox', label: '收件箱', icon: <InboxIcon size={16} /> },
       { id: 'teams', label: '团队与小队', icon: <Users size={16} /> },
-      { id: 'squads', label: '小队中心', icon: <Users size={16} /> },
       { id: 'chat', label: '💬 对话中心', icon: <MessageSquare size={16} /> },
     ],
   },
@@ -166,8 +164,7 @@ type View =
   | { page: 'finetune' }
   | { page: 'isolation' }
   | { page: 'integration' }
-  | { page: 'env-advisor' }
-  | { page: 'squads' };
+  | { page: 'env-advisor' };
 
 export default function App() {
   const getInitialNav = () => {
@@ -348,7 +345,6 @@ export default function App() {
       case 'isolation': return perm('project:read') ? <Isolation /> : <EmptyPerm />;
       case 'integration': return perm('project:read') ? <Integration /> : <EmptyPerm />;
       case 'env-advisor': return perm('project:read') ? <EnvAdvisor /> : <EmptyPerm />;
-      case 'squads': return perm('project:read') ? <SquadsPage /> : <EmptyPerm />;
       default: return <ProjectManager onSelect={(id) => setProjectDetailId(id)} />;
     }
   };

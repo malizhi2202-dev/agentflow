@@ -5,6 +5,8 @@ import {
   type AssetKind, type MemberRole, type Squad, type TeamStatus,
 } from '../stores/teams';
 import { useAuth } from '../stores/auth';
+import { safeFetch } from '../utils/requestDedup';
+import PlanningNotice from '../components/ui/PlanningNotice';
 
 const panel: React.CSSProperties = {
   background: 'var(--bg-panel)', border: '1px solid var(--border)',
@@ -329,7 +331,7 @@ function SquadCreateForm({ onDone }: { onDone: () => void }) {
   );
 }
 
-function SquadCard({ squad }: { squad: Squad }) {
+function SquadCard({ squad, tasks }: { squad: Squad; tasks: { id: number; title: string }[] }) {
   const { addSquadMember, removeSquadMember, archiveSquad } = useTeams();
   const { err, run } = useWrite();
   const [kind, setKind] = useState<'agent' | 'member'>('agent');
@@ -348,6 +350,10 @@ function SquadCard({ squad }: { squad: Squad }) {
         <span style={chip}>leader · {squad.leader_name || `#${squad.leader_agent_id}`}</span>
         <span style={chip}>成员 {(squad.members || []).length}</span>
       </header>
+      {/* 自由指令（自「小队中心」并入时补齐——旧独立页有、本卡此前漏渲染） */}
+      {squad.instructions && (
+        <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '4px 0' }}>{squad.instructions}</p>
+      )}
 
       <ul style={{ margin: '6px 0', paddingLeft: 16, fontSize: 11.5 }}>
         {(squad.members || []).map((m) => (
@@ -393,6 +399,29 @@ function SquadCard({ squad }: { squad: Squad }) {
           {confirmArchive ? '确认归档（只停未来指派）' : '归档小队'}
         </button>
       </div>
+      {/* 指派任务（v27 自「小队中心」独立页并入——该页与本页 squads tab 是同实体双入口，裁定删侧栏项） */}
+      <div style={{ marginTop: 8 }}>
+        <label htmlFor={`sq-assign-${squad.id}`} style={labelStyle}>指派任务（给 leader 入队 · leader 任务语义，成员不抢单）</label>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          <select id={`sq-assign-${squad.id}`} aria-label="选择任务" style={inputStyle} disabled={archived}
+                  onChange={(e) => {
+                    const id = Number(e.target.value);
+                    if (!id) return;
+                    run(async () => {
+                      const res = await fetch(`/api/squads/${squad.slug}/assign`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ task_id: id }),
+                      });
+                      const data = await res.json().catch(() => ({}));
+                      return res.ok ? { ok: true } : { ok: false, error: data?.detail || `指派失败 (${res.status})` };
+                    });
+                  }}>
+            <option value="">选一条任务…</option>
+            {tasks.map((t) => <option key={t.id} value={t.id}>#{t.id} {t.title}</option>)}
+          </select>
+          <span style={chip}>委派只在 leader 评论流里</span>
+        </div>
+      </div>
       {err && <div role="alert" style={{ color: 'var(--red)', fontSize: 11.5, marginTop: 4 }}>{err}</div>}
     </article>
   );
@@ -411,8 +440,13 @@ export default function Teams() {
   const [tab, setTab] = useState<'teams' | 'squads'>('teams');
   const [showCreate, setShowCreate] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  // 指派用任务表（自「小队中心」并入）：safeFetch 5s 缓存 + 去重，多卡片共用一次网络请求
+  const [tasks, setTasks] = useState<{ id: number; title: string }[]>([]);
 
-  useEffect(() => { fetchTeams(); fetchSquads(); }, [fetchTeams, fetchSquads]);
+  useEffect(() => {
+    fetchTeams(); fetchSquads();
+    safeFetch('/api/tasks').then((out) => { if (out.ok) setTasks(out.data?.tasks || []); });
+  }, [fetchTeams, fetchSquads]);
 
   const openTeam = async (slug: string) => {
     setSelected(slug);
@@ -424,12 +458,15 @@ export default function Teams() {
       return (
         <div>
           {squadsError && <div role="alert" style={{ color: 'var(--red)', fontSize: 12.5, marginBottom: 8 }}>{squadsError}</div>}
+          <div style={{ marginBottom: 10 }}>
+            <PlanningNotice note="原型 squads__code-review 的「12 节点协议时间线」需要运行事件后端（未接入）；本 tab 只呈现真实的成员/指令/指派。Team 是「谁的资产」的容器，Squad 是「这次谁一起干」的编组——不拥有资产、与 Team 无外键。" />
+          </div>
           {!squadsLoading && squads.length === 0 && !squadsError && (
             <p style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>
               还没有小队。小队是「这次谁一起干」的编组，1 个 leader Agent + 混编成员。
             </p>
           )}
-          {squads.map((s) => <SquadCard key={s.id} squad={s} />)}
+          {squads.map((s) => <SquadCard key={s.id} squad={s} tasks={tasks} />)}
         </div>
       );
     }
@@ -469,7 +506,7 @@ export default function Teams() {
         </div>
       </div>
     );
-  }, [tab, teams, teamsError, teamsLoading, showCreate, selected, detail, squads, squadsError, squadsLoading]);
+  }, [tab, teams, teamsError, teamsLoading, showCreate, selected, detail, squads, squadsError, squadsLoading, tasks]);
 
   return (
     <div style={{ padding: 16 }}>

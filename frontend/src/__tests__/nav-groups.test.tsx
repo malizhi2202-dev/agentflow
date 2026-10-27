@@ -80,7 +80,9 @@ describe('侧栏分组', () => {
     // v26：侧栏「Agent 详情」二级入口已移除（列表点卡片即进详情），这里锁死不再回来
     expect(names('构建')).not.toContain('Agent 详情');
     expect(names('运行')).toEqual(['编排', 'Agent 管控', '运行时', '回放', '自动化', '执行隔离', '对外集成', '环境参谋']);
-    expect(names('协作')).toEqual(['项目', '任务', '收件箱', '团队与小队', '小队中心', '💬 对话中心']);
+    expect(names('协作')).toEqual(['项目', '任务', '收件箱', '团队与小队', '💬 对话中心']);
+    // v27-A：「小队中心」独立页与 Teams·squads tab 是同实体双入口，侧栏项已删（功能并入 团队与小队）
+    expect(names('协作')).not.toContain('小队中心');
     expect(names('知识')).toEqual(['知识库', '记忆中心']);
     expect(names('观测')).toEqual(['监控', '告警中心']);
     expect(names('治理')).toEqual(['审批', '用户管理', '审计日志']);
