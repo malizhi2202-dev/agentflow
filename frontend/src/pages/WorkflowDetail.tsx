@@ -1,263 +1,167 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Save, Plus, Trash2, ChevronUp, ChevronDown, BarChart3, GitMerge, ArrowRight, GitFork } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, ChevronUp, ChevronDown, GitMerge, ArrowRight, GitFork, AlertCircle, RefreshCw } from 'lucide-react';
 import { useWorkflows } from '../stores/workflows';
 import EntityBreakdownPanel from '../components/EntityBreakdownPanel';
+import PageHeader from '../components/ui/PageHeader';
+import Toolbar from '../components/ui/Toolbar';
 
 const th: React.CSSProperties = { padding: '6px 8px', textAlign: 'left', color: 'var(--text-dim)', fontWeight: 500, fontSize: 10 };
 const td: React.CSSProperties = { padding: '4px 8px', fontSize: 11, color: 'var(--color-text)' };
 const inp: React.CSSProperties = { width: '100%', padding: '8px', background: 'var(--bg-input)', color: 'var(--color-text)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12, boxSizing: 'border-box' };
 
 export default function WorkflowDetail({ workflowId, onBack }: { workflowId: number; onBack: () => void }) {
-  var { workflows, fetchWorkflows, updateWorkflow } = useWorkflows();
-  var wf = workflows.find(function(w) { return w.id === workflowId; });
-  var [tab, setTab] = useState('nodes');
-  var [nodes, setNodes] = useState<any[]>([]);
-  var [edges, setEdges] = useState<any[]>([]);
-  var [editingNode, setEditingNode] = useState<string | null>(null);
-  var [editLabel, setEditLabel] = useState('');
-  var [editToolId, setEditToolId] = useState(0);
-  var [saved, setSaved] = useState(false);
-  var [monitorData, setMonitorData] = useState<any>(null);
-  var [tools, setTools] = useState<any[]>([]);
-  var [newEdge, setNewEdge] = useState({ from: '', to: '', type: 'sequential' });
-  var [showAddEdge, setShowAddEdge] = useState(false);
-  var [nodeDetailId, setNodeDetailId] = useState<string | null>(null);
-  var [nd, setNd] = useState({ label: '', tool_id: 0, gate_pre: '', gate_post: '', io_filter: 'none', token_limit: 0 });
+  const { workflows, fetchWorkflows, updateWorkflow, loading } = useWorkflows();
+  const wf = workflows.find((workflow) => workflow.id === workflowId);
+  const [tab, setTab] = useState('nodes');
+  const [nodes, setNodes] = useState<any[]>([]);
+  const [edges, setEdges] = useState<any[]>([]);
+  const [editingNode, setEditingNode] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState('');
+  const [editToolId, setEditToolId] = useState(0);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveError, setSaveError] = useState('');
+  const [monitorData, setMonitorData] = useState<any>(null);
+  const [tools, setTools] = useState<any[]>([]);
+  const [newEdge, setNewEdge] = useState({ from: '', to: '', type: 'sequential' });
+  const [showAddEdge, setShowAddEdge] = useState(false);
+  const [nodeDetailId, setNodeDetailId] = useState<string | null>(null);
+  const [nd, setNd] = useState({ label: '', tool_id: 0, gate_pre: '', gate_post: '', io_filter: 'none', token_limit: 0 });
 
-  useEffect(function() {
-    fetchWorkflows();
-    fetch('/api/tools').then(function(r) { return r.json(); }).then(function(d) { setTools(d.tools || []); });
+  useEffect(() => {
+    void fetchWorkflows();
+    fetch('/api/tools').then((response) => response.json()).then((data) => setTools(data.tools || [])).catch(() => setTools([]));
   }, []);
 
-  useEffect(function() {
+  useEffect(() => {
     if (wf) {
       setNodes(wf.spec_json?.nodes || []);
       setEdges(wf.spec_json?.edges || []);
       fetch('/api/metrics/sessions?limit=200&entity_type=workflow')
-        .then(function(r) { return r.json(); }).then(function(d) { setMonitorData(d.sessions || []); });
+        .then((response) => response.json()).then((data) => setMonitorData(data.sessions || [])).catch(() => setMonitorData([]));
     }
   }, [wf]);
 
-  if (!wf) return <div style={{ padding: 40, color: 'var(--text-dim)' }}>加载中...</div>;
-
-  var saveNodes = function(ns: any[], es?: any[]) {
-    var e = es || edges;
-    setNodes(ns); setEdges(e);
-    updateWorkflow(workflowId, { spec_json: { nodes: ns, edges: e } }).then(function() {
-      setSaved(true); setTimeout(function() { setSaved(false); }, 1500);
-    });
+  const saveNodes = async (nextNodes: any[], nextEdges?: any[]) => {
+    const next = nextEdges || edges;
+    setNodes(nextNodes);
+    setEdges(next);
+    setSaveState('saving');
+    setSaveError('');
+    const result = await updateWorkflow(workflowId, { spec_json: { nodes: nextNodes, edges: next } });
+    if (result) {
+      setSaveState('saved');
+      window.setTimeout(() => setSaveState('idle'), 1500);
+    } else {
+      setSaveState('error');
+      setSaveError('保存失败，已保留当前编辑内容。');
+    }
   };
 
-  var openNodeDetail = function(node: any) {
+  const openNodeDetail = (node: any) => {
     setNodeDetailId(node.id);
     setNd({ label: node.label || node.id, tool_id: node.tool_id || 0, gate_pre: node.gate_pre || '', gate_post: node.gate_post || '', io_filter: node.io_filter || 'none', token_limit: node.token_limit || 0 });
   };
 
-  var saveNodeDetail = function() {
-    var updated = nodes.map(function(n) { return n.id === nodeDetailId ? Object.assign({}, n, { label: nd.label, tool_id: nd.tool_id, gate_pre: nd.gate_pre || null, gate_post: nd.gate_post || null, io_filter: nd.io_filter, token_limit: nd.token_limit }) : n; });
-    saveNodes(updated);
+  const saveNodeDetail = () => {
+    const updated = nodes.map((node) => node.id === nodeDetailId ? { ...node, label: nd.label, tool_id: nd.tool_id, gate_pre: nd.gate_pre || null, gate_post: nd.gate_post || null, io_filter: nd.io_filter, token_limit: nd.token_limit } : node);
+    void saveNodes(updated);
     setNodeDetailId(null);
   };
 
-  // ── 节点详情页 ──
-  if (nodeDetailId) {
-    var node = nodes.find(function(n) { return n.id === nodeDetailId; });
-    if (!node) { setNodeDetailId(null); return null; }
+  if (!wf) {
     return (
-      <div style={{ padding: 24, height: '100%', overflow: 'auto', maxWidth: 600 }}>
-        <button onClick={function() { setNodeDetailId(null); }} style={{ padding: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4 }}>
-          <ArrowLeft size={16} /> 返回节点列表
-        </button>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 600, margin: '0 0 20px 0' }}>节点详情: {node.label || node.id}</h2>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div>
-            <label style={lbl}>节点标签</label>
-            <input value={nd.label} onChange={function(e) { setNd(Object.assign({}, nd, { label: e.target.value })); }} style={inp} />
-          </div>
-          <div>
-            <label style={lbl}>绑定工具</label>
-            <select value={nd.tool_id} onChange={function(e) { setNd(Object.assign({}, nd, { tool_id: parseInt(e.target.value) })); }} style={inp}>
-              <option value={0}>选择工具</option>
-              {tools.map(function(t) { return <option key={t.id} value={t.id}>{t.name} ({t.type})</option>; })}
-            </select>
-          </div>
-
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px 0' }}>🛡️ 安全闸门</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div><label style={lbl}>前置校验规则</label><input value={nd.gate_pre} onChange={function(e) { setNd(Object.assign({}, nd, { gate_pre: e.target.value })); }} placeholder="例: 输入必须包含 project_id" style={inp} /></div>
-              <div><label style={lbl}>后置校验规则</label><input value={nd.gate_post} onChange={function(e) { setNd(Object.assign({}, nd, { gate_post: e.target.value })); }} placeholder="例: 输出不能为空" style={inp} /></div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <div>
-                  <label style={lbl}>I/O 过滤</label>
-                  <select value={nd.io_filter} onChange={function(e) { setNd(Object.assign({}, nd, { io_filter: e.target.value })); }} style={inp}>
-                    <option value="none">不过滤</option><option value="sanitize">基础过滤</option><option value="strict">严格过滤</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={lbl}>Token 限制</label>
-                  <input type="number" value={nd.token_limit} onChange={function(e) { setNd(Object.assign({}, nd, { token_limit: parseInt(e.target.value) || 0 })); }} style={inp} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 10px 0' }}>👥 角色绑定</h3>
-            <select multiple style={{ ...inp, minHeight: 80 }}>
-              <option>架构师</option><option>高级产品经理</option><option>安全审计师</option>
-              <option>资深用户评测员</option><option>领域专家</option><option>资深测试工程师</option>
-            </select>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-dim)', marginTop: 8 }}>
-              <input type="checkbox" /> 对抗模式（两个角色互相审核）
-            </label>
-          </div>
-
-          <button onClick={saveNodeDetail} style={{ padding: '10px 20px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}>
-            <Save size={14} /> 保存节点配置
-          </button>
+      <div className="app-body" role={loading ? 'status' : 'alert'}>
+        <PageHeader title="工作流详情" context={`工作流 #${workflowId}`} summary={loading ? '正在读取工作流…' : '工作流不存在或暂时不可用'} autoFocus />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {!loading && <AlertCircle size={14} />}
+          <span>{loading ? '正在加载…' : '无法打开该工作流，请返回列表重试。'}</span>
+          <button className="btn btn-ghost btn-sm" onClick={onBack}><ArrowLeft size={13} /> 返回列表</button>
+          {!loading && <button className="btn btn-ghost btn-sm" onClick={() => void fetchWorkflows()}><RefreshCw size={13} /> 重试</button>}
         </div>
       </div>
     );
   }
 
-  // ── 主页面 ──
-  var monSessions = (monitorData || []).filter(function(s: any) { return s.entity_type === 'workflow'; });
-  var totalTokens = monSessions.reduce(function(s: number, x: any) { return s + (x.total_tokens || 0); }, 0);
-  var totalMs = monSessions.reduce(function(s: number, x: any) { return s + (x.duration_ms || 0); }, 0);
-  var totalCalls = monSessions.length;
-  var avgMs = totalCalls > 0 ? Math.round(totalMs / totalCalls) : 0;
+  const setDraft = (patch: Partial<typeof nd>) => setNd((previous) => ({ ...previous, ...patch }));
+
+  if (nodeDetailId) {
+    const node = nodes.find((item) => item.id === nodeDetailId);
+    if (!node) {
+      setNodeDetailId(null);
+      return null;
+    }
+    return (
+      <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+        <PageHeader
+          title={`节点详情：${node.label || node.id}`}
+          context={`工作流 · ${wf.name}`}
+          summary="编辑节点配置，保存后返回节点列表"
+          autoFocus
+        />
+        <div className="app-body" style={{ flex: 1 }}>
+          <Toolbar>
+            <button className="btn btn-ghost btn-sm" onClick={() => setNodeDetailId(null)}><ArrowLeft size={14} /> 返回节点列表</button>
+            <span className="grow" />
+            {saveState === 'saved' && <span role="status" className="chip ok">已保存</span>}
+          </Toolbar>
+          {saveError && <div role="alert" style={{ color: 'var(--red)', fontSize: 12 }}>{saveError}</div>}
+          <main aria-label="节点配置编辑区" style={{ maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div><label style={lbl} htmlFor="node-label">节点标签</label><input id="node-label" value={nd.label} onChange={(event) => setDraft({ label: event.target.value })} style={inp} /></div>
+            <div><label style={lbl} htmlFor="node-tool">绑定工具</label><select id="node-tool" value={nd.tool_id} onChange={(event) => setDraft({ tool_id: parseInt(event.target.value, 10) })} style={inp}><option value={0}>选择工具</option>{tools.map((tool) => <option key={tool.id} value={tool.id}>{tool.name} ({tool.type})</option>)}</select></div>
+            <section className="panel"><h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 10 }}>安全闸门</h2><div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}><div><label style={lbl} htmlFor="gate-pre">前置校验规则</label><input id="gate-pre" value={nd.gate_pre} onChange={(event) => setDraft({ gate_pre: event.target.value })} placeholder="例：输入必须包含 project_id" style={inp} /></div><div><label style={lbl} htmlFor="gate-post">后置校验规则</label><input id="gate-post" value={nd.gate_post} onChange={(event) => setDraft({ gate_post: event.target.value })} placeholder="例：输出不能为空" style={inp} /></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}><div><label style={lbl} htmlFor="io-filter">I/O 过滤</label><select id="io-filter" value={nd.io_filter} onChange={(event) => setDraft({ io_filter: event.target.value })} style={inp}><option value="none">不过滤</option><option value="sanitize">基础过滤</option><option value="strict">严格过滤</option></select></div><div><label style={lbl} htmlFor="token-limit">Token 限制</label><input id="token-limit" type="number" value={nd.token_limit} onChange={(event) => setDraft({ token_limit: parseInt(event.target.value, 10) || 0 })} style={inp} /></div></div></div></section>
+            <section className="panel"><h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 10 }}>角色绑定</h2><select multiple aria-label="角色绑定" style={{ ...inp, minHeight: 80 }}><option>架构师</option><option>高级产品经理</option><option>安全审计师</option><option>资深用户评测员</option><option>领域专家</option><option>资深测试工程师</option></select><label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-dim)', marginTop: 8 }}><input type="checkbox" /> 对抗模式（两个角色互相审核）</label></section>
+            <button className="btn btn-primary" onClick={saveNodeDetail} disabled={saveState === 'saving'} style={{ alignSelf: 'flex-start' }}><Save size={14} /> {saveState === 'saving' ? '保存中…' : '保存节点配置'}</button>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  const monSessions = (monitorData || []).filter((session: any) => session.entity_type === 'workflow');
+  const totalTokens = monSessions.reduce((sum: number, session: any) => sum + (session.total_tokens || 0), 0);
+  const totalMs = monSessions.reduce((sum: number, session: any) => sum + (session.duration_ms || 0), 0);
+  const totalCalls = monSessions.length;
+  const avgMs = totalCalls > 0 ? Math.round(totalMs / totalCalls) : 0;
 
   return (
-    <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <button onClick={onBack} style={{ padding: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><ArrowLeft size={18} /></button>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 600, margin: 0, flex: 1 }}>{wf.name}</h1>
-        {saved && <span style={{ fontSize: 11, color: 'var(--green)', padding: '4px 8px', background: 'var(--green-bg)', borderRadius: 4 }}>已保存</span>}
-        <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 3, background: wf.status === 'published' ? 'var(--green-bg)' : 'var(--bg-input)', color: wf.status === 'published' ? 'var(--green)' : 'var(--text-dim)' }}>{wf.status === 'published' ? '已发布' : wf.status}</span>
-      </div>
-
-      <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '1px solid var(--border)' }}>
-        {['nodes', 'roles', 'monitor'].map(function(t) {
-          return <button key={t} onClick={function() { setTab(t); }} style={{ padding: '8px 16px', background: 'none', border: 'none', borderBottom: tab === t ? '2px solid var(--color-primary)' : '2px solid transparent', color: tab === t ? 'var(--color-primary)' : 'var(--text-secondary)', cursor: 'pointer', fontSize: 13 }}>{t === 'nodes' ? '🔀 节点编辑' : t === 'roles' ? '👥 角色绑定' : '📊 监控'}</button>;
-        })}
-      </div>
-
-      {tab === 'nodes' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 640 }}>
-          {nodes.map(function(node, i) {
-            var tool = tools.find(function(t) { return t.id === node.tool_id; });
-            var isEditing = editingNode === node.id;
-            return (
-              <div key={node.id} style={{ background: 'var(--bg-card)', borderRadius: 8, padding: 14, border: isEditing ? '1px solid var(--color-primary)' : '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }} onClick={function(e) { e.stopPropagation(); }}>
-                  <button onClick={function() { var ns = nodes.slice(); var t = ns[i]; ns[i] = ns[i-1]; ns[i-1] = t; saveNodes(ns); }} disabled={i === 0} style={{ padding: 2, background: 'none', border: 'none', cursor: i > 0 ? 'pointer' : 'default', color: 'var(--text-dim)', opacity: i > 0 ? 1 : 0.3 }}><ChevronUp size={12} /></button>
-                  <button onClick={function() { var ns = nodes.slice(); var t = ns[i]; ns[i] = ns[i+1]; ns[i+1] = t; saveNodes(ns); }} disabled={i === nodes.length - 1} style={{ padding: 2, background: 'none', border: 'none', cursor: i < nodes.length - 1 ? 'pointer' : 'default', color: 'var(--text-dim)', opacity: i < nodes.length - 1 ? 1 : 0.3 }}><ChevronDown size={12} /></button>
-                </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-dim)', minWidth: 30 }}>{node.id}</span>
-                {isEditing ? (
-                  <div style={{ flex: 1, display: 'flex', gap: 8 }} onClick={function(e) { e.stopPropagation(); }}>
-                    <input value={editLabel} onChange={function(e) { setEditLabel(e.target.value); }} style={{ flex: 1, padding: '6px 8px', background: 'var(--bg-input)', color: 'var(--color-text)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }} />
-                    <select value={editToolId} onChange={function(e) { setEditToolId(parseInt(e.target.value)); }} style={{ padding: '6px 8px', background: 'var(--bg-input)', color: 'var(--color-text)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}>
-                      <option value={0}>选择工具</option>
-                      {tools.map(function(t) { return <option key={t.id} value={t.id}>{t.name}</option>; })}
-                    </select>
-                    <button onClick={function() { saveNodes(nodes.map(function(n) { return n.id === node.id ? Object.assign({}, n, { label: editLabel, tool_id: editToolId }) : n; })); setEditingNode(null); }} style={{ padding: '4px 10px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 11 }}>确定</button>
-                  </div>
-                ) : (
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>{node.label || node.id}</div>
-                    {tool && <div style={{ fontSize: 10, color: 'var(--text-dim)' }}>工具: {tool.name} ({tool.type})</div>}
-                  </div>
-                )}
-                {!isEditing && (
-                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }} onClick={function(e) { e.stopPropagation(); }}>
-                    <button onClick={function() { openNodeDetail(node); }} style={{ padding: '4px 8px', color: 'var(--color-primary)', background: 'none', border: '1px solid var(--color-primary)', borderRadius: 4, cursor: 'pointer', fontSize: 11, whiteSpace: 'nowrap' }}>详情</button>
-                    <button onClick={function() { setEditingNode(node.id); setEditLabel(node.label || node.id); setEditToolId(node.tool_id || 0); }} style={{ padding: '4px 8px', background: 'var(--bg-input)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer', fontSize: 11 }}>编辑</button>
-                    <button onClick={function() { saveNodes(nodes.filter(function(n) { return n.id !== node.id; }), edges.filter(function(e) { return e.from !== node.id && e.to !== node.id; })); }} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)' }}><Trash2 size={14} /></button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          {nodes.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-dim)' }}>暂无节点</div>}
-          <button onClick={function() { saveNodes(nodes.concat([{ id: 'n' + (nodes.length + 1), tool_id: 0, label: '新节点' }])); }} style={{ padding: '8px 16px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12, alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6 }}><Plus size={14} /> 添加节点</button>
-
-          {/* 连线管理 */}
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginTop: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}><GitMerge size={14} /> 节点连线（{edges.length} 条）</h3>
-              <button onClick={function() { setShowAddEdge(!showAddEdge); }} style={{ padding: '6px 12px', background: 'var(--bg-input)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}><Plus size={12} /> 添加连线</button>
-            </div>
-            {showAddEdge && (
-              <div style={{ background: 'var(--bg-input)', borderRadius: 8, padding: 14, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <select value={newEdge.from} onChange={function(e) { setNewEdge(Object.assign({}, newEdge, { from: e.target.value })); }} style={{ padding: '6px 10px', background: 'var(--bg-card)', color: 'var(--color-text)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}>
-                  <option value="">从节点</option>
-                  {nodes.map(function(n) { return <option key={n.id} value={n.id}>{n.label || n.id}</option>; })}
-                </select>
-                <ArrowRight size={14} color="var(--text-dim)" />
-                <select value={newEdge.to} onChange={function(e) { setNewEdge(Object.assign({}, newEdge, { to: e.target.value })); }} style={{ padding: '6px 10px', background: 'var(--bg-card)', color: 'var(--color-text)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}>
-                  <option value="">到节点</option>
-                  {nodes.map(function(n) { return <option key={n.id} value={n.id}>{n.label || n.id}</option>; })}
-                </select>
-                <select value={newEdge.type} onChange={function(e) { setNewEdge(Object.assign({}, newEdge, { type: e.target.value })); }} style={{ padding: '6px 10px', background: 'var(--bg-card)', color: 'var(--color-text)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}>
-                  <option value="sequential">顺序</option>
-                  <option value="if-else">IF/ELSE</option>
-                  <option value="parallel">并行</option>
-                </select>
-                <button onClick={function() { if (newEdge.from && newEdge.to) { saveNodes(nodes, edges.concat([newEdge])); setShowAddEdge(false); setNewEdge({ from: '', to: '', type: 'sequential' }); } }} disabled={!newEdge.from || !newEdge.to} style={{ padding: '6px 14px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12, opacity: newEdge.from && newEdge.to ? 1 : 0.5 }}>确认</button>
-              </div>
-            )}
-            {edges.map(function(edge, i) {
-              var fn = nodes.find(function(n) { return n.id === edge.from; });
-              var tn = nodes.find(function(n) { return n.id === edge.to; });
-              var typeColor = edge.type === 'if-else' ? 'var(--orange)' : edge.type === 'parallel' ? 'var(--purple)' : 'var(--blue)';
-              var typeBg = edge.type === 'if-else' ? 'var(--orange-bg)' : edge.type === 'parallel' ? 'var(--purple-bg)' : 'var(--blue-bg)';
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-card)', borderRadius: 6, border: '1px solid var(--border)', marginBottom: 4 }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#548cf0' }}>{fn ? (fn.label || fn.id) : edge.from}</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 6px', borderRadius: 3, fontSize: 9, background: typeBg, color: typeColor }}>
-                    {edge.type === 'if-else' ? <GitFork size={10} /> : <ArrowRight size={10} />}
-                    {edge.type === 'if-else' ? 'IF' : edge.type === 'parallel' ? '并行' : '顺序'}
-                  </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: '#5cb878' }}>{tn ? (tn.label || tn.id) : edge.to}</span>
-                  <button onClick={function() { saveNodes(nodes, edges.filter(function(_: any, j: number) { return j !== i; })); }} style={{ padding: 2, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', marginLeft: 'auto' }}><Trash2 size={12} /></button>
-                </div>
-              );
-            })}
+    <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+      <PageHeader title={wf.name} context="工作流详情" summary={`${nodes.length} 个节点 · ${edges.length} 条连线`} autoFocus action={<button className="btn btn-ghost btn-sm" onClick={onBack}><ArrowLeft size={14} /> 返回列表</button>} />
+      <div className="app-body" style={{ flex: 1 }}>
+        <Toolbar>
+          <div role="tablist" aria-label="工作流详情分区" className="toolbar">
+            {['nodes', 'roles', 'monitor'].map((value) => <button key={value} role="tab" aria-selected={tab === value} className={`btn btn-sm ${tab === value ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setTab(value)}>{value === 'nodes' ? '节点编辑' : value === 'roles' ? '角色绑定' : '监控'}</button>)}
           </div>
-        </div>
-      )}
+          <span className="grow" />
+          {saveState === 'saving' && <span role="status" className="chip info">保存中…</span>}
+          {saveState === 'saved' && <span role="status" className="chip ok">已保存</span>}
+        </Toolbar>
+        {saveError && <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--red)', fontSize: 12 }}><AlertCircle size={14} /> {saveError}<button className="btn btn-ghost btn-xs" onClick={() => void saveNodes(nodes, edges)} disabled={saveState === 'saving'}>重试保存</button></div>}
 
-      {tab === 'roles' && (
-        <div style={{ maxWidth: 640 }}>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>为每个节点绑定角色。节点执行时自动加载对应角色的审查 prompt。</p>
-          {nodes.map(function(node) {
-            return (
-              <div key={node.id} style={{ background: 'var(--bg-card)', borderRadius: 8, padding: 14, border: '1px solid var(--border)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, minWidth: 60 }}>{node.label || node.id}</span>
-                <span style={{ color: 'var(--text-dim)' }}>→</span>
-                <select style={{ padding: '6px 10px', background: 'var(--bg-input)', color: 'var(--color-text)', border: '1px solid var(--border)', borderRadius: 4, fontSize: 12 }}>
-                  <option value="">选择角色</option>
-                  <option>架构师</option><option>高级产品经理</option><option>安全审计师</option><option>资深用户评测员</option><option>领域专家</option><option>资深测试工程师</option>
-                </select>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
-                  <input type="checkbox" /> 对抗模式
-                </label>
-              </div>
-            );
-          })}
-          {nodes.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-dim)' }}>暂无节点</div>}
-          <button onClick={function() { setSaved(true); setTimeout(function() { setSaved(false); }, 1500); }} style={{ marginTop: 12, padding: '8px 16px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}><Save size={14} /> 保存角色绑定</button>
-        </div>
-      )}
+        {tab === 'nodes' && (
+          <main aria-label="节点与连线主工作区" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 240px', gap: 'var(--space-3)' }}>
+            <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {nodes.map((node, index) => {
+                const tool = tools.find((item) => item.id === node.tool_id);
+                const isEditing = editingNode === node.id;
+                return <div key={node.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, borderColor: isEditing ? 'var(--color-brand)' : undefined }}><div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><button aria-label={`上移 ${node.label || node.id}`} className="btn btn-ghost btn-xs" onClick={() => { const next = nodes.slice(); [next[index - 1], next[index]] = [next[index], next[index - 1]]; void saveNodes(next); }} disabled={index === 0}><ChevronUp size={12} /></button><button aria-label={`下移 ${node.label || node.id}`} className="btn btn-ghost btn-xs" onClick={() => { const next = nodes.slice(); [next[index], next[index + 1]] = [next[index + 1], next[index]]; void saveNodes(next); }} disabled={index === nodes.length - 1}><ChevronDown size={12} /></button></div><span className="mono" style={{ fontSize: 11, color: 'var(--text-dim)', minWidth: 30 }}>{node.id}</span>{isEditing ? <div style={{ flex: 1, display: 'flex', gap: 8 }}><input aria-label="编辑节点标签" value={editLabel} onChange={(event) => setEditLabel(event.target.value)} style={{ flex: 1 }} /><select aria-label="编辑节点工具" value={editToolId} onChange={(event) => setEditToolId(parseInt(event.target.value, 10))} style={{ width: 160 }}><option value={0}>选择工具</option>{tools.map((tool) => <option key={tool.id} value={tool.id}>{tool.name}</option>)}</select><button className="btn btn-primary btn-xs" onClick={() => { void saveNodes(nodes.map((item) => item.id === node.id ? { ...item, label: editLabel, tool_id: editToolId } : item)); setEditingNode(null); }}>确定</button></div> : <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 600 }}>{node.label || node.id}</div>{tool && <div className="page-note" style={{ fontSize: 10 }}>工具：{tool.name} ({tool.type})</div>}</div>}{!isEditing && <div className="toolbar"><button className="btn btn-xs" onClick={() => openNodeDetail(node)} style={{ color: 'var(--color-brand)' }}>详情</button><button className="btn btn-ghost btn-xs" onClick={() => { setEditingNode(node.id); setEditLabel(node.label || node.id); setEditToolId(node.tool_id || 0); }}>编辑</button><button className="btn btn-ghost btn-xs" onClick={() => void saveNodes(nodes.filter((item) => item.id !== node.id), edges.filter((edge) => edge.from !== node.id && edge.to !== node.id))} aria-label={`删除 ${node.label || node.id}`}><Trash2 size={14} /></button></div>}</div>;
+              })}
+              {nodes.length === 0 && <div className="panel" style={{ color: 'var(--text-secondary)' }}>暂无节点。点击“添加节点”开始。</div>}
+              <button className="btn btn-primary" onClick={() => void saveNodes(nodes.concat([{ id: `n${nodes.length + 1}`, tool_id: 0, label: '新节点' }]))} style={{ alignSelf: 'flex-start' }}><Plus size={14} /> 添加节点</button>
 
-      {tab === 'monitor' && (
-        <EntityBreakdownPanel entityType="workflow" entityId={workflowId} entityName={wf?.name || '工作流'} />
-      )}
+              <section className="panel" aria-label="节点连线"><div className="toolbar" style={{ marginBottom: 12 }}><h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>节点连线（{edges.length} 条）</h2><button className="btn btn-ghost btn-sm" onClick={() => setShowAddEdge(!showAddEdge)}><Plus size={12} /> 添加连线</button></div>{showAddEdge && <div style={{ background: 'var(--color-surface-muted)', padding: 12, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}><select aria-label="连线起点" value={newEdge.from} onChange={(event) => setNewEdge({ ...newEdge, from: event.target.value })}><option value="">从节点</option>{nodes.map((node) => <option key={node.id} value={node.id}>{node.label || node.id}</option>)}</select><ArrowRight size={14} /><select aria-label="连线终点" value={newEdge.to} onChange={(event) => setNewEdge({ ...newEdge, to: event.target.value })}><option value="">到节点</option>{nodes.map((node) => <option key={node.id} value={node.id}>{node.label || node.id}</option>)}</select><select aria-label="连线类型" value={newEdge.type} onChange={(event) => setNewEdge({ ...newEdge, type: event.target.value })}><option value="sequential">顺序</option><option value="if-else">IF/ELSE</option><option value="parallel">并行</option></select><button className="btn btn-primary btn-sm" onClick={() => { if (newEdge.from && newEdge.to) { void saveNodes(nodes, edges.concat([newEdge])); setShowAddEdge(false); setNewEdge({ from: '', to: '', type: 'sequential' }); } }} disabled={!newEdge.from || !newEdge.to}>确认</button></div>}{edges.map((edge, index) => { const from = nodes.find((node) => node.id === edge.from); const to = nodes.find((node) => node.id === edge.to); return <div key={index} className="card" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}><span className="mono" style={{ fontSize: 12, color: 'var(--blue)' }}>{from ? (from.label || from.id) : edge.from}</span><span className="chip info">{edge.type === 'if-else' ? <GitFork size={10} /> : <ArrowRight size={10} />}{edge.type === 'if-else' ? 'IF' : edge.type === 'parallel' ? '并行' : '顺序'}</span><span className="mono" style={{ fontSize: 12, color: 'var(--green)' }}>{to ? (to.label || to.id) : edge.to}</span><button className="btn btn-ghost btn-xs" onClick={() => void saveNodes(nodes, edges.filter((_, edgeIndex) => edgeIndex !== index))} aria-label="删除连线" style={{ marginLeft: 'auto' }}><Trash2 size={12} /></button></div>; })}</section>
+            </section>
+            <aside aria-label="工作流辅助信息" className="panel"><h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 10 }}>编辑提示</h2><p className="page-note">节点顺序、工具绑定和连线都会通过现有工作流接口保存。</p><p className="page-note" style={{ marginTop: 12 }}>保存失败时保留当前草稿，可从顶部重试。</p></aside>
+          </main>
+        )}
+
+        {tab === 'roles' && <main aria-label="角色绑定主工作区" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 240px', gap: 'var(--space-3)' }}><section style={{ maxWidth: 720 }}><p className="page-note" style={{ marginBottom: 16 }}>为每个节点绑定角色。节点执行时自动加载对应角色的审查 prompt。</p>{nodes.map((node) => <div key={node.id} className="card" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 }}><span className="mono" style={{ fontSize: 12, fontWeight: 600, minWidth: 90 }}>{node.label || node.id}</span><span className="page-note">→</span><select aria-label={`${node.label || node.id} 角色`}><option value="">选择角色</option><option>架构师</option><option>高级产品经理</option><option>安全审计师</option><option>资深用户评测员</option><option>领域专家</option><option>资深测试工程师</option></select><label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap' }}><input type="checkbox" /> 对抗模式</label></div>)}{nodes.length === 0 && <div className="panel" style={{ color: 'var(--text-secondary)' }}>暂无节点可绑定角色。</div>}<button className="btn btn-primary" onClick={() => { setSaveState('saved'); window.setTimeout(() => setSaveState('idle'), 1500); }}><Save size={14} /> 保存角色绑定</button></section><aside className="panel" aria-label="角色绑定辅助信息"><h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 10 }}>角色策略</h2><p className="page-note">角色选择仅影响工作流节点执行时加载的审查 prompt。</p></aside></main>}
+
+        {tab === 'monitor' && <main aria-label="工作流监控主工作区"><div className="toolbar" style={{ marginBottom: 12 }}><span className="chip mono">调用 {totalCalls}</span><span className="chip mono">Token {totalTokens.toLocaleString()}</span><span className="chip mono">平均 {avgMs} ms</span></div><EntityBreakdownPanel entityType="workflow" entityId={workflowId} entityName={wf.name} /></main>}
+      </div>
     </div>
   );
 }
 
-var lbl: React.CSSProperties = { fontSize: 11, fontWeight: 500, color: 'var(--text-dim)', display: 'block', marginBottom: 4 };
+const lbl: React.CSSProperties = { fontSize: 11, fontWeight: 500, color: 'var(--text-dim)', display: 'block', marginBottom: 4 };
+void th;
+void td;

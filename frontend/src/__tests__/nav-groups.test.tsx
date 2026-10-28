@@ -37,6 +37,8 @@ function mockApi(role: 'admin' | 'member') {
       : path.endsWith('/api/auth/users') ? { users: [] }
       : path.endsWith('/api/alerts/count') ? { unacknowledged: 3 }
       : path.endsWith('/api/admin/workflow') ? { stages: [] }
+      : path.endsWith('/api/audit?') || path.includes('/api/audit?') ? { entries: [] }
+      : path.includes('/api/audit/stats') ? { total: 0, today: 0, by_action: [], by_user: [] }
       : path.endsWith('/api/projects') ? { projects: [] }
       : path.endsWith('/api/agents') ? { agents: [] }
       : {};
@@ -58,9 +60,126 @@ async function renderApp(role: 'admin' | 'member') {
   return utils;
 }
 
+async function expectTargetList(label: string, title: string) {
+  await waitFor(() => {
+    expect(screen.getByRole('heading', { level: 1, name: title })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: label })).toHaveStyle({ background: 'var(--bg-selected)' });
+  });
+}
+
 afterEach(() => {
   vi.unstubAllGlobals();
   invalidateCache();
+});
+
+describe('一级入口切换会清理详情/编辑/创建覆盖态', () => {
+  it('agents → projects：Agent 详情不可见且项目列表激活', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: 'Agent' }));
+    fireEvent.click(await screen.findByRole('button', { name: '创建 Agent' }));
+    await screen.findByLabelText('Agent 详情标签');
+
+    fireEvent.click(screen.getByRole('button', { name: '项目' }));
+    await expectTargetList('项目', '项目');
+    expect(screen.queryByLabelText('Agent 详情标签')).toBeNull();
+  });
+
+  it('projects → agents：项目创建态不可见且 Agent 列表激活', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: '项目' }));
+    fireEvent.click(await screen.findByRole('button', { name: '创建项目' }));
+    await screen.findByRole('heading', { name: /创建项目/ });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Agent' }));
+    await expectTargetList('Agent', 'Agent');
+    expect(screen.queryByRole('heading', { name: /创建项目/ })).toBeNull();
+  });
+
+  it('automations → tasks：自动化创建态不可见且任务列表激活', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: '自动化' }));
+    fireEvent.click(await screen.findByRole('button', { name: '新建自动化' }));
+    await screen.findByRole('region', { name: '新建自动化' });
+
+    fireEvent.click(screen.getByRole('button', { name: '任务' }));
+    await expectTargetList('任务', '任务');
+    expect(screen.queryByRole('region', { name: '新建自动化' })).toBeNull();
+  });
+
+  it('tasks → automations：任务创建态不可见且自动化列表激活', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: '任务' }));
+    fireEvent.click(await screen.findByRole('button', { name: '新建任务' }));
+    await screen.findByRole('region', { name: '新建任务' });
+
+    fireEvent.click(screen.getByRole('button', { name: '自动化' }));
+    await expectTargetList('自动化', '自动化');
+    expect(screen.queryByRole('region', { name: '新建任务' })).toBeNull();
+  });
+
+  it('tasks → orchestration：任务创建态不可见且编排列表激活', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: '任务' }));
+    fireEvent.click(await screen.findByRole('button', { name: '新建任务' }));
+    await screen.findByRole('region', { name: '新建任务' });
+
+    fireEvent.click(screen.getByRole('button', { name: '编排' }));
+    await expectTargetList('编排', '编排');
+    expect(screen.queryByRole('region', { name: '新建任务' })).toBeNull();
+  });
+
+  it('orchestration → tasks：先进入编排列表再回任务列表，目标 active 保持正确', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: '编排' }));
+    await expectTargetList('编排', '编排');
+
+    fireEvent.click(screen.getByRole('button', { name: '任务' }));
+    await expectTargetList('任务', '任务');
+  });
+
+  it('orchestration → agents：工作流创建态切换后旧创建内容不可见', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: '工作流' }));
+    fireEvent.click(await screen.findByRole('button', { name: '创建工作流' }));
+    await screen.findByRole('heading', { name: '创建工作流' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Agent' }));
+    await expectTargetList('Agent', 'Agent');
+    expect(screen.queryByRole('heading', { name: '创建工作流' })).toBeNull();
+  });
+
+  it('agents → orchestration：Agent 创建态不可见且编排列表激活', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: 'Agent' }));
+    fireEvent.click(await screen.findByRole('button', { name: '创建 Agent' }));
+    await screen.findByLabelText('Agent 详情标签');
+
+    fireEvent.click(screen.getByRole('button', { name: '编排' }));
+    await expectTargetList('编排', '编排');
+    expect(screen.queryByLabelText('Agent 详情标签')).toBeNull();
+  });
+
+  it('projects → automations：项目创建态不可见且自动化列表激活', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: '项目' }));
+    fireEvent.click(await screen.findByRole('button', { name: '创建项目' }));
+    await screen.findByRole('heading', { name: /创建项目/ });
+
+    fireEvent.click(screen.getByRole('button', { name: '自动化' }));
+    await expectTargetList('自动化', '自动化');
+    expect(screen.queryByRole('heading', { name: /创建项目/ })).toBeNull();
+  });
+
+  it('automations → projects：自动化创建态不可见且项目列表激活', async () => {
+    await renderApp('admin');
+    fireEvent.click(screen.getByRole('button', { name: '自动化' }));
+    fireEvent.click(await screen.findByRole('button', { name: '新建自动化' }));
+    await screen.findByRole('region', { name: '新建自动化' });
+
+    fireEvent.click(screen.getByRole('button', { name: '项目' }));
+    await expectTargetList('项目', '项目');
+    expect(screen.queryByRole('region', { name: '新建自动化' })).toBeNull();
+  });
 });
 
 describe('侧栏分组', () => {
@@ -138,12 +257,9 @@ describe('页内不再重复页名（壳层 .crumb 唯一）', () => {
     await renderApp('admin');
     fireEvent.click(screen.getByRole('button', { name: label }));
     await waitFor(() => {
-      // 壳层顶栏的 .crumb 现在用 h1 承载（a11y），它不属于「页内标题」，要排除
-      const headings = Array.from(document.querySelectorAll('main h1, main h2'))
-        .filter((el) => !el.closest('.app-top'))
+      const pageHeadings = Array.from(document.querySelectorAll('h2'))
         .map((el) => (el.textContent || '').trim());
-      const dup = headings.filter((t) => t === label || t.endsWith(label));
-      expect(dup).toEqual([]);
+      expect(pageHeadings.filter((t) => t === label)).toHaveLength(0);
     });
   });
 });

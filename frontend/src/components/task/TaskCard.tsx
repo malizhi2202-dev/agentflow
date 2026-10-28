@@ -40,6 +40,7 @@ export default function TaskCard({ task }: { task: Task }) {
   const [err, setErr] = useState<string | null>(null);
   /** 后端回来的「缺证据完成」警告文案（警告式，不是拒绝） */
   const [warn, setWarn] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const [assigning, setAssigning] = useState(false);
   const [kind, setKind] = useState<AssigneeKind>('member');
   const [assigneeId, setAssigneeId] = useState('');
@@ -49,8 +50,11 @@ export default function TaskCard({ task }: { task: Task }) {
   const evidenceChips = task.evidence || [];
 
   const move = async (next: Task['status']) => {
+    if (busy) return;
     setErr(null);
+    setBusy(true);
     const out = await moveStatus(task.id, next);
+    setBusy(false);
     if (!out.ok) {
       setErr(out.error || '操作失败');
       return;
@@ -62,7 +66,9 @@ export default function TaskCard({ task }: { task: Task }) {
   const submitDone = async (evidence?: { label: string; ref: string }[]) => {
     setErr(null);
     setWarn(null);
+    setBusy(true);
     const out = await moveStatus(task.id, 'done', evidence);
+    setBusy(false);
     if (!out.ok) return { ok: false, error: out.error };
     const warning = (out.data?.evidence_warning as string | null) || null;
     setDoneOpen(false);
@@ -72,8 +78,11 @@ export default function TaskCard({ task }: { task: Task }) {
 
   // v25 R25-8：确认层两个决定——start=true「开始」（当场建 run）/ false「先不开工」只登记
   const submitAssign = async (start = false) => {
+    if (busy) return;
     setErr(null);
+    setBusy(true);
     const out = await assign(task.id, kind, assigneeId.trim(), start);
+    setBusy(false);
     if (!out.ok) {
       setErr(out.error || (start ? '指派已入账，开跑被拒' : '指派失败'));
       return;
@@ -82,7 +91,7 @@ export default function TaskCard({ task }: { task: Task }) {
   };
 
   return (
-    <article className="panel" style={{ marginBottom: 8, padding: '8px 10px' }} aria-label={`任务 ${task.title}`}>
+    <article className="panel" style={{ marginBottom: 8, padding: '8px 10px' }} aria-label={`任务 ${task.title}`} aria-busy={busy}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
         <span style={{ fontWeight: 600, lineHeight: 1.35 }}>{task.title}</span>
         <span className="chip mono" style={{ flexShrink: 0 }} title="优先级不授予任何行为">
@@ -114,11 +123,15 @@ export default function TaskCard({ task }: { task: Task }) {
           <button
             className="btn btn-ghost btn-sm"
             style={{ cursor: 'pointer' }}
-            onClick={async () => {
-              setErr(null);
-              const out = await triage(task.id);
-              if (!out.ok) setErr(out.error || '操作失败');
-            }}
+              disabled={busy}
+              onClick={async () => {
+                if (busy) return;
+                setErr(null);
+                setBusy(true);
+                const out = await triage(task.id);
+                setBusy(false);
+                if (!out.ok) setErr(out.error || '操作失败');
+              }}
             title="标记为已分诊（triage 与 status 正交）"
           >
             待分诊
@@ -156,6 +169,7 @@ export default function TaskCard({ task }: { task: Task }) {
             <button
               key={next}
               className="btn btn-ghost btn-sm"
+              disabled={busy}
               onClick={() => setDoneOpen(true)}
               title="完成需证据（建议层）：空证据也能完成，但会记成可疑完成并给补证据提醒"
             >
@@ -165,6 +179,7 @@ export default function TaskCard({ task }: { task: Task }) {
             <button
               key={next}
               className="btn btn-ghost btn-sm"
+              disabled={busy}
               onClick={() => move(next)}
               title={`把状态改为 ${STATUS_LABEL[next]}（合法性由后端判定；不会启动任何 Agent）`}
             >
@@ -172,8 +187,9 @@ export default function TaskCard({ task }: { task: Task }) {
             </button>
           )
         ))}
-        <button
+          <button
           className="btn btn-ghost btn-sm"
+          disabled={busy}
           onClick={() => setAssigning((v) => !v)}
           aria-expanded={assigning}
           title="指派（三轨）：人 / Agent / 小队——指派 ≠ 开工"
@@ -190,6 +206,7 @@ export default function TaskCard({ task }: { task: Task }) {
           onIdChange={setAssigneeId}
           onSubmit={submitAssign}
           onCancel={() => setAssigning(false)}
+          busy={busy}
           // 停车闸 = backlog/未开始（原型「backlog / 未开始 = 唯一停车闸」）：「开始」灰置
           parked={task.status === 'backlog' || task.status === 'todo'}
         />

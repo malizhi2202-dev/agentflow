@@ -231,9 +231,20 @@ export default function App() {
 
   const perm = (p: string) => isAdmin || rolePermissions.includes(p);
 
-  const navigate = (id: string) => {
-    setNav(id);
+  const clearOverlayState = () => {
     setDetailId(null);
+    setProjectDetailId(null);
+    setWorkflowDetailId(null);
+    setShowWorkflowCreate(false);
+    setRoleDetail(null);
+    setToolDetail(null);
+    setAgentDetail(null);
+    setAgentSaveError(null);
+  };
+
+  const navigate = (id: string) => {
+    clearOverlayState();
+    setNav(id);
   };
 
   const openDetail = (changeId: string) => setDetailId(changeId);
@@ -296,7 +307,7 @@ export default function App() {
     if (showWorkflowCreate) return <WorkflowCreate onBack={() => setShowWorkflowCreate(false)} onCreated={(id) => { setShowWorkflowCreate(false); setWorkflowDetailId(id); }} />;
     if (workflowDetailId) return <WorkflowDetail workflowId={workflowDetailId} onBack={() => setWorkflowDetailId(null)} />;
     if (projectDetailId) return <ProjectDetail projectId={projectDetailId} onBack={() => setProjectDetailId(null)} onNavigateAgent={(agent) => {
-      setProjectDetailId(null); setNav('agents'); setAgentDetail(agent);
+      navigate('agents'); setAgentDetail(agent);
     }} />;
     if (detailId) return <Detail changeId={detailId} onBack={() => setDetailId(null)} />;
     switch (nav) {

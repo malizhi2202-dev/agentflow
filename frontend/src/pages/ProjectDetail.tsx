@@ -5,17 +5,22 @@ import { useProjects } from '../stores/projects';
 import { useAgents } from '../stores/agents';
 import { useWorkflows } from '../stores/workflows';
 import { useMetrics } from '../stores/metrics';
+import { safeFetch } from '../utils/requestDedup';
 import ChatWindow from '../components/ChatWindow';
 import EntityBreakdownPanel from '../components/EntityBreakdownPanel';
+import PageHeader from '../components/ui/PageHeader';
+import Toolbar from '../components/ui/Toolbar';
 
 interface Props { projectId: number; onBack: () => void; onNavigateAgent?: (agent: any) => void; }
 
 export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Props) {
-  const { projects, fetchProjects, executeProject, stopProject } = useProjects();
+  const { projects, executeProject, stopProject } = useProjects();
   const { agents, fetchAgents } = useAgents();
   const { workflows, fetchWorkflows } = useWorkflows();
-  const { data: metrics, fetchMetrics } = useMetrics();
+  const { data: metrics, fetchMetrics, loading: metricsLoading } = useMetrics();
 
+  const [detailLoading, setDetailLoading] = useState(true);
+  const [detailError, setDetailError] = useState<string | null>(null);
   const [tab, setTab] = useState<'overview' | 'chat' | 'agent' | 'orchestration' | 'monitor' | 'history'>('overview');
 
   // 衍生：项目 + 绑定 Agent（提前计算，供 useEffect 使用）
@@ -23,6 +28,7 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
   const boundAgent = project ? agents.find(a => a.id === project.agent_id) : undefined;
   const orchId = project?.orchestration_id ?? null;          // 闭包内重新收窄用
   const modelTotals = metrics?.model_totals ?? {};           // 嵌套可选 → 一次收口
+  const statusLabel = (s: string) => ({ pending: '待开始', running: '执行中', completed: '已完成', error: '错误', stopped: '已停止', cancelled: '已取消' } as Record<string, string>)[s] || s;
 
   // Agent tab: 消耗数据 + 会话
   const [breakdown, setBreakdown] = useState<any>(null);
@@ -59,7 +65,28 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatConversationId, setChatConversationId] = useState<number | null>(null);
 
-  useEffect(() => { fetchProjects(); fetchAgents(); fetchWorkflows(); }, []);
+  useEffect(() => {
+    let active = true;
+    setDetailLoading(true);
+    setDetailError(null);
+    Promise.all([
+      safeFetch('/api/projects'),
+      fetchAgents(),
+      fetchWorkflows(),
+    ]).then(([result]) => {
+      if (!active) return;
+      if (result.ok) {
+        useProjects.setState({ projects: (result.data?.projects || []) as any[] });
+      } else {
+        setDetailError('项目详情加载失败，请重试。');
+      }
+    }).catch(() => {
+      if (active) setDetailError('项目详情加载失败，请重试。');
+    }).finally(() => {
+      if (active) setDetailLoading(false);
+    });
+    return () => { active = false; };
+  }, [projectId]);
   useEffect(() => { if (projectId) fetchMetrics('project', projectId, 60); }, [projectId, tab]);
 
   const sendChatMessage = (content: string) => {
@@ -84,30 +111,63 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
     }).catch(() => { setChatLoading(false); setChatError('网络错误'); });
   };
 
-  if (!project) return <div style={{ padding: 40, color: 'var(--text-weak)' }}>加载中...</div>;
+  const handleBack = () => {
+    onBack();
+    window.setTimeout(() => {
+      const trigger = document.querySelector<HTMLElement>(`[data-project-id="${projectId}"]`);
+      trigger?.focus();
+    }, 0);
+  };
+
+  if (detailLoading && !project) {
+    return <div className="app-body" role="status">正在加载项目详情…</div>;
+  }
+  if (detailError && !project) {
+    return (
+      <div className="app-body">
+        <PageHeader title="项目详情" context="协作 · 项目" summary="无法读取当前项目。" autoFocus />
+        <div role="alert" className="panel" style={{ color: 'var(--color-danger)' }}>
+          <p>{detailError}</p>
+          <button className="btn btn-ghost" onClick={() => window.location.reload()}>重试</button>
+        </div>
+      </div>
+    );
+  }
+  if (!project) return <div className="app-body" role="status">项目不存在或正在加载…</div>;
 
   return (
-    <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      {/* 头部 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <button onClick={onBack} style={{ padding: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)' }}><ArrowLeft size={18} /></button>
-        <FileText size={20} color="var(--color-primary)" />
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 600, margin: 0, flex: 1 }}>{project.name}</h1>
-        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 3, background: project.status === 'running' ? 'var(--color-warning)' : project.status === 'completed' ? 'var(--color-success)' : 'var(--color-text-dim)', color: '#fff' }}>{project.status}</span>
-        {project.status === 'pending' && <button onClick={() => executeProject(project.id)} style={btn1}><Play size={12} /> 执行</button>}
-        {project.status === 'running' && <button onClick={() => stopProject(project.id)} style={btnDanger}><Square size={12} /> 停止</button>}
-      </div>
-
-      {/* Tab 导航 */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '1px solid var(--border-normal, #2a2d35)', overflowX: 'auto' }}>
-        {(['overview','chat','agent','orchestration','monitor','history'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{ padding: '8px 14px', background: 'none', border: 'none', borderBottom: tab === t ? '2px solid var(--color-primary)' : '2px solid transparent', color: tab === t ? 'var(--color-primary)' : 'var(--color-text-secondary)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
-            {t === 'overview' ? '📋 概览' : t === 'chat' ? '💬 对话' : t === 'agent' ? '🤖 Agent' : t === 'orchestration' ? '🔀 编排组' : t === 'monitor' ? '📊 监控' : '📜 历史'}
+    <div style={{ height: '100%', overflow: 'auto' }}>
+      <PageHeader
+        title={project.name}
+        context="协作 · 项目详情"
+        summary={detailError || `${statusLabel(project.status)} · ${boundAgent ? `绑定 Agent：${boundAgent.name}` : '未绑定 Agent'}`}
+        autoFocus
+        action={(
+          <button className="btn btn-ghost" onClick={handleBack} aria-label="返回项目列表">
+            <ArrowLeft size={16} /> 返回列表
           </button>
-        ))}
-      </div>
+        )}
+      />
+      {detailError && <div role="alert" style={{ margin: '0 28px 12px', color: 'var(--color-danger)' }}>{detailError}</div>}
+      <div style={{ padding: '0 28px 28px' }}>
+        <Toolbar>
+          <span className="page-note" role="status">项目状态：{statusLabel(project.status)}</span>
+          <span className="grow" />
+          {project.status === 'pending' && <button className="btn btn-primary" onClick={() => executeProject(project.id)}><Play size={14} /> 执行</button>}
+          {project.status === 'running' && <button className="btn btn-danger" onClick={() => stopProject(project.id)}><Square size={14} /> 停止</button>}
+        </Toolbar>
 
-      {/* Tab 内容 */}
+        {/* Tab 导航 */}
+        <nav aria-label="项目详情标签" style={{ display: 'flex', gap: 0, marginTop: 20, marginBottom: 20, borderBottom: '1px solid var(--color-border)', overflowX: 'auto' }}>
+          {(['overview','chat','agent','orchestration','monitor','history'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)} aria-current={tab === t ? 'page' : undefined} style={{ padding: '8px 14px', background: 'none', border: 'none', borderBottom: tab === t ? '2px solid var(--color-primary)' : '2px solid transparent', color: tab === t ? 'var(--color-primary)' : 'var(--color-text-secondary)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>
+              {t === 'overview' ? '概览' : t === 'chat' ? '对话' : t === 'agent' ? 'Agent' : t === 'orchestration' ? '编排组' : t === 'monitor' ? '监控' : '历史'}
+            </button>
+          ))}
+        </nav>
+
+        <main aria-label="项目详情主工作区">
+
       {tab === 'overview' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 640 }}>
           {/* 需求 */}
@@ -484,10 +544,18 @@ export default function ProjectDetail({ projectId, onBack, onNavigateAgent }: Pr
       )}
 
       {tab === 'history' && (
-        <div style={{ color: 'var(--color-text-dim)', fontSize: 13, padding: 20, textAlign: 'center' }}>
+        <div className="panel" style={{ color: 'var(--color-text-tertiary)', fontSize: 13, padding: 20, textAlign: 'center' }}>
           执行历史将在 Agent 运行后自动记录
         </div>
       )}
+        </main>
+
+        <aside aria-label="项目详情辅助信息" className="panel" style={{ marginTop: 28, maxWidth: 700 }}>
+          <strong style={{ fontSize: 13 }}>辅助信息</strong>
+          <p className="page-note" style={{ marginTop: 6 }}>项目详情按概览、对话、Agent、编排组、监控和历史分区组织。</p>
+          {metricsLoading && <p role="status" className="page-note" style={{ marginTop: 6 }}>正在刷新监控数据…</p>}
+        </aside>
+      </div>
     </div>
   );
 }

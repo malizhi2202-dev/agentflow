@@ -76,7 +76,7 @@ export default function GoldenSetsCard() {
       </p>
 
       {showNew && (
-        <div style={{ border: '1px solid var(--border)', borderRadius: 4, padding: 8, marginTop: 6 }}>
+        <div role="region" aria-label="新建金标集" style={{ border: '1px solid var(--border)', borderRadius: 4, padding: 8, marginTop: 6 }}>
           <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
             <div>
               <label htmlFor="gs-name" style={labelStyle}>名称（必填）</label>

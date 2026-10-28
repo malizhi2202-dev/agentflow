@@ -66,7 +66,7 @@ export default function BoardFilters({
 }) {
   const active = activeFilters(value);
   return (
-    <div className="toolbar" aria-label="看板视图过滤">
+    <div className="toolbar" role="toolbar" aria-label="看板视图过滤">
       {FILTER_DEFS.map((f) => (
         <button
           key={f.key}
@@ -81,7 +81,7 @@ export default function BoardFilters({
         </button>
       ))}
 
-      <span className="chip mono" title="当前返回条数（受生效过滤影响）">共 {total} 条</span>
+      <span className="chip mono" role="status" title="当前返回条数（受生效过滤影响）">共 {total} 条</span>
 
       {active.length > 0 && (
         <>

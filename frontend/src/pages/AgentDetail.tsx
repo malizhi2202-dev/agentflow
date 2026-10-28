@@ -11,14 +11,15 @@
  * 保存必须一次提交；分区组件零改动、pane 组件不许再持有可写草稿态。
  * 页面名归壳层 .crumb，页内不写 h1/h2。
  */
-import { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, RotateCcw } from 'lucide-react';
 import AgentConfigEditor from '../components/agent-config/AgentConfigEditor';
 import { useAgentDraft } from '../components/agent-config/useAgentDraft';
 import OverviewPane from '../components/agent-detail/OverviewPane';
 import WorkPane from '../components/agent-detail/WorkPane';
 import MemoryPane from '../components/agent-detail/MemoryPane';
 import ChatPane from '../components/agent-detail/ChatPane';
+import PageHeader from '../components/ui/PageHeader';
 import {
   TOP_TABS_DETAIL, TOP_TABS_CREATE,
   DEFAULT_TOP_DETAIL, DEFAULT_TOP_CREATE,
@@ -38,6 +39,8 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
     io_filter: 'none', system_prompt: '', role_def: '', sop: '',
   }, agent || {}));
   var draft = useAgentDraft(agent);
+  var feedbackRef = useRef<HTMLDivElement>(null);
+  var configRef = useRef<HTMLDivElement>(null);
   // 顶层栏 + 两栏各自的子栏选中态（切栏不丢草稿：状态在本壳层，draft 也在）
   var [tab, setTab] = useState<TopTabId>(isNew ? DEFAULT_TOP_CREATE : DEFAULT_TOP_DETAIL);
   var [capPane, setCapPane] = useState<CapPaneId>(DEFAULT_CAP_PANE);
@@ -86,69 +89,130 @@ export default function AgentDetail({ agent, onBack, onSave, onDelete, saveError
     }).catch(function () { setChatLoading(false); setChatError('网络错误'); });
   };
 
+  var effectiveSaveError = saveError || draft.localError || null;
+  // 错误由壳层统一呈现，避免保存条和页面摘要各自“报错”；草稿与输入仍来自同一个 draft。
+  var editorDraft = Object.assign({}, draft, {
+    localError: null,
+    savedAt: effectiveSaveError ? null : draft.savedAt,
+    dirty: draft.dirty || Boolean(effectiveSaveError),
+  });
+
+  useEffect(function () {
+    if (!effectiveSaveError) return;
+    var feedback = feedbackRef.current;
+    if (feedback) feedback.focus();
+    else {
+      var alert = configRef.current?.querySelector('[role="alert"]') as HTMLElement | null;
+      if (alert) {
+        alert.tabIndex = -1;
+        alert.focus();
+      }
+    }
+  }, [effectiveSaveError]);
+
+  var retrySave = function () {
+    var saveButton = Array.from(configRef.current?.querySelectorAll('button') || [])
+      .find(function (button) { return (button.textContent || '').includes('保存全部'); }) as HTMLButtonElement | undefined;
+    if (saveButton) saveButton.click();
+    window.setTimeout(function () { feedbackRef.current?.focus(); }, 0);
+  };
+
   var topTabs = isNew ? TOP_TABS_CREATE : TOP_TABS_DETAIL;
+  var pageTitle = isNew ? '创建 Agent' : (data.name || agent?.name || 'Agent');
+  var pageSummary = effectiveSaveError
+    ? '保存未完成，输入仍保留在草稿中。请检查错误并重试。'
+    : draft.savedAt
+      ? '保存成功，配置已提交。'
+      : isNew
+        ? '配置 Agent 的身份、运行时与能力。'
+        : '查看 Agent 运行状态，或进入能力与设置进行编辑。';
 
   return (
-    <div style={{ padding: 24, height: '100%', overflow: 'auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-        <button onClick={onBack} aria-label="返回" style={{ padding: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-          <ArrowLeft size={18} />
-        </button>
-        <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>
-          {isNew ? '创建 Agent' : (data.name || agent?.name || 'Agent')}
-        </span>
-        {!isNew && <span className="chip mono">{'ID ' + agent.id}</span>}
+    <div style={{ height: '100%', overflow: 'auto' }}>
+      <PageHeader
+        title={pageTitle}
+        context={isNew ? 'Agent / 创建' : 'Agent / 详情 · ID ' + agent.id}
+        summary={pageSummary}
+        autoFocus
+        action={
+          <button type="button" onClick={onBack} aria-label="返回" title="返回 Agent 列表" className="btn btn-ghost">
+            <ArrowLeft size={16} aria-hidden="true" /> 返回列表
+          </button>
+        }
+      />
+
+      <div style={{ padding: '0 28px 28px' }}>
+        {effectiveSaveError && (
+          <div
+            ref={feedbackRef}
+            role="alert"
+            aria-live="assertive"
+            tabIndex={-1}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', marginBottom: 20, border: '1px solid var(--red)', borderRadius: 6, background: 'var(--red-bg)', color: 'var(--red)' }}
+          >
+            <span style={{ flex: 1 }}>保存失败：{effectiveSaveError} 输入未丢失。</span>
+            {!isNew && tab === 'set' || tab === 'cap' ? (
+              <button type="button" className="btn btn-sm" onClick={retrySave}>
+                <RotateCcw size={13} aria-hidden="true" /> 重新保存
+              </button>
+            ) : null}
+          </div>
+        )}
+
+        <nav className="tab-bar" aria-label="Agent 详情标签">
+          {topTabs.map(function (t) {
+            return (
+              <button key={t.id} type="button" aria-current={tab === t.id ? 'page' : undefined} className={'tab' + (tab === t.id ? ' active' : '')}
+                onClick={function () { setTab(t.id); }}>
+                {t.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        <main aria-label="Agent 详情主工作区">
+          {tab === 'overview' && !isNew && (
+            <OverviewPane agent={agent} goto={goto} />
+          )}
+
+          {tab === 'work' && !isNew && (
+            <WorkPane agent={agent} onOpenBoard={onOpenBoard} />
+          )}
+
+          {(tab === 'cap' || tab === 'set') && (
+            <div ref={configRef} aria-label="Agent 配置主工作区">
+              <AgentConfigEditor
+                agent={agent}
+                data={data}
+                patch={patch}
+                onSave={onSave}
+                onDelete={onDelete}
+                saveError={null}
+                workflows={workflows}
+                draft={editorDraft}
+                group={tab}
+                paneId={tab === 'cap' ? capPane : setPane}
+                onSelectPane={function (id) { if (tab === 'cap') setCapPane(id as CapPaneId); else setSetPane(id as SetPaneId); }}
+              />
+            </div>
+          )}
+
+          {tab === 'memory' && !isNew && <MemoryPane agentId={agent.id} />}
+
+          {tab === 'chat' && !isNew && agent && agent.id && (
+            <ChatPane
+              agentId={agent.id}
+              agentName={agent.name}
+              messages={chatMessages}
+              loading={chatLoading}
+              error={chatError}
+              onSend={sendChatMessage}
+              onRetry={function () { setChatError(null); }}
+              onGoChannel={function () { goto('cap', 'int'); }}
+            />
+          )}
+        </main>
       </div>
-
-      <div className="tab-bar" aria-label="Agent 详情标签">
-        {topTabs.map(function (t) {
-          return (
-            <button key={t.id} aria-current={tab === t.id ? 'page' : undefined} className={'tab' + (tab === t.id ? ' active' : '')}
-              onClick={function () { setTab(t.id); }}>
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {tab === 'overview' && !isNew && (
-        <OverviewPane agent={agent} goto={goto} />
-      )}
-
-      {tab === 'work' && !isNew && (
-        <WorkPane agent={agent} onOpenBoard={onOpenBoard} />
-      )}
-
-      {(tab === 'cap' || tab === 'set') && (
-        <AgentConfigEditor
-          agent={agent}
-          data={data}
-          patch={patch}
-          onSave={onSave}
-          onDelete={onDelete}
-          saveError={saveError}
-          workflows={workflows}
-          draft={draft}
-          group={tab}
-          paneId={tab === 'cap' ? capPane : setPane}
-          onSelectPane={function (id) { if (tab === 'cap') setCapPane(id as CapPaneId); else setSetPane(id as SetPaneId); }}
-        />
-      )}
-
-      {tab === 'memory' && !isNew && <MemoryPane agentId={agent.id} />}
-
-      {tab === 'chat' && !isNew && agent && agent.id && (
-        <ChatPane
-          agentId={agent.id}
-          agentName={agent.name}
-          messages={chatMessages}
-          loading={chatLoading}
-          error={chatError}
-          onSend={sendChatMessage}
-          onRetry={function () { setChatError(null); }}
-          onGoChannel={function () { goto('cap', 'int'); }}
-        />
-      )}
     </div>
   );
 }

@@ -21,6 +21,7 @@ import {
   type Runbook,
   type RuleVersion,
 } from '../stores/automations';
+import PageHeader from '../components/ui/PageHeader';
 
 const STATUS_LABEL: Record<string, string> = { enabled: '启用', paused: '暂停', archived: '已归档' };
 const EXEC_MODE_LABEL: Record<string, string> = {
@@ -184,6 +185,7 @@ export default function Automations() {
   } = store;
 
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
   const [selectedRunId, setSelectedRunId] = useState<number | null>(null);
@@ -223,8 +225,13 @@ export default function Automations() {
   const run = useCallback(async (fn: () => Promise<{ ok: boolean; error?: string }>) => {
     setActionError(null);
     clearNotice();
-    const out = await fn();
-    if (!out.ok) setActionError(out.error || '操作失败');
+    setActionBusy(true);
+    try {
+      const out = await fn();
+      if (!out.ok) setActionError(out.error || '操作失败');
+    } finally {
+      setActionBusy(false);
+    }
   }, [clearNotice]);
 
   const scheduleTriggers = useMemo(() => triggers.filter((t) => t.kind === 'schedule'), [triggers]);
@@ -260,6 +267,7 @@ export default function Automations() {
     if (!form.name.trim()) { setActionError('名称不能为空'); return; }
     if (!form.owner_id_ref.trim()) { setActionError('负责人不能为空：Agent 或 Squad 二轨各须指一个目标'); return; }
     if (!form.runbook.goal.trim()) { setActionError('Runbook 目标不能为空'); return; }
+    setActionBusy(true);
     const out = await create({
       name: form.name.trim(),
       runbook: form.runbook,
@@ -267,6 +275,7 @@ export default function Automations() {
       owner_id_ref: form.owner_id_ref.trim(),
       exec_mode: form.exec_mode,
     });
+    setActionBusy(false);
     if (out.ok) {
       setShowCreate(false);
       setForm({ name: '', owner_track: 'agent', owner_id_ref: '', exec_mode: 'run_only', runbook: { ...EMPTY_RUNBOOK } });
@@ -277,7 +286,19 @@ export default function Automations() {
 
   return (
     <div>
-      {/* 页级工具栏：只读元信息 + 页面级动作（页名在壳层 crumb 里） */}
+      <PageHeader
+        title="自动化"
+        context="用 Runbook、负责人和触发器管理可重复执行的工作。"
+        summary={detail
+          ? `当前选中：${detail.name} · v${detail.spec_version} · ${detail.enabled ? '启用' : '暂停'}`
+          : `规则 ${meta.total} · 启用 ${meta.enabled} · 暂停 ${meta.paused} · 已归档 ${meta.archived}`}
+        action={(
+          <button className="btn btn-primary btn-sm" onClick={() => setShowCreate((v) => !v)}
+                  aria-expanded={showCreate}>
+            <Plus size={13} /> {showCreate ? '收起新建' : '新建自动化'}
+          </button>
+        )}
+      />
       <section className="panel" aria-label="自动化清单（①）">
         <div className="toolbar">
           <span className="section-title">① 自动化清单 —— 名称 / 负责人轨 / 触发器摘要 / 执行模式 / 状态 / 近 7d 失败率 / 操作</span>
@@ -287,13 +308,9 @@ export default function Automations() {
           {meta.breaker_open > 0 && <span className="chip bad">熔断 {meta.breaker_open}</span>}
           <span className="chip">已归档 {meta.archived}</span>
           <span className="grow" />
-          <button className="btn btn-ghost btn-sm"
+          <button className="btn btn-ghost btn-sm" disabled={actionBusy}
                   onClick={() => run(async () => { await fetchAll(); return { ok: true }; })} title="刷新">
-            <RefreshCw size={13} /> 刷新
-          </button>
-          <button className="btn btn-primary btn-sm" onClick={() => setShowCreate((v) => !v)}
-                  aria-expanded={showCreate}>
-            <Plus size={13} /> 新建自动化
+            <RefreshCw size={13} /> {actionBusy ? '刷新中…' : '刷新'}
           </button>
         </div>
 
@@ -378,9 +395,10 @@ export default function Automations() {
           </table>
         </div>
 
-        {(actionError || error) && (
-          <div role="alert" style={{ color: 'var(--red)', fontSize: 12, marginTop: 8, display: 'flex', gap: 6 }}>
-            <AlertCircle size={14} /> {actionError || error}
+        {(actionBusy || actionError || error) && (
+          <div role={actionBusy ? 'status' : 'alert'} aria-live="polite"
+               style={{ color: actionBusy ? 'var(--text-muted)' : 'var(--red)', fontSize: 12, marginTop: 8, display: 'flex', gap: 6 }}>
+            {actionBusy ? '正在提交，请稍候…' : <><AlertCircle size={14} /> {actionError || error}</>}
           </div>
         )}
         {notice && <p className="page-note" role="status">{notice}</p>}
@@ -427,7 +445,8 @@ export default function Automations() {
             ))}
           </div>
           <div className="toolbar" style={{ marginTop: 6 }}>
-            <button className="btn btn-primary btn-sm" onClick={submitCreate}>保存（即 v1 快照）</button>
+          <button className="btn btn-primary btn-sm" disabled={actionBusy}
+                  onClick={submitCreate}>{actionBusy ? '提交中…' : '保存（即 v1 快照）'}</button>
             <span style={MUTED}>0 个触发器也可以建（只用 Run now）；建完就是创建者，可编辑 / 启停 / 归档</span>
           </div>
         </section>
@@ -466,7 +485,7 @@ export default function Automations() {
                   </label>
                 ))}
                 <div className="toolbar" style={{ marginTop: 4 }}>
-                  <button className="btn btn-primary btn-sm" onClick={submitRunbook}>保存 Runbook</button>
+                  <button className="btn btn-primary btn-sm" disabled={actionBusy} onClick={submitRunbook}>{actionBusy ? '保存中…' : '保存 Runbook'}</button>
                   <span style={MUTED}>改完立即对<b>此后</b>触发生效，<b>不回溯</b>在途 run</span>
                 </div>
               </div>
@@ -481,7 +500,7 @@ export default function Automations() {
                   </select>
                   <input style={INPUT} aria-label="负责人引用（编辑）" value={ownerDraft.owner_id_ref}
                          onChange={(e) => setOwnerDraft({ ...ownerDraft, owner_id_ref: e.target.value })} />
-                  <button className="btn btn-primary btn-sm" onClick={submitOwner}>保存负责人</button>
+                  <button className="btn btn-primary btn-sm" disabled={actionBusy} onClick={submitOwner}>{actionBusy ? '保存中…' : '保存负责人'}</button>
                 </div>
                 <p className="page-note">
                   一条规则只认一个负责人；要两条线跑就建两条规则，各自有版本与账。
@@ -519,7 +538,7 @@ export default function Automations() {
                 {TZ_OPTIONS.map((tz) => <option key={tz} value={tz}>{tz}</option>)}
               </select>
               <button className="btn btn-ghost btn-sm" onClick={doPreview}>预览 Next runs</button>
-              <button className="btn btn-primary btn-sm" disabled={schedPreview == null}
+              <button className="btn btn-primary btn-sm" disabled={actionBusy || schedPreview == null}
                       title={schedPreview == null ? '不预览不给保存：先看接下来 3 次触发时刻' : '保存 schedule 触发器'}
                       onClick={addSchedule}>
                 保存 schedule
@@ -590,7 +609,7 @@ export default function Automations() {
               <input style={{ ...INPUT, minWidth: 280 }} aria-label="webhook 事件过滤"
                      placeholder="事件过滤：一行一条，如 push 或 pull_request:opened,closed（留空 = 全收）"
                      value={hookFilter} onChange={(e) => setHookFilter(e.target.value)} />
-              <button className="btn btn-primary btn-sm" onClick={addWebhook}>添加 webhook</button>
+              <button className="btn btn-primary btn-sm" disabled={actionBusy} onClick={addWebhook}>{actionBusy ? '添加中…' : '添加 webhook'}</button>
               <span style={MUTED}>空规则 = 全收（不是全拒）；任一行匹配即跑</span>
             </div>
 
@@ -712,7 +731,7 @@ export default function Automations() {
               </label>
             </div>
             <div className="toolbar" style={{ marginTop: 6 }}>
-              <button className="btn btn-primary btn-sm" onClick={submitExecMode}>保存执行模式</button>
+              <button className="btn btn-primary btn-sm" disabled={actionBusy} onClick={submitExecMode}>{actionBusy ? '保存中…' : '保存执行模式'}</button>
               <span style={MUTED}>成功率口径两档同：分母 = 完结（完成 + 失败），replace 取消的 run 不计。</span>
             </div>
           </section>

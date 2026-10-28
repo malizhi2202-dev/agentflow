@@ -19,7 +19,7 @@ export default function ChatPane({ agentId, agentName, messages, loading, error,
   onGoChannel: () => void;
 }) {
   return (
-    <div style={{ height: 'calc(100vh - 200px)', minHeight: 400 }}>
+    <main aria-label="对话主工作区" style={{ height: 'calc(100vh - 200px)', minHeight: 400 }}>
       <ChatWindow
         agentId={agentId}
         agentName={agentName}
@@ -29,12 +29,12 @@ export default function ChatPane({ agentId, agentName, messages, loading, error,
         onSend={onSend}
         onRetry={onRetry}
         extraHeader={
-          <button onClick={onGoChannel}
+          <button type="button" onClick={onGoChannel}
             style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', fontSize: 11, background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
             <ExternalLink size={12} /> 发布到渠道
           </button>
         }
       />
-    </div>
+    </main>
   );
 }

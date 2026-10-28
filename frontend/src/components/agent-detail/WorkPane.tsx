@@ -37,42 +37,46 @@ export default function WorkPane({ agent, onOpenBoard }: {
   }, [agent?.id, fetchTasksForAgent]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} aria-label="工作">
-      <div className="panel">
-        <div className="toolbar" style={{ marginBottom: 6 }}>
-          <span className="section-title" style={{ fontSize: 13 }}>指派给本 Agent 的任务</span>
-          <span className="chip mono">{tasks === null ? '读取中…' : tasks.length + ' 条'}</span>
-          <span className="grow" />
-          {onOpenBoard && (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={onOpenBoard}>打开看板 →</button>
-          )}
-        </div>
-        <p className="page-note" style={{ margin: '0 0 8px' }}>
-          仅显示与你有关的任务（后端按 owner 轨过滤 · 非 admin 可能为空，非「Agent 无任务」）。
-          改状态/标 done/取消的操作集在看板同款抽屉完成，本栏不重复一份可写 UI。
-        </p>
-        {err ? <p role="alert" style={{ color: 'var(--red)', fontSize: 12, margin: '0 0 8px' }}>任务读取失败：{err}</p> : null}
-        <table className="tbl compact">
-          <thead><tr><th>任务</th><th>状态</th><th>负责人</th><th>更新</th></tr></thead>
-          <tbody>
-            {(tasks || []).map(function (t) {
-              return (
-                <tr key={t.id}>
-                  <td style={{ fontSize: 12 }}>{t.title}</td>
-                  <td><span className={'chip ' + (t.status_category === 'done' || t.status_category === 'closed' ? 'ok' : t.status === 'blocked' ? 'warn' : t.status_category === 'started' ? 'info' : '')}>{t.status}</span></td>
-                  <td style={mono}>{t.assignee_kind === 'agent' ? '本 Agent' : t.assignee_kind || '—'}</td>
-                  <td style={mono}>{t.updated_at ? new Date(t.updated_at).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
-                </tr>
-              );
-            })}
-            {tasks !== null && tasks.length === 0 && !err && (
-              <tr><td colSpan={4} style={{ color: 'var(--text-muted)' }}>没有与你相关的、指派给本 Agent 的任务。</td></tr>
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(260px, 320px)', gap: 28, alignItems: 'start' }} aria-label="工作">
+      <main aria-label="工作主工作区" style={{ minWidth: 0 }}>
+        <div className="panel">
+          <div className="toolbar" style={{ marginBottom: 6 }}>
+            <span className="section-title" style={{ fontSize: 13 }}>指派给本 Agent 的任务</span>
+            <span className="chip mono">{tasks === null ? '读取中…' : tasks.length + ' 条'}</span>
+            <span className="grow" />
+            {onOpenBoard && (
+              <button type="button" className="btn btn-ghost btn-sm" onClick={onOpenBoard}>打开看板 →</button>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+          <p className="page-note" style={{ margin: '0 0 8px' }}>
+            仅显示与你有关的任务（后端按 owner 轨过滤 · 非 admin 可能为空，非「Agent 无任务」）。
+            改状态/标 done/取消的操作集在看板同款抽屉完成，本栏不重复一份可写 UI。
+          </p>
+          {err ? <p role="alert" style={{ color: 'var(--red)', fontSize: 12, margin: '0 0 8px' }}>任务读取失败：{err}</p> : null}
+          <table className="tbl compact">
+            <thead><tr><th>任务</th><th>状态</th><th>负责人</th><th>更新</th></tr></thead>
+            <tbody>
+              {(tasks || []).map(function (t) {
+                return (
+                  <tr key={t.id}>
+                    <td style={{ fontSize: 12 }}>{t.title}</td>
+                    <td><span className={'chip ' + (t.status_category === 'done' || t.status_category === 'closed' ? 'ok' : t.status === 'blocked' ? 'warn' : t.status_category === 'started' ? 'info' : '')}>{t.status}</span></td>
+                    <td style={mono}>{t.assignee_kind === 'agent' ? '本 Agent' : t.assignee_kind || '—'}</td>
+                    <td style={mono}>{t.updated_at ? new Date(t.updated_at).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
+                  </tr>
+                );
+              })}
+              {tasks !== null && tasks.length === 0 && !err && (
+                <tr><td colSpan={4} style={{ color: 'var(--text-muted)' }}>没有与你相关的、指派给本 Agent 的任务。</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </main>
 
-      <ScheduledTasksSection agentId={agent?.id} isNew={!agent?.id} />
+      <aside aria-label="工作辅助信息" style={{ minWidth: 0 }}>
+        <ScheduledTasksSection agentId={agent?.id} isNew={!agent?.id} />
+      </aside>
     </div>
   );
 }

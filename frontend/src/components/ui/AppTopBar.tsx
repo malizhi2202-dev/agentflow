@@ -1,31 +1,27 @@
 /**
- * 壳层顶栏（v22-ui-align W1）
- *
- * 对照原型 `.app-top`：左侧 `.crumb`（页面名 · 可选上下文），右侧 `.right`（chip + 主/次动作）。
- * 为什么由 App 统一渲染：127 页原型里这一条是**壳层**，不是页面自己的东西；
- * 页面各写一份 header 就是「切换页面像换了个产品」的根因。
+ * 壳层顶栏（v27-ui-rework）：只承载全局上下文与全局动作。
+ * 页面级标题由 PageHeader 负责，避免壳层与页面重复渲染 h1。
  */
 import type { ReactNode } from 'react';
 
 export interface AppTopBarProps {
-  /** 页面名（必填，来自导航） */
+  /** 全局壳层标签（通常来自导航），不是页面级标题 */
   crumb: string;
-  /** 面包屑里的上下文，例如「当前：agentflow」 */
+  /** 壳层上下文，例如「当前：agentflow」或「详情」 */
   context?: string;
-  /** 右侧信息 chip（只读元信息） */
+  /** 右侧全局只读信息 */
   chips?: ReactNode;
-  /** 右侧动作（按钮） */
+  /** 右侧全局动作 */
   actions?: ReactNode;
 }
 
 export default function AppTopBar({ crumb, context, chips, actions }: AppTopBarProps) {
   return (
     <div className="app-top" role="banner">
-      {/* a11y：页面名是这一屏唯一的「页面级标题」，用 h1 承载；样式仍走 .crumb（视觉同原型） */}
-      <h1 className="crumb">
+      <span className="crumb">
         {crumb}
         {context && <span className="dim"> · {context}</span>}
-      </h1>
+      </span>
       {(chips || actions) && (
         <span className="right">
           {chips}

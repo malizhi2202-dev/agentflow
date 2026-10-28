@@ -120,7 +120,11 @@ export default function AssigneePicker({
             {ASSIGNEE_KIND_LABEL[k]}
           </button>
         ))}
+        <label htmlFor="assignee-id" style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>
+          负责人 ID
+        </label>
         <input
+          id="assignee-id"
           aria-label="负责人 ID"
           value={assigneeId}
           onChange={(e) => onIdChange(e.target.value)}

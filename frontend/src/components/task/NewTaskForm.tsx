@@ -84,8 +84,9 @@ export default function NewTaskForm({
       </p>
 
       <div className="toolbar">
-        <span className="chip mono">标题 · 必填</span>
+        <label htmlFor="new-task-title" className="chip mono">标题 · 必填</label>
         <input
+          id="new-task-title"
           aria-label="任务标题"
           value={title}
           onChange={(e) => setTitle(e.target.value)}

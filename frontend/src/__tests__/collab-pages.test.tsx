@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Tasks from '../pages/Tasks';
 import Inbox from '../pages/Inbox';
+import ProjectManager from '../pages/ProjectManager';
+import ProjectDetail from '../pages/ProjectDetail';
+import { useProjects } from '../stores/projects';
+import { useAgents } from '../stores/agents';
+import { useWorkflows } from '../stores/workflows';
+import { useMetrics } from '../stores/metrics';
 import { useCollab } from '../stores/collab';
 import { invalidateCache } from '../utils/requestDedup';
 

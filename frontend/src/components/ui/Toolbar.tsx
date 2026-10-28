@@ -1,7 +1,13 @@
-/** 页面级工具行（v22-ui-align W1）：动作与筛选放这里，页面名只出现在壳层 .crumb。 */
+/** 页面级工具行：承载筛选、搜索、视图切换和次要动作，不重复页面标题。 */
 import type { ReactNode } from 'react';
 
-export default function Toolbar({ children, grow }: { children: ReactNode; grow?: ReactNode }) {
+export interface ToolbarProps {
+  children: ReactNode;
+  /** 保持现有布局兼容：将内容放入可伸展区域。 */
+  grow?: ReactNode;
+}
+
+export default function Toolbar({ children, grow }: ToolbarProps) {
   return (
     <div className="toolbar">
       {children}

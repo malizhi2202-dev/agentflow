@@ -405,9 +405,11 @@ describe('自动化中心 ⑨ 基线对照', () => {
 });
 
 describe('自动化中心 页名纪律', () => {
-  it('页内不写 h1/h2（页名由壳层 crumb 承担）', async () => {
+  it('页级标题由 PageHeader 承担，九节仍使用分节标题', async () => {
     mockApi(baseRoutes());
     await openAndSelect();
-    expect(document.querySelectorAll('h1, h2').length).toBe(0);
+    expect(document.querySelectorAll('h1').length).toBe(1);
+    expect(document.querySelectorAll('h2').length).toBe(0);
+    expect(screen.getByRole('heading', { level: 1, name: '自动化' })).toBeInTheDocument();
   });
 });

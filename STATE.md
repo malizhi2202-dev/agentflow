@@ -5,11 +5,13 @@
 
 ## 会话状态（GO.md 第一步四字段 · 2026-10-24 起必填）
 
-- **活跃 Change**：`v26-agent-ui`（Agent 详情/创建 **tab 化批**——用户三裁 2026-10-26：**移除侧栏「Agent 详情」二级入口（独立页随删）· 详情顶层六栏（概览/工作/能力 5 子栏/设置 7 子栏/记忆/对话，监控并入概览）· 创建态同骨架两栏默认落含必填的设置·通用**。十六分区纵向平铺改两级子栏承载（唯一事实源 `frontend/src/components/agent-detail/panes.ts`；AnchorBar 退场、secN 锚点保留）；草稿容器 `useAgentDraft` 提壳层（**恰一次 PUT · 跨栏不丢**）。提交：`66aed2d5`（计划笔1+2 代码 · 用户收编「修改前端页面」· **已推送**）· `68c54285`（笔3 AD-01~06）· 本笔（笔4 docs：RULINGS **§五点六** R26-1…4 · 主档 §5.4/§6.4〔v26 实现注〕· INDEX 行 13 · 工件 `.specs/v26-agent-ui/`））
+- **活跃 Change**：`v27-ui-rework`（AgentFlow UI 重构与导航交互统一）
+  - 本轮已完成 T01–T12：导航覆盖态清理、极简 token、PageHeader、Agent/项目/自动化/任务/编排页面迁移、无障碍回归、兼容性扫描、全量测试与构建。
+  - 未完成：T13 浏览器走查；`npm run e2e` 因后端 `127.0.0.1:8000` 不可用退出 2；系统 Python 也缺少 uvicorn，无法临时启动 SQLite 后端。依赖审计另有既有 `js-yaml` high 告警，见 `.specs/v27-ui-rework/REVIEW.md`。
   - 前序**已全部提交**：`v25-r25-clearance`（五笔 `bb54ea48/92e62cc7/66913ab1/9531ed8b/45a2526f` + 用户 `34991e73`）· `v24-doc-refresh` · `ui-parity`（`51fd105d`）· `v22-*` 三件 · `v23-multica-import`——**origin/main 已追至 `66aed2d5`（用户自推）**；本会话新笔（`68c54285` + docs）未推，push 与否仍留用户定
-- **当前阶段**：v26 **四笔收口完成**——前端 **tsc 0 · vitest 26 文件 265/265 · build ✓** · `proto_parity --strict` exit 0（`agent-detail` 转「映射存在但未接路由」提示位）· 原型与脚本 **0 diff** · **systemctl 三件 active + 5173/8000 均 200**。⚠️ **浏览器点击走查六项未做（本会话无浏览器工具），留人工回销**——清单在 `.specs/v26-agent-ui/TEST.md`，不许以此前单测绿冒充「部署验证完成」
-- **当前 Task**：v26 向用户收口汇报（含走查欠账与 push 状态）→ **开批 `v27`（用户同日三裁）**：① SquadsPage「指派任务」并入 Teams·squads tab，删侧栏「小队中心」+ 页面文件；② **8 个不可达遗留视图全删**（home/detail/specs/runtime/workflow/roles/docs/templates——case+View+import+仅其引用的页面文件，parity 按 agent-detail 先例保持 exit 0）；③ **Automations（1023 行）与 ProjectDetail（509 行）按 v26 同款骨架 tab 化**
-- **中断任务**：（空）
+- **当前阶段**：v27 T01–T12 已完成；T13 浏览器走查阻塞，等待后端可用后继续。
+- **当前 Task**：T13 关键路径浏览器走查与审查报告（环境阻塞）
+- **中断任务**：T13（后端 127.0.0.1:8000 不可用，系统 Python 缺少 uvicorn；已登记于 `.specs/v27-ui-rework/TASK.md`）
 - **ai_context_doc**：`CLAUDE.md`（2026-10-24 用户选定；`.specs/CONTEXT.md` 已作废不用）
 - **last_intel_scan**：（未跑；按用户选择跳过）
 

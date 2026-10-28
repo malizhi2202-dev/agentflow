@@ -1,213 +1,170 @@
-/* ═══════════════════════════════════════════
-   AgentFlow console · 开发操作台风格
-   借鉴 Linear + GitHub + VSCode
-   ═══════════════════════════════════════════ */
+/* AgentFlow v27 · 极简主题 token
+ * 默认浅色；[data-theme="dark"] 提供近黑深色映射。
+ * 旧变量只作为兼容别名，新的共享样式应优先使用语义 token。
+ */
 
 :root {
-  /* 背景 */
-  --bg-app:         #0d0e12;
-  --bg-sidebar:     #0f1015;
-  --bg-main:        #13141a;
-  --bg-card:        #181a1f;
-  --bg-card-hover:  #1e2028;
-  --bg-input:       #0b0c10;
-  --bg-tooltip:     #22242a;
-  --bg-selected:    rgba(84,140,240,0.1);
+  color-scheme: light;
 
-  /* 主色 */
-  --blue:           #548cf0;
-  --blue-hover:     #6a9df4;
-  --blue-bg:        rgba(84,140,240,0.08);
-  --blue-border:    rgba(84,140,240,0.2);
+  /* 语义颜色 */
+  --color-brand: oklch(54% 0.18 255);
+  --color-brand-deep: oklch(44% 0.18 255);
+  --color-bg: oklch(98% 0.006 250);
+  --color-surface: oklch(99.5% 0.002 250);
+  --color-surface-muted: oklch(96% 0.008 250);
+  --color-elevated: oklch(99.5% 0.002 250);
+  --color-text-primary: oklch(24% 0.015 250);
+  --color-text-secondary: oklch(48% 0.018 250);
+  --color-text-tertiary: oklch(54% 0.015 250);
+  --color-border: oklch(65% 0.012 250);
+  --color-border-subtle: color-mix(in oklch, var(--color-border) 55%, transparent);
+  --color-border-strong: color-mix(in oklch, var(--color-text-primary) 24%, var(--color-border));
+  --color-focus: var(--color-brand);
+  --color-success: oklch(58% 0.15 145);
+  --color-warning: oklch(64% 0.16 78);
+  --color-danger: oklch(56% 0.19 25);
+  --color-info: var(--color-brand);
+  --color-action-primary: var(--color-text-primary);
+  --color-action-primary-fg: var(--color-bg);
+  --color-brand-soft: color-mix(in oklch, var(--color-brand) 10%, transparent);
+  --color-brand-border: color-mix(in oklch, var(--color-brand) 28%, transparent);
+  --color-grid: color-mix(in oklch, var(--color-border) 42%, transparent);
 
-  /* 语义 */
-  --green:          #5cb878;
-  --green-bg:       rgba(92,184,120,0.08);
-  --red:            #e05555;
-  --red-bg:         rgba(224,85,85,0.08);
-  --orange:         #e8a450;
-  --orange-bg:      rgba(232,164,80,0.08);
-  --purple:         #b47cd8;
-  --purple-bg:      rgba(180,124,216,0.08);
-
-  /* 文字 */
-  --text:           #e1e2e5;
-  --text-secondary: #9699a0;
-  --text-muted:     #5d6068;
-
-  /* 边框 */
-  --border:         rgba(255,255,255,0.06);
-  --border-strong:  rgba(255,255,255,0.10);
-
-  /* 字体 */
-  --font:           -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono:      'JetBrains Mono', 'Fira Code', monospace;
-
-  /* 间距 */
-  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
+  /* 间距：唯一的共享间距阶 */
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 20px;
+  --space-4: 28px;
+  --space-5: 40px;
+  --space-6: 64px;
+  --space-7: 96px;
 
   /* 圆角 */
-  --r-sm: 4px; --r-md: 8px; --r-lg: 12px;
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 
-  /* 阴影 */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  /* 字体 */
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-display: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font: var(--font-body);
 
   /* 动效 */
-  --ease: cubic-bezier(0.16, 0, 0.2, 1);
-  --fast: 100ms; --normal: 200ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease: var(--ease-out);
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 400ms;
+  --duration-micro: 150ms;
+  --fast: var(--duration-fast);
+  --normal: var(--duration-base);
 
-  /* 拓扑画布 */
-  --bg-canvas: #0b0c10;
-  --node-glow-healthy: 0 0 6px rgba(92,184,120,0.3);
-  --node-glow-failed: 0 0 8px rgba(224,85,85,0.4);
-  --grid-dot: rgba(255,255,255,0.03);
+  /* 阴影：默认平面，仅主动抬起的表面使用低 alpha 阴影 */
+  --shadow-sm: none;
+  --shadow-md: 0 8px 24px rgb(20 30 50 / 0.08);
 
-  /* ── Agent 管控面 (Control Plane) ── */
-  /* 状态指示灯 */
-  --cp-status-idle:    oklch(0.65 0.19 155);   /* 空闲 */
-  --cp-status-running: oklch(0.72 0.16 85);    /* 运行中 */
-  --cp-status-blocked: oklch(0.58 0.22 25);    /* 阻塞 */
-  --cp-status-dead:    oklch(0.55 0.01 260);   /* 死亡/离线 */
-  --cp-status-failed:  oklch(0.55 0.22 20);    /* 失败 */
+  /* ── 旧变量兼容别名 ── */
+  --bg-app: var(--color-bg);
+  --bg-sidebar: var(--color-surface-muted);
+  --bg-main: var(--color-bg);
+  --bg-card: var(--color-surface);
+  --bg-card-hover: var(--color-surface-muted);
+  --bg-input: var(--color-surface);
+  --bg-panel: var(--color-surface);
+  --bg-elevated: var(--color-elevated);
+  --bg-tooltip: var(--color-elevated);
+  --bg-selected: var(--color-brand-soft);
+  --bg-canvas: var(--color-bg);
+  --surface: var(--color-surface);
 
-  /* 探针时间线 */
-  --cp-probe-pass: oklch(0.65 0.19 155);       /* 探针通过 */
-  --cp-probe-fail: oklch(0.58 0.22 25);        /* 探针失败 */
+  --blue: var(--color-brand);
+  --blue-hover: var(--color-brand-deep);
+  --blue-bg: var(--color-brand-soft);
+  --blue-border: var(--color-brand-border);
+  --green: var(--color-success);
+  --green-bg: color-mix(in oklch, var(--color-success) 10%, transparent);
+  --red: var(--color-danger);
+  --red-bg: color-mix(in oklch, var(--color-danger) 10%, transparent);
+  --orange: var(--color-warning);
+  --orange-bg: color-mix(in oklch, var(--color-warning) 12%, transparent);
+  --purple: var(--color-brand-deep);
+  --purple-bg: var(--color-brand-soft);
 
-  /* 修复级别 */
-  --cp-repair-safe:     oklch(0.65 0.19 155);   /* safe */
-  --cp-repair-caution:  oklch(0.72 0.16 85);    /* caution */
-  --cp-repair-dangerous: oklch(0.55 0.22 20);   /* dangerous */
+  --text: var(--color-text-primary);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-muted: var(--color-text-tertiary);
+  --text-weak: var(--color-text-tertiary);
+  --text-dim: var(--color-text-tertiary);
+  --text-color: var(--color-text-primary);
 
-  /* 调度器 */
-  --cp-queue-pending:  oklch(0.72 0.16 85);     /* 排队中 */
-  --cp-queue-assigned: oklch(0.62 0.18 255);    /* 已分配 */
+  --border: var(--color-border-subtle);
+  --border-weak: var(--color-border-subtle);
+  --border-normal: var(--color-border);
+  --border-strong: var(--color-border-strong);
 
-  /* 详情面板 */
+  --s1: var(--space-1);
+  --s2: var(--space-2);
+  --s3: var(--space-3);
+  --s4: var(--space-4);
+  --s5: var(--space-5);
+  --s6: var(--space-6);
+  --s8: var(--space-7);
+  --s10: var(--space-5);
+  --r-sm: var(--radius-sm);
+  --r-md: var(--radius-md);
+  --r-lg: var(--radius-lg);
+
+  /* 新旧第二套命名并存，供历史组件平滑迁移 */
+  --color-text: var(--color-text-primary);
+  --color-text-dim: var(--color-text-tertiary);
+  --color-primary: var(--color-brand);
+
+  /* Agent 管控面与拓扑历史变量 */
+  --grid-dot: var(--color-grid);
+  --node-glow-healthy: none;
+  --node-glow-failed: none;
+  --cp-status-idle: var(--color-text-tertiary);
+  --cp-status-running: var(--color-warning);
+  --cp-status-blocked: var(--color-danger);
+  --cp-status-dead: var(--color-text-tertiary);
+  --cp-status-failed: var(--color-danger);
+  --cp-probe-pass: var(--color-success);
+  --cp-probe-fail: var(--color-danger);
+  --cp-repair-safe: var(--color-success);
+  --cp-repair-caution: var(--color-warning);
+  --cp-repair-dangerous: var(--color-danger);
+  --cp-queue-pending: var(--color-warning);
+  --cp-queue-assigned: var(--color-brand);
   --cp-detail-width: 420px;
-  --cp-detail-bg: oklch(0.16 0.01 260);
+  --cp-detail-bg: var(--color-surface-muted);
 }
 
-/* ── 全局 ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; -webkit-font-smoothing: antialiased; }
-body {
-  margin: 0;
-  background: var(--bg-app);
-  color: var(--text);
-  font-family: var(--font);
-  line-height: 1.5;
-}
-#root { width: 100vw; height: 100vh; }
-::selection { background: var(--blue-bg); }
-
-/* ── 滚动条 ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-/* ── 动画 ── */
-@keyframes pulse-red { 0%,100%{box-shadow:0 0 0 0 rgba(224,85,85,0.3)} 50%{box-shadow:0 0 0 6px rgba(224,85,85,0)} }
-@keyframes spin { to{transform:rotate(360deg)} }
-@keyframes slide-in { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
-@keyframes dash-flow { to{stroke-dashoffset:-24} }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0ms !important; transition-duration: 0ms !important; }
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
-/* ── 输入框 ── */
-input, select, textarea {
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 13px;
-  padding: 6px 10px;
-  outline: none;
-  transition: border-color var(--fast);
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-brand: oklch(64% 0.16 255);
+  --color-brand-deep: oklch(72% 0.14 255);
+  --color-bg: oklch(10% 0.01 250);
+  --color-surface: oklch(14% 0.012 250);
+  --color-surface-muted: oklch(20% 0.012 250);
+  --color-elevated: oklch(18% 0.012 250);
+  --color-text-primary: oklch(94% 0.008 250);
+  --color-text-secondary: oklch(76% 0.012 250);
+  --color-text-tertiary: oklch(68% 0.012 250);
+  --color-border: oklch(38% 0.016 250);
+  --color-success: oklch(70% 0.14 145);
+  --color-warning: oklch(78% 0.14 78);
+  --color-danger: oklch(70% 0.16 25);
+  --color-action-primary: var(--color-text-primary);
+  --color-action-primary-fg: var(--color-bg);
+  --color-shadow: rgb(10 12 18 / 0.42);
+  --shadow-md: 0 8px 24px var(--color-shadow);
 }
-input:focus, select:focus, textarea:focus { border-color: var(--blue); }
-input::placeholder { color: var(--text-muted); }
-select { cursor: pointer; }
-
-/* ── 按钮 ── */
-.btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 5px 12px; border-radius: var(--r-sm);
-  font-size: 12px; font-weight: 500;
-  border: 1px solid var(--border-strong); cursor: pointer;
-  background: var(--bg-card); color: var(--text-secondary);
-  transition: all var(--fast); white-space: nowrap; line-height: 1.4;
-}
-.btn:hover { background: var(--bg-card-hover); color: var(--text); }
-.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
-.btn-primary:hover { background: var(--blue-hover); }
-.btn-ghost { background: transparent; border-color: transparent; }
-.btn-ghost:hover { background: var(--bg-card); }
-.btn-sm { padding: 3px 8px; font-size: 11px; }
-.btn-xs { padding: 2px 6px; font-size: 10px; border-radius: 3px; }
-
-/* ── 标签 ── */
-.badge {
-  display: inline-flex; align-items: center; gap: 3px;
-  padding: 1px 6px; border-radius: 3px;
-  font-size: 10px; font-weight: 500; letter-spacing: 0.01em;
-}
-.badge-blue { background: var(--blue-bg); color: var(--blue); }
-.badge-green { background: var(--green-bg); color: var(--green); }
-.badge-red { background: var(--red-bg); color: var(--red); }
-.badge-orange { background: var(--orange-bg); color: var(--orange); }
-.badge-purple { background: var(--purple-bg); color: var(--purple); }
-
-/* ── 状态点 ── */
-.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-.dot-green { background: var(--green); }
-.dot-red { background: var(--red); }
-.dot-orange { background: var(--orange); }
-.dot-blue { background: var(--blue); }
-.dot-gray { background: var(--text-muted); }
-
-/* ── 卡片 ── */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: var(--s4);
-  transition: background var(--fast), border-color var(--fast);
-}
-.card:hover { border-color: var(--border-strong); }
-.card-clickable { cursor: pointer; }
-.card-clickable:hover { background: var(--bg-card-hover); }
-
-/* ── 进度条 ── */
-.progress { height: 4px; background: var(--bg-input); border-radius: 2px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 2px; transition: width 0.4s var(--ease); }
-
-/* ── 统计卡 ── */
-.stat {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: var(--s3) var(--s4);
-  display: flex; flex-direction: column; gap: 2px;
-}
-.stat-value { font-size: 24px; font-weight: 700; line-height: 1.1; font-family: var(--font-mono); }
-.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
-.stat-sub { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
-
-/* ── Tab ── */
-.tab-bar { display: flex; border-bottom: 1px solid var(--border); margin-bottom: var(--s4); }
-.tab {
-  padding: 8px 16px; background: none; border: none; border-bottom: 2px solid transparent;
-  color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all var(--fast);
-  margin-bottom: -1px;
-}
-.tab:hover { color: var(--text-secondary); }
-.tab.active { color: var(--text); border-bottom-color: var(--blue); font-weight: 600; }
-/* 二级子栏（v26-agent-ui · 能力 5 栏 / 设置 7 栏）：比顶层栏紧凑一档，对齐原型 .tabs.sub 规格 */
-.tab-bar.sub { margin-bottom: var(--s3); }
-.tab-bar.sub .tab { padding: 5px 11px; font-size: 12px; }

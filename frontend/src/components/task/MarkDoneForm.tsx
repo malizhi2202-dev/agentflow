@@ -74,14 +74,22 @@ export default function MarkDoneForm({
       {rows.map((row, i) => (
         <div key={i} className="toolbar" style={{ marginBottom: 4 }}>
           <span className="chip mono">证据 {i + 1}</span>
+          <label htmlFor={`evidence-${i}-label`} style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>
+            证据 {i + 1} 描述
+          </label>
           <input
+            id={`evidence-${i}-label`}
             aria-label={`证据 ${i + 1} 描述`}
             value={row.label}
             onChange={(e) => setRow(i, 'label', e.target.value)}
             placeholder="做了什么（例：npx tsc --noEmit → 0 errors）"
             style={{ fontSize: 12, padding: '3px 6px', flex: '1 1 220px' }}
           />
+          <label htmlFor={`evidence-${i}-ref`} style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>
+            证据 {i + 1} 引用
+          </label>
           <input
+            id={`evidence-${i}-ref`}
             aria-label={`证据 ${i + 1} 引用`}
             value={row.ref}
             onChange={(e) => setRow(i, 'ref', e.target.value)}

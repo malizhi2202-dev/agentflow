@@ -65,10 +65,10 @@ export default function OverviewPane({ agent, goto }: {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,2.1fr) minmax(0,1fr)', gap: 12, alignItems: 'start' }} aria-label="概览">
-      {/* ── 左列：最近模型会话 + 消耗统计（监控并入）── */}
-      <div>
-        <div className="panel" style={{ marginBottom: 12 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,2.1fr) minmax(0,1fr)', gap: 28, alignItems: 'start' }} aria-label="概览">
+      {/* ── 主工作区：最近模型会话 + 消耗统计（监控并入）── */}
+      <main aria-label="概览主工作区" style={{ minWidth: 0 }}>
+        <div className="panel" style={{ marginBottom: 20 }}>
           <div className="toolbar" style={{ marginBottom: 6 }}>
             <span className="section-title" style={{ fontSize: 13 }}>最近模型会话 · 24h</span>
             <span className="chip mono">{sessions === null ? '读取中…' : sessions.length + ' 条'}</span>
@@ -99,10 +99,10 @@ export default function OverviewPane({ agent, goto }: {
           </table>
         </div>
         <EntityBreakdownPanel entityType="agent" entityId={agent.id} entityName={agent.name || 'Agent'} />
-      </div>
+      </main>
 
-      {/* ── 右列：只读卡群（各带「去编辑 ▸」，编辑口唯一）── */}
-      <div>
+      {/* ── 辅助区：只读卡群（各带「去编辑 ▸」，编辑口唯一）── */}
+      <aside aria-label="概览辅助信息" style={{ minWidth: 0 }}>
         <div style={card}>
           <p style={cardTitle}>标识与状态</p>
           <p style={{ fontSize: 13, fontWeight: 600, margin: '0 0 2px' }}>{agent.name || '—'}</p>
@@ -158,7 +158,7 @@ export default function OverviewPane({ agent, goto }: {
             {gotoLink('set', 'gen', '去设置 → 通用 ▸')}
           </div>
         ) : null}
-      </div>
+      </aside>
     </div>
   );
 }
